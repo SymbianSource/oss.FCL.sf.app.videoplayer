@@ -1,0 +1,22 @@
+EXPORTS
+	__24CMPSettingsBaseContainer @ 1 NONAME R3UNUSED ; CMPSettingsBaseContainer::CMPSettingsBaseContainer(void)
+	ConstructL__24CMPSettingsBaseContainerRC5TRect @ 2 NONAME R3UNUSED ; CMPSettingsBaseContainer::ConstructL(TRect const &)
+	CountComponentControls__C24CMPSettingsBaseContainer @ 3 NONAME R3UNUSED ; CMPSettingsBaseContainer::CountComponentControls(void) const
+	DoActivateL__19CMPSettingsBaseViewRC10TVwsViewIdG4TUidRC6TDesC8 @ 4 NONAME ; CMPSettingsBaseView::DoActivateL(TVwsViewId const &, TUid, TDesC8 const &)
+	DoDeactivate__19CMPSettingsBaseView @ 5 NONAME R3UNUSED ; CMPSettingsBaseView::DoDeactivate(void)
+	DynInitContainerL__19CMPSettingsBaseView @ 6 NONAME R3UNUSED ; CMPSettingsBaseView::DynInitContainerL(void)
+	DynInitMenuPaneL__19CMPSettingsBaseViewiP12CEikMenuPane @ 7 NONAME R3UNUSED ; CMPSettingsBaseView::DynInitMenuPaneL(int, CEikMenuPane *)
+	HandleClientRectChange__19CMPSettingsBaseView @ 8 NONAME R3UNUSED ; CMPSettingsBaseView::HandleClientRectChange(void)
+	ListBox__24CMPSettingsBaseContainer @ 9 NONAME R3UNUSED ; CMPSettingsBaseContainer::ListBox(void)
+	ListImplementationsL__21CMPSettingsPluginViewRt13RPointerArray1Z26CImplementationInformation @ 10 NONAME R3UNUSED ; CMPSettingsPluginView::ListImplementationsL(RPointerArray<CImplementationInformation> &)
+	NewL__21CMPSettingsPluginViewG4TUid @ 11 NONAME R3UNUSED ; CMPSettingsPluginView::NewL(TUid)
+	OfferKeyEventL__24CMPSettingsBaseContainerRC9TKeyEvent10TEventCode @ 12 NONAME R3UNUSED ; CMPSettingsBaseContainer::OfferKeyEventL(TKeyEvent const &, TEventCode)
+	SetCurrentItem__19CMPSettingsBaseViewi @ 13 NONAME R3UNUSED ; CMPSettingsBaseView::SetCurrentItem(int)
+	SetNaviPaneL__19CMPSettingsBaseView @ 14 NONAME R3UNUSED ; CMPSettingsBaseView::SetNaviPaneL(void)
+	SizeChanged__24CMPSettingsBaseContainer @ 15 NONAME R3UNUSED ; CMPSettingsBaseContainer::SizeChanged(void)
+	"_._19CMPSettingsBaseView" @ 16 NONAME R3UNUSED ; CMPSettingsBaseView::~CMPSettingsBaseView(void)
+	"_._21CMPSettingsPluginView" @ 17 NONAME R3UNUSED ; CMPSettingsPluginView::~CMPSettingsPluginView(void)
+	"_._24CMPSettingsBaseContainer" @ 18 NONAME R3UNUSED ; CMPSettingsBaseContainer::~CMPSettingsBaseContainer(void)
+	__19CMPSettingsBaseView @ 19 NONAME R3UNUSED ; CMPSettingsBaseView::CMPSettingsBaseView(void)
+	ComponentControl__C24CMPSettingsBaseContaineri @ 20 NONAME R3UNUSED ; CMPSettingsBaseContainer::ComponentControl(int) const
+

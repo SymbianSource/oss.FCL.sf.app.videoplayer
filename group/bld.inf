@@ -1,0 +1,90 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Build information file for project video.*
+*/
+
+
+// Version : %version: 30 %
+
+
+#include <bldvariant.hrh>
+#include <platform_paths.hrh> // for conf file export macros
+
+/**
+ * VideoCenter domain api
+ */
+#include "../videoplayer_plat/group/bld.inf"
+
+/**
+ * Videofeeds
+ */
+#include "../videofeeds/group/bld.inf"
+
+/**
+ * My Videos as MPX plugin and view or as separate app and view
+ */
+#include "../videocollection/group/bld.inf"
+
+/**
+ * Homescreen plugins: suite configuration
+ */
+#include "../homescreenplugins/videosuiteconf/group/bld.inf"
+
+/**
+ * Homescreen plugins: action handler
+ */
+#include "../homescreenplugins/videoahlplugin/group/bld.inf"
+
+/**
+ * Homescreen plugins: content harvester plugin
+ */
+#include "../homescreenplugins/videochplugin/group/bld.inf"
+
+/**
+ * Mediasettings
+ */
+#include "../mediasettings/group/bld.inf"
+
+/* 
+*  Projects for playback views/plugins
+*/
+
+/**
+ * File details plugin
+ */
+#include "../filedetails/filedetailsplugin/group/bld.inf"
+
+
+/**
+ * File details dialog
+ */
+#include "../filedetails/filedetailsdialog/group/bld.inf"
+
+
+/*
+ *  video player app collection
+ */
+#include "../videoplayerapp/group/bld.inf"
+
+/*
+ *  mpx video playback plugins collection
+ */
+#include "../videoplayback/group/bld.inf"
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+

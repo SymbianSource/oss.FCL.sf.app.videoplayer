@@ -1,0 +1,120 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    contains localised resources to be used in video menu suite*
+*/
+
+
+NAME VODN
+
+#include <eikon.rsg>
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+#include <ipvideo.loc>
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+
+RESOURCE TBUF r_vcxns_mmenu_suite_title
+    {
+    buf = qtn_vcx_title_suite;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_last_watched_title
+    {
+    buf = qtn_vcx_ns_list_last_watched;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_my_videos_title
+    {
+    buf = qtn_vcx_ns_list_my_videos;
+    }  
+    
+RESOURCE TBUF r_vcxns_mmenu_video_feeds_title
+    {
+    buf = qtn_vcx_ns_list_video_feeds;
+    }  
+    
+RESOURCE TBUF r_vcxns_mmenu_last_watched_name
+    {
+    buf = qtn_vcx_ns_list_last_watched_name;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_no_videos
+    {
+    buf = qtn_vcx_ns_list_no_videos;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_one_video
+    {
+    buf = qtn_vcx_ns_list_my_videos_amount_one;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_n_videos
+    {
+    buf = qtn_vcx_ns_list_my_videos_amount;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_one_new_video
+    {
+    buf = qtn_vcx_ns_one_new_video;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_n_new_videos
+    {
+    buf = qtn_vcx_ns_n_new_videos;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_no_feeds
+    {
+    buf = qtn_vcx_ns_no_feeds;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_one_feed
+    {
+    buf = qtn_vcx_ns_one_feed;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_n_feeds
+    {
+    buf = qtn_vcx_ns_list_video_feeds_amount;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_options_play
+    {
+    buf = qtn_iptv_play;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_options_open
+    {
+    buf = qtn_vcx_options_open;
+    }
+
+RESOURCE TBUF r_vcxns_mmenu_options_settings
+    {
+    buf = qtn_vcx_options_settings;
+    }
+
+RESOURCE TBUF R_vcxns_mmenu_options_help    
+    {
+    buf = qtn_options_help;
+    }
+
+
+// End of File

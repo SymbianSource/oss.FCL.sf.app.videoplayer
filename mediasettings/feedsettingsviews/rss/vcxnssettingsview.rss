@@ -1,0 +1,820 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource definitions for Video Center Settings view*
+*/
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME	IPST // 4 letter ID
+
+//  INCLUDES
+
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.loc>
+#include <avkon.hrh>
+#include <avkon.mbg>
+#include <AvkonIcons.hrh>   // AVKON_ICON_FILE( Path to avkon.mbm file )
+#include <appinfo.rh>
+#include <data_caging_paths_strings.hrh>
+#include <bldvariant.hrh>
+
+#ifdef RD_MULTIPLE_DRIVE_ENABLERS
+#include <CommonDialogs.hrh> // Enumerations
+#include <CommonDialogs.rh>  // Resource structures
+#endif // RD_MULTIPLE_DRIVE_ENABLERS
+
+#include <ipvideo.loc>
+
+#include "feedsettingsview.hrh"
+#include "feedsettingsview.rh"
+
+#define POPFIELD_TEXT_WIDTH  8
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf = "vcnssettingsview"; }
+
+// -----------------------------------------------------------------------------
+//   
+// r_vcsettingsview_settingsview
+// Defines my app settings view.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_vcsettingsview_settingsview
+    {
+    menubar = r_vcsettingsview_settingsview_menubar;
+    cba = r_vcsettingsview_settingsview_buttons_msk;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_vcsettingsview_settingsview_menubar
+// Menu title definition.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcsettingsview_settingsview_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_vcsettingsview_settingsview_menu; 
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_vcsettingsview_settingsview_menu
+// "Options" menu definition
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcsettingsview_settingsview_menu 
+    {
+    items =
+        {
+        //
+        // For settings view: Open, Change.
+        //
+        MENU_ITEM
+            { 
+            command = EVcSettingsViewCmdOpen; 
+            txt = qtn_iptv_open_service_selection_setting;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsViewCmdChange; 
+            txt = qtn_iptv_change_setting;
+            flags = EEikMenuItemAction;
+            },  
+        //
+        // Common parts of video service selection.
+        //
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdMark; 
+            txt = qtn_iptv_mark_service;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdUnmark; 
+            txt = qtn_iptv_unmark_service;
+            flags = EEikMenuItemAction;
+            },
+        //
+        // Video service selection: Vod service selection
+        // Video service details, Edit video service, Remove video service, Add video service
+        //                    
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodDetails; 
+            txt = qtn_iptv_feed_details;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodEdit; 
+            txt = qtn_iptv_edit_feed;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodRemove; 
+            txt = qtn_iptv_remove_feed;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodAdd; 
+            txt = qtn_iptv_add_feed;
+            },
+        //
+        // Video service selection: Vodcast service selection
+        // Feed details, Edit feed, Remove feed, Add feed
+        //
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodcastDetails; 
+            txt = qtn_iptv_feed_details;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodcastEdit; 
+            txt = qtn_iptv_edit_feed;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodcastRemove; 
+            txt = qtn_iptv_remove_feed;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsServiceCmdVodcastAdd; 
+            txt = qtn_iptv_add_feed;
+            },
+        //
+        // Video service selection: Web link service selection
+        // Web link details, Remove web link
+        //
+        MENU_ITEM 
+            {
+            command = EVcSettingsServiceCmdWebLinkDetails; 
+            txt = qtn_iptv_web_link_details;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            {
+            command = EVcSettingsServiceCmdWebLinkRemove; 
+            txt = qtn_iptv_remove_web_link;
+            flags = EEikMenuItemSpecific;
+            },
+        //
+        // For Add service view: Change.
+        //
+        MENU_ITEM
+            {
+            command = EVcSettingsViewAddServiceCmdChange;
+            txt = qtn_iptv_change_setting;
+            flags = EEikMenuItemAction;
+            },
+        //
+        // Common: Help, Exit
+        //
+        MENU_ITEM 
+            { 
+            command = EVcSettingsViewCmdHelp; 
+            txt = qtn_options_help;
+            },
+        MENU_ITEM 
+            { 
+            command = EVcSettingsViewCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+//----------------------------------------------------------------------------
+// r_vcsettingsview_addservice_list
+// Add/Edit service: Setting item list
+//----------------------------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_ITEM_LIST r_vcsettingsview_addservice_list
+    {
+    items =
+        {
+        AVKON_SETTING_ITEM
+            {
+            identifier = EVcSettingsViewAddServiceServiceNameItem;
+            setting_page_resource = r_vcsettingsview_addservice_servicename_page;
+            name = qtn_iptv_service_name;
+            },        
+        AVKON_SETTING_ITEM
+            {
+            identifier = EVcSettingsViewAddServiceAddressItem;
+            setting_page_resource = r_vcsettingsview_addservice_address_page;
+            name = qtn_iptv_service_address;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_addservice_servicename_page
+// Add/Edit service: Name page
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_addservice_servicename_page
+    {
+    type = EEikCtEdwin;
+    editor_resource_id = r_vcsettingsview_addservice_servicename_editor;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_addservice_address_page
+// Add/Edit service: Address page
+// -----------------------------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_addservice_address_page
+    {
+    type = EEikCtEdwin;
+    editor_resource_id = r_vcsettingsview_addservice_address_editor;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_addservice_servicename_editor
+// Add/Edit service: Name editor
+// -----------------------------------------------------------------------------
+//
+RESOURCE EDWIN r_vcsettingsview_addservice_servicename_editor
+    {
+    maxlength = 80;
+    lines = 3;
+    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode; 
+    default_input_mode = EAknEditorTextInputMode;
+    flags = EEikEdwinAutoSelection | EAknEditorLowerCase | EEikEdwinNoLineOrParaBreaks;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_addservice_address_editor
+// Add/Edit service: Address editor
+// -----------------------------------------------------------------------------
+//
+RESOURCE EDWIN r_vcsettingsview_addservice_address_editor
+    {
+    maxlength = 255;
+    lines = 3;
+    special_character_table = R_AVKON_URL_SPECIAL_CHARACTER_TABLE_DIALOG;
+    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode; 
+    default_input_mode = EAknEditorTextInputMode;
+    default_case = EAknEditorLowerCase;
+    flags = EEikEdwinAutoSelection | EAknEditorLowerCase | EEikEdwinNoLineOrParaBreaks;
+    }
+    
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_servicedetails_query
+// Service details dialog
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcsettingsview_servicedetails_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE 
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = qtn_iptv_details_header;
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcsettingsview_softkeys_remove_cancel
+// CBA buttons for r_vcsettingsview_remove_service_query
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcsettingsview_softkeys_remove_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON 
+            {
+            id = EAknSoftkeyOk; 
+            txt = qtn_iptv_remove_softkey;
+            },
+        AVKON_CBA_BUTTON
+            {
+            id = EAknSoftkeyCancel;
+            txt = text_softkey_cancel;
+            }
+        };
+    }
+
+//------------------------------------------------------------------------------
+//
+//    r_vcsettingsview_remove_service_query
+//
+//------------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcsettingsview_remove_service_query
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = r_vcsettingsview_softkeys_remove_cancel;
+    items =
+        {
+        DLG_LINE 
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = qtn_iptv_remove_service_header;
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+// ----------------------------------------------------------------------------
+// r_vcsettingsview_remove_service_with_account
+// ----------------------------------------------------------------------------
+//    
+RESOURCE TBUF r_vcsettingsview_remove_service_with_account
+    {
+    buf = qtn_iptv_remove_service_with_account;
+    }
+    
+// ----------------------------------------------------------------------------
+// r_vcsettingsview_link_account
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcsettingsview_link_account
+    {
+    buf = qtn_iptv_link_account;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_delete_confirmation_query
+// -----------------------------------------------------------------------------
+//    
+RESOURCE DIALOG r_vcsettingsview_delete_confirmation_query
+	{
+	flags = EGeneralQueryFlags;
+	buttons = R_AVKON_SOFTKEYS_YES_NO;
+	items =
+		{
+		DLG_LINE
+			{
+			type = EAknCtQuery;
+			id = EGeneralQuery;
+			control = AVKON_CONFIRMATION_QUERY 
+				{ 
+				layout = EConfirmationLayout;
+				};
+			}
+		};
+	}  
+
+// -----------------------------------------------------------------------------
+// r_vcsettingsview_confirmation_query
+// Confirmation query with OK softkey
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcsettingsview_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationLayout;
+                bmpfile= AVKON_BITMAP_FILE;
+                bmpid= EMbmAvkonQgn_note_error;
+                bmpmask= EMbmAvkonQgn_note_error_mask;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------------------------------
+//
+// VIDEO SERVICE SELECTION LIST BOX
+//
+//----------------------------------------------------------------------------
+//
+RESOURCE LISTBOX r_vcsettingsview_serviceselection_list
+    {
+    flags = EAknListBoxMultiselectionList;    
+    }
+
+// ---------------------------------------------------------
+//
+//    r_checkbox_icons
+//    Array for check box icons.
+//
+// ---------------------------------------------------------
+//
+RESOURCE AKN_ICON_ARRAY r_iptv_checkbox_icons
+    {
+    bmpfile = AVKON_ICON_FILE;
+    icons =
+	    {
+	    AKN_ICON
+    	    {
+    	    iconId = EMbmAvkonQgn_indi_checkbox_on;
+    	    maskId = EMbmAvkonQgn_indi_checkbox_on_mask;
+    	    },
+    	AKN_ICON
+    	    {
+    	    iconId = EMbmAvkonQgn_indi_checkbox_off;
+    	    maskId = EMbmAvkonQgn_indi_checkbox_off_mask;
+    	    }
+    	};
+    }
+
+// ---------------------------------------------------------
+// r_vcsettingsview_settingview_servicetype_softkeys
+// Settings UI, Service Type list softkeys.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcsettingsview_settingview_servicetype_softkeys
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EVcSettingsViewSoftkeySelect; txt=text_softkey_select; },
+        CBA_BUTTON{id=EVcSettingsViewSoftkeyBack; txt=text_softkey_back; },
+        CBA_BUTTON{id=EVcSettingsViewSoftkeySelect; txt=text_softkey_select; }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcsettingsview_settingview_setting_subset_softkeys
+// Settings UI, Service Selection list softkeys.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcsettingsview_settingview_setting_subset_softkeys
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EAknSoftkeyOptions; txt=text_softkey_option; },
+        CBA_BUTTON{id=EVcSettingsViewSoftkeyDone; txt=text_softkey_done; }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcsettingsview_settingview_changepriority_moving_softkeys
+// Settings UI, Change priority list softkeys when moving.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcsettingsview_settingview_changepriority_moving_softkeys
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EVcSettingsViewSoftkeyOk; txt=text_softkey_ok; },
+        CBA_BUTTON{id=EVcSettingsViewSoftkeyCancel; txt=text_softkey_cancel; },
+        CBA_BUTTON{id=EVcSettingsViewSoftkeyOk; txt=""; }
+        };
+    }
+
+// ----------------------------------------------------------------------------
+// r_vcsettingsview_changepriority_list
+// ----------------------------------------------------------------------------
+//
+RESOURCE LISTBOX r_vcsettingsview_changepriority_list
+    {
+    flags = EAknListBoxSelectionList | EAknListBoxMarkableList;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_title
+// ----------------------------------------------------------------------------
+//
+RESOURCE TITLE_PANE r_iptv_title
+    {
+    txt = qtn_vcx_title_suite;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_title_pane_settings_title
+// ----------------------------------------------------------------------------
+//
+RESOURCE TITLE_PANE r_iptv_title_pane_settings_title
+    {
+    txt = qtn_iptv_settings_title;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_service_selection_title
+// ----------------------------------------------------------------------------
+//
+RESOURCE TITLE_PANE r_iptv_service_selection_title
+    {
+    txt = qtn_iptv_service_selection_title;    
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_new_service_default
+// "Default" Default text for a name of new service.
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_new_service_default
+    {
+    buf = qtn_iptv_new_service_default;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_remove_service_confirmation
+// "Remove video service %U?"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_remove_service_confirmation
+    {
+    buf = qtn_iptv_remove_service_confirmation;
+    }
+
+// -----------------------------------------------------------------------------  
+// r_iptv_conf_deactivate_reminders
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_conf_deactivate_reminders
+    {
+    buf = qtn_iptv_conf_deactivate_reminders;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_remove_feed_confirmation
+// "Remove feed %U?"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_remove_feed_confirmation
+    {
+    buf = qtn_iptv_remove_feed_confirmation;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_remove_web_link_confirmation
+// "Remove web link %U?"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_remove_web_link_confirmation
+    {
+    buf = qtn_iptv_remove_web_link_confirmation;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_no_video_services
+// "No services"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_no_video_services
+    {
+    buf = qtn_iptv_no_video_services;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_no_feeds_selected
+// "No feeds"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_no_feeds_selected
+    {
+    buf = qtn_iptv_no_feeds_selected;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_no_web_links
+// "No links"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_no_web_links
+    {
+    buf = qtn_iptv_no_web_links;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_query_common_conf_delete
+// "Delete? nnnnn"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_query_common_conf_delete
+    {
+    buf = qtn_query_common_conf_delete;
+    }
+    
+// ----------------------------------------------------------------------------
+// r_iptv_user_defined_service
+// "User defined service"
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_user_defined_service
+    {
+    buf = qtn_iptv_user_defined_service;
+    }
+
+// ----------------------------------------------------------------------------
+// r_iptv_new_service_main
+// "Add services"
+// NOTE Replaces provisioned "Add service" text
+// ----------------------------------------------------------------------------
+//	
+RESOURCE TBUF r_iptv_new_service_main
+    {
+    buf = qtn_iptv_new_service_main;
+    }
+        
+// ----------------------------------------------------------------------------
+// r_iptv_video_directory_list
+// "Service directory"
+// NOTE Replaces provisioned "Service directory" text
+// ----------------------------------------------------------------------------
+//	
+RESOURCE TBUF r_iptv_video_directory_list
+    {
+    buf = qtn_vcx_ns_list_video_directory;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_msk_button_open
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_msk_button_open
+    {
+    id = EAknSoftkeyOpen;
+    txt = qtn_msk_open;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_msk_button_play
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_msk_button_play
+    {
+    id = EVcSettingsViewSoftkeyMSKPlay;
+    txt = qtn_msk_play;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_msk_empty
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_msk_empty
+    {
+    id = EVcSettingsViewSoftkeyMSKDoNothing;
+    txt = " ";
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_msk_button_change
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_msk_button_change
+    {
+    id = EAknSoftkeyChange;
+    txt = qtn_msk_change;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_service_selection_msk_button_unmark
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_service_selection_msk_button_unmark
+    {
+    id = EVcSettingsServiceCmdUnmark;
+    txt = qtn_msk_unmark;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_service_selection_msk_button_mark
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_service_selection_msk_button_mark
+    {
+    id = EVcSettingsServiceCmdMark;
+    txt = qtn_msk_mark;
+    }
+
+//----------------------------------------------------
+//
+// r_vcsettingsview_service_selection_msk_button_select
+//
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcsettingsview_service_selection_msk_button_select
+    {
+    id = EVcSettingsServiceCmdSelect;
+    txt = qtn_msk_select;
+    }
+      
+//----------------------------------------------------
+//
+//    r_vcsettingsview_settingsview_buttons_msk
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_vcsettingsview_settingsview_buttons_msk
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EAknSoftkeyOptions;            txt = text_softkey_option; },
+        CBA_BUTTON{id=EAknSoftkeyBack;               txt = text_softkey_back; },
+        CBA_BUTTON{id=EAknSoftkeyOpen;               txt = text_softkey_open; }
+        };
+    }    
+
+// ----------------------------------------------------------------------------
+// r_vcsettings_title_pane_settings_title
+// ----------------------------------------------------------------------------
+//
+RESOURCE TITLE_PANE r_vcsettings_title_pane_settings_title
+    {
+    txt = qtn_iptv_settings_title;
+    }
+
+//----------------------------------------------------------------------------
+//
+// R_VCSETTINGS_GENERALSETTINGS_VIDEOCENTER_CAPTION
+//
+//----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcsettings_generalsettings_videocenter_caption
+    {
+    buf = qtn_vcx_title_suite;
+    }
+
+//----------------------------------------------------
+//   
+//    r_mpsett_feeds_view_title
+//    Feeds view's title.
+//
+//----------------------------------------------------
+//-
+RESOURCE TITLE_PANE r_mpsett_feeds_view_title
+    {
+    txt = qtn_iptv_service_selection_setting;
+    }
+

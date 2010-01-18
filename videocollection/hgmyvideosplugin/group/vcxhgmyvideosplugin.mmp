@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   vcxhgmyvideosplugin buildfile*
+*/
+
+
+// Version : %version: 8 %
+
+#include <data_caging_paths.hrh>
+#include <bldvariant.hrh>
+#include <platform_paths.hrh>
+
+
+TARGET          vcxhgmyvideosplugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x2001B2B3
+
+CAPABILITY      CAP_ECOM_PLUGIN -AllFiles
+VENDORID        VID_DEFAULT
+
+
+SOURCEPATH      ../src
+SOURCE          vcxhgmyvideospluginproxy.cpp
+SOURCE          vcxhgmyvideosplugin.cpp
+
+START RESOURCE  ../rss/vcxhgmyvideosplugin.rss
+TARGET          vcxhgmyvideosplugin.rsc
+END // RESOURCE
+
+USERINCLUDE     ../inc 
+USERINCLUDE     ../../hgmyvideos/inc
+USERINCLUDE     ../../../inc    
+USERINCLUDE     ../../../videofeeds/utils/inc
+USERINCLUDE     ../../../videofeeds/viewmessageutility/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib 
+LIBRARY         avkon.lib
+LIBRARY         ecom.lib
+LIBRARY         mpxviewplugin.lib
+LIBRARY         vcxhgmyvideos.lib

@@ -1,0 +1,158 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   GSVideoPlugin Project specification file.*
+*/
+
+
+// Version : %version: 3 %
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>    // For RESOURCE_FILES_DIR
+#include <bldvariant.hrh>
+
+CAPABILITY          CAP_ECOM_PLUGIN
+TARGET              GSVideoPlugin.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x10275068
+
+VENDORID            VID_DEFAULT
+//VERSION             11.6
+
+//********* UIDs *************
+//0x10275068     //DLL UID
+//0x10275069     //Impl1. UID
+//****************************
+
+
+SOURCEPATH      ../src
+SOURCE          GSVideoPlugin.cpp
+SOURCE          GSVideoPluginImplementationTable.cpp
+SOURCE          GSMediaPlayerVideoView.cpp
+SOURCE          GSMediaPlayerStreamingView.cpp
+
+SOURCEPATH      ../../mediasettingsapp/src  
+SOURCE          MPSettingsMainContainer.cpp
+SOURCE          MPSettingsMainView.cpp
+SOURCE          MPSettingsVideoSettingItemList.cpp
+SOURCE          MPSettingsVideoContainer.cpp
+SOURCE          MPSettingsStreamingContainer.cpp
+SOURCE          MPSettingsProxySettingItemList.cpp
+SOURCE          MPSettingsProxyContainer.cpp
+SOURCE          MPSettingsProxyView.cpp
+SOURCE          MPSettingsNetworkSettingItemList.cpp
+SOURCE          MPSettingsNetworkContainer.cpp
+SOURCE          MPSettingsNetworkView.cpp
+SOURCE          MPSettingsSliderSettingItem.cpp
+SOURCE          MPSettingsUDPPortSettingItem.cpp
+SOURCE          MPSettingsAdvancedBwContainer.cpp
+SOURCE          MPSettingsAdvancedBwSettingItemList.cpp
+SOURCE          MPSettingsAdvancedBwSettingItem.cpp
+SOURCE          MPSettingsAdvancedBwView.cpp
+
+SOURCEPATH      ../../mediasettingsengine/src  
+SOURCE          MPSettingsModelForROP.cpp
+SOURCE          MPSettingsRopConfigParser.cpp
+
+SOURCEPATH      ../src
+
+//User include paths
+
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../data
+USERINCLUDE     ../../mpsettbase/inc
+USERINCLUDE     ../../mediasettingsapp/inc
+USERINCLUDE     ../../videoplayersettingsengine/inc
+USERINCLUDE     ../../mediasettingsengine/inc
+USERINCLUDE     ../../mediasettingsengine/data
+USERINCLUDE     ../../feedsettingsviews/inc
+
+
+//System include paths
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+SYSTEMINCLUDE   /epoc32/include/cshelp
+
+//ECOM resource definition
+//***********ECOM resource definition******************
+//--Ecom resource TARGET name must be same as DLL name,
+//--otherwise Ecom won't recognise it. 
+//*****************************************************
+START RESOURCE  ../data/10275068.rss
+TARGET          GSVideoPlugin.rsc
+END
+
+//Gs Video Plugin resources
+START RESOURCE  ../../mediasettingsapp/data/MediaSettings.rss
+TARGETPATH      RESOURCE_FILES_DIR
+HEADER
+LANGUAGE_IDS
+END
+
+LIBRARY   euser.lib
+LIBRARY   ecom.lib
+LIBRARY   efsrv.lib
+LIBRARY   avkon.lib
+LIBRARY   bafl.lib 
+LIBRARY   cone.lib 
+LIBRARY   eikcoctl.lib 
+LIBRARY   eikcore.lib 
+LIBRARY   EtelMM.lib            // security, network, call
+LIBRARY   GSListBox.lib         // For CGSListBoxItemTextArray
+LIBRARY   CommonEngine.lib      // For RConeResourceLoader
+LIBRARY   FeatMgr.lib           // Feature manager 
+LIBRARY   commsdat.lib          
+LIBRARY   GSFramework.lib       // For base classes
+LIBRARY   CentralRepository.lib 
+LIBRARY   pbkeng.lib
+LIBRARY   pbkview.lib
+LIBRARY   aknskinsrv.lib        // for enhanced skinning
+LIBRARY   aknskins.lib          // for enhanced skinning
+LIBRARY   egul.lib
+LIBRARY   MMFCONTROLLERFRAMEWORK.LIB //for RMMFController
+LIBRARY   charconv.lib
+LIBRARY   apparc.lib
+LIBRARY   MPSettBase.lib
+LIBRARY   MPSettEngine.lib
+LIBRARY   eikctl.lib
+LIBRARY   mediaclientvideo.lib
+LIBRARY   estor.lib //RWriteStream
+LIBRARY   esock.lib
+LIBRARY   GSEcomPlugin.lib
+LIBRARY   vcxnssettingsengine.lib
+LIBRARY	  CommonDialogs.lib
+LIBRARY	  cmmanager.lib
+
+#ifndef RD_STARTUP_CHANGE
+LIBRARY   sysutil.lib           // Shutdown::Restart
+#endif //RD_STARTUP_CHANGE
+
+LIBRARY   AknNotify.lib         // for CAknGlobalNote.h
+LIBRARY   hlplch.lib            // for "Help" options menu
+LIBRARY   eikdlg.lib            // eikon dialogs
+
+LIBRARY   flogger.lib // For GSLogger
+LIBRARY   sisregistryclient.lib
+
+LIBRARY   vcxnssettingsview.lib
+
+SOURCEPATH      ../data
+DOCUMENT        10275068.rss
+SOURCEPATH		../../mediasettingsapp/data
+DOCUMENT        MediaSettings.rss
+
+
+// End of File

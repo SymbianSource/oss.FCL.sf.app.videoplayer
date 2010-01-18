@@ -1,0 +1,110 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file contains all the resources for the lwplayer.exe
+ *
+*/
+
+// Version : %version: 3 %
+
+
+
+//  
+//  RESOURCE IDENTIFIER
+//
+NAME    AWIZ // 4 letter ID
+
+//  
+//  INCLUDES
+//
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.mbg>
+#include <avkon.rh>
+#include <avkon.loc>
+#include <appinfo.rh>
+
+#include <lwplayer.loc>
+
+//----------------------------------------------------
+//
+//    RSS_SIGNATURE
+//
+//----------------------------------------------------
+RESOURCE RSS_SIGNATURE { }
+
+//----------------------------------------------------
+//   
+//    TBUF
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF { buf="lwplayer"; }
+
+//----------------------------------------------------
+//
+//    EIK_APP_INFO
+//
+//----------------------------------------------------
+RESOURCE EIK_APP_INFO
+    {
+    status_pane = r_lwplayer_status_pane;
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_lwp_localisable_app_info 
+//
+// ---------------------------------------------------
+//
+RESOURCE LOCALISABLE_APP_INFO r_lwp_localisable_app_info
+    {
+    caption_and_icon = 
+    CAPTION_AND_ICON_INFO
+        {
+        number_of_icons = 0;
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_lwplayer_status_pane
+//
+//----------------------------------------------------
+RESOURCE STATUS_PANE_APP_MODEL r_lwplayer_status_pane
+    {
+    layout = R_AVKON_STATUS_PANE_LAYOUT_EMPTY;
+    }
+
+// ---------------------------------------------------
+//
+//    r_lwp_clip_missing
+//
+// ---------------------------------------------------
+RESOURCE TBUF r_lwp_clip_missing
+    {
+    buf = qtn_lwp_note_missing;
+    }
+
+// ---------------------------------------------------
+//
+//    r_lwp_invalid_clip
+//
+// ---------------------------------------------------
+RESOURCE TBUF r_lwp_invalid_clip
+    {
+    buf = qtn_lwp_note_invalid_clip;
+    }
+
+// EOF

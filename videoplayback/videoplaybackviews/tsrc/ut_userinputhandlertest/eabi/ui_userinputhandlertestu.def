@@ -1,0 +1,10 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZN33CMPXVideoPlaybackUserInputHandler20ProcessPointerEventLEP11CCoeControlRK13TPointerEvent20TMPXVideoControlType @ 2 NONAME
+	_ZTI24CMPXVideoPlaybackControl @ 3 NONAME ; #<TI>#
+	_ZTI26CMPXVideoPlaybackContainer @ 4 NONAME ; #<TI>#
+	_ZTI33CMPXVideoPlaybackUserInputHandler @ 5 NONAME ; #<TI>#
+	_ZTV24CMPXVideoPlaybackControl @ 6 NONAME ; #<VT>#
+	_ZTV26CMPXVideoPlaybackContainer @ 7 NONAME ; #<VT>#
+	_ZTV33CMPXVideoPlaybackUserInputHandler @ 8 NONAME ; #<VT>#
+

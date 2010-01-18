@@ -1,0 +1,8 @@
+EXPORTS
+	??1CMPFileDetailsDialog@@UAE@XZ @ 1 NONAME ; CMPFileDetailsDialog::~CMPFileDetailsDialog(void)
+	?ExecuteLD@CMPFileDetailsDialog@@QAEXABVTDesC16@@@Z @ 2 NONAME ; void CMPFileDetailsDialog::ExecuteLD(class TDesC16 const &)
+	?ExecuteLD@CMPFileDetailsDialog@@QAEXPAVCMPFileDetails@@@Z @ 3 NONAME ; void CMPFileDetailsDialog::ExecuteLD(class CMPFileDetails *)
+	?NewL@CMPFileDetailsDialog@@SAPAV1@XZ @ 4 NONAME ; class CMPFileDetailsDialog * CMPFileDetailsDialog::NewL(void)
+	??0CMPFileDetails@@QAE@XZ @ 5 NONAME ; CMPFileDetails::CMPFileDetails(void)
+	??1CMPFileDetails@@UAE@XZ @ 6 NONAME ; CMPFileDetails::~CMPFileDetails(void)
+	?Close@CMPFileDetailsDialog@@QAEXXZ @ 7 NONAME ; void CMPFileDetailsDialog::Close(void)

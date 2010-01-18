@@ -1,0 +1,71 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of the License "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:  Package file for Mpx Player STIF tests;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"FusionMpxPlayer_Test"},(0x00000000),1,1,0,TYPE=SA
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Logo
+; None
+
+; Package signature - Optional
+; None
+
+; Start of Package body
+
+; Condition blocks
+; None
+
+; Options list
+; None
+
+; Install files
+"\epoc32\release\armv5\udeb\FusionMpxPlayer_ApiTest.dll"                  -   "!:\Sys\Bin\FusionMpxPlayer_ApiTest.dll"
+"\epoc32\release\armv5\udeb\VCXTestCommon.dll"                            -   "!:\Sys\Bin\VCXTestCommon.dll"
+"\epoc32\release\armv5\udeb\VCXTestUtilModule.dll"                       -   "!:\Sys\Bin\VCXTestUtilModule.dll"
+"\epoc32\release\armv5\udeb\FusionMpxPlayerTestExeUi.exe"                 -   "!:\Sys\Bin\FusionMpxPlayerTestExeUi.exe"
+"\epoc32\data\z\resource\apps\FusionMpxPlayerTestExeUi.rsc"               -   "!:\resource\apps\FusionMpxPlayerTestExeUi.rsc"
+"\epoc32\data\Z\private\10003a3f\apps\FusionMpxPlayerTestExeUi_reg.rsc"   -   "!:\private\10003a3f\import\apps\FusionMpxPlayerTestExeUi_reg.rsc"
+"..\init\testframework.ini"                                              -   "c:\testframework\testframework.ini"
+"..\conf\ui_FusionMpxPlayer_ApiTest.cfg"                                  -   "c:\testframework\ui_FusionMpxPlayer_ApiTest.cfg"
+"..\conf\ui_FusionMpxPlayer_ApiTestStreams.cfg"                           -   "c:\testframework\ui_FusionMpxPlayer_ApiTestStreams.cfg"
+"..\data\mmc\prettyfu.3gp"                                               -   "e:\testing\data\prettyfu.3gp"
+"..\data\mmc\sotajumala1.3gp"                                            -   "e:\testing\data\sotajumala1.3gp"
+"..\data\mmc\SufferWell.3gp"                                             -   "e:\testing\data\SufferWell.3gp"
+"..\data\mmc\5thelement_mpeg4.mp4"                                       -   "e:\testing\data\5thelement_mpeg4.mp4"
+"..\data\mmc\happytreefriends_mpeg4.mp4"                                 -   "e:\testing\data\happytreefriends_mpeg4.mp4"
+
+
+; Embedded SIS
+; None
+
+; End of Package body
+
+; PKG dependencies
+; None
+
+; PKG capabilities
+; None

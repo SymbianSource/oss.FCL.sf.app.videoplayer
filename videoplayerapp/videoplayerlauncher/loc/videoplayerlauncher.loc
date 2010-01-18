@@ -1,0 +1,37 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  VideoPlayerLauncher App localisation strings.
+*
+*/
+
+// Version : %version: da1mmcf#4 %
+
+//d:Application title for the grid view.
+//d: Title of the icon in grid view for the user to start the application
+//d: Usually hidden, this should be translated equally to qtn_vcx_title_suite
+//l:cell_app_pane_t1
+//r:5.2
+//
+#define qtn_videoplayerlauncher_short_caption        "Videos & TV"
+
+//d:Application title for the list view.
+//d: Title of the icon in list view for the user to start the application.
+//d: This item will be shown in the list of applications for example 
+//d: when configuring application shortcuts in homescreen.
+//d: The translation should be equal to qtn_vcx_title_suite
+//l:list_single_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_videoplayerlauncher_caption              "Videos & TV"
+

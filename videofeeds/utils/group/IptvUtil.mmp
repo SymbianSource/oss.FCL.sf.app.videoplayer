@@ -1,0 +1,93 @@
+/*
+* Copyright (c) 2004-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    This is a project specification file for Iptv utility dll*
+*/
+
+
+
+ 
+#include <platform_paths.hrh>
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET          IptvUtil.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x10281F1E
+
+CAPABILITY      CAP_GENERAL_DLL DRM
+
+START RESOURCE  ../data/iptvmimesupport.rss
+TARGET          iptvmimesupport.rsc
+TARGETPATH      resource/apps
+HEADER
+END // RESOURCE
+
+SOURCEPATH      ../src
+SOURCE          CIptvEpgCategory.cpp
+SOURCE          CIptvEpgContent.cpp
+SOURCE          CIptvUtil.cpp
+SOURCE          CIptvTimer.cpp
+SOURCE          CIptvIapList.cpp
+SOURCE          TIptvIap.cpp
+SOURCE          TIptvUint32StreamObject.cpp
+SOURCE          CIptvResourceLoader.cpp
+SOURCE          CIptvMediaContent.cpp
+SOURCE          CIptvTerminalVideoSupport.cpp
+SOURCE          CIptvThumbnailGenerator.cpp
+SOURCE          CIptvThumbnailImpl.cpp
+SOURCE          CIptvRtpTo3gpConverter.cpp
+SOURCE          TIptvRssSearchQuery.cpp
+SOURCE          CIptvDriveMonitor.cpp
+SOURCE          TIptvDriveInfo.cpp
+SOURCE          TIptvDriveMonitorEvent.cpp
+SOURCE          iptvlastwatcheddata.cpp
+SOURCE          iptvlastwatchedapi.cpp
+SOURCE          vcxiadupdate.cpp
+SOURCE          vcxnsimageconverter.cpp
+SOURCE          vcxhgvodtelephonyclient.cpp
+
+USERINCLUDE     . 
+USERINCLUDE     ../inc
+USERINCLUDE     ../../vccommon/conf
+
+APP_LAYER_SYSTEMINCLUDE 
+
+LIBRARY         euser.lib 
+LIBRARY         estor.lib 
+LIBRARY         flogger.lib 
+LIBRARY         efsrv.lib 
+LIBRARY         bafl.lib 
+LIBRARY         cone.lib
+LIBRARY         PlatformEnv.lib // PathInfo
+LIBRARY         imageconversion.lib
+LIBRARY         apgrfx.lib      // RApaLsSession
+LIBRARY         apmime.lib      // TDataType
+LIBRARY         centralrepository.lib
+
+LIBRARY         iaupdateapi.lib
+
+LIBRARY         TNEEngine.lib
+LIBRARY         commdb.lib
+LIBRARY         sysutil.lib
+LIBRARY         FeatMgr.lib               // Feature manager
+LIBRARY         egul.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aknicon.lib
+LIBRARY         fbscli.lib
+LIBRARY         etel.lib
+LIBRARY         etelmm.lib
+LIBRARY         SecUi.lib

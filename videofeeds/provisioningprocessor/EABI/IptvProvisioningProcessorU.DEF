@@ -1,0 +1,9 @@
+EXPORTS
+	_ZN26CIptvProvisioningProcessor15LocalProvisionLERK7TDesC16Ri @ 1 NONAME
+	_ZN26CIptvProvisioningProcessor18ExternalProvisionLER5RFileRi @ 2 NONAME
+	_ZN26CIptvProvisioningProcessor4NewLEv @ 3 NONAME
+	_ZTI21CIptvPPContentHandler @ 4 NONAME ; #<TI>#
+	_ZTI26CIptvProvisioningProcessor @ 5 NONAME ; #<TI>#
+	_ZTV21CIptvPPContentHandler @ 6 NONAME ; #<VT>#
+	_ZTV26CIptvProvisioningProcessor @ 7 NONAME ; #<VT>#
+

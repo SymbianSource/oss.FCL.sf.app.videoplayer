@@ -1,0 +1,27 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#ifndef VIDEOPLMATRIXMENU_IBY
+#define VIDEOPLMATRIXMENU_IBY
+
+data=DATAZ_\resource\apps\videosuiteres.rsc		resource\apps\videosuiteres.rsc
+data=\epoc32\include\videosuiteres.rsg resource\apps\videosuiteres.rsg
+data=DATAZ_\resource\apps\videosuite.mif resource\apps\videosuite.mif
+data=\epoc32\data\z\private\101F4CD2\import\suites\tvvideosuite\suite.xml private\101F4CD2\import\suites\tvvideosuite\suite.xml
+data=\epoc32\data\z\private\101F4CD2\import\suites\tvvideosuite\vcns_matrix_items.xml private\101F4CD2\import\suites\tvvideosuite\vcns_matrix_items.xml
+
+#endif // VIDEOPLMATRIXMENU_IBY

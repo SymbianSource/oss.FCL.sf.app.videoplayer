@@ -1,0 +1,442 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource definitions for Video Center Schedule view*
+*/
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME	SCHS // 4 letter ID
+
+//  INCLUDES
+
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.loc>
+#include <avkon.hrh>
+#include <avkon.mbg>
+#include <AvkonIcons.hrh>
+#include <appinfo.rh>
+#include <data_caging_paths_strings.hrh>
+
+#include <bldvariant.hrh>
+
+#include <CommonDialogs.hrh> // Enumerations
+#include <CommonDialogs.rh>  // Resource structures
+
+
+#include "vcxnsscheduleview.hrh"
+#include <ipvideo.loc>
+#include "vcxnsscheduleview.rh"
+
+#define POPFIELD_TEXT_WIDTH  8
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf = "vcnsscheduleview"; }
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_schedulesettingsview
+//  Schedule settings view
+//
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_vcxns_schedule_schedulesettingsview
+	{
+	menubar = r_vcxns_schedule_schedulesettingsview_options_menu;
+        cba = r_vcxns_schedule_softkeys_options_done__change;
+	}
+
+//----------------------------------------------------
+//    r_vcxns_schedule_softkeys_options_done__change
+//----------------------------------------------------
+//
+RESOURCE CBA r_vcxns_schedule_softkeys_options_done__change
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions;  txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyDone;     txt = text_softkey_done;},
+        CBA_BUTTON {id=EAknSoftkeyChange;   txt = qtn_msk_change;}
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_schedulesettingsview_options_menu
+//  Schedule settings view menu
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxns_schedule_schedulesettingsview_options_menu
+	{
+	titles =
+		{
+		MENU_TITLE
+			{
+			menu_pane = r_vcxns_schedule_schedulesettingsview_menu_pane;
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_schedulesettingsview_menu_pane
+//  Schedule settings view menu pane
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxns_schedule_schedulesettingsview_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = EIptvScheduleSettingsCmdChange;
+            txt = qtn_options_change;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EIptvScheduleSettingsCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EIptvScheduleSettingsCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//  r_vcxns_schedule_schedulesettingsview_setting_item_list
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_ITEM_LIST r_vcxns_schedule_schedulesettingsview_setting_item_list
+    {
+    items =
+        {
+        AVKON_SETTING_ITEM
+            {
+            name = qtn_iptv_download_setting;
+            identifier = EIptvVodScheduleSettingsViewDownloadConditionItem;
+            setting_page_resource = r_vcxns_schedule_schedulesettingsview_download_condition_page;
+            associated_resource = r_vcxns_schedule_schedulesettingsview_download_condition_texts;
+            },
+        AVKON_SETTING_ITEM
+            {
+            name = qtn_iptv_download_time_setting;
+            identifier = EIptvVodScheduleSettingsViewDownloadTimeItem;
+            setting_page_resource = r_vcxns_schedule_schedulesettingsview_download_time_page_marked;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//	r_vcxns_schedule_schedulesettingsview_download_condition_page
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_vcxns_schedule_schedulesettingsview_download_condition_page
+    {
+    label = qtn_iptv_download_setting;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_vcxns_schedule_schedulesettingsview_download_condition_editor;
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL;
+    }
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_schedulesettingsview_download_time_page_marked
+//  Download time setting page with Mark/Done softkeys
+//
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_vcxns_schedule_schedulesettingsview_download_time_page_marked
+    {
+    label = qtn_iptv_download_time_setting;
+    type = EAknSetListBox;
+    editor_resource_id = r_vcxns_schedule_schedulesettingsview_download_time_control;
+    softkey_resource = r_vcxns_schedule_schedulesettingsview_softkeys_mark_done;
+    }
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_schedulesettingsview_download_time_page_unmarked
+//  Download time setting page with Unmark/Done softkeys
+//
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_vcxns_schedule_schedulesettingsview_download_time_page_unmarked
+    {
+    label = qtn_iptv_download_time_setting;
+    type = EAknSetListBox;
+    editor_resource_id = r_vcxns_schedule_schedulesettingsview_download_time_control;
+    softkey_resource = r_vcxns_schedule_schedulesettingsview_softkeys_unmark_done;
+    }
+
+// ---------------------------------------------------------
+//  r_vcxns_schedule_schedulesettingsview_download_condition_editor
+// ---------------------------------------------------------
+//
+RESOURCE POPUP_SETTING_LIST r_vcxns_schedule_schedulesettingsview_download_condition_editor
+    {
+    }
+
+// ---------------------------------------------------------
+//	r_vcxns_schedule_schedulesettingsview_download_time_control
+// ---------------------------------------------------------
+//
+RESOURCE LISTBOX r_vcxns_schedule_schedulesettingsview_download_time_control
+    {
+    flags = EEikListBoxMultipleSelection;
+    }
+
+// ---------------------------------------------------------
+//	r_vcxns_schedule_schedulesettingsview_download_condition_texts
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_vcxns_schedule_schedulesettingsview_download_condition_texts
+    {
+    setting_texts_resource = r_vcxns_schedule_schedulesettingsview_download_condition_textspage_list_empty;
+    }
+
+// ---------------------------------------------------------
+// r_vcxns_schedule_schedulesettingsview_download_condition_textspage_list_empty
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_vcxns_schedule_schedulesettingsview_download_condition_textspage_list_empty
+    {
+    items = { };
+    }
+
+// ---------------------------------------------------------
+// r_vcxns_schedule_schedulesettingsview_softkeys_mark_done
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcxns_schedule_schedulesettingsview_softkeys_mark_done
+    {
+    buttons =
+        {
+        CBA_BUTTON { id=EAknSoftkeySelect; txt=text_softkey_mark; },
+        CBA_BUTTON { id=EAknSoftkeyDone; txt=text_softkey_done; }
+       ,CBA_BUTTON { id=EAknSoftkeySelect; txt=""; }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcxns_schedule_schedulesettingsview_softkeys_unmark_done
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcxns_schedule_schedulesettingsview_softkeys_unmark_done
+    {
+    buttons =
+        {
+        CBA_BUTTON { id=EAknSoftkeySelect; txt=text_softkey_unmark; },
+        CBA_BUTTON { id=EAknSoftkeyDone; txt=text_softkey_done; }
+       ,CBA_BUTTON { id=EAknSoftkeySelect; txt=""; }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//	r_vcxns_schedule_automatic_download_query_dialog
+//  Automatic download note
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxns_schedule_automatic_download_query_dialog
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow | EEikDialogFlagNoTitleBar;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = " ";
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_confirmation_query
+// Confirmation query with OK softkey
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxns_schedule_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                bmpfile= AVKON_BITMAP_FILE;
+                bmpid= EMbmAvkonQgn_note_error;
+                bmpmask= EMbmAvkonQgn_note_error_mask;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_schedule_downloads
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_schedule_downloads
+    {
+    buf = qtn_iptv_schedule_title;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_automatic_download_note
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_automatic_download_note
+    {
+    buf = qtn_iptv_battery_note;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_none_selected
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_none_selected
+    {
+    buf = qtn_iptv_none_selected_time;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_multiple_selected
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_multiple_selected
+    {
+    buf = qtn_iptv_multiple_ap_selected;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_night
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_night
+    {
+    buf = qtn_iptv_scheduled_night;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_morning
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_morning
+    {
+    buf = qtn_iptv_scheduled_morning;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_noon
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_noon
+    {
+    buf = qtn_iptv_scheduled_noon;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_afternoon
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_afternoon
+    {
+    buf = qtn_iptv_scheduled_afternoon;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_evening
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_evening
+    {
+    buf = qtn_iptv_scheduled_evening;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_manual_download
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_manual_download
+    {
+    buf = qtn_iptv_manual_download;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_auto_wlan
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_auto_wlan
+    {
+    buf = qtn_iptv_automatic_in_wlan;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_auto_home_cell
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_auto_home_cell
+    {
+    buf = qtn_iptv_automatic_in_home_cel;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_auto_always
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_auto_always
+    {
+    buf = qtn_iptv_automatic_always;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxns_schedule_define_scheduled_destination
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxns_schedule_define_scheduled_destination
+    {
+    buf = qtn_iptv_scheduled_define_destination;
+    }

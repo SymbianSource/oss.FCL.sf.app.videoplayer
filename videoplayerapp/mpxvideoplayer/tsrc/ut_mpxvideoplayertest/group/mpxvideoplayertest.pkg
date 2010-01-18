@@ -1,0 +1,46 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: Package file for mpxvideoplayer STIF test
+;
+; Version : %version: ou1cpsw#5 %
+;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"MPX Video Player STIF"}, (0x101FB3E3), 1, 0, 1, TYPE=SA, RU
+
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Install files
+"\epoc32\release\armv5\udeb\mpxvideoplayertest.dll" - "!:\sys\bin\mpxvideoplayertest.dll"
+"..\conf\mpxvideoplayertest.cfg" - "c:\testframework\mpxvideoplayertest.cfg"
+"..\init\testframework.ini" - "c:\testframework\testframework.ini"
+
+"..\data\mmc\local.3gp" - "f:\testing\data\local.3gp"
+"..\data\mmc\sdp_test.sdp" - "f:\testing\data\sdp_test.sdp"
+"..\data\mmc\test_local_hw.ram" - "f:\testing\data\test_local.ram"
+"..\data\mmc\test_multilocal_hw.ram" - "f:\testing\data\test_multilocal.ram"
+"..\data\mmc\test_streaming.ram" - "f:\testing\data\test_streaming.ram"
+"..\data\mmc\test_multilink_v2.asx" - "f:\testing\data\test_multilink_v2.asx"
+"..\data\mmc\test_seekSingle_v3.asx" - "f:\testing\data\test_seekSingle_v3.asx"

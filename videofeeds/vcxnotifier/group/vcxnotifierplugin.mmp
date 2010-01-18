@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+#include <bldvariant.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET          vcxnotifierplugin.dll
+CAPABILITY      CAP_ECOM_PLUGIN
+TARGETTYPE      PLUGIN 
+VENDORID        VID_DEFAULT
+
+UID             0x10009D8D  0x20016BA4
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../utils/inc
+USERINCLUDE     ../../vccommon/conf
+
+APP_LAYER_SYSTEMINCLUDE 
+
+SOURCEPATH      ../src
+SOURCE          vcxnotifierplugin.cpp
+SOURCE          vcxnotifier.cpp
+
+
+SOURCEPATH      ../rss
+START RESOURCE        vcxnotifierplugin.rss
+END
+
+START RESOURCE  ../rss/vcxnotifier.rss
+HEADER
+LANGUAGE_IDS 
+END // RESOURCE
+
+LIBRARY         ECOM.LIB
+LIBRARY         EUSER.LIB
+LIBRARY         AKNNOTIFIERWRAPPER.LIB
+LIBRARY         FLOGGER.LIB
+LIBRARY         COMMONENGINE.LIB
+LIBRARY         CONE.LIB       
+LIBRARY         EIKSRV.LIB
+LIBRARY         AVKON.LIB 
+LIBRARY         EIKCDLG.LIB 
+LIBRARY         EIKCTL.LIB 
+LIBRARY         APGRFX.LIB
+LIBRARY         APPARC.LIB
+LIBRARY         WS32.lib 
+LIBRARY         EIKCOCTL.LIB 
+LIBRARY         EIKDLG.LIB
+LIBRARY         EIKCORE.LIB
+LIBRARY         IptvUtil.lib
+

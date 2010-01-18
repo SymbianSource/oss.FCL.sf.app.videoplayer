@@ -1,0 +1,15 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZTI23CVCXMyVideosTestContent @ 2 NONAME ; #<TI>#
+	_ZTI24CVCXMyVideosTestDownload @ 3 NONAME ; #<TI>#
+	_ZTI25CVCXMyVideosTestDlWatcher @ 4 NONAME ; #<TI>#
+	_ZTI26CVCXMyVideosTestServiceEmu @ 5 NONAME ; #<TI>#
+	_ZTI34CVCXMyVideosCollectionPluginTester @ 6 NONAME ; #<TI>#
+	_ZTV23CVCXMyVideosTestContent @ 7 NONAME ; #<VT>#
+	_ZTV24CVCXMyVideosTestDownload @ 8 NONAME ; #<VT>#
+	_ZTV25CVCXMyVideosTestDlWatcher @ 9 NONAME ; #<VT>#
+	_ZTV26CVCXMyVideosTestServiceEmu @ 10 NONAME ; #<VT>#
+	_ZTV34CVCXMyVideosCollectionPluginTester @ 11 NONAME ; #<VT>#
+	_ZTI28CVCXMyVideosTestTransactions @ 12 NONAME ; #<TI>#
+	_ZTV28CVCXMyVideosTestTransactions @ 13 NONAME ; #<VT>#
+

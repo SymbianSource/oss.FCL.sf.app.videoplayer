@@ -1,0 +1,66 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+../data/mmc/video_3gp.3gp                /epoc32/winscw/c/testing/data/video_3gp.xxx
+../data/mmc/video_3gp2.3g2               /epoc32/winscw/c/testing/data/video_3gp2.xxx
+../data/mmc/video_applempeg.mp4          /epoc32/winscw/c/testing/data/video_applempeg.xxx
+../data/mmc/video_avi.avi                /epoc32/winscw/c/testing/data/video_avi.xxx
+../data/mmc/video_aviac3.avi             /epoc32/winscw/c/testing/data/video_aviac3.xxx
+../data/mmc/video_mp2.mp2                /epoc32/winscw/c/testing/data/video_mp2.xxx
+../data/mmc/video_mp3.mp3                /epoc32/winscw/c/testing/data/video_mp3.xxx
+../data/mmc/video_mpeg1.mpg              /epoc32/winscw/c/testing/data/video_mpeg1.xxx
+../data/mmc/video_mpeg2.mpg              /epoc32/winscw/c/testing/data/video_mpeg2.xxx
+../data/mmc/video_mpeg4.mp4              /epoc32/winscw/c/testing/data/video_mpeg4.xxx
+../data/mmc/video_mpegavc.mp4            /epoc32/winscw/c/testing/data/video_mpegavc.xxx
+../data/mmc/video_quicktime.mov          /epoc32/winscw/c/testing/data/video_quicktime.xxx
+../data/mmc/video_realvideo.rm           /epoc32/winscw/c/testing/data/video_realvideo.xxx
+../data/mmc/video_supervideocd.mpg       /epoc32/winscw/c/testing/data/video_supervideocd.xxx
+../data/mmc/video_wmv.dat                /epoc32/winscw/c/testing/data/video_wmv.xxx
+
+../conf/VCXConsts.inc                                           /epoc32/winscw/c/testframework/VCXConsts.inc
+../conf/VCXDrives.inc                                           /epoc32/winscw/c/testframework/VCXDrives.inc
+../conf/VCXErrors.inc                                           /epoc32/winscw/c/testframework/VCXErrors.inc
+../conf/vcxmvcollectionplugintest.inc                           /epoc32/winscw/c/testframework/vcxmvcollectionplugintest.inc
+../conf/VCXMyVideosCollectionPluginTestAttributes.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestAttributes.cfg
+../conf/VCXMyVideosCollectionPluginTestDelete.cfg               /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDelete.cfg
+../conf/VCXMyVideosCollectionPluginTestDownload.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDownload.cfg
+../conf/VCXMyVideosCollectionPluginTestDownload2.cfg            /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDownload2.cfg
+../conf/VCXMyVideosCollectionPluginTestMultipleDls.cfg          /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMultipleDls.cfg
+../conf/VCXMyVideosCollectionPluginTestFullMemory.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestFullMemory.cfg
+../conf/VCXMyVideosCollectionPluginTestLists.cfg                /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestLists.cfg
+../conf/VCXMyVideosCollectionPluginTestMoveCopy.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMoveCopy.cfg
+../conf/VCXMyVideosCollectionPluginTestMultiDrives.cfg          /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMultiDrives.cfg
+../conf/VCXMyVideosCollectionPluginTestSideload.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestSideload.cfg
+../conf/VCXMyVideosCollectionPluginTestSorting.cfg              /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestSorting.cfg
+../conf/VCXMyVideosCollectionPluginTestRobustness.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestRobustness.cfg
+../conf/VCXMyVideosCollectionPluginTestHelium.cfg               /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestHelium.cfg
+../conf/VCXMyVideosCollectionPluginTestMediator.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMediator.cfg
+
+PRJ_EXPORTS
+
+PRJ_TESTMMPFILES
+VCXMyVideosCollectionPluginTest.mmp
+../mediatorevents/group/MediatorEventVerifier.mmp
+
+PRJ_MMPFILES
+
+//  End of File

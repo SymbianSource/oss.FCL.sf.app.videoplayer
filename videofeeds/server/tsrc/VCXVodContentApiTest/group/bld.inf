@@ -1,0 +1,47 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   ?Description*
+*/
+
+
+
+#include "../VCXTestEcgFileObserver/group/bld.inf"
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+../conf/VCXVodContentApiTest.inc                   /epoc32/winscw/c/TestFramework/VCXVodContentApiTest.inc
+../conf/VCXVodContentApiTest.cfg                   /epoc32/winscw/c/TestFramework/VCXVodContentApiTest.cfg
+../conf/VCXVodContentApiTestCategoriesR3.cfg       /epoc32/winscw/c/TestFramework/VCXVodContentApiTestCategoriesR3.cfg
+../conf/VCXVodContentApiTestDb.cfg                 /epoc32/winscw/c/TestFramework/VCXVodContentApiTestDb.cfg
+../conf/VCXVodContentApiTestErrors.cfg             /epoc32/winscw/c/TestFramework/VCXVodContentApiTestErrors.cfg
+../conf/VCXVodContentApiTestInterference.cfg       /epoc32/winscw/c/TestFramework/VCXVodContentApiTestInterference.cfg
+../conf/VCXVodContentApiTestMimeTypes.cfg          /epoc32/winscw/c/TestFramework/VCXVodContentApiTestMimeTypes.cfg
+../conf/VCXVodContentApiTestParental.cfg           /epoc32/winscw/c/TestFramework/VCXVodContentApiTestParental.cfg
+../conf/VCXVodContentApiTestSearch2R3.cfg          /epoc32/winscw/c/TestFramework/VCXVodContentApiTestSearch2R3.cfg
+../conf/VCXVodContentApiTestSearchR3.cfg           /epoc32/winscw/c/TestFramework/VCXVodContentApiTestSearchR3.cfg
+../conf/VCXVodContentApiTestSearchStressR3.cfg     /epoc32/winscw/c/TestFramework/VCXVodContentApiTestSearchStressR3.cfg
+../conf/VCXVodContentEpgUpdateTest.cfg             /epoc32/winscw/c/TestFramework/VCXVodContentEpgUpdateTest.cfg
+../conf/VCXVodContentModificationCheckTest.cfg     /epoc32/winscw/c/TestFramework/VCXVodContentModificationCheckTest.cfg
+
+
+PRJ_EXPORTS
+
+PRJ_TESTMMPFILES
+VCXVodContentApiTest.mmp
+
+PRJ_MMPFILES
+
+//  End of File

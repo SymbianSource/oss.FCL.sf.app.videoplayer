@@ -1,0 +1,25 @@
+EXPORTS
+	??0CMPSettingsBaseContainer@@QAE@XZ @ 1 NONAME ; CMPSettingsBaseContainer::CMPSettingsBaseContainer(void)
+	??0CMPSettingsBaseView@@QAE@XZ @ 2 NONAME ; CMPSettingsBaseView::CMPSettingsBaseView(void)
+	??1CMPSettingsBaseContainer@@UAE@XZ @ 3 NONAME ; CMPSettingsBaseContainer::~CMPSettingsBaseContainer(void)
+	??1CMPSettingsBaseView@@UAE@XZ @ 4 NONAME ; CMPSettingsBaseView::~CMPSettingsBaseView(void)
+	??1CMPSettingsPluginView@@UAE@XZ @ 5 NONAME ; CMPSettingsPluginView::~CMPSettingsPluginView(void)
+	?ComponentControl@CMPSettingsBaseContainer@@UBEPAVCCoeControl@@H@Z @ 6 NONAME ; class CCoeControl * CMPSettingsBaseContainer::ComponentControl(int) const
+	?ConstructL@CMPSettingsBaseContainer@@QAEXABVTRect@@@Z @ 7 NONAME ; void CMPSettingsBaseContainer::ConstructL(class TRect const &)
+	?CountComponentControls@CMPSettingsBaseContainer@@UBEHXZ @ 8 NONAME ; int CMPSettingsBaseContainer::CountComponentControls(void) const
+	?DoActivateL@CMPSettingsBaseView@@MAEXABVTVwsViewId@@VTUid@@ABVTDesC8@@@Z @ 9 NONAME ; void CMPSettingsBaseView::DoActivateL(class TVwsViewId const &, class TUid, class TDesC8 const &)
+	?DoDeactivate@CMPSettingsBaseView@@MAEXXZ @ 10 NONAME ; void CMPSettingsBaseView::DoDeactivate(void)
+	?DynInitContainerL@CMPSettingsBaseView@@MAEXXZ @ 11 NONAME ; void CMPSettingsBaseView::DynInitContainerL(void)
+	?DynInitMenuPaneL@CMPSettingsBaseView@@MAEXHPAVCEikMenuPane@@@Z @ 12 NONAME ; void CMPSettingsBaseView::DynInitMenuPaneL(int, class CEikMenuPane *)
+	?HandleClientRectChange@CMPSettingsBaseView@@QAEXXZ @ 13 NONAME ; void CMPSettingsBaseView::HandleClientRectChange(void)
+	?ListBox@CMPSettingsBaseContainer@@UAEPAVCEikTextListBox@@XZ @ 14 NONAME ; class CEikTextListBox * CMPSettingsBaseContainer::ListBox(void)
+	?ListImplementationsL@CMPSettingsPluginView@@SAXAAV?$RPointerArray@VCImplementationInformation@@@@@Z @ 15 NONAME ; void CMPSettingsPluginView::ListImplementationsL(class RPointerArray<class CImplementationInformation> &)
+	?NewL@CMPSettingsPluginView@@SAPAV1@VTUid@@@Z @ 16 NONAME ; class CMPSettingsPluginView * CMPSettingsPluginView::NewL(class TUid)
+	?OfferKeyEventL@CMPSettingsBaseContainer@@UAE?AW4TKeyResponse@@ABUTKeyEvent@@W4TEventCode@@@Z @ 17 NONAME ; enum TKeyResponse CMPSettingsBaseContainer::OfferKeyEventL(struct TKeyEvent const &, enum TEventCode)
+	?SetCurrentItem@CMPSettingsBaseView@@UAEXH@Z @ 18 NONAME ; void CMPSettingsBaseView::SetCurrentItem(int)
+	?SetNaviPaneL@CMPSettingsBaseView@@MAEXXZ @ 19 NONAME ; void CMPSettingsBaseView::SetNaviPaneL(void)
+	?SizeChanged@CMPSettingsBaseContainer@@UAEXXZ @ 20 NONAME ; void CMPSettingsBaseContainer::SizeChanged(void)
+	?HandleResourceChange@CMPSettingsBaseContainer@@UAEXH@Z @ 21 NONAME ; void CMPSettingsBaseContainer::HandleResourceChange(int)
+	?SetSelectedItem@CMPSettingsBaseContainer@@QAEXH@Z @ 22 NONAME ; void CMPSettingsBaseContainer::SetSelectedItem(int)
+	?SetMiddleSoftKeyLabelL@CMPSettingsBaseView@@MAEXHH@Z @ 23 NONAME ; void CMPSettingsBaseView::SetMiddleSoftKeyLabelL(int, int)
+

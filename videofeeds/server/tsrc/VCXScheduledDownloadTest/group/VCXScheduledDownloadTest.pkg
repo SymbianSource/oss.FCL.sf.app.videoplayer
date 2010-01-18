@@ -1,0 +1,78 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of the License "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+; 
+; Description:  Package file for scheduled download STIF tests;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"VCXScheduledDownloadTest"},(0x00000000),1,1,0,TYPE=SA
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Logo
+; None
+
+; Package signature - Optional
+; None
+
+; Start of Package body
+
+; Condition blocks
+; None
+
+; Options list
+; None
+
+; Install files
+"\epoc32\release\armv5\udeb\VCXScheduledDownloadTest.dll"                   - "!:\Sys\Bin\VCXScheduledDownloadTest.dll"
+"\epoc32\release\armv5\udeb\VCXTestUtilModule.dll"                          - "!:\Sys\Bin\VCXTestUtilModule.dll"
+"\epoc32\release\armv5\udeb\VCXServiceManagementApiTest.dll"                - "!:\Sys\Bin\VCXServiceManagementApiTest.dll"
+"\epoc32\release\armv5\udeb\IptvTestUtility.dll"                            - "!:\Sys\Bin\IptvTestUtility.dll"
+"\epoc32\release\armv5\udeb\VCXTestCommon.dll"                              - "!:\Sys\Bin\VCXTestCommon.dll"
+"\epoc32\release\armv5\udeb\VCXTestMyVideosCollectionClient.dll"            - "!:\Sys\Bin\VCXTestMyVideosCollectionClient.dll"
+
+"..\conf\VCXScheduledDownloadTest.cfg"                                      - "C:\TestFramework\VCXScheduledDownloadTest.cfg"
+"..\conf\VCXScheduledDownloadTestHelium.cfg"                                - "C:\TestFramework\VCXScheduledDownloadTestHelium.cfg"
+"..\conf\VCXScheduledDownload.inc"                                          - "C:\TestFramework\VCXScheduledDownload.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXServiceManagementApiTest.inc"    - "C:\TestFramework\VCXServiceManagementApiTest.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXServiceNames.inc"                - "C:\TestFramework\VCXServiceNames.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXServiceUpdating.inc"             - "C:\TestFramework\VCXServiceUpdating.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXServiceUrls.inc"                 - "C:\TestFramework\VCXServiceUrls.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXConsts.inc"                      - "C:\TestFramework\VCXConsts.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXDrives.inc"                      - "C:\TestFramework\VCXDrives.inc"
+"..\..\VCXServiceManagementApiTest\conf\VCXErrors.inc"                      - "C:\TestFramework\VCXErrors.inc"
+
+; this cenrep file won't install with sis, only for auto build tests
+; The cenrep and testframework.ini files won't install with sis, only for ATS test runs.
+"..\init\TestFramework.ini"                                                 - "C:\TestFramework\TestFramework.ini"
+"..\data\cccccc00.cre"                                                       - "C:\private\10202be9\persists\cccccc00.cre"
+  
+; Embedded SIS 
+; None
+
+; End of Package body
+
+; PKG dependencies
+; None
+
+; PKG capabilities
+; None

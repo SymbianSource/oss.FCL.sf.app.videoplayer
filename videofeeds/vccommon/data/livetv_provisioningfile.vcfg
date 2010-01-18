@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<nv:ServiceProvider xmlns:nv="www.nokia.com/multimedia/video-service" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" nv:schemaLocation="www.forum.nokia.com/multimedia/video-service/IPTVProvSchema" Version="1.0">
+	<nv:Service Type="LiveTV" Protocol="DVB-IPI" ID="test-1" Timestamp="2004-14-13T09:30:47.0Z">
+		<nv:ServiceDetails>
+			<nv:Text xml:lang="en">
+				<nv:Title>IPTV Demo</nv:Title>
+				<nv:Description>Live TV</nv:Description>
+			</nv:Text>
+		</nv:ServiceDetails>
+		<nv:ServiceURI>http://193.65.64.241/dvb/sdns/service_discovery</nv:ServiceURI>
+		<nv:IconURI></nv:IconURI>
+		<nv:serviceAccountURI></nv:serviceAccountURI>
+		<nv:Auth>
+			<nv:UserName></nv:UserName>
+			<nv:Password></nv:Password>
+		</nv:Auth>
+		<nv:IAP></nv:IAP>
+	</nv:Service>
+</nv:ServiceProvider>

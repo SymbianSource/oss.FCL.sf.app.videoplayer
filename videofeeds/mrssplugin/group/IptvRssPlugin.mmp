@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2004-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    This is a project specification file for IptvRssPlugin*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+
+#include <data_caging_paths.hrh>
+#include "../../utils/inc/IptvEngineUids.h"
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET          IptvRssPlugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D  KIptvRssPluginDllUid
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          DllMain.cpp
+SOURCE          CIptvRssPlugin.cpp
+SOURCE          CIptv3XmlContentHandler.cpp
+SOURCE          CIptvRssDownload.cpp
+SOURCE          CIptvDownloadItem.cpp
+SOURCE          ciptvxmldatetime.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../utils/inc
+USERINCLUDE     ../../vccommon/conf
+USERINCLUDE     ../../server/IptvEpgManager/inc
+USERINCLUDE     ../../clientapi/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../data
+
+START RESOURCE        IptvRssPlugin.rss
+END
+
+LIBRARY         xmlframework.lib
+LIBRARY         bafl.lib
+LIBRARY         downloadmgr.lib
+LIBRARY         flogger.lib
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         efsrv.lib
+LIBRARY         XMLInterface.lib
+LIBRARY         esock.lib
+LIBRARY         commdb.lib
+LIBRARY         centralrepository.lib
+LIBRARY         charconv.lib
+LIBRARY         iptvutil.lib
+LIBRARY         sysutil.lib
+LIBRARY         IptvClientApi.lib
+LIBRARY         hash.lib
