@@ -69,7 +69,7 @@ LIBRARY    apparc.lib
 LIBRARY    avkon.lib
 LIBRARY    aknlayout.lib
 LIBRARY    aknlayout2scalable.lib
-LIBRARY    AknSkins.lib
+LIBRARY    aknskins.lib
 LIBRARY    browserlauncher.lib
 LIBRARY    commonengine.lib
 LIBRARY    cone.lib 
@@ -86,7 +86,7 @@ LIBRARY    fbscli.lib
 LIBRARY    flogger.lib
 LIBRARY    imcm.lib
 LIBRARY    inetprotutil.lib
-LIBRARY    IptvUtil.lib 
+LIBRARY    iptvutil.lib 
 LIBRARY    mpxviewutility.lib
 LIBRARY    vcxnsuiengine.lib
 LIBRARY    sendui.lib

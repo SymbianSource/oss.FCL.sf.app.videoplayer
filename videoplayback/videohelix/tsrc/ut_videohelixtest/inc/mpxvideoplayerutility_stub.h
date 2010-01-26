@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -91,7 +91,7 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
                                 const TDesC8& aDataTo2 );
 
         void Prepare();
-        void Play();
+        void PlayL();
         void PauseL();
         void Close();
         TInt Stop();

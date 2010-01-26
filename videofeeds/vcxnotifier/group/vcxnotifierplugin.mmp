@@ -51,21 +51,21 @@ HEADER
 LANGUAGE_IDS 
 END // RESOURCE
 
-LIBRARY         ECOM.LIB
-LIBRARY         EUSER.LIB
-LIBRARY         AKNNOTIFIERWRAPPER.LIB
-LIBRARY         FLOGGER.LIB
-LIBRARY         COMMONENGINE.LIB
-LIBRARY         CONE.LIB       
-LIBRARY         EIKSRV.LIB
-LIBRARY         AVKON.LIB 
-LIBRARY         EIKCDLG.LIB 
-LIBRARY         EIKCTL.LIB 
-LIBRARY         APGRFX.LIB
-LIBRARY         APPARC.LIB
-LIBRARY         WS32.lib 
-LIBRARY         EIKCOCTL.LIB 
-LIBRARY         EIKDLG.LIB
-LIBRARY         EIKCORE.LIB
-LIBRARY         IptvUtil.lib
+LIBRARY         ecom.lib
+LIBRARY         euser.lib
+LIBRARY         aknnotifierwrapper.lib
+LIBRARY         flogger.lib
+LIBRARY         commonengine.lib
+LIBRARY         cone.lib       
+LIBRARY         eiksrv.lib
+LIBRARY         avkon.lib 
+LIBRARY         eikcdlg.lib 
+LIBRARY         eikctl.lib 
+LIBRARY         apgrfx.lib
+LIBRARY         apparc.lib
+LIBRARY         ws32.lib 
+LIBRARY         eikcoctl.lib 
+LIBRARY         eikdlg.lib
+LIBRARY         eikcore.lib
+LIBRARY         iptvutil.lib
 

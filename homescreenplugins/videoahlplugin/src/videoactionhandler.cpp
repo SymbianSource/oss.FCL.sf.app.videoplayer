@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 21 %
 
 #include <e32def.h>
 #include <e32uid.h>
@@ -29,7 +29,7 @@
 #include <AknGlobalNote.h>
 #include <MediatorEventProvider.h>
 #include <centralrepository.h>
-#include <LiwVariant.h>
+#include <liwvariant.h>
 #include <videoplayeractivationmessage.h>
 #include <vcxmyvideosdefs.h>
 #include <ErrorUI.h>

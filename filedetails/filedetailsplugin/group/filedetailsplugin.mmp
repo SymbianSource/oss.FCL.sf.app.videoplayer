@@ -45,5 +45,5 @@ LIBRARY         bafl.lib
 LIBRARY         flogger.lib
 LIBRARY         estor.lib
 LIBRARY         mpxcommon.lib
-LIBRARY         MPFileDetailsDialog.lib
+LIBRARY         mpfiledetailsdialog.lib
 

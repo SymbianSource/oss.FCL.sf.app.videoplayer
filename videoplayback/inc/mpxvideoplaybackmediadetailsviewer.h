@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  e003sa33#4 %
 
 #ifndef MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
 #define MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
@@ -142,14 +142,14 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         * @since 9.2 
         * @return the number of rows to be created
         */         
-        TInt NumOfItemsShownInViewer();
+        TInt NumOfItemsShownInViewerL();
         
         /** 
         * Dynamically calculate determine the viewer rectangle dyanmically
         * @since 9.2 
         * @return the viewer rect
         */                   
-        TRect CalculateViewerRect();          
+        TRect CalculateViewerRectL();          
                 
 
     private:    // Data

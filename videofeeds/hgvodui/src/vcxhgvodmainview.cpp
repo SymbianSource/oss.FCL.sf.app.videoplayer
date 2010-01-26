@@ -14,7 +14,7 @@
 * Description:   HG VOD Main view implementation*
 */
 
-// Version : %version: REL6_37 %
+// Version : %version: REL6_39 %
 
 #include <aknview.h>
 #include <aknViewAppUi.h>

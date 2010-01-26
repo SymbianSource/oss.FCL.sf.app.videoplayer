@@ -25,7 +25,7 @@
 //OPTION ARMCC --asm --interleave
 ALWAYS_BUILD_AS_ARM
 
-TARGET          IptvRssPlugin.dll
+TARGET          iptvrssplugin.dll
 TARGETTYPE      PLUGIN
 UID             0x10009D8D  KIptvRssPluginDllUid
 
@@ -60,12 +60,12 @@ LIBRARY         flogger.lib
 LIBRARY         euser.lib
 LIBRARY         ecom.lib
 LIBRARY         efsrv.lib
-LIBRARY         XMLInterface.lib
+LIBRARY         xmlinterface.lib
 LIBRARY         esock.lib
 LIBRARY         commdb.lib
 LIBRARY         centralrepository.lib
 LIBRARY         charconv.lib
 LIBRARY         iptvutil.lib
 LIBRARY         sysutil.lib
-LIBRARY         IptvClientApi.lib
+LIBRARY         iptvclientapi.lib
 LIBRARY         hash.lib

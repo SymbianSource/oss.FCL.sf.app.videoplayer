@@ -2,9 +2,9 @@
 * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
+* under the terms of the License "Symbian Foundation License v1.0"
 * which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+* at the URL "http://www.symbianfoundation.org/legal/sfl-v10.html".
 *
 * Initial Contributors:
 * Nokia Corporation - initial contribution.
@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#11 %
+// Version : %version: e003sa33#11 %
 
 
 // INCLUDES
@@ -34,6 +34,13 @@
 #include "mpxvpbuih_stub.h"
 #include "mpxcommonvideoplaybackview.hrh"
 #include "mpxvideo_debug.h"
+
+// CONSTANTS
+
+_LIT( KFileTitle, "asdfasdfasdfasdfasdfasd asdfasdfasdfasdfasdfasd" );
+
+const TInt KMaxFileTitleLength = 2048;
+
 
 // ============================ MEMBER FUNCTIONS ===================================================
 
@@ -323,5 +330,45 @@ CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackContainer::UserInputHandler(
     return iUserInputHandler;
 }
 
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackContainer::AddLongFileDetailsL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackContainer::AddLongFileDetailsL( TBool aHasVideoTrack )
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::AddFileDetailsL() "));
+
+    iFileDetails->iAudioEnabled = ETrue;
+    iFileDetails->iVideoEnabled = aHasVideoTrack;
+    iFileDetails->iSeekable = ETrue;
+
+    HBufC* temp = HBufC::NewLC(KMaxFileTitleLength);
+    TPtr fileTitlePtr = temp->Des();
+
+    const int loop = 10;
+    for ( int i=0; i<loop; i++ )
+    {
+        fileTitlePtr.Append( KFileTitle() );
+    }
+    iFileDetails->iTitle  = fileTitlePtr.Alloc();
+    CleanupStack::PopAndDestroy();  //temp
+
+    if ( iFileDetails->iVideoEnabled )
+    {
+        iFileDetails->iVideoHeight = 176;
+        iFileDetails->iVideoWidth = 144;
+
+        iFileDetails->iBitRate = 8000;
+        iFileDetails->iMimeType = _L("video/3gp").Alloc();
+    }
+
+    if ( iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
+    {
+        iFileDetails->iSeekable = EFalse;
+    }
+
+    iControlsController->AddFileDetailsL( iFileDetails );
+}
 
 //  End of File

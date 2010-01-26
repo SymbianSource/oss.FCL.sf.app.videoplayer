@@ -24,11 +24,11 @@ PRJ_EXPORTS
 
 ../rom/videomatrixmenu.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(videomatrixmenu.iby)
 
-../data/suite.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/tvvideosuite/suite.xml
-../data/vcns_matrix_items.xml /epoc32/release/winscw/udeb/z/private/101F4CD2/import/suites/tvvideosuite/vcns_matrix_items.xml
+../data/suite.xml /epoc32/release/winscw/udeb/z/private/101f4cd2/import/suites/tvvideosuite/suite.xml
+../data/vcns_matrix_items.xml /epoc32/release/winscw/udeb/z/private/101f4cd2/import/suites/tvvideosuite/vcns_matrix_items.xml
 
-../data/suite.xml /epoc32/data/z/private/101F4CD2/import/suites/tvvideosuite/suite.xml
-../data/vcns_matrix_items.xml /epoc32/data/z/private/101F4CD2/import/suites/tvvideosuite/vcns_matrix_items.xml
+../data/suite.xml /epoc32/data/z/private/101f4cd2/import/suites/tvvideosuite/suite.xml
+../data/vcns_matrix_items.xml /epoc32/data/z/private/101f4cd2/import/suites/tvvideosuite/vcns_matrix_items.xml
 
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv

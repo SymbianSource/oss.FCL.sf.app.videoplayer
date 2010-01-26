@@ -35,12 +35,12 @@ PRJ_EXPORTS
 ../conf/videocenteralr.confml           APP_LAYER_CONFML(videocenteralr.confml)
 ../conf/videocenteralr_2000B438.crml    APP_LAYER_CRML(videocenteralr_2000B438.crml)
 
-../data/services_rom.xml   /epoc32/data/z/private/102750D5/services.xml
-../data/services_sis.xml   /epoc32/data/c/private/102750D5/services.xml
-../data/services_sis.xml   /epoc32/winscw/c/private/102750D5/services.xml
+../data/services_rom.xml   /epoc32/data/z/private/102750d5/services.xml
+../data/services_sis.xml   /epoc32/data/c/private/102750d5/services.xml
+../data/services_sis.xml   /epoc32/winscw/c/private/102750d5/services.xml
 
-../data/backup_registration_eng.xml /epoc32/data/z/private/102750D5/backup_registration.xml
-../data/cenrep/backup_registration_eng.xml /epoc32/data/z/private/102750E2/backup_registration.xml
+../data/backup_registration_eng.xml /epoc32/data/z/private/102750d5/backup_registration.xml
+../data/cenrep/backup_registration_eng.xml /epoc32/data/z/private/102750e2/backup_registration.xml
 
 // engineering english loc file export
 ../loc/ipvideo.loc            APP_LAYER_LOC_EXPORT_PATH( ipvideo.loc )

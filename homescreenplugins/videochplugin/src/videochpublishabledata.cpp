@@ -15,7 +15,7 @@
 */
 
 
-#include <LiwVariant.h>
+#include <liwvariant.h>
 #include <e32hashtab.h>
 
 #include <videosuiteres.rsg>

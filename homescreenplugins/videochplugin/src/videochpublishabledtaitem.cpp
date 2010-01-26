@@ -21,7 +21,7 @@
 #include <e32std.h>
 #include <e32base.h>
 #include <e32hashtab.h>
-#include <LiwVariant.h>
+#include <liwvariant.h>
 
 #include "videochpublishabledataitem.h"
 #include "videochpublishabledata.h"

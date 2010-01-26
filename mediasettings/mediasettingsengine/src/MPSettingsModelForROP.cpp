@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 9 %
 
 
 
@@ -30,7 +30,7 @@
 #include <f32file.h>
 #include <commdb.h>             // CMDBSession
 #include <commsdattypesv1_1.h>  // CCDWAPIPBearerRecord
-#include <MPSettingsROPModel.rsg>
+#include <mpsettingsropmodel.rsg>
 
 #include    <data_caging_path_literals.hrh> // KDC_RESOURCE_FILES_DIR
 

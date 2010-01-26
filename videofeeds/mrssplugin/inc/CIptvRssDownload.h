@@ -22,7 +22,7 @@
 #define CIPTVRSSDOWNLOAD_H
 
 #include <e32std.h>
-#include <DownloadMgrClient.h>
+#include <downloadmgrclient.h>
 #include "CIptvUtil.h"
 #include "MIptvTimerObserver.h"
 

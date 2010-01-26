@@ -27,6 +27,7 @@
 class CVcxMyVideosCollectionPlugin;
 class CMPXMedia;
 class CVcxMyVideosDownloadCache;
+class CRepository;
 
 // CONSTANTS
 
@@ -361,6 +362,12 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         * My Videos collection plugin, owner of this object.
         */
         CVcxMyVideosCollectionPlugin& iCollection;        
+
+        /**
+        * Provides access to the sorting order key in cenrep. Own.
+        */
+        CRepository* iCenRep;
+
     };
 
 #endif   // VCXMYVIDEOSVIDEOCACHE_H

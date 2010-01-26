@@ -18,8 +18,8 @@
 
 #include <ganes/HgScroller.h>
 #include <aknnotewrappers.h>
-#include <BrowserLauncher.h>
-#include <BrowserOverriddenSettings.h>
+#include <browserlauncher.h>
+#include <browseroverriddensettings.h>
 #include "CIptvUtil.h"
 #include <uriutils.h>
 #include <StringLoader.h>

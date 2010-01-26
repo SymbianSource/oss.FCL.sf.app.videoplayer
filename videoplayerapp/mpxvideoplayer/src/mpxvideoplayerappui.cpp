@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#33 %
+// Version : %version: 34 %
 
 
 #include <hlplch.h>                     // Help launcher
@@ -26,7 +26,7 @@
 #include <AknQueryDialog.h>
 #include <aknview.h>
 #include <aknconsts.h>
-#include <akndef.h>
+#include <AknDef.h>
 #include <AiwGenericParam.h>
 #include <coeutils.h>
 

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 21 %
 
 #include <akntitle.h>
 #include <aknViewAppUi.h>

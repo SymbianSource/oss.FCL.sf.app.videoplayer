@@ -23,8 +23,8 @@
 #include <eikclbd.h>
 #include <barsread.h>
 #include <aknViewAppUi.h>
-#include <BrowserLauncher.h>
-#include <BrowserOverriddenSettings.h>
+#include <browserlauncher.h>
+#include <browseroverriddensettings.h>
 #include <uriutils.h>
 #include "IptvDebug.h"
 #include <AknQueryDialog.h>

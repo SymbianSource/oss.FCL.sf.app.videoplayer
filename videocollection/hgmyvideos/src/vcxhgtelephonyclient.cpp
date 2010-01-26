@@ -19,8 +19,8 @@
 
 // INCLUDE FILES
 #include <mmtsy_names.h>
-#include <SecUi.h>
-#include <SecUiSecurityHandler.h>
+#include <secui.h>
+#include <secuisecurityhandler.h>
 
 #include "vcxhgtelephonyclient.h"
 

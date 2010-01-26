@@ -15,12 +15,12 @@
 */
 
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
 #include <platform_paths.hrh>
-TARGET          MPSettBase.dll
+TARGET          mpsettbase.dll
 TARGETTYPE      dll
 UID             0x1000006C 0x101F85E3
 VENDORID		VID_DEFAULT
@@ -49,7 +49,7 @@ LIBRARY         commonengine.lib
 LIBRARY         eikcoctl.lib
 LIBRARY         featmgr.lib
 LIBRARY         aknskins.lib 
-LIBRARY         Flogger.lib
+LIBRARY         flogger.lib
 
 #if defined(ARMCC)
 deffile ../eabi/ 

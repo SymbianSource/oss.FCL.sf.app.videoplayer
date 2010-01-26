@@ -19,7 +19,7 @@
 #include <platform_paths.hrh>
 #include <data_caging_paths.hrh>
 
-TARGET          dummyVideo.dll
+TARGET          dummyvideo.dll
 TARGETTYPE      dll
 
 CAPABILITY      CAP_GENERAL_DLL

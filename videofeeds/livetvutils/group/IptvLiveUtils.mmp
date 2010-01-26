@@ -19,7 +19,7 @@
 
 #include <platform_paths.hrh>
 
-TARGET          LiveTvUtils.dll
+TARGET          livetvutils.dll
 TARGETTYPE      dll
 UID             0x1000008d 0x102750E6
 
@@ -57,7 +57,7 @@ LIBRARY         estor.lib           // For RDbColWriteStream
 LIBRARY         fbscli.lib          // CFbsBitmap
 LIBRARY         downloadmgr.lib     // RHttpDownloadMgr
 LIBRARY         imageconversion.lib // CImageDecoder
-LIBRARY         AknIcon.lib         // AknIconUtils
+LIBRARY         aknicon.lib         // AknIconUtils
 LIBRARY         egul.lib            // CGulIcon
 LIBRARY         aknskins.lib           //AknsUtils
 LIBRARY         aknskinsrv.lib         //AknsUtils

@@ -62,7 +62,7 @@ USERINCLUDE   ../../../videofeeds/server/IptvScheduledDownload/inc
 
 APP_LAYER_SYSTEMINCLUDE
 
-LIBRARY         CseSchedulerClient.lib
+LIBRARY         cseschedulerclient.lib
 
 LIBRARY        avkon.lib
 LIBRARY        bafl.lib
@@ -77,13 +77,13 @@ LIBRARY        eikcoctl.lib
 LIBRARY        eikdlg.lib 
 LIBRARY        euser.lib
 LIBRARY        flogger.lib
-LIBRARY        GSEcomPlugin.lib
-LIBRARY        IptvClientApi.lib
+LIBRARY        gsecomplugin.lib
+LIBRARY        iptvclientapi.lib
 LIBRARY        iptvutil.lib
 LIBRARY        mpxviewutility.lib
 LIBRARY        vcxnsuiengine.lib
 LIBRARY        vcxnssettingsengine.lib
-LIBRARY        InetProtUtil.lib // for UriParser
+LIBRARY        inetprotutil.lib // for UriParser
 LIBRARY        browserlauncher.lib // Browser
 LIBRARY        apparc.lib
 LIBRARY        vcxconnectionutility.lib
@@ -91,9 +91,9 @@ LIBRARY        centralrepository.lib
 LIBRARY        sisregistryclient.lib
 LIBRARY        aknskinsrv.lib        // for enhanced skinning
 LIBRARY        aknskins.lib          // for enhanced skinning
-LIBRARY        GSFramework.lib       // CGSTabHelper
+LIBRARY        gsframework.lib       // CGSTabHelper
 LIBRARY        hlplch.lib            // for "Help" options menu
-LIBRARY        FeatMgr.lib           // Feature manager 
+LIBRARY        featmgr.lib           // Feature manager 
 
 // For RAPTOR compliancy
 LIBRARY        ecom.lib

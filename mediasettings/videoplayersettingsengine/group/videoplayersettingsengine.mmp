@@ -47,7 +47,7 @@ LIBRARY etel.lib
 LIBRARY etelmm.lib
 LIBRARY centralrepository.lib
 LIBRARY efsrv.lib
-LIBRARY SecUi.lib       
+LIBRARY secui.lib       
 LIBRARY apmime.lib      
-LIBRARY PlatformEnv.lib // PathInfo
+LIBRARY platformenv.lib // PathInfo
 

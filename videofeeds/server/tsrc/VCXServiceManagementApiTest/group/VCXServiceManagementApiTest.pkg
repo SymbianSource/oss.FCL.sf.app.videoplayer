@@ -60,7 +60,6 @@
 "../conf/VCXServiceManagementApiTestSync.cfg"                - "c:/testframework/VCXServiceManagementApiTestSync.cfg"
 "../conf/VCXServiceManagementApiTestAsync.cfg"               - "c:/testframework/VCXServiceManagementApiTestAsync.cfg"
 "../conf/VCXServiceManagementApiTestServiceCustom.cfg"       - "c:/testframework/VCXServiceManagementApiTestServiceCustom.cfg"
-"../conf/VCXServiceManagementApiTestSnapSelection.cfg"       - "c:/testframework/VCXServiceManagementApiTestSnapSelection.cfg"
 "../conf/VCXServiceManagementApiTestSyncErrorHandling.cfg"   - "c:/testframework/VCXServiceManagementApiTestSyncErrorHandling.cfg"
 "../conf/VCXServiceManagementApiTestAsyncR3.cfg"             - "c:/testframework/VCXServiceManagementApiTestAsyncR3.cfg"
 "../conf/VCXServiceManagementApiTestStressAsync.cfg"         - "c:/testframework/VCXServiceManagementApiTestStressAsync.cfg"

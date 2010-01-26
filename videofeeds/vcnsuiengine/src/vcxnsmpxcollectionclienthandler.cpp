@@ -35,7 +35,7 @@
 #include <vcxmyvideosuids.h>
 #include <mpxcommandgeneraldefs.h>
 #include <mpxcollectioncommanddefs.h>
-#include <HttpDownloadMgrCommon.h>
+#include <httpdownloadmgrcommon.h>
 
 #include "CIptvMyVideosGlobalFileId.h"
 #include "vcxnsmpxcollectionclienthandler.h"

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 9 %
 
 
 
@@ -265,8 +265,8 @@ void CMPSettingsNetworkSettingItemList::LaunchConnectionSelectionL()
     CleanupStack::PushL ( settingsUi );
     
     TCmSettingSelection selection; 
-    selection.iId = 0; // iSettingUsedSnapId;
-    selection.iResult = CMManager::EDestination;
+    selection.iId = 0;
+    selection.iResult = CMManager::EConnectionMethod;
     
     TUint listItems = CMManager::EShowConnectionMethods;
     

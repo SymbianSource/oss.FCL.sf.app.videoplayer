@@ -25,7 +25,7 @@
 //OPTION ARMCC --asm --interleave
 ALWAYS_BUILD_AS_ARM
 
-TARGET      IptvProvisioningApp.exe
+TARGET      iptvprovisioningapp.exe
 TARGETTYPE  exe
 UID         0x0 0x10281F1A
 TARGETPATH      PROGRAMS_DIR
@@ -72,10 +72,10 @@ LIBRARY	ws32.lib
 LIBRARY apgrfx.lib
 LIBRARY efsrv.lib 
 LIBRARY bafl.lib
-LIBRARY	IptvClientApi.lib
-LIBRARY IptvUtil.lib // CIptvIapList
-LIBRARY	IptvProvisioningProcessor.lib
-LIBRARY CommonEngine.lib // for StringLoader
+LIBRARY	iptvclientapi.lib
+LIBRARY iptvutil.lib // CIptvIapList
+LIBRARY	iptvprovisioningprocessor.lib
+LIBRARY commonengine.lib // for StringLoader
 LIBRARY ecom.lib // for REComSession
 LIBRARY flogger.lib
 

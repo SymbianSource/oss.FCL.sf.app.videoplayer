@@ -24,8 +24,8 @@
 #include <commdb.h>
 #include <sysutil.h>
 #include <mmtsy_names.h>
-#include <SecUi.h>
-#include <SecUiSecurityHandler.h>
+#include <secui.h>
+#include <secuisecurityhandler.h>
 
 #include "videosettingsdrivemonitor.h"
 

@@ -293,6 +293,7 @@ EXPORT_C void CVideoSettingsDriveMonitor::RefreshAvailableDrivesL()
 #endif // __WINSCW__
                 {                
                 if ( !(driveInfo.iMediaAtt & KMediaAttWriteProtected) &&
+                     !(driveInfo.iDriveAtt & KDriveAttExternal) &&   
                       (driveInfo.iDriveAtt & KDriveAttLocal) )
                     {
                     TIptvDriveInfo iptvDriveInfo;

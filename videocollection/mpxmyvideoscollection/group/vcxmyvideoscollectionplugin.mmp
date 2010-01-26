@@ -72,10 +72,10 @@ LIBRARY         bafl.lib
 LIBRARY         flogger.lib
 LIBRARY         mdeclient.lib
 LIBRARY         efsrv.lib
-LIBRARY         DownloadMgr.lib
+LIBRARY         downloadmgr.lib
 LIBRARY         charconv.lib
 LIBRARY         vcxconnectionutility.lib
 LIBRARY         mediatorclient.lib
 LIBRARY         centralrepository.lib
 LIBRARY         drmutility.lib
-LIBRARY         PlatformEnv.lib
+LIBRARY         platformenv.lib

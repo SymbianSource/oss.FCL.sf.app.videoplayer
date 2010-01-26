@@ -23,7 +23,6 @@ DEFAULT
 PRJ_TESTEXPORTS
 ../conf/VCXServiceManagementApiTestAsync.cfg               /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestAsync.cfg
 ../conf/VCXServiceManagementApiTestAsyncR3.cfg             /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestAsyncR3.cfg
-../conf/VCXServiceManagementApiTestSnapSelection.cfg       /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestSnapSelection.cfg
 ../conf/VCXServiceManagementApiTestStressAsync.cfg         /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestStressAsync.cfg
 ../conf/VCXServiceManagementApiTestStressSync.cfg          /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestStressSync.cfg
 ../conf/VCXServiceManagementApiTestSync.cfg                /epoc32/winscw/c/TestFramework/VCXServiceManagementApiTestSync.cfg

@@ -132,6 +132,7 @@ EXPORT_C void CIptvTestTimer::After(TTimeIntervalMicroSeconds32 aInterval)
 
     if( !IsActive() )
     	{
+	    VCXLOGLO2("CIptvTestTimer::After: Setting active. (%d)", this);
     	iTimer.After( iStatus, aInterval );
 	    SetActive();
 	    iRestartAfterCancel = EFalse; 

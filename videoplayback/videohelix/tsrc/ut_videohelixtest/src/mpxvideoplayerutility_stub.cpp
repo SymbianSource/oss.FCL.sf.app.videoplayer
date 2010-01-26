@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -287,9 +287,9 @@ void CMpxVideoPlayerUtility::GetVideoLoadingProgressL( TInt& aPercentageProgress
     MPX_DEBUG(_L("CMpxVideoPlayerUtility::GetVideoLoadingProgressL(%d)"), aPercentageProgress );
 }
 
-void CMpxVideoPlayerUtility::Play()
+void CMpxVideoPlayerUtility::PlayL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::Play()"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::PlayL()"));
 
     if ( iFirstPlayCmd )
     {

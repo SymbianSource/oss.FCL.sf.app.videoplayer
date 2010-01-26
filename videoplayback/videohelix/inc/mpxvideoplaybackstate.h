@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 16 %
+// Version : %version: 17 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -128,6 +128,10 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
          *  that can leave
          */
         void ConstructL(CMPXVideoPlaybackController* aVideoPlaybackCtlr);
+
+        void IssuePlayCommand( TMPXVideoPlaybackState aState,
+                               MMPXPlaybackPluginObserver::TEvent aEvent,
+                               TBool aSendEvent = ETrue );
 
     protected:
         //

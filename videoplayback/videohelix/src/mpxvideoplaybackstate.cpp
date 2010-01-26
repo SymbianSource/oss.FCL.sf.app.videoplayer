@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 30 %
+// Version : %version: 31 %
 
 
 //
@@ -277,7 +277,7 @@ void CMPXVideoPlaybackState::HandleVolumeChange()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleVolumeChange()"));
 
-    MPX_TRAPD(err, iVideoPlaybackCtlr->SetVolumeMMFL());
+    MPX_TRAPD( err, iVideoPlaybackCtlr->SetVolumeMMFL() );
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -663,6 +663,33 @@ TInt CMPXVideoPlaybackState::RetrieveBufferingPercentage()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackState::RetrieveBufferingPercentage()"));
     return 100;
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackState::IssuePlayCommand()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackState::IssuePlayCommand( TMPXVideoPlaybackState aState,
+                                               MMPXPlaybackPluginObserver::TEvent aEvent, 
+                                               TBool aSendEvent )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::CMPXVideoPlaybackState::IssuePlayCommand()"),
+                   _L("aState = %d, aEvent  = %d, aSendEvent = %d"), aState, aEvent, aSendEvent );
+
+    MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->PlayL() );
+
+    if ( err == KErrNone )
+    {
+        iVideoPlaybackCtlr->ChangeState( aState );
+    
+        if ( aSendEvent )
+        {
+            iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( aEvent, 0, KErrNone );
+        }
+    }
+    else
+    {
+        TRAP_IGNORE( SendErrorToViewL( err ) );
+    }
 }
 
 // *************************************************************************************************
@@ -1064,7 +1091,7 @@ CMPXInitialisedState::~CMPXInitialisedState()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXInitialisedState::HandlePlay()
+//    CMPXInitialisedState::HandlePlay()
 //  ------------------------------------------------------------------------------------------------
 void CMPXInitialisedState::HandlePlay()
 {
@@ -1074,13 +1101,7 @@ void CMPXInitialisedState::HandlePlay()
     {
         iVideoPlaybackCtlr->iForegroundPause = EFalse;
 
-        iVideoPlaybackCtlr->iPlayer->Play();
-
-        iVideoPlaybackCtlr->ChangeState( EMPXVideoBuffering );
-
-        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPBufferingStarted,
-                                                              0,
-                                                              KErrNone );
+        IssuePlayCommand( EMPXVideoBuffering, MMPXPlaybackPluginObserver::EPBufferingStarted );
     }
     else
     {
@@ -1293,11 +1314,17 @@ void CMPXPlayingState::HandleSetPositionL( TInt aPosition )
         pos *= KPbMilliMultiplier;
 
         //
-        // Helix can't handle setposition in playing state
+        //  Helix can't handle set position in playing state
         //
         iVideoPlaybackCtlr->iPlayer->PauseL();
         iVideoPlaybackCtlr->iPlayer->SetPositionL( pos );
-        iVideoPlaybackCtlr->iPlayer->Play();
+
+        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->PlayL() );
+
+        if ( err != KErrNone )
+        {
+            SendErrorToViewL( err );
+        }
     }
     else
     {
@@ -1376,7 +1403,7 @@ CMPXPausedState::~CMPXPausedState()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXPausedState::HandlePlay()
+//    CMPXPausedState::HandlePlay()
 //  ------------------------------------------------------------------------------------------------
 void CMPXPausedState::HandlePlay()
 {
@@ -1386,13 +1413,7 @@ void CMPXPausedState::HandlePlay()
     {
         iVideoPlaybackCtlr->iForegroundPause = EFalse;
 
-        iVideoPlaybackCtlr->iPlayer->Play();
-
-        iVideoPlaybackCtlr->ChangeState(EMPXVideoPlaying);
-
-        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlaying,
-                                                              0,
-                                                              KErrNone );
+        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
     }
 }
 
@@ -1488,8 +1509,9 @@ void CMPXPausedState::HandleForeground()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXPausedState::HandleCustomPlay()
-//  Handle the custom play command only when in paused state
+//    CMPXPausedState::HandleCustomPlay()
+//    Handle the custom play command only when in paused state.
+//    No state change is sent to the framework
 //  ------------------------------------------------------------------------------------------------
 void CMPXPausedState::HandleCustomPlay()
 {
@@ -1499,9 +1521,7 @@ void CMPXPausedState::HandleCustomPlay()
     {
         iVideoPlaybackCtlr->iForegroundPause = EFalse;
 
-        iVideoPlaybackCtlr->iPlayer->Play();
-
-        iVideoPlaybackCtlr->ChangeState(EMPXVideoPlaying);
+        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying, EFalse );
     }
 }
 
@@ -1541,13 +1561,7 @@ void CMPXStoppedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iPlayer->Play();
-
-        iVideoPlaybackCtlr->ChangeState(EMPXVideoPlaying);
-
-        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlaying,
-                                                              0,
-                                                              KErrNone );
+        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
     }
 }
 
@@ -1781,7 +1795,7 @@ CMPXSeekingState::~CMPXSeekingState()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXSeekingState::HandlePlay()
+//    CMPXSeekingState::HandlePlay()
 //  ------------------------------------------------------------------------------------------------
 void CMPXSeekingState::HandlePlay()
 {
@@ -1789,13 +1803,7 @@ void CMPXSeekingState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iPlayer->Play();
-
-        iVideoPlaybackCtlr->ChangeState( EMPXVideoPlaying );
-
-        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPlaying,
-                                                              0,
-                                                              KErrNone );
+        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
     }
     else
     {

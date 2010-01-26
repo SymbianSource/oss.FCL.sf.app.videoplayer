@@ -96,13 +96,6 @@
 "../../../videofeeds/server/tsrc/VCXScheduledReminderTest/conf/VCXScheduledReminderTest.cfg" - "c:/testframework/VCXScheduledReminderTest.cfg"
 "../../../videofeeds/server/tsrc/VCXScheduledReminderTest/conf/VCXScheduledReminderTest.inc" - "c:/testframework/VCXScheduledReminderTest.inc"
 
-; SCHEDULED DOWNLOAD
-"/epoc32/release/armv5/udeb/VCXScheduledDownloadTest.dll" - "!:/Sys/Bin/VCXScheduledDownloadTest.dll"
-"../../../videofeeds/server/tsrc/VCXScheduledDownloadTest/conf/VCXScheduledDownloadTest.cfg" - "c:/testframework/VCXScheduledDownloadTest.cfg"
-"../../../videofeeds/server/tsrc/VCXScheduledDownloadTest/conf/VCXScheduledDownload.inc" - "c:/testframework/VCXScheduledDownload.inc"
-"../../../videofeeds/server/tsrc/VCXScheduledDownloadTest/conf/VCXScheduledDownloadTestHelium.cfg" - "C:/TestFramework/VCXScheduledDownloadTestHelium.cfg"
-
-
 ; MEDIASETTINGSENGINE
 "/epoc32/release/armv5/udeb/mpxmediasettingsenginetest.dll" - "!:/Sys/Bin/mpxmediasettingsenginetest.dll"
 "../../../mediasettings/mediasettingsengine/tsrc/mediasettingsenginetest/conf/mpxmediasettingsenginetest.cfg" - "c:/testframework/mpxmediasettingsenginetest.cfg"

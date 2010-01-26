@@ -24,7 +24,7 @@
 //OPTION ARMCC --asm --interleave
 ALWAYS_BUILD_AS_ARM
 
-TARGET            IptvServer.exe
+TARGET            iptvserver.exe
 EPOCSTACKSIZE     0x5000
 EPOCHEAPSIZE      0x1000 0x1000000
 
@@ -106,7 +106,7 @@ LIBRARY           insock.lib
 LIBRARY           esock.lib
 
 LIBRARY           bafl.lib         // for string pools
-LIBRARY           InetProtUtil.lib // for UriParser
+LIBRARY           inetprotutil.lib // for UriParser
 LIBRARY           http.lib         // for HTTP Client API
 LIBRARY           ecom.lib         // for HTTP Client API
 
@@ -115,26 +115,26 @@ LIBRARY	          msgs.lib
 LIBRARY	          smcm.lib
 LIBRARY	          gsmu.lib	
 LIBRARY	          mtur.lib
-LIBRARY           CommonEngine.lib		
+LIBRARY           commonengine.lib		
 
-LIBRARY           IptvClientApi.lib
+LIBRARY           iptvclientapi.lib
 
 //database stuff
 LIBRARY           edbms.lib
 LIBRARY           estor.lib
 
-LIBRARY	          LiveTvUtils.lib
+LIBRARY	          livetvutils.lib
 
 LIBRARY           centralrepository.lib
-LIBRARY           CenRepNotifHandler.lib
+LIBRARY           cenrepnotifhandler.lib
 LIBRARY           flogger.lib
-LIBRARY           IptvUtil.lib
+LIBRARY           iptvutil.lib
 LIBRARY           commdb.lib
-LIBRARY           FeatDiscovery.lib
-LIBRARY           ConnMon.lib //RConnectionMonitor
+LIBRARY           featdiscovery.lib
+LIBRARY           connmon.lib //RConnectionMonitor
 
 LIBRARY           caf.lib // DRM checking
-LIBRARY           IptvProvisioningProcessor.lib
+LIBRARY           iptvprovisioningprocessor.lib
 LIBRARY           apgrfx.lib
 LIBRARY           apparc.lib 
 LIBRARY           cone.lib
@@ -142,5 +142,5 @@ LIBRARY           ws32.lib
 LIBRARY           sysutil.lib
 LIBRARY           profileeng.lib
 LIBRARY           apmime.lib      // TDataType
-LIBRARY           CseSchedulerClient.lib  // common scheduler engine
+LIBRARY           cseschedulerclient.lib  // common scheduler engine
 LIBRARY	          cmmanager.lib

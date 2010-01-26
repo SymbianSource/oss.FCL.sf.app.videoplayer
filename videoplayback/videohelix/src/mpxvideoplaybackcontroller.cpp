@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 39 %
+// Version : %version: 40 %
 
 
 //
@@ -1170,7 +1170,9 @@ void CMPXVideoPlaybackController::ChangeState(TMPXVideoPlaybackState aChangeToSt
         switch ( aChangeToState )
         {
             case EMPXVideoPlaying:
+            {
                 iState = iPlayingState;
+                
                 //
                 //  If clip is audio only, stop the backlight timer and break switch
                 //  If clip has audio and video, proceed to the next case which will
@@ -1184,34 +1186,50 @@ void CMPXVideoPlaybackController::ChangeState(TMPXVideoPlaybackState aChangeToSt
                 {
                     CancelBackLightTimer();
                 }
+                
                 break;
+            }
             case EMPXVideoPaused:
+            {
                 iState = iPausedState;
                 CancelBackLightTimer();
                 break;
+            }
             case EMPXVideoInitializing:
+            {
                 iState = iInitialisingState;
                 StartBackLightTimer();
                 break;
+            }
             case EMPXVideoInitialized:
+            {
                 iState = iInitialisedState;
                 break;
+            }
             case EMPXVideoBuffering:
+            {
                 iState = iBufferingState;
                 StartBackLightTimer();
                 break;
+            }
             case EMPXVideoSeeking:
+            {
                 iState = iSeekingState;
                 break;
+            }
             case EMPXVideoStopped:
+            {
                 iState = iStoppedState;
                 CancelBackLightTimer();
                 break;
+            }
             case EMPXVideoNotInitialized:
+            {
                 ResetMemberVariables();
                 iState = iNotIntialisedState;
                 CancelBackLightTimer();
                 break;
+            }
         }
     }
 }

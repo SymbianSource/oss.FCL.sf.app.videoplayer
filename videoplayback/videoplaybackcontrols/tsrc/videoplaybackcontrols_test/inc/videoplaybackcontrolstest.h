@@ -2,9 +2,9 @@
 * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
+* under the terms of the License "Symbian Foundation License v1.0"
 * which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+* at the URL "http://www.symbianfoundation.org/legal/sfl-v10.html".
 *
 * Initial Contributors:
 * Nokia Corporation - initial contribution.
@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#8 %
+// Version : %version: e003sa33#8 %
 
 
 
@@ -202,6 +202,12 @@ private:
     */
     virtual TInt AddAudioOnlyFileDetails();
 
+    /**
+    * Add long file details
+    * @return Symbian OS error code.
+    */
+    virtual TInt AddLongFileDetails();
+    
     /**
     * Create controller
     */

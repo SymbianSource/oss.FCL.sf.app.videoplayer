@@ -14,6 +14,5 @@ INC ..\..\videofeeds\server\tsrc\VCXServiceTest\conf\atsconf.txt
 INC ..\..\videofeeds\server\tsrc\VCXSettingsDatabaseTest\conf\atsconf.txt
 INC ..\..\videofeeds\server\tsrc\VCXProvisioningTest\conf\atsconf.txt
 INC ..\..\videofeeds\server\tsrc\VCXScheduledReminderTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXScheduledDownloadTest\conf\atsconf.txt
 INC ..\..\videofeeds\server\tsrc\VCXServiceManagementApiTest\conf\atsconf.txt
 INC ..\..\videofeeds\server\tsrc\VCXVodContentApiTest\conf\atsconf.txt

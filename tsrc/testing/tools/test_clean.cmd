@@ -25,6 +25,15 @@ call abld reallyclean
 popd
 
 echo ----------------------------------------
+echo CLEAN VIDEOPLAYER
+echo ----------------------------------------
+
+pushd \VideoApp_Domain\videoplayer\group
+call bldmake bldfiles
+call abld reallyclean
+popd
+
+echo ----------------------------------------
 echo CLEAN VIDEOUTILS/TSRC
 echo ----------------------------------------
 
@@ -34,19 +43,34 @@ call abld test reallyclean
 popd
 
 echo ----------------------------------------
-echo CLEAN VIDEO
-echo ----------------------------------------
-
-pushd \VideoApp_Domain\videoplayer\group
-call bldmake bldfiles
-call abld reallyclean
-popd
-
-echo ----------------------------------------
-echo CLEAN VIDEO/TSRC
+echo CLEAN VIDEOPLAYER/TSRC
 echo ----------------------------------------
 
 pushd \VideoApp_Domain\videoplayer\tsrc\group
 call bldmake bldfiles
 call abld test reallyclean
 popd
+
+echo ----------------------------------------
+echo CLEAN VIDEOPLAYER UNIT TESTS
+echo ----------------------------------------
+
+call pushd \VideoApp_Domain\videoplayer\videoplayback\videohelix\tsrc\ut_videohelixtest\group
+call bldmake bldfiles
+call abld test reallyclean
+call popd
+
+call pushd \VideoApp_Domain\videoplayer\videoplayback\videoplaybackcontrols\tsrc\videoplaybackcontrols_test\group
+call bldmake bldfiles
+call abld test reallyclean
+call popd
+
+call pushd \VideoApp_Domain\videoplayer\videoplayback\videoplaybackviews\tsrc\ut_userinputhandlertest\group
+call bldmake bldfiles
+call abld test reallyclean
+call popd
+
+call pushd \VideoApp_Domain\videoplayer\videoplayerapp\mpxvideoplayer\tsrc\ut_mpxvideoplayertest\group
+call bldmake bldfiles
+call abld test reallyclean
+call popd

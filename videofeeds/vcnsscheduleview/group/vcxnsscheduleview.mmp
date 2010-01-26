@@ -73,7 +73,7 @@ LIBRARY        eikcoctl.lib
 LIBRARY        eikdlg.lib 
 LIBRARY        euser.lib
 LIBRARY        flogger.lib
-LIBRARY        IptvClientApi.lib
+LIBRARY        iptvclientapi.lib
 LIBRARY        iptvutil.lib
 LIBRARY        mpxviewutility.lib
 LIBRARY        vcxnsuiengine.lib

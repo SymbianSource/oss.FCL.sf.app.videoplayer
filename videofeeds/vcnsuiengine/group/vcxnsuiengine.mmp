@@ -68,8 +68,8 @@ LIBRARY efsrv.lib
 LIBRARY estor.lib
 LIBRARY euser.lib
 LIBRARY flogger.lib
-LIBRARY IptvUtil.lib
-LIBRARY IptvClientApi.lib
+LIBRARY iptvutil.lib
+LIBRARY iptvclientapi.lib
 LIBRARY mpxcommon.lib
 LIBRARY mpxcollectionutility.lib
 LIBRARY vcxconnectionutility.lib

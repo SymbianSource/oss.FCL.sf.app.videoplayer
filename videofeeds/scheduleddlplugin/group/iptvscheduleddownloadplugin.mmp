@@ -64,9 +64,9 @@ LIBRARY     flogger.lib
 LIBRARY     profileeng.lib          // CProfileChangeNotifyHandler
 LIBRARY     commdb.lib              // CCommsDatabase, CCommsDbTableView
 
-LIBRARY     CseSchedulerClient.lib  // CCseScheduledProgram
-LIBRARY     IptvClientApi.lib       // IPTV Server
-LIBRARY     IptvUtil.lib            // CIptvUtil::ConnectionTypeL
+LIBRARY     cseschedulerclient.lib  // CCseScheduledProgram
+LIBRARY     iptvclientapi.lib       // IPTV Server
+LIBRARY     iptvutil.lib            // CIptvUtil::ConnectionTypeL
 LIBRARY     etel.lib                // ETel functionalities
 LIBRARY     etelmm.lib              // ETel functionalities
 

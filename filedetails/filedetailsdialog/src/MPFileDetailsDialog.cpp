@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 16 %
+// Version : %version: 18 %
 
 // INCLUDE FILES
 #include <aknlists.h>

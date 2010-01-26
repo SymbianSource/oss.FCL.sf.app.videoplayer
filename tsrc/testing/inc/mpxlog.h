@@ -25,7 +25,7 @@
 #include <e32svr.h>
 #include <e32property.h>
 
-#include "mpxvideo_debug.h"
+#include <mpxvideo_debug.h>
 
 #ifdef _DEBUG
 

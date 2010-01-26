@@ -50,7 +50,7 @@
 
 const TInt KVcxNsUiEngineInstance = 0x2000B43D;
 
-// Version : %version: tr1ido#REL6_54 %
+// Version : %version: REL6_56 %
 
 // -----------------------------------------------------------------------------
 // CVcxNsUiEngine::CVcxNsUiEngine()

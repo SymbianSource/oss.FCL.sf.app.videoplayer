@@ -1366,6 +1366,7 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
             
     if ( iVideoArray->VideoCount() > 0 )
         {
+        iScroller.Reset();
         iScroller.ResizeL( iVideoArray->VideoCount() );               
 		
         TInt highlight( KErrNotFound );

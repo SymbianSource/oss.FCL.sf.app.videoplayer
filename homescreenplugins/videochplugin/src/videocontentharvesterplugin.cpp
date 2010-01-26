@@ -20,9 +20,9 @@
 #include <e32def.h>
 #include <e32cmn.h>
 
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 
 #include <vcxmyvideosdefs.h>
 #include <vcxmyvideosuids.h>

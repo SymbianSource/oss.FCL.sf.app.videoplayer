@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 16 %
+// Version : %version: 19 %
 
 
 
@@ -282,13 +282,15 @@ void CMPSettingsVideoSettingItemList::EditPreferredMemoryItemL(
         }
        
 #endif
-    
-    (*SettingItemArray())[itemIndex]->LoadL();
-    (*SettingItemArray())[itemIndex]->UpdateListBoxTextL();
-    
-    iVideoSettingsEngine.SetUsedMemory( 
-                  iDriveMonitor->iAvailableDrives[iSettingMemory].iDrive );
-    
+   
+    if ( iSettingMemory != KErrNotFound )
+        {
+        (*SettingItemArray())[itemIndex]->LoadL();
+        (*SettingItemArray())[itemIndex]->UpdateListBoxTextL();
+   
+        iVideoSettingsEngine.SetUsedMemory( 
+                iDriveMonitor->iAvailableDrives[iSettingMemory].iDrive );
+        }
     DrawDeferred();
     }
 

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -23,7 +23,7 @@
 #include <data_caging_paths.hrh>
 #include <bldvariant.hrh>
 
-TARGET          MediaSettings.exe
+TARGET          mediasettings.exe
 TARGETTYPE      exe
 UID             0x100039CE 0x10005A3F
 EPOCSTACKSIZE   0x5000
@@ -93,12 +93,12 @@ LIBRARY         featmgr.lib
 LIBRARY         aknskins.lib
 LIBRARY         egul.lib
 LIBRARY         centralrepository.lib 
-LIBRARY         MPSettBase.lib
-LIBRARY         MPSettEngine.lib
-LIBRARY         Flogger.lib
+LIBRARY         mpsettbase.lib
+LIBRARY         mpsettengine.lib
+LIBRARY         flogger.lib
 LIBRARY         sisregistryclient.lib
 LIBRARY   		vcxnssettingsengine.lib
-LIBRARY			CommonDialogs.lib
+LIBRARY			commondialogs.lib
 LIBRARY			cmmanager.lib
 LIBRARY   		vcxnssettingsview.lib
 

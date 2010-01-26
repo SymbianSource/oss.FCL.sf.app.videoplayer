@@ -16,12 +16,12 @@
 
 
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
 #include <platform_paths.hrh>
-TARGET          MPSettROPModel.dll
+TARGET          mpsettropmodel.dll
 CAPABILITY      CAP_ECOM_PLUGIN
 TARGETTYPE      PLUGIN
 UID             0x10009D8D 0x101F857B
@@ -35,12 +35,12 @@ SOURCE          MPSettingsModelForRopImplementationProxy.cpp
 
 SOURCEPATH      ../data
 START RESOURCE  101F857B.rss
-TARGET MPSettROPModel.rsc                                                                
+TARGET mpsettropmodel.rsc                                                                
 END
 
 START RESOURCE  MPSettingsROPModel.rss
 HEADER
-TARGET MPSettingsROPModel.rsc       
+TARGET mpsettingsropmodel.rsc       
 TARGETPATH      resource 
 END
 
@@ -54,14 +54,14 @@ SYSTEMINCLUDE   /epoc32/include/mmf/common
 
 
 LIBRARY         euser.lib
-LIBRARY         MMFCONTROLLERFRAMEWORK.LIB
+LIBRARY         mmfcontrollerframework.lib
 LIBRARY         charconv.lib
-LIBRARY         MPSettEngine.lib
+LIBRARY         mpsettengine.lib
 LIBRARY         commdb.lib
 LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
-LIBRARY         Flogger.lib
-LIBRARY         CentralRepository.lib
+LIBRARY         flogger.lib
+LIBRARY         centralrepository.lib
 LIBRARY         commsdat.lib
 
 //end of file

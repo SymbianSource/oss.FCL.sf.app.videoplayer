@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 56 %
+// Version : %version: 57 %
 
 
 //  Include Files
@@ -1354,14 +1354,18 @@ void CMPXVideoBasePlaybackView::HandleMediaL( const CMPXMedia& aMedia, TInt aErr
         if ( aMedia.IsSupported( KMPXMediaVideoError ) )
         {
             TInt error = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoError );
+
             // Reset the controls
             iContainer->HandleCommandL( EMPXPbvCmdResetControls );
+
             // Set the iMediaRequested flag to false
             iMediaRequested = EFalse;
-            // Reset the playback state to stopped
-            iPlaybackState = EPbStateStopped;
+
             // Handle the plugin error
             HandlePluginErrorL( error );
+
+            // Reset the playback state to stopped
+            iPlaybackState = EPbStateStopped;
         }
         else
         {
@@ -1840,7 +1844,13 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleDrmErrorsL()"));
 
-    if ( IsMultiItemPlaylist() )
+    //
+    //  If we receive an error when we are initialized, let the DRM UI Handler
+    //  process the error.  If we have been playing, display the error message
+    //  and close the playback
+    //
+    if ( IsMultiItemPlaylist() || iPlaybackState != EPbStateInitialised )
+
     {
         DisplayErrorMessageL( R_MPX_DRM_RIGHTS_MISSING  );
     }

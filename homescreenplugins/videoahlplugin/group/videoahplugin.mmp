@@ -47,7 +47,7 @@ END
 
 
 LIBRARY        euser.lib
-LIBRARY        ECom.lib 
+LIBRARY        ecom.lib 
 LIBRARY        liwservicehandler.lib
 LIBRARY        eikcore.lib
 LIBRARY        cone.lib

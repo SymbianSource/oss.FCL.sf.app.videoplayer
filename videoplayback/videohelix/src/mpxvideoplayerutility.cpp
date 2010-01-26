@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 
 #include <AudioPreference.h>
@@ -307,11 +307,11 @@ void CMpxVideoPlayerUtility::GetVideoLoadingProgressL( TInt& aPercentageProgress
     MPX_DEBUG(_L("CMpxVideoPlayerUtility::GetVideoLoadingProgressL(%d)"), aPercentageProgress );
 }
 
-void CMpxVideoPlayerUtility::Play()
+void CMpxVideoPlayerUtility::PlayL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::Play()"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::PlayL()"));
 
-    TInt err = iController.Play();
+    User::LeaveIfError( iController.Play() );
 }
 
 void CMpxVideoPlayerUtility::PauseL()

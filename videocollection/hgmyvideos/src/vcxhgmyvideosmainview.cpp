@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: TB92_30 %
+// Version : %version: TB92_33 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -269,6 +269,7 @@ void CVcxHgMyVideosMainView::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         {
         ActivateVideoListL( KErrNotFound ); // Try to activate old list. 
         }
+    UpdateLayout();
     }
 
 // -----------------------------------------------------------------------------

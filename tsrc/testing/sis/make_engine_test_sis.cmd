@@ -216,5 +216,5 @@ call signsis.exe fusion_engine_tests.sis fusion_engine_tests.sisx Nokia_RnDCert_
 call del fusion_engine_tests.sis
 
 call pushd \VideoApp_Domain
-call \VideoApp_Domain\videoplayer\tsrc\testing\tools\tsrpkgtool.pl -a
+call \VideoApp_Domain\videoplayer\tsrc\testing\tools\tsrpkgtool.pl -r
 call popd

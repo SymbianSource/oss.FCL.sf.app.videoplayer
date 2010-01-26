@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: TB92_23 %
+// Version : %version: TB92_24 %
 
 #include <platform_paths.hrh>
 #include <bldvariant.hrh>
@@ -105,14 +105,14 @@ LIBRARY                 aknswallpaperutils.lib
 LIBRARY                 charconv.lib              // CnvUtfConverter
 LIBRARY                 etel.lib                  // RTelServer
 LIBRARY                 etelmm.lib                // RMobilePhone
-LIBRARY                 SecUi.lib                 // CSecurityHandler
+LIBRARY                 secui.lib                 // CSecurityHandler
 LIBRARY                 mpxcommon.lib             // MPX
 LIBRARY                 mpxcollectionutility.lib  // MPX
 LIBRARY                 iptvutil.lib              // Iptv Resource Loader
-LIBRARY                 CommonDialogs.lib         // Memory selection dialog
+LIBRARY                 commondialogs.lib         // Memory selection dialog
 LIBRARY                 drmhelper.lib             // DRM
-LIBRARY                 FeatMgr.lib               // Feature manager
-LIBRARY                 ServiceHandler.lib        // AIW Service Handler
+LIBRARY                 featmgr.lib               // Feature manager
+LIBRARY                 servicehandler.lib        // AIW Service Handler
 LIBRARY                 centralrepository.lib	  // Upnp
 LIBRARY                 thumbnailmanager.lib      // CThumbnailManager
 LIBRARY                 caf.lib                   // CAF
@@ -122,7 +122,7 @@ LIBRARY                 drmutility.lib            // DRM
 LIBRARY                 playbackhelper.lib        // Recognizer
 LIBRARY                 mpxplaybackutility.lib    // MPX playback utility
 LIBRARY                 mpxviewutility.lib
-LIBRARY                 MPFileDetailsDialog.lib
+LIBRARY                 mpfiledetailsdialog.lib
 LIBRARY                 vcxviewmessageutility.lib // CVcxViewMessageUtility
 LIBRARY                 upnpcommand.lib
 LIBRARY                 ganes.lib                 // for HgList

@@ -15,22 +15,30 @@
 @rem
 @echo off
 
+echo ----------------------------------------
+echo LOGGING HEADERS
+echo ----------------------------------------
+call \VideoApp_Domain\videoplayer\tsrc\testing\tools\copylogheaders.cmd
+
+echo ----------------------------------------
+echo ADD COMMENTS TO .PKG AND .INF
+echo ----------------------------------------
+call pushd \VideoApp_Domain\
+call \VideoApp_Domain\videoplayer\tsrc\testing\tools\tsrpkgtool.pl -a
+call popd
+
+echo ----------------------------------------
+echo CLEANUP
+echo ----------------------------------------
 call pushd \VideoApp_Domain\videoplayer\tsrc\testing\tools
 call test_clean.cmd
 call popd
-
-call pushd \VideoApp_Domain
-
-echo ----------------------------------------
-echo COPY LOG HEADERS
-echo ----------------------------------------
-call \VideoApp_Domain\videoplayer\tsrc\testing\tools\copylogheaders.cmd
 
 echo ----------------------------------------
 echo BUILD VIDEOUTILS
 echo ----------------------------------------
 
-call pushd videoutils\group
+call pushd \VideoApp_Domain\videoutils\group
 call bldmake bldfiles
 call abld build armv5 udeb -k
 call abld build winscw udeb -k
@@ -40,7 +48,7 @@ echo ----------------------------------------
 echo BUILD VIDEO
 echo ----------------------------------------
 
-call pushd video\group
+call pushd \VideoApp_Domain\videoplayer\group
 call bldmake bldfiles
 call abld build armv5 udeb -k
 call abld build winscw udeb -k
@@ -50,7 +58,7 @@ echo ----------------------------------------
 echo BUILD VIDEOUTILS/TSRC
 echo ----------------------------------------
 
-call pushd videoutils\tsrc\group
+call pushd \VideoApp_Domain\videoutils\tsrc\group
 call bldmake bldfiles
 call abld test build armv5 udeb -k
 call abld test build winscw udeb -k
@@ -60,7 +68,7 @@ echo ----------------------------------------
 echo BUILD VIDEO/TSRC
 echo ----------------------------------------
 
-call pushd video\tsrc\group
+call pushd \VideoApp_Domain\videoplayer\tsrc\group
 call bldmake bldfiles
 call abld test build armv5 udeb -k
 call abld test build winscw udeb -k
@@ -70,14 +78,39 @@ echo ----------------------------------------
 echo CREATE VIDEOPLAYER SIS
 echo ----------------------------------------
 call pushd \VideoApp_Domain\videoplayer\videoplayerapp\mpxvideoplayer\sis
-call pushd \VideoApp_Domain\videoplayer\mediasettings\sis
-call attrib -r -a -s -h *.pkg
-call perl -pi.bak -e "s/urel/udeb/g" mediasettings.pkg
-call popd
-call attrib -r -a -s -h *.pkg
-call perl -pi.bak -e "s/urel/udeb/g" VideoPlayer.pkg
-call perl -pi.bak -e "s/urel/udeb/g" disable_mediaplayer.pkg
+call \VideoApp_Domain\videoplayer\tsrc\testing\tools\setversion.pl -f VideoPlayer.pkg
 call make_videoplayer_sisx.bat
 call popd
 
+echo ----------------------------------------
+echo BUILD VIDEOPLAYER UNIT TESTS
+echo ----------------------------------------
+
+call pushd videoplayer\videoplayback\videohelix\tsrc\ut_videohelixtest\group
+call bldmake bldfiles
+call abld test build
+call popd
+
+call pushd videoplayer\videoplayback\videoplaybackcontrols\tsrc\videoplaybackcontrols_test\group
+call bldmake bldfiles
+call abld test build
+call popd
+
+call pushd videoplayer\videoplayback\videoplaybackviews\tsrc\ut_userinputhandlertest\group
+call bldmake bldfiles
+call abld test build
+call popd
+
+call pushd videoplayer\videoplayerapp\mpxvideoplayer\tsrc\ut_mpxvideoplayertest\group
+call bldmake bldfiles
+call abld test build
+call popd
+
+call popd
+
+echo ----------------------------------------
+echo REMOVE COMMENTS FROM .PKG & .INF
+echo ----------------------------------------
+call pushd \VideoApp_Domain\
+call \VideoApp_Domain\videoplayer\tsrc\testing\tools\tsrpkgtool.pl -r
 call popd

@@ -2,9 +2,9 @@
 * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
+* under the terms of the License "Symbian Foundation License v1.0"
 * which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+* at the URL "http://www.symbianfoundation.org/legal/sfl-v10.html".
 *
 * Initial Contributors:
 * Nokia Corporation - initial contribution.
@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#8 %
+// Version : %version: e003sa33#8 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -69,6 +69,7 @@ TInt CVideoPlaybackControlsTest::RunMethodL( CStifItemParser& aItem )
         ENTRY( "SetVolume", CVideoPlaybackControlsTest::SetVolume ),
         ENTRY( "SetState", CVideoPlaybackControlsTest::SetState ),
         ENTRY( "AddDefaultFileDetails", CVideoPlaybackControlsTest::AddDefaultFileDetails ),
+        ENTRY( "AddLongFileDetails", CVideoPlaybackControlsTest::AddLongFileDetails ),
         ENTRY( "AddAudioOnlyFileDetails", CVideoPlaybackControlsTest::AddAudioOnlyFileDetails ),
         ENTRY( "SetDuration", CVideoPlaybackControlsTest::SetDuration ),
         ENTRY( "SoftkeyPressed", CVideoPlaybackControlsTest::SoftkeyPressed ),
@@ -479,6 +480,19 @@ TInt CVideoPlaybackControlsTest::AddAudioOnlyFileDetails()
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::AddAudioOnlyFileDetails()"));
 
     TRAPD( result, iContainer->AddFileDetailsL( EFalse ) );
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CVideoPlaybackControlsTest::AddLongFileDetails
+// -------------------------------------------------------------------------------------------------
+//
+TInt CVideoPlaybackControlsTest::AddLongFileDetails()
+{
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::AddLongFileDetails()"));
+
+    TRAPD( result, iContainer->AddLongFileDetailsL() );
 
     return result;
 }

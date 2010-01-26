@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 
@@ -23,7 +23,7 @@
 #include <platform_paths.hrh>
 #include <data_caging_paths.hrh>
 
-TARGET      MPFileDetailsDialog.dll
+TARGET      mpfiledetailsdialog.dll
 TARGETTYPE  dll
 UID         0x1000006C 0x101F8511
 
@@ -64,20 +64,20 @@ LIBRARY euser.lib
 LIBRARY eikcoctl.lib
 LIBRARY avkon.lib
 LIBRARY bafl.lib
-LIBRARY Flogger.lib
+LIBRARY flogger.lib
 LIBRARY eikcore.lib
 LIBRARY centralrepository.lib
 LIBRARY efsrv.lib
 LIBRARY playbackhelper.lib
 LIBRARY commonengine.lib
-LIBRARY FeatMgr.lib
-LIBRARY ServiceHandler.lib
+LIBRARY featmgr.lib
+LIBRARY servicehandler.lib
 LIBRARY mmfcontrollerframework.lib
-LIBRARY MediaClientAudio.lib
+LIBRARY mediaclientaudio.lib
 LIBRARY mediaclientvideo.lib
-LIBRARY MetaDataUtility.lib
+LIBRARY metadatautility.lib
 LIBRARY caf.lib
-LIBRARY DrmUtility.lib
+LIBRARY drmutility.lib
 
 
 

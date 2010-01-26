@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 12 %
+// Version : %version: 14 %
 
 #ifndef VCXHGMYVIDEOSMAINVIEW_H
 #define VCXHGMYVIDEOSMAINVIEW_H

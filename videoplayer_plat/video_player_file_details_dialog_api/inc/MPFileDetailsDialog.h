@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -24,14 +24,14 @@
 #define MPFILEDETAILSDIALOG_H
 
 //  INCLUDES
-#include <aknPopup.h>
+#include <aknpopup.h>
 #ifdef SYMBIAN_BUILD_GCE
 #include <videoplayer2.h>
 #else
 #include <videoplayer.h>
 #endif //SYMBIAN_BUILD_GCE
 #include <mdaaudiosampleplayer.h>
-#include <MPFileDetails.h>
+#include <mpfiledetails.h>
 
 // FORWARD DECLARATIONS
 class CAknDoublePopupMenuStyleListBox;

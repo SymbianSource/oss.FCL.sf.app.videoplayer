@@ -14,8 +14,8 @@
 @rem Description:
 @rem
 
-call pushd \VideoApp_Domain\videoplayer\tsrc\testing\tools\
-call copy ..\..\inc\mpxvideo_debug.h \VideoApp_Domain\videoplayer\inc\mpxvideo_debug.h
-call copy ..\..\inc\mpxvideo_debug.h \epoc32\include\domain\middleware\mpxvideo_debug.h
-call copy ..\..\inc\mpxlog.h \epoc32\include\domain\middleware\mpxlog.h
+call pushd \VideoApp_Domain\videoplayer\tsrc\testing\inc\
+call copy mpxvideo_debug.h \VideoApp_Domain\videoplayer\inc\mpxvideo_debug.h
+call copy mpxvideo_debug.h \epoc32\include\platform\mw
+call copy mpxlog.h \epoc32\include\platform\mw
 call popd

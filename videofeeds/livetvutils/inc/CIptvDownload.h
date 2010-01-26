@@ -21,7 +21,7 @@
 
 // User includes
 #include <e32std.h>
-#include <DownloadMgrClient.h>
+#include <downloadmgrclient.h>
 #include "MIptvDownloadObserver.h"
 #include "MIptvLiveUITimerObserver.h"
 

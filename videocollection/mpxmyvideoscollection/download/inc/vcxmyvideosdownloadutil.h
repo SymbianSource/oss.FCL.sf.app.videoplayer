@@ -23,7 +23,7 @@
 
 // INCLUDES
 
-#include <DownloadMgrClient.h>
+#include <downloadmgrclient.h>
 #include <mpxmedia.h>
 #include <vcxmyvideosdefs.h>
 #include <ipvideo/vcxconnutilengineobserver.h>

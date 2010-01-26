@@ -68,6 +68,8 @@ CVcxMyVideosVideoCache::~CVcxMyVideosVideoCache()
     
     delete iVideoList;
     delete iDownloadCache;
+    delete iCenRep;
+    
     DeletePartialList();
     }
 
@@ -1317,17 +1319,18 @@ TInt CVcxMyVideosVideoCache::CompareL( CMPXMedia& aNewVideo, CMPXMedia& aVideoIn
 //    
 TVcxMyVideosSortingOrder CVcxMyVideosVideoCache::SortingOrderL()
     {
-    TUid uid;
-    uid.iUid = KVcxMyVideosCollectionCenrepUid;
-    CRepository* cenRep = CRepository::NewL( uid );
-    CleanupStack::PushL( cenRep ); // 1->
+
+    if( !iCenRep ) 
+        {
+        TUid uid;
+        uid.iUid = KVcxMyVideosCollectionCenrepUid;
+		iCenRep = CRepository::NewL( uid );
+        }
     
     TInt sortingOrderInCenrep;
 
-    TInt cenRepError = cenRep->Get( KVcxMyVideosCollectionCenrepKeySortingOrder,
+    TInt cenRepError = iCenRep->Get( KVcxMyVideosCollectionCenrepKeySortingOrder,
             sortingOrderInCenrep );
-
-    CleanupStack::PopAndDestroy( cenRep ); // <-1
     
     TVcxMyVideosSortingOrder sortingOrder;
     
