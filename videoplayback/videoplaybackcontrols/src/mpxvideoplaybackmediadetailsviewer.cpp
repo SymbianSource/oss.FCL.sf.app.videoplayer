@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  e003sa33#10 %
+// Version : %version:  e003sa33#11 %
 
 
 // INCLUDE FILES
@@ -583,41 +583,49 @@ void CMPXVideoPlaybackMediaDetailsViewer::CreateLabelsL()
     iClipnameLabel = new (ELeave) CEikLabel;
     iClipnameLabel->SetContainerWindowL( *this );     
     iClipnameLabel->SetTextL( KNullDesC ); 
+    iClipnameLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Title
     iTitleLabel = new (ELeave) CEikLabel;
     iTitleLabel->SetContainerWindowL( *this );     
     iTitleLabel->SetTextL( KNullDesC );     
+    iTitleLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Artist
     iArtistLabel = new (ELeave) CEikLabel;
     iArtistLabel->SetContainerWindowL( *this );     
     iArtistLabel->SetTextL( KNullDesC );        
+    iArtistLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Format
     iFormatLabel = new (ELeave) CEikLabel;
     iFormatLabel->SetContainerWindowL( *this );     
     iFormatLabel->SetTextL( KNullDesC );
+    iFormatLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Resolution
     iResolutionLabel = new (ELeave) CEikLabel;
     iResolutionLabel->SetContainerWindowL( *this );     
     iResolutionLabel->SetTextL( KNullDesC );    
+    iResolutionLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Duration
     iDurationLabel = new (ELeave) CEikLabel;
     iDurationLabel->SetContainerWindowL( *this );     
     iDurationLabel->SetTextL( KNullDesC );    
+    iDurationLabel->SetLabelAlignment( ELayoutAlignBidi );
     
     // Bitrate
     iBitrateLabel = new (ELeave) CEikLabel;
     iBitrateLabel->SetContainerWindowL( *this );     
     iBitrateLabel->SetTextL( KNullDesC );   
+    iBitrateLabel->SetLabelAlignment( ELayoutAlignBidi );
 
     // Additional Labels
     iAdditionalLabel = new (ELeave) CEikLabel;
     iAdditionalLabel->SetContainerWindowL( *this );     
     iAdditionalLabel->SetTextL( KNullDesC );   
+    iAdditionalLabel->SetLabelAlignment( ELayoutAlignBidi );
 
 } 
 

@@ -740,19 +740,9 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     //  This is a fix for setting the title always
     if ( !property || static_cast<CMdETextProperty*>(property)->Value().Length() == 0 )
         {
-        TEntry entry;
         TParse parse;
-
-        if ( iFs.Entry( aObject.Uri(), entry ) == KErrNone )
-            {
-            parse.Set( entry.iName, NULL, NULL );
-            }
-        else
-            {
-            parse.Set( aObject.Uri(), NULL, NULL );
-            }
-        aVideo.SetTextValueL( KMPXMediaGeneralTitle,
-                parse.Name());        
+        parse.Set( aObject.Uri(), NULL, NULL );
+        aVideo.SetTextValueL( KMPXMediaGeneralTitle, parse.Name() );
         }
 
     //3. DESCRIPTION

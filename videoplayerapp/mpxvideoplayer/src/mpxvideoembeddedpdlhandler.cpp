@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:  Handles PDL commands passed in by other appilcations
- *
+*
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 
 #include <mpxcommand.h>
@@ -105,7 +105,7 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
             //
             //  New download received, close old playback plugin
             //
-            iAppUiEngine->PlaybackUtility()->CommandL( EPbCmdClose );
+            iAppUiEngine->ClosePlaybackPluginL();
 
             StartNewDownloadL( aDlId, aFileName );
         }

@@ -14,7 +14,7 @@
 * Description:   HG VOD Main view implementation*
 */
 
-// Version : %version: REL6_39 %
+// Version : %version: REL6_40 %
 
 #include <aknview.h>
 #include <aknViewAppUi.h>
@@ -297,6 +297,11 @@ void CVcxHgVodMainView::HandleCommandL( TInt aCommand )
                 {
                 iModel->HandleBack();
                 }
+            
+            if ( iServiceList && iModel->VcAppState() == EStateBrowser )
+                {
+                iServiceList->CloseEmbeddedBrowser();
+                }            
             
             TBool consumed  = iModel->HandleBack();
 

@@ -100,10 +100,6 @@ void CVcxHgVodListImplBase::OpenEmbeddedBrowserL( const TDesC& aUri )
         urlToLaunch->Des().Append( KUrlLaunchParameter );
         urlToLaunch->Des().Append( *parsed );
 
-#if defined(__WINSCW__)
-        //custom ap overriden settings cannot be used in emulator environment
-        iLauncher->LaunchBrowserEmbeddedL( *urlToLaunch, NULL, this );
-#else
         //Get available iap and pass it to browser 
         TUint32 wap = iModel.GetAvailableWapIdL();
         if ( wap == 0 )
@@ -113,8 +109,11 @@ void CVcxHgVodListImplBase::OpenEmbeddedBrowserL( const TDesC& aUri )
         TBrowserOverriddenSettings overriddenSettings;
         overriddenSettings.SetBrowserSetting( EBrowserOverSettingsCustomAp, wap );
 
-        iLauncher->LaunchBrowserEmbeddedL( *urlToLaunch, NULL, this, &overriddenSettings );
-#endif
+        // Check, that the state has not been changed while launching
+        if ( iModel.VcAppState() == EStateBrowser )
+            {
+            iLauncher->LaunchBrowserEmbeddedL( *urlToLaunch, NULL, this, &overriddenSettings );
+            }
 
         CleanupStack::PopAndDestroy( urlToLaunch );
         CleanupStack::PopAndDestroy( parsed );

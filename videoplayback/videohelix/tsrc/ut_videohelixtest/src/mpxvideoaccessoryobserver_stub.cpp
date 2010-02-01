@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 //
 //  INCLUDE FILES
@@ -75,6 +75,9 @@ CMPXVideoAccessoryObserver::~CMPXVideoAccessoryObserver()
 
 void CMPXVideoAccessoryObserver::SetTvOutConnected( TBool aConnected )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoAccessoryObserver::SetTvOutConnected()"),
+                   _L("aConnected = %d"), aConnected);
+
     iTvOutConnected = aConnected;
 
     if ( ! iTvOutConnected )
@@ -85,6 +88,9 @@ void CMPXVideoAccessoryObserver::SetTvOutConnected( TBool aConnected )
 
 void CMPXVideoAccessoryObserver::SetTvOutPlaybackAllowed( TBool aAllowed )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoAccessoryObserver::SetTvOutPlaybackAllowed()"),
+                   _L("aAllowed = %d"), aAllowed);
+
     iTvOutPlaybackAllowed = aAllowed;
 }
 
@@ -98,21 +104,6 @@ void CMPXVideoAccessoryObserver::UpdateTvOutStatusL( TBool aTvOutConnected )
     if ( iTvOutConnected != aTvOutConnected )
     {
         iTvOutConnected = aTvOutConnected;
-
-        if ( iTvOutConnected )
-        {
-            //
-            //  Check the playablility of the clip
-            //
-            if ( iController )
-            {
-                iTvOutPlaybackAllowed = iController->iPlaybackMode->IsTvOutAllowedL();
-            }
-        }
-        else
-        {
-            iTvOutPlaybackAllowed = ETrue;
-        }
 
         iController->HandleTvOutEventL( iTvOutConnected );
     }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 57 %
+// Version : %version: e003sa33#58 %
 
 
 //  Include Files
@@ -587,8 +587,10 @@ void CMPXVideoBasePlaybackView::HandleViewActivation( const TUid& aCurrentViewTy
     //  This view is active since we are receiving the callback.
     //  Some new view is being activated so stop playback and return to automatic orientation
     //
-    HandleCommandL( EMPXPbvCmdStop );
-    AppUi()->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic );
+    TRAP_IGNORE(
+        HandleCommandL( EMPXPbvCmdStop );
+        AppUi()->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic );
+        );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1624,6 +1626,7 @@ TBool CMPXVideoBasePlaybackView::IsAppInFrontL()
     RWsSession wsSession;
 
     User::LeaveIfError( wsSession.Connect() );
+    CleanupClosePushL( wsSession );
 
     if ( wsSession.Handle() )
     {
@@ -1643,7 +1646,7 @@ TBool CMPXVideoBasePlaybackView::IsAppInFrontL()
         delete wgList;
     }
 
-    wsSession.Close();
+    CleanupStack::PopAndDestroy(); //wsSession
 
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::IsAppInFrontL (%d)" ), ret);
 
@@ -2014,7 +2017,11 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
 
         if ( openError == KErrNone )
         {
-            TRAP_IGNORE( drmUiHandling->ShowDetailsViewL(fileHandle) );
+            MPX_TRAPD( err, drmUiHandling->ShowDetailsViewL( fileHandle ) );
+            if ( KLeaveExit == err )
+            {
+                User::Leave( err );
+            }
         }
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         else if ( openError == KErrTooBig )
@@ -2025,9 +2032,12 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
 
             if ( err == KErrNone && openError == KErrNone )
             {
-                TRAP_IGNORE( drmUiHandling->ShowDetailsViewL(fileHandle64) );
+                MPX_TRAPD( err, drmUiHandling->ShowDetailsViewL( fileHandle64 ) );
+                if ( KLeaveExit == err )
+                {
+                    User::Leave( err );
+                }
             }
-
             CleanupStack::PopAndDestroy(); // fileHandle64
         }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API

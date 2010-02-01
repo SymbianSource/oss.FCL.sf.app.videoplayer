@@ -563,10 +563,10 @@ void CVcxHgVodContentListImpl::OpenBrowserLinkL( TInt aSelected )
 
         if( aSelected >= 0 && aSelected < contents.Count() )
             {
-            OpenEmbeddedBrowserL( ( contents[aSelected] )->GetBrowserUrl() );
             iModel.SetVcAppState( EStateBrowser );
+            
+            OpenEmbeddedBrowserL( ( contents[aSelected] )->GetBrowserUrl() );
             }
-        
         }
     }
 

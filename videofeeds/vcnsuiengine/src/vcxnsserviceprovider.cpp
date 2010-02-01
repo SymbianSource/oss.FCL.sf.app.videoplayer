@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: Rel6_49 %
+// Version : %version: Rel6_50 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -710,6 +710,8 @@ void CVcxNsServiceProvider::ManageAccountL( TInt aSelected )
         service = GetServiceData( aSelected );
         if ( service )
             {
+            iUiEngine.SetVcAppState( EStateBrowser );
+            
             for ( TInt i = 0; i < iServiceObservers.Count(); i++ )
                 {
                 if( iServiceObservers[i] )
@@ -718,7 +720,6 @@ void CVcxNsServiceProvider::ManageAccountL( TInt aSelected )
                         service->AccountMgmtUri() );
                     }
                 }
-            iUiEngine.SetVcAppState( EStateBrowser );
             }
         }
     }
@@ -1372,6 +1373,8 @@ void CVcxNsServiceProvider::OpenToBrowserL( const TDesC& aUri )
     {
     if ( aUri.Length() > 0 )
         {
+        iUiEngine.SetVcAppState( EStateBrowser );
+
         for ( TInt i = 0; i < iServiceObservers.Count(); i++ )
             {
             if( iServiceObservers[i] )
@@ -1379,7 +1382,6 @@ void CVcxNsServiceProvider::OpenToBrowserL( const TDesC& aUri )
                 iServiceObservers[i]->OpenBrowserLinkL( aUri );
                 }
             }
-        iUiEngine.SetVcAppState( EStateBrowser );
         }
     }
 

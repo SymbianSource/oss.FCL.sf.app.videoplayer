@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#26 %
+// Version : %version: da1mmcf#27 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -238,6 +238,8 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         TBool ExitToMatrixMenu();
 
         void InitializeFileL( const TDesC& aFileName );
+
+        void ClosePlaybackPluginL();
 
     private:
         /**

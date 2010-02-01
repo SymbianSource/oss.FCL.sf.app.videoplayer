@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 
@@ -264,8 +264,8 @@ void CMPSettingsNetworkSettingItemList::LaunchConnectionSelectionL()
     CCmApplicationSettingsUi* settingsUi = CCmApplicationSettingsUi::NewL();
     CleanupStack::PushL ( settingsUi );
     
-    TCmSettingSelection selection; 
-    selection.iId = 0;
+    TCmSettingSelection selection;
+    selection.iId = iDefaultAP;
     selection.iResult = CMManager::EConnectionMethod;
     
     TUint listItems = CMManager::EShowConnectionMethods;

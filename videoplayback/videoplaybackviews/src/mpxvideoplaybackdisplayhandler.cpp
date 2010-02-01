@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -420,6 +420,8 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()"));
 
+    TSurfaceId oldSurfaceId = iSurfaceId;
+    
     //
     //  Extract the surface parameters from the message
     //
@@ -432,7 +434,7 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
         //
         //  Remove old surface if one exists
         //
-        if ( iSurfaceId.IsNull() )
+        if ( ! oldSurfaceId.IsNull() )
         {
             iVideoDisplay->RemoveSurface();
         }

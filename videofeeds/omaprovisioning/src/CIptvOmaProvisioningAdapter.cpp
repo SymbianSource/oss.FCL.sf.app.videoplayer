@@ -25,11 +25,12 @@
 #include "IptvEngineUids.h"
 #include "CIptvUtil.h"
 #include <StringLoader.h>
-#include <IptvOmaProvisioningAdapter.rsg>
+#include <IptvOmaProvisioningAdapterRes.rsg>
 #include <bautils.h>
 #include <f32file.h>
 #include "iptvlocalisationliterals.h"
 #include <bautils.h>
+#include "CIptvResourceLoader.h"
 
 #include "CIptvService.h"
 #include "CIptvServices.h"
@@ -67,6 +68,8 @@ _LIT(KIptvParamNameApplicationAccountUrl, "APPLICATION/ACCOUNT-URL");
 
 const TInt KIptvDriveLetterSpace( 2 );
 
+_LIT( KIptvOmaProvisioningAdapterResFile, "\\Resource\\Plugins\\IptvOmaProvisioningAdapterRes.");
+
 // ================= MEMBER FUNCTIONS =======================
 
 // ---------------------------------------------------------
@@ -92,20 +95,31 @@ void CIptvOmaProvisioningAdapter::ConstructL()
 
     iServices = CIptvServices::NewL();
 
-    HBufC* resourceText = LoadResourceTextL( R_IPTV_OMA_CLIENT_PROV_SUMMARY_TITLE );
-    CleanupStack::PushL( resourceText ); //1->
-    if ( resourceText->Des().Length() > KIptvOcpMaxSummaryTitleLength )
+    CCoeEnv* env = CCoeEnv::Static();
+    if( env )
         {
-        iSummaryTitle = resourceText->Des().Left( KIptvOcpMaxSummaryTitleLength - 1 );
-        }
-    else
-        {
-        iSummaryTitle = resourceText->Des();
-        }
-
-    IPTVLOGSTRING2_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: iSummaryTitle = %S", &iSummaryTitle );
-
-    CleanupStack::PopAndDestroy( resourceText ); // <-1
+        CIptvResourceLoader* resourceLoader = CIptvResourceLoader::NewL( *env );   
+        if ( resourceLoader )
+            {
+            CleanupStack::PushL( resourceLoader );
+            resourceLoader->AddResourceL( KIptvOmaProvisioningAdapterResFile );
+            HBufC* resourceText = StringLoader::LoadLC( R_IPTV_OMA_CLIENT_PROV_SUMMARY_TITLE );
+            if ( resourceText->Des().Length() > KIptvOcpMaxSummaryTitleLength )
+                {
+                iSummaryTitle = resourceText->Des().Left( KIptvOcpMaxSummaryTitleLength - 1 );
+                }
+            else
+                {
+                iSummaryTitle = resourceText->Des();
+                }
+            CleanupStack::PopAndDestroy( resourceText );
+			CleanupStack::PopAndDestroy( resourceLoader );
+            }
+        else
+            {
+            User::Leave( KErrGeneral );
+            }
+        } 
     
     User::LeaveIfError( iFs.Connect() );
 
@@ -422,32 +436,6 @@ void CIptvOmaProvisioningAdapter::VisitL( CWPParameter& aParameter )
         case EWPParameterName:
             IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: parameter EWPParameterName -> collecting" );
 
-#if defined(__SERIES60_30__) || defined(__SERIES60_31__) || defined(__SERIES60_32__)
-
-            // Video Store name must be localised here.
-            if ( 0 == aParameter.Value().CompareF( KQtnIptvVideoStoreList ) )
-                {
-                HBufC* resourceText = LoadResourceTextL( R_IPTV_VIDEO_STORE_LIST );
-                if ( resourceText->Length() > KIptvSmServicesDbNameMaxLength )
-                    {
-                    IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: name too long! -> skipping value" );
-                    }
-                else
-                    {
-                    iCurrentService->SetName( *resourceText );
-                    }
-                delete resourceText;
-                }
-            else if ( aParameter.Value().Length() > KIptvSmServicesDbNameMaxLength )
-                {
-                IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: name too long! -> skipping value" );
-                }
-            else
-                {
-                iCurrentService->SetName( aParameter.Value() );
-                }
-
-#else // S60 5.0 ->
 
             if ( aParameter.Value().Length() > KIptvSmServicesDbNameMaxLength )
                 {
@@ -457,9 +445,6 @@ void CIptvOmaProvisioningAdapter::VisitL( CWPParameter& aParameter )
                 {
                 iCurrentService->SetName( aParameter.Value() );
                 }
-
-#endif // defined(__SERIES60_30__) || defined(__SERIES60_31__) || defined(__SERIES60_32__)
-
             break;
 
         case EWPParameterToNapID:
@@ -770,65 +755,6 @@ void CIptvOmaProvisioningAdapter::SavingFinalizedL()
     iServices = CIptvServices::NewL();
     
     IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter::SavingFinalizedL() exit" );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvOmaProvisioningAdapter::LoadResourceTextL
-// -----------------------------------------------------------------------------
-//
-HBufC* CIptvOmaProvisioningAdapter::LoadResourceTextL( TInt aResourceId ) const
-    {        
-    IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter::LoadResourceTextL() start" );
-
-    // Open a file server session
-    RFs fs;
-    User::LeaveIfError( fs.Connect() );
-    CleanupClosePushL( fs ); // 1->
-
-    // Get the drive from DLL file name
-    TFileName dllName;
-    Dll::FileName( dllName );
-
-    TFileName fileName;
-    TParsePtrC parse( dllName );
-    fileName = parse.Drive();
-
-    _LIT(KIptvOcpResourcePath, "\\Resource\\Plugins\\");
-    fileName.Append( KIptvOcpResourcePath );
-
-    _LIT(KIptvOcpResourceFileName, "IptvOmaProvisioningAdapter.rsc");    
-    fileName.Append( KIptvOcpResourceFileName );
-
-    //Retrieve the correct suffix
-    BaflUtils::NearestLanguageFile( fs, fileName );
-
-    IPTVLOGSTRING2_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: resource file = %S", &fileName );
-
-    //Open the file
-    RResourceFile resourceFile;
-    resourceFile.OpenL( fs, fileName );
-    CleanupClosePushL( resourceFile ); // 2->
- 
-    //Read data from resource file
-    HBufC8* resourceData = resourceFile.AllocReadLC( aResourceId ); // 3->
-    
-    //Extract text from data    
-    TResourceReader resReader;
-    resReader.SetBuffer( resourceData );    
-    HBufC* text = resReader.ReadHBufCL();
-    CleanupStack::PushL( text ); // 4->
-    
-    TPtr textPtr( text->Des() );
-    
-    IPTVLOGSTRING2_LOW_LEVEL( "CIptvOmaProvisioningAdapter:: resource text = %S", &textPtr );
-
-    CleanupStack::Pop( text );                    // <-4
-    CleanupStack::PopAndDestroy( resourceData );  // <-3
-    CleanupStack::PopAndDestroy( &resourceFile ); // <-2    
-    CleanupStack::PopAndDestroy( &fs );           // <-1
-
-    IPTVLOGSTRING_LOW_LEVEL( "CIptvOmaProvisioningAdapter::LoadResourceTextL() exit" );    
-    return text;
     }
 
 // -----------------------------------------------------------------------------

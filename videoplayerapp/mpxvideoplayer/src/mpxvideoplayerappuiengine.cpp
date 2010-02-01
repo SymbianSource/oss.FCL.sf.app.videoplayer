@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#58 %
+// Version : %version: da1mmcf#59 %
 
 
 #include <eikon.hrh>
@@ -429,7 +429,7 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
     else if ( iRecognizer->IsValidStreamingPrefix( aFileName ) ||
               mediaType == CMediaRecognizer::ELocalSdpFile )
     {
-    	InitializeStreamingLinkL( aFileName );
+        InitializeStreamingLinkL( aFileName );
     }
     else
     {
@@ -483,8 +483,8 @@ void CMpxVideoPlayerAppUiEngine::ActivatePlaybackViewL()
     if ( iUpdateSeekInfo )
     {
         //
-    	//  The plugin has been instantiated, update the media
-    	//
+        //  The plugin has been instantiated, update the media
+        //
         UpdatePbPluginMediaL();
         iUpdateSeekInfo = EFalse;
     }
@@ -524,7 +524,8 @@ void CMpxVideoPlayerAppUiEngine::PrepareCloseMpxL()
 
     if ( iPlaybackUtility )
     {
-        iPlaybackUtility->CommandL( EPbCmdClose );
+        ClosePlaybackPluginL();
+        
         MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
         TRAP_IGNORE( manager.ClearSelectPlayersL() );
     }
@@ -770,7 +771,7 @@ void CMpxVideoPlayerAppUiEngine::DoHandleMultiLinksFileL( CVideoPlaylistUtility*
         }
         else
         {
-        	InitializeStreamingLinkL( link );
+            InitializeStreamingLinkL( link );
         }
         CleanupStack::PopAndDestroy();  // link
     }
@@ -1272,7 +1273,7 @@ void CMpxVideoPlayerAppUiEngine::HandleOpenL( const CMPXCollectionPlaylist& aPla
 
     if ( aError == KErrNone )
     {
-    	InitializePlaylistL( aPlaylist, EFalse );
+        InitializePlaylistL( aPlaylist, EFalse );
     }
 }
 
@@ -1477,13 +1478,13 @@ TBool CMpxVideoPlayerAppUiEngine::ExitToMatrixMenu()
 void CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL( const TDesC& aUri )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL()"),
-    		       _L("aUri = %S"), &aUri );
+                   _L("aUri = %S"), &aUri );
 
     SetAccessPointL();
 
-	iPlaybackUtility->InitStreamingL( aUri,
-									  (TDesC8*)(&KDATATYPEVIDEOHELIX),
-									  iAccessPointId );
+    iPlaybackUtility->InitStreamingL( aUri,
+                                      (TDesC8*)(&KDATATYPEVIDEOHELIX),
+                                      iAccessPointId );
 
     ActivatePlaybackViewL();
 }
@@ -1495,9 +1496,9 @@ void CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL( const TDesC& aUri )
 void CMpxVideoPlayerAppUiEngine::InitializeFileL( const TDesC& aFileName )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeFileL()"),
-    		       _L("aFileName = %S"), &aFileName );
+                   _L("aFileName = %S"), &aFileName );
 
-	iPlaybackUtility->InitL( aFileName );
+    iPlaybackUtility->InitL( aFileName );
 
     ActivatePlaybackViewL();
 }
@@ -1511,9 +1512,28 @@ void CMpxVideoPlayerAppUiEngine::InitializePlaylistL( const CMPXCollectionPlayli
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializePlaylistL()"));
 
-	iPlaybackUtility->InitL( aPlaylist, aPlay );
+    iPlaybackUtility->InitL( aPlaylist, aPlay );
 
     ActivatePlaybackViewL();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL"));
+
+    if ( iViewUtility->ActiveViewType() == TUid::Uid( KMpxPlaybackPluginTypeUid ) )
+    {
+        //
+        //  The display window must be removed before closing the playback plugin
+        //
+        iAppUi->View()->HandleCommandL( EAknSoftkeyClose );
+    }
+
+    iPlaybackUtility->CommandL( EPbCmdClose );
 }
 
 

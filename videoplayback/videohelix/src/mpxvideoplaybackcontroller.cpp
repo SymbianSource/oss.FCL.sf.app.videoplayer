@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 40 %
+// Version : %version: ou1cpsw#41 %
 
 
 //
@@ -1727,13 +1727,6 @@ void CMPXVideoPlaybackController::HandleTvOutEventL( TBool aConnected )
 
             iState->SendErrorToViewL( KMPXVideoTvOutPlaybackNotAllowed );
         }
-    }
-    else
-    {
-        //
-        //  Pause playback since TV-Out accessory has been disconnected.
-        //
-        DoHandleCommandL( EPbCmdPause );
     }
 
     //

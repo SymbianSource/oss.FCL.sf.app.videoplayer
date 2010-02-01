@@ -44,11 +44,15 @@ USERINCLUDE     ../../vccommon/conf
 APP_LAYER_SYSTEMINCLUDE
 
 SOURCEPATH      ../data
-START RESOURCE IptvOmaProvisioningAdapter.rss
+START RESOURCE  IptvOmaProvisioningAdapter.rss
+END // RESOURCE
+
+SOURCEPATH      ../data
+START RESOURCE  IptvOmaProvisioningAdapterRes.rss
 HEADER
-TARGETPATH resource/plugins
 LANGUAGE_IDS 
-END
+END // RESOURCE
+
 
 SOURCEPATH      ../src
 SOURCE          CIptvOmaProvisioningAdapter.cpp
@@ -60,6 +64,9 @@ LIBRARY	        bafl.lib
 LIBRARY         iptvclientapi.lib
 LIBRARY         flogger.lib
 LIBRARY         efsrv.lib
+LIBRARY         iptvutil.lib
+LIBRARY         cone.lib                // CCoeEnv
+LIBRARY         commonengine.lib        // StringLoader
 
 // For RAPTOR compliancy
 LIBRARY         ecom.lib 

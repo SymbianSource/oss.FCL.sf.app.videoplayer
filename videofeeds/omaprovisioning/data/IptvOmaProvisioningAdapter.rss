@@ -20,8 +20,6 @@
 //  INCLUDES
 #include <ecom/registryinfo.rh>
 #include "IptvOmaProvisioningAdapterUIDs.h"
-#include <eikon.rh>
-#include <ipvideo.loc>
 
 //  RESOURCE DEFINITIONS 
 // ---------------------------------------------------------
@@ -54,26 +52,5 @@ RESOURCE REGISTRY_INFO theInfo
 			}
 		};
 	}
-
-// -----------------------------------------------------------------------------
-// r_iptv_oma_client_prov_summary_title
-// 
-// -----------------------------------------------------------------------------
-//
-RESOURCE LBUF r_iptv_oma_client_prov_summary_title
-	{
-	txt = qtn_vcx_ns_service_settings_title; 
-	}
-
-// ---------------------------------------------------------------------------
-// r_iptv_video_store_list
-// "Nokia video store"
-// NOTE Replaces provisioned logical text.
-// ---------------------------------------------------------------------------
-//
-RESOURCE LBUF r_iptv_video_store_list
-    {
-    txt = qtn_iptv_video_store_list;
-    }
 
 // End of file

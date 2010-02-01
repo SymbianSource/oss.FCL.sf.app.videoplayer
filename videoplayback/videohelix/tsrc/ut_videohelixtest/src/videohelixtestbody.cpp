@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -1959,6 +1959,8 @@ CVHPPTestClass::ConnectTvOutL( CStifItemParser& aItem )
 
     if ( err == KErrNone )
     {
+        iAccObserver->SetTvOutPlaybackAllowed( playable );
+
         if ( ! playable )
         {
             TCallbackEvent* event = new TCallbackEvent;

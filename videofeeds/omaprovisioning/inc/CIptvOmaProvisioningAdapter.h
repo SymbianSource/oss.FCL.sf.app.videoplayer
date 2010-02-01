@@ -237,12 +237,6 @@ class CIptvOmaProvisioningAdapter :  public CWPAdapter,
         void ConstructL();
         
         /**
-        * Loads localized texts from resource file.
-        * @param aResourceId Resource ID.
-        */
-        HBufC* LoadResourceTextL( TInt aResourceId ) const;
-
-        /**
         * Set given icon path. Whether it is drive independent filepath,
         * searches correct drive and fix it
         *
