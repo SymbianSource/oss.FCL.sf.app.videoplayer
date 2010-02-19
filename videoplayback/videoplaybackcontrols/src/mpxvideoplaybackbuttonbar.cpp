@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 
@@ -144,7 +144,7 @@ void CMPXVideoPlaybackButtonBar::CreateButtonsL()
     for ( TInt i = 0 ; i < EMPXButtonCount -1 ; i++ )
     {
         CMPXVideoPlaybackButton* button =
-            CMPXVideoPlaybackButton::NewL(
+            CMPXVideoPlaybackButton::NewL( iController,
                     TRect( leftOffset, iconSize * i, leftOffset + iconSize, iconSize * ( i + 1 ) ),
                     iconsPath );
 
@@ -157,7 +157,7 @@ void CMPXVideoPlaybackButtonBar::CreateButtonsL()
     // create pause button in same rect as paly button's
     //
     CMPXVideoPlaybackButton* button =
-        CMPXVideoPlaybackButton::NewL( iButtons[EMPXButtonPlay]->Rect(), iconsPath );
+        CMPXVideoPlaybackButton::NewL( iController, iButtons[EMPXButtonPlay]->Rect(), iconsPath );
 
     CleanupStack::PushL( button );
     iButtons.AppendL( button );
@@ -563,17 +563,20 @@ void CMPXVideoPlaybackButtonBar::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( Window().DisplayMode() == EColor16MAP )
+    if ( iController->SetBackgroundBlack() )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        gc.Clear( aRect );
-    }
-    else if ( Window().DisplayMode() == EColor16MA )
-    {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        gc.Clear( aRect );
+        if ( Window().DisplayMode() == EColor16MAP )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+            gc.Clear( aRect );
+        }
+        else if ( Window().DisplayMode() == EColor16MA )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+            gc.Clear( aRect );
+        }
     }
     else
     {

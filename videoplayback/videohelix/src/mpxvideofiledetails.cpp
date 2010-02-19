@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 
@@ -83,6 +83,36 @@ CMPXVideoFileDetails::ClearFileDetails()
         iClipName = NULL;
     }
 
+    if ( iDescription )
+    {
+        delete iDescription;
+        iDescription = NULL;
+    }
+
+    if ( iLocation )
+    {
+        delete iLocation;
+        iLocation = NULL;
+    }
+
+    if ( iCopyright )
+    {
+        delete iCopyright;
+        iCopyright = NULL;
+    }
+
+    if ( iLanguage )
+    {
+        delete iLanguage;
+        iLanguage = NULL;
+    }
+    
+    if ( iKeywords )
+    {
+        delete iKeywords;
+        iKeywords = NULL;
+    }
+        
     iResolutionWidth = 0;
     iResolutionHeight = 0;
     iMaxVolume = 0;

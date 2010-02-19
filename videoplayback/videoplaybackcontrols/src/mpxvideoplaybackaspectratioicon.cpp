@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 // INCLUDE FILES
@@ -218,17 +218,20 @@ void CMPXVideoPlaybackAspectRatioIcon::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( Window().DisplayMode() == EColor16MAP )
+    if ( iController->SetBackgroundBlack() )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        gc.Clear( aRect );
-    }
-    else if ( Window().DisplayMode() == EColor16MA )
-    {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        gc.Clear( aRect );
+        if ( Window().DisplayMode() == EColor16MAP )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+            gc.Clear( aRect );
+        }
+        else if ( Window().DisplayMode() == EColor16MA )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+            gc.Clear( aRect );
+        }
     }
     else
     {

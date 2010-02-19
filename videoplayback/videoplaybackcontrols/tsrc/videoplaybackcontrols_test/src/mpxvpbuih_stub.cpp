@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#6 %
+// Version : %version: 7 %
 
 
 
@@ -60,7 +60,7 @@ CMPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler(CMPXVideoPl
 // -------------------------------------------------------------------------------------------------
 //
 CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
-																												CMPXVideoPlaybackContainer* aContainer)
+        CMPXVideoPlaybackContainer* aContainer)
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::NewL()"));
 
@@ -100,6 +100,9 @@ void CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aCont
                                                               TMPXVideoControlType /*aMPXControl*/ )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent"));
+
+    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"), 
+       aPointerEvent.iType, aPointerEvent.iPosition.iX, aPointerEvent.iPosition.iY );
 
     switch (iProcessingInputType)
     {

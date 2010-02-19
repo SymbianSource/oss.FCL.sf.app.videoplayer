@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 17 %
 
 
 // INCLUDE FILES
@@ -49,6 +49,8 @@ const TInt KMPXProgressSliderWidth = 20;
 const TInt KMPXSliderHeightOverProgresBar = 5;
 const TInt64 KMPXMicroSeconds = 1000000;
 const TInt KMPXOneHourInSeconds = 3600;
+
+const TInt KMPXProgressBarHeight = 41;
 
 // ============================ MEMBER FUNCTIONS ===================================================
 
@@ -215,12 +217,11 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     //
     // Calculate icon rects
     //
-    TAknLayoutRect progressPaneRect;
-    progressPaneRect.LayoutRect( iEikonEnv->EikAppUi()->ApplicationRect(),
-                                 mp4_progress_pane(0).LayoutLine() );
 
     TRect progressRect = Rect();
-    progressRect.iBr.iY = progressPaneRect.Rect().Height();
+    TInt topMarginHeight = ( progressRect.iBr.iY - KMPXProgressBarHeight ) / 2;
+    progressRect.iTl.iY += topMarginHeight;
+    progressRect.iBr.iY = progressRect.iTl.iY + KMPXProgressBarHeight;
 
     TAknLayoutRect seekBarFrameRect;
     seekBarFrameRect.LayoutRect( progressRect, mup_progress_pane_cp04().LayoutLine() );
@@ -484,17 +485,20 @@ void CMPXVideoPlaybackProgressBar::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( Window().DisplayMode() == EColor16MAP )
+    if ( iController->SetBackgroundBlack() )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        gc.Clear( aRect );
-    }
-    else if ( Window().DisplayMode() == EColor16MA )
-    {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        gc.Clear( aRect );
+        if ( Window().DisplayMode() == EColor16MAP )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+            gc.Clear( aRect );
+        }
+        else if ( Window().DisplayMode() == EColor16MA )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+            gc.Clear( aRect );
+        }
     }
     else
     {

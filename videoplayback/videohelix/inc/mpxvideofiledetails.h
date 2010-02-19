@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -58,6 +58,11 @@ NONSHARABLE_CLASS( CMPXVideoFileDetails ) : public CBase
         HBufC*   iTitle;
         HBufC*   iArtist;
         HBufC*   iMimeType;
+        HBufC*   iDescription;
+        HBufC*   iLocation;
+        HBufC*   iCopyright;
+        HBufC*   iLanguage;
+        HBufC*   iKeywords;                
 
 
         TInt     iResolutionWidth;

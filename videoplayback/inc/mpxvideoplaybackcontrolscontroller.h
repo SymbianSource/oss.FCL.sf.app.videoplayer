@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -132,6 +132,8 @@ class CMPXVideoPlaybackControlsController : public CBase
         void LocateBitmapFileL( TFileName& aFileName );
 
         void SetRealOneBitmapVisibility( TBool aVisible );
+
+        TBool SetBackgroundBlack();
 
     private:
         /**
@@ -349,6 +351,9 @@ class CMPXVideoPlaybackControlsController : public CBase
 
         RFs                                     iFs;
         TFileName                               iBitmapFileName;
+
+        TBool                                   iSurfaceCreated;
+        TBool                                   iTvOutConnected;
 
 #ifdef RD_TACTILE_FEEDBACK
         MTouchFeedback*                         iFeedback;

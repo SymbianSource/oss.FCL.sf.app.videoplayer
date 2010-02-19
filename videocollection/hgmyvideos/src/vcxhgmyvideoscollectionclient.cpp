@@ -60,8 +60,7 @@ const TUint32 KVcxHgMyVideosTransactionId = 5;
 //
 CVcxHgMyVideosCollectionClient::CVcxHgMyVideosCollectionClient()
   : iCollectionOpenStatus( EVcxHgCollectionNotOpen ),
-    iPendingCommand( EVcxHgMyVideosCollectionCommandNone ),
-    iCollectionLevel( KErrNotFound )
+    iPendingCommand( EVcxHgMyVideosCollectionCommandNone )
     {
     }
 
@@ -158,15 +157,12 @@ void CVcxHgMyVideosCollectionClient::SetVideoModelObserver(
 //
 TInt CVcxHgMyVideosCollectionClient::CollectionLevelL()
     {
-    if ( iCollectionLevel == KErrNotFound )
-        {
-        CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
-        CleanupStack::PushL( path );
-        iCollectionLevel = path->Levels();
-        CleanupStack::PopAndDestroy( path );
-        }
-		
-    return iCollectionLevel;
+    CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( path );
+    TInt collectionLevel = path->Levels();
+    CleanupStack::PopAndDestroy( path );
+
+    return collectionLevel;
     }
 
 // -----------------------------------------------------------------------------
@@ -637,8 +633,6 @@ void CVcxHgMyVideosCollectionClient::HandleSingleCollectionMessageL(
                     {
                     case TMPXCollectionMessage::EPathChanged:
                         {
-                        iCollectionLevel = KErrNotFound;
-                        
                         if ( data == EMcContainerOpened  )
                             {
                             if ( iCollectionOpenStatus == EVcxHgCollectionOpening )

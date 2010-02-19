@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 
 // INCLUDES
@@ -369,6 +369,15 @@ void CMPXVideoPlaybackContainer::AddLongFileDetailsL( TBool aHasVideoTrack )
     }
 
     iControlsController->AddFileDetailsL( iFileDetails );
+}
+
+
+void CMPXVideoPlaybackContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::HandlePointerEventL()"));
+
+    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"), 
+       aPointerEvent.iType, aPointerEvent.iPosition.iX, aPointerEvent.iPosition.iY );
 }
 
 //  End of File

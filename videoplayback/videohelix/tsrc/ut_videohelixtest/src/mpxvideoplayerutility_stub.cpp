@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -657,17 +657,43 @@ void CMpxVideoPlayerUtility::FindFileDetail( TPtrC8& aItem, TPtrC8& value )
 
         iTitle = value.AllocL();
     }
-    else if ( ! aItem.Compare(_L8("Description")) )
+    else if ( ! aItem.Compare(_L8("Description")) ||
+    	      ! aItem.Compare(_L8("Abstract")) )
     {
-        delete iDescription;
-
-        iDescription = value.AllocL();
+        if ( ! iDescription )
+        {
+            iDescription = value.AllocL();
+        }
     }
     else if ( ! aItem.Compare(_L8("Artist")) )
     {
         delete iArtist;
 
         iArtist = value.AllocL();
+    }
+    else if ( ! aItem.Compare(_L8("Location")) )
+    {
+        delete iLocation;
+
+        iLocation = value.AllocL();
+    }
+    else if ( ! aItem.Compare(_L8("Copyright")) )
+    {
+        delete iCopyright;
+
+        iCopyright = value.AllocL();
+    }
+    else if ( ! aItem.Compare(_L8("Language")) )
+    {
+        delete iLanguage;
+
+        iLanguage = value.AllocL();
+    }
+    else if ( ! aItem.Compare(_L8("Keywords")) )
+    {
+        delete iKeywords;
+
+        iKeywords = value.AllocL();
     }
 
     HBufC* name = HBufC::NewL( aItem.Length() );

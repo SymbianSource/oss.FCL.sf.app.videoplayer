@@ -57,7 +57,9 @@
 #include "vcxhgmyvideospanics.h"
 #include "vcxhgmyvideosupnpinterface.h"
 #include "vcxhgtelephonyclient.h"
+#ifdef RD_VIDEO_AS_RINGING_TONE
 #include "vcxhgmyvideosaiwmenuhandler.h"
+#endif
 
 _LIT( KVcxHgMyVideosMifFile, "\\resource\\apps\\vcxhgmyvideosicons.mif" );
 
@@ -104,8 +106,10 @@ CVcxHgMyVideosVideoListImpl::CVcxHgMyVideosVideoListImpl(
         CHgScroller& aScroller )
   : CVcxHgMyVideosListBase( aModel, aView, aScroller ),
     iCurrentlyPlayedVideo( KErrNotFound ),
-    iMultipleMarkingActive( EFalse ),
-    iAiwMenuHandler( NULL )
+    iMultipleMarkingActive( EFalse )
+#ifdef RD_VIDEO_AS_RINGING_TONE
+    , iAiwMenuHandler( NULL )
+#endif
     {
     }
 
@@ -184,7 +188,9 @@ CVcxHgMyVideosVideoListImpl::~CVcxHgMyVideosVideoListImpl()
     delete iVideoCopier;
     delete iVideoModel;
     delete iSendUi;
+#ifdef RD_VIDEO_AS_RINGING_TONE
     delete iAiwMenuHandler;
+#endif
     }
 
 // -----------------------------------------------------------------------------
@@ -709,11 +715,13 @@ void CVcxHgMyVideosVideoListImpl::ShowResumeStartsFromBeginningNoteL()
 void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
                                                     CEikMenuPane* aMenuPane )
     {
+#ifdef RD_VIDEO_AS_RINGING_TONE
     if ( AiwMenuHandlerL()->TryHandleSubmenuL( aMenuPane ) )
         {
         // Submenu was initialized by Aiw
         return;
         }
+#endif
 
     RArray<TInt> markedVideos;
     CleanupClosePushL( markedVideos );
@@ -817,7 +825,11 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
                 {
                 // Place Send menu item on top of "Use as" (Assign) submenu
                 TInt sendItemIndex = 0;
+#ifdef RD_VIDEO_AS_RINGING_TONE                
                 aMenuPane->ItemAndPos( EVcxHgMyVideosCmdAiwAssign, sendItemIndex );
+#else
+                aMenuPane->ItemAndPos( EVcxHgMyVideosCmdSortSubMenu, sendItemIndex );
+#endif
                 // Add Send item to menu
                 TSendingCapabilities capabilities(
                     0,
@@ -837,6 +849,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             CleanupStack::PopAndDestroy( &operationTargets );
             }
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
         // Assign (use as) menu item
         if ( ( markedVideos.Count() == 0 ) &&
                 ( highlight >= 0 ) && ( count > 0 ) &&
@@ -849,6 +862,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             // Hide Assign (use as) menu item
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
             }
+#endif
 
         // Marking submenu
         if( count > 0 )
@@ -864,6 +878,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdSortSubMenu, ETrue );
             }
         }
+#ifdef RD_VIDEO_AS_RINGING_TONE
     else if ( aResourceId == R_VCXHGMYVIDEOS_USE_AS_SUBMENU )
         {
         RArray<TInt> operationTargets;
@@ -886,6 +901,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             }
         CleanupStack::PopAndDestroy( &operationTargets );
         }
+#endif
     CleanupStack::PopAndDestroy( &markedVideos );
     }
 
@@ -1121,6 +1137,7 @@ CSendUi* CVcxHgMyVideosVideoListImpl::SendUiL()
     return iSendUi;
     }
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
 // ---------------------------------------------------------------------------
 // CVcxHgMyVideosVideoListImpl::TryHandleAiwCommandL()
 // ---------------------------------------------------------------------------
@@ -1149,6 +1166,7 @@ void CVcxHgMyVideosVideoListImpl::TryHandleAiwCommandL( TInt aCommand )
         CleanupStack::PopAndDestroy( &operationTargets );
         }
     }
+#endif
 
 // ---------------------------------------------------------------------------
 // CVcxHgMyVideosVideoListImpl::IsMarking()
@@ -1165,6 +1183,7 @@ TBool CVcxHgMyVideosVideoListImpl::IsMarking()
     return ret;
     }
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
 // ---------------------------------------------------------------------------
 // CVcxHgMyVideosVideoListImpl::AiwMenuHandlerL()
 // ---------------------------------------------------------------------------
@@ -1178,3 +1197,4 @@ CHgMyVideosAiwMenuHandler* CVcxHgMyVideosVideoListImpl::AiwMenuHandlerL()
         }
     return iAiwMenuHandler;
     }
+#endif

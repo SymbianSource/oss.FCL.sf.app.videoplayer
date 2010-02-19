@@ -254,9 +254,8 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
         
         TInt highlight = iScroller.SelectedIndex();
         
-        // It is enough to reset scroll buffer only, not whole scroller
-        iScroller.DisableScrollBuffer();
-        iScroller.EnableScrollBufferL( *this, KHgBufferSize, KHgBufferTreshold );
+        iScroller.Reset();
+        iScroller.ResizeL( iVideoArray->VideoCount() );
         
         iScroller.SetSelectedIndex( highlight );
         
@@ -1363,12 +1362,20 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
         "MPX My Videos UI # NewVideoListL(count=%d) - Enter", aVideoList.Count() );
         
     ReplaceVideoArrayL( aVideoList );
-            
-    if ( iVideoArray->VideoCount() > 0 )
+    
+    TInt videoCount = iVideoArray->VideoCount();         
+    if (  videoCount > 0 )
         {
-        iScroller.Reset();
-        iScroller.ResizeL( iVideoArray->VideoCount() );               
-		
+        if ( videoCount == iScroller.ItemCount() )
+	        {
+            iScroller.DisableScrollBuffer();
+            iScroller.EnableScrollBufferL( *this, KHgBufferSize, KHgBufferTreshold );
+            }
+        else
+	        {
+            iScroller.ResizeL( videoCount );
+            }
+            		
         TInt highlight( KErrNotFound );
 		
         if ( iRestoreHighlightPosition )
@@ -1451,7 +1458,7 @@ void CVcxHgMyVideosVideoModelHandler::VideoModifiedL( TMPXChangeEventType aEvent
                     {                    
                     // Re-fetch current list completely, MMC card has 
                     // removed or inserted.
-                    iModel.CollectionClient().GetVideoListL( KErrNotFound );
+                    iModel.CollectionClient().GetVideoListL( iCurrentCategoryIndex );
                     }
                 }
             else
