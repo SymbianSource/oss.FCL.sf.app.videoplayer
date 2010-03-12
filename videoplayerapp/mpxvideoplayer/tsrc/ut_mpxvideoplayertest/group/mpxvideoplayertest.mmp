@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#9 %
+// Version : %version: 10 %
 
 
 #include <platform_paths.hrh>
@@ -44,12 +44,9 @@ SOURCE          mpxviewutilityimp_stub.cpp
 SOURCE          mpxvideoplayerappui_stub.cpp
 SOURCE          mpxcollectionutility_stub.cpp
 SOURCE          mpxcollectionutilityimp_stub.cpp
-SOURCE          commsdatabase_stub.cpp
-SOURCE          mpsettingsmodelimp_stub.cpp
 SOURCE          stifutilities.cpp
 SOURCE          coneutils_stub.cpp
 SOURCE          timeoutcontroller.cpp
-SOURCE          apstubs.cpp
 
 SOURCEPATH      ../../../src
 SOURCE          mpxvideoplayerappuiengine.cpp

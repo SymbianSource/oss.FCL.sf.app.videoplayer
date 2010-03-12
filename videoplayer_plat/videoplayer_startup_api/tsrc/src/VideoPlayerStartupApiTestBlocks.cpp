@@ -32,7 +32,6 @@
 
 #include "VideoPlayerStartupApiTest.h"
 #include "VCXTestLog.h"
-#include "VCXTestSmClient.h"
 #include "VCXTestMyVideosCollectionClient.h"
 
 // CONSTANTS
@@ -70,7 +69,7 @@ TInt CVideoPlayerStartupApiTest::RunMethodL(
         {  
         // Copy this line for every implemented function.
         // First string is the function name used in TestScripter script file.
-        // Second is the actual implementation member function. 
+        // Second is the actual implementation member function.
         ENTRY( "ActivationMessage", CVideoPlayerStartupApiTest::ActivationMessageL ),
         ENTRY( "KillFusion", CVideoPlayerStartupApiTest::KillFusionL ),
         //ADD NEW ENTRY HERE
@@ -118,7 +117,7 @@ TInt CVideoPlayerStartupApiTest::ActivationMessageL( CStifItemParser& aItem )
         // Refresh collection.
         iMyVideosCollectionClient->RefreshCollectionL();
         iMessageWait->AddMessage( EVCXTestVideoListRefreshed );
-        iMessageWait->WaitForAllL( 10, ETrue );    
+        iMessageWait->WaitForAllL( 10, ETrue );
         }
     
     if( iCollectionError != KErrNone )
@@ -207,7 +206,6 @@ TInt CVideoPlayerStartupApiTest::ActivationMessageL( CStifItemParser& aItem )
         case TVideoPlayerActivationMessage::ELaunchServiceById:
             {
             VCXLOGLO1("CVideoPlayerStartupApiTest:: msgType: ELaunchServiceById");
-            iSmClient->GetAnyServiceIdL( message.iServiceId );
             }
             break;
             

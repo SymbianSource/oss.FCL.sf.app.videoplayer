@@ -51,7 +51,8 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdSend,                   // Send video
     EVcxHgMyVideosCmdNothing,                // Non-functional command
     EVcxHgMyVideosCmdStartMarking,           // Sets marking mode on
-    EVcxHgMyVideosCmdStopMarking             // Sets marking mode off
+    EVcxHgMyVideosCmdStopMarking,             // Sets marking mode off
+    EVcxHgMyVideosCmdOpenSettings            // Opens Settings application
 #ifdef RD_VIDEO_AS_RINGING_TONE
     ,EVcxHgMyVideosCmdAiwBase = 800           // Base number for AIW commands
 #endif

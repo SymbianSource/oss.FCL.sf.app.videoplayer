@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#2 %
+// Version : %version: 3 %
 
 
 // INCLUDE FILES
@@ -28,63 +28,62 @@
 // ================= MEMBER FUNCTIONS ==============================================================
 
 // -------------------------------------------------------------------------------------------------
-// HAL::HAL()
+// CHWRMLight::CHWRMLight()
 // C++ default constructor can NOT contain any code, that
 // might leave.
 // -------------------------------------------------------------------------------------------------
 //
-HAL::HAL()
+CHWRMLight::CHWRMLight()
 {
 }
 
-
-// -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackControl::~CMPXVideoPlaybackControl()
-// Destructor.
-// -------------------------------------------------------------------------------------------------
-//
-HAL::~HAL()
+CHWRMLight::~CHWRMLight()
 {
-    MPX_DEBUG(_L("HAL::~HAL()"));
+    MPX_DEBUG(_L("CHWRMLight::~CHWRMLight()"));
 }
 
-// -------------------------------------------------------------------------------------------------
-// Gets the attribute value.
-// -------------------------------------------------------------------------------------------------
-//
-TInt HAL::Get( TAttribute aAttribute, TInt& aValue )
+CHWRMLight* CHWRMLight::NewL()
 {
-    switch ( aAttribute )
-    {
-        case EBacklightState:
-        {
-            aValue = iBacklightState;
-            break;
-        }
-        default:
-            break;
-    }
-    return KErrNone;
+    MPX_DEBUG(_L("CHWRMLight::NewL()"));
+
+    CHWRMLight* self = new (ELeave) CHWRMLight();
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop();
+
+    return self;
 }
 
-// -------------------------------------------------------------------------------------------------
-// From CCoeControl
-// Gets an indexed component of a compound control.
-// -------------------------------------------------------------------------------------------------
-//
-TInt HAL::Set( TAttribute aAttribute, TInt aValue )
+void CHWRMLight::ConstructL()
 {
-    switch ( aAttribute )
-    {
-        case EBacklightState:
-        {
-            iBacklightState =  aValue;
-            break;
-        }
-        default:
-            break;
-    }
-    return KErrNone;
+	 MPX_DEBUG(_L("CHWRMLight::ConstructL()"));
+}
+
+void CHWRMLight::ReserveLightL(TInt aTarget)
+{
+	MPX_DEBUG(_L("CHWRMLight::ReserveLightL()"));
+}
+
+void CHWRMLight::ReleaseLight(TInt aTarget)
+{
+	MPX_DEBUG(_L("CHWRMLight::ReleaseLight()"));
+}
+
+void CHWRMLight::LightOnL(TInt aTarget)
+{
+	MPX_DEBUG(_L("CHWRMLight::LightOnL()"));
+	iBacklightState = ELightOn;	
+}
+void CHWRMLight::LightOffL(TInt aTarget)
+{
+	MPX_DEBUG(_L("CHWRMLight::LightOffL()"));
+	iBacklightState = ELightOff;
+}
+
+TLightStatus CHWRMLight::LightStatus(TInt aTarget) const
+{
+	MPX_DEBUG(_L("CHWRMLight::LightStatus()"));
+	return iBacklightState;
 }
 
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 // INCLUDE FILES
@@ -43,8 +43,7 @@
 #else
 #include "mpxvideoplaybackcontainer.h"
 #include "mpxvideoplaybackcontrol.h"
-#include <hal.h>
-#include <hal_data.h>
+#include <hwrmlight.h> //light status
 #endif
 
 #include "mpxvideoplaybackcontrol.hrh"
@@ -104,6 +103,8 @@ void CMPXVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
 
     iTVOutConnected = aTvOutConnected;
 
+    iLight = CHWRMLight::NewL();
+
     // Start the timer if TV out is connected
     if ( iTVOutConnected )
     {
@@ -158,6 +159,11 @@ CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
     // the view updates or deactivates
     EnableBacklight();
 
+    if ( iLight )
+    {
+        delete iLight;
+        iLight = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -612,7 +618,11 @@ void CMPXVideoPlaybackUserInputHandler::DisableBacklight()
     iDisplayTimer->Cancel();
 
     // disable the backlight
-    HAL::Set( HALData::EBacklightState, 0 );
+    MPX_TRAPD( err, 
+    {
+        iLight->ReserveLightL( CHWRMLight::EPrimaryDisplay );
+        iLight->LightOffL( CHWRMLight::EPrimaryDisplay );
+    } );
 }
 
 // -----------------------------------------------------------------------------
@@ -624,7 +634,11 @@ void CMPXVideoPlaybackUserInputHandler::EnableBacklight()
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::EnableBacklight"));
 
     // enable the backlight
-    HAL::Set( HALData::EBacklightState, 1 );
+    MPX_TRAPD( err,
+    {
+        iLight->LightOnL( CHWRMLight::EPrimaryDisplay );
+        iLight->ReleaseLight(CHWRMLight::EPrimaryDisplay );
+    } );
 }
 
 
@@ -691,11 +705,8 @@ void CMPXVideoPlaybackUserInputHandler::RestartDisplayTimer()
     {
         // timeout has happened and the backlight is disabled
         // enable the backlight
-        HAL::Set( HALData::EBacklightState, 1 );
+        EnableBacklight();
     }
-
-    TBool backlightState;
-    TInt ret = HAL::Get( HALData::EBacklightState, backlightState );
 
     // Re start the display backlight timer
     iDisplayTimer->Start( iDisplayTimeOut, iDisplayTimeOut,

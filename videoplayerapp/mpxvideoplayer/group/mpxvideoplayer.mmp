@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 27 %
+// Version : %version: da1mmcf#28 %
 
 #include <platform_paths.hrh>
 #include <data_caging_paths.hrh>
@@ -73,15 +73,7 @@ LIBRARY         servicehandler.lib
 LIBRARY         commonengine.lib
 LIBRARY         estor.lib
 LIBRARY         apgrfx.lib
-LIBRARY         cmmanager.lib
-LIBRARY         commsdat.lib
-LIBRARY         mpsettengine.lib
 LIBRARY         playbackhelper.lib
-LIBRARY         esock.lib
-LIBRARY         extendedconnpref.lib
-LIBRARY         netmeta.lib
-LIBRARY         commdb.lib
-
 LIBRARY         mpxviewutility.lib      // MPX view utility
 LIBRARY         mpxplaybackutility.lib    // MPX playback utility
 LIBRARY         mpxcollectionutility.lib

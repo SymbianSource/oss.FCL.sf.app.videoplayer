@@ -34,7 +34,6 @@ class TViaPlayerCustomMessage;
 class CAknWaitDialog;
 class CVcxHgMyVideosVideoCopier;
 class CVcxHgMyVideosUPnPInterface;
-class CVcxHgTelephonyClient;
 class CHgScroller;
 class CSendUi;
 class CDRMHelper;
@@ -375,14 +374,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
         void CloseDeleteWaitNote();
         
         /**
-         * Checks parental control for a video, and asks lock code.
-         *
-         * @leave KErrPermissionDenied If not allowed to play.
-         * @param aAgeProfile Age profile for the video to be checked.
-         */
-        void CheckParentalControlL( TUint32 aAgeProfile );
-        
-        /**
          * Fetch SendUI messaging configuration from CenRep
          * 
          * @return Messaging configuration from CenRep
@@ -415,11 +406,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
         CVcxHgMyVideosVideoModelHandler* iVideoModel;    
         
         /**
-         * Index of video currently in play.
-         */
-        TInt iCurrentlyPlayedVideo;
-        
-        /**
          * Delete wait dialog.
          * Own.
          */
@@ -436,23 +422,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          * Own.
          */
         CVcxHgMyVideosUPnPInterface* iUPnP;
-        
-        /**
-         * Central repository access needed for parental control setting.
-         * Own.
-         */
-        CRepository* iCenRep;
-        
-        /**
-         * Telephony client, used for asking lock code from user.
-		 * Own.
-         */
-        CVcxHgTelephonyClient* iTelephonyClient;
-        
-        /**
-         * Flag for marking mode. True when marking mode enabled.
-         */
-        TBool iMultipleMarkingActive;
 
         /**
          * SendUI

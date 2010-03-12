@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -37,7 +37,6 @@ const TUid KMPSettMainViewId = {1};
 const TUid KMPSettVideoViewId = {2};
 const TUid KMPSettAudioViewId = {3};
 const TUid KMPSettStreamingViewId = {4};
-const TUid KMPSettFeedsViewId = {5};
 
 // UIDs for subviews
 const TUid KMPSettProxyViewId = {11};

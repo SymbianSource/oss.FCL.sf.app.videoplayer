@@ -40,10 +40,10 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoData ) :
         enum TVideoDataState
             {
             EVideoDataStateNone = 0,
+            EVideoDataStateThumbnailPeekStarted,
+            EVideoDataStateThumbnailPeekFinished,
             EVideoDataStateThumbnailStarted,
-            EVideoDataStateThumbnailFinished,
-            EVideoDataStateDrmStarted,
-            EVideoDataStateDrmFinished
+            EVideoDataStateThumbnailFinished
             };
 
     public:

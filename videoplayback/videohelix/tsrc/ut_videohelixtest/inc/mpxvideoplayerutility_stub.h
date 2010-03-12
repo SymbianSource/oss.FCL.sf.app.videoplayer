@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -110,6 +110,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         void AddStifObserver( MStifTestObserver* aStifObserver );
 
         void SetVolumeSteps( TInt aVolumeSteps );
+
+        void SurfaceRemovedFromView();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         void OpenFile64L( const RFile64& aFile );

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#10 %
+// Version : %version: ou1cpsw#13 %
 
 #ifndef MPXVIDEOPLAYER_APPUIENGINETESTER_H_
 #define MPXVIDEOPLAYER_APPUIENGINETESTER_H_
@@ -110,20 +110,16 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         TInt CreateGenericParametersTerminateL();
         TInt OpenFileL( CStifItemParser& aItem );
         TInt OpenMediaL( CStifItemParser& aItem );
-        TInt SetDefaultAccessPointL( CStifItemParser& aItem );
-        TInt SetQueryAccessPointL( CStifItemParser& aItem );
         TInt SetGenericParamAccessPointL( CStifItemParser& aItem );
         TInt OpenFileEmbeddedPdlL( CStifItemParser& aItem );
         TInt HandleMessageEmbeddedPdlL( CStifItemParser& aItem );
         TInt HandleMessageActivationMessageL( CStifItemParser& aItem );
-        TInt PrepareCloseMpxL( CStifItemParser& aItem );
         TInt StartStandAloneL( CStifItemParser& aItem );
         TInt HandleCollectionMessageL( CStifItemParser& aItem );
         TInt HandleCollectionMediaL( CStifItemParser& aItem );
         TInt HandleSoftkeyBackL( CStifItemParser& aItem );
         TInt HandleOpenPlaylistL( CStifItemParser& aItem );
         TInt HandleOpenMediaL( CStifItemParser& aItem );
-        TInt ProcessActivationMessageL( CStifItemParser& aItem );
         TInt HandleViewActivation( CStifItemParser& aItem );
         TInt ProcessCommandParametersL( CStifItemParser& aItem );
         TInt GetViewDepthL( CStifItemParser& aItem );
@@ -147,8 +143,6 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         void AddEmbeddedPdlCallbacksL( TInt aDownloadId, TDesC& aFileName );
         void AddMessagePdlCallbacksL( TInt aNewFile, TInt aDownloadId, TDesC& aFileName );
 
-        void WriteAccessPointL( const TDesC& aFileName, TInt aApId );
-
         CMPXMessage* CreateMpxMessageLC( TInt aEvent, TInt aType, TInt aData );
 
         void AddLocalFileCallbacksL( TDesC& aFileName,  TBool aUseFileHandle );
@@ -165,8 +159,6 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         TFileName GetFileNameAndPathL( CStifItemParser& aItem );
 
         void AddCollectionMediaPdlCallbacksL( TInt aDownloadId, TDesC& aFileName );
-
-        void CleanupTempFiles();
 
     private:
 

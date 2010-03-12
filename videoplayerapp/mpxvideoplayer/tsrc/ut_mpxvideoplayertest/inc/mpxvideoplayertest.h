@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#7 %
+// Version : %version: ou1cpsw#10 %
 
 #ifndef MPXVIDEOPLAYER_TEST_H
 #define MPXVIDEOPLAYER_TEST_H
@@ -115,19 +115,15 @@ NONSHARABLE_CLASS(Cmpxvideoplayer_test) : public CScriptBase
         virtual TInt CreateGenericParametersTerminateL();
         virtual TInt OpenFileL( CStifItemParser& aItem );
         virtual TInt OpenMediaL( CStifItemParser& aItem );
-        virtual TInt SetDefaultAccessPointL( CStifItemParser& aItem );
-        virtual TInt SetQueryAccessPointL( CStifItemParser& aItem );
         virtual TInt SetGenericParamAccessPointL( CStifItemParser& aItem );
         virtual TInt OpenFileEmbeddedPdlL( CStifItemParser& aItem );
         virtual TInt HandleMessageEmbeddedPdlL( CStifItemParser& aItem );
-        virtual TInt PrepareCloseMpxL( CStifItemParser& aItem );
         virtual TInt StartStandAloneL( CStifItemParser& aItem );
         virtual TInt HandleCollectionMessageL( CStifItemParser& aItem );
         virtual TInt HandleCollectionMediaL( CStifItemParser& aItem );
         virtual TInt HandleSoftkeyBackL( CStifItemParser& aItem );
         virtual TInt HandleOpenPlaylistL( CStifItemParser& aItem );
         virtual TInt HandleOpenMediaL( CStifItemParser& aItem );
-        virtual TInt ProcessActivationMessageL( CStifItemParser& aItem );
         virtual TInt HandleViewActivation( CStifItemParser& aItem );
         virtual TInt ProcessCommandParametersL( CStifItemParser& aItem );
         virtual TInt HandleMessageActivationMessageL( CStifItemParser& aItem );

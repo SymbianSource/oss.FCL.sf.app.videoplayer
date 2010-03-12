@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: TB92_24.1.1 %
+// Version : %version: e92_30 %
 
 #include <platform_paths.hrh>
 #include <bldvariant.hrh>
@@ -53,15 +53,17 @@ SOURCE                  vcxhgmyvideosvideodetailsdialog.cpp
 SOURCE                  vcxhgmyvideosvideolist.cpp
 SOURCE                  vcxhgmyvideosvideocopier.cpp
 SOURCE                  vcxhgmyvideosupnpinterface.cpp
-SOURCE                  vcxhgtelephonyclient.cpp
 #ifdef RD_VIDEO_AS_RINGING_TONE 
 SOURCE                  vcxhgmyvideosaiwmenuhandler.cpp
 #endif
+SOURCE                  vcxhgmyvideosthumbnailmanager.cpp
+SOURCE                  CIptvResourceLoader.cpp
+SOURCE                  CIptvDriveMonitor.cpp
+SOURCE                  TIptvDriveInfo.cpp
+SOURCE                  TIptvDriveMonitorEvent.cpp
 
 USERINCLUDE             ../inc
 USERINCLUDE    ../../../inc
-USERINCLUDE    ../../../videofeeds/utils/inc
-USERINCLUDE    ../../../videofeeds/viewmessageutility/inc
 
 APP_LAYER_SYSTEMINCLUDE
 
@@ -84,36 +86,18 @@ LIBRARY                 eikcore.lib
 LIBRARY                 egul.lib 
 LIBRARY                 avkon.lib
 LIBRARY                 aknicon.lib         
-LIBRARY                 aknlayout.lib
-LIBRARY                 aknlayout2.lib
-LIBRARY                 aknlayout2scalable.lib
 LIBRARY                 bafl.lib                  // CDesCArray 
 LIBRARY                 commonengine.lib          // String loader
 LIBRARY                 flogger.lib               // RFileLogger
 LIBRARY                 hlplch.lib                // HlpLauncher
 LIBRARY                 efsrv.lib
-LIBRARY                 mediaclientvideo.lib      // S60 video player
-LIBRARY                 ws32.lib                  // RBlankWindow
-LIBRARY                 apmime.lib                // TDataType
-LIBRARY                 fbscli.lib                // CFbsBitmap
-LIBRARY                 bitgdi.lib                // CFbsBitmapDevice
+LIBRARY                 ws32.lib                  // RWsSession
 LIBRARY                 estor.lib
-LIBRARY                 form.lib                  // CTextView
-LIBRARY                 fepbase.lib               // MCoeFepObserver
-LIBRARY                 mediatorclient.lib
 LIBRARY                 aknskins.lib
-LIBRARY                 aknskinsrv.lib
-LIBRARY                 aknswallpaperutils.lib 
-LIBRARY                 charconv.lib              // CnvUtfConverter
-LIBRARY                 etel.lib                  // RTelServer
-LIBRARY                 etelmm.lib                // RMobilePhone
-LIBRARY                 secui.lib                 // CSecurityHandler
 LIBRARY                 mpxcommon.lib             // MPX
 LIBRARY                 mpxcollectionutility.lib  // MPX
-LIBRARY                 iptvutil.lib              // Iptv Resource Loader
 LIBRARY                 commondialogs.lib         // Memory selection dialog
 LIBRARY                 drmhelper.lib             // DRM
-LIBRARY                 featmgr.lib               // Feature manager
 LIBRARY                 centralrepository.lib	  // Upnp
 LIBRARY                 thumbnailmanager.lib      // CThumbnailManager
 LIBRARY                 caf.lib                   // CAF
@@ -121,13 +105,12 @@ LIBRARY                 cafutils.lib              // CAF Utils
 LIBRARY                 sendui.lib                // For send video
 LIBRARY                 drmutility.lib            // DRM
 LIBRARY                 playbackhelper.lib        // Recognizer
-LIBRARY                 mpxplaybackutility.lib    // MPX playback utility
-LIBRARY                 mpxviewutility.lib
-LIBRARY                 mpfiledetailsdialog.lib
-LIBRARY                 vcxviewmessageutility.lib // CVcxViewMessageUtility
 LIBRARY                 upnpcommand.lib
 LIBRARY                 ganes.lib                 // for HgList
 LIBRARY                 ecom.lib
+LIBRARY                 apgrfx.lib                // RApaLsSession
 #ifdef RD_VIDEO_AS_RINGING_TONE
 LIBRARY                 servicehandler.lib        // AIW Service Handler
 #endif
+LIBRARY                 platformenv.lib
+LIBRARY                 fbscli.lib                // CFbsBitmap

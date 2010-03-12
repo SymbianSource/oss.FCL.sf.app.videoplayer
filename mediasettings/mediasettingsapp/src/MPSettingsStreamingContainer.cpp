@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -27,6 +27,7 @@
 
 #include    "MPSettingsApp.h"
 #include    "MPSettingsStreamingContainer.h"
+#include    "MPSettingsStreamingSettingItemList.h"
 #include    "MPSettingsConstants.h"
 #include	"mpxlog.h"
 
@@ -52,10 +53,8 @@ CMPSettingsStreamingContainer::CMPSettingsStreamingContainer(CMPSettingsModelFor
 CMPSettingsStreamingContainer::~CMPSettingsStreamingContainer()
     {
     MPX_DEBUG1(_L("#MS# CMPSettingsStreamingContainer::~CMPSettingsStreamingContainer()"));
-	if (iListBox) 
-		{
-		delete iListBox;
-		}
+
+    delete iSettingList;
     }
 
 // ---------------------------------------------------------
@@ -65,19 +64,13 @@ CMPSettingsStreamingContainer::~CMPSettingsStreamingContainer()
 void CMPSettingsStreamingContainer::ConstructComponentControlsL()
     {
     MPX_FUNC("#MS# CMPSettingsStreamingContainer::ConstructComponentControlsL()");
-    iListBox = new(ELeave) CAknSettingStyleListBox;
-   
-    iListBox->SetContainerWindowL(*this); // set's iListBox to be contained in this container
-
-    TResourceReader rReader;
-    iCoeEnv->Static()->CreateResourceReaderLC(rReader, R_MPSETT_STREAMING_LBX_RESOURCE);
-    iListBox->ConstructFromResourceL(rReader); // construct's iListBox from resource file
-    CleanupStack::PopAndDestroy(); // rReader
     
-    iListBox->CreateScrollBarFrameL(ETrue);
-    iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
+    iSettingList = new(ELeave) CMPSettingsStreamingSettingItemList( iModel );
+    iSettingList->SetContainerWindowL( *this );
+    iSettingList->ConstructFromResourceL( R_MPSETT_STREAMING_SETTING_ITEM_LIST );
 
-    iComponentControl = iListBox;
+    iComponentControl = iSettingList;
+    iListBox = iSettingList->ListBox();
     }
 
 // ---------------------------------------------------------
@@ -105,7 +98,7 @@ void CMPSettingsStreamingContainer::GetHelpContext(TCoeHelpContext& aContext) co
 // ---------------------------------------------------------
 //
 void CMPSettingsStreamingContainer::FocusChanged(TDrawNow /*aDrawNow*/)
-{
+    {
 	if( iListBox)
         {
         iListBox->SetFocus( IsFocused() );
@@ -115,5 +108,16 @@ void CMPSettingsStreamingContainer::FocusChanged(TDrawNow /*aDrawNow*/)
         {
         iComponentControl->SetFocus( IsFocused() );
         }
-}
+    }
+
+// ---------------------------------------------------------
+// CMPSettingsStreamingContainer::EditCurrentItemFromMenuL
+// ---------------------------------------------------------
+//
+void CMPSettingsStreamingContainer::EditCurrentItemFromMenuL(TBool iMenuOption)
+    {
+    MPX_DEBUG2(_L("#MS# CMPSettingsProxyContainer::EditCurrentItemFromMenuL(%d)"),iMenuOption);
+    TInt index = iListBox->CurrentItemIndex();
+    iSettingList->EditItemL(index, iMenuOption);
+    }
 // End of File  

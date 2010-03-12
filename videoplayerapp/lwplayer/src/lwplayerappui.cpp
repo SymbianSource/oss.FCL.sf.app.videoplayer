@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 #include <DocumentHandler.h>
@@ -208,14 +208,14 @@ void CLWPlayerAppUi::ExtractGenericParamsL( const TDesC8& aParams )
 
         MPX_DEBUG(_L("    filename = %S"), &fileName);
 
-        if ( !iEmbeddedMPCreated )
+        if ( ! iEmbeddedMPCreated )
         {
             //
             //  Launch the Media Player for ProgDL playback
             //  Ignore the errors since the Media Player is
             //  responsible for all error messages once launched.
             //
-            TRAPD( err, LaunchMediaPlayerL( fileName, genParList ) );
+            MPX_TRAPD( err, LaunchMediaPlayerL( fileName, genParList ) );
 
             if ( err != KErrNone )
             {
@@ -232,8 +232,8 @@ TInt
 CLWPlayerAppUi::LaunchMediaPlayerL( const TDesC& afilename,
                                     const CAiwGenericParamList* aparamList )
 {
-    MPX_DEBUG(_L("CLWPlayerAppUi::LaunchMediaPlayerL(%S)"), &afilename);
-
+    MPX_ENTER_EXIT(_L("CLWPlayerAppUi::LaunchMediaPlayerL()"),
+                   _L("afilename = %S"), &afilename );
 
     //
     //  The download manager has already performed recognition on the file
@@ -250,7 +250,7 @@ CLWPlayerAppUi::LaunchMediaPlayerL( const TDesC& afilename,
     //  Call the document handler to open the file
     //  It will leave if the filename is not present
     //
-    TRAPD( err, handler.OpenTempFileL( afilename, file ));
+    MPX_TRAPD( err, handler.OpenTempFileL( afilename, file ));
 
     if ( err == KErrNotFound )
     {
@@ -264,7 +264,7 @@ CLWPlayerAppUi::LaunchMediaPlayerL( const TDesC& afilename,
     {
         CleanupClosePushL( file );
 
-        TRAPD( err, handler.OpenFileEmbeddedL( file, datatype, *aparamList ) );
+        MPX_TRAPD( err, handler.OpenFileEmbeddedL( file, datatype, *aparamList ) );
 
         //
         //  ignore some document handler errors

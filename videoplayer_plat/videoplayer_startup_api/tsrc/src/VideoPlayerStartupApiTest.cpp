@@ -21,7 +21,6 @@
 #include <SettingServerClient.h>
 
 #include "VideoPlayerStartupApiTest.h"
-#include "VCXTestSmClient.h"
 
 // EXTERNAL DATA STRUCTURES
 //extern  ?external_data;
@@ -131,8 +130,6 @@ void CVideoPlayerStartupApiTest::ConstructL()
                           CStifLogger::ETxt,
                           CStifLogger::EFile,
                           EFalse );
-    
-    iSmClient = CVCXTestSmClient::NewL();
         
     SendTestClassVersion();
     }
@@ -164,9 +161,6 @@ CVideoPlayerStartupApiTest::~CVideoPlayerStartupApiTest()
 
     // Delete logger
     delete iLog; 
-    
-    delete iSmClient;
-    iSmClient = NULL;
     }
 
 //-----------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 #include <data_caging_paths.hrh>
 #include <bldvariant.hrh>
@@ -41,8 +41,6 @@ END // RESOURCE
 USERINCLUDE     ../inc 
 USERINCLUDE     ../../hgmyvideos/inc
 USERINCLUDE     ../../../inc    
-USERINCLUDE     ../../../videofeeds/utils/inc
-USERINCLUDE     ../../../videofeeds/viewmessageutility/inc
 
 APP_LAYER_SYSTEMINCLUDE
 

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 8 %
 
 
 
@@ -41,8 +41,11 @@ class CMPSettingsModelForROP;
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CMPSettingsAdvancedBwView::CMPSettingsAdvancedBwView(CMPSettingsModelForROP* aModel, TBool iConstructAsGsPlugin) 
-    : iModel( aModel), iGsPlugin(iConstructAsGsPlugin)
+CMPSettingsAdvancedBwView::CMPSettingsAdvancedBwView( 
+        CMPSettingsModelForROP* aModel,
+        TBool iConstructAsGsPlugin ) 
+    : iModel( aModel), 
+      iGsPlugin(iConstructAsGsPlugin)
     {
     MPX_FUNC("#MS# CMPSettingsAdvancedBwView::CMPSettingsAdvancedBwView()");
     }
@@ -63,7 +66,9 @@ void CMPSettingsAdvancedBwView::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CMPSettingsAdvancedBwView* CMPSettingsAdvancedBwView::NewLC(CMPSettingsModelForROP* aModel, TBool iConstructAsGsPlugin)
+CMPSettingsAdvancedBwView* CMPSettingsAdvancedBwView::NewLC(
+        CMPSettingsModelForROP* aModel, 
+        TBool iConstructAsGsPlugin )
     {
     MPX_DEBUG2(_L("#MS# CMPSettingsAdvancedBwView::NewLC(%d)"),iConstructAsGsPlugin);
     CMPSettingsAdvancedBwView* self = new(ELeave) CMPSettingsAdvancedBwView(aModel,iConstructAsGsPlugin);
@@ -107,13 +112,13 @@ void CMPSettingsAdvancedBwView::HandleCommandL(TInt aCommand)
             static_cast<CMPSettingsAdvancedBwContainer*>(iContainer)->EditCurrentItemFromMenuL();
             break;
         case EAknSoftkeyBack:
-            AppUi()->ActivateLocalViewL(KMPSettNetworkViewId);
+            AppUi()->ActivateLocalViewL( KMPSettStreamingViewId );
             break;
         case EMPSettCmdHelp:
             if( FeatureManager::FeatureSupported( KFeatureIdHelp ) )
-            {
+                {
                 HlpLauncher::LaunchHelpApplicationL(iEikonEnv->WsSession(), AppUi()->AppHelpContextL() );
-            }
+                }
             break;
         default:
             AppUi()->HandleCommandL(aCommand);
@@ -139,10 +144,10 @@ CMPSettingsBaseContainer* CMPSettingsAdvancedBwView::NewContainerL()
 void CMPSettingsAdvancedBwView::SetNaviPaneL()
     {
     MPX_FUNC("#MS# CMPSettingsAdvancedBwView::SetNaviPaneL()");
-        if (!iGsPlugin)
+    if (!iGsPlugin)
         {
-            iNaviPaneContext = NULL;
-            CMPSettingsBaseView::SetNaviPaneL();
+        iNaviPaneContext = NULL;
+        CMPSettingsBaseView::SetNaviPaneL();
         }
     CMPSettingsBaseView::SetMiddleSoftKeyLabelL(R_MEDIASETTING_MSK_CHANGE,EMPSettCmdChange);
     }

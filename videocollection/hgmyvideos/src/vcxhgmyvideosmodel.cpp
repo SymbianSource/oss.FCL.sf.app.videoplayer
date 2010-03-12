@@ -22,16 +22,12 @@
 #include <AknUtils.h>
 #include <centralrepository.h>
 #include "IptvDebug.h"
-#include <MediatorEventProvider.h>
-#include "iptvlastwatcheddata.h"
-#include "iptvlastwatchedapi.h"
 #include "vcxhgmyvideosmodel.h"
 #include "vcxhgmyvideoscollectionclient.h"
 #include "vcxhgmyvideosdownloadclient.h"
-#include "vcxnsmediatorids.h"
 #include "thumbnaildata.h"
-
-_LIT( KTemporaryThumbPath, "C:\\Data\\videocenter\\ecg\\lastwatched.bmp" ); 
+#include "vcxhgmyvideoscenrepkeys.h"
+#include "vcxhgmyvideosthumbnailmanager.h"
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -42,7 +38,6 @@ _LIT( KTemporaryThumbPath, "C:\\Data\\videocenter\\ecg\\lastwatched.bmp" );
 CVcxHgMyVideosModel::CVcxHgMyVideosModel()
   : iAppState( EVcxMyVideosAppStateUnknown ),
     iPreviousAppState( EVcxMyVideosAppStateUnknown ),
-    iTnRequestId( KErrNotFound ),
     iSortOrder( EVcxMyVideosSortingNone )
     {
     }
@@ -80,7 +75,8 @@ void CVcxHgMyVideosModel::ConstructL()
     {
     iCollection = CVcxHgMyVideosCollectionClient::NewL();
     iTouchSupport = AknLayoutUtils::PenEnabled();
-    iMediatorEventProvider = CMediatorEventProvider::NewL();
+    iTnManager = CVcxHgMyVideosThumbnailManager::NewL();
+    InitMyVideosCenRepL();
     }
 
 // -----------------------------------------------------------------------------
@@ -96,16 +92,8 @@ CVcxHgMyVideosModel::~CVcxHgMyVideosModel()
     delete iDriveMonitor;
     delete iCollection;
     delete iCollectionCenRep;
-    delete iLastWatchedApi;
-    delete iLastWatchedData;
-    delete iVideoPlayerCustomMessage;
-
-    if ( iTnManager && iTnRequestId != KErrNotFound )
-        {
-        iTnManager->CancelRequest( iTnRequestId );
-        }
+    delete iMyVideosCenRep;
     delete iTnManager;
-    delete iMediatorEventProvider;
     }
 
 // -----------------------------------------------------------------------------
@@ -143,7 +131,17 @@ RFs& CVcxHgMyVideosModel::FileServerSessionL()
     {
     if ( ! iFsSession.Handle() )
         {
-        User::LeaveIfError( iFsSession.Connect() );
+        TInt err = iFsSession.Connect();
+        if ( err == KErrNone )
+            {
+            // For sending handles to thumbnailmanager
+            err = iFsSession.ShareProtected();
+            }
+        if ( err != KErrNone )
+            {
+            iFsSession.Close();
+            User::Leave( err );
+            }
         }
 
     return iFsSession;
@@ -211,6 +209,20 @@ void CVcxHgMyVideosModel::SetVideolistSortOrderL( TVcxMyVideosSortingOrder aSort
     }
 
 // -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetLastWatchedIdL()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetLastWatchedIdL( TInt& aId )
+    {
+    if ( ! iCollectionCenRep )
+        {
+        iCollectionCenRep = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+        }
+
+    return iCollectionCenRep->Get( KVcxMyVideosCollectionCenrepKeyLastWatchedMpxId, aId );
+    }
+
+// -----------------------------------------------------------------------------
 // CVcxHgMyVideosModel::VideolistSortOrderL()
 // -----------------------------------------------------------------------------
 //
@@ -275,222 +287,12 @@ CVcxHgMyVideosModel::TVcxScreenResolution CVcxHgMyVideosModel::GetScreenResoluti
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::SetVideoAsLastWatchedL()
+// CVcxHgMyVideosModel::ThumbnailManager()
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosModel::SetVideoAsLastWatchedL( TVideoPlayerCustomMessage& aVideoInfo, 
-                                                  TInt aMpxId1,
-                                                  TUint32 aAgeProfile )
+CVcxHgMyVideosThumbnailManager& CVcxHgMyVideosModel::ThumbnailManager() const
     {
-    if ( iTnRequestId != KErrNotFound )
-        {
-        ThumbnailManagerL()->CancelRequest( iTnRequestId );
-        iTnRequestId = KErrNotFound;
-        }
-
-    CopyVideoPlayerCustomMessageL( aVideoInfo, *VideoPlayerCustomMessageL() );
-    
-    // Store data from Video Player Custom message to 'Last Watched' item on 
-    // disk. Un-used (legacy) data fields are resetted to dummy values.
-    
-    LastWatchedDataL()->SetIconPathL( VideoPlayerCustomMessageL()->iIcon );
-    /*
-    LastWatchedDataL()->SetLastVideoPlayPoint( ViaPlayerCustomMessageL()->iStartPosition ); 
-    LastWatchedDataL()->SetMimeTypeL( ViaPlayerCustomMessageL()->iMimeType ); 
-    */
-    
-    LastWatchedDataL()->SetNameL( VideoPlayerCustomMessageL()->iName );
-    LastWatchedDataL()->SetUriL( VideoPlayerCustomMessageL()->iContent ); 
-    
-	// LastWatchedDataL()->SetContentType( ViaPlayerCustomMessageL()->iContentType );
-        
-    LastWatchedDataL()->SetMpxId( aMpxId1 );
-    LastWatchedDataL()->SetServiceId( KIdUndefined );
-    LastWatchedDataL()->SetContentId( KIdUndefined );
-    LastWatchedDataL()->SetContentIndex( -1 );    
-    LastWatchedDataL()->SetParentalControl( aAgeProfile );
-    LastWatchedDataL()->SetParametersL( KNullDesC8 );
-    LastWatchedDataL()->SetAppUid( TUid::Uid( 0 ) );
-    LastWatchedDataL()->SetViewUid( TUid::Uid( 0 ) );
-    LastWatchedDataL()->SetParameterId( TUid::Uid( 0 ) );
-    LastWatchedDataL()->SetLaunchType( CIptvLastWatchedData::EUndefined );
-    
-    // Start fetching or generating thumbnail for last watched video.
-    // The 'Last Watched' data is published only when thumb is available.
-    CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
-        VideoPlayerCustomMessageL()->iContent, 
-        KNullDesC ); 
-    iTnRequestId = ThumbnailManagerL()->GetThumbnailL( *source );
-    CleanupStack::PopAndDestroy( source );    
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::UpdateLastWatchedPlayPositionL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::UpdateLastWatchedPlayPositionL( TUint32 aLastVideoPlayPoint )
-    {
-    if ( iTnRequestId != KErrNotFound )
-        {
-        LastWatchedDataL()->SetLastVideoPlayPoint( aLastVideoPlayPoint );
-        }
-    else
-        {
-        LastWatchedApiL()->UpdateLastVideoPlayPointL( aLastVideoPlayPoint );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::GetLastWatchedDataL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::GetLastWatchedDataL( TVideoPlayerCustomMessage& aVideoInfo,
-                                               TUint32& /*aMpxId1 */,
-                                               TUint32& aAgeProfile )
-    {
-    LastWatchedApiL()->GetLastWatchedDataL( *LastWatchedDataL() );
-
-    aVideoInfo.iContent = LastWatchedDataL()->Uri();
-    aVideoInfo.iName = LastWatchedDataL()->Name();
-    aVideoInfo.iIcon = LastWatchedDataL()->IconPath();
-    
-    aAgeProfile = LastWatchedDataL()->ParentalControl();
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::ThumbnailPreviewReady()
-// From MThumbnailManagerObserver, not used in Video Center.
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::ThumbnailPreviewReady( MThumbnailData& /*aThumbnail*/, 
-                                                 TThumbnailRequestId /*aId*/ )
-    {
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::ThumbnailReady()
-// From MThumbnailManagerObserver
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::ThumbnailReady( TInt aError,
-                                          MThumbnailData& aThumbnail,
-                                          TThumbnailRequestId aId )
-    {
-    TRAP_IGNORE( HandleThumbnailReadyL( aError, aThumbnail, aId ) );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::HandleThumbnailReadyL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::HandleThumbnailReadyL( TInt aError,
-                                                 MThumbnailData& aThumbnail,
-                                                 TThumbnailRequestId aId )
-    {
-    IPTVLOGSTRING3_LOW_LEVEL(
-        "MPX My Videos UI # HandleThumbnailReadyL(error=%d, ID=%d)", aError, aId );
-
-    if ( aError == KErrNone && aId == iTnRequestId )
-        {
-        iTnRequestId = KErrNotFound;
-
-        // Save a copy of the bitmap to local file that Matrix Menu can access.
-        CFbsBitmap* bitmap = aThumbnail.Bitmap();
-        bitmap->Save( KTemporaryThumbPath );
-        LastWatchedDataL()->SetIconPathL( KTemporaryThumbPath );
-        VideoPlayerCustomMessageL()->iIcon = KTemporaryThumbPath;
-        }
-    else
-        {
-        iTnRequestId = KErrNotFound;
-        }
-
-    LastWatchedApiL()->SetLastWatchedDataL( *LastWatchedDataL() );
-    TPckg<TVideoPlayerCustomMessage> videoInfoPckg( *VideoPlayerCustomMessageL() );
-    iMediatorEventProvider->RaiseEvent( KVcxNsVideoCenterMediatorDomain,
-                                        KVcxNsPlayerGeneralCategory,
-                                        KVcxNsMediatorEventPlayerLastWatch,
-                                        TVersion( KVcxNsMediatorPlayerVersion, 0, 0 ),
-                                        videoInfoPckg );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::ResetDownloadNotification()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::ResetDownloadNotification()
-    {
-    iMediatorEventProvider->RaiseEvent( TUid::Uid( KVcxNsMpxMediatorDomain ),
-                                        TUid::Uid( KVcxNsMpxMediatorCategory ), 
-                                        KVcxNsMpxEventResetDownloadNotification,
-                                        TVersion( KVcxNsMpxEventVersion, 0, 0 ),
-                                        KNullDesC8() ); 
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::ThumbnailManagerL()
-// -----------------------------------------------------------------------------
-//
-CThumbnailManager* CVcxHgMyVideosModel::ThumbnailManagerL()
-    {
-    if ( ! iTnManager )
-        {
-        iTnManager = CThumbnailManager::NewL( *this );
-        iTnManager->SetThumbnailSizeL( EVideoListThumbnailSize );
-        iTnManager->SetDisplayModeL( EColor16M );
-        }
-    return iTnManager;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::CopyVideoPlayerCustomMessageL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosModel::CopyVideoPlayerCustomMessageL( TVideoPlayerCustomMessage& aSource,
-                                                         TVideoPlayerCustomMessage& aTarget )
-    {
-    aTarget.iContent = aSource.iContent;
-    aTarget.iName = aSource.iName;
-    aTarget.iIcon = aSource.iIcon;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::VideoPlayerCustomMessageL()
-// -----------------------------------------------------------------------------
-//
-TVideoPlayerCustomMessage* CVcxHgMyVideosModel::VideoPlayerCustomMessageL()
-    {
-    if ( ! iVideoPlayerCustomMessage ) 
-        {
-        iVideoPlayerCustomMessage = new (ELeave) TVideoPlayerCustomMessage;
-        }
-    return iVideoPlayerCustomMessage;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::LastWatchedApiL()
-// -----------------------------------------------------------------------------
-//
-CIptvLastWatchedApi* CVcxHgMyVideosModel::LastWatchedApiL()
-    {
-    if ( ! iLastWatchedApi )
-        {
-        iLastWatchedApi = CIptvLastWatchedApi::NewL();
-        }
-    return iLastWatchedApi;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::LastWatchedDataL()
-// -----------------------------------------------------------------------------
-//
-CIptvLastWatchedData* CVcxHgMyVideosModel::LastWatchedDataL()
-    {
-    if ( ! iLastWatchedData )
-        {
-        iLastWatchedData = CIptvLastWatchedData::NewL();
-        }
-    return iLastWatchedData;
+    return *iTnManager;
     }
 
 // -----------------------------------------------------------------------------
@@ -501,4 +303,47 @@ void CVcxHgMyVideosModel::HandleDriveMonitorEvent( TIptvDriveMonitorEvent& /*aEv
     {
     // We are not interested about the event, we are observing just to keep
     // iDriveMonitor.iAvailableDrives up to date. 
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetMyVideosCustomizationIntL()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetMyVideosCustomizationInt( const TInt& aKey, 
+                                                       TInt& aValue )
+    {
+    if ( iMyVideosCenRep )
+        {
+        return iMyVideosCenRep->Get( aKey, aValue );
+        }
+    return KErrNotFound;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetMyVideosCustomizationString()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetMyVideosCustomizationString( const TInt& aKey, 
+                                                          TDes& aValue )
+    {
+    if ( iMyVideosCenRep )
+        {
+        return iMyVideosCenRep->Get( aKey, aValue );
+        }
+    return KErrNotFound;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::InitMyVideosCenRepL()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::InitMyVideosCenRepL()
+    {
+    TInt retVal = KErrNone;
+    if ( !iMyVideosCenRep )
+        {
+        TRAPD( error, iMyVideosCenRep = CRepository::NewL( KMyVideosMainViewCenRepUid ) );
+        retVal = error;
+        }
+    return retVal;
     }

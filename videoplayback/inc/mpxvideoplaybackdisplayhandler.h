@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -93,6 +93,8 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         void SurfaceChangedL( CMPXMessage* aMessage );
         void SurfaceRemoved();
         TInt SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd );
+
+        void SignalSurfaceRemovedL();
 
 #endif
 

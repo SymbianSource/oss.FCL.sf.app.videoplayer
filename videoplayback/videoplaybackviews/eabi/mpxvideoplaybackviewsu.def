@@ -20,4 +20,5 @@ EXPORTS
 	_ZN26CMPXVideoPlaybackContainer16UserInputHandlerEv @ 19 NONAME
 	_ZTI31CMPXVideoPlaybackDisplayHandler @ 20 NONAME ; #<TI>#
 	_ZTV31CMPXVideoPlaybackDisplayHandler @ 21 NONAME ; #<VT>#
+	_ZN32CMPXVideoPlaybackViewFileDetails17GenerateFileNameLEv @ 22 NONAME
 

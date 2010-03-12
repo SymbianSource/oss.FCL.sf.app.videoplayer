@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -28,8 +28,9 @@
 // FORWARD DECLARATIONS
 class CEikTextListBox;
 class CMPSettingsModelForROP;
-// CLASS DECLARATION
+class CMPSettingsStreamingSettingItemList;
 
+// CLASS DECLARATION
 /**
 *  CMPSettingsStreamingContainer  container control class.
 *  
@@ -56,8 +57,15 @@ class CMPSettingsStreamingContainer : public CMPSettingsBaseContainer
         * From CoeControl
         */
         void GetHelpContext(TCoeHelpContext& aContext) const;
-	void FocusChanged(TDrawNow /*aDrawNow*/);
+	    void FocusChanged(TDrawNow /*aDrawNow*/);
    
+        /**
+        * Edits current setting item.
+        * 
+        * @param aMenuOption
+        */
+        void EditCurrentItemFromMenuL(TBool aMenuOption);
+	
     protected: // Functions from base classes 
 
         /**
@@ -72,6 +80,12 @@ class CMPSettingsStreamingContainer : public CMPSettingsBaseContainer
         */
         TInt TitleResourceId();
         CMPSettingsModelForROP* iModel;
+	
+		/**
+		 * Setting item list.
+	     */
+        CMPSettingsStreamingSettingItemList* iSettingList;
+    
     };
 
 #endif

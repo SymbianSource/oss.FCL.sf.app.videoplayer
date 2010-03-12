@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -110,7 +110,6 @@ class CMPSettingsAdvancedBwSettingItem : public CAknEnumeratedTextPopupSettingIt
         RArray<TInt>& iValueArray;
         TInt& iValue;
         TInt iQueryRes;
-        CEikonEnv* iEnv;
 
         CArrayPtr<CAknEnumeratedText>* iEnumTextArray;
     };

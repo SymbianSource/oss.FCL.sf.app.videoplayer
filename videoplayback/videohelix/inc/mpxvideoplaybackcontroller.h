@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 18 %
+// Version : %version: 19 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -117,7 +117,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
 
         void SetPlaybackModeL();
 
-        TBool IsDisplayOff();
+        TBool IsKeyLocked();
         TBool IsAlarm();
         TBool IsPhoneCall();
         TBool IsActivePhoneCall();

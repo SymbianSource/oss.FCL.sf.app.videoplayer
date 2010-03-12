@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -26,6 +26,7 @@
 #include    <featmgr.h>
 #include    <hlplch.h>             // For HlpLauncher
 #include    "mediasettings.hrh"
+#include    "MPSettingsAppUi.h"
 #include    "MPSettingsNaviPaneController.h"
 #include    "MPSettingsStreamingView.h"
 #include    "MPSettingsStreamingContainer.h"
@@ -34,10 +35,6 @@
 
 class CMPSettingsModelForROP;
 
-// CONSTANTS
-
-const   TInt    KMPSettProxyViewListItemId  =   0;
-const   TInt    KMPSettNetworkViewListItemId  =   1;
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -47,10 +44,11 @@ const   TInt    KMPSettNetworkViewListItemId  =   1;
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CMPSettingsStreamingView::CMPSettingsStreamingView(CMPSettingsModelForROP* aModel) : iModel( aModel)
+CMPSettingsStreamingView::CMPSettingsStreamingView(CMPSettingsModelForROP* aModel) 
+    : iModel( aModel)
     {
-        MPX_FUNC("#MS# CMPSettingsStreamingView::CMPSettingsStreamingView()");
-        iNaviPaneContext = iNaviCntrl->MPTabGroup();
+    MPX_FUNC("#MS# CMPSettingsStreamingView::CMPSettingsStreamingView()");
+    iNaviPaneContext = iNaviCntrl->MPTabGroup();
     }
 
 // ---------------------------------------------------------
@@ -109,17 +107,29 @@ void CMPSettingsStreamingView::HandleCommandL(TInt aCommand)
     MPX_DEBUG2(_L("#MS# CMPSettingsStreamingView::HandleCommandL(%d)"),aCommand);
     switch (aCommand)
         {
+        case EMPSettCmdChange:
+            static_cast<CMPSettingsStreamingContainer*>(iContainer)->EditCurrentItemFromMenuL(ETrue);
+            break;
+        case EMPMiddleSoftKeyChange:
+            static_cast<CMPSettingsStreamingContainer*>(iContainer)->EditCurrentItemFromMenuL(EFalse);
+            break;  
+        case EMPSettCmdAdvancedSett:
+            AppUi()->ActivateLocalViewL( KMPSettAdvancedBwViewId );
+            break;            
         case EMPSettCmdOpen:
-            HandleListBoxSelectionL();
             break;
         case EAknSoftkeyBack:
-            AppUi()->ActivateLocalViewL(KMPSettMainViewId);
+            {
+            // If video view is empty, then exit Settings
+            CMPSettingsAppUi* appUi = static_cast<CMPSettingsAppUi*>(AppUi());
+            appUi->ActivateLocalViewL( KMPSettMainViewId );
+            }
             break;
         case EMPSettCmdHelp:
             if( FeatureManager::FeatureSupported( KFeatureIdHelp ) )
-            {
+                {
                 HlpLauncher::LaunchHelpApplicationL(iEikonEnv->WsSession(), AppUi()->AppHelpContextL() );
-            }
+                }
             break;
         default:
             AppUi()->HandleCommandL(aCommand);
@@ -137,24 +147,6 @@ CMPSettingsBaseContainer* CMPSettingsStreamingView::NewContainerL()
     return new(ELeave) CMPSettingsStreamingContainer(iModel);
     }  
 
-// ---------------------------------------------------------------------------
-// CMPSettingsStreamingView::HandleListBoxEventL
-// ---------------------------------------------------------------------------
-
-void CMPSettingsStreamingView::HandleListBoxEventL(CEikListBox* /*aListBox*/, TListBoxEvent aEventType)
-    {
-    MPX_FUNC("#MS# CMPSettingsStreamingView::HandleListBoxEventL()");
-    switch (aEventType)
-        {
-        case EEventEnterKeyPressed:
-        case EEventItemSingleClicked:
-        case EEventItemDoubleClicked:
-            HandleListBoxSelectionL();
-            break;
-        default:
-           break;
-        }
-    }
 
 // ---------------------------------------------------------------------------
 // CMPSettingsStreamingView::DynInitContainerL
@@ -165,7 +157,6 @@ void CMPSettingsStreamingView::DynInitContainerL()
     MPX_FUNC("#MS# CMPSettingsStreamingView::DynInitContainerL()");
     CEikTextListBox* listbox = iContainer->ListBox();
 
-    listbox->SetListBoxObserver(this);
     listbox->SetTopItemIndex(iTopItemIndex);
 
     if (iCurrentItem >= 0 && iCurrentItem < listbox->Model()->NumberOfItems()) // magic
@@ -175,35 +166,6 @@ void CMPSettingsStreamingView::DynInitContainerL()
     CMPSettingsBaseView::SetMiddleSoftKeyLabelL(R_MEDIASETTING_MSK_OPEN,EMPSettCmdOpen);
     }
 
-// ---------------------------------------------------------------------------
-// CMPSettingsStreamingView::HandleListBoxSelectionL()
-// Handles listbox selection.
-// ---------------------------------------------------------------------------
-//
-void CMPSettingsStreamingView::HandleListBoxSelectionL() 
-    {
-    iCurrentItem = iContainer->ListBox()->CurrentItemIndex();
-    iTopItemIndex = iContainer->ListBox()->TopItemIndex();
-    MPX_DEBUG3(_L("#MS# CMPSettingsStreamingView::HandleListBoxSelectionL() iCurrentItem(%d) iTopItemIndex(%d)"),iCurrentItem,iTopItemIndex);
-
-    switch (iCurrentItem)
-        {
-        case KMPSettProxyViewListItemId:
-        if (!FeatureManager::FeatureSupported(KFeatureIdProtocolCdma))
-            {
-            // If KFeatureIdProtocolCdma is not supported then show the 
-            // Proxy view. Otherwise, fall through to show Network view because
-            // only Network setting is available.
-            AppUi()->ActivateLocalViewL(KMPSettProxyViewId);
-            break;
-            }
-        case KMPSettNetworkViewListItemId:
-            AppUi()->ActivateLocalViewL(KMPSettNetworkViewId);
-            break;
-        default:
-            break;
-        }
-    }
 
 // End of File
 

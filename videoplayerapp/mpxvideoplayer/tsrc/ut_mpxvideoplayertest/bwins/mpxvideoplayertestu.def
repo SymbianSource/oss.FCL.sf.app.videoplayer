@@ -1,74 +1,8 @@
 EXPORTS
 	?LibEntryL@@YAPAVCScriptBase@@AAVCTestModuleIf@@@Z @ 1 NONAME ; class CScriptBase * LibEntryL(class CTestModuleIf &)
-	?Close@RConnection@@QAEXXZ @ 2 NONAME ; void RConnection::Close(void)
-	?Connect@RSocketServ@@QAEHI@Z @ 3 NONAME ; int RSocketServ::Connect(unsigned int)
-	??1CMDBTextFieldBase@CommsDat@@UAE@XZ @ 4 NONAME ; CommsDat::CMDBTextFieldBase::~CMDBTextFieldBase(void)
-	??0RConnection@@QAE@XZ @ 5 NONAME ; RConnection::RConnection(void)
-	?NewL@MMPXCollectionUtility@@SAPAV1@PAVMMPXCollectionObserver@@ABVTUid@@@Z @ 6 NONAME ; class MMPXCollectionUtility * MMPXCollectionUtility::NewL(class MMPXCollectionObserver *, class TUid const &)
-	??0TExtendedConnPref@@QAE@XZ @ 7 NONAME ; TExtendedConnPref::TExtendedConnPref(void)
-	?AppendL@TConnPrefList@@QAEXPAUSMetaDataECom@Meta@@@Z @ 8 NONAME ; void TConnPrefList::AppendL(struct Meta::SMetaDataECom *)
-	?LoadL@SMetaDataECom@Meta@@SAPAU12@AAVTPtrC8@@@Z @ 9 NONAME ; struct Meta::SMetaDataECom * Meta::SMetaDataECom::LoadL(class TPtrC8 &)
-	?GetVDataTable@CMDBNumFieldBase@CommsDat@@UBEPBUSVDataTableEntry@Meta@@XZ @ 10 NONAME ; struct Meta::SVDataTableEntry const * CommsDat::CMDBNumFieldBase::GetVDataTable(void) const
-	?GetAttribPtr@CMDBRecordLinkBase@CommsDat@@MBEPAEH@Z @ 11 NONAME ; unsigned char * CommsDat::CMDBRecordLinkBase::GetAttribPtr(int) const
-	?GetIntAttributeL@RCmConnectionMethodExt@@QBEKK@Z @ 12 NONAME ; unsigned long RCmConnectionMethodExt::GetIntAttributeL(unsigned long) const
-	??1RCmConnectionMethodExt@@QAE@XZ @ 13 NONAME ; RCmConnectionMethodExt::~RCmConnectionMethodExt(void)
-	??0CCDRecordBase@CommsDat@@QAE@K@Z @ 14 NONAME ; CommsDat::CCDRecordBase::CCDRecordBase(unsigned long)
-	?GetVDataTable@CMDBTextFieldBase@CommsDat@@UBEPBUSVDataTableEntry@Meta@@XZ @ 15 NONAME ; struct Meta::SVDataTableEntry const * CommsDat::CMDBTextFieldBase::GetVDataTable(void) const
-	??BCMDBRecordLinkBase@CommsDat@@QAEKXZ @ 16 NONAME ; CommsDat::CMDBRecordLinkBase::operator unsigned long(void)
-	??0CCommsDatabaseBase@@IAE@XZ @ 17 NONAME ; CCommsDatabaseBase::CCommsDatabaseBase(void)
-	??0MMetaDatabase@CommsDat@@IAE@XZ @ 18 NONAME ; CommsDat::MMetaDatabase::MMetaDatabase(void)
-	?Open@RConnection@@QAEHAAVRSocketServ@@I@Z @ 19 NONAME ; int RConnection::Open(class RSocketServ &, unsigned int)
-	??0RMetaDataContainerBase@Meta@@QAE@XZ @ 20 NONAME ; Meta::RMetaDataContainerBase::RMetaDataContainerBase(void)
-	?UtilityL@MMPXPlaybackUtility@@SAPAV1@W4TMPXCategory@@ABVTUid@@@Z @ 21 NONAME ; class MMPXPlaybackUtility * MMPXPlaybackUtility::UtilityL(enum TMPXCategory, class TUid const &)
-	?GetIntSetting@RConnection@@QAEHABVTDesC16@@AAK@Z @ 22 NONAME ; int RConnection::GetIntSetting(class TDesC16 const &, unsigned long &)
-	?OpenL@RCmManagerExt@@QAEXXZ @ 23 NONAME ; void RCmManagerExt::OpenL(void)
-	?GetVDataTable@CMDBElement@CommsDat@@UBEPBUSVDataTableEntry@Meta@@XZ @ 24 NONAME ; struct Meta::SVDataTableEntry const * CommsDat::CMDBElement::GetVDataTable(void) const
-	??1MMetaDatabase@CommsDat@@UAE@XZ @ 25 NONAME ; CommsDat::MMetaDatabase::~MMetaDatabase(void)
-	?SetAutoPlay@CMPXCollectionPlaylist@@QAEXH@Z @ 26 NONAME ; void CMPXCollectionPlaylist::SetAutoPlay(int)
-	??1CCommsDatabase@@UAE@XZ @ 27 NONAME ; CCommsDatabase::~CCommsDatabase(void)
-	?GetAttribPtr@TExtendedConnPref@@MBEPAEH@Z @ 28 NONAME ; unsigned char * TExtendedConnPref::GetAttribPtr(int) const
-	?GetAttribPtr@CMDBElement@CommsDat@@UBEPAEH@Z @ 29 NONAME ; unsigned char * CommsDat::CMDBElement::GetAttribPtr(int) const
-	?RecordFactoryL@CCDRecordBase@CommsDat@@SAPAVCMDBRecordBase@2@K@Z @ 30 NONAME ; class CommsDat::CMDBRecordBase * CommsDat::CCDRecordBase::RecordFactoryL(unsigned long)
-	?GetAttribPtr@CCDRecordBase@CommsDat@@MBEPAEH@Z @ 31 NONAME ; unsigned char * CommsDat::CCDRecordBase::GetAttribPtr(int) const
-	?GetAttribPtr@CMDBTextFieldBase@CommsDat@@UBEPAEH@Z @ 32 NONAME ; unsigned char * CommsDat::CMDBTextFieldBase::GetAttribPtr(int) const
-	?NewL@CCommsDatabase@@SAPAV1@W4TCommDbDatabaseType@@@Z @ 33 NONAME ; class CCommsDatabase * CCommsDatabase::NewL(enum TCommDbDatabaseType)
-	?ConnectionMethodL@RCmManagerExt@@QAE?AVRCmConnectionMethodExt@@K@Z @ 34 NONAME ; class RCmConnectionMethodExt RCmManagerExt::ConnectionMethodL(unsigned long)
-	?SetSnapPurpose@TExtendedConnPref@@QAEXW4TSnapPurpose@CMManager@@@Z @ 35 NONAME ; void TExtendedConnPref::SetSnapPurpose(enum CMManager::TSnapPurpose)
-	??1SMetaDataECom@Meta@@UAE@XZ @ 36 NONAME ; Meta::SMetaDataECom::~SMetaDataECom(void)
-	??0TConnPref@@QAE@XZ @ 37 NONAME ; TConnPref::TConnPref(void)
-	?UtilityL@MMPXViewUtility@@SAPAV1@XZ @ 38 NONAME ; class MMPXViewUtility * MMPXViewUtility::UtilityL(void)
-	?GetAttribPtr@CMDBNumFieldBase@CommsDat@@UBEPAEH@Z @ 39 NONAME ; unsigned char * CommsDat::CMDBNumFieldBase::GetAttribPtr(int) const
-	??1CMDBSession@CommsDat@@UAE@XZ @ 40 NONAME ; CommsDat::CMDBSession::~CMDBSession(void)
-	?GetVDataTable@CCDRecordBase@CommsDat@@MBEPBUSVDataTableEntry@Meta@@XZ @ 41 NONAME ; struct Meta::SVDataTableEntry const * CommsDat::CCDRecordBase::GetVDataTable(void) const
-	??1CMDBRecordLinkBase@CommsDat@@UAE@XZ @ 42 NONAME ; CommsDat::CMDBRecordLinkBase::~CMDBRecordLinkBase(void)
-	?Close@RCmManagerExt@@QAEXXZ @ 43 NONAME ; void RCmManagerExt::Close(void)
-	?NewL@CMDBSession@CommsDat@@SAPAV12@VTVersion@@@Z @ 44 NONAME ; class CommsDat::CMDBSession * CommsDat::CMDBSession::NewL(class TVersion)
-	??0CMDBRecordLinkBase@CommsDat@@QAE@XZ @ 45 NONAME ; CommsDat::CMDBRecordLinkBase::CMDBRecordLinkBase(void)
-	?GetFieldByNameL@CMDBRecordBase@CommsDat@@UAEPAVCMDBElement@2@ABVTPtrC16@@AAH@Z @ 46 NONAME ; class CommsDat::CMDBElement * CommsDat::CMDBRecordBase::GetFieldByNameL(class TPtrC16 const &, int &)
-	?GetVDataTable@TExtendedConnPref@@MBEPBUSVDataTableEntry@Meta@@XZ @ 47 NONAME ; struct Meta::SVDataTableEntry const * TExtendedConnPref::GetVDataTable(void) const
-	?LatestVersion@CMDBSession@CommsDat@@SA?AVTVersion@@XZ @ 48 NONAME ; class TVersion CommsDat::CMDBSession::LatestVersion(void)
-	??0RCmConnectionMethodExt@@QAE@XZ @ 49 NONAME ; RCmConnectionMethodExt::RCmConnectionMethodExt(void)
-	??4CMDBRecordLinkBase@CommsDat@@QAEAAV01@K@Z @ 50 NONAME ; class CommsDat::CMDBRecordLinkBase & CommsDat::CMDBRecordLinkBase::operator=(unsigned long)
-	??0RSocketServ@@QAE@XZ @ 51 NONAME ; RSocketServ::RSocketServ(void)
-	?SetConnSelectionDialog@TExtendedConnPref@@QAEXH@Z @ 52 NONAME ; void TExtendedConnPref::SetConnSelectionDialog(int)
-	??1CCommsDatabaseBase@@UAE@XZ @ 53 NONAME ; CCommsDatabaseBase::~CCommsDatabaseBase(void)
-	??1TConnPrefList@@QAE@XZ @ 54 NONAME ; TConnPrefList::~TConnPrefList(void)
-	?Start@RConnection@@QAEHAAVTConnPref@@@Z @ 55 NONAME ; int RConnection::Start(class TConnPref &)
-	?NewL@CMPSettingsModel@@SAPAV1@VTUid@@@Z @ 56 NONAME ; class CMPSettingsModel * CMPSettingsModel::NewL(class TUid)
-	??0TConnPrefList@@QAE@XZ @ 57 NONAME ; TConnPrefList::TConnPrefList(void)
-	??0CMDBTextFieldBase@CommsDat@@QAE@XZ @ 58 NONAME ; CommsDat::CMDBTextFieldBase::CMDBTextFieldBase(void)
-	?FindL@MMetaDatabase@CommsDat@@QAEHAAVCMDBSession@2@@Z @ 59 NONAME ; int CommsDat::MMetaDatabase::FindL(class CommsDat::CMDBSession &)
-	??1SMetaData@Meta@@UAE@XZ @ 60 NONAME ; Meta::SMetaData::~SMetaData(void)
-	??1CMDBElement@CommsDat@@UAE@XZ @ 61 NONAME ; CommsDat::CMDBElement::~CMDBElement(void)
-	??0SMetaData@Meta@@IAE@XZ @ 62 NONAME ; Meta::SMetaData::SMetaData(void)
-	?GetVDataTable@CMDBRecordLinkBase@CommsDat@@MBEPBUSVDataTableEntry@Meta@@XZ @ 63 NONAME ; struct Meta::SVDataTableEntry const * CommsDat::CMDBRecordLinkBase::GetVDataTable(void) const
-	?SetNoteBehaviour@TExtendedConnPref@@QAEXK@Z @ 64 NONAME ; void TExtendedConnPref::SetNoteBehaviour(unsigned long)
-	??1RConnection@@UAE@XZ @ 65 NONAME ; RConnection::~RConnection(void)
-	?GetRecordInfo@CMDBRecordBase@CommsDat@@UAEPBUSRecordTypeInfo@2@XZ @ 66 NONAME ; struct CommsDat::SRecordTypeInfo const * CommsDat::CMDBRecordBase::GetRecordInfo(void)
-	??0CMDBElement@CommsDat@@QAE@XZ @ 67 NONAME ; CommsDat::CMDBElement::CMDBElement(void)
-	??1CMPSettingsModel@@UAE@XZ @ 68 NONAME ; CMPSettingsModel::~CMPSettingsModel(void)
-	?FileExists@ConeUtils@@SAHABVTDesC16@@@Z @ 69 NONAME ; int ConeUtils::FileExists(class TDesC16 const &)
-	??0CMDBNumFieldBase@CommsDat@@QAE@XZ @ 70 NONAME ; CommsDat::CMDBNumFieldBase::CMDBNumFieldBase(void)
-	??0SMetaDataECom@Meta@@IAE@XZ @ 71 NONAME ; Meta::SMetaDataECom::SMetaDataECom(void)
-	?GetFieldByIdL@CMDBRecordBase@CommsDat@@UAEPAVCMDBElement@2@K@Z @ 72 NONAME ; class CommsDat::CMDBElement * CommsDat::CMDBRecordBase::GetFieldByIdL(unsigned long)
+	?NewL@MMPXCollectionUtility@@SAPAV1@PAVMMPXCollectionObserver@@ABVTUid@@@Z @ 2 NONAME ; class MMPXCollectionUtility * MMPXCollectionUtility::NewL(class MMPXCollectionObserver *, class TUid const &)
+	?UtilityL@MMPXViewUtility@@SAPAV1@XZ @ 3 NONAME ; class MMPXViewUtility * MMPXViewUtility::UtilityL(void)
+	?UtilityL@MMPXPlaybackUtility@@SAPAV1@W4TMPXCategory@@ABVTUid@@@Z @ 4 NONAME ; class MMPXPlaybackUtility * MMPXPlaybackUtility::UtilityL(enum TMPXCategory, class TUid const &)
+	?FileExists@ConeUtils@@SAHABVTDesC16@@@Z @ 5 NONAME ; int ConeUtils::FileExists(class TDesC16 const &)
+	?SetAutoPlay@CMPXCollectionPlaylist@@QAEXH@Z @ 6 NONAME ; void CMPXCollectionPlaylist::SetAutoPlay(int)
 

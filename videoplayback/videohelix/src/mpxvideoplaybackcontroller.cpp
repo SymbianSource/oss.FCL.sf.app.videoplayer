@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 43 %
+// Version : %version: 47 %
 
 
 //
@@ -38,10 +38,9 @@
 #include <ctsydomainpskeys.h>
 #include <mmf/common/mmferrors.h>
 
-#include <hal.h>
-#include <hal_data.h>
 #include <e32std.h>
 #include <devsoundif.h>
+#include <avkondomainpskeys.h>
 
 #include "mpxvideoregion.h"
 #include "mpxvideoplaybackcontroller.h"
@@ -145,7 +144,7 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::ConstructL()"));
 
     iMPXPluginObs = &aObs;
-    iAccessPointId = -1;
+    iAccessPointId = KUseDefaultIap;
     iVideoSeeker = CMPXVideoSeeker::NewL( this );
 
     // Initiliaze to True
@@ -523,6 +522,11 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
                 aCmd.SetTObjectValueL<TInt>( KMPXMediaVideoBufferingPercentage,
                                              bufferingPercentage );
 
+                break;
+            }
+            case EPbCmdSurfaceRemoved:
+            {
+                iPlayer->SurfaceRemovedFromView();
                 break;
             }
             default:
@@ -1725,17 +1729,17 @@ TBool CMPXVideoPlaybackController::IsAlarm()
 }
 
 // -----------------------------------------------------------------------------
-// CMPXVideoPlaybackController::IsDisplayOff
+// CMPXVideoPlaybackController::IsKeyLocked
 // -----------------------------------------------------------------------------
 //
-TBool CMPXVideoPlaybackController::IsDisplayOff()
+TBool CMPXVideoPlaybackController::IsKeyLocked()
 {
-    TBool displayState;
-    HAL::Get( HALData::EDisplayState, displayState );
+    TBool keylock( EFalse );
+    RProperty::Get( KPSUidAvkonDomain, KAknKeyguardStatus, keylock );
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackController::IsDisplayOff(%d)"), !displayState);
+    MPX_DEBUG(_L("CMPXVideoPlaybackController::IsKeyLocked(%d)"), keylock);
 
-    return !displayState;
+    return keylock;
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1906,6 +1910,16 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
     MPX_ENTER_EXIT( _L("CMPXVideoPlaybackController::ResetMemberVariables()"));
 
     iPlayer->Reset();
+
+    //
+    // Delete the video accessory observer when the plugin
+    // goes back to Not Initialised state.
+    //
+    if ( iAccessoryMonitor )
+    {    
+        delete iAccessoryMonitor;
+        iAccessoryMonitor = NULL;
+    }
 
     if ( iFileDetails )
     {

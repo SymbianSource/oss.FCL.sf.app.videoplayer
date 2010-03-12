@@ -20,6 +20,8 @@ call pushd \VideoApp_Domain
 call \VideoApp_Domain\videoplayer\tsrc\testing\tools\tsrpkgtool.pl -a
 call popd
 
+call del *.sisx
+
 echo ----------------------------------------
 echo VIDEOPLAYER - MEDIASETTINGSENGINETEST
 echo ----------------------------------------
@@ -54,94 +56,6 @@ call signsis.exe VCXMyVideosCollectionPluginTest.sis VCXMyVideosCollectionPlugin
 call del VCXMyVideosCollectionPluginTest.sis
 
 echo ----------------------------------------
-echo VIDEOPLAYER - VCXPROVISIONINGTEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXProvisioningTest\group
-call makesis VCXProvisioningTest.pkg VCXProvisioningTest.sis
-call copy VCXProvisioningTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXProvisioningTest.sis VCXProvisioningTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXProvisioningTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXSCHEDULEDREMINDERTEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXScheduledReminderTest\group
-call makesis VCXScheduledReminderTest.pkg VCXScheduledReminderTest.sis
-call copy VCXScheduledReminderTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXScheduledReminderTest.sis VCXScheduledReminderTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXScheduledReminderTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXSCHEDULEDDOWNLOADTEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXScheduledDownloadTest\group
-call makesis VCXScheduledDownloadTest.pkg VCXScheduledDownloadTest.sis
-call copy VCXScheduledDownloadTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXScheduledDownloadTest.sis VCXScheduledDownloadTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXScheduledDownloadTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXSERVICEMANAGEMENTAPITEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXServiceManagementApiTest\group
-call makesis VCXServiceManagementApiTest.pkg VCXServiceManagementApiTest.sis
-call copy VCXServiceManagementApiTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXServiceManagementApiTest.sis VCXServiceManagementApiTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXServiceManagementApiTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXVODCONTENTAPITEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXVodContentApiTest\group
-call makesis VCXVodContentApiTest.pkg VCXVodContentApiTest.sis
-call copy VCXVodContentApiTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXVodContentApiTest.sis VCXVodContentApiTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXVodContentApiTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXSETTINGSDATABASETEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXSettingsDatabaseTest\group
-call makesis VCXSettingsDatabaseTest.pkg VCXSettingsDatabaseTest.sis
-call copy VCXSettingsDatabaseTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXSettingsDatabaseTest.sis VCXSettingsDatabaseTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXSettingsDatabaseTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXIAPLISTTEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXIapListTest\group
-call makesis VCXIapListTest.pkg VCXIapListTest.sis
-call copy VCXIapListTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXIapListTest.sis VCXIapListTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXIapListTest.sis
-
-echo ----------------------------------------
-echo VIDEOPLAYER - VCXSERVICETEST
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\videofeeds\server\tsrc\VCXServiceTest\group
-call makesis VCXServiceTest.pkg VCXServiceTest.sis
-call copy VCXServiceTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe VCXServiceTest.sis VCXServiceTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del VCXServiceTest.sis
-
-echo ----------------------------------------
 echo VIDEOPLAYER - VIDEOPLAYER_STARTUP_API
 echo ----------------------------------------
 
@@ -153,17 +67,6 @@ call signsis.exe VideoPlayerStartupApiTest.sis VideoPlayerStartupApiTest.sisx No
 call del VideoPlayerStartupApiTest.sis
 
 echo ----------------------------------------
-echo VIDEOPLAYER - MPX_FUSION_API
-echo ----------------------------------------
-
-call pushd \VideoApp_Domain\videoplayer\tsrc\fusionmpxplayer_test\group
-call makesis FusionMpxPlayer_ApiTest.pkg FusionMpxPlayer_ApiTest.sis
-call copy FusionMpxPlayer_ApiTest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
-call popd
-call signsis.exe FusionMpxPlayer_ApiTest.sis FusionMpxPlayer_ApiTest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
-call del FusionMpxPlayer_ApiTest.sis
-
-echo ----------------------------------------
 echo VIDEOPLAYER - UT_MPXVIDEOPLAYER
 echo ----------------------------------------
 
@@ -173,6 +76,17 @@ call copy mpxvideoplayertest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
 call popd
 call signsis.exe mpxvideoplayertest.sis mpxvideoplayertest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
 call del mpxvideoplayertest.sis
+
+echo ----------------------------------------
+echo VIDEOPLAYER - VIDEOHELIXTEST
+echo ----------------------------------------
+
+call pushd VideoApp_Domain\videoplayer\videoplayback\videohelix\tsrc\ut_videohelixtest\group
+call makesis videohelixtest.pkg videohelixtest.sis
+call copy videohelixtest.sis \VideoApp_Domain\videoplayer\tsrc\testing\sis
+call popd
+call signsis.exe videohelixtest.sis videohelixtest.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+call del videohelixtest.sis
 
 echo ----------------------------------------
 echo VIDEOPLAYER_PLAT - FILE_DETAILS_DIALOG_API

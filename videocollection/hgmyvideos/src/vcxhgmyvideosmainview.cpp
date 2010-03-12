@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: TB92_33.1.1 %
+// Version : %version: e92_37 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -25,6 +25,8 @@
 #include <coeaui.h>
 #include <aknnotewrappers.h>
 #include <hlplch.h>
+#include <apgcli.h>     // RApaLsSession
+#include <apacmdln.h>   // CApaCommandLine
 
 #include <AknsBasicBackgroundControlContext.h>
 #include <ganes/HgDoubleTextList.h>
@@ -49,6 +51,12 @@
 _LIT( KVcxHgMyVideosMainViewResFile, "\\resource\\apps\\vcxhgmyvideos." );
 
 const TUint32 KVcxHgMyVideosViewUid = 0x20021191;
+const TUid KMediaSettingsAppUid = { 0x10005A3F };
+const TUid KBrowserAppUid       = { 0x10008D39 };
+
+const TInt KVcxHgMyVideosUrlMaxLen = 1024;
+
+_LIT( KBrowserProtocol, "4 " );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -146,8 +154,8 @@ CVcxHgMyVideosCategoryListImpl* CVcxHgMyVideosMainView::CategoryListL()
         IPTVLOGSTRING_LOW_LEVEL( 
             "MPX My Videos UI # CVcxHgMyVideosMainView::CategoryListL: Creating category list." );
         // Create category list control.
-        CHgDoubleTextList* hgCategoryList = 
-            CHgDoubleTextList::NewL( ClientRect(), 0 );
+        CHgDoubleGraphicList* hgCategoryList = 
+            CHgDoubleGraphicList::NewL( ClientRect(), 0 );
         CleanupStack::PushL( hgCategoryList );
       
         // Create list implementations. 
@@ -361,7 +369,7 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
             
             if ( highlight >= 0 )
                 {
-                ActivateVideoListL( highlight );
+                CategoryListL()->HandleOpenL( highlight );
                 }
             }
             break;
@@ -448,6 +456,12 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
         case EVcxHgMyVideosCmdToggleMultipleMarking:        
             {
             VideoListL()->HandleMarkCommandL( aCommand );
+            }
+            break;
+        case EVcxHgMyVideosCmdOpenSettings:
+            {
+            // Open MediaSettings application
+            LaunchAppL( KMediaSettingsAppUid ); 
             }
             break;
         case EVcxHgMyVideosCmdHelp:
@@ -756,7 +770,15 @@ void CVcxHgMyVideosMainView::DynInitRskL()
         }    
     else
         {
-        rskToSet = R_VCXHGMYVIDEOS_RSK_BACK;
+        if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryIdle ||
+             iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryBusy )
+             {
+             rskToSet = R_VCXHGMYVIDEOS_RSK_EXIT;
+             }
+         else 
+             {     
+             rskToSet = R_VCXHGMYVIDEOS_RSK_BACK;
+             }
         }
 
     if ( rskToSet != iCurrentRskResource )
@@ -783,3 +805,81 @@ void CVcxHgMyVideosMainView::HandleCancelL()
         VideoListL()->HandleMarkCommandL( EVcxHgMyVideosCmdStopMarking );
         }    
     }
+
+// ------------------------------------------------------------------------------
+// CVcxHgMyVideosMainView::LaunchAppL()
+// ------------------------------------------------------------------------------
+//
+void CVcxHgMyVideosMainView::LaunchAppL( const TUid aAppUid, const TDesC& aMsg )
+    {
+    RWsSession wsSession;
+    User::LeaveIfError( wsSession.Connect() );
+    CleanupClosePushL<RWsSession>( wsSession );
+    TApaTaskList taskList( wsSession );
+    TApaTask task = taskList.FindApp( aAppUid );
+    TInt msgLen = aMsg.Length();
+       
+    if ( task.Exists() )
+        {
+        if ( msgLen > 0 )
+            {
+            // Send message
+            HBufC8* param8 = HBufC8::NewLC( msgLen );
+            param8->Des().Append( aMsg );
+            task.SendMessage( TUid::Uid( 0 ), *param8 );
+            CleanupStack::PopAndDestroy( param8 );
+            }
+        else
+            {
+            task.BringToForeground();
+            }
+        }
+    else // Task didn't exist
+        {
+        RApaLsSession appArcSession;
+        User::LeaveIfError( appArcSession.Connect() );
+        CleanupClosePushL<RApaLsSession>( appArcSession );
+    
+        if ( msgLen > 0 )
+            {
+            TThreadId id;
+            appArcSession.StartDocument( aMsg, aAppUid , id ); 
+            }
+        else
+            {
+            TApaAppInfo appInfo;
+            TInt retVal = appArcSession.GetAppInfo( appInfo, aAppUid );
+            if ( retVal == KErrNone )
+                {
+                CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
+                cmdLine->SetExecutableNameL( appInfo.iFullName );
+                cmdLine->SetCommandL( EApaCommandRun );
+                User::LeaveIfError( appArcSession.StartApp( *cmdLine ) );
+                CleanupStack::PopAndDestroy( cmdLine );
+                }
+            else
+                {
+                IPTVLOGSTRING_LOW_LEVEL( 
+                        "MPX My Videos UI # CVcxHgMyVideosMainView::LaunchAppL - Application not found!" );
+                }
+            }
+        CleanupStack::PopAndDestroy(); // appArcSession
+        }
+    CleanupStack::PopAndDestroy(); // wsSession
+    }
+
+// ------------------------------------------------------------------------------
+// CVcxHgMyVideosMainView::LaunchBrowserL()
+// ------------------------------------------------------------------------------
+//
+void CVcxHgMyVideosMainView::LaunchBrowserL( const TDesC& aUrl )
+    {
+    HBufC* param = HBufC::NewLC( KVcxHgMyVideosUrlMaxLen );
+    param->Des().Copy( KBrowserProtocol() );
+    param->Des().Append( aUrl );
+    
+    LaunchAppL( KBrowserAppUid, *param );
+    
+    CleanupStack::PopAndDestroy( param );
+    }
+

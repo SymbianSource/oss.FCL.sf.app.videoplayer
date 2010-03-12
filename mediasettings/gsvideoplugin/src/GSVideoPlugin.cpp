@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 8 %
+// Version : %version: 10 %
 
 
 
@@ -24,16 +24,14 @@
 #include "GSVideoPlugin.h"
 #include "MPSettingsConstants.h"
 #include "MPSettingsMainView.h"
-#include "MPSettingsProxyView.h"
-#include "MPSettingsNetworkView.h"
 #include "MPSettingsPluginView.h"
 #include "MPSettingsAdvancedBwView.h"
 #include "MPSettingsMainContainer.h" 
+#include "MPSettingsStreamingContainer.h" 
 #include "mediasettings.hrh"
 #include "gstabhelper.h"
 #include "GSMediaPlayerVideoView.h"
 #include "GSMediaPlayerStreamingView.h"
-#include "feedsettingsview.h"
 #include "mpxlog.h"
 
 #include <coeaui.h>
@@ -41,18 +39,20 @@
 #include <aknview.h>
 #include <aknViewAppUi.h>
 #include <featmgr.h>
-#include <bautils.h>
 #include <StringLoader.h>     //for StringLoader
 #include <gsprivatepluginproviderids.h>
 #include <gsmainview.h>
 #include <mediasettings.mbg>
-#include <gsfwviewuids.h>     //for KGSMainViewUid
 #include <MediaSettings.rsg>
 #include <eiktxlbm.h>
 #include <eikmenup.h> 
 
+#include <centralrepository.h>
+#include "MediaPlayerPrivateCRKeys.h"
+#include "MediaPlayerVariant.hrh" 
+
 // CONSTANTS
-const TInt KGSRopSettViewIdArrayGranularity = 3;
+const TInt KGSRopSettViewIdArrayGranularity = 2;
 const TInt KGSRopSettTopItemIndex = 0;
 
 // ========================= MEMBER FUNCTIONS ================================
@@ -81,11 +81,6 @@ CGSVideoPlugin::~CGSVideoPlugin()
     FeatureManager::UnInitializeLib();
     iImplInfoArray.ResetAndDestroy();   
     
-    if ( iTabHelper ) 
-        {
-        delete iTabHelper;
-        }
-
     iResources.Close();
     
     if ( iViewIds )
@@ -116,15 +111,20 @@ void CGSVideoPlugin::ConstructL()
     {
     MPX_FUNC("#MS# CGSVideoPlugin::ConstructL()");
     FeatureManager::InitializeLibL();
-    iViewArray = new (ELeave) CArrayPtrFlat<MGSTabbedView>( 3 ); 
 
+    iVideoViewAvailable = VideoContrastIsSupportedL();
+    if ( iVideoViewAvailable )
+        {
+        iViewArray = new (ELeave) CArrayPtrFlat<MGSTabbedView>( KGSRopSettViewIdArrayGranularity ); 
+        }
     TFileName fileName;
     LocateFilePathL( fileName, EFalse );    
     OpenLocalizedResourceFileL( fileName, iResources );
-        
-    BaseConstructL(R_GS_MEDIASETTING_VIEW);
-
-    iTabHelper = CGSTabHelper::NewL();
+    
+    TInt ctorResource = ( iVideoViewAvailable ? R_GS_MEDIASETTING_VIEW :
+                                                R_GS_MPSETT_STREAMING_VIEW );
+    
+    BaseConstructL( ctorResource );
     }
    
 // ---------------------------------------------------------------------------
@@ -196,7 +196,10 @@ void CGSVideoPlugin::DoActivateL( const TVwsViewId& aPrevViewId,
         }
     CreateContainerL();
     AppUi()->AddToViewStackL( *this, iContainer );
-    iContainer->ListBox()->SetListBoxObserver( this ) ;
+    if ( iVideoViewAvailable )
+        {
+        iContainer->ListBox()->SetListBoxObserver( this ) ;
+        }
     ResetSelectedItemIndex();
     }
 
@@ -229,12 +232,14 @@ void CGSVideoPlugin::HandleCommandL( TInt aCommand )
     switch ( aCommand )
         {
         case EMPSettCmdOpen:
-            HandleListBoxSelectionL();
             break;          
         case EAknSoftkeyBack:
             SetCurrentItem(EGSMediaSettingsVideoIndex);
             AppUi()->ActivateLocalViewL( KGSAppsPluginUid );
             break;
+        case EMPSettCmdAdvancedSett:
+            AppUi()->ActivateLocalViewL( KMPSettAdvancedBwViewId );
+            break;                    
         case EMPSettCmdHelp:
             {
             if( FeatureManager::FeatureSupported( KFeatureIdHelp ) )
@@ -291,9 +296,16 @@ TInt CGSVideoPlugin::PluginProviderCategory() const
 void CGSVideoPlugin::NewContainerL()
     {
     MPX_FUNC("#MS# CGSVideoPlugin::NewContainerL()");
-    iContainer = new( ELeave ) CMPSettingsMainContainer;
+    if ( iVideoViewAvailable )
+        {
+        iContainer = new( ELeave ) CMPSettingsMainContainer;
+        }
+    else    
+        {
+        iContainer = new( ELeave ) CMPSettingsStreamingContainer( iModel );
+        }
     }
-
+    
 // ---------------------------------------------------------------------------
 // CGSVideoPlugin::HandleListBoxSelectionL
 // 
@@ -322,7 +334,6 @@ void CGSVideoPlugin::HandleListBoxSelectionL()
             streamingView = static_cast<CGSMediaPlayerStreamingView*>(AppUi()->View(iViewIds->At(i)));
             streamingView->SetCurrentItem(KGSRopSettTopItemIndex);        
             }
-        // Third item of the list is "Video service selection"
         }
          
     AppUi()->ActivateLocalViewL(iViewIds->At(iCurrentItem));
@@ -377,38 +388,32 @@ void CGSVideoPlugin::CreateLocalViewsL()
     iModel = CMPSettingsModelForROP::NewL();
 
     // Create vector which contains view id's for all setting folders. 
-    iViewIds = new(ELeave) CArrayFixFlat<TUid>(KGSRopSettViewIdArrayGranularity);
-    iViewIds->AppendL(KMPSettVideoViewId);
-    iViewIds->AppendL(KMPSettStreamingViewId);
-    iViewIds->AppendL(KMPSettFeedsViewId);
+    iViewIds = new(ELeave) CArrayFixFlat<TUid>( KGSRopSettViewIdArrayGranularity );
+    if ( iVideoViewAvailable )
+        {
+        iViewIds->AppendL( KMPSettVideoViewId );
+        }
+    iViewIds->AppendL( KMPSettStreamingViewId );
+  
     CAknView* view;  
 
-    view = CMPSettingsMainView::NewLC(iViewIds,iModel,iConstructAsGsPlugin); 
-    AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view
+    if ( iVideoViewAvailable )
+        {
+        view = CMPSettingsMainView::NewLC(iViewIds,iModel,iConstructAsGsPlugin); 
+        AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
+        CleanupStack::Pop();    // view
 
-    // iMainView is not owned, i.e. it is not deleted in the destructor ->
-    // main view cannot be directly creted to iMainView, as it's against the coding
-    // conventions to place class' pointers to cleanup stack => static_cast.
-    iMainView = static_cast<CMPSettingsMainView*>(view);
-
-    view = CGSMediaPlayerVideoView::NewLC(iModel,iViewArray);
-    AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view
-
+        // iMainView is not owned, i.e. it is not deleted in the destructor ->
+        // main view cannot be directly creted to iMainView, as it's against the coding
+        // conventions to place class' pointers to cleanup stack => static_cast.
+        iMainView = static_cast<CMPSettingsMainView*>(view);
+        
+        view = CGSMediaPlayerVideoView::NewLC(iModel,iViewArray);
+        AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
+        CleanupStack::Pop();    // view
+        }
+        
     view = CGSMediaPlayerStreamingView::NewLC(iModel,iViewArray);
-    AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
-
-    view = CVcxNsSettingsView::NewLC( iViewArray );
-    AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view
-    
-    view = CMPSettingsProxyView::NewLC(iModel,iConstructAsGsPlugin);
-    AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
-
-    view = CMPSettingsNetworkView::NewLC(iModel,iConstructAsGsPlugin);
     AppUi()->AddViewL(view);      // transfer ownership to CAknViewAppUi
     CleanupStack::Pop();    // view 
 
@@ -537,7 +542,6 @@ void CGSVideoPlugin::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane)
 void CGSVideoPlugin::LocateFilePathL( TFileName& aFileName, TBool aBitmapFile )
     {
     _LIT( KGSResourceFileName, "mediasettings.rsc" );
-    //_LIT( KGSIconFileName, "mediasettings.mbm");
     _LIT( KGSIconFileName, "mediasettings.mif");
     
     TParse parse;
@@ -591,5 +595,19 @@ void CGSVideoPlugin::LocateFilePathL( TFileName& aFileName, TBool aBitmapFile )
         }
         MPX_DEBUG3(_L("#MS# CGSVideoPlugin::LocateFilePathL(%d,%S)"),aBitmapFile,&aFileName);
     }   
+
+// -----------------------------------------------------------------------------
+// CGSVideoPlugin::VideoContrastIsSupportedL
+// -----------------------------------------------------------------------------
+//
+TBool CGSVideoPlugin::VideoContrastIsSupportedL()
+    {
+    TInt flags;
+    CRepository* repository = CRepository::NewL( KCRUidMediaPlayerFeatures );
+    repository->Get( KMPLocalVariation, flags );
+    delete repository;
+
+    return ( flags & KMediaPlayerVideoContrast );
+    }
 
 //End of File

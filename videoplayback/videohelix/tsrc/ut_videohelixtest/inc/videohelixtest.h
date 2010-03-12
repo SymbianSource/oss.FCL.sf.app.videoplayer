@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -165,11 +165,14 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt EndPhoneCall();
         virtual TInt SetTvOutConnectedL( CStifItemParser& aItem );
         virtual TInt SetTvOutDisconnectedL();
-        virtual TInt CVHPPTestClass::ConnectTvOutL( CStifItemParser& aItem );
-        virtual TInt CVHPPTestClass::DisconnectTvOutL();
+        virtual TInt ConnectTvOutL( CStifItemParser& aItem );
+        virtual TInt DisconnectTvOutL();
         virtual TInt SetDrmProtectedL( CStifItemParser& aItem );
         virtual TInt IssueSeekedToEndCommandL( CStifItemParser& aItem );
         virtual TInt HandleVolumeL( CStifItemParser& aItem );
+        virtual TInt ConnectHDMITvOutL();
+        virtual TInt DisconnectHDMITvOutL();
+        virtual TInt SetHDMITvOutConnectedL();
 
         // ---------------------------------------------------------------------
         //  Helper Functions

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 #include <AudioPreference.h>
@@ -77,6 +77,12 @@ void CMpxVideoPlayerUtility::Close()
         iControllerEventMonitor->Cancel();
         delete iControllerEventMonitor;
         iControllerEventMonitor = NULL;
+    }
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoRemoveDisplayWindow ) );
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
 
     iController.Close();
@@ -271,6 +277,21 @@ void CMpxVideoPlayerUtility::SetDisplayWindowL( const TRect& aScreenRect,
                 iVideoPlayControllerCustomCommands.DirectScreenAccessEvent( EResumeDSA ) );
 
         iDirectScreenAccessAbort = EFalse;
+    }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SurfaceRemovedFromView()"));
+    
+    if ( ! iSurfaceId.IsNull() )
+    {
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
 }
 

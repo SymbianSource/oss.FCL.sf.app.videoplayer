@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -49,8 +49,7 @@ CMPSettingsAdvancedBwSettingItem::CMPSettingsAdvancedBwSettingItem(
     CAknEnumeratedTextPopupSettingItem(aIdentifier, aListValue),
     iValueArray(aValueArray),
     iValue(aValue),
-    iQueryRes(aQueryRes),
-    iEnv(CEikonEnv::Static())
+    iQueryRes(aQueryRes)
     {
     MPX_FUNC("#MS# CMPSettingsAdvancedBwSettingItem::CMPSettingsAdvancedBwSettingItem()");
     }

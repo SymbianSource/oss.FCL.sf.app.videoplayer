@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 18 %
+// Version : %version: 19 %
 
 // INCLUDE FILES
 #include <aknlists.h>
@@ -154,7 +154,7 @@ EXPORT_C CMPFileDetailsDialog::~CMPFileDetailsDialog()
         {
         iPopupList->CancelPopup();
         }
-
+    delete iPopupList;  // cause removal from control stack
     delete iListBox;
     delete iGenres;
     UnLoadResources();
@@ -514,7 +514,6 @@ EXPORT_C void CMPFileDetailsDialog::ExecuteLD(CMPFileDetails* aFileDetails)
     if ( err && iPopupList )
     {
         iPopupList->CancelPopup();
-        iPopupList = NULL;
     }
 
     delete this;

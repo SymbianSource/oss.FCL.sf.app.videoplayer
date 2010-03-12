@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -37,7 +37,6 @@ class CVcxHgMyVideosDownloadUpdater;
 class TVcxHgMyVideosVideoDetailsDialog;
 class CVcxHgMyVideosVideoList;
 class CHgScroller;
-class TVideoPlayerCustomMessage;
 class CMyVideosIndicator;
 
 // CLASS DECLARATION
@@ -169,22 +168,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @param aMarkCommand Mark command.
          */
         void HandleMarkCommandL( TInt aMarkCommand );
-        
-        /**
-         * Returns last playback position of video, video identified by URI.
-         * 
-         * @param aContentUri URL or path to video.
-         * @return Last playback position.
-         */
-        TInt LastPlaybackPosition( const TDesC& aContentUri );
-
-        /**
-         * Stores last playback position of video, video identified by URI.
-         * 
-         * @param aContentUri URL or path to video.
-         * @param aPosition Last playback position.
-         */
-        void SetLastPlaybackPositionL( const TDesC& aContentUri, TInt aPosition );        
 
         /**
          * Returns video's name.
@@ -248,26 +231,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @param aIndex Video's index on UI list.
          */
         void CancelDownloadL( TInt aIndex );
-        
-        /**
-         * Returns Video Player custom message of a video.
-         * 
-         * @param aFilteredIndex Video's index on filtered UI list.
-         * @param aVideoInfo On return, Video Player custom message with video information.
-         * @param aMpxId1 On return, MPX ID 1 of the video.
-         */
-        TInt GetVideoPlayerCustomMessage( TInt aFilteredIndex, 
-                                          TVideoPlayerCustomMessage& aVideoInfo,
-                                          TInt& aMpxId1 );
-
-        /**
-         * Returns Video Player custom message of a video.
-         * 
-         * @param aMpxItemId MPX Item Id of the video.
-         * @param aVideoInfo On return, Video Player custom message with video information.
-         */
-        TInt GetVideoPlayerCustomMessage( TMPXItemId& aMpxItemId,
-                                          TVideoPlayerCustomMessage& aVideoInfo );
 
         /**
          * Returns age profile of a video.
@@ -301,22 +264,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @return ETrue if video was found.
          */
         TBool FindVideoMpxIdL( const TDesC& aVideoPath, TMPXItemId& aMpxItemId );
-
-        /**
-         * Informative call about video being played. Method removes possible new
-         * indicator from video.
-         * 
-         * @param aIndex Video's index on UI list.
-         */
-        void ClearNewVideoIndicatorL( TInt aIndex );        
-
-        /**
-         * Informative call about video being played. Method removes possible new
-         * indicator from video.
-         * 
-         * @param aMpxItemId Video's MPX item Id.
-         */
-        void ClearNewVideoIndicatorL( TMPXItemId& aMpxItemId );
 
         /**
          * Gets data of currently highlighted video, and passes it to
@@ -530,6 +477,25 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * Update scrollbar strip type depending on sort order
          */
         void UpdateScrollbarTypeL( const TVcxMyVideosSortingOrder& aSortingOrder );
+
+        /**
+         * Resets scroller items for refetch only
+         */
+        void ResetScrollerItemsL();
+
+        /** 
+         * Resets scroller buffer and items for refetch
+         * This is fastest way to reset scroller when item count is unchanged
+         */
+        void ResetScrollerBufferAndItemsL();
+
+        /** 
+         * Resizes scroller with refetch
+         * This is faster way to reset scroller than CHgScroller::Reset() and 
+         * CHgScroller::ResizeL() calls combined
+		 * @param aNewItemCount New item count
+         */
+        void ResizeScrollerL( TInt aNewItemCount );
 
     private:
         

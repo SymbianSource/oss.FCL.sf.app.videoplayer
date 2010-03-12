@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 
@@ -367,11 +367,8 @@ RESOURCE ARRAY r_mpsett_main_lbx
         LBUF
             {
             txt = "1\t"qtn_mp_settings_streaming;
-            },
-        LBUF
-            {
-            txt = "2\t"qtn_iptv_service_selection_setting;
             }
+
         };  
     }
 
@@ -480,7 +477,7 @@ RESOURCE TITLE_PANE r_mpsett_streaming_view_title
 //
 RESOURCE AVKON_VIEW r_gs_mpsett_streaming_view
     {
-    menubar = r_mpsett_app_and_open_menubar;
+    menubar = r_mpsett_app_and_adv_sett_menubar;
     cba=r_mediasetting_softkeys_options_back_open;
     }
 
@@ -493,71 +490,7 @@ RESOURCE AVKON_VIEW r_gs_mpsett_streaming_view
 //
 RESOURCE AVKON_VIEW r_mpsett_streaming_view
     {
-    menubar = r_mpsett_app_and_open_menubar;  
-    cba = R_AVKON_SOFTKEYS_SELECTION_LIST;    
-    }
-
-//----------------------------------------------------
-//   
-//    r_mpsett_streaming_lbx_resource
-//    Streaming view's listbox resource.
-//
-//----------------------------------------------------
-//
-RESOURCE LISTBOX r_mpsett_streaming_lbx_resource
-    {
-    array_id = r_mpsett_streaming_lbx;
-    flags = EEikListBoxMultipleSelection;
-    }
-            
-//----------------------------------------------------
-//    
-//  r_mpsett_streaming_lbx    
-//  Streaming view's listbox.
-//
-//----------------------------------------------------
-//
-RESOURCE ARRAY r_mpsett_streaming_lbx
-    {
-    items =
-        {
-#ifndef __PROTOCOL_CDMA
-        LBUF
-            {
-            txt = " \t"qtn_mp_setting_stream_proxy;
-            },
-#endif
-        LBUF
-            {
-            txt = " \t"qtn_mp_setting_stream_net;
-            }
-        };  
-    }
-
-// * Feeds view *
-
-//----------------------------------------------------
-//   
-//    r_mpsett_feeds_view_title
-//    Video view's title.
-//
-//----------------------------------------------------
-//-
-RESOURCE TITLE_PANE r_mpsett_feeds_view_title
-    {
-    txt = qtn_iptv_service_selection_title;
-    }
-
-//----------------------------------------------------
-//   
-//    r_mpsett_video_view
-//    Video view's Options menu and cba.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_VIEW r_mpsett_feeds_view
-    {
-    menubar = r_mpsett_feeds_menubar;  
+    menubar = r_mpsett_app_and_adv_sett_menubar;  
     cba = R_AVKON_SOFTKEYS_SELECTION_LIST;    
     }
 
@@ -575,19 +508,6 @@ RESOURCE TITLE_PANE r_mpsett_proxy_view_title
     txt = qtn_mp_sett_stream_title_proxy;
     }
 
-//----------------------------------------------------
-//   
-//    r_mpsett_proxy_view
-//    Proxy view's Options menu and cba.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_VIEW r_mpsett_proxy_view
-    {
-    menubar = r_mpsett_app_and_change_menubar;  
-    cba = R_AVKON_SOFTKEYS_SELECTION_LIST;    
-    }
-
 // * NETWORK view *
 
 //----------------------------------------------------
@@ -600,19 +520,6 @@ RESOURCE AVKON_VIEW r_mpsett_proxy_view
 RESOURCE TITLE_PANE r_mpsett_network_view_title
     {
     txt = qtn_mp_sett_stream_title_net;
-    }
-
-//----------------------------------------------------
-//   
-//    r_mpsett_network_view
-//    Network view's Options menu and cba.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_VIEW r_mpsett_network_view
-    {
-    menubar = r_mpsett_app_and_adv_sett_menubar;  
-    cba = R_AVKON_SOFTKEYS_SELECTION_LIST;    
     }
 
 // * ADVANCED bw view *
@@ -664,33 +571,6 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_mpsett_video_setting_item_list
             identifier = EMPSettVideoContrastSettingId;
             name = qtn_mp_setting_video_contrast;
             setting_page_resource = r_mpsett_video_contrast_setting_page;
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EVcSettingsViewParentControlItem;
-            name = qtn_iptv_setting_parental_control;
-            setting_page_resource = r_vcsettingsview_settingview_parentcontrol_page;
-            associated_resource = r_vcsettingsview_settingview_parentcontrol_texts;
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EVcSettingsViewMemoryItem;
-            setting_page_resource = r_vcsettingsview_settingview_memory_page;
-            name = qtn_iptv_memory_setting;
-            associated_resource = r_vcsettingsview_settingview_memory_texts;
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EVcSettingsViewThumbnails;
-            setting_page_resource = r_vcsettingsview_settingview_thumbnails_page;
-            name = qtn_iptv_setting_thumbnails;
-            associated_resource = r_vcsettingsview_settingview_thumbnails_texts;
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EVcSettingsviewIadUpdateItem;
-            name = qtn_vcx_setting_version_number;
-            setting_page_resource = r_vcsettingsview_settingview_iadupdate_page;
             }
         };
     }
@@ -711,190 +591,6 @@ RESOURCE AVKON_SETTING_PAGE r_mpsett_video_contrast_setting_page
     softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK; //MSK
     type = EAknCtSlider;
     editor_resource_id = r_mpsett_contrast_slider;
-    }
-
-//----------------------------------------------------
-//    
-//  r_vcsettingsview_settingview_iadupdate_page    
-//  Setting page resource for Video version.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_settingview_iadupdate_page
-    {
-    label = qtn_vcx_setting_version_number;
-    type = EEikCtEdwin;
-    editor_resource_id = r_vcsettingsview_settingview_iadupdate_editor;
-    }
-
-RESOURCE EDWIN r_vcsettingsview_settingview_iadupdate_editor
-    {
-    maxlength = 20;
-    }
-
-
-RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_settingview_thumbnails_page
-    {
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_vcsettingsview_settingview_thumbnails_editor;
-    }
-
-RESOURCE POPUP_SETTING_LIST r_vcsettingsview_settingview_thumbnails_editor
-    {
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_vcsettingsview_settingview_thumbnails_texts
-    {
-    setting_texts_resource = r_vcsettingsview_settingview_thumbnails_textspage_list;
-    popped_up_texts_resource = r_vcsettingsview_settingview_thumbnails_textsitem_array;
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_thumbnails_textspage_list
-    {
-    items =
-        {
-        AVKON_ENUMERATED_TEXT { value = 0; text = qtn_iptv_setting_off; },
-        AVKON_ENUMERATED_TEXT { value = 1; text = qtn_iptv_setting_on; }
-        };
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_thumbnails_textsitem_array
-    {
-    items =
-        {
-        LBUF { txt = qtn_iptv_setting_off; },
-        LBUF { txt = qtn_iptv_setting_on; }
-        };
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_settingview_parentcontrol_page
-    {
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_vcsettingsview_settingview_parentcontrol_editor;
-    }
-
-RESOURCE POPUP_SETTING_LIST r_vcsettingsview_settingview_parentcontrol_editor
-    {
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_vcsettingsview_settingview_parentcontrol_texts
-    {
-    setting_texts_resource = r_vcsettingsview_settingview_parentcontrol_textspage_list;
-    popped_up_texts_resource = r_vcsettingsview_settingview_parentcontrol_textsitem_array;
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_parentcontrol_textspage_list
-    {
-    items =
-        {
-        AVKON_ENUMERATED_TEXT { value = 0; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 1; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 2; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 3; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 4; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 5; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 6; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 7; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 8; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 9; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 10; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 11; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 12; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 13; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 14; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 15; text = ""; }
-        };
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_parentcontrol_textsitem_array
-    {
-    items =
-        {
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; },
-        LBUF { txt = ""; }
-        };
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_settingview_memory_page
-    {
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_vcsettingsview_settingview_memory_editor;
-    }
-
-RESOURCE POPUP_SETTING_LIST r_vcsettingsview_settingview_memory_editor
-    {
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_vcsettingsview_settingview_memory_texts
-    {
-    setting_texts_resource = r_vcsettingsview_settingview_memory_textspage_list;
-    popped_up_texts_resource = r_vcsettingsview_settingview_memory_textsitem_array;
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_memory_textspage_list
-    {
-    items =
-        {
-        AVKON_ENUMERATED_TEXT { value = 0; text = qtn_iptv_setting_phone_memory; },
-        AVKON_ENUMERATED_TEXT { value = 1; text = qtn_iptv_setting_memory_card; }
-        };
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_memory_textsitem_array
-    {
-    items =
-        {
-        LBUF { txt = qtn_iptv_setting_phone_memory; },
-        LBUF { txt = qtn_iptv_setting_memory_card; }
-        };
-    }
-
-RESOURCE AVKON_SETTING_PAGE r_vcsettingsview_settingview_setting_subset_page
-    {
-    type = EAknCtPopupSettingList;
-    editor_resource_id = r_vcsettingsview_settingview_setting_subset_editor;
-    }
-
-RESOURCE POPUP_SETTING_LIST r_vcsettingsview_settingview_setting_subset_editor
-    {
-    }
-
-RESOURCE AVKON_POPUP_SETTING_TEXTS r_vcsettingsview_settingview_setting_subset_texts
-    {
-    setting_texts_resource = r_vcsettingsview_settingview_setting_subset_textspage_list;
-    popped_up_texts_resource = r_vcsettingsview_settingview_setting_subset_textsitem_array;
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_setting_subset_textspage_list
-    {
-    items =
-        {
-        AVKON_ENUMERATED_TEXT { value = 0; text = ""; },
-        AVKON_ENUMERATED_TEXT { value = 1; text = ""; }
-        };
-    }
-
-RESOURCE ARRAY r_vcsettingsview_settingview_setting_subset_textsitem_array
-    {
-    items =
-        {
-        LBUF { txt = ""; },
-        LBUF { txt = ""; }
-        };
     }
 
 //----------------------------------------------------
@@ -956,19 +652,38 @@ RESOURCE POPUP_SETTING_LIST r_mpsett_default_view_on_off_popup_setting_list
     {
     }
 
-// ** PROXY setting item list **
+// ** STREAMING setting item list **
 
 //----------------------------------------------------
 //    
-//  r_mpsett_proxy_setting_item_list    
+//  r_mpsett_streaming_setting_item_list  
 //  Proxy setting list view's item list.
 //
 //----------------------------------------------------
 //
-RESOURCE AVKON_SETTING_ITEM_LIST r_mpsett_proxy_setting_item_list
+RESOURCE AVKON_SETTING_ITEM_LIST r_mpsett_streaming_setting_item_list
     {
     items = 
         {
+#ifndef __PROTOCOL_CDMA                
+        AVKON_SETTING_ITEM
+            {
+            identifier = EMPSettDefaultAPSettingId;
+            name = qtn_mp_setting_default_ap;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = EMPSettMinUDPPortSettingId;
+            name = qtn_mp_setting_min_udp_port;
+            setting_page_resource = r_mpsett_min_udp_port_setting_page;         
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = EMPSettMaxUDPPortSettingId;
+            name = qtn_mp_setting_max_udp_port;
+            setting_page_resource = r_mpsett_max_udp_port_setting_page;         
+            },
+#endif            
         AVKON_SETTING_ITEM
             {
             identifier = EMPSettProxyModeSettingId;
@@ -1108,42 +823,6 @@ RESOURCE AVKON_INTEGER_EDWIN r_mpsett_proxy_port_edwin
     min = 0;
     max = 65535;
     maxlength = 5;
-    }
-
-
-// ** NETWORK setting item list **
-
-//----------------------------------------------------
-//    
-//  r_mpsett_network_setting_item_list    
-//  Network setting list view's item list.
-//
-//----------------------------------------------------
-//
-RESOURCE AVKON_SETTING_ITEM_LIST r_mpsett_network_setting_item_list
-    {
-    items = 
-        {
-#ifndef __PROTOCOL_CDMA
-        AVKON_SETTING_ITEM
-            {
-            identifier = EMPSettDefaultAPSettingId;
-            name = qtn_mp_setting_default_ap;
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EMPSettMinUDPPortSettingId;
-            name = qtn_mp_setting_min_udp_port;
-            setting_page_resource = r_mpsett_min_udp_port_setting_page;         
-            },
-        AVKON_SETTING_ITEM
-            {
-            identifier = EMPSettMaxUDPPortSettingId;
-            name = qtn_mp_setting_max_udp_port;
-            setting_page_resource = r_mpsett_max_udp_port_setting_page;         
-            }
-#endif
-        };
     }
 
 // * UDP PORT RANGE *
@@ -1528,12 +1207,10 @@ RESOURCE TBUF r_mpsett_user_defined
 
 // *** PLUGIN VIEWS ***
 
-
 // *** GSVideoPlugin ***
 //----------------------------------------------------
 //   
 //    r_gs_mediasetting_view
-//    Telephony sub-menu view
 //
 //----------------------------------------------------
 //
@@ -1599,7 +1276,6 @@ RESOURCE TBUF r_gs_mediasetting_view_caption
     buf = qtn_set_folder_media_player;
     }
 
-
 // MSK Handling
 
 // -----------------------------------------------------------------------------
@@ -1637,82 +1313,6 @@ RESOURCE TBUF r_mediasetting_msk_change
     {
     buf = qtn_msk_change;
     }
-
-// ----------------------------------------------------------------------------   
-// r_iptv_database_phone
-// "Phone memory"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_setting_phone_memory
-    {
-    buf = qtn_iptv_setting_phone_memory;
-    }
-
-// ----------------------------------------------------------------------------
-// r_iptv_setting_mass_memory
-// "Mass memory"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_setting_mass_memory
-    {
-    buf = qtn_iptv_setting_mass_memory;
-    }
-
-// ----------------------------------------------------------------------------
-// r_iptv_setting_memory_card
-// "Memory card"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_setting_memory_card
-    {
-    buf = qtn_iptv_setting_memory_card;
-    }
-
-// ----------------------------------------------------------------------------
-// r_iptv_locked_memory_card
-// "Locked memory card"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_locked_memory_card
-    {
-    buf = qtn_iptv_locked_memory_card;
-    }
-
-// ----------------------------------------------------------------------------
-// r_iptv_parental_control_off
-// "Off"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_parental_control_off
-    {
-    buf = qtn_iptv_setting_off;
-    }
-
-// ----------------------------------------------------------------------------
-// r_iptv_parental_control_n_years
-// "4 years"
-// ----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_iptv_parental_control_n_years
-    {
-    buf = qtn_iptv_parental_control_n_years;
-    }
-
-#ifdef RD_MULTIPLE_DRIVE_ENABLERS
-// --------------------------------------------------------------------------
-// Memory selection dialog
-// --------------------------------------------------------------------------
-//
-RESOURCE MEMORYSELECTIONDIALOG r_mtv_memory_selection_dialog
-    {
-    softkey_1 = text_softkey_select;
-    softkey_2 = text_softkey_cancel;
-    locations =
-        {   
-        LOCATION { root_path = "C:\\"; }
-        };
-    }
-#endif
 
 //----------------------------------------------------
 //   

@@ -94,12 +94,27 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
 
         /**
          * Called by video list implementation when new data is needed.
-         * Appends data item into buffer.
+         * Appends data item into buffer and flushes it to start fetching.
          * 
          * @param aMPXItemId MPX item id of video data.
          */
         void RequestDataL( TMPXItemId aMPXItemId );
-        
+
+        /**
+         * Called by video list implementation when new data is needed.
+         * Appends data item into buffer that needs to be flushed using 
+         * FlushRequestBufferL() to start fetching.
+         * 
+         * @param aMPXItemId MPX item id of video data.
+         */
+        void AddToRequestBufferL( TMPXItemId aMPXItemId );
+
+        /**
+         * Called by video list implementation when new data is needed.
+         * Flushes fetch requests from buffer.
+         */
+        void FlushRequestBufferL();
+
         /**
          * Called by video list implementation when data is not needed anymore.
          * Removes data item from buffer.
@@ -175,9 +190,10 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         TInt IndexByMPXItemId( TMPXItemId aMpxItemId );
         
         /**
-         * Selects next index to be fetched.  
+         * Selects next index to be fetched.
+         * @param aSelectForPeekOnly  
          */
-        void SelectNextIndexL();
+        void SelectNextIndexL( TBool aSelectForPeekOnly );
         
         /**
          * Removes item from fetch array.
@@ -213,14 +229,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         /**
          * Updates fetched video data to UI.
          */
-        void UpdateVideoDataToUiL( CVcxHgMyVideosVideoData& videoData );
-        
-        /**
-         * If needed creates, and returns pointer to Thumbnail Manager.
-         *
-         * @return Pointer to Thumbnail Manager.
-         */
-        CThumbnailManager* ThumbnailManagerL();
+        void UpdateVideoDataToUiL( CVcxHgMyVideosVideoData& aVideoData );
         
         /**
          * Checks if list refreshing is needed.
@@ -239,7 +248,22 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          * Refreshes the ganes list.
          */
         void RefreshScreen();
-        
+
+        /**
+         * Checks DRM properties
+         */
+        void CheckDrmL( CVcxHgMyVideosVideoData& aVideoData );
+
+        /**
+         * Gets active request count
+         */
+        void GetActiveRequestCount( TInt& aPeekRequests, TInt& aGetRequests );
+
+        /**
+         * Starts thumbnail fetch
+         */
+        void StartThumbnailL( CVcxHgMyVideosVideoData& aItem, TBool aPeek );
+
     protected:
 
         /**
@@ -265,13 +289,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          * Not own.
          */
         CVcxHgMyVideosVideoList& iVideoArray; 
-        
-        /**
-         * S60 Thumbnail Manager.
-         * Own.
-         */
-        CThumbnailManager* iTnEngine;
-                
+                        
         /** 
          * Used for indicating that list needs to be refreshed.         
          * Own.

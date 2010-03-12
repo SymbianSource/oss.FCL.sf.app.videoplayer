@@ -39,8 +39,11 @@
 #include "vcxhgmyvideosvideolist.h"
 #include "vcxhgmyvideosvideodataupdater.h"
 #include "vcxhgmyvideosindicatorhelper.h"
+#include "vcxhgmyvideosthumbnailmanager.h"
 
 const TInt KRefreshTimerInterval( 1000000 ); // 1 second
+const TInt KMaxThumbnailReqs( 2 ); // Max count of peek and get reqs combined
+const TInt KMaxThumbnailGetReqs( 1 ); // Max count of get reqs
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -103,6 +106,7 @@ CVcxHgMyVideosVideoDataUpdater::CVcxHgMyVideosVideoDataUpdater(
 void CVcxHgMyVideosVideoDataUpdater::ConstructL()
     {
     iRefreshTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iModel.ThumbnailManager().AddObserverL( *this );
     }
 
 // -----------------------------------------------------------------------------
@@ -123,15 +127,10 @@ void CVcxHgMyVideosVideoDataUpdater::InfoArrayChanged()
 //
 CVcxHgMyVideosVideoDataUpdater::~CVcxHgMyVideosVideoDataUpdater()
     {
-    if ( iRefreshTimer )
-	    {
-	    // Calling cancel without checking if the timer is active is safe.        
-        iRefreshTimer->Cancel();
-        delete iRefreshTimer;
-		}
-    
-    CancelAndDeleteFetchArray();
-    delete iTnEngine;
+    iModel.ThumbnailManager().RemoveObserver( *this );
+    Cancel();
+    delete iRefreshTimer; // Cancels active timer
+    iFetchArray.ResetAndDestroy();
     }
 
 // -----------------------------------------------------------------------------
@@ -155,6 +154,24 @@ void CVcxHgMyVideosVideoDataUpdater::SetPausedL( TBool aPaused )
 void CVcxHgMyVideosVideoDataUpdater::RequestDataL( TMPXItemId aMPXItemId )
     {
     AddItemToFetchArrayL( aMPXItemId );
+    ContinueVideoDataFetchingL();
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::AddToRequestBufferL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::AddToRequestBufferL( TMPXItemId aMPXItemId )
+    {
+    AddItemToFetchArrayL( aMPXItemId );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::FlushRequestBufferL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::FlushRequestBufferL()
+    {
     ContinueVideoDataFetchingL();
     }
 
@@ -204,20 +221,12 @@ void CVcxHgMyVideosVideoDataUpdater::CancelActivities( TInt aIndex )
     {    
     if ( aIndex >= 0 && aIndex < iFetchArray.Count() )
         {
-        CVcxHgMyVideosVideoData::TVideoDataState state = iFetchArray[aIndex]->State();
-    
-        if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted )
+		CVcxHgMyVideosVideoData* item = iFetchArray[aIndex];
+        CVcxHgMyVideosVideoData::TVideoDataState state = item->State();
+        if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted ||
+             state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted )
             {
-            // Cancel thumbnail generation. Safe to ignore leave, as the ThumbnailManagerL 
-			// can only leave if iTnEngine is not created yet, so there cannot be 
-			// any outstanding requests either. 
-            TRAP_IGNORE( ThumbnailManagerL()->CancelRequest( 
-                    iFetchArray[aIndex]->ThumbnailConversionId() ) );
-            }
-        else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateDrmStarted )
-            {
-            // Cancel DRM checking.
-            Cancel();
+            iModel.ThumbnailManager().Cancel( item->ThumbnailConversionId() );
             }
         }
     }
@@ -228,9 +237,10 @@ void CVcxHgMyVideosVideoDataUpdater::CancelActivities( TInt aIndex )
 //
 void CVcxHgMyVideosVideoDataUpdater::CancelAndDeleteFetchArray()
     {    
-    for ( TInt i = 0; i < iFetchArray.Count(); i++ )
+    TInt count = iFetchArray.Count();
+    for ( TInt i = 0; i < count; i++ )
         {
-        RemoveItem( i );
+        CancelActivities( i );
         }
     iFetchArray.ResetAndDestroy();
     }
@@ -241,90 +251,66 @@ void CVcxHgMyVideosVideoDataUpdater::CancelAndDeleteFetchArray()
 //
 void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
     {
-    if ( iFetchArray.Count() >= 1 && ! iPaused && iVideoArray.VideoCount() > 0 )
+    if ( !iPaused && iVideoArray.VideoCount() > 0 && iFetchArray.Count() > 0 )
         {
-        TBool go = EFalse;
-
-        // If first item is in idle state, we need to start new operation.
-        if ( iFetchArray[0]->State() == CVcxHgMyVideosVideoData::EVideoDataStateNone )
+        TBool startRefreshTimer = EFalse;
+        TInt peekReqs = 0;
+        TInt getReqs = 0;
+        GetActiveRequestCount( peekReqs, getReqs );
+        TInt reqs = peekReqs + getReqs;
+        if ( reqs < KMaxThumbnailReqs )
             {
-            // It's safe to ignore leave here, because in that case we just use the first index
-			// of fetch array.
-			TRAP_IGNORE( SelectNextIndexL() );
-            go = ETrue;
-            }   
-        // If thumbnail generation has finished, start DRM checking.
-        else if ( iFetchArray[0]->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished )
-            {
-            go = ETrue;
-            }
-        // If first item has completed all operations, remove it and start with second one.
-        else if ( iFetchArray[0]->State() == CVcxHgMyVideosVideoData::EVideoDataStateDrmFinished )
-            {
-            UpdateVideoDataToUiL( *( iFetchArray[0] ) );
-            RemoveItem( 0 );            
-			
-            if ( iFetchArray.Count() >= 1 )
+            CVcxHgMyVideosVideoData::TVideoDataState state =
+                        CVcxHgMyVideosVideoData::EVideoDataStateNone;
+            CVcxHgMyVideosVideoData* prevItem = NULL;
+            CVcxHgMyVideosVideoData* item = NULL;
+            do
                 {
-                TRAP_IGNORE( SelectNextIndexL() );
-                go = ETrue;
-                }
-            }
-
-        if ( go )
-            {
-            if ( iFetchArray[0]->State() == CVcxHgMyVideosVideoData::EVideoDataStateNone )
-                {
-                CMPXMedia* media = iVideoArray.MPXMediaByMPXItemId( iFetchArray[0]->MPXItemId() );
-
-                if ( media && media->IsSupported( KMPXMediaGeneralUri ) )
+                TInt err = KErrNone;
+                prevItem = item;
+                SelectNextIndexL( getReqs >= KMaxThumbnailGetReqs );
+                item = iFetchArray[0];
+                state = item->State();
+                if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone )
                     {
-                    HBufC* mimeType = NULL;
-                    if ( media->IsSupported( KMPXMediaGeneralMimeType ) )
+                    // Try first a quick peek with thumbnail creation denied
+                    TRAP( err, StartThumbnailL( *item, ETrue ) );
+                    if( err == KErrNone )
                         {
-                        mimeType = media->ValueText( KMPXMediaGeneralMimeType ).AllocLC();
+                        ++reqs;
+                        startRefreshTimer = ETrue;
                         }
-                    else
-                        {
-                        mimeType = HBufC::NewLC( 1 );
-                        }
-
-                    CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
-                        media->ValueText( KMPXMediaGeneralUri ), 
-                        *mimeType );
-                    iFetchArray[0]->SetThumbnailConversionId( 
-                        ThumbnailManagerL()->GetThumbnailL( *source ) );
-                    CleanupStack::PopAndDestroy( source );
-                    CleanupStack::PopAndDestroy( mimeType );
-
-                    IPTVLOGSTRING3_LOW_LEVEL( 
-                            "MPX My Videos UI # GetThumbnailL() called thumbID %d for %S.",
-                            iFetchArray[0]->ThumbnailConversionId(),
-                            &media->ValueText( KMPXMediaGeneralUri ) );
-
-                    iRefreshTimer->Cancel();
-                    iRefreshTimer->Start( KRefreshTimerInterval, 
-                                          KRefreshTimerInterval, 
-                                          TCallBack( RefreshTimerCallBack, this ) );
-                    
-                    iFetchArray[0]->SetState(
-                        CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted );
                     }
-                }
-            else if ( iFetchArray[0]->State() == 
-                      CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished )
-                {
-                if ( ! IsActive() )
+                else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished ) 
                     {
-                    SetActive();
-                    iStatus = KRequestPending;
-                    TRequestStatus* stat = &iStatus;
-                    User::RequestComplete(stat, KErrNone);
-
-                    iFetchArray[0]->SetState(
-                        CVcxHgMyVideosVideoData::EVideoDataStateDrmStarted );
+                    if ( getReqs < KMaxThumbnailGetReqs )
+                        {
+                        // Try then get with thumbnail creation allowed
+                        TRAP( err, StartThumbnailL( *item, EFalse ) );
+                        if ( err == KErrNone )
+                            {
+                            ++reqs;
+                            ++getReqs;
+                            startRefreshTimer = ETrue;
+                            }
+                        }
                     }
+                else
+                    {
+                    break; // Nothing to be started
+                    }
+                if ( err != KErrNone )
+                    {
+                    RemoveItem( 0 );
+                    }                
                 }
+            while ( iFetchArray.Count() > 0 && reqs < KMaxThumbnailReqs && prevItem != item );
+            }
+        if ( startRefreshTimer )
+            {
+            iRefreshTimer->Cancel();
+            iRefreshTimer->Start( KRefreshTimerInterval, KRefreshTimerInterval,
+                TCallBack( RefreshTimerCallBack, this ) );
             }
         }
     }
@@ -333,18 +319,18 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
 // CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL()
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoData& videoData )
+void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoData& aVideoData )
     {
-    TInt index = iVideoArray.IndexByMPXItemId( videoData.MPXItemId() );
+    TInt index = iVideoArray.IndexByMPXItemId( aVideoData.MPXItemId() );
     
     if ( index >= 0 && index < iScroller.ItemCount() )
         {       
-        TBool drmUpdate = videoData.DrmProtected();
+        TBool drmUpdate = aVideoData.DrmProtected();
         CHgItem& listItem = iScroller.ItemL( index );
                 
-        if ( videoData.Thumbnail() )
+        if ( aVideoData.Thumbnail() )
             {
-            CGulIcon* thumbnail = CGulIcon::NewL( videoData.Thumbnail( ETrue ) );
+            CGulIcon* thumbnail = CGulIcon::NewL( aVideoData.Thumbnail( ETrue ) );
             listItem.SetIcon( thumbnail ); 
             }
         
@@ -359,7 +345,7 @@ void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoDa
                 TInt indicator1( 0 );
                 TInt indicator2( 0 );
 
-                if ( videoData.ValidDrmRights() )
+                if ( aVideoData.ValidDrmRights() )
                     {
                     drmStatus = TVcxHgMyVideosIndicatorHelper::EIndicatorDrmStatusValid;
                     }
@@ -411,7 +397,8 @@ void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoDa
 //
 TInt CVcxHgMyVideosVideoDataUpdater::IndexByMPXItemId( TMPXItemId aMPXItemId )
     {   
-    for ( TInt i = 0; i < iFetchArray.Count(); i++ )
+    TInt count = iFetchArray.Count();
+    for ( TInt i = 0; i < count; i++ )
         {
         if ( iFetchArray[i]->MPXItemId() == aMPXItemId )
             {
@@ -425,7 +412,7 @@ TInt CVcxHgMyVideosVideoDataUpdater::IndexByMPXItemId( TMPXItemId aMPXItemId )
 // CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL()
 // -----------------------------------------------------------------------------
 // 
-void CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL()
+void CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL( TBool aSelectForPeekOnly )
     {   
     TInt firstIndexOnScreen = iScroller.FirstIndexOnScreen();
     
@@ -454,13 +441,28 @@ void CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL()
             {
             mpxItemId = iVideoArray.ArrayIndexToMpxItemIdL( i );
             index = IndexByMPXItemId( mpxItemId );
-        
-            if ( index > 0 )
+
+            if ( index >= 0 )
                 {
+                CVcxHgMyVideosVideoData* item = iFetchArray[index];
+                CVcxHgMyVideosVideoData::TVideoDataState state = item->State();
                 // Move selected index to first index of the fetch array. 
-                iFetchArray.Insert( iFetchArray[index], 0 );
-                iFetchArray.Remove( index + 1 );
-                break;
+                if ( aSelectForPeekOnly )
+                    {
+                    if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone )
+                        {
+                        iFetchArray.InsertL( item, 0 );
+                        iFetchArray.Remove( index + 1 );
+                        break;
+                        }
+                    }
+                else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone ||
+                          state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished )
+                    {
+                    iFetchArray.InsertL( item, 0 );
+                    iFetchArray.Remove( index + 1 );
+                    break;
+                    }
                 }
             }
         }
@@ -539,25 +541,6 @@ TBool CVcxHgMyVideosVideoDataUpdater::ListRefreshNeeded( TInt aIndex )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoDataUpdater::ThumbnailManagerL()
-// -----------------------------------------------------------------------------
-//
-CThumbnailManager* CVcxHgMyVideosVideoDataUpdater::ThumbnailManagerL()
-    {
-    if ( !iTnEngine )
-        {
-        IPTVLOGSTRING_LOW_LEVEL( 
-            "MPX My Videos UI # CVcxHgMyVideosVideoDataUpdater::ThumbnailManagerL: Creating thumbnail manager." );
-        
-        iTnEngine = CThumbnailManager::NewL( *this );
-        iTnEngine->SetThumbnailSizeL( EVideoListThumbnailSize );
-        iTnEngine->SetDisplayModeL( EColor16M );
-        }
-    
-    return iTnEngine;
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoDataUpdater::ThumbnailPreviewReady()
 // From MThumbnailManagerObserver, not used in Video Center.
 // -----------------------------------------------------------------------------
@@ -579,23 +562,51 @@ void CVcxHgMyVideosVideoDataUpdater::ThumbnailReady( TInt aError,
     IPTVLOGSTRING3_LOW_LEVEL( 
         "MPX My Videos UI # ThumbnailReady(error=%d, thumbID=%d)", aError, aId );
 
-    if ( iFetchArray.Count() > 0 )
+    TInt count = iFetchArray.Count();
+    for( TInt i = 0; i < count; ++i )
         {
-        if ( aError == KErrNone 
-             && aId == iFetchArray[0]->ThumbnailConversionId() )
+        CVcxHgMyVideosVideoData* item = iFetchArray[i];
+        if ( aId == item->ThumbnailConversionId() )
             {
-            // Never delete this, ownership gone to Ganes list
-            iFetchArray[0]->SetThumbnail( aThumbnail.DetachBitmap() );
-            }
-        else
-            {
-            iFetchArray[0]->SetThumbnail( NULL );
-            }
+            if ( aError == KErrNone ||
+			     aError == KErrCompletion || // Accept blacklisted
+                 item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted )
+                {
+                // Never delete this, ownership gone to Ganes list
+                item->SetThumbnail( aError == KErrNone ? aThumbnail.DetachBitmap() : NULL );
+                item->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
+                }
+            else if ( aError == KErrNotFound &&
+            	item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted )
+                {
+                // Try getting thumbnail with create allowed when peek failed with not found
+                item->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished );
+                }
+            else
+                {
+                // Stop thumbnail peek attemps
+                item->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
+                }
 
-        iFetchArray[0]->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
+			// Start DRM check if thumb finished
+            if ( item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished && 
+			     !IsActive() )
+                {
+                SetActive();
+                TRequestStatus* stat = &iStatus;
+                User::RequestComplete( stat, KErrNone );
+                }
+
+            TRAPD( err, ContinueVideoDataFetchingL() );
+            if ( err != KErrNone )
+                {
+                IPTVLOGSTRING2_LOW_LEVEL(
+                "MPX My Videos UI # CVcxHgMyVideosVideoDataUpdater::ThumbnailReady, err = %d",
+                err );
+                }
+            break;
+            }
         }
-
-    TRAP_IGNORE( ContinueVideoDataFetchingL() );
     }
 
 // -----------------------------------------------------------------------------
@@ -605,57 +616,29 @@ void CVcxHgMyVideosVideoDataUpdater::ThumbnailReady( TInt aError,
 //
 void CVcxHgMyVideosVideoDataUpdater::RunL()
     {
-    if ( iFetchArray.Count() > 0 )
+    if ( !iPaused )
         {
-        CMPXMedia* media = iVideoArray.MPXMediaByMPXItemId( iFetchArray[0]->MPXItemId() );
-        
-        if ( media )
+        TInt i = 0;
+        while( i < iFetchArray.Count() )
             {
-            if ( media->IsSupported( KMPXMediaGeneralUri ) )
+            CVcxHgMyVideosVideoData* item = iFetchArray[i];
+            if ( item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished )
                 {
-                TUint32 flags = 0;
-                if ( media->IsSupported( KMPXMediaGeneralFlags ) )
+                TRAP_IGNORE(
                     {
-                    flags = media->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
-                    }
-
-                if ( flags & EVcxMyVideosVideoDrmProtected )
-                    {
-                    ContentAccess::CData* cData = NULL;
-
-                    iFetchArray[0]->SetDrmProtected( ETrue );
-                    iFetchArray[0]->SetValidDrmRights( EFalse );
-
-                    TRAPD( trapError,
-                           cData = CData::NewL( 
-                                       (TVirtualPathPtr) media->ValueText( KMPXMediaGeneralUri ),
-                                       EPeek,
-                                       EContentShareReadWrite ) );                    
-
-                    if ( cData )
-                        {
-                        if ( trapError == KErrNone )
-                            {
-                            TInt intentResult = cData->EvaluateIntent( ContentAccess::EPlay );
-
-                            // Not valid rights should return KErrCANoRights, KErrCANoPermission,
-                            // or in rare cases KErrCAPendingRights. But we don't trust those and
-                            // just compare against KErrNone.
-                            if ( intentResult == KErrNone )
-                                {
-                                iFetchArray[0]->SetValidDrmRights( ETrue );
-                                }
-                            }
-                        delete cData;
-                        }
-                    }
+                    CheckDrmL( *item );
+                    UpdateVideoDataToUiL( *item );
+                    } );
+                delete iFetchArray[i];
+                iFetchArray.Remove(i);
+                }
+            else
+                {
+                ++i;
                 }
             }
-
-        iFetchArray[0]->SetState( CVcxHgMyVideosVideoData::EVideoDataStateDrmFinished );
+        ContinueVideoDataFetchingL();
         }
-
-    ContinueVideoDataFetchingL();
     }
 
 // -----------------------------------------------------------------------------
@@ -669,8 +652,6 @@ TInt CVcxHgMyVideosVideoDataUpdater::RunError( TInt aError )
     
     if ( aError != KErrNone )
         {
-        // Remove current item from fetch array
-        RemoveItem( 0 );            
         }
     return KErrNone;
     }
@@ -682,4 +663,116 @@ TInt CVcxHgMyVideosVideoDataUpdater::RunError( TInt aError )
 //
 void CVcxHgMyVideosVideoDataUpdater::DoCancel()
     {
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::CheckDrmL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::CheckDrmL( CVcxHgMyVideosVideoData& aVideoData )
+    {
+    CMPXMedia* media = iVideoArray.MPXMediaByMPXItemId( aVideoData.MPXItemId() );
+    if ( media && media->IsSupported( KMPXMediaGeneralUri ) )
+        {
+        TUint32 flags = 0;
+        if ( media->IsSupported( KMPXMediaGeneralFlags ) )
+            {
+            flags = media->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
+            }
+        if ( flags & EVcxMyVideosVideoDrmProtected )
+            {
+            aVideoData.SetDrmProtected( ETrue );
+            aVideoData.SetValidDrmRights( EFalse );
+
+            ContentAccess::CData* cData = CData::NewLC( 
+                               (TVirtualPathPtr) media->ValueText( KMPXMediaGeneralUri ),
+                               EPeek,
+                               EContentShareReadWrite );
+            TInt intentResult = cData->EvaluateIntent( ContentAccess::EPlay );
+
+            // Not valid rights should return KErrCANoRights, KErrCANoPermission,
+            // or in rare cases KErrCAPendingRights. But we don't trust those and
+            // just compare against KErrNone.
+            if ( intentResult == KErrNone )
+                {
+                aVideoData.SetValidDrmRights( ETrue );
+                }
+            CleanupStack::PopAndDestroy( cData );
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::GetActiveRequestCount()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::GetActiveRequestCount(
+        TInt& aPeekRequests, TInt& aGetRequests )
+    {
+    aPeekRequests = 0;
+    aGetRequests = 0;
+    TInt count = iFetchArray.Count();
+    for( TInt i = 0; i < count; ++i )
+        {
+        CVcxHgMyVideosVideoData::TVideoDataState state = iFetchArray[i]->State();
+        if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted )
+            {
+            ++aPeekRequests;
+            }
+        else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted )
+            {
+            ++aGetRequests;
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::StartThumbnailL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::StartThumbnailL(
+        CVcxHgMyVideosVideoData& aItem, TBool aPeek )
+    {
+    CMPXMedia* media = iVideoArray.MPXMediaByMPXItemId( aItem.MPXItemId() );
+    if ( media && media->IsSupported( KMPXMediaGeneralUri ) )
+        {
+        TPtrC uri = media->ValueText( KMPXMediaGeneralUri ); 
+        TPtrC mime = media->IsSupported( KMPXMediaGeneralMimeType ) ? 
+                        media->ValueText( KMPXMediaGeneralMimeType ) : KNullDesC;
+        TThumbnailRequestId id = 0;
+        if ( aPeek )
+            {
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
+                    uri, mime );
+            id = iModel.ThumbnailManager().PeekL( *source );
+            CleanupStack::PopAndDestroy( source );
+            }
+        else
+            {
+            // Use shared file handle to minimize thumbnailserver overhead 
+            RFs& fs = iModel.FileServerSessionL();
+            RFile64 file;
+            User::LeaveIfError( file.Open( fs, uri, EFileShareReadersOrWriters ));
+            CleanupClosePushL( file );
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
+                    file, mime );
+            id = iModel.ThumbnailManager().GetL( *source );
+            CleanupStack::PopAndDestroy( source ); 
+            CleanupStack::PopAndDestroy( &file );
+            }
+        aItem.SetThumbnailConversionId( id );
+
+        IPTVLOGSTRING3_LOW_LEVEL( 
+                "MPX My Videos UI # GetThumbnailL() called thumbID %d for %S.",
+                aItem.ThumbnailConversionId(),
+                &media->ValueText( KMPXMediaGeneralUri ) );
+
+        aItem.SetState( aPeek ?
+                CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted :
+                CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted );
+        }
+    else
+        {
+        User::Leave( KErrNotFound );
+        }
     }

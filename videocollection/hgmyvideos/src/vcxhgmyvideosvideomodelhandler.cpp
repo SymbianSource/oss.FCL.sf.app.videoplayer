@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of the License "Eclipse Public License v1.0"
@@ -48,9 +48,6 @@
 #include "vcxhgmyvideosvideodetailsdialog.h"
 #include "vcxhgmyvideosvideolist.h"
 #include "vcxhgmyvideospanics.h"
-
-
-#include <videoplayercustommessage.h>
 
 // CONSTANTS
 const TUint KVcxSecondsInMinute( 60 );
@@ -254,8 +251,7 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
         
         TInt highlight = iScroller.SelectedIndex();
         
-        iScroller.Reset();
-        iScroller.ResizeL( iVideoArray->VideoCount() );
+        ResetScrollerBufferAndItemsL();
         
         iScroller.SetSelectedIndex( highlight );
         
@@ -379,64 +375,6 @@ void CVcxHgMyVideosVideoModelHandler::HandleMarkCommandL( TInt aMarkCommand )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::GetVideoPlayerCustomMessage()
-// -----------------------------------------------------------------------------
-//
-TInt CVcxHgMyVideosVideoModelHandler::GetVideoPlayerCustomMessage(
-        TInt aIndex, TVideoPlayerCustomMessage& aVideoInfo, TInt& aMpxId1 )
-    {
-    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
-
-    if ( ( ! media ) || ( ! media->IsSupported( KMPXMediaGeneralId ) ) )
-        {
-        return KErrNotFound;
-        }
-    
-    TMPXItemId mpxItemId = media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
-    
-    if ( GetVideoPlayerCustomMessage( mpxItemId, aVideoInfo ) != KErrNone )
-        {
-        return KErrNotFound;
-        }
-		
-    aMpxId1 = ( media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) ).iId1;
-
-    return KErrNone;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::GetVideoPlayerCustomMessage()
-// -----------------------------------------------------------------------------
-//
-TInt CVcxHgMyVideosVideoModelHandler::GetVideoPlayerCustomMessage(
-        TMPXItemId& aMpxItemId, TVideoPlayerCustomMessage& aVideoInfo )
-    {
-    CMPXMedia* media = iVideoArray->MPXMediaByMPXItemId( aMpxItemId );
-
-    if ( ! media )
-        {
-        return KErrNotFound;
-        }
-
-    if ( media->IsSupported( KMPXMediaGeneralUri ) )
-        {
-        aVideoInfo.iContent = media->ValueText( KMPXMediaGeneralUri );
-        }
-
-    if ( media->IsSupported( KMPXMediaGeneralTitle ) )
-        {
-        aVideoInfo.iName = media->ValueText( KMPXMediaGeneralTitle );
-        }
-
-    if ( media->IsSupported( KMPXMediaGeneralThumbnail1 ) )
-        {
-        aVideoInfo.iIcon = media->ValueText( KMPXMediaGeneralThumbnail1 );
-        }
-
-    return KErrNone;
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoModelHandler::VideoAgeProfileL()
 // -----------------------------------------------------------------------------
 //
@@ -495,70 +433,6 @@ TBool CVcxHgMyVideosVideoModelHandler::FindVideoMpxIdL( const TDesC& aVideoPath,
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::ClearNewVideoIndicatorL()
-// Informative call about video being played. Method removes possible new indicator
-// from video.
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::ClearNewVideoIndicatorL( TInt aIndex )
-    {
-    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
-
-    if ( media )
-        {
-        if ( media->IsSupported( KMPXMediaGeneralFlags ) &&
-             media->IsSupported( KMPXMediaGeneralId ) )
-            {
-            TUint32 flags = media->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
-            if ( flags & EVcxMyVideosVideoNew )
-                {
-                flags &= ~EVcxMyVideosVideoNew;
-                CVcxHgMyVideosCollectionClient& collectionClient = iModel.CollectionClient();
-                collectionClient.SetAttributeL( *media, KMPXMediaGeneralFlags, flags );
-                
-                if ( media->IsSupported( KVcxMediaMyVideosOrigin ) && 
-                     ( media->ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ) == EVcxMyVideosOriginDownloaded ) )
-                    {
-                    iModel.ResetDownloadNotification();
-                    }
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::ClearNewVideoIndicatorL()
-// Informative call about video being played. Method removes possible new indicator
-// from video.
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::ClearNewVideoIndicatorL( TMPXItemId& aMpxItemId )
-    {
-    CMPXMedia* media = iVideoArray->MPXMediaByMPXItemId( aMpxItemId );
-
-    if ( media )
-        {
-        if ( media->IsSupported( KMPXMediaGeneralFlags ) &&
-             media->IsSupported( KMPXMediaGeneralId ) )
-            {
-            TUint32 flags = media->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
-            if ( flags & EVcxMyVideosVideoNew )
-                {
-                flags &= ~EVcxMyVideosVideoNew;
-                CVcxHgMyVideosCollectionClient& collectionClient = iModel.CollectionClient();
-                collectionClient.SetAttributeL( *media, KMPXMediaGeneralFlags, flags );
-                
-                if ( media->IsSupported( KVcxMediaMyVideosOrigin ) && 
-                     ( media->ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ) == EVcxMyVideosOriginDownloaded ) )
-                    {
-                    iModel.ResetDownloadNotification();
-                    }
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoModelHandler::ShowVideoDetailsDialogL()
 // -----------------------------------------------------------------------------
 //
@@ -580,89 +454,6 @@ void CVcxHgMyVideosVideoModelHandler::ShowVideoDetailsDialogL()
 CMyVideosIndicator& CVcxHgMyVideosVideoModelHandler::VideoIndicator()
     {
     return *iVideoIndicator;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::LastPlaybackPosition()
-// -----------------------------------------------------------------------------
-//
-TInt CVcxHgMyVideosVideoModelHandler::LastPlaybackPosition( const TDesC& aContentUri )
-    {
-    TInt position = 0;
-    
-    if ( CIptvUtil::LastPlaybackPositionFeatureSupported() )
-        {
-        CMPXMedia* media = iVideoArray->MPXMediaByUri( aContentUri );
-
-        if ( media )
-            {
-            if ( media->IsSupported( KMPXMediaGeneralLastPlaybackPosition ) )
-                {
-                position = *media->Value<TInt>( KMPXMediaGeneralLastPlaybackPosition );            
-                }
-            }
-        IPTVLOGSTRING3_LOW_LEVEL( "MPX My Videos UI # Found position %d for clip %S", 
-                                  position, &aContentUri );
-        }
-    else
-        {
-        IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # LastPlaybackPosition() - Feature is not supported, position = 0" );
-        }		
-
-    return position;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::SetLastPlaybackPositionL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::SetLastPlaybackPositionL( const TDesC& aContentUri,
-                                                                TInt aPosition )
-    {
-    if ( CIptvUtil::LastPlaybackPositionFeatureSupported() )
-        {
-        CMPXMedia* media = iVideoArray->MPXMediaByUri( aContentUri );
-
-        // If media is not in our own list, it was launched from external source. In this
-        // case the MPX Media object could be fetched on background to allow position storing.
-        if ( ! media )
-            {
-            media = iModel.CollectionClient().GetLatestFetchedMpxMediaL();
-
-            if ( media )
-                {
-                TBool match( EFalse );            
-                if ( media->IsSupported( KMPXMediaGeneralUri ) )
-                    {
-                    if ( aContentUri.CompareF( media->ValueText( KMPXMediaGeneralUri ) ) == 0 )
-                        {
-                        match = ETrue;
-                        }
-                    }
-                if ( ! match )
-                    {
-                    media = NULL;
-                    }
-                }
-            }
-
-        if ( media )
-            {
-            IPTVLOGSTRING3_LOW_LEVEL( "MPX My Videos UI # Storing position %d for clip %S", 
-                                      aPosition, &aContentUri );
-
-            // Change data type of last playback position?
-
-            iModel.CollectionClient().SetAttributeL( *media, 
-                                                     KMPXMediaGeneralLastPlaybackPosition, 
-                                                     TUint32( aPosition ) );
-            }
-        iModel.UpdateLastWatchedPlayPositionL( aPosition );    
-        }
-    else
-	    {
-        IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # SetLastPlaybackPositionL() - Feature is not supported" ); 
-        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -882,11 +673,17 @@ void CVcxHgMyVideosVideoModelHandler::HandleRequestL( TInt aRequestStart,
     
     IPTVLOGSTRING3_LOW_LEVEL(
         "MPX My Videos UI # CVcxHgMyVideosVideoModelHandler::HandleRequestL - aRequestStart: %d, aRequestEnd: %d", requestStart, requestEnd );
-        
+
+    TBool flushNeeded = EFalse;
     for ( TInt i = requestStart; i <= requestEnd; i++ )
         {
         UpdateVideoListItemL( i );
-        iDataUpdater->RequestDataL( iVideoArray->ArrayIndexToMpxItemIdL( i ) );
+        iDataUpdater->AddToRequestBufferL( iVideoArray->ArrayIndexToMpxItemIdL( i ) );
+        flushNeeded = ETrue;
+        }
+    if ( flushNeeded )
+        {
+        iDataUpdater->FlushRequestBufferL();
         }
 
     iScroller.DrawDeferred();
@@ -1373,7 +1170,7 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
             }
         else
 	        {
-            iScroller.ResizeL( videoCount );
+            ResizeScrollerL( iVideoArray->VideoCount() );
             }
             		
         TInt highlight( KErrNotFound );
@@ -1609,5 +1406,52 @@ void CVcxHgMyVideosVideoModelHandler::UpdateScrollbarTypeL( const TVcxMyVideosSo
         {
         // No strip
         iScroller.SetScrollBarTypeL( CHgScroller::EHgScrollerScrollBar );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::ResetScrollerItemsL()
+// -----------------------------------------------------------------------------
+// 
+void CVcxHgMyVideosVideoModelHandler::ResetScrollerItemsL()
+    {
+    // Reset items for refetch
+    TInt count = iScroller.ItemCount();
+    for ( TInt i = 0; i < count; ++i )
+        {
+        iScroller.ItemL( i ).SetIcon( NULL );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::ResetScrollerBufferAndItemsL()
+// -----------------------------------------------------------------------------
+// 
+void CVcxHgMyVideosVideoModelHandler::ResetScrollerBufferAndItemsL()
+    {
+    // Reset scroll buffer and items for refetch
+    iScroller.DisableScrollBuffer();
+    iScroller.EnableScrollBufferL( *this, KHgBufferSize, KHgBufferTreshold );
+    ResetScrollerItemsL();
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::ResizeScrollerL()
+// -----------------------------------------------------------------------------
+// 
+void CVcxHgMyVideosVideoModelHandler::ResizeScrollerL( TInt aNewItemCount )
+    {
+    if (iScroller.ItemCount() > 0)
+        {
+        // Reset scroller without time consuming scaling of icons never shown
+        iScroller.DisableScrollBuffer();
+        iScroller.ResizeL( aNewItemCount );
+        iScroller.EnableScrollBufferL( *this, KHgBufferSize, KHgBufferTreshold );
+        ResetScrollerItemsL();
+        }
+    else
+        {
+        // CHgScroller::Reset() was already called, no need to reset tricks
+        iScroller.ResizeL( aNewItemCount );
         }
     }

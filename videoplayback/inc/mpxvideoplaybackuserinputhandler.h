@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -37,6 +37,7 @@ class CMPXVideoPlaybackControlsController;
 class CRemConInterfaceSelector; // Side volume key
 class CRemConCoreApiTarget;
 class CMPXVideoPlaybackContainer;
+class CHWRMLight;
 
 // CLASS DECLARATION
 
@@ -159,7 +160,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         CPeriodic*                              iDisplayTimer;          // Timer to timeout the lights time-out
         TInt                                    iDisplayTimeOut;        // Value of the lights time-out
 
-
+        CHWRMLight*                             iLight;
         CMPXVideoPlaybackContainer*             iContainer;	  // not owned
 
 

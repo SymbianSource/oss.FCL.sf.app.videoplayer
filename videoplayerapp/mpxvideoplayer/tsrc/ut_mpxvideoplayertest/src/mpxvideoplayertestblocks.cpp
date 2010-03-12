@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#7 %
+// Version : %version: ou1cpsw#10 %
 
 // [INCLUDE FILES] - do not remove
 #include <e32svr.h>
@@ -59,19 +59,15 @@ TInt Cmpxvideoplayer_test::RunMethodL( CStifItemParser& aItem )
         ENTRY( "CreateGenericParametersTerminate", Cmpxvideoplayer_test::CreateGenericParametersTerminateL ),
         ENTRY( "OpenFile", Cmpxvideoplayer_test::OpenFileL ),
         ENTRY( "OpenMedia", Cmpxvideoplayer_test::OpenMediaL ),
-        ENTRY( "SetDefaultAccessPoint", Cmpxvideoplayer_test::SetDefaultAccessPointL ),
-        ENTRY( "SetQueryAccessPoint", Cmpxvideoplayer_test::SetQueryAccessPointL ),
         ENTRY( "SetGenericParamAccessPoint", Cmpxvideoplayer_test::SetGenericParamAccessPointL ),
         ENTRY( "OpenFileEmbeddedPdl", Cmpxvideoplayer_test::OpenFileEmbeddedPdlL ),
         ENTRY( "HandleMessageEmbeddedPdl", Cmpxvideoplayer_test::HandleMessageEmbeddedPdlL ),
-        ENTRY( "PrepareCloseMpx", Cmpxvideoplayer_test::PrepareCloseMpxL ),
         ENTRY( "StartStandAlone", Cmpxvideoplayer_test::StartStandAloneL ),
         ENTRY( "HandleCollectionMessage", Cmpxvideoplayer_test::HandleCollectionMessageL ),
         ENTRY( "HandleCollectionMedia", Cmpxvideoplayer_test::HandleCollectionMediaL ),
         ENTRY( "HandleSoftkeyBack", Cmpxvideoplayer_test::HandleSoftkeyBackL ),
         ENTRY( "HandleOpenPlaylist", Cmpxvideoplayer_test::HandleOpenPlaylistL ),
         ENTRY( "HandleOpenMedia", Cmpxvideoplayer_test::HandleOpenMediaL ),
-        ENTRY( "ProcessActivationMessage", Cmpxvideoplayer_test::ProcessActivationMessageL ),
         ENTRY( "HandleViewActivation", Cmpxvideoplayer_test::HandleViewActivation ),
         ENTRY( "ProcessCommandParameters", Cmpxvideoplayer_test::ProcessCommandParametersL ),
         ENTRY( "HandleMessageActivationMessageL", Cmpxvideoplayer_test::HandleMessageActivationMessageL ),
@@ -123,24 +119,6 @@ TInt Cmpxvideoplayer_test::OpenMediaL( CStifItemParser& aItem )
 }
 
 // -----------------------------------------------------------------------------
-//   Cmpxvideoplayer_test::SetDefaultAccessPointL
-// -----------------------------------------------------------------------------
-//
-TInt Cmpxvideoplayer_test::SetDefaultAccessPointL( CStifItemParser& aItem )
-{
-    return iAppUiEngineTester->SetDefaultAccessPointL( aItem );
-}
-
-// -----------------------------------------------------------------------------
-//   Cmpxvideoplayer_test::SetQueryAccessPointL
-// -----------------------------------------------------------------------------
-//
-TInt Cmpxvideoplayer_test::SetQueryAccessPointL( CStifItemParser& aItem )
-{
-    return iAppUiEngineTester->SetQueryAccessPointL( aItem );
-}
-
-// -----------------------------------------------------------------------------
 //   Cmpxvideoplayer_test::SetGenericParamAccessPointL
 // -----------------------------------------------------------------------------
 //
@@ -165,15 +143,6 @@ TInt Cmpxvideoplayer_test::OpenFileEmbeddedPdlL( CStifItemParser& aItem )
 TInt Cmpxvideoplayer_test::HandleMessageEmbeddedPdlL( CStifItemParser& aItem )
 {
     return iAppUiEngineTester->HandleMessageEmbeddedPdlL( aItem );
-}
-
-// -----------------------------------------------------------------------------
-//   Cmpxvideoplayer_test::PrepareCloseMpxL
-// -----------------------------------------------------------------------------
-//
-TInt Cmpxvideoplayer_test::PrepareCloseMpxL( CStifItemParser& aItem )
-{
-    return iAppUiEngineTester->PrepareCloseMpxL( aItem );
 }
 
 // -----------------------------------------------------------------------------
@@ -228,15 +197,6 @@ TInt Cmpxvideoplayer_test::HandleOpenPlaylistL( CStifItemParser& aItem )
 TInt Cmpxvideoplayer_test::HandleOpenMediaL( CStifItemParser& aItem )
 {
     return iAppUiEngineTester->HandleOpenMediaL( aItem );
-}
-
-// -----------------------------------------------------------------------------
-//   Cmpxvideoplayer_test::ProcessActivationMessageL
-// -----------------------------------------------------------------------------
-//
-TInt Cmpxvideoplayer_test::ProcessActivationMessageL( CStifItemParser& aItem )
-{
-    return iAppUiEngineTester->ProcessActivationMessageL( aItem );
 }
 
 // -----------------------------------------------------------------------------

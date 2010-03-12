@@ -135,18 +135,8 @@ CMPXMedia* CVcxMyVideosVideoCache::CreateVideoListByOriginL( TUint8 aOrigin )
         {
         media = (*allVideosArray)[i];
 
-        TUint8 mediaOrigin = EVcxMyVideosOriginOther;
-
-        if ( media->IsSupported( KVcxMediaMyVideosOrigin ) )
-            {
-            mediaOrigin = *(media->Value<TUint8>( KVcxMediaMyVideosOrigin ));
-            
-            if ( mediaOrigin == EVcxMyVideosOriginSideLoaded )
-                {
-                mediaOrigin = EVcxMyVideosOriginOther;
-                }
-            }
-            
+        TUint8 mediaOrigin = TVcxMyVideosCollectionUtil::OriginL( *media );
+                    
         if ( mediaOrigin == aOrigin )
             {
             filteredVideosArray->AppendL( *media );
@@ -807,14 +797,16 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
                 TBool modified = EFalse;
                 iCollection.CategoriesL().UpdateCategoryNewVideoNameAndDateL(
                         *videoInCache, modified );
-    
+
+                TUint8 origin = TVcxMyVideosCollectionUtil::OriginL( *videoInCache );
+                
                 iCollection.CategoriesL().NewVideoFlagChangedL(
                         oldFlags, newFlags,
-                        videoInCache->ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ),
+                        origin,
                         modified );
                 
                 if ( !(newFlags & EVcxMyVideosVideoNew) && 
-                        TVcxMyVideosCollectionUtil::OriginL( *videoInCache ) == EVcxMyVideosOriginDownloaded )
+                        origin == EVcxMyVideosOriginDownloaded )
                     {
                     MPX_DEBUG1("CVcxMyVideosVideoCache::UpdateVideoL - Count of new videos in Downloaded origin has decreased, sending mediator event to notification launcher");                   
                     iCollection.NotifyNewVideosCountDecreasedL( *videoInCache );

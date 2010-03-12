@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -107,14 +107,14 @@ void CMPSettingsMainView::HandleCommandL(TInt aCommand)
             HandleListBoxSelectionL();
             break;
         case EAknSoftkeyBack:
-            if (iGsPlugin)
-            {
+            if ( iGsPlugin )
+                {
                 AppUi()->ActivateLocalViewL( KGSVideoPluginUid );       
-            }
+                }
             else
-            {
+                {
                 AppUi()->HandleCommandL(EEikCmdExit);
-            }
+                }
             break;
         default:
             AppUi()->HandleCommandL(aCommand);
@@ -210,7 +210,10 @@ void CMPSettingsMainView::HandleListBoxSelectionL()
         view->SetCurrentItem(KMPSettTopItemIndex);
         }
 
-    AppUi()->ActivateLocalViewL(iViewIds->At(iCurrentItem));
+    if ( iCurrentItem < count )
+        {
+        AppUi()->ActivateLocalViewL(iViewIds->At(iCurrentItem));
+        }
     }
 
 

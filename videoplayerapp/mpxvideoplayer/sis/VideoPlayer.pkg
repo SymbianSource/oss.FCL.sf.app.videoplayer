@@ -1,4 +1,4 @@
-﻿;
+;
 ; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 ; All rights reserved.
 ; This component and the accompanying materials are made available
@@ -41,13 +41,6 @@
 "/epoc32/data/Z/resource/apps/mpxvideoplayer_aif.mif"                   - "!:/resource/apps/mpxvideoplayer_aif.mif"
 
 ;
-; Video Player launcher
-;
-"/epoc32/release/armv5/urel/videoplayerlauncher.exe"                    - "!:/sys/bin/videoplayerlauncher.exe"
-"/epoc32/data/z/resource/apps/videoplayerlauncher.rsc"                  - "!:/resource/apps/videoplayerlauncher.rsc"
-"/epoc32/data/z/private/10003a3f/apps/videoplayerlauncher_reg.rsc"      - "!:/private/10003a3f/import/apps/videoplayerlauncher_reg.rsc"
-
-;
 ; Playback Plugin
 ;
 "/epoc32/release/armv5/urel/mpxvideohelixplayback.dll"                  - "!:/sys/bin/mpxvideohelixplayback.dll"
@@ -88,20 +81,6 @@
 "/epoc32/data/z/private/10003a3f/apps/lwplayer_reg.rsc"                 - "!:/private/10003a3f/import/apps/lwplayer_reg.rsc" 
 
 ;
-; Matrix (Homescreen)
-;
-"/epoc32/release/armv5/urel/vcxnsahplugin.dll"                          - "!:/sys/bin/vcxnsahplugin.dll"
-"/epoc32/data/z/resource/plugins/vcxnsahplugin.rsc"                     - "!:/resource/plugins/vcxnsahplugin.rsc"
-"/epoc32/release/armv5/urel/vcxnscontentharvesterplugin.dll"            - "!:/sys/bin/vcxnscontentharvesterplugin.dll"
-"/epoc32/data/z/resource/plugins/vcxnscontentharvesterplugin.rsc"       - "!:/resource/plugins/vcxnscontentharvesterplugin.rsc"
-"/epoc32/data/z/resource/apps/videocontentharvester.rsc"             - "!:/resource/apps/videocontentharvester.rsc"
-"/epoc32/data/z/resource/apps/videosuiteres.rsc"                        - "!:/resource/apps/videosuiteres.rsc"
-"/epoc32/include/videosuiteres.rsg"                                     - "!:/resource/apps/videosuiteres.rsg"
-"/epoc32/data/Z/resource/apps/videosuite.mif"                           - "!:/resource/apps/videosuite.mif"
-"../../../homescreenplugins/videosuiteconf/data/suite.xml"              - "!:/private/101f4cd2/import/suites/tvvideosuite/suite.xml"
-"../../../homescreenplugins/videosuiteconf/data/vcns_matrix_items.xml"  - "!:/private/101f4cd2/import/suites/tvvideosuite/vcns_matrix_items.xml"
-
-;
 ; File details dialog
 ;
 "/epoc32/release/armv5/urel/MPFileDetailsDialog.dll"                    - "!:/sys/bin/MPFileDetailsDialog.dll"
@@ -112,22 +91,6 @@
 ;
 "/epoc32/release/armv5/urel/filedetailsplugin.dll"                      - "!:/sys/bin/filedetailsplugin.dll"
 "/epoc32/data/z/resource/plugins/filedetailsplugin.rsc"                 - "!:/resource/plugins/filedetailsplugin.rsc"
-
-;
-; Iptv Server
-;
-"/epoc32/release/armv5/urel/iptvserver.exe"                             - "!:/sys/bin/iptvserver.exe"
-
-;
-; Iptv Client API
-;
-"/epoc32/release/armv5/urel/iptvclientapi.dll"                          - "!:/sys/bin/iptvclientapi.dll"
-
-;
-; Iptv Utils
-;
-"/epoc32/release/armv5/urel/iptvutil.dll"                               - "!:/sys/bin/iptvutil.dll"
-"/epoc32/data/z/resource/apps/iptvmimesupport.rsc"                      - "!:/resource/apps/iptvmimesupport.rsc"
 
 ;
 ; MyVideos Collection Plugin
@@ -146,64 +109,6 @@
 ;
 "/epoc32/release/armv5/urel/cseschedulerserver.exe"                     - "!:/sys/bin/cseschedulerserver.exe"
 "/epoc32/release/armv5/urel/cseschedulerclient.dll"                     - "!:/sys/bin/cseschedulerclient.dll"
-
-;
-; View Message Utility
-;
-"/epoc32/release/armv5/urel/vcxviewmessageutility.dll"                  - "!:/sys/bin/vcxviewmessageutility.dll"
-
-;
-; Vcx Notifier
-;
-"/epoc32/release/armv5/urel/vcxnotifierplugin.dll"                      - "!:/sys/bin/vcxnotifierplugin.dll"
-"/epoc32/data/z/resource/plugins/vcxnotifierplugin.rsc"                 - "!:/resource/plugins/vcxnotifierplugin.rsc"
-"/epoc32/data/z/resource/plugins/vcxnotifier.rsc"                       - "!:/resource/plugins/vcxnotifier.rsc"
-
-;
-; Scheduled Download Plugin
-;
-"/epoc32/release/armv5/urel/iptvscheduleddownloadplugin.dll"            - "!:/sys/bin/iptvscheduleddownloadplugin.dll"
-"/epoc32/data/z/resource/plugins/iptvscheduleddownloadplugin.rsc"       - "!:/resource/plugins/iptvscheduleddownloadplugin.rsc"
-
-;
-; Provisioning App
-;
-"/epoc32/release/armv5/urel/iptvprovisioningapp.exe"                    - "!:/sys/bin/iptvprovisioningapp.exe"
-"/epoc32/data/z/private/10003a3f/apps/iptvprovisioningapp_reg.rsc"      - "!:/private/10003a3f/import/apps/iptvprovisioningapp_reg.rsc"
-"/epoc32/data/z/resource/apps/iptvprovisioningapp.rsc"                  - "!:/resource/apps/iptvprovisioningapp.rsc"
-
-;
-; Provisioning Processor
-;
-"/epoc32/release/armv5/urel/iptvprovisioningprocessor.dll"              - "!:/sys/bin/iptvprovisioningprocessor.dll"
-
-;
-; OMA Provisioning
-;
-"/epoc32/release/armv5/urel/iptvomaprovisioningadapter.dll"             - "!:/sys/bin/iptvomaprovisioningadapter.dll"
-"/epoc32/data/z/resource/plugins/iptvomaprovisioningadapter.rsc"        - "!:/resource/plugins/iptvomaprovisioningadapter.rsc"
-
-; 
-; Provisioning Recognizer
-;
-"/epoc32/release/armv5/urel/iptvprovrec.dll"                            - "!:/sys/bin/iptvprovrec.dll"
-"/epoc32/data/z/resource/plugins/iptvprovrec.rsc"                       - "!:/resource/plugins/iptvprovrec.rsc"
-
-;
-; RSS Plugin
-;
-"/epoc32/release/armv5/urel/iptvrssplugin.dll"                          - "!:/sys/bin/iptvrssplugin.dll"
-"/epoc32/data/z/resource/plugins/iptvrssplugin.rsc"                     - "!:/resource/plugins/iptvrssplugin.rsc"
-
-;
-; VOD UI Engine
-;
-"/epoc32/release/armv5/urel/vcxnsuiengine.dll"                          - "!:/sys/bin/vcxnsuiengine.dll"
-
-; 
-; LiveTV Utils
-;
-"/epoc32/release/armv5/urel/livetvutils.dll"                            - "!:/sys/bin/livetvutils.dll"
 
 ;
 ; MediaSettings
@@ -241,47 +146,22 @@
 ;
 ; View Plugins
 ;
-"/epoc32/release/armv5/urel/vcxnssettingsplugin.dll"                    - "!:/sys/bin/vcxnssettingsplugin.dll" 
-"/epoc32/data/z/resource/plugins/vcxnssettingsplugin.rsc"               - "!:/resource/plugins/vcxnssettingsplugin.rsc"
-
-"/epoc32/release/armv5/urel/vcxhgvodplugin.dll"                         - "!:/sys/bin/vcxhgvodplugin.dll"
-"/epoc32/data/z/resource/plugins/vcxhgvodplugin.rsc"                    - "!:/resource/plugins/vcxhgvodplugin.rsc"
-
 "/epoc32/release/armv5/urel/vcxhgmyvideosplugin.dll"                    - "!:/sys/bin/vcxhgmyvideosplugin.dll"
 "/epoc32/data/z/resource/plugins/vcxhgmyvideosplugin.rsc"               - "!:/resource/plugins/vcxhgmyvideosplugin.rsc"
-
-"/epoc32/release/armv5/urel/vcxnsscheduleplugin.dll"                    - "!:/sys/bin/vcxnsscheduleplugin.dll"
-"/epoc32/data/z/resource/plugins/vcxnsscheduleplugin.rsc"               - "!:/resource/plugins/vcxnsscheduleplugin.rsc"
 
 ;
 ; Views
 ;
-"/epoc32/release/armv5/urel/vcxnssettingsview.dll"                      - "!:/sys/bin/vcxnssettingsview.dll"
-"/epoc32/data/z/resource/apps/vcxnssettingsview.rsc"                    - "!:/resource/apps/vcxnssettingsview.rsc"
-
 "/epoc32/release/armv5/urel/vcxhgmyvideos.dll"                          - "!:/sys/bin/vcxhgmyvideos.dll"
 "/epoc32/data/z/resource/apps/vcxhgmyvideos.rsc"                        - "!:/resource/apps/vcxhgmyvideos.rsc"
 "/epoc32/data/z/resource/apps/vcxhgmyvideos.mif"                        - "!:/resource/apps/vcxhgmyvideos.mif"
 "/epoc32/data/z/resource/apps/vcxhgmyvideosicons.mif"                   - "!:/resource/apps/vcxhgmyvideosicons.mif"
-
-"/epoc32/release/armv5/urel/vcxhgvodui.dll"                             - "!:/sys/bin/vcxhgvodui.dll"
-"/epoc32/data/z/resource/apps/vcxhgvodui.rsc"                           - "!:/resource/apps/vcxhgvodui.rsc"
-
-"/epoc32/data/z/resource/apps/vcxhgvoddefaulticons.mif"                 - "!:/resource/apps/vcxhgvoddefaulticons.mif"
-
-"/epoc32/release/armv5/urel/vcxnsscheduleview.dll"                      - "!:/sys/bin/vcxnsscheduleview.dll"
-"/epoc32/data/z/resource/apps/vcxnsscheduleview.rsc"                    - "!:/resource/apps/vcxnsscheduleview.rsc"
 
 ;
 ; My Videos indicator plugin
 ;
 "/epoc32/release/armv5/urel/myvideosindicatorplugin.dll"                - "!:/sys/bin/myvideosindicatorplugin.dll"
 "/epoc32/data/z/resource/plugins/myvideosindicatorplugin.rsc"           - "!:/resource/plugins/myvideosindicatorplugin.rsc"
-
-;
-; Default VOD services 
-;
-"/epoc32/data/z/private/102750D5/services.xml"                          - "c:/private/102750D5/services.xml"
 
 ;
 ; Help files
@@ -295,21 +175,12 @@
 ; Language specific files for Video Player application
 ; If user want to create sis files for a specific variant then add supported languages here 
 ;
-"/epoc32/data/z/resource/apps/vcxnssettingsview.r01"                    - "!:/resource/apps/vcxnssettingsview.r01"
 "/epoc32/data/z/resource/mediasettings.r01"                             - "!:/resource/mediasettings.r01"
 "/epoc32/data/z/resource/apps/MPFileDetails.r01"                        - "!:/resource/apps/MPFileDetails.r01"
-"/epoc32/data/z/resource/apps/videosuiteres.r01"                        - "!:/resource/apps/videosuiteres.r01" 
 "/epoc32/data/z/resource/apps/mediasettings.r01"                        - "!:/resource/apps/mediasettings.r01" 
 "/epoc32/data/z/resource/apps/vcxhgmyvideos.r01"                        - "!:/resource/apps/vcxhgmyvideos.r01"
-"/epoc32/data/z/resource/apps/vcxhgvodui.r01"                           - "!:/resource/apps/vcxhgvodui.r01"
-"/epoc32/data/z/resource/plugins/iptvomaprovisioningadapter.r01"        - "!:/resource/plugins/iptvomaprovisioningadapter.r01"
-"/epoc32/data/z/resource/apps/iptvprovisioningapp.r01"                  - "!:/resource/apps/iptvprovisioningapp.r01"
-"/epoc32/data/z/resource/apps/vcxnsscheduleview.r01"                    - "!:/resource/apps/vcxnsscheduleview.r01"
-"/epoc32/data/z/resource/plugins/vcxnotifier.r01"                       - "!:/resource/plugins/vcxnotifier.r01"
 "/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.r01"             - "!:/resource/apps/mpxvideoplaybackcontrols.r01"
 "/epoc32/data/z/resource/apps/mpxvideoplaybackviews.r01"                - "!:/resource/apps/mpxvideoplaybackviews.r01"
 "/epoc32/data/z/resource/apps/lwplayer.r01"                             - "!:/resource/apps/lwplayer.r01"
 "/epoc32/data/z/resource/apps/mpxvideoplayer.r01"                       - "!:/resource/apps/mpxvideoplayer.r01"
-"/epoc32/data/z/resource/apps/videoplayerlauncher.r01"                  - "!:/resource/apps/videoplayerlauncher.r01"
-"/epoc32/data/z/resource/apps/videocontentharvester.r01"                - "!:/resource/apps/videocontentharvester.r01"
 

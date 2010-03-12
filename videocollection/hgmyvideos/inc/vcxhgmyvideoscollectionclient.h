@@ -171,30 +171,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          * @param aMpxItemId MPX item id
          */
         void PlayVideoL( TMPXItemId aMpxItemId );
-
-        /**
-         * Sets attribute value to MPX Collection.
-         * 
-         * @param aMedia MPX Media object to change.
-         * @param aAttribute MPX attribute to change.
-         * @param aValue New value for attribute.
-         */
-        void SetAttributeL( const CMPXMedia& aMedia,
-                            const TMPXAttribute& aAttribute,
-                            const TUint32 aValue );
-        
-        void SetAttributeL( const CMPXMedia& aMedia,
-                            const TMPXAttribute& aAttribute,
-                            const TReal32 aValue );        
-
-        /**
-         * Returns MPX Media object most recently requested with method call
-         * FetchMpxMediaByMpxIdL().
-         * 
-         * @return Latest MPX Media object or NULL.
-         */
-        CMPXMedia* GetLatestFetchedMpxMediaL();
-        
+       
         /**
          * Fetches MPX Media object based on MPX ID. Fetched MPX Media object
          * is returned through callback interface MVcxHgMyVideosVideoModelObserver.
@@ -344,6 +321,14 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
         void HandleGetMediasByMpxIdRespL( CMPXMessage* aMessage, TInt aError );
         
         /**
+         * Handles list complete message, called by HandleSingleCollectionMessageL().
+         * 
+         * @param aMessage collection message.
+         * @param aError system error code. 
+         */
+        void HandleMyVideosListCompleteL( CMPXMessage* aMessage, TInt aError );
+        
+        /**
          * Handles response message when video details requested.
          * 
          * @param aMessage collection message.
@@ -396,12 +381,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          */
         TVcxHgMyVideosCollectionCommand iPendingCommand;
         
-        /**
-         * Variable for storing latest MPX Media object fetched separately.
-         * Own.
-         */
-        CMPXMedia* iLatestMpxMedia;
-        
 #if defined(_DEBUG) && IPTV_LOGGING_METHOD != 0
     private:
         /**
@@ -409,6 +388,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          */
         void DebugPrintVideoListL( CMPXMediaArray* aVideoArray );
 #endif // _DEBUG && IPTV_LOGGING_METHOD        
+
     };
 
 #endif // VCXHGMYVIDEOSCOLLECTIONCLIENT_H

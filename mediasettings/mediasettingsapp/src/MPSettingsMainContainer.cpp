@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 
@@ -43,7 +43,7 @@
 #include	"mpxlog.h"
 
 // CONSTANTS
-const TInt KIconArrayGranularity = 3;
+const TInt KIconArrayGranularity = 2;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -226,13 +226,7 @@ void CMPSettingsMainContainer::MakeIconArrayL()
         EMbmMediasettingsQgn_prop_set_mp_stream_sub, 
         EMbmMediasettingsQgn_prop_set_mp_stream_sub_mask );
   
-    AppendIconToArrayL( 
-        icons, 
-        KAknsIIDQgnPropSetMpVideoSub, 
-        fileName, 
-        EMbmMediasettingsQgn_prop_set_service, 
-        EMbmMediasettingsQgn_prop_set_service_mask );
-
+    
     CleanupStack::Pop(); // icons
     CleanupStack::PopAndDestroy(); // mbmpath
 

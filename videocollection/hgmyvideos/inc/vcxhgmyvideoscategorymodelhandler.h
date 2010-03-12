@@ -23,10 +23,25 @@
 // INCLUDE FILES
 #include "vcxhgmyvideoscategorymodelobserver.h"
 
+
+#include <thumbnailmanager.h>
+#include <thumbnailmanagerobserver.h>
+
 // FORWARD DECLARATIONS
 class CMPXMedia;
 class CVcxHgMyVideosModel;
 class CHgScroller;
+class CMPXMedia;
+class CMyVideosIndicator;
+class CVcxHgMyVideosThumbnailManager;
+
+// ENUMERATIONS
+enum TVcxHgMyVideosCategoryItemType
+    {
+    TVcxHgMyVideosCategoryItemTypeUndefined = 0,
+    TVcxHgMyVideosCategoryItemTypeUid,
+    TVcxHgMyVideosCategoryItemTypeUrl
+    };
 
 // CLASS DECLARATION
 
@@ -37,7 +52,8 @@ class CHgScroller;
  */
 NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) : 
         public CBase,
-        public MVcxHgMyVideosCategoryModelObserver
+        public MVcxHgMyVideosCategoryModelObserver,
+        public MThumbnailManagerObserver
     {
     public:
         
@@ -47,7 +63,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * @param aModel Application model
          * @param aScroller Hg list component.
          */
-        CVcxHgMyVideosCategoryModelHandler(
+        static CVcxHgMyVideosCategoryModelHandler* NewL(
             CVcxHgMyVideosModel& aModel,
             CHgScroller& aScroller );  
         
@@ -86,6 +102,41 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          */
         TInt ResolveCategoryId( TInt aScrollerIndex );
         
+        /**
+         * Plays last watched videdo.
+         * 
+         * @param Ganes scroller list index
+         * @return Index of category
+         */
+        void PlayLastWatchedVidedoL();
+        
+        /**
+         * Returns video indicator.
+         * 
+         * @return Reference to video indicator.
+         */
+        CMyVideosIndicator& VideoIndicatorL();
+        
+        /**
+         * Handles "ExtraItem" list item selection.
+		 *
+		 * @param aCategoryId  Selected category id
+		 * @param aItemType    On return, item type
+		 * @param aUid         On return, UID if selected item contains UID 
+		 * @param aUrl         On return, URL string if selected item contains URL
+         */
+        void HandleExtraItemSelectionL( TInt aCategoryId,
+                                        TVcxHgMyVideosCategoryItemType& aItemType,
+                                        TUid& aUid,
+                                        TDes& aUrl );
+
+        /**
+         * Create empty icon to be used as category list default icon
+         * 
+         * @return empty icon
+         */
+        CGulIcon* CreateEmptyHgListIconL();
+        
     public: // From MVcxHgMyVideosCategoryModelObserver
 
         /**
@@ -93,8 +144,10 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * Ownership of array is transferred.
          * 
          * @param aCategoryList List of categories
+         * @param aIsPartial    ETrue if list fetching continues, and KVcxMessageMyVideosListComplete 
+         *                      message will arrive. EFalse if this is last event of list fetching.
          */
-        void NewCategoryListL( CMPXMediaArray* aCategoryList );
+        void NewCategoryListL( CMPXMediaArray* aCategoryList, TBool aIsPartial );
         
         /**
          * Called when the list of categories has been modified.
@@ -108,17 +161,69 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * @param aMpxItemId MPX Item Id of the modified item.
          */
         void CategoryModifiedL( TMPXChangeEventType aEventType,
-                                TMPXItemId& aMpxItemId );         
+                                TMPXItemId& aMpxItemId );
+        
+        /*
+         * Called when a single video item has been fetched.
+         * Ownership of video is transferred.
+         * 
+         * @param aVideo Video item.
+         */
+        void VideoFetchingCompletedL( CMPXMedia* aVideo );
+
+        /**
+         * Called when category list items have been fetched.
+		 */
+        void CategoryListFetchingCompletedL();
+
+    public: // From MThumbnailManagerObserver)
+
+        /**
+         * Preview thumbnail generation or loading is complete.
+         *
+         * @param aThumbnail     An object representing the resulting thumbnail.
+         * @param aId            Request ID for the operation
+         */
+        void ThumbnailPreviewReady( MThumbnailData& aThumbnail,
+            TThumbnailRequestId aId );
+
+        /**
+         * Final thumbnail bitmap generation or loading is complete.
+         *
+         * @param aError         Error code.
+         * @param aThumbnail     An object representing the resulting thumbnail.
+         * @param aId            Request ID for the operation.
+         */
+        void ThumbnailReady( TInt aError, MThumbnailData& aThumbnail,
+            TThumbnailRequestId aId );
 
     private:    
+        
+        /**
+         * C++ constructor
+         *
+         * @param aModel Application model
+         * @param aScroller Hg list component.
+         */
+        CVcxHgMyVideosCategoryModelHandler(
+            CVcxHgMyVideosModel& aModel,
+            CHgScroller& aScroller );  
 
         /**
          * Loads name of category from resources.
          * 
-         * @param aIndex Index of category.
+         * @param aCategoryId Index of category.
          * @return Name of category.
          */
-        HBufC* GetCategoryNameLC( TInt aIndex );
+        HBufC* GetCategoryNameLC( TInt aCategoryId );
+
+        /**
+         * Loads icon for category
+         * 
+         * @param aCategoryId Id of category
+         * @return Category icon
+         */
+        CGulIcon* GetCategoryIconL( TInt aCategoryId );
 
         /**
          * Formats second row text for categories.
@@ -127,7 +232,15 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * @return Second row text for category.
          */
         HBufC* FormatCategorySecondRowLC( CMPXMedia& aMedia );        
-
+        
+        /**
+         * Formats second row text for categories.
+         * 
+		 * @param   aCategoryId Category id.
+		 * @return  Second row text for category.
+         */
+        HBufC* FormatCategorySecondRowLC( TInt aCategoryId );
+        
         /**
          * Translates MPX Item Id to index on UI list. 
          * 
@@ -180,6 +293,51 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          */
         TInt ResolveCategoryArrayIndexById( TInt aCategoryId );
         
+        /**
+         * @param aCategoryId Category id to be found
+         * @return CMPXMedia
+         */
+        CMPXMedia* GetCategoryDataL( TInt aCategoryId );
+		
+        /**
+         * Gets the last watched videos data from collection.
+		 * Result is returned asynchronously to VideoFetchingCompletedL callback.
+         */
+		void FetchLastWatchedL();
+		
+        /**
+         * Gets the last watched videos icon from tbn server.
+		 * Result is returned asynchronously to ThumbnailReady callback.
+         */
+        void LoadLastWatchedIconL();
+
+        /**
+         * Set indicator for last watched item
+         */
+        void SetLastWatchedIndicatorL();
+
+        /**
+         * Final thumbnail bitmap generation or loading is complete.
+         * @param aError         Error code.
+         * @param aThumbnail     An object representing the resulting thumbnail.
+         * @param aId            Request ID for the operation.
+         */
+        void ThumbnailReadyL( TInt aError, MThumbnailData& aThumbnail,
+            TThumbnailRequestId aId );
+        
+        /**
+         * Create hg list icon from file
+         * 
+         * @param aFileName mif file name
+         * @param aBitmapId bitmap index in mif file
+         * @param aMaskId mask index in mif file
+         * @return Icon
+         */
+        CGulIcon* CreateHgListIconL(
+                const TFileName& aFileName,
+                TInt aBitmapId,
+                TInt aMaskId );
+
     private:
     
         /**
@@ -201,12 +359,33 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
         CMPXMediaArray* iCategoryList;
         
         /**
+         * Last watched media.
+         * Own.
+         */
+        CMPXMedia* iLastWatched;
+        
+        /**
          * TArray containing category ID's. Each index 
          * corresponds to the scroller list (eg. correct
          * category ID for the 1st item in scroller list can
          * be found from index 0).  
          */
         RArray<TInt> iCategoryIdArray;
+        
+        /**
+         * CVcxHgMyVideosThumbnailManager instance, not own.
+         */
+        CVcxHgMyVideosThumbnailManager& iTnManager;
+        
+        /**
+         * Request ID of ongoing thumbnail request, or KErrNotFound.
+         */
+        TThumbnailRequestId iTnRequestId;
+        
+        /**
+         * Video indicator class instance. Own.
+         */
+        CMyVideosIndicator* iVideoIndicator;
     };
 
 #endif // VCXHGMYVIDEOSCATEGORYMODELHANDLER_H

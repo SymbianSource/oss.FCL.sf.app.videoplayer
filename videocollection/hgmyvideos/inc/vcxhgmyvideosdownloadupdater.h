@@ -23,7 +23,7 @@
 // INCLUDE FILES
 #include <e32std.h>
 #include <e32base.h>
-#include "CIptvUtil.h"
+
 #include <mpxcollectionmessagedefs.h>
 
 class CVcxHgMyVideosVideoModelHandler;

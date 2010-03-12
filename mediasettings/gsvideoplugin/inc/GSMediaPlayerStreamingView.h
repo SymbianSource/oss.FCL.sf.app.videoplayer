@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -39,7 +39,6 @@ class CGSTabHelper;
 *  @since 3.1
 */
 class CGSMediaPlayerStreamingView : public CAknView,
-                                    public MEikListBoxObserver,
                                     public MGSTabbedView    
 {
     public: // Constructors and destructor
@@ -131,15 +130,7 @@ class CGSMediaPlayerStreamingView : public CAknView,
         */
         void CreateContainerL();       
 
-    protected: // from MEikListBoxObserver
-
-        /**
-        * Handles listbox events.
-        * @param aListBox Listbox where the event occurred.
-        * @param aEventType Event type.
-        */
-        void HandleListBoxEventL(CEikListBox* aListBox,
-                                 TListBoxEvent aEventType);
+    protected:
 
         /**
         * Called at the end of DoActivateL.
@@ -151,20 +142,14 @@ class CGSMediaPlayerStreamingView : public CAknView,
         /**
         * C++ default constructor.
         */
-        CGSMediaPlayerStreamingView(CMPSettingsModelForROP* aModel, CArrayPtrFlat<MGSTabbedView>* aTabViewArray);
+        CGSMediaPlayerStreamingView( CMPSettingsModelForROP* aModel, 
+		                             CArrayPtrFlat<MGSTabbedView>* aTabViewArray);
 
         /**
         * Symbian OS 2nd phase constructor.
         * @since 2.1
         */
         void ConstructL( CArrayPtrFlat<MGSTabbedView>* aTabViewArray );
-
-    private: // New 
-
-        /**
-        * Handles listbox selection.
-        */
-        virtual void HandleListBoxSelectionL();
         
     private: // Data
         

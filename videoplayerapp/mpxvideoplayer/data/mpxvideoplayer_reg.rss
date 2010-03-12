@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#12 %
+// Version : %version:  13 %
 
 //  INCLUDES
 #include <appinfo.rh>
@@ -39,9 +39,6 @@ RESOURCE APP_REGISTRATION_INFO
     localisable_resource_file = APP_RESOURCE_DIR"\\MpxVideoPlayer";
     localisable_resource_id = R_MPXVIDEOPLAYER_LOCALISABLE_APP_INFO;
     embeddability = KAppEmbeddable;
-
-    // Hide this application, launcher will be visible instead
-    hidden = KAppIsHidden;
 
     datatype_list =
         {

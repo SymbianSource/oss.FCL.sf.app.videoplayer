@@ -28,6 +28,7 @@
 // FORWARD DECLARATIONS
 
 class CMPXMediaArray;
+class CMPXMedia;
 
 // CLASS DECLARATION
 
@@ -45,8 +46,10 @@ NONSHARABLE_CLASS( MVcxHgMyVideosCategoryModelObserver )
          * Ownership of array is transferred.
          * 
          * @param aCategoryList List of categories
+         * @param aIsPartial    ETrue if list fetching continues, and KVcxMessageMyVideosListComplete 
+         *                      message will arrive. EFalse if this is last event of list fetching.
          */
-        virtual void NewCategoryListL( CMPXMediaArray* aCategoryList ) = 0;
+        virtual void NewCategoryListL( CMPXMediaArray* aCategoryList, TBool aIsPartial ) = 0;
 
         /**
          * Called when the list of categories has been modified.
@@ -60,7 +63,21 @@ NONSHARABLE_CLASS( MVcxHgMyVideosCategoryModelObserver )
          * @param aMpxItemId MPX Item Id of the modified item.
          */
         virtual void CategoryModifiedL( TMPXChangeEventType aEventType, 
-                                        TMPXItemId& aMpxItemId ) = 0;        
+                                        TMPXItemId& aMpxItemId ) = 0;
+        
+        /*
+         * Called when a single video item has been fetched.
+         * Ownership of video is transferred.
+         * 
+         * @param aVideo Video item.
+         */
+        virtual void VideoFetchingCompletedL( CMPXMedia* aVideo ) = 0;
+        
+        /**
+         * Called when category list items have been fetched.
+         */
+        virtual void CategoryListFetchingCompletedL() = 0;
+
     };
 
 #endif // VCXHGMYVIDEOSCATEGORYMODELOBSERVER_H

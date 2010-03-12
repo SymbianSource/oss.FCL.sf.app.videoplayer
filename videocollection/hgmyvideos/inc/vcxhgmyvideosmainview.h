@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 14 %
+// Version : %version: 17 %
 
 #ifndef VCXHGMYVIDEOSMAINVIEW_H
 #define VCXHGMYVIDEOSMAINVIEW_H
@@ -151,6 +151,21 @@ class CVcxHgMyVideosMainView : public CAknView
          * Updates layout for controls.
          */ 
         void UpdateLayout();
+        
+        /**
+         * Launches external application.
+         * 
+         * @param aAppUid Application UID
+         * @param aMsg    Message to send
+         */
+        void LaunchAppL( const TUid aAppUid, const TDesC& aMsg = KNullDesC() );
+
+        /**
+         * Launches standalone browser application.
+         * 
+         * @param aUrl  URL to open.
+         */
+        void LaunchBrowserL( const TDesC& aUrl );        
         
     private: // Constructors
 

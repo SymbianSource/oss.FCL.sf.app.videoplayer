@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 16 %
+// Version : %version: 17 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -341,11 +341,11 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool IsMultiItemPlaylist();
         TInt OpenDrmFileHandleL( RFile& aFile );
         void LaunchDRMDetailsL();
-        
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-        TInt OpenDrmFileHandle64L( RFile64& aFile );        
+        TInt OpenDrmFileHandle64L( RFile64& aFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-        
+
     protected: // data
         MMPXPlaybackUtility*                iPlaybackUtility;
         MMPXViewUtility*                    iViewUtility;
@@ -365,6 +365,7 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iMediaRequested;
         TBool                               iPlaylistView;
         TBool                               iCollectionMediaRequested;
+        TBool                               iPdlReloading;
 
         HBufC*                              iClipName;
 };

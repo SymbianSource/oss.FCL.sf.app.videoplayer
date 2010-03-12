@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#5 %
+// Version : %version: 6 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -33,7 +33,6 @@
 #include "mpxvideoplaybackuserinputhandler.h"
 #include "mpxvideo_debug.h"
 #include "hal_stub.h"
-#include <hal_data.h>
 
 //
 // pre-define
@@ -579,10 +578,13 @@ TInt CUserinputhandlertest::CheckBacklightState( CStifItemParser& aItem )
 {
     MPX_DEBUG(_L("CUserinputhandlertest::CheckBacklightState()"));
 
-    TBool backlightState;
+    TLightStatus backlightState = ELightStatusUnknown;
     TInt status;
     
-    HAL::Get( HALData::EBacklightState, backlightState );    
+    CHWRMLight* light = NULL;
+    MPX_TRAPD( err, light = CHWRMLight::NewL() );
+    backlightState = light->LightStatus( CHWRMLight::EPrimaryDisplay );
+    delete light;
 
     TInt result = aItem.GetNextInt( status );
 

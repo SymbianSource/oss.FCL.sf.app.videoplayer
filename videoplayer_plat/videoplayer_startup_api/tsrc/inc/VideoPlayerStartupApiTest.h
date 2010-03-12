@@ -48,7 +48,6 @@ _LIT( KVideoPlayerStartupApiTestLogFileWithTitle, "VideoPlayerStartupApiTest_[%S
 // FORWARD DECLARATIONS
 //class ?FORWARD_CLASSNAME;
 class CVideoPlayerStartupApiTest;
-class CVCXTestSmClient;
 class CVCXTestMyVideosCollectionClient;
 
 // DATA TYPES
@@ -167,8 +166,6 @@ NONSHARABLE_CLASS(CVideoPlayerStartupApiTest) : public CScriptBase,
     private:    // Data
         
         RPointerArray<CTestProcess> iProcessHandles;
-        
-        CVCXTestSmClient* iSmClient;
         
         CVCXTestMyVideosCollectionClient* iMyVideosCollectionClient;
         CVCXTestMessageWait* iMessageWait;

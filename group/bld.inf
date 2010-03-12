@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 30 %
+// Version : %version: 31 %
 
 
 #include <bldvariant.hrh>
@@ -35,21 +35,6 @@
  * My Videos as MPX plugin and view or as separate app and view
  */
 #include "../videocollection/group/bld.inf"
-
-/**
- * Homescreen plugins: suite configuration
- */
-#include "../homescreenplugins/videosuiteconf/group/bld.inf"
-
-/**
- * Homescreen plugins: action handler
- */
-#include "../homescreenplugins/videoahlplugin/group/bld.inf"
-
-/**
- * Homescreen plugins: content harvester plugin
- */
-#include "../homescreenplugins/videochplugin/group/bld.inf"
 
 /**
  * Mediasettings

@@ -105,7 +105,6 @@ void CVcxHgMyVideosCollectionClient::ConstructL()
 //
 CVcxHgMyVideosCollectionClient::~CVcxHgMyVideosCollectionClient()
     {
-    delete iLatestMpxMedia;
     delete iDownloadClient;
     if ( iCollectionUtility )
         {
@@ -383,81 +382,6 @@ void CVcxHgMyVideosCollectionClient::PlayVideoL( TMPXItemId aMpxItemId )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosCollectionClient::SetAttributeL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosCollectionClient::SetAttributeL( const CMPXMedia& aMedia,
-                                                    const TMPXAttribute& aAttribute,
-                                                    const TUint32 aValue )
-    {
-    if ( ! HasPendingCommand() && ! iDownloadClient->HasPendingCommand() )
-        {
-        CMPXMedia* updatedMedia = CMPXMedia::NewL();
-        CleanupStack::PushL( updatedMedia );
-        CMPXCommand* cmd = CMPXCommand::NewL();
-        CleanupStack::PushL( cmd );
-
-        updatedMedia->SetTObjectValueL<TMPXItemId>( 
-            KMPXMediaGeneralId,
-            aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
-        updatedMedia->SetTObjectValueL<TUint32>( aAttribute, aValue );
-
-        cmd->SetTObjectValueL( KMPXCommandGeneralId, KMPXCommandIdCollectionSet );
-        cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, ETrue );
-        cmd->SetCObjectValueL( KMPXCommandColSetMedia, updatedMedia );
-        cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId,
-                               KVcxUidMyVideosMpxCollection );
-
-        iCollectionUtility->Collection().CommandL( *cmd );
-        
-        CleanupStack::PopAndDestroy( cmd );
-        CleanupStack::PopAndDestroy( updatedMedia );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosCollectionClient::SetAttributeL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosCollectionClient::SetAttributeL( const CMPXMedia& aMedia,
-                                                    const TMPXAttribute& aAttribute,
-                                                    const TReal32 aValue )
-    {
-    if ( ! HasPendingCommand() && ! iDownloadClient->HasPendingCommand() )
-        {
-        CMPXMedia* updatedMedia = CMPXMedia::NewL();
-        CleanupStack::PushL( updatedMedia );
-        CMPXCommand* cmd = CMPXCommand::NewL();
-        CleanupStack::PushL( cmd );
-
-        updatedMedia->SetTObjectValueL<TMPXItemId>( 
-            KMPXMediaGeneralId,
-            aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) );
-        updatedMedia->SetTObjectValueL<TReal32>( aAttribute, aValue );
-
-        cmd->SetTObjectValueL( KMPXCommandGeneralId, KMPXCommandIdCollectionSet );
-        cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, ETrue );
-        cmd->SetCObjectValueL( KMPXCommandColSetMedia, updatedMedia );
-        cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId,
-                               KVcxUidMyVideosMpxCollection );
-
-        iCollectionUtility->Collection().CommandL( *cmd );
-
-        CleanupStack::PopAndDestroy( cmd );
-        CleanupStack::PopAndDestroy( updatedMedia );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosCollectionClient::GetLatestFetchedMpxMediaL()
-// -----------------------------------------------------------------------------
-//
-CMPXMedia* CVcxHgMyVideosCollectionClient::GetLatestFetchedMpxMediaL()
-    {
-    return iLatestMpxMedia;
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosCollectionClient::FetchMpxMediaByMpxIdL()
 // -----------------------------------------------------------------------------
 //
@@ -606,6 +530,9 @@ void CVcxHgMyVideosCollectionClient::HandleSingleCollectionMessageL(
                         case KVcxMessageMyVideosItemsAppended:
                             HandleMyVideosItemsAppendedL( aMessage, aError );
                             break;
+                        case KVcxMessageMyVideosListComplete:
+                            HandleMyVideosListCompleteL( aMessage, aError );
+                            break;
                         case KVcxMessageMyVideosDeleteStarted:
                         case KVcxMessageMyVideosDeleteResp:
                             HandleMyVideosDeleteMessageL( aMessage, aError );
@@ -717,7 +644,12 @@ void CVcxHgMyVideosCollectionClient::HandleOpenL(
 
                 if ( iCategoryModelObserver )
                     {
-                    iCategoryModelObserver->NewCategoryListL( categoryArray );
+                    TBool isPartial( EFalse );
+                    if ( aEntries.IsSupported( KVcxMediaMyVideosVideoListIsPartial ) )
+                        {
+                        isPartial = aEntries.ValueTObjectL<TBool>( KVcxMediaMyVideosVideoListIsPartial );
+                        }
+                    iCategoryModelObserver->NewCategoryListL( categoryArray, isPartial );
                     CleanupStack::Pop( categoryArray );
                     }
                 else
@@ -878,12 +810,6 @@ void CVcxHgMyVideosCollectionClient::HandleMyVideosItemsChangedL( CMPXMessage* a
         {
         IPTVLOGSTRING_LOW_LEVEL( 
             "MPX My Videos UI # HandleMyVideosItemsChangedL() - MMC plugged/unplugged." );
-
-        // Show "Refreshing view" information note.
-        HBufC* text = StringLoader::LoadLC( R_VCXHGMYVIDEOS_REFRESHING );
-        CAknConfirmationNote* note = new (ELeave) CAknConfirmationNote();
-        note->ExecuteLD( *text );
-        CleanupStack::PopAndDestroy( text );
         
         if ( levels == KVcxMpxLevelCategories )
             {
@@ -894,7 +820,7 @@ void CVcxHgMyVideosCollectionClient::HandleMyVideosItemsChangedL( CMPXMessage* a
         {
         if ( levels == KVcxMpxLevelCategories )
             {
-            if ( iCategoryModelObserver && eventlevel == KVcxHgEventLevelCategory )
+            if ( iCategoryModelObserver )
                 {
                 iCategoryModelObserver->CategoryModifiedL( eventType, eventData );
                 }        
@@ -1129,13 +1055,33 @@ void CVcxHgMyVideosCollectionClient::HandleGetMediasByMpxIdRespL( CMPXMessage* a
                     // Ownership is transferred.
             	    iVideoModelObserver->VideoFetchingCompletedL( media );  
             	    }
-            
-                delete iLatestMpxMedia;
-                iLatestMpxMedia = NULL;
-                iLatestMpxMedia = CMPXMedia::NewL( *( ( *array )[0] ) );
+                
+                else if ( iCategoryModelObserver )
+                    {
+                    CMPXMedia* media = CMPXMedia::NewL( *( ( *array )[0] ) );
+                    // Ownership is transferred.
+                    iCategoryModelObserver->VideoFetchingCompletedL( media );  
+                    }
                 }
 			}
         CleanupStack::PopAndDestroy( entries );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosCollectionClient::HandleMyVideosListCompleteL( CMPXMessage* /*aMessage*/,
+                                                                  TInt aError )
+    {
+    IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # HandleMyVideosListCompleteL()" );
+    if ( aError == KErrNone )
+        {
+        if ( iCategoryModelObserver )
+            {
+            iCategoryModelObserver->CategoryListFetchingCompletedL();
+            }
         }
     }
 

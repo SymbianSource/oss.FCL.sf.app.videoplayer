@@ -31,8 +31,6 @@
 #include <filedetailspluginif.h>
 
 
-const TInt KThousandNotKilobyte = 1000;
-
 // ============================ MEMBER FUNCTIONS =============================
 
 // ---------------------------------------------------------------------------

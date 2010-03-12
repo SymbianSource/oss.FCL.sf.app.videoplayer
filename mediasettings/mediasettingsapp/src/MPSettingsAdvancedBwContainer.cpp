@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -94,7 +94,7 @@ void CMPSettingsAdvancedBwContainer::ConstructComponentControlsL()
 //
 TInt CMPSettingsAdvancedBwContainer::TitleResourceId()
     {
-    return R_MPSETT_NETWORK_VIEW_TITLE;
+    return R_MPSETT_STREAMING_VIEW_TITLE;
     }
 
 // ---------------------------------------------------------

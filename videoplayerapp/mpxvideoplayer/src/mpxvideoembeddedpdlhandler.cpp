@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  11 %
+// Version : %version:  12 %
 
 
 #include <mpxcommand.h>
@@ -106,6 +106,8 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
             //  New download received, close old playback plugin
             //
             iAppUiEngine->ClosePlaybackPluginL();
+            
+            iAppUiEngine->SignalViewPdlReloading();
 
             StartNewDownloadL( aDlId, aFileName );
         }

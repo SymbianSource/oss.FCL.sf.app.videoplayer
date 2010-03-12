@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -113,7 +113,13 @@ class CGSVideoPlugin : public CGSBaseView
         */
         void SetCurrentItem( TInt aIndex );
 
-                       
+        /**
+        * Checks if video contrast item should be visible.
+        * 
+        * @return ETrue if video contrast is supported
+        */
+        TBool VideoContrastIsSupportedL();
+        
     public: // From CGSPluginInterface - See CGSPluginInterface header file.
     
         /**
@@ -230,15 +236,19 @@ class CGSVideoPlugin : public CGSBaseView
              
         CArrayFix<TUid>*             iViewIds;
         CMPSettingsMainView*      iMainView;                   
-        CGSTabHelper*                iTabHelper;
         CMPSettingsModelForROP*         iModel;
         CMPSettingsBaseContainer* iContainer;
         RImplInfoPtrArray       iImplInfoArray;
         TBool   iConstructAsGsPlugin;
         CArrayPtrFlat<MGSTabbedView>* iViewArray; 
         TVwsViewId iPrevViewId; // Previous view. 
+        
+        /**
+         * Video view availability status.
+         */
+        TBool iVideoViewAvailable;
     
-};
+    };
 
 
 #endif //CGSVIDEOPLUGIN_H

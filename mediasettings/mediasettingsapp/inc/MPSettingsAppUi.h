@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 
@@ -115,7 +115,12 @@ class CMPSettingsAppUi : public CAknViewAppUi,
         */
         void UpdateTabIndex();
 
-
+        /**
+        * Activates view.
+		* @param aViewId View Id
+        */
+        void ActivateLocalViewL( TUid aViewId );
+        
     private:
 
         /**
@@ -157,19 +162,40 @@ class CMPSettingsAppUi : public CAknViewAppUi,
         */
         void AddTabSettingsGroupL();
 
+        /**
+         * Check whether or not the Contrast settings item should be drawn
+		 * @return ETrue, if contrast item should be visible.
+         */
+        TBool VideoContrastIsSupportedL();        
+        
     private: //Data
+
+        /**
+         * Navi pane. Not own.
+         */
         CAknNavigationControlContainer* iNaviPane;
+        
+        /**
+         * Tab group. Not own.
+         */
         CAknTabGroup*                   iTabGroup; 
-        CAknNavigationDecorator*        iDecoratedTabGroup; // owned
+
+        /**
+         * Decorated tab group. Own.
+         */
+        CAknNavigationDecorator*        iDecoratedTabGroup;
 
         CArrayFix<TUid>*                iViewIds;
         CMPSettingsMainView*            iMainView;
         RImplInfoPtrArray               iImplInfoArray;
 
-        CMPSettingsModel* iModel;
-        CMPSettingsModelForROP* iRopModel;
-        
-		TBool	iConstructAsGsPlugin;
+        CMPSettingsModel*               iModel;
+        CMPSettingsModelForROP*         iRopModel;
+		
+		/**
+		 * Video view availability status.
+		 */
+		TBool iVideoViewAvailable;
     };
 
 #endif

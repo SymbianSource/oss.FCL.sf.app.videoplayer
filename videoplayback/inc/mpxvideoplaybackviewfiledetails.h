@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#10 %
+// Version : %version: e003sa33#11 %
 
 
 
@@ -45,6 +45,13 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
         //
         void ClearFileDetails();
 
+        /** 
+        * Generate file name, remove all file path
+        * 
+        * @return generated file name, ownership is transferred 
+        */
+        IMPORT_C HBufC* GenerateFileNameL();
+        
     private:
         //
         //  By default Symbian 2nd phase constructor is private.

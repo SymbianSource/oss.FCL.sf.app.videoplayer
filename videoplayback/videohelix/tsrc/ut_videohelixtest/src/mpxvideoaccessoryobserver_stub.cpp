@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 //
 //  INCLUDE FILES
@@ -65,6 +65,7 @@ CMPXVideoAccessoryObserver::CMPXVideoAccessoryObserver( CMPXVideoPlaybackControl
     : iController( aController )
     , iTvOutConnected( EFalse )
     , iTvOutPlaybackAllowed( ETrue )
+    , iTvOutHDMI( EFalse )
 {
 }
 
@@ -104,6 +105,12 @@ void CMPXVideoAccessoryObserver::UpdateTvOutStatusL( TBool aTvOutConnected )
     if ( iTvOutConnected != aTvOutConnected )
     {
         iTvOutConnected = aTvOutConnected;
+ 
+        if ( iTvOutConnected && iTvOutHDMI)
+        {
+            //  if HDMI playback is always allowed
+            iTvOutPlaybackAllowed = ETrue;
+        }
 
         iController->HandleTvOutEventL( iTvOutConnected );
     }
@@ -132,6 +139,14 @@ TBool CMPXVideoAccessoryObserver::IsTvOutPlaybackAllowed()
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::IsTvOutPlaybackAllowed(%d)"), playAllowed);
 
     return playAllowed;
+}
+
+void CMPXVideoAccessoryObserver::SetTvOutHDMI( TBool aTvOutHDMI )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoAccessoryObserver::SetTvOutHDMI()"),
+                   _L("aTvOutHDMI = %d"), aTvOutHDMI);
+
+    iTvOutHDMI = aTvOutHDMI;
 }
 
 //  End of File

@@ -112,6 +112,11 @@ void CVcxMyVideosOpenHandler::OpenL(
                 {
                 MPX_DEBUG2("iCache->CreateVideoListL() left: %d. Returning categories anyway.", err);
                 }
+            
+            iCollection.CategoriesL().iList->
+                        SetTObjectValueL<TBool>( KVcxMediaMyVideosVideoListIsPartial,
+                        iCache.iVideoListIsPartial );
+
             iCollection.iObs->HandleOpen( iCollection.CategoriesL().iList, KErrNone );
             }
             break;

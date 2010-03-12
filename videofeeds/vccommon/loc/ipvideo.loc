@@ -627,13 +627,6 @@
 //
 #define qtn_iptv_download_failed_note  "Download failed: %U"
 
-//d:Text in note that's displayed when view is refreshed because of MMC insertion.
-//d: Ui Spec sec 16.9 Activating and deactivating mass storage mode (p99)
-//l:popup_note_window/opt2
-//r:5.0
-//
-#define qtn_iptv_refreshing  "Refreshing the view"
-
 //d:Info pop-up note shown to user when video service added.
 //d: Ui Spec sec 7.1.2	Video feeds view content and service installation promotion (p27)
 //l:popup_note_window/opt2
@@ -648,11 +641,10 @@
 
 #define qtn_vcx_downloads_title          "Downloads"
 
-//d:page 69 qtn_iptv_captured_title video captured by the user
-//d: Ui Spec sec 13.1	My Videos sub-levels(p76)
+//d:Video list title pane text for videos captured by the user.
 //l:title_pane_t2/opt9
-//r:5.0
-
+//r:5.2
+//
 #define qtn_vcx_captured_title          "Captured videos"
 
 /*
@@ -1835,12 +1827,11 @@
 //
 #define qtn_iptv_tv_recordings_title "TV recordings"
 
-//d:Title pane text on Video Storage UI for Other view.
-//d: Ui Spec sec 13 My videos (p76)
+//d:Video list title pane text for other videos.
 //l:title_pane_t2/opt9
-//r:5.0
+//r:5.2
 //
-#define qtn_iptv_other_title "Other"
+#define qtn_iptv_other_title "Other videos"
 
 //d:Command in option "Mark/Unmark" submenu.
 //d:When selected, starts marking mode (user can mark items from
@@ -2056,6 +2047,68 @@
 //l:list_single_pane_t1_cp2/opt3
 //r:5.0
 #define qtn_vcx_hg_options_use_video_as "Use video as"
+
+//d:Main view item text for last watched
+//l:list_double_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_vcx_hg_list_last_watched           "Last watched"
+
+//d:Main view item text for videos other than captured
+//l:list_double_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_vcx_hg_list_storage_other          "Other videos"
+
+//d:Main view item text for captured videos
+//l:list_double_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_vcx_hg_list_storage_captured       "Captured"
+
+//d:Main view item text for Ovi Store link
+//l:list_double_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_vcx_hg_list_ovi_store              "Ovi Store"
+
+//d:Second line for main view item, amount of videos in category.
+//d:%N is the amount of videos.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_videos_in_category     "%N videos"
+
+//d:Same as qtn_vcx_hg_list_videos_in_category but used when only one video in category.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_one_video_in_category  "1 video"	
+
+//d:Second line for main view item, there is one new video.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_one_new_video          "1 new video"
+
+//d:Second line for main view item, there are more than 1 new videos. 
+//d:%N is the count of new videos.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_n_new_videos           "%N new videos"
+
+//d:Second line for main view item, there are no videos.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_no_videos_in_category  "No videos"
+
+//d:Second line for main view item, Ovi Store link.
+//l:list_double_large_graphic_pane_t2
+//r:5.2
+//
+#define qtn_vcx_hg_list_ovi_store_videos       "Videos"
 
 
 /*

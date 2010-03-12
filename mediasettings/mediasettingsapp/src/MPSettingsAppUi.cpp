@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 11 %
 
 
 
@@ -35,8 +35,6 @@
 #include    "MPSettingsMainView.h"
 #include    "MPSettingsVideoView.h"
 #include    "MPSettingsStreamingView.h"
-#include    "MPSettingsProxyView.h"
-#include    "MPSettingsNetworkView.h"
 #include    "MPSettingsConstants.h"
 #include    "MPSettingsPluginView.h"
 #include    "MPSettingsAdvancedBwView.h"
@@ -44,10 +42,13 @@
 #include    "mpsettingsmodel.h"
 #include    "MPSettingsModelForROP.h"
 #include    "mpxlog.h"
-#include    "feedsettingsview.h"
+
+#include    <centralrepository.h>
+#include    "MediaPlayerPrivateCRKeys.h"
+#include    "MediaPlayerVariant.hrh" 
 
 // CONSTANTS
-const TInt KMPSettViewIdArrayGranularity = 3;
+const TInt KMPSettViewIdArrayGranularity = 2;
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -58,7 +59,7 @@ const TInt KMPSettViewIdArrayGranularity = 3;
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CMPSettingsAppUi::CMPSettingsAppUi() : iConstructAsGsPlugin(EFalse)
+CMPSettingsAppUi::CMPSettingsAppUi()
     {
     MPX_DEBUG1(_L("#MS# CMPSettingsAppUi::CMPSettingsAppUi()"));
     }
@@ -77,8 +78,9 @@ void CMPSettingsAppUi::ConstructL()
     // Sets up TLS, must be done before FeatureManager is used.
     FeatureManager::InitializeLibL();   
 
-    CMPSettingsDocument* doc = static_cast<CMPSettingsDocument*>(static_cast<CEikAppUi*>
-        (CEikonEnv::Static()->AppUi())->Document());
+    iVideoViewAvailable =  VideoContrastIsSupportedL();
+    
+    CMPSettingsDocument* doc = static_cast<CMPSettingsDocument*>( Document() );
     iModel = doc->SettingsModel();
     iRopModel = static_cast<CMPSettingsModelForROP*>(iModel);
 
@@ -90,52 +92,46 @@ void CMPSettingsAppUi::ConstructL()
     // Construct navipane tabs 
     iDecoratedTabGroup = iNaviPane->CreateTabGroupL(this);
 
-    // Construct tabs
-    AddTabSettingsGroupL();
+    // Construct tabs if we have multiple views
+    if ( iVideoViewAvailable )
+        {
+        AddTabSettingsGroupL();
+        }
 
     // Create vector which contains view id's for all setting folders. 
     iViewIds = new(ELeave) CArrayFixFlat<TUid>(KMPSettViewIdArrayGranularity);
-    iViewIds->AppendL(KMPSettVideoViewId);
-    iViewIds->AppendL(KMPSettStreamingViewId);
-    iViewIds->AppendL(KMPSettFeedsViewId);
+    if ( iVideoViewAvailable )
+        {
+        iViewIds->AppendL( KMPSettVideoViewId );
+        }
+    iViewIds->AppendL( KMPSettStreamingViewId );
 
-    // * Create application views *
-
+    // Create application views
     CAknView* view;  
-
-    view = CMPSettingsMainView::NewLC(iViewIds,iRopModel,iConstructAsGsPlugin);
+    view = CMPSettingsMainView::NewLC( iViewIds, iRopModel, EFalse );
     AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view
+    CleanupStack::Pop(); // view
 
     // iMainView is not owned, i.e. it is not deleted in the destructor ->
     // main view cannot be directly creted to iMainView, as it's against the coding
     // conventions to place class' pointers to cleanup stack => static_cast.
     iMainView = static_cast<CMPSettingsMainView*>(view);
 
-    view = CMPSettingsVideoView::NewLC(iRopModel);
-    AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view
-
-    view = CMPSettingsStreamingView::NewLC(iRopModel);
-    AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
-
-    view = CVcxNsSettingsView::NewLC();
-    AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
+    if ( iVideoViewAvailable )
+        {
+        view = CMPSettingsVideoView::NewLC(iRopModel);
+        AddViewL(view);      // transfer ownership to CAknViewAppUi
+        CleanupStack::Pop(); // view
+        }
     
-    view = CMPSettingsProxyView::NewLC(iRopModel,iConstructAsGsPlugin);
+    CMPSettingsStreamingView* streamingView = CMPSettingsStreamingView::NewLC(iRopModel);
+    view = streamingView;
     AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
+    CleanupStack::Pop(); // view 
 
-    view = CMPSettingsNetworkView::NewLC(iRopModel,iConstructAsGsPlugin);
+    view = CMPSettingsAdvancedBwView::NewLC( iRopModel, EFalse );
     AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
-
-    view = CMPSettingsAdvancedBwView::NewLC(iRopModel,iConstructAsGsPlugin);
-    AddViewL(view);      // transfer ownership to CAknViewAppUi
-    CleanupStack::Pop();    // view 
-
+    CleanupStack::Pop(); // view 
 
     // Construct plug-in views (if any exists)
     CMPSettingsPluginView::ListImplementationsL(iImplInfoArray);
@@ -164,7 +160,14 @@ void CMPSettingsAppUi::ConstructL()
         User::LeaveIfError(iViewIds->Sort(sortKey));
         }
  
-    SetDefaultViewL(*iMainView);
+    if ( iVideoViewAvailable && iMainView )
+        {    
+        SetDefaultViewL(*iMainView);
+        }
+    else if ( streamingView )
+        {
+        SetDefaultViewL(*streamingView);
+        }
     }
 
 // ----------------------------------------------------
@@ -176,20 +179,15 @@ void CMPSettingsAppUi::ConstructL()
 CMPSettingsAppUi::~CMPSettingsAppUi()
     {
     MPX_DEBUG1(_L("#MS# CMPSettingsAppUi::~CMPSettingsAppUi()"));
-    if (iDecoratedTabGroup) 
-        {
-        delete iDecoratedTabGroup;
-        }
+
+    delete iDecoratedTabGroup;
 
     if (iDoorObserver)
         {
         iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::EEmpty);
         }
 
-    if (iViewIds) 
-        {
-        delete iViewIds;
-        }
+    delete iViewIds;
 
     iImplInfoArray.ResetAndDestroy();
     FeatureManager::UnInitializeLib();
@@ -233,7 +231,6 @@ void CMPSettingsAppUi::HandleResourceChangeL( TInt aType )
         }
     }
  
-
 // ----------------------------------------------------
 // CMPSettingsAppUi::TabChangedL
 // MAknTabObserver callback for handling tab changed event.
@@ -274,7 +271,10 @@ CAknNavigationDecorator* CMPSettingsAppUi::MPTabGroup() const
 void CMPSettingsAppUi::UpdateTabIndex()
     {
     MPX_DEBUG1(_L("#MS# CMPSettingsAppUi::UpdateTabIndex()"));
-    iTabGroup->SetActiveTabByIndex(iMainView->ActiveFolder());
+    if ( iTabGroup )
+        {
+        iTabGroup->SetActiveTabByIndex( iMainView->ActiveFolder() );
+        }
     }
 
 // ------------------------------------------------------------------------------
@@ -309,7 +309,6 @@ TKeyResponse CMPSettingsAppUi::HandleKeyEventL(
     return iTabGroup->OfferKeyEventL(aKeyEvent, aType);
     }
 
-
 // ----------------------------------------------------
 // CMPSettingsAppUi::AddTabSettingsGroupL()
 // (Re)create tab group with skin support
@@ -331,7 +330,7 @@ void CMPSettingsAppUi::AddTabSettingsGroupL()
     iTabGroup = static_cast<CAknTabGroup*>
         (iDecoratedTabGroup->DecoratedControl());
 
-    iTabGroup->SetTabFixedWidthL(KTabWidthWithThreeTabs);
+    iTabGroup->SetTabFixedWidthL(KTabWidthWithTwoTabs);
 
     HBufC* mbmpath = StringLoader::LoadLC(R_MPSETT_ICON_MBM_FILE);
 
@@ -361,12 +360,6 @@ void CMPSettingsAppUi::AddTabSettingsGroupL()
         EMbmMediasettingsQgn_prop_set_mp_stream_tab2,
         EMbmMediasettingsQgn_prop_set_mp_stream_tab2_mask,
         EMPViewStreamTab);
-
-    AddTabSettingsL(KAknsIIDQgnPropSetMpStreamTab3,
-        fileName,
-        EMbmMediasettingsQgn_prop_set_mp_video_tab3,
-        EMbmMediasettingsQgn_prop_set_mp_video_tab3_mask,
-        EMPViewFeedsTab);
     
     CleanupStack::PopAndDestroy();  // mbmpath
 
@@ -409,6 +402,38 @@ void CMPSettingsAppUi::AddTabSettingsL(
     iTabGroup->AddTabL(aTabId, bitmap, mask);
     
     CleanupStack::Pop(2); // bitmap, mask
+    }
+
+// ----------------------------------------------------
+// CMPSettingsAppUi::ActivateLocalViewL
+// ----------------------------------------------------
+//
+void CMPSettingsAppUi::ActivateLocalViewL( TUid aViewId )
+    {
+    if ( !iVideoViewAvailable && 
+         aViewId == KMPSettMainViewId )
+        {
+        HandleCommandL( EEikCmdExit );
+        }
+    else 
+        {
+        CAknViewAppUi::ActivateLocalViewL( aViewId );
+        }
+    }
+
+// ----------------------------------------------------
+// CMPSettingsAppUi::VideoContrastIsSupportedL
+// ----------------------------------------------------
+//
+TBool CMPSettingsAppUi::VideoContrastIsSupportedL()
+    {
+    TInt flags = 0;
+
+    CRepository* repository = CRepository::NewL( KCRUidMediaPlayerFeatures );
+    repository->Get( KMPLocalVariation, flags );
+    delete repository;
+
+    return ( flags & KMediaPlayerVideoContrast );
     }
 
 // End of File  

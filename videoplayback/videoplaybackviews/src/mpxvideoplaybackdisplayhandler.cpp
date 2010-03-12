@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -60,6 +60,8 @@ CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
         iVideoDisplay = NULL;
     }
 #endif
+
+    iSurfaceId = TSurfaceId::CreateNullId();
 }
 
 CMPXVideoPlaybackDisplayHandler*
@@ -101,6 +103,27 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 }
 
 // -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackDisplayHandler::SignalSurfaceRemovedL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackDisplayHandler::SignalSurfaceRemovedL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SignalSurfaceRemovedL()"));
+
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+
+    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
+    cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
+                                                     EPbCmdSurfaceRemoved );
+
+    iPlaybackUtility->CommandL( *cmd );
+
+    CleanupStack::PopAndDestroy( cmd );
+}
+
+// -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 // -------------------------------------------------------------------------------------------------
 //
@@ -115,6 +138,16 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
         iVideoDisplay = NULL;
     }
 #endif
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        //
+        //  Signal to the Playback Plugin that the surface has been removed
+        //
+        TRAP_IGNORE( SignalSurfaceRemovedL() );
+
+        iSurfaceId = TSurfaceId::CreateNullId();
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -148,6 +181,18 @@ CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessa
         case EPbMsgVideoSurfaceRemoved:
         {
             SurfaceRemoved();
+            break;
+        }
+        case EPbMsgVideoRemoveDisplayWindow:
+        {
+            if ( iVideoDisplay )
+            {
+                delete iVideoDisplay;
+                iVideoDisplay = NULL;
+            }
+
+            iSurfaceId = TSurfaceId::CreateNullId();
+
             break;
         }
 #endif
@@ -421,7 +466,7 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()"));
 
     TSurfaceId oldSurfaceId = iSurfaceId;
-    
+
     //
     //  Extract the surface parameters from the message
     //

@@ -56,7 +56,6 @@
 #include "vcxhgmyvideosvideocopier.h"
 #include "vcxhgmyvideospanics.h"
 #include "vcxhgmyvideosupnpinterface.h"
-#include "vcxhgtelephonyclient.h"
 #ifdef RD_VIDEO_AS_RINGING_TONE
 #include "vcxhgmyvideosaiwmenuhandler.h"
 #endif
@@ -104,9 +103,7 @@ CVcxHgMyVideosVideoListImpl::CVcxHgMyVideosVideoListImpl(
         CVcxHgMyVideosModel& aModel,
         CVcxHgMyVideosMainView& aView,
         CHgScroller& aScroller )
-  : CVcxHgMyVideosListBase( aModel, aView, aScroller ),
-    iCurrentlyPlayedVideo( KErrNotFound ),
-    iMultipleMarkingActive( EFalse )
+  : CVcxHgMyVideosListBase( aModel, aView, aScroller )
 #ifdef RD_VIDEO_AS_RINGING_TONE
     , iAiwMenuHandler( NULL )
 #endif
@@ -182,8 +179,6 @@ void CVcxHgMyVideosVideoListImpl::ConstructL()
 CVcxHgMyVideosVideoListImpl::~CVcxHgMyVideosVideoListImpl()
     {
     CloseDeleteWaitNote();
-    delete iTelephonyClient;
-    delete iCenRep;
     delete iUPnP;
     delete iVideoCopier;
     delete iVideoModel;
@@ -469,33 +464,11 @@ void CVcxHgMyVideosVideoListImpl::PlayVideoL()
     // Need to handle multiply selected videos
     for ( TInt i = operationTargets.Count() - 1; i >= 0; i-- )
         {
-        CheckParentalControlL( iVideoModel->VideoAgeProfileL( operationTargets[i] ) );
-
         if( !iUPnP->IsStarted() )
-            {    
-            TVideoPlayerCustomMessage* videoInfo = new (ELeave) TVideoPlayerCustomMessage;
-            CleanupStack::PushL( videoInfo );
-            TInt mpxId1( 0 );
-                       
-            if ( iVideoModel->GetVideoPlayerCustomMessage( operationTargets[i], *videoInfo, mpxId1 )
-                 == KErrNone )
-                {
-                iCurrentlyPlayedVideo = operationTargets[i];
-       
-                iVideoModel->PlayVideoL( operationTargets[i] );
+            {
+            iVideoModel->PlayVideoL( operationTargets[i] );
 
-                iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
-                iModel.SetVideoAsLastWatchedL( *videoInfo, mpxId1,
-                   iVideoModel->VideoAgeProfileL( iCurrentlyPlayedVideo ) );
-                
-                //Sometimes MDS has database locked and this fails, we still want to start the playback -> trap ignore
-                TRAP_IGNORE( iVideoModel->ClearNewVideoIndicatorL( iCurrentlyPlayedVideo ) );
-                }
-            else
-                {
-                // Error notes?
-                }
-            CleanupStack::PopAndDestroy( videoInfo );
+            iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
             }
         else // UPnP started
             {
@@ -594,8 +567,9 @@ void CVcxHgMyVideosVideoListImpl::ShowMarkMenuItemsL(
     TInt highlight = Highlight();
 
     // Set menu visibility information.
-    showStartMarking = !iMultipleMarkingActive;
-    showEndMarking = iMultipleMarkingActive;
+    TBool markingMode( IsMarking() );
+    showStartMarking = !markingMode;
+    showEndMarking = markingMode;
     aShowMarkAll = ( ( count > 0 ) && ( markedVideos.Count() < count ) );
     aShowUnmarkAll = ( ( count > 0 ) && ( markedVideos.Count() > 0 ) );
     aShowMarkSubmenu = ( showStartMarking || showEndMarking || aShowMarkAll || aShowUnmarkAll );
@@ -620,6 +594,7 @@ void CVcxHgMyVideosVideoListImpl::HandleMarkCommandL( TInt aMarkCommand )
             }
         case EVcxHgMyVideosCmdStopMarking:
             {
+            iVideoModel->HandleMarkCommandL( EVcxHgMyVideosCmdUnmarkAll );
             EndMarkingMode();
             break;
             }
@@ -877,6 +852,9 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             // Dont show "Sort by" if list is empty.
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdSortSubMenu, ETrue );
             }
+        
+        // Hide "Settings" menu item
+        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdOpenSettings, ETrue );
         }
 #ifdef RD_VIDEO_AS_RINGING_TONE
     else if ( aResourceId == R_VCXHGMYVIDEOS_USE_AS_SUBMENU )
@@ -981,53 +959,18 @@ TInt CVcxHgMyVideosVideoListImpl::GetMskResourceL()
         }
     }
 
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoListImpl::CheckParentalControlL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoListImpl::CheckParentalControlL( TUint32 aAgeProfile )
-    {
-    TInt parentControlSetting( KVcxMyvideosCenRepParentControlKeyDefault );
-    TInt error( KErrNone );
-    if ( !iCenRep )
-        {
-        TRAP( error, iCenRep = CRepository::NewL( TUid::Uid( KVcxMyVideosCenRepUid ) ) )
-        }
-    if ( error == KErrNone )
-        {
-        error = iCenRep->Get( KVcxMyvideosCenRepParentControlKey, parentControlSetting );
-        if ( error == KErrNone && parentControlSetting != KVcxMyvideosCenRepParentControlKeyOff )
-            {
-            // Parental control has been set
-            if ( static_cast<TInt>( aAgeProfile ) >= parentControlSetting )
-                {
-                // Must ask lock code to allow playing
-                if ( !iTelephonyClient )
-                    {
-                    iTelephonyClient = new( ELeave ) CVcxHgTelephonyClient();
-                    }
-                if ( !iTelephonyClient->CheckLockCodeL() )
-                    {
-                    User::Leave( KErrPermissionDenied );
-                    }
-                }
-            }
-        }
-    }
-
 // ---------------------------------------------------------------------------
 // CVcxHgMyVideosVideoListImpl::StartMarkingMode()
 // ---------------------------------------------------------------------------
 //  
 void CVcxHgMyVideosVideoListImpl::StartMarkingMode()
     {
-    IPTVLOGSTRING2_LOW_LEVEL( "MPX My Videos UI # CVcxHgMyVideosVideoListImpl::StartMarkingMode() iMultipleMarkingActive = %d", iMultipleMarkingActive );
+    IPTVLOGSTRING2_LOW_LEVEL( "MPX My Videos UI # CVcxHgMyVideosVideoListImpl::StartMarkingMode() IsMarking = %d", IsMarking() );
     
     // Start multiple marking mode
     if ( iModel.TouchSupport() )
         {
         iScroller->SetFlags( CHgScroller::EHgScrollerSelectionMode );
-        iMultipleMarkingActive = ETrue;
         }
     }
 
@@ -1037,11 +980,10 @@ void CVcxHgMyVideosVideoListImpl::StartMarkingMode()
 //  
 void CVcxHgMyVideosVideoListImpl::EndMarkingMode()
     {
-    IPTVLOGSTRING2_LOW_LEVEL( "MPX My Videos UI # CVcxHgMyVideosVideoListImpl::EndMarkingMode() iMultipleMarkingActive = %d", iMultipleMarkingActive );
+    IPTVLOGSTRING2_LOW_LEVEL( "MPX My Videos UI # CVcxHgMyVideosVideoListImpl::EndMarkingMode() IsMarking = %d", IsMarking() );
 
     // End multiple marking mode
     iScroller->ClearFlags( CHgScroller::EHgScrollerSelectionMode );
-    iMultipleMarkingActive = EFalse;
     }
 
 // ---------------------------------------------------------------------------

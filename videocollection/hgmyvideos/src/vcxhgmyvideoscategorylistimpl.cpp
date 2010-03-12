@@ -20,6 +20,8 @@
 // INCLUDE FILES
 #include <ganes/HgScroller.h>
 #include <vcxhgmyvideos.rsg>
+#include <myvideosindicator.h>
+#include <ganes/HgDoubleGraphicList.h>
 
 #include "vcxhgmyvideoscategorylistimpl.h"
 #include "vcxhgmyvideoscategorymodelhandler.h"
@@ -79,7 +81,21 @@ CVcxHgMyVideosCategoryListImpl::CVcxHgMyVideosCategoryListImpl(
 void CVcxHgMyVideosCategoryListImpl::ConstructL()
     {
     CVcxHgMyVideosListBase::ConstructL();
-    iCategoryModel = new (ELeave) CVcxHgMyVideosCategoryModelHandler( iModel, *iScroller );
+    iCategoryModel = CVcxHgMyVideosCategoryModelHandler::NewL( iModel, *iScroller );
+
+    // Load indicator
+    CGulIcon* ind = iCategoryModel->VideoIndicatorL().VideoOverlayIndicatorL();
+    if ( ind )
+        {
+        CleanupStack::PushL( ind );
+        // Ownership of the icon is transferred
+        static_cast<CHgDoubleGraphicList*>( iScroller )->SetIconOverlayIndicator( ind );
+        CleanupStack::Pop( ind );
+        }
+
+    // Set default icon as empty
+    iScroller->SetDefaultIconL( iCategoryModel->CreateEmptyHgListIconL() );
+
     iScroller->SetFlags( CHgScroller::EHgScrollerKeyMarkingDisabled );
     iScroller->SetSelectionObserver( *this );
     }
@@ -141,10 +157,53 @@ void CVcxHgMyVideosCategoryListImpl::HandleSelectL( TInt /* aIndex */ )
 void CVcxHgMyVideosCategoryListImpl::HandleOpenL( TInt /*aIndex*/ )
     {
     TInt highlight = Highlight();
+    TInt categoryId = iCategoryModel->ResolveCategoryId( highlight );
     
-    if ( highlight >= 0 && iModel.TouchSupport() )
+    switch ( categoryId )
         {
-        iView.ActivateVideoListL( iCategoryModel->ResolveCategoryId( highlight ) );
+        case KVcxMvcCategoryIdAll:
+        case KVcxMvcCategoryIdDownloads:
+        case KVcxMvcCategoryIdCaptured:
+        case KVcxMvcCategoryIdOther:
+            {
+            if ( highlight >= 0 && iModel.TouchSupport() )
+                {
+                iView.ActivateVideoListL( iCategoryModel->ResolveCategoryId( highlight ) );
+                }
+            }
+            break;
+            
+        case KCategoryIdLastWatched:
+            {
+            iCategoryModel->PlayLastWatchedVidedoL();
+            }
+            break;
+            
+        case KCategoryIdExtraItem1:
+        case KCategoryIdExtraItem2:
+        case KCategoryIdExtraItem3:
+            {
+            // Handle item according to type (open web link or start app).
+            
+            TVcxHgMyVideosCategoryItemType itemType;
+            TUid appUid;
+            TBuf<64> urlString;
+            iCategoryModel->HandleExtraItemSelectionL( categoryId, itemType, appUid, urlString );
+            
+            if ( itemType == TVcxHgMyVideosCategoryItemTypeUid )
+                {
+                iView.LaunchAppL( appUid );
+                }
+            else if ( itemType == TVcxHgMyVideosCategoryItemTypeUrl )
+                {
+                iView.LaunchBrowserL( urlString );
+                }
+            }
+            break;
+            
+        default:
+            ASSERT( 0 );
+            break;
         }
     }
 

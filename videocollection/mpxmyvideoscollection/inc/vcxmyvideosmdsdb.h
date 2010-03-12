@@ -26,6 +26,8 @@
 #include <harvesterclient.h>
 #include <mpxcollectionmessagedefs.h>
 
+class CRepository;
+
 /**
  *  MPX My Videos collection MDS database observer class.
  *  Part of ECOM Plugin.
@@ -495,6 +497,11 @@ private: // data
     * The observer for db changes. Not own.
     */
     MVcxMyVideosMdsDbObserver* iMdsDbObserver;
+
+    /**
+     * Cenrep session.
+     */
+    CRepository* iRepository;
     };
 
 #endif // VCXMYVIDEOSMDSDB_H

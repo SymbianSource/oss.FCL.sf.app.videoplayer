@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -32,10 +32,8 @@ class CMPSettingsModelForROP;
 /**
 *  CMPSettingsStreamingView view class.
 * 
-*  @lib MediaSettings.app
-*  @since 2.0
 */
-class CMPSettingsStreamingView : public CMPSettingsBaseView, public MEikListBoxObserver
+class CMPSettingsStreamingView : public CMPSettingsBaseView 
     {
     public: // Constructors and destructor
 
@@ -63,14 +61,7 @@ class CMPSettingsStreamingView : public CMPSettingsBaseView, public MEikListBoxO
 
     protected: // from MEikListBoxObserver
 
-        /**
-        * Handles listbox events.
-        * @param aListBox Listbox where the event occurred.
-        * @param aEventType Event type.
-        */
-        void HandleListBoxEventL(CEikListBox* aListBox,
-                                 TListBoxEvent aEventType);
-
+ 
     protected: // From CMPSettingsBaseView
 
         /**
@@ -99,7 +90,6 @@ class CMPSettingsStreamingView : public CMPSettingsBaseView, public MEikListBoxO
         /**
         * Handles listbox selection.
         */
-        virtual void HandleListBoxSelectionL();
 		CMPSettingsModelForROP* iModel;
 
     };

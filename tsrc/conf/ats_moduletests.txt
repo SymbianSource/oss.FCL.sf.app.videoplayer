@@ -9,10 +9,3 @@ SIS \VideoApp_Domain\videoplayer\videoplayerapp\mpxvideoplayer\sis\VideoPlayer.s
 INC ..\..\mediasettings\mediasettingsengine\tsrc\mediasettingsenginetest\conf\atsconf.txt
 INC ..\..\mediasettings\videoplayersettingsengine\tsrc\vpsettingsenginetest\conf\atsconf.txt
 INC ..\..\videocollection\mpxmyvideoscollection\tsrc\mpxmvcolltest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXIapListTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXServiceTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXSettingsDatabaseTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXProvisioningTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXScheduledReminderTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXServiceManagementApiTest\conf\atsconf.txt
-INC ..\..\videofeeds\server\tsrc\VCXVodContentApiTest\conf\atsconf.txt

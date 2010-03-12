@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 17 %
+// Version : %version: 19 %
 
 
 
@@ -180,7 +180,7 @@ void CMPXVideoPlaybackMode::HandleBackground()
     if ( iVideoPlaybackCtlr->iAppInForeground )
     {
         if ( iVideoPlaybackCtlr->IsAlarm() ||
-             ( iVideoPlaybackCtlr->IsDisplayOff() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ) )
+             ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ) )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
             iVideoPlaybackCtlr->iState->HandlePause();
@@ -213,7 +213,7 @@ TBool CMPXVideoPlaybackMode::CanPlayNow()
             MPX_TRAPD( err,
                 iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ) );
         }
-        else if ( iVideoPlaybackCtlr->IsDisplayOff() &&
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
                   iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
@@ -262,7 +262,7 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
 
     if ( networkMode == RMobilePhone::ENetworkModeGsm)
     {
-    	networkMode2g = ETrue;
+        networkMode2g = ETrue;
     }
 
     mobilePhone.Close();
@@ -346,13 +346,14 @@ void CMPXStreamingPlaybackMode::HandleOpenComplete()
 {
     MPX_ENTER_EXIT(_L("CMPXStreamingPlaybackMode::HandleOpenComplete()"));
 
-    // since SDP files are opened as KMmfUidFileSource type, we need to set
-    // the access point for SDP files before Prepare is called on Helix
     //
-    // for RAM files and URLs - access point is already been set
-    // at the point of adding data source
-
-    if ( iVideoPlaybackCtlr->iMediaType == CMediaRecognizer::ELocalSdpFile )
+    //  There is no need to send the access point if it is set to use default.
+    //  SDP files are opened as KMmfUidFileSource type, we need to set the access point for
+    //  SDP files before Prepare is called on Helix for RAM files and URLs - access point is
+    //  already been set at the point of adding data source
+    //
+    if ( iVideoPlaybackCtlr->iAccessPointId != KUseDefaultIap &&
+         iVideoPlaybackCtlr->iMediaType == CMediaRecognizer::ELocalSdpFile )
     {
         const TMMFMessageDestinationPckg destinationPckg(KUidInterfaceMMFHelixController);
         const TPckgBuf<TBool> savePckg( EFalse );
@@ -393,7 +394,7 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
             MPX_TRAPD(err,
                       iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ));
         }
-        else if ( iVideoPlaybackCtlr->IsDisplayOff() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
           //exit for live streaming
         }
@@ -505,7 +506,7 @@ void CMPXLiveStreamingPlaybackMode::HandleBackground()
     {
         if ( iVideoPlaybackCtlr->IsPhoneCall() ||
              iVideoPlaybackCtlr->IsVideoCall() ||
-             ( iVideoPlaybackCtlr->IsDisplayOff() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ))
+             ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ))
         {
             iVideoPlaybackCtlr->iState->HandlePause();
         }

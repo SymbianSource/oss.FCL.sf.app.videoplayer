@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 34 %
+// Version : %version: e92_37 %
 
 
 #include <hlplch.h>                     // Help launcher
@@ -44,19 +44,12 @@
 #include "mpxvideo_debug.h"
 #include "videoplayerpskeys.h"
 
-// Matrix uid, needed for activating the suite view.
-const TInt KVcxMatrixUid = 0x101F4CD2;
-
-// The action=exit flag tells menu that the suite app view is exiting via options->exit.
-_LIT8( KVcxVideoSuiteExitMessage, "mm://tvvideosuite?action=exit" );
-
 // ======== MEMBER FUNCTIONS ========
 // -----------------------------------------------------------------------------
 // CMpxVideoPlayerAppUi::CMpxVideoPlayerAppUi
 // -----------------------------------------------------------------------------
 //
 CMpxVideoPlayerAppUi::CMpxVideoPlayerAppUi()
-    : iEndKeyExit( EFalse )
 {
     MPX_DEBUG(_L("CMpxVideoPlayerAppUi::CMpxVideoPlayerAppUi()"));
 }
@@ -71,8 +64,6 @@ void CMpxVideoPlayerAppUi::ConstructL()
 
     BaseConstructL( EAknEnableSkin | EAknSingleClickCompatible );
 
-    DoWgIdUpkeep();
-
     if ( IsEmbedded() )
     {
         //
@@ -80,50 +71,8 @@ void CMpxVideoPlayerAppUi::ConstructL()
         //
         SetOrientationL( CAknAppUiBase::EAppUiOrientationLandscape );
     }
-    else
-    {
-        //
-        //  if we are stand alone mode store window group id to RProperty
-        //  so we can identify it in ActionHandlerPlugin.
-        //
-        RProperty::Define( KVideoPlayerRPropertyCategory,
-                           KVideoPlayerRPropertyWGIdKey,
-                           RProperty::EInt );
-
-        RProperty::Set( KVideoPlayerRPropertyCategory,
-                        KVideoPlayerRPropertyWGIdKey,
-                        iCoeEnv->RootWin().Identifier() );
-    }
 
     iAppUiEngine = CMpxVideoPlayerAppUiEngine::NewL( this );
-}
-
-
-// -----------------------------------------------------------------------------
-// CMpxVideoPlayerAppUi::DoWgIdUpkeer
-// Checks if stored wgid is run by other application than us
-// -----------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUi::DoWgIdUpkeep()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::DoWgIdUpkeep()"));
-
-    // Do the upkeep for stand alone wg identifier
-    // If we find that the WgId of this application is same
-    // as the one stored in RProperty we know that the stand
-    // alone has crashed and we have to clear it.
-    TInt wgId( 0 );
-    TInt err( RProperty::Get( KVideoPlayerRPropertyCategory, KVideoPlayerRPropertyWGIdKey, wgId ) );
-
-    if ( wgId && !err )
-    {
-        if ( IsEmbedded() && wgId == iCoeEnv->RootWin().Identifier() )
-        {
-            // Stored wgId is ours and we are in embedded mode. Delete!
-            RProperty::Delete( KVideoPlayerRPropertyCategory,
-                               KVideoPlayerRPropertyWGIdKey );
-        }
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -134,13 +83,6 @@ void CMpxVideoPlayerAppUi::DoWgIdUpkeep()
 CMpxVideoPlayerAppUi::~CMpxVideoPlayerAppUi()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::~CMpxVideoPlayerAppUi()"));
-
-    // If we are running in embedded we keep the RProperty alive when exiting.
-    if ( ! IsEmbedded() )
-    {
-        RProperty::Delete( KVideoPlayerRPropertyCategory,
-                           KVideoPlayerRPropertyWGIdKey );
-    }
 
     delete iAppUiEngine;
 }
@@ -180,13 +122,15 @@ TBool CMpxVideoPlayerAppUi::ProcessCommandParametersL( TApaCommand aCommand,
 void CMpxVideoPlayerAppUi::HandleWsEventL( const TWsEvent& aEvent, CCoeControl* aDestination )
 {
     TInt eventType = aEvent.Type();
-    if ( eventType == KAknUidValueEndKeyCloseEvent // End Call key
-            || eventType == KAknShutOrHideApp ) // Exit cmd from Task Switcher
+
+    //
+    //  Close from the End Call Key or the Exit Cmd from the Task Switcher
+    //
+    if ( eventType == KAknUidValueEndKeyCloseEvent || eventType == KAknShutOrHideApp )
     {
         MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleWsEventL() Closed by framework"));
 
-        iEndKeyExit = ETrue;
-        iAppUiEngine->PrepareCloseMpxL();
+        iAppUiEngine->ClosePlaybackPluginL();
     }
 
     CAknAppUi::HandleWsEventL( aEvent, aDestination );
@@ -208,17 +152,7 @@ void CMpxVideoPlayerAppUi::HandleCommandL( TInt aCommand )
         {
             MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleCommandL() - Exit"));
 
-            iAppUiEngine->PrepareCloseMpxL();
-
-            //
-            //  Send message to matrix menu on a stand alone instance if:
-            //     1)  End Key is pressed
-            //     2)  Exit command has been issued
-            //
-            if ( ! IsEmbedded() && ( ! iEndKeyExit && iAppUiEngine->ExitToMatrixMenu() ) )
-            {
-                LaunchMmViewL( KVcxVideoSuiteExitMessage );
-            }
+            iAppUiEngine->ClosePlaybackPluginL();
 
             HandleExit();
             break;
@@ -237,11 +171,6 @@ void CMpxVideoPlayerAppUi::HandleCommandL( TInt aCommand )
         case EAknCmdHideInBackground:
         {
             iAppUiEngine->ClearPdlInformation();
-            break;
-        }
-        default:
-        {
-            // do nothing if the command is not reconized
             break;
         }
     }
@@ -376,25 +305,5 @@ void CMpxVideoPlayerAppUi::HandleForegroundEventL( TBool aForeground )
 CAknView* CMpxVideoPlayerAppUi::View()
 {
     return iView;
-}
-
-// ---------------------------------------------------------------------------
-// Sends a message to Matrix Menu
-// ---------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUi::LaunchMmViewL( const TDesC8& aMessage )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::LaunchMmViewL()"));
-
-    TApaTaskList taskList( iCoeEnv->WsSession() );
-    TApaTask task = taskList.FindApp( TUid::Uid( KVcxMatrixUid ) );
-
-    if ( task.Exists() )
-    {
-        //
-        //  Matrix is already running in background - send APA Message
-        //
-        task.SendMessage( TUid::Uid( KUidApaMessageSwitchOpenFileValue ), aMessage );
-    }
 }
 

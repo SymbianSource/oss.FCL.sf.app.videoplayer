@@ -47,7 +47,6 @@ SOURCEPATH      ../src
 
 SOURCE          VideoPlayerStartupApiTest.cpp
 SOURCE          VideoPlayerStartupApiTestBlocks.cpp
-SOURCE          VCXTestSmClient.cpp
 
 //RESOURCE        resource_file
 //RESOURCE        resource_file2
@@ -78,8 +77,6 @@ LIBRARY         inetprotutil.lib
 LIBRARY         insock.lib
 LIBRARY         esock.lib
 LIBRARY         sendui.lib
-LIBRARY         IptvUtil.lib
-LIBRARY         IPTVClientAPI.lib
 LIBRARY         FLOGGER.lib
 LIBRARY         ecom.lib
 LIBRARY         VCXTestMyVideosCollectionClient.lib

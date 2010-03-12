@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 //
@@ -193,7 +193,7 @@ void CMPXVideoHelixPlayback::InitStreamingL( const TDesC& aUri,
                                              TInt aAccessPoint )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreamingL()"),
-                   _L("aUri %S, aType %d"), &aUri, aAccessPoint );
+                   _L("aUri %S, aAccessPoint %d"), &aUri, aAccessPoint );
 
     RFile fileHandle;
 
@@ -220,7 +220,8 @@ void CMPXVideoHelixPlayback::InitStreamingL( const TDesC& aUri,
 //
 void CMPXVideoHelixPlayback::InitStreamingL( RFile& aFile, TInt aAccessPoint  )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreamingL( RFile )"));
+    MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreamingL( RFile )"),
+                   _L("aAccessPoint = %d"), aAccessPoint );
 
     TFileName filename;
     aFile.FullName( filename );
@@ -386,7 +387,8 @@ void CMPXVideoHelixPlayback::Initialise64L( RFile64& aSong )
 //
 void CMPXVideoHelixPlayback::InitStreaming64L( RFile64& aFile, TInt aAccessPoint  )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreaming64L( RFile64 )"));
+    MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreaming64L( RFile64 )"),
+                   _L("aAccessPoint = %d"), aAccessPoint );
 
     TFileName filename;
     aFile.FullName( filename );

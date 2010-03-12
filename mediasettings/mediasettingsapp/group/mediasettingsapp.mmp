@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 
@@ -41,12 +41,7 @@ SOURCE          MPSettingsVideoContainer.cpp
 SOURCE          MPSettingsVideoView.cpp
 SOURCE          MPSettingsStreamingView.cpp
 SOURCE          MPSettingsStreamingContainer.cpp
-SOURCE          MPSettingsProxySettingItemList.cpp
-SOURCE          MPSettingsProxyContainer.cpp
-SOURCE          MPSettingsProxyView.cpp
-SOURCE          MPSettingsNetworkSettingItemList.cpp
-SOURCE          MPSettingsNetworkContainer.cpp
-SOURCE          MPSettingsNetworkView.cpp
+SOURCE          MPSettingsStreamingSettingItemList.cpp
 SOURCE          MPSettingsSliderSettingItem.cpp
 SOURCE          MPSettingsUDPPortSettingItem.cpp
 SOURCE          MPSettingsAdvancedBwContainer.cpp
@@ -70,7 +65,6 @@ USERINCLUDE     ../inc
 USERINCLUDE     ../../mpsettbase/inc
 USERINCLUDE     ../../videoplayersettingsengine/inc
 USERINCLUDE     ../../mediasettingsengine/inc
-USERINCLUDE     ../../feedsettingsviews/inc
 
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom
@@ -96,10 +90,8 @@ LIBRARY         centralrepository.lib
 LIBRARY         mpsettbase.lib
 LIBRARY         mpsettengine.lib
 LIBRARY         flogger.lib
-LIBRARY         sisregistryclient.lib
-LIBRARY   		vcxnssettingsengine.lib
-LIBRARY			commondialogs.lib
-LIBRARY			cmmanager.lib
-LIBRARY   		vcxnssettingsview.lib
+LIBRARY         vcxnssettingsengine.lib
+LIBRARY         commondialogs.lib
+LIBRARY	        cmmanager.lib
 
 // End of File

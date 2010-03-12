@@ -200,11 +200,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
         
         media = videoListArray->AtL( i );
         
-        if ( media->IsSupported( KVcxMediaMyVideosOrigin ) )
-            {
-            origin = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin );                
-            }
-        
+        origin = TVcxMyVideosCollectionUtil::OriginL( *media );
+                
         TBool newVideo = EFalse;
         TUint32 flags  = 0;
         
@@ -554,15 +551,11 @@ TInt CVcxMyVideosCategories::CategoryIndex( TInt aOrigin )
         case -1:
             return KVcxMyVideosAllVideosCategoryIndex;
             
-        case EVcxMyVideosOriginDownloaded:
-            return KVcxMyVideosDownloadsCategoryIndex;
-            
         case EVcxMyVideosOriginCapturedWithCamera:
             return KVcxMyVideosCapturedCategoryIndex;
                             
+        case EVcxMyVideosOriginDownloaded:
         case EVcxMyVideosOriginTvRecording:
-            return KVcxMyVideosTvRecordingsCategoryIndex;
-
         case EVcxMyVideosOriginSideLoaded:                
         case EVcxMyVideosOriginOther:
         default:

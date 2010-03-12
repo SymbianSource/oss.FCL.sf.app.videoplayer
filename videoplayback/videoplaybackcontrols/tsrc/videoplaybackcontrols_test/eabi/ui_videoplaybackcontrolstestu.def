@@ -34,4 +34,7 @@ EXPORTS
 	_ZTV34CMPXVideoPlaybackBrandingAnimation @ 33 NONAME ; #<VT>#
 	_ZTV35CMPXVideoPlaybackControlsController @ 34 NONAME ; #<VT>#
 	_ZTV37CMPXVideoPlaybackControlConfiguration @ 35 NONAME ; #<VT>#
+	_ZN32CMPXVideoPlaybackViewFileDetails17GenerateFileNameLEv @ 36 NONAME
+	_ZTI35CMPXVideoPlaybackMediaDetailsViewer @ 37 NONAME
+	_ZTV35CMPXVideoPlaybackMediaDetailsViewer @ 38 NONAME
 

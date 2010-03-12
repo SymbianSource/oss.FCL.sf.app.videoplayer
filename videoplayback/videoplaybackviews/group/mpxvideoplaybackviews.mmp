@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 13 %
+// Version : %version: 14 %
 
 
 #include <data_caging_paths.hrh>
@@ -83,7 +83,7 @@ LIBRARY             mpfiledetailsdialog.lib
 LIBRARY             sysutil.lib 
 LIBRARY             drmuihandling.lib
 LIBRARY             centralrepository.lib // for backlight timeout value
-LIBRARY             hal.lib  // disabling backlight
+LIBRARY             hwrmlightclient.lib   // light status
 
 #ifdef SYMBIAN_BUILD_GCE
 LIBRARY             mediaclientvideodisplay.lib

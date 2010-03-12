@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 22 %
 
 
 //  Include Files
@@ -370,7 +370,11 @@ void CMPXVideoPdlPlaybackView::HandleStoppedStateL()
 {
     MPX_DEBUG(_L("CMPXVideoPdlPlaybackView::HandleStoppedStateL()"));
 
-    if ( iPlaybackState == EPbStateStopped )
+    if ( iPdlReloading )
+    {
+        iPdlReloading = EFalse;
+    }
+    else
     {
         ClosePlaybackViewL();
     }

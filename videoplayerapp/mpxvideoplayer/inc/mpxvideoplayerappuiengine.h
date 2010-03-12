@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#27 %
+// Version : %version: e92_31 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -42,7 +42,6 @@ class CMpxVideoEmbeddedPdlHandler;
 class MMPXCollectionUiHelper;
 class CAiwGenericParamList;
 class CVideoPlaylistUtility;
-class RConnection;
 
 /**
 *  Application UI class.
@@ -97,11 +96,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         void ActivatePlaybackViewL();
 
         /**
-         * Sets mpx components ready for application shutdown
-         */
-        void PrepareCloseMpxL();
-
-        /**
          * Sets AppUiEngine in stand alone "mode"
          */
         void StartStandAloneL();
@@ -115,12 +109,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          * Steps one level up in collection path
          */
         void StepBackCollectionPathL();
-
-        /**
-         * Process activation message.
-         * @param aMsg reference to activation message
-         */
-        void ProcessActivationMessageL( const TDesC8 &aMsg );
 
         /*
          * Handle embedded playback message
@@ -232,14 +220,11 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
 
         void ClearPdlInformation();
 
-        /**
-         *  Checks if application has to exit to Matrix root menu
-         */
-        TBool ExitToMatrixMenu();
-
         void InitializeFileL( const TDesC& aFileName );
 
         void ClosePlaybackPluginL();
+        
+        void SignalViewPdlReloading();
 
     private:
         /**
@@ -271,41 +256,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         TPtrC GetLinkLC( const TDesC& aFileName,
                          CMediaRecognizer::TMediaType aMediaType,
                          TBool aUseFileHandle = EFalse );
-
-        /*
-         *  Sets the access point member variable
-         */
-        void SetAccessPointL();
-
-        /**
-         *  Checks if the the AP is WLAN
-         *
-         *  @param aAPId - the ID of access point to be evaluated
-         *  @return ETrue if the bearer type is WLAN for this access point
-         */
-        TBool IsWLANAccessPointL(TInt aAPId);
-
-        /**
-         *  Reads the default AP
-         *
-         *  @return ID of the default Access Point read from the config file
-         */
-        TInt GetDefaultAccessPointL();
-
-        /**
-         *  Converts UID of the AP to and Access Point Id
-         *
-         *  @return ID of the Access Point
-         */
-        TInt GetAccessPointIdForUIDL(TUint32 aAPUid);
-
-        /**
-         *  Tries to get AP ID for connection.
-         *  If default AP is not available, AP is queried from the user.
-         *
-         *  @return ID of the Access Point
-         */
-        TUint32 TryToGetAccessPointL();
 
         TInt HandleAiwGenericParamListL( const CAiwGenericParamList* aParams );
 
@@ -340,20 +290,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
        */
        void UpdatePbPluginMediaL();
 
-       /*
-       * Sends custom command to active view
-       *
-       * @param aMsg custom message data
-       */
-       void SendCustomCommandToActiveViewL( const TDesC8& aMsg );
-
-       /*
-       * Gets IAP ID from active connection.
-       *
-       * @param aConn   Connection to query.
-       */
-       TUint32 QueryIap( RConnection& aConn );
-
        void InitializeStreamingLinkL( const TDesC& aUri );
        void InitializePlaylistL( const CMPXCollectionPlaylist& aPlaylist, TBool aPlay );
 
@@ -376,11 +312,9 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         CMpxVideoEmbeddedPdlHandler*  iPdlHandler;       // own
 
         TInt                     iAccessPointId;
-        TInt                     iExtAccessPointId;
         TBool                    iMultilinkPlaylist;
         TBool                    iSeekable;
         TBool                    iUpdateSeekInfo;
-        TBool                    iExitToMatrixMenu;
 };
 
 //

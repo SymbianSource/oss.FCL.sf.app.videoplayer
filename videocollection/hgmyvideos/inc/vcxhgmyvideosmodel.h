@@ -23,10 +23,7 @@
 // INCLUDE FILES
 #include <coemain.h>
 #include <vcxmyvideosdefs.h>
-#include <MediatorEventProvider.h>
 #include <thumbnailmanager.h>
-#include <thumbnailmanagerobserver.h>
-#include <videoplayercustommessage.h>
 
 #include "CIptvDriveMonitor.h"
 
@@ -35,9 +32,7 @@
 class CVcxHgMyVideosCollectionClient;
 class CVcxHgMyVideosDownloadClient;
 class CRepository;
-class CIptvLastWatchedApi;
-class CIptvLastWatchedData;
-
+class CVcxHgMyVideosThumbnailManager;
 
 // CONSTANTS
 
@@ -52,7 +47,6 @@ const TInt KVcxHgMyVideosVideoControlGroupId(600);
  * @lib vcxhgmyvideos.lib
  */
 NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
-                                           public MThumbnailManagerObserver,
                                            public MIptvDriveMonitorObserver
     {
     public:
@@ -174,6 +168,14 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
          * @param aSortOrder New video list sort order.
          */
         void SetVideolistSortOrderL( TVcxMyVideosSortingOrder aSortOrder );
+        
+        /**
+         * Gets the last watched video id from CenRep.
+         * 
+         * @param aId Video's mpx id (iId1).
+         * @return System wide error code
+         */
+        TInt GetLastWatchedIdL( TInt& aId );
 
         /**
          * Gets video list sort order (from CenRep).
@@ -183,59 +185,29 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
         TVcxMyVideosSortingOrder VideolistSortOrderL();
 
         /**
-         * Should be called when playback of video is stopping. Updates last
-         * play point of video to 'Last Watched' dat-file.
-         */
-        void UpdateLastWatchedPlayPositionL( TUint32 aLastVideoPlayPoint );
-        
-        /**
-         * Cancels the download completed soft notification.
-         */
-        void ResetDownloadNotification();
-        
-        /**
-         * Should be called when playback of video is starting. Updates 'Last
-         * Watched' information to Matrix and dat-file.
+         * Gets the My Videos customization integer from CenRep.
          * 
-         * @param aVideoInfo Information about played video.
-         * @param aMpxId1 MPX ID 1 of the played video.
-         * @param aAgeProfile Age profile of the video for parental control.
+         * @param aKey   CenRep key for the value to be fetched.
+         * @param aValue On return, fetched value.
+         * @return System wide error code
          */
-        void SetVideoAsLastWatchedL( TVideoPlayerCustomMessage& aVideoInfo, 
-                                     TInt aMpxId1,
-                                     TUint32 aAgeProfile );
+        TInt GetMyVideosCustomizationInt( const TInt& aKey, TInt& aValue );
 
         /**
-         * Reads information about 'Last Watched' video clip from dat-file.
+         * Gets the My Videos customization string from CenRep.
          * 
-         * @param aVideoInfo On return, information about last played video.
-         * @param aMpxId1 On return, MPX Item Id 1.
-         * @param aAgeProfile On return, the age profile of the video for 
-         *      parental control
+         * @param aKey   CenRep key for the value to be fetched.
+         * @param aValue On return, fetched value.
+         * @return System wide error code
          */
-        void GetLastWatchedDataL( TVideoPlayerCustomMessage& aVideoInfo, 
-                                  TUint32& aMpxId1,
-                                  TUint32& aAgeProfile );
-        
-    public: // From MThumbnailManagerObserver
-        
+        TInt GetMyVideosCustomizationString( const TInt& aKey, TDes& aValue );
         /**
-         * Preview thumbnail generation or loading is complete.
+         * Returns reference to Thumbnail Manager.
          *
-         * @param aThumbnail An object representing the resulting thumbnail.
-         * @param aId Request ID for the operation
+         * @return Reference to Thumbnail Manager.
          */
-        void ThumbnailPreviewReady( MThumbnailData& aThumbnail, TThumbnailRequestId aId );
-    
-        /**
-         * Final thumbnail bitmap generation or loading is complete.
-         *
-         * @param aError Error code.
-         * @param aThumbnail An object representing the resulting thumbnail.
-         * @param aId Request ID for the operation.
-         */
-        void ThumbnailReady( TInt aError, MThumbnailData& aThumbnail, TThumbnailRequestId aId );
-    
+        CVcxHgMyVideosThumbnailManager& ThumbnailManager() const;
+
     public: // from MIptvDriveMonitorObserver
         
         /**
@@ -256,53 +228,11 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
          * Symbian 2nd phase constructor.
          */
         void ConstructL();
-
-        /**
-         * If needed creates, and returns pointer to Last Watched API.
-         * 
-         * @return Pointer to Last Watched API.
-         */
-        CIptvLastWatchedApi* LastWatchedApiL();
         
         /**
-         * If needed creates, and returns pointer to Last Watched Data.
-         * 
-         * @return Pointer to Last Watched Data.
+         * Initializes MyVideos customization CenRep session.
          */
-        CIptvLastWatchedData* LastWatchedDataL();
-
-        /**
-         * Copies data from one Video Player Custom message to another.
-         * 
-         * @param aSource Source object.
-         * @param aTarget Target object.
-         */
-        void CopyVideoPlayerCustomMessageL( TVideoPlayerCustomMessage& aSource,
-                                            TVideoPlayerCustomMessage& aTarget );
-        
-        /**
-         * If needed creates, and returns pointer to Video Player Custom Message.
-         * 
-         * @return Pointer to Video Player Custom Message.
-         */        
-         TVideoPlayerCustomMessage* VideoPlayerCustomMessageL();       
-        
-        /**
-         * Handles ThumbnailReady() call.
-         *
-         * @param aError Error code.
-         * @param aThumbnail An object representing the resulting thumbnail.
-         * @param aId Request ID for the operation.
-         */        
-        void HandleThumbnailReadyL( TInt aError,
-                                    MThumbnailData& aThumbnail,
-                                    TThumbnailRequestId aId );        
-        /**
-         * If needed creates, and returns pointer to Thumbnail Manager.
-         *
-         * @return Pointer to Thumbnail Manager.
-         */
-        CThumbnailManager* ThumbnailManagerL();
+        TInt InitMyVideosCenRepL();
         
     private:
 
@@ -346,44 +276,21 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
         CRepository* iCollectionCenRep;
         
         /**
-         * Pointer to 'Last Watched' API.
+         * Session to My Videos customization CenRep.
          * Own.
          */
-        CIptvLastWatchedApi* iLastWatchedApi;
-        
-        /**
-         * Pointer to 'Last Watched' data object.
-         * Own.
-         */
-        CIptvLastWatchedData* iLastWatchedData;
-
-        /**
-         * Pointer to Video Player custom message.
-         * Own.
-         */
-        TVideoPlayerCustomMessage* iVideoPlayerCustomMessage;
-        
-        /**
-         * S60 Thumbnail Manager.
-         * Own.
-         */
-        CThumbnailManager* iTnManager;
-        
-        /**
-         * Request ID of ongoing thumbnail request, or KErrNotFound.
-         */
-        TThumbnailRequestId iTnRequestId;
-
-        /**
-         * Pointer to Mediator Event class.
-         * Own.
-         */        
-        CMediatorEventProvider* iMediatorEventProvider;
+        CRepository* iMyVideosCenRep;
     
         /**
          * Video list sort order.
          */
         TVcxMyVideosSortingOrder iSortOrder;
+
+		/**
+         * Thumbnail Manager.
+         * Own.
+         */
+        CVcxHgMyVideosThumbnailManager* iTnManager;
     };
 
 #endif // VCXHGMYVIDEOSMODEL_H

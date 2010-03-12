@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 //
 //  INCLUDE FILES
@@ -133,6 +133,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL()"));
 
     TBool statusChanged = EFalse;
+    TBool tvOutHDMI = EFalse;
 
     //
     //  Initialize TV-Out value to EFalse before checking if
@@ -153,10 +154,12 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
 
     for ( TInt index = 0 ; index < count ; index++ )
     {
+        TAccPolGenericID genId = iGenericIdArray.GetGenericIDL( index );
+        
         //
         //  Get all supported capabilities for this connected accessory.
         //
-        iConnection.GetSubblockNameArrayL( iGenericIdArray.GetGenericIDL( index ), *nameArray );
+        iConnection.GetSubblockNameArrayL( genId, *nameArray );
 
         //
         //  Check if this connected accessory supports TV-Out
@@ -166,7 +169,22 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
             MPX_DEBUG(_L("    TV-Out Capabilities Exist"));
 
             tvOutConnected = ETrue;
-            break;
+
+            TAccPolNameRecord nameRecord;
+            nameRecord.SetNameL( KAccVideoOut );                       
+            TAccValueTypeTInt value;            
+            iConnection.GetValueL( genId, nameRecord, value );  
+            
+            if ( value.iValue == EAccVideoOutEHDMI )
+            {
+                tvOutHDMI = ETrue;
+                //
+                // HDMI has precedence over Comp TV-Out, If the accessory is
+                // HDMI then stop the search for Video Out accessory, else continue 
+                // looping through all the accessories.
+                //
+                break;
+            }
         }
     }
 
@@ -180,7 +198,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     {
         iTvOutConnected = tvOutConnected;
 
-        if ( iTvOutConnected )
+        if ( iTvOutConnected && !tvOutHDMI)
         {
             //
             //  Check the playablility of the clip
@@ -195,7 +213,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
         statusChanged   = ETrue;
     }
 
-    MPX_DEBUG(_L("    iTvOutConnected = %d"), iTvOutConnected);
+    MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL  iTvOutConnected = %d, tvOutHDMI = %d"), iTvOutConnected, tvOutHDMI);
 
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL() ret = %d"), statusChanged);
 

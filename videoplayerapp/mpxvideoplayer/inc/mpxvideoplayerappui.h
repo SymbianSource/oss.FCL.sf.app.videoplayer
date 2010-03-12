@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#14 %
+// Version : %version: 15 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUI_H
@@ -107,12 +107,6 @@ class CMpxVideoPlayerAppUi : public CAknViewAppUi
          * @return Active akn view or NULL if no views.
          */
         CAknView* View();
-
-        /**
-         * Sends a message to Matrix menu.
-         * @param aMessage The message to be sent.
-         */
-        void LaunchMmViewL( const TDesC8& aMessage );
         
     private:
         /**
@@ -161,7 +155,6 @@ class CMpxVideoPlayerAppUi : public CAknViewAppUi
 
         // own
         CMpxVideoPlayerAppUiEngine* iAppUiEngine;
-        TBool                       iEndKeyExit;
 
 };
 

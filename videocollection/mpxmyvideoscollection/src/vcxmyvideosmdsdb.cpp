@@ -29,6 +29,7 @@
 #include <mpxmediageneralextdefs.h>
 #include <mpxmediaarray.h>
 #include <mpxmediavideodefs.h>
+#include <centralrepository.h>
 #include "vcxmyvideosmdsdb.h"
 #include "vcxmyvideoscollectionutil.h"
 
@@ -192,6 +193,7 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
     delete iVideoQuery;
     delete iMDSSession;
     delete iActiveSchedulerWait;
+    delete iRepository;
     }
 
 // ---------------------------------------------------------------------------
@@ -882,8 +884,15 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     //16. ORIGIN, KVcxMediaMyVideosOrigin
     if ( aObject.Property( *iOriginPropertyDef, property, 0 ) != KErrNotFound )
         {
-        aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin,
-                static_cast<CMdEUint8Property*>(property)->Value() );
+        TUint8 origin = static_cast<CMdEUint8Property*>(property)->Value();
+        if ( origin == EVcxMyVideosOriginDownloaded ||
+                origin == EVcxMyVideosOriginSideLoaded ||
+                origin == EVcxMyVideosOriginTvRecording )
+            {
+            origin = EVcxMyVideosOriginOther;
+            }
+                
+        aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, origin );
         }
 
     //17. DURATION, (KMPXMediaGeneralDuration can't be used since it is TInt
@@ -1261,6 +1270,17 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             static_cast<CMdEUint32Property*>(property)->SetValueL( flags );
             }
         
+        // Play pos has really changed -> put the video as last watched
+        if ( aObject.Property( *iLastPlayPositionPropertyDef, property, 0 ) == KErrNotFound ||
+             static_cast<CMdEReal32Property*>(property)->Value() != lastPlaybackPos  )
+            {
+            if ( !iRepository )
+                {
+                iRepository = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+                }
+            iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedMpxId,
+                                            TInt ( aVideo.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ).iId1 ) );
+            }
         if ( aObject.Property( *iLastPlayPositionPropertyDef, property, 0 ) != KErrNotFound )
             {
             static_cast<CMdEReal32Property*>(property)->SetValueL( lastPlaybackPos );

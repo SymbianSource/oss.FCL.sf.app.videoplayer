@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#18 %
+// Version : %version: ou1cpsw#21 %
 
 
 #include "mpxvideoplayer_appuienginetester.h"
@@ -37,9 +37,6 @@
 
 #include "mpxvideo_debug.h"
 
-
-_LIT( KDefaultAccessPointFilename, "c:\\defaultApId.txt" );
-_LIT( KQueryAccessPointFilename, "c:\\queryApId.txt" );
 
 #define KMPXPLAYBACKPLUGINTYPEUID 0x101FFCA0
 #define EMatrix 4
@@ -69,8 +66,6 @@ CMpxVideoPlayer_AppUiEngineTester::NewL( CScriptBase* aScriptBase )
 CMpxVideoPlayer_AppUiEngineTester::~CMpxVideoPlayer_AppUiEngineTester()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::~CMpxVideoPlayer_AppUiEngineTester()"));
-
-    CleanupTempFiles();
 
     delete iAppUiEngine;
     iAppUiEngine = NULL;
@@ -235,27 +230,16 @@ void CMpxVideoPlayer_AppUiEngineTester::AddSdpFileCallbacksL( TDesC& aFileName,
     //
     TCallbackEvent* event = new (ELeave) TCallbackEvent;
 
-    if ( expectedApId > 0 )
-    {
         event->iFileName = aFileName;
         event->iApId     = expectedApId;
 
-        if ( aUseFileHandle )
-        {
-            event->iEvent = EPlaybackUtilityInitStreamingFileHandle;
-        }
-        else
-        {
-            event->iEvent = EPlaybackUtilityInitStreamingUrl;
-        }
+    if ( aUseFileHandle )
+    {
+        event->iEvent = EPlaybackUtilityInitStreamingFileHandle;
     }
     else
     {
-        //
-        //  When the apId is negative, an error code will be return with a Leave
-        //
-        event->iEvent = EFunctionLeave;
-        event->iExtra = expectedApId;
+        event->iEvent = EPlaybackUtilityInitStreamingUrl;
     }
 
     AddExpectedEvent( event );
@@ -503,46 +487,6 @@ TInt CMpxVideoPlayer_AppUiEngineTester::OpenMediaL( CStifItemParser& aItem )
     EndTest();
 
     return iError;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayer_AppUiEngineTester::SetDefaultAccessPointL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayer_AppUiEngineTester::SetDefaultAccessPointL( CStifItemParser& aItem )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::SetDefaultAccessPointL()"));
-
-    TInt apId;
-
-    //
-    //  Read in the filename from the config file
-    //
-    User::LeaveIfError( aItem.GetNextInt( apId ) );
-
-    WriteAccessPointL( KDefaultAccessPointFilename, apId );
-
-    return KErrNone;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayer_AppUiEngineTester::SetQueryAccessPointL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayer_AppUiEngineTester::SetQueryAccessPointL( CStifItemParser& aItem )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::SetQueryAccessPointL()"));
-
-    TInt apId;
-
-    //
-    //  Read in the filename from the config file
-    //
-    User::LeaveIfError( aItem.GetNextInt( apId ) );
-
-    WriteAccessPointL( KQueryAccessPointFilename, apId );
-
-    return KErrNone;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -865,25 +809,6 @@ CMpxVideoPlayer_AppUiEngineTester::CreateMpxMessageLC( TInt aEvent, TInt aType, 
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayer_AppUiEngineTester::PrepareCloseMpxL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayer_AppUiEngineTester::PrepareCloseMpxL( CStifItemParser& /*aItem*/ )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::PrepareCloseMpxL()"));
-
-    TCallbackEvent* event = new (ELeave) TCallbackEvent;
-    event->iEvent = EPlaybackUtilityClose;
-    AddExpectedEvent( event );
-
-    iAppUiEngine->PrepareCloseMpxL();
-
-    EndTest();
-
-    return iError;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayer_AppUiEngineTester::StartStandAloneL
 // -------------------------------------------------------------------------------------------------
 //
@@ -1119,102 +1044,6 @@ TInt CMpxVideoPlayer_AppUiEngineTester::HandleOpenMediaL( CStifItemParser& /*aIt
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayer_AppUiEngineTester::ProcessActivationMessageL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayer_AppUiEngineTester::ProcessActivationMessageL( CStifItemParser& aItem )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::ProcessActivationMessageL()"));
-
-    TInt msgSender;
-    TInt msgType;
-
-    User::LeaveIfError( aItem.GetNextInt( msgSender ) );
-
-    if ( msgSender == KErrNotSupported )
-    {
-        _LIT8( KShortDes, "Test" );
-
-        MPX_TRAP( iError, iAppUiEngine->ProcessActivationMessageL( KShortDes ) );
-
-        if ( iError == msgSender )
-        {
-            iError = KErrNone;
-        }
-    }
-    else
-    {
-        TVideoPlayerActivationMessage params;
-
-        User::LeaveIfError( aItem.GetNextInt( msgType ) );
-
-        params.iMsgType   = (TVideoPlayerActivationMessage::TMessageType)msgType;
-        params.iMsgSender = (TVideoPlayerActivationMessage::TMessageSender)msgSender;
-
-        if ( msgType == TVideoPlayerActivationMessage::EOpenInternetVideos )
-        {
-            TCallbackEvent* event = new TCallbackEvent;
-            event->iEvent = EViewUtilityActivateViewUid;
-            event->iUid   = TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId );
-            AddExpectedEvent( event );
-        }
-        else if ( msgType == TVideoPlayerActivationMessage::EOpenVideoStorage )
-        {
-            TCallbackEvent* event = new TCallbackEvent;
-            event->iEvent = EViewUtilityActivateViewUid;
-            event->iUid   = TUid::Uid( KUidMyVideosViewTypeId );
-            AddExpectedEvent( event );
-        }
-        else if ( msgType == TVideoPlayerActivationMessage::ELaunchVideoToPlayer )
-        {
-            TFileName filename = GetFileNameAndPathL( aItem );
-
-            TBool idDefined;
-            User::LeaveIfError(  aItem.GetNextInt( idDefined ));
-
-            if ( idDefined )
-            {
-                params.iServiceId = 0x1234;
-                RFs fs;
-                User::LeaveIfError( fs.Connect() );
-                CleanupClosePushL( fs );
-
-                if ( BaflUtils::FileExists( fs , filename ) )
-                {
-                    TCallbackEvent* event1 = new (ELeave) TCallbackEvent;
-                    event1->iEvent = EViewUtilityPreLoadView;
-                    event1->iUid   = KVideoPlaybackViewUid;
-                    AddExpectedEvent( event1 );
-
-                    TCallbackEvent* event2 = new (ELeave) TCallbackEvent;
-                    event2->iEvent = EPlaybackUtilityInitPlaylist;
-                    AddExpectedEvent( event2 );
-                }
-                CleanupStack::PopAndDestroy( &fs );
-            }
-            else
-            {
-                params.iServiceId = 0;
-
-                TCallbackEvent* event = new TCallbackEvent;
-                event->iEvent = EViewUtilityActivateViewUid;
-                event->iUid   = TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId );
-                AddExpectedEvent( event );
-            }
-            params.iFullPath = filename;
-        }
-
-        TPckg<TVideoPlayerActivationMessage> paramsPckg( params );
-
-        iAppUiEngine->ProcessActivationMessageL( paramsPckg );
-    }
-
-    EndTest();
-
-    return iError;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayer_AppUiEngineTester::HandleViewActivation
 // -------------------------------------------------------------------------------------------------
 //
@@ -1268,31 +1097,6 @@ TInt CMpxVideoPlayer_AppUiEngineTester::ProcessCommandParametersL( CStifItemPars
 
     switch ( cmdId )
     {
-        case EProcessTail:
-        {
-            TInt msgSender;
-            TInt msgType;
-
-            User::LeaveIfError( aItem.GetNextInt( msgSender ) );
-            User::LeaveIfError( aItem.GetNextInt( msgType ) );
-
-
-            TVideoPlayerActivationMessage params;
-
-            params.iMsgType   = TVideoPlayerActivationMessage::EOpenVideoStorage;
-            params.iMsgSender = TVideoPlayerActivationMessage::EMatrixMenu;
-
-            TPckg<TVideoPlayerActivationMessage> paramsPckg( params );
-
-            TCallbackEvent* event = new TCallbackEvent;
-            event->iEvent = EViewUtilityActivateViewUid;
-            event->iUid   = TUid::Uid( KUidMyVideosViewTypeId );
-            AddExpectedEvent( event );
-
-            tail.Set( paramsPckg );
-
-            break;
-        }
         case EProcessStandAlone:
         {
             TCallbackEvent* event = new (ELeave) TCallbackEvent;
@@ -1470,31 +1274,6 @@ CMpxVideoPlayer_AppUiEngineTester::HandleUtilityEvent( TCallbackEvent* aEvent )
 }
 
 void
-CMpxVideoPlayer_AppUiEngineTester::WriteAccessPointL( const TDesC& aFileName, TInt aApId )
-{
-    MPX_DEBUG(_L("CMpxVideoPlayer_AppUiEngineTester::WriteAccessPointL(%S, %d)"),
-        &aFileName, aApId);
-
-    //
-    //  Write to test file so the controller open fails
-    //
-    RFile file;
-
-    RFs fs;
-    User::LeaveIfError( fs.Connect() );
-
-    TBuf8<16> tgt;
-    tgt.Num( aApId );
-
-    file.Replace( fs, aFileName, EFileWrite );
-
-    file.Write( tgt );
-
-    file.Close();
-    fs.Close();
-}
-
-void
 CMpxVideoPlayer_AppUiEngineTester::EndTest()
 {
     if ( ! iTimeoutController )
@@ -1548,20 +1327,6 @@ CMpxVideoPlayer_AppUiEngineTester::GetFileNameAndPathL( CStifItemParser& aItem )
     fullPath.Append( filename );
 
     return fullPath;
-}
-
-void
-CMpxVideoPlayer_AppUiEngineTester::CleanupTempFiles()
-{
-    MPX_DEBUG(_L("CMpxVideoPlayer_AppUiEngineTester::CleanupTempFiles()"));
-
-    RFs fs;
-    TInt error = fs.Connect();
-
-    error = fs.Delete( KDefaultAccessPointFilename );
-    error = fs.Delete( KQueryAccessPointFilename );
-
-    fs.Close();
 }
 
 // EOF

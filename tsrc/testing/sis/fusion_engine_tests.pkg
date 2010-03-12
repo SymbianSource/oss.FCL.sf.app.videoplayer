@@ -51,50 +51,9 @@
 "/epoc32/release/armv5/udeb/VCXTestEcgFileObserver.dll"   - "!:/Sys/Bin/VCXTestEcgFileObserver.dll"
 "/epoc32/release/armv5/udeb/VCXTestMyVideosCollectionClient.dll" - "!:/Sys/Bin/VCXTestMyVideosCollectionClient.dll"
 
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceUpdating.inc" - "c:/testframework/VCXServiceUpdating.inc"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceNames.inc" - "c:/testframework/VCXServiceNames.inc"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXConsts.inc" - "c:/testframework/VCXConsts.inc"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXErrors.inc" - "c:/testframework/VCXErrors.inc"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXDrives.inc" - "c:/testframework/VCXDrives.inc"
-
-; PROVISIONING & ZIP FILES
-"/epoc32/release/armv5/udeb/VCXProvisioningTest.dll"      - "!:/Sys/Bin/VCXProvisioningTest.dll"
-"../../../videofeeds/server/tsrc/VCXProvisioningTest/conf/VCXProvisioningTest.cfg" - "c:/testframework/VCXProvisioningTest.cfg"
-"../../../videofeeds/server/tsrc/VCXProvisioningTest/data/c/provisionzip/provision.zip" - "c:/testing/data/provisionzip/provision.zip"
-"../../../videofeeds/server/tsrc/VCXProvisioningTest/data/c/verifyzip/verify.zip" - "c:/testing/data/verifyzip/verify.zip"
-
-; SERVICE MANAGEMENT API
-"/epoc32/release/armv5/udeb/VCXServiceManagementApiTest.dll" - "!:/Sys/Bin/VCXServiceManagementApiTest.dll"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTest.inc" - "c:/testframework/VCXServiceManagementApiTest.inc"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestSync.cfg" - "c:/testframework/VCXServiceManagementApiTestSync.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestAsync.cfg" - "c:/testframework/VCXServiceManagementApiTestAsync.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestServiceCustom.cfg" - "c:/testframework/VCXServiceManagementApiTestServiceCustom.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestSyncErrorHandling.cfg" - "c:/testframework/VCXServiceManagementApiTestSyncErrorHandling.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestAsyncR3.cfg" - "c:/testframework/VCXServiceManagementApiTestAsyncR3.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestStressAsync.cfg" - "c:/testframework/VCXServiceManagementApiTestStressAsync.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestStressSync.cfg" - "c:/testframework/VCXServiceManagementApiTestStressSync.cfg"
-"../../../videofeeds/server/tsrc/VCXServiceManagementApiTest/conf/VCXServiceManagementApiTestHelium.cfg" - "c:/testframework/VCXServiceManagementApiTestHelium.cfg"
-
-; VOD CONTENT API
-"/epoc32/release/armv5/udeb/VCXVodContentApiTest.dll" - "!:/Sys/Bin/VCXVodContentApiTest.dll"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTest.inc" - "c:/testframework/VCXVodContentApiTest.inc"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTest.cfg" - "c:/testframework/VCXVodContentApiTest.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestCategoriesR3.cfg" - "c:/testframework/VCXVodContentApiTestCategoriesR3.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestDb.cfg" - "c:/testframework/VCXVodContentApiTestDb.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestErrors.cfg" - "c:/testframework/VCXVodContentApiTestErrors.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestInterference.cfg" - "c:/testframework/VCXVodContentApiTestInterference.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestMimeTypes.cfg" - "c:/testframework/VCXVodContentApiTestMimeTypes.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestParental.cfg" - "c:/testframework/VCXVodContentApiTestParental.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestSearch2R3.cfg" - "c:/testframework/VCXVodContentApiTestSearch2R3.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestSearchR3.cfg" - "c:/testframework/VCXVodContentApiTestSearchR3.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestSearchStressR3.cfg" - "c:/testframework/VCXVodContentApiTestSearchStressR3.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentModificationCheckTest.cfg" - "c:/testframework/VCXVodContentModificationCheckTest.cfg"
-"../../../videofeeds/server/tsrc/VCXVodContentApiTest/conf/VCXVodContentApiTestHelium.cfg" - "c:/testframework/VCXVodContentApiTestHelium.cfg"
-
-; SCHEDULED REMINDER
-"/epoc32/release/armv5/udeb/VCXScheduledReminderTest.dll" - "!:/Sys/Bin/VCXScheduledReminderTest.dll"
-"../../../videofeeds/server/tsrc/VCXScheduledReminderTest/conf/VCXScheduledReminderTest.cfg" - "c:/testframework/VCXScheduledReminderTest.cfg"
-"../../../videofeeds/server/tsrc/VCXScheduledReminderTest/conf/VCXScheduledReminderTest.inc" - "c:/testframework/VCXScheduledReminderTest.inc"
+"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXConsts.inc" - "c:/testframework/VCXConsts.inc"
+"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXErrors.inc" - "c:/testframework/VCXErrors.inc"
+"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXDrives.inc" - "c:/testframework/VCXDrives.inc"
 
 ; MEDIASETTINGSENGINE
 "/epoc32/release/armv5/udeb/mpxmediasettingsenginetest.dll" - "!:/Sys/Bin/mpxmediasettingsenginetest.dll"
@@ -104,19 +63,7 @@
 "/epoc32/release/armv5/udeb/vcxnssettingsenginetest.dll" - "!:/Sys/Bin/vcxnssettingsenginetest.dll"
 "../../../mediasettings/videoplayersettingsengine/tsrc/vpsettingsenginetest/conf/vcxnssettingsenginetest.cfg" - "c:/TestFramework/vcxnssettingsenginetest.cfg"
 
-; VCXSETTINGSDATABASETEST
-"/epoc32/release/armv5/udeb/VCXSettingsDatabaseTest.dll" - "!:/Sys/Bin/VCXSettingsDatabaseTest.dll"
-"../../../videofeeds/server/tsrc/VCXSettingsDatabaseTest/conf/VCXSettingsDatabaseTest.cfg" - "c:/testframework/VCXSettingsDatabaseTest.cfg"
-
-; VCXIAPLISTTEST
-"/epoc32/release/armv5/udeb/VCXIapListTest.dll" - "!:/Sys/Bin/VCXIapListTest.dll"
-"../../../videofeeds/server/tsrc/VCXIapListTest/conf/VCXIapListTest.cfg" - "c:/testframework/VCXIapListTest.cfg"
-
-; VCXSERVICETEST
-"/epoc32/release/armv5/udeb/VCXServiceTest.dll" - "!:/Sys/Bin/VCXServiceTest.dll"
-"../../../videofeeds/server/tsrc/VCXServiceTest/conf/VCXServiceTest.cfg" - "c:/testframework/VCXServiceTest.cfg"
-
-; MY VIDEOS
+; MY VIDEOS COLLECTION
 "/epoc32/release/armv5/udeb/VCXMyVideosCollectionPluginTest.dll" - "!:/Sys/Bin/VCXMyVideosCollectionPluginTest.dll"
 "/epoc32/release/armv5/udeb/MediatorEventVerifier.dll" - "!:/Sys/Bin/MediatorEventVerifier.dll"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestAttributes.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestAttributes.cfg"

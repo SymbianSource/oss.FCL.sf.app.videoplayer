@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -49,12 +49,7 @@ SOURCE          MPSettingsMainView.cpp
 SOURCE          MPSettingsVideoSettingItemList.cpp
 SOURCE          MPSettingsVideoContainer.cpp
 SOURCE          MPSettingsStreamingContainer.cpp
-SOURCE          MPSettingsProxySettingItemList.cpp
-SOURCE          MPSettingsProxyContainer.cpp
-SOURCE          MPSettingsProxyView.cpp
-SOURCE          MPSettingsNetworkSettingItemList.cpp
-SOURCE          MPSettingsNetworkContainer.cpp
-SOURCE          MPSettingsNetworkView.cpp
+SOURCE          MPSettingsStreamingSettingItemList.cpp
 SOURCE          MPSettingsSliderSettingItem.cpp
 SOURCE          MPSettingsUDPPortSettingItem.cpp
 SOURCE          MPSettingsAdvancedBwContainer.cpp
@@ -78,7 +73,6 @@ USERINCLUDE     ../../mediasettingsapp/inc
 USERINCLUDE     ../../videoplayersettingsengine/inc
 USERINCLUDE     ../../mediasettingsengine/inc
 USERINCLUDE     ../../mediasettingsengine/data
-USERINCLUDE     ../../feedsettingsviews/inc
 
 
 //System include paths
@@ -117,8 +111,6 @@ LIBRARY   featmgr.lib           // Feature manager
 LIBRARY   commsdat.lib          
 LIBRARY   gsframework.lib       // For base classes
 LIBRARY   centralrepository.lib 
-LIBRARY   pbkeng.lib
-LIBRARY   pbkview.lib
 LIBRARY   aknskinsrv.lib        // for enhanced skinning
 LIBRARY   aknskins.lib          // for enhanced skinning
 LIBRARY   egul.lib
@@ -145,13 +137,10 @@ LIBRARY   hlplch.lib            // for "Help" options menu
 LIBRARY   eikdlg.lib            // eikon dialogs
 
 LIBRARY   flogger.lib // For GSLogger
-LIBRARY   sisregistryclient.lib
-
-LIBRARY   vcxnssettingsview.lib
 
 SOURCEPATH      ../data
 DOCUMENT        10275068.rss
-SOURCEPATH		../../mediasettingsapp/data
+SOURCEPATH      ../../mediasettingsapp/data
 DOCUMENT        MediaSettings.rss
 
 

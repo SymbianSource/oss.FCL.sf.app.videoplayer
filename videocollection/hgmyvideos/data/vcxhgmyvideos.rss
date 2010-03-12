@@ -170,6 +170,11 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
 #endif
         MENU_ITEM 
             { 
+            command = EVcxHgMyVideosCmdOpenSettings; 
+            txt = qtn_vcx_options_settings;
+            },
+        MENU_ITEM 
+            { 
             command = EVcxHgMyVideosCmdHelp; 
             txt = qtn_options_help;
             },
@@ -277,6 +282,16 @@ RESOURCE CBA_BUTTON r_vcxhgmyvideos_rsk_back
     { 
     id = EAknSoftkeyBack; 
     txt = text_softkey_back; 
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhgmyvideos_rsk_exit
+    { 
+    id = EAknSoftkeyExit; 
+    txt = text_softkey_exit; 
     }
 
 // -----------------------------------------------------------------------------
@@ -625,37 +640,37 @@ RESOURCE TBUF r_vcxhgmyvideos_no_videos { buf = qtn_iptv_no_videos; }
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_my_videos_title { buf = qtn_iptv_my_videos_title; }
+RESOURCE TBUF r_vcxhgmyvideos_my_videos_title { buf = qtn_vcx_title_suite; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_one_new_video { buf = qtn_vcx_hg_one_new_video; }
+RESOURCE TBUF r_vcxhgmyvideos_one_new_video { buf = qtn_vcx_hg_list_one_new_video; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_n_new_videos { buf = qtn_vcx_hg_n_new_videos; }
+RESOURCE TBUF r_vcxhgmyvideos_n_new_videos { buf = qtn_vcx_hg_list_n_new_videos; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_no_videos_in_category { buf = qtn_vcx_hg_no_videos_in_category; }
+RESOURCE TBUF r_vcxhgmyvideos_no_videos_in_category { buf = qtn_vcx_hg_list_no_videos_in_category; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_one_video_in_category { buf = qtn_vcx_hg_one_video_in_category; }
+RESOURCE TBUF r_vcxhgmyvideos_one_video_in_category { buf = qtn_vcx_hg_list_one_video_in_category; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_videos_in_category { buf = qtn_vcx_hg_videos_in_category; }
+RESOURCE TBUF r_vcxhgmyvideos_videos_in_category { buf = qtn_vcx_hg_list_videos_in_category; }
 
 // -----------------------------------------------------------------------------
 //
@@ -680,13 +695,13 @@ RESOURCE TBUF r_vcxhgmyvideos_storage_tv_recordings_list
 //
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_storage_captured_list { buf = qtn_vcx_hg_storage_captured_list; }
+RESOURCE TBUF r_vcxhgmyvideos_storage_captured_list { buf = qtn_vcx_hg_list_storage_captured; }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //  
-RESOURCE TBUF r_vcxhgmyvideos_storage_other_list { buf = qtn_iptv_storage_other_list; }
+RESOURCE TBUF r_vcxhgmyvideos_storage_other_list { buf = qtn_vcx_hg_list_storage_other; }
 
 // -----------------------------------------------------------------------------
 //
@@ -858,11 +873,27 @@ RESOURCE TBUF r_vcxhgmyvideos_fldr_some_items_cant_move
 //
 // -----------------------------------------------------------------------------
 //
-RESOURCE TBUF r_vcxhgmyvideos_refreshing { buf = qtn_iptv_refreshing; }
+RESOURCE TBUF r_vcxhgmyvideos_resume_not_possible
+    { buf = qtn_iptv_resume_not_possible; }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhgmyvideos_last_watched
+    { buf = qtn_vcx_hg_list_last_watched; }
 
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
 //
-RESOURCE TBUF r_vcxhgmyvideos_resume_not_possible
-    { buf = qtn_iptv_resume_not_possible; }
+RESOURCE TBUF r_vcxhgmyvideos_ovi_store
+    { buf =  qtn_vcx_hg_list_ovi_store; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhgmyvideos_ovi_store_videos
+    { buf = qtn_vcx_hg_list_ovi_store_videos; }
+

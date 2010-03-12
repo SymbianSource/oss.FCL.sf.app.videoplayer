@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 61 %
+// Version : %version: 63 %
 
 
 //  Include Files
@@ -64,6 +64,7 @@
 #include <mpxvideoplaybackdefs.h>
 #include "mpxmediavideodefs.h"
 #include "mpxvideo_debug.h"
+#include "mpxvideoplayercustomviewmsgconsts.h"
 
 //  Member Functions
 
@@ -220,6 +221,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
             CreateGeneralPlaybackCommandL( EPbCmdPause );
             break;
         }
+        case EAknSoftkeyClose:
         case EMPXPbvCmdClose:
         {
             MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleCommandL() EMPXPbvCmdClose"));
@@ -363,17 +365,9 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
             LaunchDRMDetailsL();
             break;
         }
-        case EAknSoftkeyClose:
+        case KMpxVideoPlaybackPdlReloading:
         {
-            //
-            //  Close is in progress
-            //  Remove the display window so the surface can be released
-            //
-            if ( iDisplayHandler )
-            {
-                iDisplayHandler->RemoveDisplayWindow();
-            }
-
+            iPdlReloading = ETrue;
             break;
         }
     }

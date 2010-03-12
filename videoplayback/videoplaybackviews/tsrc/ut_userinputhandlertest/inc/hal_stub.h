@@ -15,17 +15,22 @@
  *
  */
 
-// Version : %version: ou1cpsw#2 %
+// Version : %version: 3 %
 
 #ifndef __HAL_STUB_H__
 #define __HAL_STUB_H__
 
-#include <e32def.h>
-#include <hal_data.h>
-#include <e32property.h>
+#include <e32base.h>
 
+enum TLightStatus
+            {
+            ELightStatusUnknown = 0,
+            ELightOn,              
+            ELightOff,             
+            ELightBlink            
+            };
 
-static TInt  iBacklightState = 1;
+static TLightStatus  iBacklightState = ELightOn;
 
 /**
 @publishedPartner
@@ -33,50 +38,40 @@ static TInt  iBacklightState = 1;
 
 A set of static functions to get and set HAL attributes.
 
-@see HALData
+@see CHWRMLight
 */
-class HAL : public HALData
-	{
-public:
-    
-    HAL();
-    virtual ~HAL();
-    
-    /**
-    Gets the value of the specified HAL attribute.
+class CHWRMLight : public CBase
+{
+    public:
 
-    @param aAttribute The HAL attribute.
-    @param aValue      On successful return, contains the attribute value.
+       enum TLightTarget
+            {
+            ENoTarget                    = 0x0,    
+            EPrimaryDisplay              = 0x1,     
+            ESystemTarget                = 0x80000000  
+		    };
 
-    @return  KErrNone, if successful;
-             KErrNotSupported, if the attribute is not defined in the list
-             of attributes, or is not meaningful for this device.
-         
-    @see HALData::TAttribute
-    @see HALData::TAttributeProperty
-    */
-	static TInt Get(TAttribute aAttribute, TInt& aValue);
+    public:
 
-	
-	/**
-    Sets the specified HAL attribute.
+        static CHWRMLight* NewL();
 
-    @param aAttribute The HAL attribute.
-    @param aValue      The attribute value.
+        void ConstructL(); 
 
-    @return  KErrNone, if successful;
-             KErrNotSupported, if the attribute is not defined in the list
-             of attributes, or is not meaningful for this device, or is
-             not settable.
-         
-    @see HALData::TAttribute
-    @see HALData::TAttributeProperty
+        CHWRMLight();
 
-    @capability WriteDeviceData or other capability specified
-    for individual attributes in TAttribute
-    */
-	static TInt Set(TAttribute aAttribute, TInt aValue);
-	
-	};
+        ~CHWRMLight();
+
+    public: 
+        void ReserveLightL(TInt aTarget);
+
+        void ReleaseLight(TInt aTarget);
+
+        void LightOnL(TInt aTarget);
+
+   	    void LightOffL(TInt aTarget);
+
+        TLightStatus LightStatus(TInt aTarget) const;
+
+};
 
 #endif

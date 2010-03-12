@@ -236,7 +236,9 @@ TUint8 TVcxMyVideosCollectionUtil::OriginL( CMPXMedia& aVideo )
     if ( aVideo.IsSupported( KVcxMediaMyVideosOrigin ) )
         {
         origin = aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin );                
-        if ( origin == EVcxMyVideosOriginSideLoaded )
+        if ( origin == EVcxMyVideosOriginSideLoaded ||
+                origin == EVcxMyVideosOriginDownloaded ||
+                origin == EVcxMyVideosOriginTvRecording )
             {
             origin = EVcxMyVideosOriginOther;
             }

@@ -15,12 +15,14 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: e003sa33#9 %
 
 
 //
 //  INCLUDE FILES
 //
+#include <f32file.h>
+
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackviewfiledetails.h"
 
@@ -97,6 +99,34 @@ CMPXVideoPlaybackViewFileDetails::ClearFileDetails()
     iVideoWidth  = 0;
     iBitRate = 0;
     iFourCCCode = 0;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackViewFileDetails::GenerateFileNameL
+// -------------------------------------------------------------------------------------------------
+//
+EXPORT_C HBufC* CMPXVideoPlaybackViewFileDetails::GenerateFileNameL()
+{
+    MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackViewFileDetails::GenerateFileNameL()" ) );
+    
+	HBufC* fileName = NULL;
+
+	if ( iClipName && iClipName->Length()
+			&& EMPXVideoStreaming != iPlaybackMode &&
+    		EMPXVideoLiveStreaming != iPlaybackMode )
+	{
+        //
+        // Get only file name for media details viewer 
+        //
+        //TParsePtrC filePath( iClipName->Des() );
+        //fileName = ( filePath.Name() ).AllocL();
+        TParse parse;
+        parse.Set( iClipName->Des(), NULL, NULL);
+        fileName = ( parse.Name() ).AllocL();
+
+	}
+	
+    return fileName;
 }
 
 //  EOF

@@ -6,4 +6,5 @@ EXPORTS
 	?GetBitmap@CMPXVideoPlaybackControlsController@@QAEPAVCEikImage@@W4TMPXVideoPlaybackControls@@@Z @ 5 NONAME ; class CEikImage * CMPXVideoPlaybackControlsController::GetBitmap(enum TMPXVideoPlaybackControls)
 	?HandleEventL@CMPXVideoPlaybackControlsController@@QAEXW4TMPXVideoPlaybackControlCommandIds@@H@Z @ 6 NONAME ; void CMPXVideoPlaybackControlsController::HandleEventL(enum TMPXVideoPlaybackControlCommandIds, int)
 	?NewL@CMPXVideoPlaybackControlsController@@SAPAV1@PAVCMPXVideoPlaybackContainer@@VTRect@@PAVCMPXVideoPlaybackViewFileDetails@@@Z @ 7 NONAME ; class CMPXVideoPlaybackControlsController * CMPXVideoPlaybackControlsController::NewL(class CMPXVideoPlaybackContainer *, class TRect, class CMPXVideoPlaybackViewFileDetails *)
+	?GenerateFileNameL@CMPXVideoPlaybackViewFileDetails@@QAEPAVHBufC16@@XZ @ 8 NONAME ; class HBufC16 * CMPXVideoPlaybackViewFileDetails::GenerateFileNameL(void)
 
