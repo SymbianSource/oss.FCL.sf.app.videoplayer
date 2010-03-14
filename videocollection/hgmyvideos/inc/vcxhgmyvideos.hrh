@@ -42,15 +42,19 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdUnmark,                 // Mark/Unmark submenu: Unmark video 
     EVcxHgMyVideosCmdMarkAll,                // Mark/Unmark submenu: Mark all videos
     EVcxHgMyVideosCmdUnmarkAll,              // Mark/Unmark submenu: Unmark all videos
+#ifdef RD_VIDEO_AS_RINGING_TONE    
     EVcxHgMyVideosCmdAiwAssign,              // Submenu: Placeholder for "Use video as"
+#endif
     EVcxHgMyVideosCmdHelp,                   // Help
     EVcxHgMyVideosCmdExit,                   // Exit Video Storage
     EVcxHgMyVideosCmdToggleMultipleMarking,  // Toggle marking mode state
     EVcxHgMyVideosCmdSend,                   // Send video
     EVcxHgMyVideosCmdNothing,                // Non-functional command
     EVcxHgMyVideosCmdStartMarking,           // Sets marking mode on
-    EVcxHgMyVideosCmdStopMarking,            // Sets marking mode off
-    EVcxHgMyVideosCmdAiwBase = 800           // Base number for AIW commands
+    EVcxHgMyVideosCmdStopMarking             // Sets marking mode off
+#ifdef RD_VIDEO_AS_RINGING_TONE
+    ,EVcxHgMyVideosCmdAiwBase = 800           // Base number for AIW commands
+#endif
     };
 
 enum TVcxHgMyVideosMarkButtonStates

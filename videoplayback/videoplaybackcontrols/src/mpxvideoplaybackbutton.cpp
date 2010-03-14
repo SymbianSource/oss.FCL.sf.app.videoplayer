@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 
@@ -39,11 +39,13 @@ CMPXVideoPlaybackButton::CMPXVideoPlaybackButton()
 // Symbian 2nd phase constructor can leave.
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackButton::ConstructL( TRect aRect, const TDesC &aIconPath )
+void CMPXVideoPlaybackButton::ConstructL( CMPXVideoPlaybackControlsController* aController, 
+                                          TRect aRect, const TDesC &aIconPath )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackButton::ConstructL()"));
 
     iIConPath = aIconPath.AllocL();
+    iController = aController;
 
     SetRect( aRect );
 }
@@ -53,14 +55,15 @@ void CMPXVideoPlaybackButton::ConstructL( TRect aRect, const TDesC &aIconPath )
 // Two-phased constructor.
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackButton* CMPXVideoPlaybackButton::NewL( TRect aRect, const TDesC &aIconPath)
+CMPXVideoPlaybackButton* CMPXVideoPlaybackButton::NewL( CMPXVideoPlaybackControlsController* aController, 
+                                                        TRect aRect, const TDesC &aIconPath)
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackButton::NewL()"));
 
     CMPXVideoPlaybackButton* self = new ( ELeave ) CMPXVideoPlaybackButton();
 
     CleanupStack::PushL( self );
-    self->ConstructL( aRect, aIconPath );
+    self->ConstructL( aController, aRect, aIconPath );
     CleanupStack::Pop();
     return self;
 }
@@ -193,17 +196,20 @@ void CMPXVideoPlaybackButton::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( Window().DisplayMode() == EColor16MAP )
+    if ( iController->SetBackgroundBlack() )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        gc.Clear( aRect );
-    }
-    else if ( Window().DisplayMode() == EColor16MA )
-    {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        gc.Clear( aRect );
+        if ( Window().DisplayMode() == EColor16MAP )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+            gc.Clear( aRect );
+        }
+        else if ( Window().DisplayMode() == EColor16MA )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+            gc.Clear( aRect );
+        }
     }
     else
     {

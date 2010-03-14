@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#59 %
+// Version : %version: da1mmcf#61 %
 
 
 #include <eikon.hrh>
@@ -525,7 +525,7 @@ void CMpxVideoPlayerAppUiEngine::PrepareCloseMpxL()
     if ( iPlaybackUtility )
     {
         ClosePlaybackPluginL();
-        
+
         MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
         TRAP_IGNORE( manager.ClearSelectPlayersL() );
     }

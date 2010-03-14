@@ -409,11 +409,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          */
         void DebugPrintVideoListL( CMPXMediaArray* aVideoArray );
 #endif // _DEBUG && IPTV_LOGGING_METHOD        
-        
-        /**
-         * Variable for storing current MPX collection level.
-         */
-        TInt iCollectionLevel;
     };
 
 #endif // VCXHGMYVIDEOSCOLLECTIONCLIENT_H

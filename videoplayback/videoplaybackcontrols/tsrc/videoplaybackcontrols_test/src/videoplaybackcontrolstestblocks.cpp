@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -541,18 +541,42 @@ void CVideoPlaybackControlsTest::TapOnScreen( TPointerEvent::TType aType,
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::TapOnScreen()"));
 
+    MPX_DEBUG(_L("   aType = %d, aPosition = (%d,%d)"), aType, aPosition.iX, aPosition.iY);
+
+    TPoint tapPoint( aPosition );
+
+#if !defined(__WINS__)
+
+    //
+    //  On the hardware, the window server is performing a rotation.
+    //  This calculation will adjust the points so the same touch point is received
+    //  on both the emulator and hardware
+    //
+    //  ix = ( ScreenWidth - 1 ) - oldPosition.iY - YOffset
+    //      I am not sure why they subtract 1 from the screen width, but they do
+    //      The YOffset can be read from the wsini.ini file
+    //
+    //  iy = oldPosition.iX
+    //  
+    tapPoint.iX = ( 360 - 1 ) - aPosition.iY - 12;
+    tapPoint.iY = aPosition.iX;
+
+#endif
+    
+    MPX_DEBUG(_L("   tapPosition = (%d,%d)"), tapPoint.iX, tapPoint.iY);
+
     TRawEvent pointer;
 
     if ( aType == TPointerEvent::EButton1Down )
     {
-        pointer.Set( TRawEvent::EButton1Down, aPosition.iX, aPosition.iY );
+        pointer.Set( TRawEvent::EButton1Down, tapPoint.iX, tapPoint.iY );
 
         iWsSession.SimulateRawEvent( pointer );
         iWsSession.Flush();
     }
     else if ( aType == TPointerEvent::EButton1Up )
     {
-        pointer.Set( TRawEvent::EButton1Up, aPosition.iX, aPosition.iY );
+        pointer.Set( TRawEvent::EButton1Up, tapPoint.iX, tapPoint.iY );
 
         iWsSession.SimulateRawEvent( pointer );
         iWsSession.Flush();

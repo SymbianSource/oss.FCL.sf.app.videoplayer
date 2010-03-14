@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24 %
+// Version : %version: 27 %
 
 
 // INCLUDE FILES
@@ -65,6 +65,7 @@ using namespace AknLayoutScalable_Avkon;
 
 const TInt KMPXControlsTimeOut = 4000000;
 
+const TInt KMP4LayoutSet = 6;
 // ================= MEMBER FUNCTIONS ==============================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -76,7 +77,8 @@ CMPXVideoPlaybackControlsController::CMPXVideoPlaybackControlsController(
     CMPXVideoPlaybackContainer* aContainer, TRect aRect )
     : iControls( EMPXControlsCount ),
       iRect( aRect ),
-      iContainer( aContainer )
+      iContainer( aContainer ),
+      iSurfaceCreated(EFalse)
 {
 }
 
@@ -111,6 +113,7 @@ void CMPXVideoPlaybackControlsController::ConstructL( CMPXVideoPlaybackViewFileD
     iVideoResourceOffset = coeEnv->AddResourceFileL( resourceFile );
 
     iFileDetails = aDetails;
+    iTvOutConnected = iFileDetails->iTvOutConnected;
 
     iFileDetails->iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
 
@@ -316,12 +319,14 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         case EMPXControlCmdTvOutConnected:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutConnected]"));
+            iTvOutConnected = ETrue;
             HandleTvOutEventL( ETrue, aEvent, aValue );
             break;
         }
         case EMPXControlCmdTvOutDisconnected:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutDisConnected]"));
+            iTvOutConnected = EFalse;
             HandleTvOutEventL( EFalse, aEvent, aValue );
             break;
         }
@@ -376,6 +381,7 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
 			//
 			//  When surface is created, remove the Real One Bitmap
 			//
+			iSurfaceCreated = ETrue;
 			SetRealOneBitmapVisibility( EFalse );
 			break;
 		}
@@ -675,7 +681,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
         case EMPXProgressBar:
         {
             TAknLayoutRect progressPaneRect;
-            progressPaneRect.LayoutRect( iRect, mp4_progress_pane(0).LayoutLine() );
+            progressPaneRect.LayoutRect( iRect, mp4_progress_pane( KMP4LayoutSet ).LayoutLine() );
 
             TRect touchPaneRect( progressPaneRect.Rect().iTl.iX,
                                  progressPaneRect.Rect().iTl.iY,
@@ -714,7 +720,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
             CreateTextLabelWithSpecificLayoutL( R_MPX_LOADING,
                                                 aControlIndex,
                                                 properties,
-                                                main_mp4_pane_t3(0) );
+                                                main_mp4_pane_t3( KMP4LayoutSet ) );
             break;
         }
         case EMPXTitleLabel:
@@ -800,12 +806,20 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
 
             AknLayoutUtils::LayoutImage( dlPausedBitmap,
                                          iRect,
-                                         AknLayoutScalable_Apps::main_mp4_pane_g6(0) );
+                                         AknLayoutScalable_Apps::main_mp4_pane_g6( KMP4LayoutSet ) );
 
+            TRect ctrlRect = dlPausedBitmap->Rect();
+
+            // To make it aligned with AspectRatioIcon when touch is supported.
+            if ( AknLayoutUtils::PenEnabled() )
+            {
+                ctrlRect.iBr.iY += 10;
+                ctrlRect.iTl.iY += 10;
+            }
             CMPXVideoPlaybackControl* control =
                 CMPXVideoPlaybackControlPdl::NewL( this,
                                                    dlPausedBitmap,
-                                                   dlPausedBitmap->Rect(),
+                                                   ctrlRect,
                                                    aControlIndex,
                                                    properties );
 
@@ -822,7 +836,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
 
             TAknLayoutRect aspectRatioPaneRect;
             aspectRatioPaneRect.LayoutRect( iRect,
-                                            main_mp4_pane_g5(0).LayoutLine() );
+                                            main_mp4_pane_g5( KMP4LayoutSet ).LayoutLine() );
 
             //
             // Set the touchable area for aspect ratio
@@ -855,11 +869,17 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
         case EMPXBrandingAnimation:
         {
             TAknLayoutRect brandingPaneRect;
-            brandingPaneRect.LayoutRect( iRect, main_mp4_pane_g1(0).LayoutLine() );
+            brandingPaneRect.LayoutRect( iRect, main_mp4_pane_g3( KMP4LayoutSet ).LayoutLine() );
 
+            // Decrease the size of BrandingAnimation to make it look better.
+            TRect brandingLogoRect(
+                    brandingPaneRect.Rect().iTl.iX+20,
+                    brandingPaneRect.Rect().iTl.iY+50,
+                    brandingPaneRect.Rect().iBr.iX-20,
+                    brandingPaneRect.Rect().iBr.iY-50 );
             CMPXVideoPlaybackBrandingAnimation* brandingAnimation =
                 CMPXVideoPlaybackBrandingAnimation::NewL( this,
-                                                          brandingPaneRect.Rect(),
+                                                          brandingLogoRect,
                                                           iFileDetails->iRNFormat );
 
             CleanupStack::PushL( brandingAnimation );
@@ -867,7 +887,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
             CMPXVideoPlaybackControl* control =
                 CMPXVideoPlaybackControl::NewL( this,
                                                 brandingAnimation,
-                                                brandingPaneRect.Rect(),
+                                                brandingLogoRect,
                                                 aControlIndex,
                                                 properties );
 
@@ -890,7 +910,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
 
             AknLayoutUtils::LayoutImage( pausedBitmap,
                                          iRect,
-                                         AknLayoutScalable_Apps::main_mp4_pane_g4(0) );
+                                         AknLayoutScalable_Apps::main_mp4_pane_g4( KMP4LayoutSet ) );
 
             CMPXVideoPlaybackControl* control =
                 CMPXVideoPlaybackControl::NewL( this,
@@ -1031,19 +1051,11 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
 
     if ( aTop )
     {
-        SKLayout = main_mp4_pane_t1(0);
-        skRect.iTl.iX = iRect.iBr.iX-iRect.iBr.iX/5;
-        skRect.iTl.iY = iRect.iTl.iY;
-        skRect.iBr.iX = iRect.iBr.iX;
-        skRect.iBr.iY = iRect.iBr.iY/5;
+        SKLayout = main_mp4_pane_t2( KMP4LayoutSet );
     }
     else
     {
-        SKLayout = main_mp4_pane_t2(0);
-        skRect.iTl.iX = iRect.iBr.iX-iRect.iBr.iX/5;
-        skRect.iTl.iY = iRect.iBr.iY-iRect.iBr.iY/5;
-        skRect.iBr.iX = iRect.iBr.iX;
-        skRect.iBr.iY = iRect.iBr.iY;
+        SKLayout = main_mp4_pane_t1( KMP4LayoutSet );
     }
 
     AknLayoutUtils::LayoutLabel( label,
@@ -1052,7 +1064,14 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
 
     if ( AknLayoutUtils::PenEnabled() )
     {
-        label->SetAlignment( EHCenterVCenter );
+        if ( aTop )
+        {
+            label->SetAlignment( EHRightVCenter );
+        }
+        else
+        {
+            label->SetAlignment( EHLeftVCenter );
+        }
     }
     else
     {
@@ -1065,6 +1084,12 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
             label->SetAlignment( EHRightVBottom );
         }
     }
+    
+    skRect = label->Rect();
+
+    // Enlarge the button region to make it easy to be touched.
+    skRect.iTl.iY -= 6;
+    skRect.iBr.iY += 6;
 
     CMPXVideoPlaybackControl* control = CMPXVideoPlaybackControl::NewL( this,
                                                                         label,
@@ -1898,6 +1923,14 @@ void CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()
         delete iMediaDetailsViewerControl;
         iMediaDetailsViewerControl = NULL;
     }
+}
+
+TBool CMPXVideoPlaybackControlsController::SetBackgroundBlack()
+{
+    TBool backgroundBlack = iSurfaceCreated && !iTvOutConnected;
+
+    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::SetBackgroundBlack(%d)"), backgroundBlack);
+    return backgroundBlack;
 }
 
 

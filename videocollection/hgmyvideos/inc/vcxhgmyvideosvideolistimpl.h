@@ -37,8 +37,10 @@ class CVcxHgMyVideosUPnPInterface;
 class CVcxHgTelephonyClient;
 class CHgScroller;
 class CSendUi;
-class CHgMyVideosAiwMenuHandler;
 class CDRMHelper;
+#ifdef RD_VIDEO_AS_RINGING_TONE
+class CHgMyVideosAiwMenuHandler;
+#endif
 
 namespace DRM
     {
@@ -266,13 +268,15 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          * Send video using SendUI
          */
         void HandleSendL();
-        
+
+#ifdef RD_VIDEO_AS_RINGING_TONE        
         /**
          * Handles command if aCommand is an Aiw command
          * 
          * @param aCommand Menu command ID
          */
         void TryHandleAiwCommandL( TInt aCommand );
+#endif
         
         /**
          * Checks if we are at marking mode and returns
@@ -392,6 +396,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          */
         CSendUi* SendUiL();
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
         /**
          * Returns pointer to instance of CHgMyVideosAiwMenuHandler.
          * First call creates handler and attaches AIW menu.
@@ -399,6 +404,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          * @return Pointer to CHgMyVideosAiwMenuHandler
          */
         CHgMyVideosAiwMenuHandler* AiwMenuHandlerL();
+#endif
 
     protected:
     
@@ -454,11 +460,13 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          */
         CSendUi* iSendUi;
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
         /** 
          * Aiw Menu Handler
          * Own
          */
         CHgMyVideosAiwMenuHandler* iAiwMenuHandler;
+#endif
 
     };
 

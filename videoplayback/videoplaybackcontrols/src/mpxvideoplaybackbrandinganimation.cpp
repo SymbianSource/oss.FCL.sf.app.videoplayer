@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 9 %
 
 
 // INCLUDE FILES
@@ -57,8 +57,8 @@ void CMPXVideoPlaybackBrandingAnimation::ConstructL( TRect aRect )
     //
     // set rect
     //
-    SetRect( TRect( 0, 0, aRect.Width(), aRect.Height() ) );
-    iBrandingRect = aRect;
+    iBrandingRect = TRect( 0, 0, aRect.Width(), aRect.Height() );
+    SetRect( iBrandingRect );
 
     //
     // construct branding timer
@@ -217,17 +217,20 @@ void CMPXVideoPlaybackBrandingAnimation::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( Window().DisplayMode() == EColor16MAP )
+    if ( iController->SetBackgroundBlack() )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        gc.Clear( aRect );
-    }
-    else if ( Window().DisplayMode() == EColor16MA )
-    {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        gc.Clear( aRect );
+        if ( Window().DisplayMode() == EColor16MAP )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+            gc.Clear( aRect );
+        }
+        else if ( Window().DisplayMode() == EColor16MA )
+        {
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+            gc.Clear( aRect );
+        }
     }
     else
     {

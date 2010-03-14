@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: TB92_33 %
+// Version : %version: TB92_33.1.1 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -501,9 +501,11 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
         case EVcxHgMyVideosCmdNothing:
         default:
             {
+#ifdef RD_VIDEO_AS_RINGING_TONE            
             // The command could be an AIW command,  offer it
             // to AIW command handler
             VideoListL()->TryHandleAiwCommandL( aCommand );
+#endif
             }
             break;
         }
@@ -603,7 +605,9 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdVideoDetails, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdStopShowViaHomenet, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdShowViaHomenet, ETrue );
+#ifdef RD_VIDEO_AS_RINGING_TONE
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
+#endif
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdOpen, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMemoryStatus, ETrue );
@@ -665,7 +669,8 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
                 break;
                 }
             }
-        }        
+        }   
+#ifdef RD_VIDEO_AS_RINGING_TONE
     else if ( aResourceId == R_VCXHGMYVIDEOS_USE_AS_SUBMENU )
         {
         if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryIdle )
@@ -676,6 +681,7 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
         // Let video list handle AIW menu
         VideoListL()->DynInitMenuPaneL( aResourceId, aMenuPane );
         }
+#endif
     else if ( aResourceId == R_VCXHGMYVIDEOS_MARK_SUBMENU )
         {
         if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryIdle )

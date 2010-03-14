@@ -30,8 +30,10 @@ NAME    VCHG // 4 letter ID
 #include <avkon.mbg>
 #include <CommonDialogs.hrh>
 #include <CommonDialogs.rh>
+#ifdef RD_VIDEO_AS_RINGING_TONE
 #include <AiwCommon.hrh>
 #include <AiwCommon.rh>
+#endif
 
 #include <vcxhgmyvideos.mbg>
 
@@ -156,7 +158,8 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
             cascade = r_vcxhgmyvideos_mark_submenu;
             txt = qtn_options_list;
             },
-        // AIW assign (Use video as)
+#ifdef RD_VIDEO_AS_RINGING_TONE
+            // AIW assign (Use video as)
         MENU_ITEM
             {
             command = EVcxHgMyVideosCmdAiwAssign;
@@ -164,6 +167,7 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
             txt = qtn_vcx_hg_options_use_video_as;
             flags = EEikMenuItemSpecificListQuery;
             },
+#endif
         MENU_ITEM 
             { 
             command = EVcxHgMyVideosCmdHelp; 
@@ -480,6 +484,7 @@ RESOURCE MEMORYSELECTIONDIALOG r_vcxhgmyvideos_memory_selection_dialog
     softkey_2 = text_softkey_cancel;
     }
 
+#ifdef RD_VIDEO_AS_RINGING_TONE
 //------------------------------------------------------------------------------
 //
 //      r_vcxhgmyvideos_aiw_assign_interest
@@ -518,6 +523,7 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_use_as_submenu
             }
         };
     }
+#endif
 
 // -----------------------------------------------------------------------------
 // 

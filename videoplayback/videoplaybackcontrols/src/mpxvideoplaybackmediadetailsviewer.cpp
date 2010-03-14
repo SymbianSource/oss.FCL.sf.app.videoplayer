@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  e003sa33#11 %
+// Version : %version:  e003sa33#12 %
 
 
 // INCLUDE FILES
@@ -42,7 +42,7 @@
 
 // Constants
 _LIT(KHeadingValueSeperator, ": ");
-_LIT(KWidthHeightSeparator, " x ");
+_LIT(KWidthHeightSeparator, " \xd7 ");
 _LIT(KLeftMargin, " " );
 
 const TInt KMediaDetailsViewerMaxItems = 11;  // used to determine the height of each item
@@ -368,6 +368,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
         resolutionField.AppendNum( iController->FileDetails()->iVideoWidth );   
         resolutionField.Append( KWidthHeightSeparator );
         resolutionField.AppendNum( iController->FileDetails()->iVideoHeight);
+        AknTextUtils::DisplayTextLanguageSpecificNumberConversion( resolutionField );
         
         iResolutionLabel->SetTextL(resolutionField);
         iResolutionLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);

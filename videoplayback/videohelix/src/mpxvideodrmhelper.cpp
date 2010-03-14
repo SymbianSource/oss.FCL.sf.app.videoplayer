@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 #include <caf/data.h>
@@ -55,19 +55,19 @@ void CMpxVideoDrmHelper::ConstructL()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsProtected()
+//    CMpxVideoDrmHelper::IsProtectedL()
 //  ------------------------------------------------------------------------------------------------
 //
-TBool CMpxVideoDrmHelper::IsProtected( RFile& aFile )
+TBool CMpxVideoDrmHelper::IsProtectedL( RFile& aFile )
 {
     TBool drmProtected = EFalse;
 
     if ( aFile.SubSessionHandle() )
     {
-        MPX_TRAPD( err, drmProtected = iDrmUtility->IsProtectedL( aFile ) );
+        drmProtected = iDrmUtility->IsProtectedL( aFile );
     }
 
-    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsProtected(%d)"), drmProtected);
+    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsProtectedL(%d)"), drmProtected);
 
     return drmProtected;
 }
@@ -81,8 +81,11 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus( RFile& aFile )
     MPX_ENTER_EXIT(_L("CMpxVideoDrmHelper::GetDrmRightsStatus()"));
 
     TInt drmError = KErrNone;
+    TBool drmProtected = EFalse;
 
-    if ( IsProtected( aFile ) )
+    MPX_TRAP( drmError, drmProtected = IsProtectedL(aFile ) );
+
+    if ( drmProtected && (drmError == KErrNone) )
     {
         ContentAccess::CData* data = NULL;
 
@@ -111,7 +114,7 @@ TBool CMpxVideoDrmHelper::IsTvOutAllowedL( RFile& aFile )
 {
     TBool tvOutAllowed = ETrue;
 
-    if ( IsProtected( aFile ) )
+    if ( IsProtectedL( aFile ) )
     {
         ContentAccess::CContent* content = ContentAccess::CContent::NewLC( aFile );
 
@@ -145,19 +148,19 @@ TBool CMpxVideoDrmHelper::IsTvOutAllowedL( RFile& aFile )
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
 //  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsProtected64()
+//    CMpxVideoDrmHelper::IsProtected64L()
 //  ------------------------------------------------------------------------------------------------
 //
-TBool CMpxVideoDrmHelper::IsProtected64( RFile64& aFile )
+TBool CMpxVideoDrmHelper::IsProtected64L( RFile64& aFile )
 {
     TBool drmProtected = EFalse;
 
     if ( aFile.SubSessionHandle() )
     {
-        MPX_TRAPD( err, drmProtected = iDrmUtility->IsProtectedL( aFile ) );
+       drmProtected = iDrmUtility->IsProtectedL( aFile );
     }
 
-    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsProtected64(%d)"), drmProtected);
+    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsProtected64L(%d)"), drmProtected);
 
     return drmProtected;
 }
@@ -171,8 +174,11 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus64( RFile64& aFile )
     MPX_ENTER_EXIT(_L("CMpxVideoDrmHelper::GetDrmRightsStatus64()"));
 
     TInt drmError = KErrNone;
+    TBool drmProtected = EFalse;
 
-    if ( IsProtected64( aFile ) )
+    MPX_TRAP( drmError, drmProtected = IsProtected64L( aFile ) );
+
+    if ( drmProtected && (drmError == KErrNone) )
     {
         ContentAccess::CData* data = NULL;
 
@@ -205,7 +211,7 @@ TBool CMpxVideoDrmHelper::IsTvOutAllowed64L( RFile64& aFile )
 {
     TBool tvOutAllowed = ETrue;
 
-    if ( IsProtected64( aFile ) )
+    if ( IsProtected64L( aFile ) )
     {
         ContentAccess::CContent* content = ContentAccess::CContent::NewLC( aFile );
 

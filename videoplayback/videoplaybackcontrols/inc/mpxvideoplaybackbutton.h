@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 #ifndef MPXVIDEOPLAYBACKBUTTON_H
@@ -25,6 +25,7 @@
 #include <coecntrl.h>
 
 #include "mpxvideo_debug.h"
+#include "mpxvideoplaybackcontrolscontroller.h"
 
 // FORWARD DECLARATIONS
 
@@ -46,7 +47,8 @@ class CMPXVideoPlaybackButton : public CCoeControl
         /**
         * Two-phased constructor.
         */
-        static CMPXVideoPlaybackButton* NewL( TRect aRect, const TDesC &aIconPath );
+        static CMPXVideoPlaybackButton* NewL( CMPXVideoPlaybackControlsController* aController,
+                                              TRect aRect, const TDesC &aIconPath );
 
         /**
         * Destructor.
@@ -63,7 +65,8 @@ class CMPXVideoPlaybackButton : public CCoeControl
         /**
          * By default Symbian 2nd phase constructor is private.
          */
-        void ConstructL( TRect aRect, const TDesC &aIconPath );
+        void ConstructL( CMPXVideoPlaybackControlsController* aController,
+                         TRect aRect, const TDesC &aIconPath );
 
     private:
 
@@ -138,6 +141,8 @@ class CMPXVideoPlaybackButton : public CCoeControl
 
         TMPXButtonState         iState;
         HBufC*                  iIConPath;
+
+        CMPXVideoPlaybackControlsController* iController;
 };
 
 // INLINE METHODS

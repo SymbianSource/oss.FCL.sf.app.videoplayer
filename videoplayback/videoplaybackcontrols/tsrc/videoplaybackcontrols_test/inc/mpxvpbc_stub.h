@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 
@@ -45,6 +45,9 @@ class CMPXVideoPlaybackContainer: public CCoeControl
         * Destructor.
         */
         virtual ~CMPXVideoPlaybackContainer();
+
+        void HandlePointerEventL( const TPointerEvent& aPointerEvent );
+        
 
     private:
     

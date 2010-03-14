@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#58 %
+// Version : %version: 61 %
 
 
 //  Include Files
@@ -133,16 +133,16 @@ CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
         iCloseAO = NULL;
     }
 
-    if ( iDisplayHandler )
-    {
-        delete iDisplayHandler;
-        iDisplayHandler = NULL;
-    }
-
     if ( iFileDetails )
     {
         delete iFileDetails;
         iFileDetails = NULL;
+    }
+
+    if ( iDisplayHandler )
+    {
+        delete iDisplayHandler;
+        iDisplayHandler = NULL;
     }
 
     if ( iPlaybackUtility )
@@ -223,6 +223,18 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdClose:
         {
             MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleCommandL() EMPXPbvCmdClose"));
+
+            //
+            //  The display window must be removed before closing the playback plugin
+            //
+            if ( iDisplayHandler )
+            {
+                //
+                //  Remove the display window so the surface can be released
+                //
+                iDisplayHandler->RemoveDisplayWindow();
+            }
+
             CreateGeneralPlaybackCommandL( EPbCmdClose );
             break;
         }
@@ -351,7 +363,19 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
             LaunchDRMDetailsL();
             break;
         }
+        case EAknSoftkeyClose:
+        {
+            //
+            //  Close is in progress
+            //  Remove the display window so the surface can be released
+            //
+            if ( iDisplayHandler )
+            {
+                iDisplayHandler->RemoveDisplayWindow();
+            }
 
+            break;
+        }
     }
 }
 
@@ -402,6 +426,7 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     //
     iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
     iPlaybackUtility->AddObserverL( *this );
+    iPlaybackUtility->SetPrimaryClientL();
 
     //
     //  Initialize the playback state
@@ -473,10 +498,11 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
     //
     //  Delete the display handler when the view is deactivated
     //
-    iDisplayHandler->RemoveDisplayWindow();
-
-    delete iDisplayHandler;
-    iDisplayHandler = NULL;
+    if ( iDisplayHandler )
+    {
+        delete iDisplayHandler;
+        iDisplayHandler = NULL;
+    }
 
     if ( iPlaybackUtility )
     {
@@ -737,23 +763,28 @@ void CMPXVideoBasePlaybackView::DoHandlePlaybackMessageL( CMPXMessage* aMessage 
     {
         HandleVideoPlaybackMessage( aMessage );
     }
-    else if ( KMPXMediaIdVideoDisplayMessage == id )
+    else if ( KMPXMediaIdVideoDisplaySyncMessage == id )
     {
         if ( iDisplayHandler )
         {
             TMPXVideoDisplayCommand cmdId = iDisplayHandler->HandleVideoDisplayMessageL( aMessage );
 
             if ( cmdId == EPbMsgVideoSurfaceCreated )
-			{
+            {
                 //
-            	//  Notify container that surface has been created to make window transparent
-            	//
+                //  Notify container that surface has been created to make window transparent
+                //
                 if ( iContainer )
                 {
                     iContainer->HandleCommandL( EMPXPbvSurfaceCreated );
                 }
-			}
+            }
         }
+
+        //
+        //  Signal Sync Message handling is complete
+        //
+        iPlaybackUtility->CommandL( EPbCmdSyncMsgComplete );
     }
 }
 
@@ -868,11 +899,18 @@ void CMPXVideoBasePlaybackView::HandleVideoPlaybackMessage( CMPXMessage* aMessag
 //
 void CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()
 {
-    MPX_DEBUG(
-      _L("CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()") );
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()"));
 
     if ( IsMultiItemPlaylist() )
     {
+        if ( iDisplayHandler )
+        {
+            //
+            //  Remove the display window so the surface can be released
+            //
+            iDisplayHandler->RemoveDisplayWindow();
+        }
+
         iPlaybackUtility->CommandL( EPbCmdNext );
     }
     else
@@ -1541,7 +1579,6 @@ TInt CMPXVideoBasePlaybackView::ClosePlayerL( TAny* aPtr )
 void CMPXVideoBasePlaybackView::DoClosePlayerL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::DoClosePlayerL()"));
-
     AppUi()->HandleCommandL( EAknSoftkeyBack );
 }
 
@@ -2018,6 +2055,7 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
         if ( openError == KErrNone )
         {
             MPX_TRAPD( err, drmUiHandling->ShowDetailsViewL( fileHandle ) );
+
             if ( KLeaveExit == err )
             {
                 User::Leave( err );
@@ -2033,6 +2071,7 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
             if ( err == KErrNone && openError == KErrNone )
             {
                 MPX_TRAPD( err, drmUiHandling->ShowDetailsViewL( fileHandle64 ) );
+
                 if ( KLeaveExit == err )
                 {
                     User::Leave( err );
