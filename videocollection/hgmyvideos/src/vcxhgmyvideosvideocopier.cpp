@@ -151,7 +151,13 @@ void CVcxHgMyVideosVideoCopier::MoveOrCopyL(
         // in DialogDismissedL() or in VideoMoveOrCopyCompletedL().
         OpenMoveCopyWaitNoteL( aOperationTargets, aCopy );
 
-        iVideoModel.MoveOrCopyVideosL( aOperationTargets, targetDrive, aCopy );
+        TRAPD( ret, iVideoModel.MoveOrCopyVideosL( aOperationTargets, targetDrive, aCopy ));
+        
+        if( ret != KErrNone )
+            {
+            CloseMoveCopyWaitNote();
+            }
+        
         iCopy = aCopy;
         }
     }

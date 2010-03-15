@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 7 %
+
+// Version : %version: 8 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -36,6 +37,7 @@
 //  CLASS DECLARATION
 //
 class MMPXPlaybackUtility;
+class CMPXVideoPlaybackContainer;
 class CMPXVideoPlaybackViewFileDetails;
 
 /*
@@ -58,13 +60,14 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
         ~CMPXVideoPlaybackDisplayHandler();
 
-        static CMPXVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil );
+        static CMPXVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
+                                                      CMPXVideoPlaybackContainer* aContainer );
 
         void CreateDisplayWindowL( CWsScreenDevice& aScreenDevice, RWindow& aWin );
 
-        void RemoveDisplayWindow();
+        void RemoveDisplayWindow( TBool aSignalPlaybackPlugin = ETrue );
 
-        TMPXVideoDisplayCommand HandleVideoDisplayMessageL( CMPXMessage* aMessage );
+        void HandleVideoDisplaySyncMessageL( CMPXMessage* aMessage );
 
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 
@@ -73,7 +76,8 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
     private:
 
-        CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil );
+        CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
+                                         CMPXVideoPlaybackContainer* aContainer );
 
         void ConstructL();
 
@@ -100,6 +104,7 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
     private:
         MMPXPlaybackUtility*                iPlaybackUtility;
+        CMPXVideoPlaybackContainer*         iContainer;
 
         RArray<TMPXAspectRatio>             iAspectRatioArray;
         TInt                                iCurrentIndexForAspectRatio;

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 22 %
+
+// Version : %version: 23 %
 
 
 //  Include Files
@@ -116,7 +117,8 @@ TUid CMPXVideoPdlPlaybackView::ViewImplementationId() const
 //
 void CMPXVideoPdlPlaybackView::CloseEmbeddedPlaybackViewL()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::CloseEmbeddedPlaybackViewL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::CloseEmbeddedPlaybackViewL()"),
+                   _L("iPlaybackState = %d"), iPlaybackState );
 
     //
     //  If playback state is playing, pause playback
@@ -128,11 +130,7 @@ void CMPXVideoPdlPlaybackView::CloseEmbeddedPlaybackViewL()
     }
     else if ( iPlaybackState == EPbStateStopped )
     {
-        //
-        //  Close the playback plugin and clear out the PDL data from the PDL Handler
-        //
-        HandleCommandL( EMPXPbvCmdClose );
-        AppUi()->HandleCommandL( EAknCmdHideInBackground );
+        ActivateClosePlayerActiveObject();
     }
 
     //
@@ -239,7 +237,7 @@ void CMPXVideoPdlPlaybackView::HandlePluginErrorL( TInt aError )
             //  could not be played until the entire file is downloaded.
             //
             DisplayErrorMessageL( R_MPX_VIDEO_PDL_WAIT_DL_COMPLETE_MSG );
-            ClosePlaybackViewL();
+            ClosePlaybackViewWithErrorL();
 
             break;
         }
@@ -250,7 +248,7 @@ void CMPXVideoPdlPlaybackView::HandlePluginErrorL( TInt aError )
             //  has timed out waiting for more data to be downloaded
             //
             DisplayErrorMessageL( R_MPX_VIDEO_PDL_ALL_CONTENT_PLAYED_MSG );
-            ClosePlaybackViewL();
+            ClosePlaybackViewWithErrorL();
 
             break;
         }
@@ -276,7 +274,7 @@ void CMPXVideoPdlPlaybackView::HandlePluginErrorL( TInt aError )
                 DisplayErrorMessageL( R_MPX_VIDEO_INVALID_CLIP );
             }
 
-            ClosePlaybackViewL();
+            ClosePlaybackViewWithErrorL();
 
             break;
         }
@@ -305,7 +303,7 @@ void CMPXVideoPdlPlaybackView::HandlePdlStateChangeL( TInt aState )
         case EPbDlStateDownloadCanceled:
         {
             HandleCommandL( EMPXPbvCmdStop );
-            ClosePlaybackViewL();
+            ClosePlaybackViewWithErrorL();
             break;
         }
         case EPbDlStateDownloading:
@@ -420,6 +418,22 @@ void CMPXVideoPdlPlaybackView::SendPdlCustomCommandL( TMPXPlaybackPdCommand aCus
     iPlaybackUtility->CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::ClosePlaybackViewWithErrorL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::ClosePlaybackViewWithErrorL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::ClosePlaybackViewWithErrorL"));
+
+    //
+    //  An error has been processed, set the playback state to Stopped and close the view
+    //
+    iPlaybackState = EPbStateStopped;
+
+    ClosePlaybackViewL();
 }
 
 // EOF

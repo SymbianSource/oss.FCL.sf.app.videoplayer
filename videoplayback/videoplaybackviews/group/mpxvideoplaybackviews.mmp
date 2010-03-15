@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: ou1cpsw#15 %
 
 
 #include <data_caging_paths.hrh>
@@ -82,8 +82,7 @@ LIBRARY             apgrfx.lib
 LIBRARY             mpfiledetailsdialog.lib
 LIBRARY             sysutil.lib 
 LIBRARY             drmuihandling.lib
-LIBRARY             centralrepository.lib // for backlight timeout value
-LIBRARY             hwrmlightclient.lib   // light status
+
 
 #ifdef SYMBIAN_BUILD_GCE
 LIBRARY             mediaclientvideodisplay.lib

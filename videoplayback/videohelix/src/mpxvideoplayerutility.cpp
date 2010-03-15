@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 16 %
+// Version : %version: 18 %
 
 
 #include <AudioPreference.h>
@@ -288,7 +288,7 @@ void CMpxVideoPlayerUtility::SetDisplayWindowL( const TRect& aScreenRect,
 void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SurfaceRemovedFromView()"));
-    
+
     if ( ! iSurfaceId.IsNull() )
     {
         iSurfaceId = TSurfaceId::CreateNullId();
@@ -590,19 +590,17 @@ TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     TInt error = KErrNone;
 
-    if ( iSurfaceId.IsNull() )
+    if ( !iSurfaceId.IsNull() )
     {
-        error = KErrNotFound;
+        //
+        //  Send command to view to remove the surface
+        //
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
+
+        error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
+
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
-
-    //
-    //  Send command to view to remove the surface
-    //
-    MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
-
-    error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
-
-    iSurfaceId = TSurfaceId::CreateNullId();
 
     return error;
 }

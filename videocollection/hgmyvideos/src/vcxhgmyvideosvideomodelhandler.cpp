@@ -142,6 +142,7 @@ CVcxHgMyVideosVideoModelHandler::~CVcxHgMyVideosVideoModelHandler()
     {
     iResumeArray.Close();
     
+    delete iVideoDetails;
     delete iVideoIndicator;
     delete iDataUpdater;
     delete iDownloadUpdater;
@@ -487,6 +488,22 @@ const TDesC& CVcxHgMyVideosVideoModelHandler::GetVideoUri( TInt aIndex )
     }
 
 // -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::GetVideoId()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosVideoModelHandler::GetVideoId( TInt aIndex )
+    {
+    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
+
+    if ( media && media->IsSupported( KMPXMediaGeneralId ) )
+        {
+        return media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ).iId1;
+        }
+    
+    return KErrNotFound;
+    }
+
+// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoModelHandler::GetVideoSize()
 // -----------------------------------------------------------------------------
 //
@@ -516,7 +533,7 @@ void CVcxHgMyVideosVideoModelHandler::DeleteVideosL(
 
     for ( TInt i = 0; i < aOperationTargets.Count(); i++ )
         {
-        media = iVideoArray->MPXMedia( aOperationTargets[i] );
+        media = iVideoArray->MPXMediaByMPXItemId( TMPXItemId(aOperationTargets[i],0) );
 
         if ( media && media->IsSupported( KMPXMediaGeneralId ) )
             {
@@ -526,7 +543,13 @@ void CVcxHgMyVideosVideoModelHandler::DeleteVideosL(
             mediaToDelete->SetTObjectValueL( KMPXMediaGeneralId, mpxItemId );
             mediasToDelete->AppendL( *mediaToDelete );
             CleanupStack::PopAndDestroy( mediaToDelete );
+            iDataUpdater->PrepareForMoveOrDelete( mpxItemId );
             }
+        }
+
+    if ( mediasToDelete->Count() <= 0 )
+        {
+		User::Leave( KErrNotFound );
         }
 
     TRAPD( err, iModel.CollectionClient().DeleteVideosL( mediasToDelete ) );
@@ -559,7 +582,7 @@ void CVcxHgMyVideosVideoModelHandler::MoveOrCopyVideosL(
 
     for ( TInt i = 0; i < aOperationTargets.Count(); i++ )
         {
-        media = iVideoArray->MPXMedia( aOperationTargets[i] );
+        media = iVideoArray->MPXMediaByMPXItemId( TMPXItemId(aOperationTargets[i],0) );
                     
         if ( media && media->IsSupported( KMPXMediaGeneralId ) )
             {
@@ -569,10 +592,17 @@ void CVcxHgMyVideosVideoModelHandler::MoveOrCopyVideosL(
             mediaToMoveOrCopy->SetTObjectValueL( KMPXMediaGeneralId, mpxItemId );
             mediasToMoveOrCopy->AppendL( *mediaToMoveOrCopy );
             CleanupStack::PopAndDestroy( mediaToMoveOrCopy );
+            iDataUpdater->PrepareForMoveOrDelete( mpxItemId );
             }
         }
 
+    if ( mediasToMoveOrCopy->Count() <= 0 )
+        {
+		User::Leave( KErrNotFound );
+        }
+		
     iModel.CollectionClient().MoveOrCopyVideosL( mediasToMoveOrCopy, aTargetDrive, aCopy );
+
     CleanupStack::PopAndDestroy( mediasToMoveOrCopy );    
     }
 
@@ -1382,6 +1412,10 @@ void CVcxHgMyVideosVideoModelHandler::VideoMoveOrCopyCompletedL( TInt aFailedCou
 // 
 void CVcxHgMyVideosVideoModelHandler::VideoDetailsCompletedL( const CMPXMedia& aMedia )
     {
+    if ( !iVideoDetails )
+        {
+	    iVideoDetails = CVcxHgMyVideosVideoDetailsDialog::NewL();
+        }
     iVideoDetails->ShowVideoDetailsDialogL( aMedia );
     }
 

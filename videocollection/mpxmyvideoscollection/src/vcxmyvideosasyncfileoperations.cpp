@@ -223,6 +223,10 @@ void CVcxMyVideosAsyncFileOperations::DeleteVideoL( TUint32 aMdsId, TBool aForce
 //
 TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     {
+    // Reset inactivity timer. This will prevent ThumbAGDaemon start running while
+    // Move/copy is ongoing and failing the operation due to locked file handle.
+    User::ResetInactivityTime();
+    
     CMPXMedia& cmd = iCollection.iActiveTask->GetCommand();
     
     TBool done;
@@ -667,6 +671,10 @@ void CVcxMyVideosAsyncFileOperations::GenerateTargetPathForMoveOrCopyL(
 //
 TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     {
+    // Reset inactivity timer. This will prevent ThumbAGDaemon start running while
+    // delete is ongoing and failing the operation due to locked file handle.
+    User::ResetInactivityTime();
+    
     CMPXMedia& cmd = iCollection.iActiveTask->GetCommand();
     
     //no sanity checks for array items, since we want to generate all events, even if there is nothing to delete

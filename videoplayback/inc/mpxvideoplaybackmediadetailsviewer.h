@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  e003sa33#4 %
+// Version : %version:  e003sa33#5 %
 
 #ifndef MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
 #define MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
@@ -172,6 +172,7 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         TBool                                iShouldPauseScrolling;
         TRect                                iViewerRect;
         HBufC*                               iAdditionalString;
+        TUint32                              iScrollTimerDelayBeginningTick;
 };
 
 

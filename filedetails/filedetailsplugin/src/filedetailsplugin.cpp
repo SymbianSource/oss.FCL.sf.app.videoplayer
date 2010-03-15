@@ -60,21 +60,21 @@ CFileDetailsPlugin::~CFileDetailsPlugin()
 //
 // -----------------------------------------------------------------------------
 //  
-void CFileDetailsPlugin::ShowFileDetails( const CMPXMedia& aMedia )
+void CFileDetailsPlugin::ShowFileDetailsL( const CMPXMedia& aMedia )
     {  
-    CMPFileDetailsDialog* detailsDialog = CMPFileDetailsDialog::NewL(); 
     CMPFileDetails* details = new (ELeave) CMPFileDetails();
+    CleanupStack::PushL( details );
     
     //File path    
     if ( aMedia.IsSupported( KMPXMediaGeneralUri ) )
         {
-        details->iFilePath = aMedia.ValueText( KMPXMediaGeneralUri ).AllocLC();                
+        details->iFilePath = aMedia.ValueText( KMPXMediaGeneralUri ).AllocL();                
         }
     
     //Name    
     if ( aMedia.IsSupported( KMPXMediaGeneralTitle ) )
         {
-        details->iTitle = aMedia.ValueText( KMPXMediaGeneralTitle ).AllocLC();                
+        details->iTitle = aMedia.ValueText( KMPXMediaGeneralTitle ).AllocL();                
         }
     else if ( details->iFilePath )
         {
@@ -100,13 +100,13 @@ void CFileDetailsPlugin::ShowFileDetails( const CMPXMedia& aMedia )
     //Copyright
     if ( aMedia.IsSupported( KMPXMediaGeneralCopyright ) )
         {
-        details->iCopyright = aMedia.ValueText( KMPXMediaGeneralCopyright ).AllocLC();        
+        details->iCopyright = aMedia.ValueText( KMPXMediaGeneralCopyright ).AllocL();        
         }
     
     //MIME
     if ( aMedia.IsSupported( KMPXMediaGeneralMimeType ) )
         {
-        details->iFormat = aMedia.ValueText( KMPXMediaGeneralMimeType ).AllocLC();        
+        details->iFormat = aMedia.ValueText( KMPXMediaGeneralMimeType ).AllocL();        
         }
     
     // File creation date
@@ -138,32 +138,12 @@ void CFileDetailsPlugin::ShowFileDetails( const CMPXMedia& aMedia )
     //Artist    
    if ( aMedia.IsSupported( KMPXMediaVideoArtist ) )
        {
-       details->iArtist = aMedia.ValueText( KMPXMediaVideoArtist ).AllocLC();                
+       details->iArtist = aMedia.ValueText( KMPXMediaVideoArtist ).AllocL();                
        } 
-             
+
+    // Show details dialog
+    CMPFileDetailsDialog* detailsDialog = CMPFileDetailsDialog::NewL(); 
     detailsDialog->ExecuteLD( details );
-    
-    // cleanup
-    if( details->iFormat )
-        {
-        CleanupStack::PopAndDestroy( details->iFormat );
-        details->iFormat = NULL;
-        }    
-    if( details->iCopyright )
-        {
-        CleanupStack::PopAndDestroy( details->iCopyright );
-        details->iCopyright = NULL;
-        }
-    if( details->iTitle )
-        {
-        CleanupStack::PopAndDestroy( details->iTitle );
-        details->iTitle = NULL;
-        }
-    if( details->iFilePath )
-        {
-        CleanupStack::PopAndDestroy( details->iFilePath );
-        details->iFilePath = NULL;
-        }   
-  
-    delete details;
+
+    CleanupStack::PopAndDestroy( details );
     }

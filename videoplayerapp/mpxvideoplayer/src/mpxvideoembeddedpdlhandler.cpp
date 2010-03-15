@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version:  12 %
+
+// Version : %version:  ou1cpsw#14 %
 
 
 #include <mpxcommand.h>
@@ -98,7 +99,7 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
 
         if ( ( aDlId == iDownloadId ) && ( ! aFileName.Compare( *iDownloadFileName ) ) )
         {
-            iAppUiEngine->PlaybackUtility()->CommandL( EPbCmdPlay );
+            iAppUiEngine->PlaybackUtilityL().CommandL( EPbCmdPlay );
         }
         else
         {
@@ -106,8 +107,8 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
             //  New download received, close old playback plugin
             //
             iAppUiEngine->ClosePlaybackPluginL();
-            
-            iAppUiEngine->SignalViewPdlReloading();
+
+            iAppUiEngine->SignalViewPdlReloadingL();
 
             StartNewDownloadL( aDlId, aFileName );
         }
@@ -153,9 +154,9 @@ void CMpxVideoEmbeddedPdlHandler::StartNewDownloadL( TInt aDlId, TDesC& aFileNam
     iDownloadFileName = aFileName.AllocL();
 
     //
-    //  Create the Playback Utility
+    //  Load the correct playback view
     //
-    iAppUiEngine->CreateEmbeddedPdlPlaybackUtilityMemberVariablesL();
+    iAppUiEngine->PreLoadPdlPlaybackViewL();
 
     SendPdlCustomCommandL( EPbCmdStartPd, iDownloadId );
 
@@ -182,7 +183,7 @@ void CMpxVideoEmbeddedPdlHandler::SendPdlCustomCommandL( TMPXPlaybackPdCommand a
     cmd->SetTextValueL( KMPXMediaVideoPlaybackFileName, *iDownloadFileName );
     cmd->SetTObjectValueL<TInt>( KMPXMediaVideoMovePdlFile, iEmbeddedPdlCase );
 
-    iAppUiEngine->PlaybackUtility()->CommandL( *cmd );
+    iAppUiEngine->PlaybackUtilityL().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
 }

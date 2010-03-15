@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_31 %
+// Version : %version: e92_33 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -63,10 +63,11 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         virtual ~CMpxVideoPlayerAppUiEngine();
 
     public:
+
         /*
-         *  Retrieve the playback utility pointer
+         *  Retrieves playback utility and creates it if needed
          */
-        inline MMPXPlaybackUtility* PlaybackUtility();
+        MMPXPlaybackUtility& PlaybackUtilityL();
 
         /**
          * Opens the specified file in response to a corresponding message.
@@ -186,7 +187,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
             */
         void HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCategory aCategory  );
 
-        void CreateEmbeddedPdlPlaybackUtilityMemberVariablesL();
+        void PreLoadPdlPlaybackViewL();
 
         /*
          * Handles the "back" button.
@@ -223,8 +224,14 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         void InitializeFileL( const TDesC& aFileName );
 
         void ClosePlaybackPluginL();
+
+        void SignalViewPdlReloadingL();
         
-        void SignalViewPdlReloading();
+        /*
+         *  Activates an active object to finish the 
+         *  initialization of the standalone application
+         */
+        void ActivateLateConstructTimerL();
 
     private:
         /**
@@ -266,8 +273,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         */
        void DoHandleCollectionMessageL( CMPXMessage* aMessage );
 
-       void CreatePlaybackUtilityMemberVariablesL();
-
        void CreateCollectionUtilityMemberVariablesL();
 
        void CreateRemoteControlListenerL();
@@ -293,6 +298,21 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
        void InitializeStreamingLinkL( const TDesC& aUri );
        void InitializePlaylistL( const CMPXCollectionPlaylist& aPlaylist, TBool aPlay );
 
+        /*
+         *  Provides the static function for the callback to 
+         *  finish the standalone application construction
+         *  Called by CPeriodic iConstructTimer
+         *  @param aPtr Pointer to callback class
+         *  @return KErrNone
+         */
+        static TInt LateConstructCallback( TAny* aPtr );
+        
+        /*
+         *  Called to finalize the standalone 
+         *  application initialization.
+         */
+        virtual void DoLateConstructL();
+
     private:       // data
 
         CMpxVideoPlayerAppUi*         iAppUi;
@@ -305,8 +325,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         MMPXCollectionUtility*   iCollectionUtility;
         MMPXCollectionUiHelper*  iCollectionUiHelper;  // own
 
-        TUid iVideoCollectionId;
-
+        CPeriodic*                    iConstructTimer;
         CIdle*                        iExitAo;
         CMediaRecognizer*             iRecognizer;       // own
         CMpxVideoEmbeddedPdlHandler*  iPdlHandler;       // own
@@ -315,15 +334,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         TBool                    iMultilinkPlaylist;
         TBool                    iSeekable;
         TBool                    iUpdateSeekInfo;
-};
-
-//
-//  Inline methods
-//
-inline
-MMPXPlaybackUtility* CMpxVideoPlayerAppUiEngine::PlaybackUtility()
-{
-    return iPlaybackUtility;
-}
+    };
 
 #endif             // CMPXVIDEOPLAYERAPPUIENGINE_H

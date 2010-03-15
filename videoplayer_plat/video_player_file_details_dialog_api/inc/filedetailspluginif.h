@@ -49,7 +49,7 @@ public:
     * @param    aDetails  Already constructed details to be shown    
     * @return   None
     */  
-    virtual void ShowFileDetails( const CMPXMedia& aMedia ) = 0; 
+    virtual void ShowFileDetailsL( const CMPXMedia& aMedia ) = 0; 
     
 protected:    
     /**

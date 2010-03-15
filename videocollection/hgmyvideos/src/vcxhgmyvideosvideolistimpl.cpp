@@ -312,13 +312,16 @@ void CVcxHgMyVideosVideoListImpl::PlayCurrentVideoL()
 void CVcxHgMyVideosVideoListImpl::DeleteVideosL()
     {
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # CVcxHgMyVideosVideoListImpl::DeleteVideosL()" );
-    RArray<TInt> operationTargets;
-    CleanupClosePushL( operationTargets );
+    RArray<TInt> operationTargetIndexes;
+	RArray<TInt> operationTargetIds;
+    CleanupClosePushL( operationTargetIndexes );
+    CleanupClosePushL( operationTargetIds );
     
-    GetOperationTargetIndexesL( operationTargets );
+    GetOperationTargetIndexesL( operationTargetIndexes );
+    OperationTargetsToMpxIdsL( operationTargetIndexes, operationTargetIds );
 
-    if ( ConfirmDeleteVideosL( operationTargets.Count(),
-                               iVideoModel->GetVideoName( operationTargets[0] ) ) )
+    if ( ConfirmDeleteVideosL( operationTargetIndexes.Count(),
+                               iVideoModel->GetVideoName( operationTargetIndexes[0] ) ) )
         {
         HandleMarkCommandL( EVcxHgMyVideosCmdUnmarkAll );
 
@@ -326,9 +329,16 @@ void CVcxHgMyVideosVideoListImpl::DeleteVideosL()
         // in DialogDismissedL() or in VideoDeletionCompletedL().
         OpenDeleteWaitNoteL();
 
-        iVideoModel->DeleteVideosL( operationTargets );
+        TRAPD( err, iVideoModel->DeleteVideosL( operationTargetIds ) );
+        
+        if( err != KErrNone )
+            {
+            CloseDeleteWaitNote();
+            }
         }
-    CleanupStack::PopAndDestroy( &operationTargets );
+
+    CleanupStack::PopAndDestroy( &operationTargetIds );
+    CleanupStack::PopAndDestroy( &operationTargetIndexes );
     }
 
 // -----------------------------------------------------------------------------
@@ -651,14 +661,19 @@ void CVcxHgMyVideosVideoListImpl::ShowMoveAndCopyMenuItemsL(
 //
 void CVcxHgMyVideosVideoListImpl::HandleMoveOrCopyCommandL( TBool aCopy )
     {
-    RArray<TInt> operationTargets;
-    CleanupClosePushL( operationTargets );
+    RArray<TInt> operationTargetIndexes;
+	RArray<TInt> operationTargetIds;
+    CleanupClosePushL( operationTargetIndexes );
+    CleanupClosePushL( operationTargetIds );
     
-    GetOperationTargetIndexesL( operationTargets );
+    GetOperationTargetIndexesL( operationTargetIndexes );
+    OperationTargetsToMpxIdsL( operationTargetIndexes, operationTargetIds );
+    
     HandleMarkCommandL( EVcxHgMyVideosCmdUnmarkAll );
-    iVideoCopier->MoveOrCopyL( operationTargets, aCopy );
+    iVideoCopier->MoveOrCopyL( operationTargetIds, aCopy );
     
-    CleanupStack::PopAndDestroy( &operationTargets );
+    CleanupStack::PopAndDestroy( &operationTargetIds );
+    CleanupStack::PopAndDestroy( &operationTargetIndexes );
     }
 
 // -----------------------------------------------------------------------------
@@ -1140,3 +1155,20 @@ CHgMyVideosAiwMenuHandler* CVcxHgMyVideosVideoListImpl::AiwMenuHandlerL()
     return iAiwMenuHandler;
     }
 #endif
+
+// ---------------------------------------------------------------------------
+// CVcxHgMyVideosVideoListImpl::OperationTargetsToMpxIdsL()
+// ---------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoListImpl::OperationTargetsToMpxIdsL( 
+                                       RArray<TInt>& aOperationTargetIndexes,  
+                                       RArray<TInt>& aOperationTargetIds )
+    {
+    for ( TInt i = 0; i < aOperationTargetIndexes.Count(); i++ )
+        {
+		if ( iVideoModel->GetVideoId( aOperationTargetIndexes[i] ) != KErrNotFound )
+            {
+            aOperationTargetIds.Append( iVideoModel->GetVideoId( aOperationTargetIndexes[i] ) );
+            }
+        }
+    }

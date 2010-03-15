@@ -41,9 +41,22 @@
 #include "vcxhgmyvideosindicatorhelper.h"
 #include "vcxhgmyvideosthumbnailmanager.h"
 
-const TInt KRefreshTimerInterval( 1000000 ); // 1 second
-const TInt KMaxThumbnailReqs( 2 ); // Max count of peek and get reqs combined
-const TInt KMaxThumbnailGetReqs( 1 ); // Max count of get reqs
+const TInt KRefreshTimerInterval( 1000000 );    // 1 second
+const TInt KMaxThumbnailReqs( 2 );              // Max count of peek and get reqs combined
+const TInt KMaxThumbnailGetReqs( 1 );           // Max count of get reqs
+const TInt KMaxPredictiveSelect( 10 );          // Max range for selecting items before/after visible area
+const TInt KScrollCheckInterval( 250000 );      // 0.25 seconds
+
+// -----------------------------------------------------------------------------
+// TimeStamp
+// -----------------------------------------------------------------------------
+//
+static TInt64 TimeStamp()
+    {
+    TTime time;
+    time.UniversalTime();
+    return time.Int64();
+    }
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -106,6 +119,7 @@ CVcxHgMyVideosVideoDataUpdater::CVcxHgMyVideosVideoDataUpdater(
 void CVcxHgMyVideosVideoDataUpdater::ConstructL()
     {
     iRefreshTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iRetryTimer =   CPeriodic::NewL( CActive::EPriorityStandard );
     iModel.ThumbnailManager().AddObserverL( *this );
     }
 
@@ -130,6 +144,7 @@ CVcxHgMyVideosVideoDataUpdater::~CVcxHgMyVideosVideoDataUpdater()
     iModel.ThumbnailManager().RemoveObserver( *this );
     Cancel();
     delete iRefreshTimer; // Cancels active timer
+    delete iRetryTimer;
     iFetchArray.ResetAndDestroy();
     }
 
@@ -181,7 +196,40 @@ void CVcxHgMyVideosVideoDataUpdater::FlushRequestBufferL()
 //
 void CVcxHgMyVideosVideoDataUpdater::ReleaseData( TMPXItemId aMPXItemId )
     {
-    RemoveItem( IndexByMPXItemId( aMPXItemId ) );  
+    TInt index = IndexByMPXItemId( aMPXItemId );
+    if ( index >= 0 )
+        {
+        RemoveItem( index ); 
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::PrepareForMoveOrDelete()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::PrepareForMoveOrDelete( TMPXItemId aMPXItemId )
+    {
+    TInt index = IndexByMPXItemId( aMPXItemId );
+    if ( index >= 0 )
+        {
+        RemoveAndCancelThumbnailGeneration( index ); 
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::RemoveAndCancelThumbnailGeneration()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::RemoveAndCancelThumbnailGeneration( TInt aIndex )
+    {
+    if ( aIndex >= 0 && aIndex < iFetchArray.Count() )
+        {
+        // Can be enabled when cancellation of (hd) thumbnail gets faster and
+        // does not hang up UI
+        CancelActivities( aIndex );
+        delete iFetchArray[aIndex];
+        iFetchArray.Remove( aIndex );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -191,13 +239,19 @@ void CVcxHgMyVideosVideoDataUpdater::ReleaseData( TMPXItemId aMPXItemId )
 void CVcxHgMyVideosVideoDataUpdater::RemoveItem( TInt aIndex )
     {
     if ( aIndex >= 0 && aIndex < iFetchArray.Count() )
-        {
-        CancelActivities( aIndex );
+        {    
+        CVcxHgMyVideosVideoData* item = iFetchArray[aIndex];
         
-        delete iFetchArray[aIndex];
-        iFetchArray[aIndex] = NULL;
-        iFetchArray.Remove( aIndex );
-        }    
+        // When scrolling around canceling thumbnail creation is sometimes so slow
+        // that it hangs UI for while. Thumbnail is needed sooner or later anyway.
+        // Therefore let creation get finished in peace. It is possible to fetch already 
+        // created thumbs during creation but not during hang up. 
+        if ( item && !CancelNeeded( *item ) )
+            {
+            delete item;
+            iFetchArray.Remove( aIndex );
+            }         
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -221,10 +275,8 @@ void CVcxHgMyVideosVideoDataUpdater::CancelActivities( TInt aIndex )
     {    
     if ( aIndex >= 0 && aIndex < iFetchArray.Count() )
         {
-		CVcxHgMyVideosVideoData* item = iFetchArray[aIndex];
-        CVcxHgMyVideosVideoData::TVideoDataState state = item->State();
-        if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted ||
-             state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted )
+        CVcxHgMyVideosVideoData* item = iFetchArray[aIndex];
+        if ( item && CancelNeeded( *item ) )
             {
             iModel.ThumbnailManager().Cancel( item->ThumbnailConversionId() );
             }
@@ -236,13 +288,17 @@ void CVcxHgMyVideosVideoDataUpdater::CancelActivities( TInt aIndex )
 // -----------------------------------------------------------------------------
 //
 void CVcxHgMyVideosVideoDataUpdater::CancelAndDeleteFetchArray()
-    {    
+    {
     TInt count = iFetchArray.Count();
     for ( TInt i = 0; i < count; i++ )
         {
         CancelActivities( i );
         }
     iFetchArray.ResetAndDestroy();
+    
+    iPreviousFirstScrollerIndexTime = 0;
+    iPreviousFirstScrollerIndex = iScroller.FirstIndexOnScreen();
+    iPreviousModifiedIndexOnScreen = EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -251,9 +307,11 @@ void CVcxHgMyVideosVideoDataUpdater::CancelAndDeleteFetchArray()
 //
 void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
     {
+    iRetryTimer->Cancel();
     if ( !iPaused && iVideoArray.VideoCount() > 0 && iFetchArray.Count() > 0 )
         {
-        TBool startRefreshTimer = EFalse;
+        TInt64 time = TimeStamp();
+        TBool refreshTimerNeeded = EFalse;
         TInt peekReqs = 0;
         TInt getReqs = 0;
         GetActiveRequestCount( peekReqs, getReqs );
@@ -268,7 +326,21 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
                 {
                 TInt err = KErrNone;
                 prevItem = item;
-                SelectNextIndexL( getReqs >= KMaxThumbnailGetReqs );
+                if ( !SelectNextIndexL( getReqs >= KMaxThumbnailGetReqs ) )
+                    {
+                    // Nothing to be started
+                    if ( !reqs && iFetchArray.Count() > 0 )
+                        {
+                        // To ensure that thumbnail creation continues after
+                        // disabled while scrolling
+                        iRetryTimer->Start( KScrollCheckInterval, KScrollCheckInterval,
+                            TCallBack( RetryTimerCallBack, this ) );
+                        iPreviousFirstScrollerIndexTime = 0; // Force scroll check update
+                        IPTVLOGSTRING_LOW_LEVEL(
+                           "MPX My Videos UI # ContinueVideoDataFetchingL # iRetryTimer start" );
+                        }
+                    break;
+                    }
                 item = iFetchArray[0];
                 state = item->State();
                 if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone )
@@ -278,7 +350,7 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
                     if( err == KErrNone )
                         {
                         ++reqs;
-                        startRefreshTimer = ETrue;
+                        refreshTimerNeeded = ETrue;
                         }
                     }
                 else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished ) 
@@ -291,13 +363,9 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
                             {
                             ++reqs;
                             ++getReqs;
-                            startRefreshTimer = ETrue;
+                            refreshTimerNeeded = ETrue;
                             }
                         }
-                    }
-                else
-                    {
-                    break; // Nothing to be started
                     }
                 if ( err != KErrNone )
                     {
@@ -306,11 +374,18 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
                 }
             while ( iFetchArray.Count() > 0 && reqs < KMaxThumbnailReqs && prevItem != item );
             }
-        if ( startRefreshTimer )
+        if ( refreshTimerNeeded && !iRefreshTimer->IsActive() )
             {
-            iRefreshTimer->Cancel();
             iRefreshTimer->Start( KRefreshTimerInterval, KRefreshTimerInterval,
                 TCallBack( RefreshTimerCallBack, this ) );
+            IPTVLOGSTRING_LOW_LEVEL(
+               "MPX My Videos UI # ContinueVideoDataFetchingL # iRefreshTimer start" );
+            }
+        if ( time - iPreviousFirstScrollerIndexTime >= KScrollCheckInterval )
+            {
+            // Store values for scroll direction check
+            iPreviousFirstScrollerIndexTime = time;
+            iPreviousFirstScrollerIndex = iScroller.FirstIndexOnScreen();
             }
         }
     }
@@ -412,60 +487,76 @@ TInt CVcxHgMyVideosVideoDataUpdater::IndexByMPXItemId( TMPXItemId aMPXItemId )
 // CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL()
 // -----------------------------------------------------------------------------
 // 
-void CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL( TBool aSelectForPeekOnly )
-    {   
-    TInt firstIndexOnScreen = iScroller.FirstIndexOnScreen();
-    
-    if ( firstIndexOnScreen < 0 ) 
+TBool CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL( TBool aSelectForPeekOnly )
+    {
+    TBool selected = EFalse;
+    if ( iScroller.ItemCount() > 0 )
         {
-        firstIndexOnScreen = 0;
-        }
-    
-    TInt lastIndexOnScreen = firstIndexOnScreen + iScroller.ItemsOnScreen();
-   
-    if ( lastIndexOnScreen >= iScroller.ItemCount() )
-        {
-        lastIndexOnScreen = iScroller.ItemCount() - 1;
-        }
-         
-    // If visible items not found, updater takes object from 0 index. 
-    for ( TInt i = firstIndexOnScreen; i <= lastIndexOnScreen; i++ )
-        {      
-        TInt index( KErrNotFound );
-        TMPXItemId mpxItemId;
-        CGulIcon* icon( NULL );
-        
-        // Skip if list item already have a thumbnail.
-        icon = iScroller.ItemL( i ).Icon();
-        if ( !icon )
-            {
-            mpxItemId = iVideoArray.ArrayIndexToMpxItemIdL( i );
-            index = IndexByMPXItemId( mpxItemId );
+        TInt firstIndexOnScreen = 0;
+        TInt lastIndexOnScreen = 0;
+        TInt lastIndex = 0;
+        GetScrollerArea( firstIndexOnScreen, lastIndexOnScreen, lastIndex );
 
-            if ( index >= 0 )
+        // Determine scroll direction for optimal selection
+        TInt maxPredict = KMaxPredictiveSelect;
+        TBool scrollUp = iPreviousFirstScrollerIndex > firstIndexOnScreen;
+        TBool scrollDown = iPreviousFirstScrollerIndex < firstIndexOnScreen;
+        if ( scrollUp || scrollDown )
+            {
+            if ( scrollUp )
                 {
-                CVcxHgMyVideosVideoData* item = iFetchArray[index];
-                CVcxHgMyVideosVideoData::TVideoDataState state = item->State();
-                // Move selected index to first index of the fetch array. 
-                if ( aSelectForPeekOnly )
+                IPTVLOGSTRING_LOW_LEVEL(
+                   "MPX My Videos UI # CVcxHgMyVideosVideoDataUpdater # scroll up" );
+                }
+            else
+                {
+                IPTVLOGSTRING_LOW_LEVEL(
+                    "MPX My Videos UI # CVcxHgMyVideosVideoDataUpdater # scroll down" );
+                }
+            aSelectForPeekOnly = ETrue; // Disable thumb creation while scrolling
+            }
+        else
+            {
+            maxPredict /= 2; // Split range when checking both directions
+            }
+
+        if ( !aSelectForPeekOnly || scrollUp )
+            {
+            // Try visible area first with thumb creation disabled to get
+            // already created thumbs as fast as possible
+            selected = TrySelectFromScrollerAreaL( firstIndexOnScreen, 
+                                                   lastIndexOnScreen,
+                                                   ETrue );
+            }
+        if ( !selected && !scrollUp )
+            {
+            // Try visible area and items below
+            TInt end = Min( lastIndexOnScreen + maxPredict, lastIndex );
+            selected = TrySelectFromScrollerAreaL( firstIndexOnScreen, end, 
+                    aSelectForPeekOnly );
+            }
+        if ( !selected && !scrollDown && firstIndexOnScreen > 0 )
+            {
+            // Try items above visible area
+            TInt end = Max( firstIndexOnScreen - maxPredict - 1, 0 );
+            selected = TrySelectFromScrollerAreaL( firstIndexOnScreen - 1, end,
+                    aSelectForPeekOnly );
+            }
+        if ( !selected )
+            {
+            // Try any item
+            TInt count = iFetchArray.Count();
+            for ( TInt i = 0; i < count; i++ )
+                {
+                if ( TrySelectL( i, aSelectForPeekOnly ) )
                     {
-                    if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone )
-                        {
-                        iFetchArray.InsertL( item, 0 );
-                        iFetchArray.Remove( index + 1 );
-                        break;
-                        }
-                    }
-                else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone ||
-                          state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished )
-                    {
-                    iFetchArray.InsertL( item, 0 );
-                    iFetchArray.Remove( index + 1 );
+                    selected = ETrue;
                     break;
                     }
                 }
             }
         }
+    return selected;
     }
 
 // -----------------------------------------------------------------------------
@@ -475,14 +566,20 @@ void CVcxHgMyVideosVideoDataUpdater::SelectNextIndexL( TBool aSelectForPeekOnly 
 TInt CVcxHgMyVideosVideoDataUpdater::RefreshTimerCallBack( TAny* aAny )
     {
     CVcxHgMyVideosVideoDataUpdater* self = static_cast<CVcxHgMyVideosVideoDataUpdater*>( aAny ); 
-    self->iRefreshTimer->Cancel();
-    if ( self->iListRefreshIsDelayed )
+    if ( !self->iPaused && self->iFetchArray.Count() > 0 )
         {
-        self->iListRefreshIsDelayed = EFalse;
-        if ( !self->iPaused )
+        // Do refresh only if on screen item has been modified
+        if ( self->iPreviousModifiedIndexOnScreen )
             {
+            self->iPreviousModifiedIndexOnScreen = EFalse; // Reset refresh checking
             self->RefreshScreen();
             }
+        }
+    else
+        {
+        self->iRefreshTimer->Cancel();
+        IPTVLOGSTRING_LOW_LEVEL(
+           "MPX My Videos UI # RefreshTimerCallBack # iRefreshTimer stop" );
         }
     return KErrNone;
     }
@@ -503,40 +600,38 @@ void CVcxHgMyVideosVideoDataUpdater::RefreshScreen()
 //
 TBool CVcxHgMyVideosVideoDataUpdater::ListRefreshNeeded( TInt aIndex )
     {
-    TBool modifiedIndexOnScreen( EFalse );
-    TInt firstIndexOnScreen( iScroller.FirstIndexOnScreen() );
+    TInt firstIndexOnScreen = 0;
+    TInt lastIndexOnScreen = 0;
+    TInt lastIndex = 0;
+    GetScrollerArea( firstIndexOnScreen, lastIndexOnScreen, lastIndex );
     
-    if ( firstIndexOnScreen < 0 )
-        {
-        firstIndexOnScreen = 0;
-        }
-    
-    TInt lastIndexOnScreen = firstIndexOnScreen + iScroller.ItemsOnScreen(); 
-    
-    if ( lastIndexOnScreen >= iScroller.ItemCount() )
-        {
-        lastIndexOnScreen = iScroller.ItemCount() - 1;
-        }
-         
-    if ( aIndex >= firstIndexOnScreen && aIndex <= lastIndexOnScreen )
-        {
-        modifiedIndexOnScreen = ETrue;
-        }
-    
-    TBool timerHasExpired( ! iRefreshTimer->IsActive() );
+    TBool modifiedIndexOnScreen = aIndex >= firstIndexOnScreen &&
+        aIndex <= lastIndexOnScreen;
     TBool refreshNeeded( EFalse );
-    
-    if ( ( iListRefreshIsDelayed && !modifiedIndexOnScreen ) 
-            || iFetchArray.Count() <= 1 || timerHasExpired )
+
+    // Refresh rules:
+    // 1) Refresh if off screen item is detected after on screen item
+    // 2) Refresh if item is the last
+    if ( ( iPreviousModifiedIndexOnScreen && !modifiedIndexOnScreen ) ||
+         iFetchArray.Count() <= 1 )
         {
-        iListRefreshIsDelayed = EFalse;
-        refreshNeeded = ETrue;        
-        }        
-    else if ( modifiedIndexOnScreen )
-        {
-        iListRefreshIsDelayed = ETrue;    
+        // Restart refresh timer if there are items left after current one
+        iRefreshTimer->Cancel();
+        if ( iFetchArray.Count() > 1 )
+            {
+            iRefreshTimer->Start( KRefreshTimerInterval, KRefreshTimerInterval,
+                TCallBack( RefreshTimerCallBack, this ) );
+            IPTVLOGSTRING_LOW_LEVEL(
+               "MPX My Videos UI # ListRefreshNeeded # iRefreshTimer start" );
+            }
+        else
+            {
+            IPTVLOGSTRING_LOW_LEVEL(
+               "MPX My Videos UI # ListRefreshNeeded # iRefreshTimer stop" );
+            }
+        refreshNeeded = ETrue;
         }
-    
+    iPreviousModifiedIndexOnScreen = modifiedIndexOnScreen;
     return refreshNeeded;
     }
 
@@ -575,6 +670,7 @@ void CVcxHgMyVideosVideoDataUpdater::ThumbnailReady( TInt aError,
                 // Never delete this, ownership gone to Ganes list
                 item->SetThumbnail( aError == KErrNone ? aThumbnail.DetachBitmap() : NULL );
                 item->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
+                StartFinalActions();
                 }
             else if ( aError == KErrNotFound &&
             	item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted )
@@ -586,15 +682,7 @@ void CVcxHgMyVideosVideoDataUpdater::ThumbnailReady( TInt aError,
                 {
                 // Stop thumbnail peek attemps
                 item->SetState( CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
-                }
-
-			// Start DRM check if thumb finished
-            if ( item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished && 
-			     !IsActive() )
-                {
-                SetActive();
-                TRequestStatus* stat = &iStatus;
-                User::RequestComplete( stat, KErrNone );
+                StartFinalActions();
                 }
 
             TRAPD( err, ContinueVideoDataFetchingL() );
@@ -618,8 +706,8 @@ void CVcxHgMyVideosVideoDataUpdater::RunL()
     {
     if ( !iPaused )
         {
-        TInt i = 0;
-        while( i < iFetchArray.Count() )
+        TInt i = iFetchArray.Count() - 1;
+        while( i >= 0 )
             {
             CVcxHgMyVideosVideoData* item = iFetchArray[i];
             if ( item->State() == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished )
@@ -628,16 +716,28 @@ void CVcxHgMyVideosVideoDataUpdater::RunL()
                     {
                     CheckDrmL( *item );
                     UpdateVideoDataToUiL( *item );
-                    } );
-                delete iFetchArray[i];
+                    } );				
+                delete item;
                 iFetchArray.Remove(i);
+#if 0
+                if ( iFetchArray.Count() > 0 )
+                    {
+                    // If drm checking is time consuming, proceed finalisation later
+                    StartFinalActions();
+                    break;
+                    }
+#endif
                 }
-            else
-                {
-                ++i;
-                }
+            --i;
             }
-        ContinueVideoDataFetchingL();
+        if ( !iFetchArray.Count() )
+            {
+            // No items left, timers are not needed anymore
+            iRefreshTimer->Cancel();
+            iRetryTimer->Cancel();
+            IPTVLOGSTRING_LOW_LEVEL(
+               "MPX My Videos UI # RunL # iRefreshTimer stop" );
+            }
         }
     }
 
@@ -762,10 +862,11 @@ void CVcxHgMyVideosVideoDataUpdater::StartThumbnailL(
             }
         aItem.SetThumbnailConversionId( id );
 
-        IPTVLOGSTRING3_LOW_LEVEL( 
-                "MPX My Videos UI # GetThumbnailL() called thumbID %d for %S.",
+        IPTVLOGSTRING4_LOW_LEVEL( 
+                "MPX My Videos UI # StartThumbnailL() called thumbID %d for %S (peek %d)",
                 aItem.ThumbnailConversionId(),
-                &media->ValueText( KMPXMediaGeneralUri ) );
+                &media->ValueText( KMPXMediaGeneralUri ),
+                aPeek );
 
         aItem.SetState( aPeek ?
                 CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted :
@@ -775,4 +876,158 @@ void CVcxHgMyVideosVideoDataUpdater::StartThumbnailL(
         {
         User::Leave( KErrNotFound );
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::TrySelectL()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosVideoDataUpdater::TrySelectL( TInt aIndex, 
+                                                  TBool aSelectForPeekOnly )
+    {
+    // Move selected index to first index of the fetch array
+    TBool selected = EFalse;
+    CVcxHgMyVideosVideoData* item = iFetchArray[aIndex];
+    CVcxHgMyVideosVideoData::TVideoDataState state = item->State();
+    if ( aSelectForPeekOnly )
+        {
+        // Accept item only for peeking
+        if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone )
+            {
+            iFetchArray.InsertL( item, 0 );
+            iFetchArray.Remove( aIndex + 1 );
+            selected = ETrue;
+            }
+        }
+    else if ( state == CVcxHgMyVideosVideoData::EVideoDataStateNone ||
+              state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekFinished )
+        {
+        // Accept any item that waits to be fetched
+        iFetchArray.InsertL( item, 0 );
+        iFetchArray.Remove( aIndex + 1 );
+        selected = ETrue;
+        }
+    return selected;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::TrySelectFromScrollerL()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosVideoDataUpdater::TrySelectFromScrollerL(
+    TInt aPos, TBool aSelectForPeekOnly )
+    {
+    TBool selected = EFalse;
+    CGulIcon* icon = iScroller.ItemL( aPos ).Icon();
+    TMPXItemId mpxItemId = iVideoArray.ArrayIndexToMpxItemIdL( aPos );
+    TInt index = IndexByMPXItemId( mpxItemId );
+    if ( index >= 0 )
+        {
+		// Skip fetch selection if icon already exist
+        if ( !icon )
+            {
+            if ( TrySelectL( index, aSelectForPeekOnly ) )
+                {
+                selected = ETrue;
+                }
+            }
+        else
+            {
+            iFetchArray[index]->SetState(
+                CVcxHgMyVideosVideoData::EVideoDataStateThumbnailFinished );
+            StartFinalActions();
+            }
+        }
+    return selected;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::TrySelectFromScrollerAreaL()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosVideoDataUpdater::TrySelectFromScrollerAreaL( 
+    TInt aStartPos, TInt aEndPos, TBool aSelectForPeekOnly )
+    {
+    TBool selected = EFalse;
+    if ( aEndPos >= aStartPos )
+        {
+        // Search forwards
+        for ( TInt i = aStartPos; i <= aEndPos; i++ )
+            {
+            if ( TrySelectFromScrollerL( i, aSelectForPeekOnly ) )
+                {
+                selected = ETrue;
+                break;
+                }
+            }
+        }
+    else
+        {
+        // Search backwards
+        for ( TInt i = aStartPos; i >= aEndPos; i-- )
+            {
+            if ( TrySelectFromScrollerL( i, aSelectForPeekOnly ) )
+                {
+                selected = ETrue;
+                break;
+                }
+            }
+        }
+    return selected;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::StartFinalActions()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::StartFinalActions()
+    {
+    if ( !IsActive() )
+        {
+        SetActive();
+        TRequestStatus* stat = &iStatus;
+        User::RequestComplete( stat, KErrNone );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::CancelNeeded()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosVideoDataUpdater::CancelNeeded( CVcxHgMyVideosVideoData& aItem )
+    {
+    CVcxHgMyVideosVideoData::TVideoDataState state = aItem.State();
+    return ( state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailPeekStarted ||
+             state == CVcxHgMyVideosVideoData::EVideoDataStateThumbnailStarted );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::RetryTimerCallBack()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosVideoDataUpdater::RetryTimerCallBack( TAny* aAny )
+    {
+    CVcxHgMyVideosVideoDataUpdater* self = static_cast<CVcxHgMyVideosVideoDataUpdater*>( aAny ); 
+    self->iRetryTimer->Cancel();
+    TRAPD( err, self->ContinueVideoDataFetchingL() );
+    if ( err != KErrNone )
+        {
+        IPTVLOGSTRING2_LOW_LEVEL(
+        "MPX My Videos UI # CVcxHgMyVideosVideoDataUpdater::RetryTimerCallBack, err = %d",
+        err );
+        }
+    return KErrNone;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDataUpdater::GetScrollerArea()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDataUpdater::GetScrollerArea( TInt& aFirstIndexOnScreen, 
+                                                      TInt& aLastIndexOnScreen, 
+                                                      TInt& aLastIndex )
+    {
+    aLastIndex = Max( iScroller.ItemCount() - 1, 0 );
+    aFirstIndexOnScreen = Max( iScroller.FirstIndexOnScreen(), 0 );
+    aLastIndexOnScreen = Min( aFirstIndexOnScreen + iScroller.ItemsOnScreen(), aLastIndex );
     }

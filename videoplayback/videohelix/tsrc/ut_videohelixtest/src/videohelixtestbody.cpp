@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -118,8 +118,11 @@ TInt CVHPPTestClass::RunMethodL( CStifItemParser& aItem )
         ENTRY( "HandleVolume", CVHPPTestClass::HandleVolumeL ),
         ENTRY( "ConnectHDMITvOut", CVHPPTestClass::ConnectHDMITvOutL ),
         ENTRY( "DisconnectHDMITvOut", CVHPPTestClass::DisconnectHDMITvOutL ),
-        ENTRY( "SetHDMITvOutConnected", CVHPPTestClass::SetHDMITvOutConnectedL )
+        ENTRY( "SetHDMITvOutConnected", CVHPPTestClass::SetHDMITvOutConnectedL ),
 
+        ENTRY ("InitializeWithPositionL", CVHPPTestClass::InitializeWithPositionL),
+        ENTRY ("InitializeLinkWithPositionL", CVHPPTestClass::InitializeLinkWithPositionL),
+        ENTRY ("InitializeHandleWithPositionL", CVHPPTestClass::InitializeHandleWithPositionL)
 
         //
         //  ADD NEW ENTRIES HERE
@@ -2227,6 +2230,249 @@ CVHPPTestClass::SetHDMITvOutConnectedL()
     iAccObserver->SetTvOutHDMI( ETrue );
 
     return KErrNone;
+}
+
+TInt
+CVHPPTestClass::InitializeWithPositionL( CStifItemParser& aItem )
+{
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::InitializeL()"));
+    iLog->Log(_L("CVHPPTestClass::InitializeL()"));
+
+    TInt duration;
+    TInt volumeSteps;
+    TInt position;
+    
+    TInt err = aItem.GetNextInt( duration );
+
+    if ( err == KErrNone )
+    {
+        //
+        //  We will always get an Init Complete message out
+        //
+        TCallbackEvent* event = new TCallbackEvent;
+
+        event->iEvent = EPInitialised;
+        event->iData  = duration;
+        event->iError = KErrNone;
+
+        AddExpectedEvent( event );
+
+        // 
+        // read number of volume steps
+        //
+        err = aItem.GetNextInt( volumeSteps );
+        
+        if ( err == KErrNone )
+        {        
+            //
+            // set volume steps
+            //
+            SetVolumeSteps( volumeSteps );
+            
+            err = aItem.GetNextInt( position );
+            
+            if (err == KErrNone )
+            {
+                TBuf<120> fullPath;    
+
+                err = ReadFileInitializationParameters( aItem, fullPath );
+                
+                if ( err == KErrNone )
+                {
+                    PreparePluginL();
+        
+                    //
+                    //  Initalize the Plugin with a file name
+                    //
+                    MPX_DEBUG(_L("Initialize the Plugin:  filename = %S, position = %d"), &fullPath, position);
+                    iLog->Log(_L("Initialize the Plugin:  filename = %S, position = %d"), &fullPath, position);
+        
+                    iPlaybackPlugin->InitialiseWithPositionL( fullPath, position );
+                }
+
+            }
+        }
+    }
+
+    return err;
+}
+
+
+TInt
+CVHPPTestClass::InitializeLinkWithPositionL( CStifItemParser& aItem )
+{
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::InitializeLinkL()"));
+    iLog->Log(_L("CVHPPTestClass::InitializeLinkL()"));
+
+    TInt duration;
+    TInt volumeSteps;
+    TInt position;
+    
+    TInt err = aItem.GetNextInt( duration );
+
+    if ( err == KErrNone )
+    {
+        //
+        //  We will always get an Init Complete message out
+        //
+        TCallbackEvent* event = new TCallbackEvent;
+
+        event->iEvent = EPInitialised;
+        event->iData  = duration;
+        event->iError = KErrNone;
+
+        AddExpectedEvent( event );
+
+        // 
+        // read number of volume steps
+        //
+        err = aItem.GetNextInt( volumeSteps );
+        
+        if ( err == KErrNone )
+        {        
+            //
+            // set volume steps
+            //
+            SetVolumeSteps( volumeSteps );
+            
+            err = aItem.GetNextInt( position );
+            
+            if ( err == KErrNone )
+            {
+                TPtrC  link;
+    
+                //
+                //  Read in the link from the config file
+                //
+                TInt err = aItem.GetNextString( link );
+    
+                if ( err == KErrNone )
+                {
+                    TInt err = ReadInitializationErrors( aItem );
+    
+                    if ( err == KErrNone )
+                    {
+                        PreparePluginL();
+    
+                        //
+                        //  Extract the streaming link from the ram file and
+                        //  Initalize the Plugin with the link and an access point
+                        //
+                        MPX_DEBUG(_L("Initialize the Plugin:  link = %S, position = %d"), &link, position);
+                        iLog->Log(_L("Initialize the Plugin:  link = %S, position = %d"), &link, position);
+    
+                        iPlaybackPlugin->InitStreamingL( link, KNullDesC8, 11, position );
+                    }
+                }
+            }
+        }
+    }
+
+    return err;
+}
+
+
+TInt
+CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
+{
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::InitializeHandleL()"));
+    iLog->Log(_L("CVHPPTestClass::InitializeHandleL()"));
+
+    TInt duration;
+    TInt volumeSteps;
+    TInt position;
+    TInt fileHandle32;
+    
+    TInt err = aItem.GetNextInt( fileHandle32 );
+    
+    if ( err == KErrNone )
+    {        
+    
+#ifndef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+        //
+        // set RFile as default if the 64-bit flag is not defined
+        //
+        fileHandle32 = ETrue;
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+        
+        err = aItem.GetNextInt( duration );
+    
+        if ( err == KErrNone )
+        {
+            //
+            //  We will always get an Init Complete message out
+            //
+            TCallbackEvent* event = new TCallbackEvent;
+    
+            event->iEvent = EPInitialised;
+            event->iData  = duration;
+            event->iError = KErrNone;
+    
+            AddExpectedEvent( event );
+    
+            // 
+            // read number of volume steps
+            //
+            err = aItem.GetNextInt( volumeSteps );
+            
+            if ( err == KErrNone )
+            {        
+                //
+                // set volume steps
+                //
+                SetVolumeSteps( volumeSteps );
+
+                err = aItem.GetNextInt( position );
+
+                if (err == KErrNone )
+                {
+                    TBuf<120> fullPath;
+                    
+                    err = ReadFileInitializationParameters( aItem, fullPath );
+        
+                    if ( err == KErrNone )
+                    {
+                        PreparePluginL();
+        
+                        RFs fs;
+                        TInt error = fs.Connect();
+                        TInt fileError = KErrNone;
+                    
+                        //
+                        //  Open a file handle to the clip
+                        //
+                        if ( fileHandle32 )
+                        {
+                            RFile file;
+                            fileError = file.Open( fs, fullPath, EFileRead );
+                            iPlaybackPlugin->InitialiseWithPositionL( file, position );
+                            file.Close();
+                        }
+#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+                        else
+                        {
+                            RFile64 file64;
+                            fileError = file64.Open( fs, fullPath, EFileRead );
+                            iPlaybackPlugin->Initialise64L( file64, position );
+                            file64.Close();
+                        }
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+                            
+                        //
+                        //  Initalize the Plugin with a file name
+                        //
+                        MPX_DEBUG(_L("Initialize the Plugin with File Handle:  filename = %S, position = %d"), &fullPath, position);
+                        iLog->Log(_L("Initialize the Plugin with File Handle:  filename = %S, position = %d"), &fullPath, position);
+            
+                        fs.Close();
+                    }
+                }            
+
+            } 
+        } 
+    } 
+
+    return err;
 }
 
 //  EOF

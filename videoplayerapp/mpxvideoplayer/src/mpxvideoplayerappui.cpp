@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_37 %
+// Version : %version: e92_38 %
 
 
 #include <hlplch.h>                     // Help launcher
@@ -172,6 +172,12 @@ void CMpxVideoPlayerAppUi::HandleCommandL( TInt aCommand )
         {
             iAppUiEngine->ClearPdlInformation();
             break;
+        }
+        case KVcxMyVideosCmdDoLateConstruct:
+        {
+             MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleCommandL( DoLateConstruct )"));
+             iAppUiEngine->ActivateLateConstructTimerL();
+             break;
         }
     }
 }

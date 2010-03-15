@@ -36,6 +36,8 @@
 #include <AknsUtils.h>
 #include <AknUtils.h>
 #include <aknlayoutscalable_avkon.cdl.h>
+#include <coemain.h>
+#include <aknappui.h>
 
 #include <vcxhgmyvideosicons.mbg>
 #include <myvideosindicator.h>
@@ -873,6 +875,15 @@ void CVcxHgMyVideosCategoryModelHandler::CategoryListFetchingCompletedL()
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # CategoryListFetchingCompletedL()" ); 
     FetchLastWatchedL();
     SetLastWatchedIndicatorL();
+
+    // Send custom command to appui that signals that the 
+    // my videos main view is constructed.
+    CAknAppUi* appui = static_cast<CAknAppUi*>( CCoeEnv::Static()->AppUi() );
+    
+    if ( appui )
+        {
+        appui->HandleCommandL( KVcxMyVideosCmdDoLateConstruct );
+        }
     }
 
 // -----------------------------------------------------------------------------

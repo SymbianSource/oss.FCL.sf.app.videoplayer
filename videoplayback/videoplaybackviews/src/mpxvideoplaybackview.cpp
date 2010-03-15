@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 17 %
+
+// Version : %version: 18 %
 
 
 //  Include Files
@@ -227,12 +228,8 @@ void CMPXVideoPlaybackView::HandleStoppedStateL()
     {
         //
         //  New item from the playlist clean up the view
-        //  Remove the Display Window
         //
-        if ( iDisplayHandler )
-        {
-            iDisplayHandler->RemoveDisplayWindow();
-        }
+        RemoveBackgroundSurfaceL();
     }
 }
 

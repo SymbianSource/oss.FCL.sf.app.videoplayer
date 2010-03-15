@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: e003sa33#10 %
 
 
 
@@ -111,6 +111,12 @@ class CMPXVideoPlaybackContainer: public CCoeControl
         */
         void AddLongFileDetailsL( TBool aHasVideoTrack = ETrue );
 
+        /**
+        * Add file details 
+        * and make sure aspect ratio equal to screen aspect ratio 
+        */
+        void AddSameARFileDetailsL( TBool aHasVideoTrack = ETrue );
+        
     private:    
         // Data
         TInt                                 iCommand;

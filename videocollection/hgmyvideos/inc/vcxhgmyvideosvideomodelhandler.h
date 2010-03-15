@@ -34,7 +34,7 @@ class CVcxHgMyVideosMainView;
 class CMPXMedia;
 class CVcxHgMyVideosVideoDataUpdater;
 class CVcxHgMyVideosDownloadUpdater;
-class TVcxHgMyVideosVideoDetailsDialog;
+class CVcxHgMyVideosVideoDetailsDialog;
 class CVcxHgMyVideosVideoList;
 class CHgScroller;
 class CMyVideosIndicator;
@@ -186,6 +186,14 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         const TDesC& GetVideoUri( TInt aIndex );
         
         /**
+         * Returns video's unique mpx id.
+         * 
+         * @param aIndex Video's index on UI list.
+         * @return Video's id or KErrNotFound.
+         */  
+        TInt GetVideoId( TInt aIndex );
+        
+        /**
          * Returns video size in bytes
          * 
          * @param aIndex Video's index on UI list.
@@ -194,16 +202,16 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         TInt64 GetVideoSize( TInt aIndex );
 
         /**
-         * Deletes videos from requested indexes.
+         * Deletes videos with requested ids.
          * 
-         * @param aOperationTargets Video indexes.
+         * @param aOperationTargets Videos' mpx ids.
          */
         void DeleteVideosL( const RArray<TInt>& aOperationTargets );
 
         /**
-         * Moves or copies videos from requested indexes to given target.
+         * Moves or copies videos with requested ids to given target.
          * 
-         * @param aOperationTargets Video indexes.
+         * @param aOperationTargets Videos' mpx ids.
          * @param aTargetDrive Target drive.
          * @param aCopy If ETrue, copy is performed. If EFalse, move.
          */
@@ -503,7 +511,7 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * Video details dialog.
          * Own.
          */
-        TVcxHgMyVideosVideoDetailsDialog* iVideoDetails;
+        CVcxHgMyVideosVideoDetailsDialog* iVideoDetails;
         
         /**
          * Reference to video list implementation.

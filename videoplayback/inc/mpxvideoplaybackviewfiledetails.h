@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,50 +15,50 @@
 *
 */
 
-// Version : %version: e003sa33#11 %
 
-
+// Version : %version: 12 %
 
 
 #ifndef __MPXVIDEOPLAYBACKVIEWFILEDETAILS__
 #define __MPXVIDEOPLAYBACKVIEWFILEDETAILS__
 
 #include "mpxhelixplaybackplugindefs.h"
-// 
+
+//
 //  CLASS DECLARATION
 //
 NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
 {
-    public:  
+    public:
         //
         //  Constructors and destructor
         //
         static CMPXVideoPlaybackViewFileDetails* NewL();
-        
+
         //
         //  Destructor.
         //
         virtual ~CMPXVideoPlaybackViewFileDetails();
-        
+
         //
         //  Clear all file details
         //
         void ClearFileDetails();
 
-        /** 
+        /**
         * Generate file name, remove all file path
-        * 
-        * @return generated file name, ownership is transferred 
+        *
+        * @return generated file name, ownership is transferred
         */
         IMPORT_C HBufC* GenerateFileNameL();
-        
+
     private:
         //
         //  By default Symbian 2nd phase constructor is private.
         //
         void ConstructL();
 
-    public:    
+    public:
         //
         // Data
         //
@@ -73,7 +73,6 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
         TBool          iAudioEnabled;
         TBool          iVideoEnabled;
         TBool          iPartialPlayback;
-        TBool          iRNFormat;
         TBool          iTvOutConnected;
         TBool          iTvOutPlayAllowed;
         TBool          iDrmProtected;
@@ -86,7 +85,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
         TInt           iDuration;
 };
 
-#endif      // __MPXVIDEOPLAYBACKVIEWFILEDETAILS__  
+#endif      // __MPXVIDEOPLAYBACKVIEWFILEDETAILS__
 
-            
+
 // EOF

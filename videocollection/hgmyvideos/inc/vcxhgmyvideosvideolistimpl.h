@@ -397,6 +397,17 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
         CHgMyVideosAiwMenuHandler* AiwMenuHandlerL();
 #endif
 
+        /**
+         * OperationTargetsToMpxIdsL
+         * Translates the target ui indexes to mpx ids. Needed for targeting 
+         * list items if list may change while the requested operation is ongoing.
+         *
+         * @param operationTargetIndexes IN: Ui idexes of the target items
+         * @param operationTargetIds OUT: Mpx ids of the target items
+         */
+        void OperationTargetsToMpxIdsL( RArray<TInt>& operationTargetIndexes,  
+                                        RArray<TInt>& operationTargetIds );
+
     protected:
     
         /**

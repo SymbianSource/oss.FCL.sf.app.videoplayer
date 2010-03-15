@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#9 %
+// Version : %version: 10 %
 
 
 //
@@ -88,13 +88,12 @@ CMPXVideoPlaybackViewFileDetails::ClearFileDetails()
     iAudioEnabled = EFalse;
     iVideoEnabled = EFalse;
     iPartialPlayback = EFalse;
-    iRNFormat = EFalse;
 
     iDuration = 0;
     iTvOutConnected   = EFalse;
     iTvOutPlayAllowed = ETrue;
     iDrmProtected = EFalse;
-    
+
     iVideoHeight = 0;
     iVideoWidth  = 0;
     iBitRate = 0;
@@ -108,24 +107,22 @@ CMPXVideoPlaybackViewFileDetails::ClearFileDetails()
 EXPORT_C HBufC* CMPXVideoPlaybackViewFileDetails::GenerateFileNameL()
 {
     MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackViewFileDetails::GenerateFileNameL()" ) );
-    
-	HBufC* fileName = NULL;
 
-	if ( iClipName && iClipName->Length()
-			&& EMPXVideoStreaming != iPlaybackMode &&
-    		EMPXVideoLiveStreaming != iPlaybackMode )
-	{
+    HBufC* fileName = NULL;
+
+    if ( iClipName &&
+         iClipName->Length() &&
+         EMPXVideoStreaming != iPlaybackMode &&
+         EMPXVideoLiveStreaming != iPlaybackMode )
+    {
         //
-        // Get only file name for media details viewer 
+        //  Get only file name for media details viewer
         //
-        //TParsePtrC filePath( iClipName->Des() );
-        //fileName = ( filePath.Name() ).AllocL();
         TParse parse;
-        parse.Set( iClipName->Des(), NULL, NULL);
+        parse.Set( iClipName->Des(), NULL, NULL );
         fileName = ( parse.Name() ).AllocL();
+    }
 
-	}
-	
     return fileName;
 }
 

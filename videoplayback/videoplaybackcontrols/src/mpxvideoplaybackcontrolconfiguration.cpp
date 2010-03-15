@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 11 %
+
+// Version : %version: e003sa33#13 %
 
 
 // INCLUDE FILES
@@ -98,16 +99,9 @@ void CMPXVideoPlaybackControlConfiguration::CreateControlListL()
     if ( fileDetails->iPlaybackMode == EMPXVideoStreaming )
     {
         //
-        // streaming mode, add branding animation control to show while initializing
+        //  streaming mode, add branding animation control to show while initializing
         //
         iControlsList.AppendL( EMPXBrandingAnimation );
-    }
-    else if ( fileDetails->iRNFormat )
-    {
-        //
-        // RN clip and local mode, add RN logo bitmap to show while initializing
-        //
-        iControlsController->SetRealOneBitmapVisibility( ETrue );
     }
 
     iControlsList.AppendL( EMPXSoftkeyDetails );
@@ -298,11 +292,14 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
             }
 
             //
-            //  If video is enabled, add aspect ratio icon
+            //  If video is enabled, 
+            //  if video has not same aspect ratio with phone screenadd then
+            //  add aspect ratio icon
             //
             if ( ! iAspectRatioIconAdded &&
                    fileDetails->iVideoHeight > 0 &&
                    fileDetails->iVideoWidth > 0 &&
+                   ! ( iControlsController->IsSameAspectRatio() ) &&
                    AknLayoutUtils::PenEnabled() )
             {
                 iControlsList.AppendL( EMPXAspectRatioIcon );
@@ -315,7 +312,7 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
         //
         //  No video for this clip
         //
-    
+
         //
         //  Remove the Real One bitmap and show the audio only bitmaps
         //
@@ -323,7 +320,7 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
 
         if ( ! iAudioOnlyIndicatorsAdded )
         {
-            if ( fileDetails->iRNFormat )
+            if ( iControlsController->IsRealMediaFormat() )
             {
                 iControlsList.AppendL( EMPXRealAudioBitmap );
             }

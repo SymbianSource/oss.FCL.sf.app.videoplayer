@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 
 
@@ -446,7 +446,8 @@ void CMPXStreamingPlaybackMode::HandlePause()
             TRAP_IGNORE( iVideoPlaybackCtlr->iState->SendErrorToViewL( err ) );
         }
     }
-    else
+    // Streaming link is non-pausable and no alarm stop playback
+    else if ( !iVideoPlaybackCtlr->IsAlarm() )
     {
         iVideoPlaybackCtlr->iPlayer->Stop();
 

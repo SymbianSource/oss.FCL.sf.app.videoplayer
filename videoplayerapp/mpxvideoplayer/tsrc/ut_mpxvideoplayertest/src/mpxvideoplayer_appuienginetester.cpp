@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#21 %
+// Version : %version: e92_22 %
 
 
 #include "mpxvideoplayer_appuienginetester.h"
@@ -601,17 +601,12 @@ void CMpxVideoPlayer_AppUiEngineTester::AddEmbeddedPdlCallbacksL( TInt aDownload
     //
     //  We should get 4 callbacks
     //  iViewUtility->PreLoadViewL( PDL View Uid )
-    //  iPlaybackUtility->Utility( Playback Plugin Uid )
     //  iPlaybackUtility->CommandL( EPbCmdStartPd );
     //  iPlaybackUtility->InitL( iFileName );
     //
     TCallbackEvent* event = new (ELeave) TCallbackEvent;
     event->iEvent = EViewUtilityPreLoadView;
     event->iUid   = KVideoPdlPlaybackViewUid;
-    AddExpectedEvent( event );
-
-    event = new (ELeave) TCallbackEvent;
-    event->iEvent = EPlaybackUtilityPdlInstance;
     AddExpectedEvent( event );
 
     event = new (ELeave) TCallbackEvent;

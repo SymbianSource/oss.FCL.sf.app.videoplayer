@@ -15,8 +15,8 @@
 *
 */
 
-// Version : %version: 22 %
 
+// Version : %version: 25 %
 
 
 // INCLUDE FILES
@@ -48,7 +48,10 @@
 
 using namespace AknLayoutScalable_Apps;
 
-// CONSTANTS
+//
+//  CONSTANTS
+//
+const TInt KMPXRealOneLogoTimeOut = 600000;
 
 // ======== MEMBER FUNCTIONS =======================================================================
 
@@ -96,7 +99,7 @@ void CMPXVideoPlaybackContainer::ConstructL()
     CreateControlsL();
 
     iUserInputHandler =
-        CMPXVideoPlaybackUserInputHandler::NewL( this, iFileDetails->iTvOutConnected );
+        CMPXVideoPlaybackUserInputHandler::NewL( this );
 
     ActivateL();
 }
@@ -107,6 +110,13 @@ void CMPXVideoPlaybackContainer::ConstructL()
 //
 CMPXVideoPlaybackContainer::~CMPXVideoPlaybackContainer()
 {
+    if ( iRealOneBitmapTimer )
+    {
+        iRealOneBitmapTimer->Cancel();
+        delete iRealOneBitmapTimer;
+        iRealOneBitmapTimer = NULL;
+    }
+
     if ( iFileDetails )
     {
         delete iFileDetails;
@@ -134,15 +144,30 @@ CMPXVideoPlaybackContainer::~CMPXVideoPlaybackContainer()
 //
 void CMPXVideoPlaybackContainer::AddFileDetailsL( CMPXVideoPlaybackViewFileDetails* aDetails )
 {
-    iControlsController->AddFileDetailsL( aDetails );
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::AddFileDetailsL()"));
 
     //
-    //  Delete the temp file details since plugin initialization is complete
+    //  If clip is audio only Real Media, delay adding the file details until the
+    //  Real One bitmap has been shown.
     //
-    if ( iFileDetails )
+    if ( iRealOneBitmapTimer && iRealOneBitmapTimer->IsActive() && ! aDetails->iVideoEnabled )
     {
-        delete iFileDetails;
-        iFileDetails = NULL;
+        MPX_DEBUG(_L("CMPXVideoPlaybackContainer::AddFileDetailsL() file details delayed"));
+
+        iDelayedFileDetails = aDetails;
+    }
+    else
+    {
+        iControlsController->AddFileDetailsL( aDetails );
+
+        //
+        //  Delete the temp file details since plugin initialization is complete
+        //
+        if ( iFileDetails )
+        {
+            delete iFileDetails;
+            iFileDetails = NULL;
+        }
     }
 }
 
@@ -230,7 +255,7 @@ CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, TEven
             if ( aType == EEventKeyUp )
             {
                 iControlsController->HandleEventL( EMPXControlCmdSoftKeyPressed,
-                		                           aKeyEvent.iScanCode );
+                                                   aKeyEvent.iScanCode );
             }
 
             iKeyResponse = EKeyWasConsumed;
@@ -243,8 +268,8 @@ CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, TEven
 // Handles rocker's middle key =>  Toggles between play & pause
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackContainer::HandleRockerMiddleKeyL(const TKeyEvent& aKeyEvent,
-                                                       TEventCode aType)
+void CMPXVideoPlaybackContainer::HandleRockerMiddleKeyL( const TKeyEvent& aKeyEvent,
+                                                         TEventCode aType )
 {
     if ( aKeyEvent.iCode == EKeyNull && aType == EEventKeyDown  )
     {
@@ -256,15 +281,15 @@ void CMPXVideoPlaybackContainer::HandleRockerMiddleKeyL(const TKeyEvent& aKeyEve
 // Starts/Stops Seeking Forward
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackContainer::HandleSeekFwdL(TEventCode aType)
+void CMPXVideoPlaybackContainer::HandleSeekFwdL( TEventCode aType )
 {
-    if (aType == EEventKeyDown)
+    if ( aType == EEventKeyDown )
     {
-        iView->HandleCommandL(EMPXPbvCmdSeekForward);
+        iView->HandleCommandL( EMPXPbvCmdSeekForward );
     }
-    else if (aType == EEventKeyUp)
+    else if ( aType == EEventKeyUp )
     {
-        iView->HandleCommandL(EMPXPbvCmdEndSeek);
+        iView->HandleCommandL( EMPXPbvCmdEndSeek );
     }
 }
 
@@ -272,15 +297,15 @@ void CMPXVideoPlaybackContainer::HandleSeekFwdL(TEventCode aType)
 // Starts/Stops Seeking Backward
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackContainer::HandleSeekBackL(TEventCode aType)
+void CMPXVideoPlaybackContainer::HandleSeekBackL( TEventCode aType )
 {
-    if (aType == EEventKeyDown)
+    if ( aType == EEventKeyDown )
     {
         iView->HandleCommandL(EMPXPbvCmdSeekBackward);
     }
-    else if (aType == EEventKeyUp)
+    else if ( aType == EEventKeyUp )
     {
-        iView->HandleCommandL(EMPXPbvCmdEndSeek);
+        iView->HandleCommandL( EMPXPbvCmdEndSeek );
     }
 }
 
@@ -301,7 +326,6 @@ void CMPXVideoPlaybackContainer::HandleResourceChange( TInt aType )
 //
 void CMPXVideoPlaybackContainer::GetHelpContext( TCoeHelpContext& /*aContext*/ ) const
 {
-    //aContext.iMajor = KAppUidMusicPlayerX;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -311,14 +335,14 @@ void CMPXVideoPlaybackContainer::GetHelpContext( TCoeHelpContext& /*aContext*/ )
 //
 TInt CMPXVideoPlaybackContainer::CountComponentControls() const
 {
-	TInt count = 0;
+    TInt count = 0;
 
-	if ( iRealOneBitmap )
-	{
+    if ( iRealOneBitmap )
+    {
         count = 1;
-	}
+    }
 
-	return count;
+    return count;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -350,7 +374,7 @@ void CMPXVideoPlaybackContainer::HandlePointerEventL( const TPointerEvent& aPoin
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::HandlePointerEventL()"));
 
-    iUserInputHandler->ProcessPointerEventL(this, aPointerEvent, EMpxVideoPlaybackContainer);
+    iUserInputHandler->ProcessPointerEventL( this, aPointerEvent, EMpxVideoPlaybackContainer );
 }
 
 
@@ -380,7 +404,7 @@ void CMPXVideoPlaybackContainer::Draw( const TRect& aRect ) const
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::Draw()"));
 
     CWindowGc& gc = SystemGc();
-    
+
     gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
 
     //
@@ -431,14 +455,12 @@ void CMPXVideoPlaybackContainer::HandleEventL( TMPXVideoPlaybackControlCommandId
     }
     else if ( aEvent == EMPXControlCmdTvOutConnected )
     {
-    	iTvOutConnected = ETrue;
-        iUserInputHandler->HandleTVOutEvent(ETrue);
+        iTvOutConnected = ETrue;
         DrawNow();
     }
     else if ( aEvent == EMPXControlCmdTvOutDisconnected )
     {
-    	iTvOutConnected = EFalse;
-        iUserInputHandler->HandleTVOutEvent(EFalse);
+        iTvOutConnected = EFalse;
         DrawNow();
     }
 
@@ -473,8 +495,6 @@ EXPORT_C void CMPXVideoPlaybackContainer::HandleCommandL( TInt aCommand, TInt aV
             //
             iView->RetrievePdlInformationL();
 
-            iControlsController->HandleEventL( EMPXControlCmdCloseFileDetailsViewer );
-
             break;
         }
         case EAknSoftkeyOptions:
@@ -489,9 +509,16 @@ EXPORT_C void CMPXVideoPlaybackContainer::HandleCommandL( TInt aCommand, TInt aV
         }
         case EMPXPbvSurfaceCreated:
         {
-        	iSurfaceCreated = ETrue;
-			iControlsController->HandleEventL( EMPXControlCmdSurfaceCreated );
-        	DrawNow();
+            iSurfaceCreated = ETrue;
+            iControlsController->HandleEventL( EMPXControlCmdSurfaceCreated );
+            DrawNow();
+            break;
+        }
+        case EMPXPbvSurfaceRemoved:
+        {
+            iSurfaceCreated = EFalse;
+            iControlsController->HandleEventL( EMPXControlCmdSurfaceRemoved );
+            DrawNow();
             break;
         }
         default:
@@ -556,6 +583,22 @@ void CMPXVideoPlaybackContainer::CreateControlsL()
     //  Retrieve the Real One Logo bitmap
     //
     iRealOneBitmap = iControlsController->GetBitmap( EMPXRealLogoBitmap );
+
+    if ( iRealOneBitmap )
+    {
+        //
+        //  Start timer since Real One bitmap is created
+        //
+        iRealOneBitmapTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+
+        iRealOneBitmapTimer->Start(
+            KMPXRealOneLogoTimeOut,
+            0,
+            TCallBack( CMPXVideoPlaybackContainer::HandleRealOneBitmapTimeout, this ) );
+
+        DrawNow();
+    }
+
     iTvOutConnected = iFileDetails->iTvOutConnected;
 }
 
@@ -566,8 +609,71 @@ void CMPXVideoPlaybackContainer::CreateControlsL()
 EXPORT_C CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackContainer::UserInputHandler()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackContainer::UserInputHandler()"));
-
     return iUserInputHandler;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackContainer::IsRealOneBitmapTimerActive()
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackContainer::IsRealOneBitmapTimerActive()
+{
+    TBool timerActive( EFalse );
+
+    if ( iRealOneBitmapTimer )
+    {
+        timerActive = iRealOneBitmapTimer->IsActive();
+    }
+
+    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::IsRealOneBitmapTimerActive(%d)"), timerActive);
+
+    return timerActive;
+}
+
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackContainer::HandleRealOneBitmapTimeout
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoPlaybackContainer::HandleRealOneBitmapTimeout( TAny* aPtr )
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::HandleRealOneBitmapTimeout()"));
+    static_cast<CMPXVideoPlaybackContainer*>(aPtr)->DoHandleRealOneBitmapTimeout();
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackContainer::DoHandleRealOneBitmapTimeout
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackContainer::DoHandleRealOneBitmapTimeout()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::DoHandleRealOneBitmapTimeout()"));
+
+    if ( iDelayedFileDetails )
+    {
+        iControlsController->AddFileDetailsL( iDelayedFileDetails );
+
+        //
+        //  Delete the temp file details since plugin initialization is complete
+        //
+        if ( iFileDetails )
+        {
+            delete iFileDetails;
+            iFileDetails = NULL;
+        }
+
+        iDelayedFileDetails = NULL;
+    }
+
+    if ( iRealOneBitmapTimer->IsActive() )
+    {
+        iRealOneBitmapTimer->Cancel();
+        delete iRealOneBitmapTimer;
+        iRealOneBitmapTimer = NULL;
+    }
+
+    iView->HandleCommandL( EMPXPbvCmdRealOneBitmapTimeout );
 }
 
 // EOF

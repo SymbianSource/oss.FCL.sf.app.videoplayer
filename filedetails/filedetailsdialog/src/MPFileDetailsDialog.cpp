@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 // INCLUDE FILES
 #include <aknlists.h>
@@ -517,6 +517,11 @@ EXPORT_C void CMPFileDetailsDialog::ExecuteLD(CMPFileDetails* aFileDetails)
     }
 
     delete this;
+    
+    if ( KLeaveExit == err )
+        {
+        User::Leave( err );
+        }
 }
 
 // -----------------------------------------------------------------------------

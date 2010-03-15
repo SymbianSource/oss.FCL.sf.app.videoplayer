@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: ou1cpsw#7 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -112,9 +112,7 @@ TInt CUserinputhandlertest::RunMethodL( CStifItemParser& aItem )
         ENTRY( "MediaKeyEvent", CUserinputhandlertest::MediaKeyEvent ),
         ENTRY( "SetForeground", CUserinputhandlertest::SetForeground ),
         ENTRY( "CheckExpectedResult",CUserinputhandlertest::CheckExpectedResult ),
-        ENTRY( "CheckExpectedCommand",CUserinputhandlertest::CheckExpectedCommand ),
-        ENTRY( "TvOutEvent",CUserinputhandlertest::TvOutEvent ),
-        ENTRY( "CheckBacklightState",CUserinputhandlertest::CheckBacklightState ),        
+        ENTRY( "CheckExpectedCommand",CUserinputhandlertest::CheckExpectedCommand ),      
     };
 
     const TInt count = sizeof( KFunctions ) / sizeof( TStifFunctionInfo );
@@ -128,8 +126,7 @@ TInt CUserinputhandlertest::RunMethodL( CStifItemParser& aItem )
 //
 TInt CUserinputhandlertest::CreateStubsL( CStifItemParser&  aItem )
 {
-    TInt tvOutConnected;
-    TInt err = aItem.GetNextInt( tvOutConnected );
+
     //
     // Stubs
     //
@@ -139,11 +136,9 @@ TInt CUserinputhandlertest::CreateStubsL( CStifItemParser&  aItem )
     //
     // Class to be unit-tested
     //
-	if ( err == KErrNone )
-	{
-        iUserInputHandler = CMPXVideoPlaybackUserInputHandler::NewL( iContainer, tvOutConnected );
-    }
-	
+
+    iUserInputHandler = CMPXVideoPlaybackUserInputHandler::NewL( iContainer );
+
     return KErrNone;
 }
 
@@ -553,54 +548,6 @@ TInt CUserinputhandlertest::CheckExpectedCommand( CStifItemParser& aItem )
     return result;
 }
 
-// -------------------------------------------------------------------------------------------------
-// CUserinputhandlertest::TvOutEvent
-// -------------------------------------------------------------------------------------------------
-//
-TInt CUserinputhandlertest::TvOutEvent( CStifItemParser& aItem )
-{
-    MPX_DEBUG(_L("CUserinputhandlertest::CheckBacklightState()"));
 
-    TInt tvOutEvent;
-    
-    TInt result = aItem.GetNextInt( tvOutEvent );
-
-    iUserInputHandler->HandleTVOutEvent( tvOutEvent );
-    
-    return result;
-}
-
-// -------------------------------------------------------------------------------------------------
-// CUserinputhandlertest::CheckBacklightState
-// -------------------------------------------------------------------------------------------------
-//
-TInt CUserinputhandlertest::CheckBacklightState( CStifItemParser& aItem )
-{
-    MPX_DEBUG(_L("CUserinputhandlertest::CheckBacklightState()"));
-
-    TLightStatus backlightState = ELightStatusUnknown;
-    TInt status;
-    
-    CHWRMLight* light = NULL;
-    MPX_TRAPD( err, light = CHWRMLight::NewL() );
-    backlightState = light->LightStatus( CHWRMLight::EPrimaryDisplay );
-    delete light;
-
-    TInt result = aItem.GetNextInt( status );
-
-    if ( result == KErrNone && status == backlightState )
-    {
-        result = KErrNone;
-    }
-    else
-    {
-        MPX_DEBUG(_L("CheckBacklightState FAILED: expectedState=%d, actualState=%d]"),
-                backlightState, status );
-
-        result = KErrArgument;
-    }
-
-    return result;
-}
 
 //  [End of File] - Do not remove

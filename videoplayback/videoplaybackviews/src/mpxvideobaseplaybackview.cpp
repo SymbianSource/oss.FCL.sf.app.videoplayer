@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 63 %
+
+// Version : %version: 66 %
 
 
 //  Include Files
@@ -229,13 +230,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
             //
             //  The display window must be removed before closing the playback plugin
             //
-            if ( iDisplayHandler )
-            {
-                //
-                //  Remove the display window so the surface can be released
-                //
-                iDisplayHandler->RemoveDisplayWindow();
-            }
+            RemoveBackgroundSurfaceL();
 
             CreateGeneralPlaybackCommandL( EPbCmdClose );
             break;
@@ -337,7 +332,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         {
             if ( AknLayoutUtils::PenEnabled() )
             {
-                iContainer->HandleEventL(EMPXControlCmdShowFileDetailsViewer);
+                iContainer->HandleEventL( EMPXControlCmdShowFileDetailsViewer );
             }
             else
             {
@@ -368,6 +363,11 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case KMpxVideoPlaybackPdlReloading:
         {
             iPdlReloading = ETrue;
+            break;
+        }
+        case EMPXPbvCmdRealOneBitmapTimeout:
+        {
+            HandleRealOneBitmapTimeoutL();
             break;
         }
     }
@@ -433,11 +433,6 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     iViewUtility->AddObserverL( this );
 
     //
-    //  Create Video Playback Display Handler
-    //
-    iDisplayHandler = CMPXVideoPlaybackDisplayHandler::NewL( iPlaybackUtility );
-
-    //
     //  Disable tool bar in playback view
     //
     AppUi()->CurrentFixedToolbar()->SetToolbarVisibility( EFalse );
@@ -451,10 +446,29 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
         AppUi()->AddToStackL( *this, iContainer );
 
         iContainer->GetWindow().SetVisible( ETrue );
+
+        //
+        //  Create Video Playback Display Handler
+        //
+        iDisplayHandler = CMPXVideoPlaybackDisplayHandler::NewL( iPlaybackUtility, iContainer );
+
+        //
+        //  Delay the adding of the display window while the Real One Bitmap is being shown
+        //
+        if ( ! iContainer->IsRealOneBitmapTimerActive() )
+        {
+            //
+            //  Setup the display window
+            //
+            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
+                                                   iContainer->GetWindow() );
+        }
     }
 
-    // Deactivate the CBA set the LSK&RSK to empty
-    Cba()->SetCommandSetL(R_AVKON_SOFTKEYS_EMPTY);
+    //
+    //  Deactivate the CBA set the LSK & RSK to empty
+    //
+    Cba()->SetCommandSetL( R_AVKON_SOFTKEYS_EMPTY );
 
     //
     //  Determine if the playback is from a playlist on view activation
@@ -543,11 +557,11 @@ void CMPXVideoBasePlaybackView::HandleForegroundEventL( TBool aForeground )
     if ( aForeground )
     {
         videoCmd = EPbCmdHandleForeground;
-        iContainer->HandleEventL(EMPXControlCmdHandleForegroundEvent);
+        iContainer->HandleEventL( EMPXControlCmdHandleForegroundEvent );
     }
     else
     {
-        iContainer->HandleEventL(EMPXControlCmdHandleBackgroundEvent);
+        iContainer->HandleEventL( EMPXControlCmdHandleBackgroundEvent );
     }
 
     //
@@ -759,26 +773,7 @@ void CMPXVideoBasePlaybackView::DoHandlePlaybackMessageL( CMPXMessage* aMessage 
     }
     else if ( KMPXMediaIdVideoDisplaySyncMessage == id )
     {
-        if ( iDisplayHandler )
-        {
-            TMPXVideoDisplayCommand cmdId = iDisplayHandler->HandleVideoDisplayMessageL( aMessage );
-
-            if ( cmdId == EPbMsgVideoSurfaceCreated )
-            {
-                //
-                //  Notify container that surface has been created to make window transparent
-                //
-                if ( iContainer )
-                {
-                    iContainer->HandleCommandL( EMPXPbvSurfaceCreated );
-                }
-            }
-        }
-
-        //
-        //  Signal Sync Message handling is complete
-        //
-        iPlaybackUtility->CommandL( EPbCmdSyncMsgComplete );
+        iDisplayHandler->HandleVideoDisplaySyncMessageL( aMessage );
     }
 }
 
@@ -792,9 +787,8 @@ void CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL( CMPXMessage* aMes
     TInt type( *aMessage->Value<TInt>( KMPXMessageGeneralType ) );
     TInt data( *aMessage->Value<TInt>( KMPXMessageGeneralData ) );
 
-    MPX_DEBUG(
-      _L("CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL() event = %d type = %d  value = %d"),
-      event, type, data );
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL()"),
+                   _L("event = %d type = %d  value = %d"), event, type, data );
 
     switch ( event )
     {
@@ -806,8 +800,7 @@ void CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL( CMPXMessage* aMes
         }
         case TMPXPlaybackMessage::EPropertyChanged:
         {
-            TMPXPlaybackProperty property(
-                 static_cast<TMPXPlaybackProperty>( type ) );
+            TMPXPlaybackProperty property( static_cast<TMPXPlaybackProperty>( type ) );
 
             HandlePropertyL( property, data, KErrNone );
             break;
@@ -827,17 +820,9 @@ void CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL( CMPXMessage* aMes
 
             break;
         }
-        case TMPXPlaybackMessage::ECommandReceived:
-        {
-            break;
-        }
         case TMPXPlaybackMessage::EReachedEndOfPlaylist:
         {
             HandleCommandL( EAknSoftkeyBack );
-            break;
-        }
-        case TMPXPlaybackMessage::ESongChanged:
-        {
             break;
         }
     }
@@ -897,13 +882,7 @@ void CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()
 
     if ( IsMultiItemPlaylist() )
     {
-        if ( iDisplayHandler )
-        {
-            //
-            //  Remove the display window so the surface can be released
-            //
-            iDisplayHandler->RemoveDisplayWindow();
-        }
+        RemoveBackgroundSurfaceL();
 
         iPlaybackUtility->CommandL( EPbCmdNext );
     }
@@ -1006,10 +985,10 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
             case EPbStateInitialising:
             {
                 //
-                //  Get playlist information
-                //  Source if available once the plugin is initializing
+                //  For multi item playlists, reset the container and controls for next
+                //  item in playlist
                 //
-                if ( iContainer )
+                if ( IsMultiItemPlaylist() && iContainer )
                 {
                     //
                     //  If transitioning from Not Initialized to Initialising there is
@@ -1019,7 +998,22 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
                     if ( oldState != EPbStateNotInitialised )
                     {
                         iMediaRequested = EFalse;
+
                         iContainer->HandleCommandL( EMPXPbvCmdResetControls );
+
+                        //
+                        //  Delay the adding of the display window while the Real One Bitmap
+                        //  is being shown
+                        //
+                        if ( ! iContainer->IsRealOneBitmapTimerActive() && iDisplayHandler )
+                        {
+                            //
+                            //  Setup the display window since it was destroyed to free the surface
+                            //
+                            iDisplayHandler->CreateDisplayWindowL(
+                                                 *(CCoeEnv::Static()->ScreenDevice()),
+                                                 iContainer->GetWindow() );
+                        }
 
                         if ( iFileDetails )
                         {
@@ -1094,7 +1088,7 @@ void CMPXVideoBasePlaybackView::DoHandleErrorPlaybackMessageL( TInt aError )
                     _L("aError = %d"), aError );
 
     iContainer->HandleCommandL( EMPXPbvCmdResetControls );
-    HandlePluginErrorL(aError);
+    HandlePluginErrorL( aError );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1308,16 +1302,20 @@ void CMPXVideoBasePlaybackView::DoHandleMediaL( const CMPXMessage& aMedia, TInt 
             TInt newAspectRatio = iDisplayHandler->SetDefaultAspectRatioL( iFileDetails,
                                                                            displayAspectRatio );
 
-            //
-            //  Setup the display window and issue play command
-            //
-            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
-                                                   iContainer->GetWindow() );
-
             iContainer->HandleEventL( EMPXControlCmdSetAspectRatio, newAspectRatio );
         }
 
-        CreateGeneralPlaybackCommandL( EPbCmdPlay );
+        //
+        //  Delay the play command while the Real One Bitmap is being shown
+        //
+        if ( iContainer->IsRealOneBitmapTimerActive() )
+        {
+            iRealOneDelayedPlay = ETrue;
+        }
+        else
+        {
+            CreateGeneralPlaybackCommandL( EPbCmdPlay );
+        }
     }
 }
 
@@ -1530,9 +1528,7 @@ void CMPXVideoBasePlaybackView::RetrieveFileNameAndModeL( CMPXCommand* aCmd )
     //  set attributes on the command
     //
     aCmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
-
     aCmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
-
     aCmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
                                                       EPbCmdInitView );
 
@@ -1712,7 +1708,6 @@ void CMPXVideoBasePlaybackView::ClosePlaybackViewL()
             //  This prevents black boxes on the view switching
             //
             iContainer->HandleEventL( EMPXControlCmdHideControls );
-            iContainer->GetWindow().SetVisible( EFalse );
         }
         else
         {
@@ -1804,30 +1799,43 @@ void CMPXVideoBasePlaybackView::ShowFileDetailsDialogL()
     CMPFileDetails* fileDetailsDialogParams = new (ELeave) CMPFileDetails();
     CleanupStack::PushL( fileDetailsDialogParams );
 
-    if ( iFileDetails->iClipName )
+    HBufC* fileName = iFileDetails->GenerateFileNameL();
+
+    if ( fileName && fileName->Length() )
     {
-        fileDetailsDialogParams->iFileName = iFileDetails->iClipName->AllocL();
+        fileDetailsDialogParams->iFileName = fileName;
     }
 
-    if ( iFileDetails->iTitle )
+    if ( iFileDetails->iTitle && iFileDetails->iTitle->Length() )
     {
         fileDetailsDialogParams->iTitle = iFileDetails->iTitle->AllocL();
     }
 
-    if ( iFileDetails->iArtist )
+    if ( iFileDetails->iArtist && iFileDetails->iArtist->Length() )
     {
         fileDetailsDialogParams->iArtist = iFileDetails->iArtist->AllocL();
     }
 
-    if ( iFileDetails->iMimeType )
+    if ( iFileDetails->iMimeType && iFileDetails->iMimeType->Length() )
     {
         fileDetailsDialogParams->iFormat = iFileDetails->iMimeType->AllocL();
     }
 
-    fileDetailsDialogParams->iResolutionHeight = iFileDetails->iVideoHeight;
-    fileDetailsDialogParams->iResolutionWidth = iFileDetails->iVideoWidth;
-    fileDetailsDialogParams->iDurationInSeconds = iFileDetails->iDuration / KPbMilliMultiplier;
-    fileDetailsDialogParams->iBitrate = iFileDetails->iBitRate;
+    if ( iFileDetails->iVideoHeight && iFileDetails->iVideoWidth )
+    {
+        fileDetailsDialogParams->iResolutionHeight = iFileDetails->iVideoHeight;
+        fileDetailsDialogParams->iResolutionWidth = iFileDetails->iVideoWidth;
+    }
+
+    if ( iFileDetails->iDuration > 0 )
+    {
+        fileDetailsDialogParams->iDurationInSeconds = iFileDetails->iDuration / KPbMilliMultiplier;
+    }
+
+    if (iFileDetails->iBitRate > 0 )
+    {
+        fileDetailsDialogParams->iBitrate = iFileDetails->iBitRate;
+    }
 
     if ( iFileDetails->iDrmProtected )
     {
@@ -2166,5 +2174,58 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
 }
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()"));
+
+    if ( iDisplayHandler )
+    {
+        //
+        //  Remove the display window so the surface can be released
+        //
+        iDisplayHandler->RemoveDisplayWindow();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()"));
+
+    //
+    //  Check if this clip has video
+    //  If video exists, setup the display window
+    //  If the video is not enabled, redraw container to remove Real One Bitmap
+    //
+    if ( iFileDetails && iFileDetails->iVideoEnabled )
+    {
+        if ( iDisplayHandler )
+        {
+            //
+            //  Setup the display window
+            //
+            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
+                                                   iContainer->GetWindow() );
+        }
+    }
+    else
+    {
+        iContainer->DrawNow();
+    }
+
+    if ( iRealOneDelayedPlay )
+    {
+        CreateGeneralPlaybackCommandL( EPbCmdPlay );
+        iRealOneDelayedPlay = EFalse;
+    }
+}
 
 // EOF

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version:  e003sa33#14 %
+
+// Version : %version:  e003sa33#16 %
 
 
 // INCLUDE FILES
@@ -55,23 +56,16 @@ const TInt KMediaDetailsViewerMaxBufLen = 255;
 
 // UID of this interface
 const TUid KFileDetailsCntlPluginUid = {0x2002A59D};
-const TUid KFileDetailsInterfaceUid = {0x2002A5A0};
-// ---------------------------------------------------------------------------
-// Local function to cleanup an array
-// ---------------------------------------------------------------------------
-//
 
-static void CleanupEcomArray( TAny* aArray )
-{
-  ( static_cast<RImplInfoPtrArray*>( aArray ) )->ResetAndDestroy();
-  ( static_cast<RImplInfoPtrArray*>( aArray ) )->Close();
-}
+const TUint32 KScrollTimerDelayTickCounts = 2000;   // 2000 milliseconds
+const TUint32 KInvalidTick = 0;
 
 // ============================ MEMBER FUNCTIONS ===================================================
 
 CMPXVideoPlaybackMediaDetailsViewer::CMPXVideoPlaybackMediaDetailsViewer(
     CMPXVideoPlaybackControlsController* aController )
     : iController( aController )
+    , iScrollTimerDelayBeginningTick( KInvalidTick )
 {
 }
 
@@ -83,26 +77,25 @@ CMPXVideoPlaybackMediaDetailsViewer::CMPXVideoPlaybackMediaDetailsViewer(
 void CMPXVideoPlaybackMediaDetailsViewer::ConstructL()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMediaDetailsViewer::ConstructL()"));
-   
+
     iViewerRect = CalculateViewerRectL();
     SetRect( TRect(0, 0, iViewerRect.Width(), iViewerRect.Height()) );
-        
+
     CreateLabelsL();
     SkinChangeL();
-    
+
     iBackgroundBitmap = new ( ELeave ) CFbsBitmap();
     TSize bitmapSize = Rect().Size();
     User::LeaveIfError( iBackgroundBitmap->Create( bitmapSize, EColor16MA ) );
-    
+
     iScrollPosition = 0;
-    iScrollingTextTimer = CPeriodic::NewL( CActive::EPriorityStandard );     
-    iScrollingTextTimer->Start( 
+    iScrollingTextTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+    iScrollingTextTimer->Start(
                 0,
                 175000,
-                TCallBack( CMPXVideoPlaybackMediaDetailsViewer::ScrollFilenameTimer, this ) );  
-    
+                TCallBack( CMPXVideoPlaybackMediaDetailsViewer::ScrollFilenameTimer, this ) );
+
     iShouldPauseScrolling = EFalse;
-           
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -131,79 +124,79 @@ CMPXVideoPlaybackMediaDetailsViewer* CMPXVideoPlaybackMediaDetailsViewer::NewL(
 CMPXVideoPlaybackMediaDetailsViewer::~CMPXVideoPlaybackMediaDetailsViewer()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMediaDetailsViewer::~CMPXVideoPlaybackMediaDetailsViewer()"));
-    
+
     if ( iClipnameLabel )
     {
         delete iClipnameLabel;
         iClipnameLabel = NULL;
     }
-    
+
     if ( iTitleLabel )
     {
         delete iTitleLabel;
         iTitleLabel = NULL;
-    }    
-    
+    }
+
     if ( iArtistLabel )
     {
         delete iArtistLabel;
         iArtistLabel = NULL;
-    }           
-    
+    }
+
     if ( iFormatLabel )
     {
         delete iFormatLabel;
         iFormatLabel = NULL;
     }
-    
+
     if ( iResolutionLabel )
     {
         delete iResolutionLabel;
         iResolutionLabel = NULL;
-    }    
-    
+    }
+
     if ( iDurationLabel )
     {
         delete iDurationLabel;
         iDurationLabel = NULL;
-    }    
-  
+    }
+
     if ( iBitrateLabel )
     {
         delete iBitrateLabel;
         iBitrateLabel = NULL;
-    }     
-    
+    }
+
     if ( iLicenseLabel )
     {
         delete iLicenseLabel;
         iLicenseLabel = NULL;
-    }     
-    
+    }
+
     if ( iBackgroundBitmap )
     {
         delete iBackgroundBitmap;
         iBackgroundBitmap = NULL;
-    }          
-    
+    }
+
     if ( iScrollingTextTimer )
     {
         iScrollingTextTimer->Cancel();
         delete iScrollingTextTimer;
         iScrollingTextTimer = NULL;
-    }        
-    
+    }
+
     if ( iAdditionalLabel )
     {
         delete iAdditionalLabel;
         iAdditionalLabel = NULL;
-    }   
-    
+    }
+
     if ( iAdditionalString )
     {
         delete iAdditionalString;
         iAdditionalString = NULL;
-    }          
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -223,12 +216,12 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandlePointerEventL( const TPointerEve
         case TPointerEvent::EButton1Up:
         {
             TRect expandedRect;  //make it a bit easier to click the License label
-            
+
             if ( iLicenseLabel )
             {
-                expandedRect = TRect(iLicenseLabel->Rect().iTl, 
-                                     TPoint(iLicenseLabel->Rect().iBr.iX, 
-                                            iLicenseLabel->Rect().iBr.iY * 2 ) );                
+                expandedRect = TRect(iLicenseLabel->Rect().iTl,
+                                     TPoint(iLicenseLabel->Rect().iBr.iX,
+                                            iLicenseLabel->Rect().iBr.iY * 2 ) );
             }
 
             if ( iLicenseLabel && expandedRect.Contains(aPointerEvent.iPosition) )
@@ -236,9 +229,9 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandlePointerEventL( const TPointerEve
                 LaunchDRMDetailsL();
             }
             else
-            { 
-                iController->HandleEventL( EMPXControlCmdCloseFileDetailsViewer );   
-            }             
+            {
+                iController->HandleEventL( EMPXControlCmdCloseFileDetailsViewer );
+            }
         }
     }
 }
@@ -248,7 +241,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandlePointerEventL( const TPointerEve
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackMediaDetailsViewer::LaunchDRMDetailsL()
-{      
+{
     iController->iContainer->HandleCommandL(EMPXPbvLaunchDRMDetails);
 }
 
@@ -257,9 +250,8 @@ void CMPXVideoPlaybackMediaDetailsViewer::LaunchDRMDetailsL()
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackMediaDetailsViewer::SkinChangeL()
-{   
+{
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackMediaDetailsViewer::Draw()
@@ -271,16 +263,16 @@ void CMPXVideoPlaybackMediaDetailsViewer::Draw( const TRect& aRect ) const
 
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
-    
+
     this->DrawableWindow()->SetCornerType(EWindowCorner5);
-    
+
     TRAP_IGNORE( UpdateBackgroundBitmapL() );
     gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
     gc.BitBlt( Rect().iTl, iBackgroundBitmap );
-                    
-    TRAP_IGNORE( FormatLabelsL() );    
-    
-    gc.SetBrushStyle( CGraphicsContext::ENullBrush );       
+
+    TRAP_IGNORE( FormatLabelsL() );
+
+    gc.SetBrushStyle( CGraphicsContext::ENullBrush );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -290,7 +282,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::Draw( const TRect& aRect ) const
 void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
 {
     // FORMAT LABELS
-    
+
 
     TInt labelWidth = Rect().iBr.iX;
     TInt labelHeight = iController->iContainer->Rect().iBr.iY / KMediaDetailsViewerMaxItems;
@@ -299,114 +291,114 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
     // License
     if ( iController->FileDetails()->iDrmProtected )
     {
-        iLicenseLabel->SetExtent( 
-        		             TPoint(Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded) ) , 
-                             TSize( labelWidth, labelHeight ) 
-                             );  
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_LICENSE_HEADING );     
+        iLicenseLabel->SetExtent(
+                             TPoint(Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded) ) ,
+                             TSize( labelWidth, labelHeight )
+                             );
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_LICENSE_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> licenseField;
         licenseField.Append(KLeftMargin);
         licenseField.Append( *heading );
         iLicenseLabel->OverrideColorL(EColorLabelText, KRgbDarkBlue);
         iLicenseLabel->SetTextL(licenseField);
-        iLicenseLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin); 
+        iLicenseLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
         iLicenseLabel->SetLabelAlignment(ELayoutAlignCenter);
         iLicenseLabel->SetUnderlining(ETrue);
         iLicenseLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
+
         CleanupStack::PopAndDestroy( heading );
-    }    
+    }
 
     // Filename
     HBufC* fileName = iController->FileDetails()->GenerateFileNameL();
+
     if ( fileName && fileName->Length() )
-    {   
-        // file name gets populated by HandleScrollFilenameTimer method         
-        iClipnameLabel->SetExtent( 
-        		             TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+    {
+        // file name gets populated by HandleScrollFilenameTimer method
+        iClipnameLabel->SetExtent(
+                             TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                              TSize( labelWidth, labelHeight )
                              );
-        iClipnameLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);        
+        iClipnameLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
         iClipnameLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
+
         delete fileName;
-    }    
+    }
 
     // Mime Type (Format)
-    if ( iController->FileDetails()->iMimeType 
-    		&& iController->FileDetails()->iMimeType->Length() )
+    if ( iController->FileDetails()->iMimeType && iController->FileDetails()->iMimeType->Length() )
     {
-        iFormatLabel->SetExtent( 
-        		          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+        iFormatLabel->SetExtent(
+                          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                           TSize( labelWidth, labelHeight )
                           );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_FORMAT_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_FORMAT_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> formatField;
         formatField.Append(KLeftMargin);
         formatField.Append( *heading );
         formatField.Append( KHeadingValueSeperator );
         TInt allowLen = KMediaDetailsViewerMaxBufLen-formatField.Length();
-        formatField.Append( (iController->FileDetails()->iMimeType)->Left(allowLen) );        
+        formatField.Append( (iController->FileDetails()->iMimeType)->Left(allowLen) );
         iFormatLabel->SetTextL(formatField);
         iFormatLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
-        iFormatLabel->MakeVisible( ETrue ); 
+        iFormatLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
+
         CleanupStack::PopAndDestroy( heading );
-    }    
+    }
 
     // Resolution
-    if ( iController->FileDetails()->iVideoHeight &&  
-         iController->FileDetails()->iVideoWidth )
+    if ( iController->FileDetails()->iVideoHeight &&  iController->FileDetails()->iVideoWidth )
     {
-        iResolutionLabel->SetExtent( 
-        		               TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+        iResolutionLabel->SetExtent(
+                               TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                                TSize( labelWidth, labelHeight )
                                );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_RESOLUTION_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_RESOLUTION_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> resolutionField;
         resolutionField.Append(KLeftMargin);
         resolutionField.Append( *heading );
         resolutionField.Append( KHeadingValueSeperator );
-        resolutionField.AppendNum( iController->FileDetails()->iVideoWidth );   
+        resolutionField.AppendNum( iController->FileDetails()->iVideoWidth );
         resolutionField.Append( KWidthHeightSeparator );
         resolutionField.AppendNum( iController->FileDetails()->iVideoHeight);
         AknTextUtils::DisplayTextLanguageSpecificNumberConversion( resolutionField );
-        
+
         iResolutionLabel->SetTextL(resolutionField);
         iResolutionLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
-        iResolutionLabel->MakeVisible( ETrue ); 
+        iResolutionLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
+
         CleanupStack::PopAndDestroy( heading );
-    } 
+    }
 
     // Duration
     if ( iController->FileDetails()->iDuration > 0 )
     {
         iDurationLabel->SetExtent(
-        		             TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded) ) , 
+                             TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded) ) ,
                              TSize( labelWidth, labelHeight )
                              );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_DURATION_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_DURATION_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> durationField;
         durationField.Append(KLeftMargin);
         durationField.Append( *heading );
         durationField.Append( KHeadingValueSeperator );
-        
+
         TInt64 durationInSeconds =  iController->FileDetails()->iDuration / 1000;
-        
+
         HBufC* unitFormatString;
+
         if ( durationInSeconds < 3600 )  // one hour
         {
             unitFormatString = StringLoader::LoadLC(R_QTN_TIME_DURAT_MIN_SEC);
@@ -415,88 +407,84 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
         {
             unitFormatString = StringLoader::LoadLC(R_QTN_TIME_DURAT_LONG);
         }
-        
+
         TBuf<64> dur;
         TTime durTime = TTime(durationInSeconds * 1000000);
         durTime.FormatL(dur, *unitFormatString);
-        AknTextUtils::DisplayTextLanguageSpecificNumberConversion( dur );        
-        
+        AknTextUtils::DisplayTextLanguageSpecificNumberConversion( dur );
+
         durationField.Append( dur );
         iDurationLabel->SetTextL(durationField);
         iDurationLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
-        iDurationLabel->MakeVisible( ETrue ); 
+        iDurationLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
+
         CleanupStack::PopAndDestroy( unitFormatString ); // unitFormatString
         CleanupStack::PopAndDestroy( heading );
-
-    }     
-    
+    }
 
     // Bitrate
     if ( iController->FileDetails()->iBitRate > 0 )
     {
-        iBitrateLabel->SetExtent( 
-        		          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+        iBitrateLabel->SetExtent(
+                          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                           TSize( labelWidth, labelHeight )
                           );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_BITRATE_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_BITRATE_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> bitrateField;
         bitrateField.Append(KLeftMargin);
         bitrateField.Append( *heading );
         bitrateField.Append( KHeadingValueSeperator );
-                
-        HBufC* formattedBitrate = 
+
+        HBufC* formattedBitrate =
              StringLoader::LoadLC(R_MPX_BITRATE_UNITS,iController->FileDetails()->iBitRate / 1000 );
-                
+
         bitrateField.Append( *formattedBitrate );
         iBitrateLabel->SetTextL(bitrateField);
         iBitrateLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
-        iBitrateLabel->MakeVisible( ETrue ); 
+        iBitrateLabel->MakeVisible( ETrue );
         rowsAdded++;
 
         CleanupStack::PopAndDestroy( formattedBitrate ); // formattedBitrate
         CleanupStack::PopAndDestroy( heading );
-    }         
+    }
 
     // Title
-    if ( iController->FileDetails()->iTitle 
-    		&& iController->FileDetails()->iTitle->Length() )
+    if ( iController->FileDetails()->iTitle && iController->FileDetails()->iTitle->Length() )
     {
-        iTitleLabel->SetExtent( 
-        		          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
-                          TSize( labelWidth, labelHeight ) 
+        iTitleLabel->SetExtent(
+                          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
+                          TSize( labelWidth, labelHeight )
                           );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_TITLE_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_TITLE_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> titleField;
         titleField.Append(KLeftMargin);
         titleField.Append( *heading );
         titleField.Append( KHeadingValueSeperator );
         TInt allowLen = KMediaDetailsViewerMaxBufLen-titleField.Length();
-        titleField.Append( (iController->FileDetails()->iTitle)->Left(allowLen) );        
+        titleField.Append( (iController->FileDetails()->iTitle)->Left(allowLen) );
         iTitleLabel->SetTextL(titleField);
         iTitleLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
         iTitleLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
-        CleanupStack::PopAndDestroy( heading );        
-    }    
+
+        CleanupStack::PopAndDestroy( heading );
+    }
 
     // Artist
-    if ( iController->FileDetails()->iArtist 
-    		&& iController->FileDetails()->iArtist->Length() )
+    if ( iController->FileDetails()->iArtist && iController->FileDetails()->iArtist->Length() )
     {
-        iArtistLabel->SetExtent( 
-        		          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+        iArtistLabel->SetExtent(
+                          TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                           TSize( labelWidth, labelHeight )
                           );
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_ARTIST_HEADING );     
+        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_ARTIST_HEADING );
         CleanupStack::PushL( heading );
-        
+
         TBuf<KMediaDetailsViewerMaxBufLen> artistField;
         artistField.Append(KLeftMargin);
         artistField.Append( *heading );
@@ -507,19 +495,18 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
         iArtistLabel->SetAllMarginsTo(KMediaDetailsViewerItemMargin);
         iArtistLabel->MakeVisible( ETrue );
         rowsAdded++;
-        
-        CleanupStack::PopAndDestroy( heading );       
-    } 
- 
-    
+
+        CleanupStack::PopAndDestroy( heading );
+    }
+
     // Additional Label
-    if ( iAdditionalString && iAdditionalString->Length() ) 
-    {    
+    if ( iAdditionalString && iAdditionalString->Length() )
+    {
         iAdditionalLabel->SetExtent(
-        		               TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) , 
+                               TPoint( Rect().iTl.iX, Rect().iTl.iY + ( labelHeight * rowsAdded ) ) ,
                                TSize( labelWidth, labelHeight )
-                               );  
-        
+                               );
+
         TBuf<KMediaDetailsViewerMaxBufLen> titleField;
         titleField.Append(KLeftMargin);
         TInt allowLen = KMediaDetailsViewerMaxBufLen-titleField.Length();
@@ -545,9 +532,9 @@ TInt CMPXVideoPlaybackMediaDetailsViewer::CountComponentControls() const
 // -------------------------------------------------------------------------------------------------
 //
 CCoeControl* CMPXVideoPlaybackMediaDetailsViewer::ComponentControl(TInt aIndex) const
-{    
+{
     CCoeControl* control = NULL;
-    
+
     switch ( aIndex )
     {
         case 0:
@@ -580,7 +567,7 @@ CCoeControl* CMPXVideoPlaybackMediaDetailsViewer::ComponentControl(TInt aIndex) 
         default:
             break;
     }
-    
+
     return control;
 }
 
@@ -598,60 +585,59 @@ void CMPXVideoPlaybackMediaDetailsViewer::Reset()
 //
 void CMPXVideoPlaybackMediaDetailsViewer::CreateLabelsL()
 {
-    // Licence / DRM    
+    // Licence / DRM
     iLicenseLabel = new (ELeave) CEikLabel;
-    iLicenseLabel->SetContainerWindowL( *this );     
+    iLicenseLabel->SetContainerWindowL( *this );
     iLicenseLabel->SetTextL( KNullDesC );
 
     // Filename
     iClipnameLabel = new (ELeave) CEikLabel;
-    iClipnameLabel->SetContainerWindowL( *this );     
-    iClipnameLabel->SetTextL( KNullDesC ); 
+    iClipnameLabel->SetContainerWindowL( *this );
+    iClipnameLabel->SetTextL( KNullDesC );
     iClipnameLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Title
     iTitleLabel = new (ELeave) CEikLabel;
-    iTitleLabel->SetContainerWindowL( *this );     
-    iTitleLabel->SetTextL( KNullDesC );     
+    iTitleLabel->SetContainerWindowL( *this );
+    iTitleLabel->SetTextL( KNullDesC );
     iTitleLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Artist
     iArtistLabel = new (ELeave) CEikLabel;
-    iArtistLabel->SetContainerWindowL( *this );     
-    iArtistLabel->SetTextL( KNullDesC );        
+    iArtistLabel->SetContainerWindowL( *this );
+    iArtistLabel->SetTextL( KNullDesC );
     iArtistLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Format
     iFormatLabel = new (ELeave) CEikLabel;
-    iFormatLabel->SetContainerWindowL( *this );     
+    iFormatLabel->SetContainerWindowL( *this );
     iFormatLabel->SetTextL( KNullDesC );
     iFormatLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Resolution
     iResolutionLabel = new (ELeave) CEikLabel;
-    iResolutionLabel->SetContainerWindowL( *this );     
-    iResolutionLabel->SetTextL( KNullDesC );    
+    iResolutionLabel->SetContainerWindowL( *this );
+    iResolutionLabel->SetTextL( KNullDesC );
     iResolutionLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Duration
     iDurationLabel = new (ELeave) CEikLabel;
-    iDurationLabel->SetContainerWindowL( *this );     
-    iDurationLabel->SetTextL( KNullDesC );    
+    iDurationLabel->SetContainerWindowL( *this );
+    iDurationLabel->SetTextL( KNullDesC );
     iDurationLabel->SetLabelAlignment( ELayoutAlignBidi );
-    
+
     // Bitrate
     iBitrateLabel = new (ELeave) CEikLabel;
-    iBitrateLabel->SetContainerWindowL( *this );     
-    iBitrateLabel->SetTextL( KNullDesC );   
+    iBitrateLabel->SetContainerWindowL( *this );
+    iBitrateLabel->SetTextL( KNullDesC );
     iBitrateLabel->SetLabelAlignment( ELayoutAlignBidi );
 
     // Additional Labels
     iAdditionalLabel = new (ELeave) CEikLabel;
-    iAdditionalLabel->SetContainerWindowL( *this );     
-    iAdditionalLabel->SetTextL( KNullDesC );   
+    iAdditionalLabel->SetContainerWindowL( *this );
+    iAdditionalLabel->SetTextL( KNullDesC );
     iAdditionalLabel->SetLabelAlignment( ELayoutAlignBidi );
-
-} 
+}
 
 // -----------------------------------------------------------------------------
 // CMPXVideoPlaybackMediaDetailsViewer::UpdateBackgroundBitmapL
@@ -662,16 +648,15 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateBackgroundBitmapL() const
 {
     TSize bitmapSize = Rect().Size();
 
-    CFbsBitmapDevice* bgBitmapDevice = 
-                    CFbsBitmapDevice::NewL( iBackgroundBitmap );
+    CFbsBitmapDevice* bgBitmapDevice = CFbsBitmapDevice::NewL( iBackgroundBitmap );
     CleanupStack::PushL( bgBitmapDevice );
-                    
+
     CFbsBitGc* bgBitGc( NULL );
     User::LeaveIfError( bgBitmapDevice->CreateContext( bgBitGc ) );
     CleanupStack::PushL( bgBitGc );
 
     bgBitGc->SetBrushColor( TRgb(0x708090) );  // slate gray
-    bgBitGc->Clear(); 
+    bgBitGc->Clear();
 
     CleanupStack::PopAndDestroy( bgBitGc );
     CleanupStack::PopAndDestroy( bgBitmapDevice );
@@ -680,22 +665,22 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateBackgroundBitmapL() const
     //
     // Scan line length in 32-bit words
     TInt scanLineLengthWord = CFbsBitmap::ScanLineLength( bitmapSize.iWidth, EColor16MA) / 4;
-    
+
     iBackgroundBitmap->LockHeap();
-    TUint32* dataAddr = 
-                reinterpret_cast<TUint32*>( iBackgroundBitmap->DataAddress() );
+    TUint32* dataAddr = reinterpret_cast<TUint32*>( iBackgroundBitmap->DataAddress() );
+
     for ( TInt y = 0; y < bitmapSize.iHeight; y++ )
+    {
+        for ( TInt x = 0; x < bitmapSize.iWidth; x++ )
+        {
+            if ( ( y + x ) & 1 )
             {
-            for ( TInt x = 0; x < bitmapSize.iWidth; x++ )
-                {
-                if ( ( y + x ) & 1 )
-                    {
-                    // Make this pixel transparent
-                    dataAddr[y * scanLineLengthWord + x] = 0x00000000; 
-                    }
-                }
+                // Make this pixel transparent
+                dataAddr[y * scanLineLengthWord + x] = 0x00000000;
             }
-    
+        }
+    }
+
     iBackgroundBitmap->UnlockHeap();
 }
 
@@ -705,9 +690,9 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateBackgroundBitmapL() const
 //
 TInt CMPXVideoPlaybackMediaDetailsViewer::ScrollFilenameTimer( TAny* aPtr )
 {
-	TRAP_IGNORE( 
-			static_cast<CMPXVideoPlaybackMediaDetailsViewer*>(aPtr)->HandleScrollFilenameTimerL()
-			);
+    TRAP_IGNORE(
+            static_cast<CMPXVideoPlaybackMediaDetailsViewer*>(aPtr)->HandleScrollFilenameTimerL()
+            );
     return KErrNone;
 }
 
@@ -716,55 +701,79 @@ TInt CMPXVideoPlaybackMediaDetailsViewer::ScrollFilenameTimer( TAny* aPtr )
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackMediaDetailsViewer::HandleScrollFilenameTimerL()
-{   
-    HBufC* fileName = iController->FileDetails()->GenerateFileNameL();
-    
-	if ( fileName && fileName->Length() )
+{
+    MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackMediaDetailsViewer::HandleScrollFilenameTimerL" ) );
+
+    TBool skipForTimerDelay = EFalse;
+
+    // add a delay after each complete scrolling
+    if ( iScrollTimerDelayBeginningTick != KInvalidTick )
     {
-        CleanupStack::PushL( fileName );
-        if ( iShouldPauseScrolling )
+        if ( ( User::NTickCount() - iScrollTimerDelayBeginningTick ) >= KScrollTimerDelayTickCounts )
         {
-            iShouldPauseScrolling = EFalse;
-            User::After( 2000000 );  // add a 2 second delay after each complete scrolling
-        }    
-    
-        TInt length = fileName->Length();                
-                        
-        HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_FILENAME_HEADING );     
-        CleanupStack::PushL( heading );
-        
-        TBuf<KMediaDetailsViewerMaxBufLen> filenameField;
-        filenameField.Append(KLeftMargin);
-        filenameField.Append( *heading );
-        filenameField.Append( KHeadingValueSeperator );           
-        
-        if ( length >= KMediaDetailsViewerVisibleCharacters )
-        {  
-            filenameField.Append( fileName->Mid( iScrollPosition,
-            		KMediaDetailsViewerVisibleCharacters ) );
-            
-            if ( iScrollPosition ==  (length - KMediaDetailsViewerVisibleCharacters) )
-            {
-                iScrollPosition = 0;    
-                iShouldPauseScrolling = ETrue;
-            }
-            else
-            {
-                iScrollPosition++;
-            }
+            iScrollTimerDelayBeginningTick = KInvalidTick;
         }
         else
         {
-            filenameField.Append( *fileName );
-            iScrollingTextTimer->Cancel();   // no need to keep the timer active
+            skipForTimerDelay = ETrue;
         }
-                    
-        iClipnameLabel->SetTextL(filenameField);    
-        DrawNow();
+    }
+
+    if ( !skipForTimerDelay && iShouldPauseScrolling )
+    {
+        iShouldPauseScrolling = EFalse;
+        iScrollTimerDelayBeginningTick = User::NTickCount();
+        skipForTimerDelay = ETrue;
+    }
+
+    // skip the scrolling operation if the loop for delay is going on
+    if ( !skipForTimerDelay )
+    {
+        HBufC* fileName = iController->FileDetails()->GenerateFileNameL();
+
         
-        CleanupStack::PopAndDestroy( heading );        
-        CleanupStack::PopAndDestroy( fileName );                  
-    }           
+        if ( fileName && fileName->Length() )
+        {
+            CleanupStack::PushL( fileName );
+        
+            TInt length = fileName->Length();
+
+            HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_FILENAME_HEADING );
+            CleanupStack::PushL( heading );
+
+            TBuf<KMediaDetailsViewerMaxBufLen> filenameField;
+            filenameField.Append(KLeftMargin);
+            filenameField.Append( *heading );
+            filenameField.Append( KHeadingValueSeperator );
+            
+            if ( length >= KMediaDetailsViewerVisibleCharacters )
+            {
+                filenameField.Append( fileName->Mid( iScrollPosition,
+                        KMediaDetailsViewerVisibleCharacters ) );
+
+                if ( iScrollPosition ==  (length - KMediaDetailsViewerVisibleCharacters) )
+                {
+                    iScrollPosition = 0;
+                    iShouldPauseScrolling = ETrue;
+                }
+                else
+                {
+                    iScrollPosition++;
+                }
+            }
+            else
+            {
+                filenameField.Append( *fileName );
+                iScrollingTextTimer->Cancel();   // no need to keep the timer active
+            }
+
+            iClipnameLabel->SetTextL(filenameField);
+            DrawNow();
+
+            CleanupStack::PopAndDestroy( heading );
+            CleanupStack::PopAndDestroy( fileName );
+        }
+    }
 }
 
 
@@ -775,43 +784,43 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandleScrollFilenameTimerL()
 TInt CMPXVideoPlaybackMediaDetailsViewer::NumOfItemsShownInViewerL()
 {
     TInt numOfItems = 0;
-    
+
     if ( iController->FileDetails()->iDrmProtected )
     {
         numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iClipName )
     {
         numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iMimeType )
     {
         numOfItems++;
     }
-    
-    if ( iController->FileDetails()->iVideoHeight && 
+
+    if ( iController->FileDetails()->iVideoHeight &&
          iController->FileDetails()->iVideoWidth )
     {
         numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iDuration > 0 )
     {
-        numOfItems++;    
+        numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iBitRate > 0 )
     {
-        numOfItems++;  
+        numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iTitle )
     {
         numOfItems++;
     }
-    
+
     if ( iController->FileDetails()->iArtist )
     {
         numOfItems++;
@@ -819,27 +828,27 @@ TInt CMPXVideoPlaybackMediaDetailsViewer::NumOfItemsShownInViewerL()
 
     // Additional File Details
     CMPXFileDetailsPlugin* addPlugin( NULL );
-    
+
     // Use the interface to load the ecom plugin
     TRAPD ( err, addPlugin = CMPXFileDetailsPlugin::NewL( KFileDetailsCntlPluginUid ) );
 
     // If plugin loaded successfully
-    if (!err )
+    if ( ! err )
     {
         TPtrC addLabel;
         addLabel.Set( addPlugin->GetAdditionalLabelLC( iController->FileDetails()->iFourCCCode ) );
         iAdditionalString = addLabel.AllocL();
 
-        if ( iAdditionalString->Length() ) 
-        {   
+        if ( iAdditionalString->Length() )
+        {
             numOfItems++;
         }
 
         CleanupStack::PopAndDestroy();  // addLabel
     }
-    
+
     delete addPlugin;
-    
+
     return numOfItems;
 }
 
@@ -850,38 +859,38 @@ TInt CMPXVideoPlaybackMediaDetailsViewer::NumOfItemsShownInViewerL()
 TRect CMPXVideoPlaybackMediaDetailsViewer::CalculateViewerRectL()
 {
     TInt numOfItems = NumOfItemsShownInViewerL();
-    TRect viewerRect;    
-    
-    // optimize viewer's width for the clipname 
+    TRect viewerRect;
+
+    // optimize viewer's width for the clipname
     TInt horizontalOffset = 0;
     TInt filenameLength = iController->FileDetails()->iClipName->Des().Length();
 
-    if ( filenameLength <= KMediaDetailsViewerFilenameMedium  )    
+    if ( filenameLength <= KMediaDetailsViewerFilenameMedium )
     {
-        horizontalOffset = 
+        horizontalOffset =
             iController->iContainer->Rect().iBr.iX / KMediaDetailsViewerOffsetDivisorMedium;
-    }        
+    }
     else
     {
-        horizontalOffset = 
+        horizontalOffset =
             iController->iContainer->Rect().iBr.iX / KMediaDetailsViewerOffsetDivisorMax;
     }
-            
-    TInt eachItemHeight = 
-            iController->iContainer->Rect().iBr.iY / KMediaDetailsViewerMaxItems;
-    
-    TInt verticalHalf = iController->iContainer->Rect().iBr.iY / 2;        
-    
+
+    TInt eachItemHeight = iController->iContainer->Rect().iBr.iY / KMediaDetailsViewerMaxItems;
+
+    TInt verticalHalf = iController->iContainer->Rect().iBr.iY / 2;
+
     TInt tLX = (iController->iContainer->Rect().iTl.iX) + horizontalOffset;
-    TInt bRX = (iController->iContainer->Rect().iBr.iX) - horizontalOffset; 
-    
+    TInt bRX = (iController->iContainer->Rect().iBr.iX) - horizontalOffset;
+
     TInt tLY = verticalHalf - ( eachItemHeight * numOfItems/2 );
-    
-    // pad for the margins on top and bottom of viewer      
-    TInt bRY = verticalHalf + ( eachItemHeight * numOfItems/2 ) + (KMediaDetailsViewerItemMargin * 2); 
-    
+
+    // pad for the margins on top and bottom of viewer
+    TInt bRY =
+        verticalHalf + ( eachItemHeight * numOfItems/2 ) + ( KMediaDetailsViewerItemMargin * 2 );
+
     viewerRect = TRect( tLX, tLY, bRX, bRY );
-    
+
     return viewerRect;
 }
 
@@ -893,7 +902,6 @@ TRect CMPXVideoPlaybackMediaDetailsViewer::ViewerRect()
 {
     return iViewerRect;
 }
-
 
 
 //  End of File

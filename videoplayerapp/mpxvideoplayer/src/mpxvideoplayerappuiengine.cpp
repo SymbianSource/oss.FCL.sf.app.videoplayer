@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_66 %
+// Version : %version: e92_68 %
 
 
 #include <eikon.hrh>
@@ -114,11 +114,54 @@ void CMpxVideoPlayerAppUiEngine::ConstructL()
 
         iCollectionUtility = MMPXCollectionUtility::NewL( this, collectionMode );
     }
+    //
+    //  Create the playback utility to reduce startup time for embedded cases
+    //
+    else
+    {
+        PlaybackUtilityL();
+    }
 
     //
     //  Create Active Object for exiting the application
     //
     iExitAo = CIdle::NewL( CActive::EPriorityStandard );
+}
+
+// -----------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::PlaybackUtilityL
+// -----------------------------------------------------------------------------
+//
+MMPXPlaybackUtility& CMpxVideoPlayerAppUiEngine::PlaybackUtilityL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::PlaybackUtilityL()"));
+
+    if ( ! iPlaybackUtility )
+    {
+        //
+        //  Create VideoHelix playback plugin
+        //
+        MMPXPlaybackUtility* playbackUtility =
+            MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeNewPlayer );
+        MMPXPlayerManager& manager = playbackUtility->PlayerManager();
+        TRAPD( err,
+        {
+            manager.SelectPlayerL( KVideoHelixPlaybackPluginUid );
+            playbackUtility->CommandL( EPbCmdSetAutoResume, EFalse );
+        } );
+        if ( err == KErrNone )
+        {
+            iPlaybackUtility = playbackUtility;
+        }
+        else
+        {
+            TRAP_IGNORE( manager.ClearSelectPlayersL() );
+            playbackUtility->Close();
+            User::Leave( err );
+        }
+    }
+
+    return *iPlaybackUtility;
 }
 
 // -----------------------------------------------------------------------------
@@ -142,42 +185,14 @@ void CMpxVideoPlayerAppUiEngine::CreateCollectionUtilityMemberVariablesL()
 }
 
 // -----------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL
+//   CMpxVideoPlayerAppUiEngine::PreLoadPdlPlaybackViewL
 // -----------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL()
+void CMpxVideoPlayerAppUiEngine::PreLoadPdlPlaybackViewL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL()"));
-
-    if ( ! iPlaybackUtility )
-    {
-        //
-        //  Create VideoHelix playback plugin
-        //
-        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeNewPlayer );
-        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
-        manager.SelectPlayerL( KVideoHelixPlaybackPluginUid );
-        iPlaybackUtility->CommandL( EPbCmdSetAutoResume, EFalse );
-    }
-}
-
-// -----------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL
-// -----------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL()"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::PreLoadPdlPlaybackViewL()"));
 
     iViewUtility->PreLoadViewL( KVideoPdlPlaybackViewUid );
-
-    if ( ! iPlaybackUtility )
-    {
-        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeNewPlayer );
-        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
-        manager.SelectPlayerL( KVideoHelixPlaybackPluginUid );
-        iPlaybackUtility->CommandL( EPbCmdSetAutoResume, EFalse );
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -187,6 +202,12 @@ void CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariables
 CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()"));
+
+    if ( iConstructTimer )
+    {
+        delete iConstructTimer;
+        iConstructTimer = NULL;
+    }
 
     if ( iExitAo )
     {
@@ -350,11 +371,6 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
 
     if ( KErrNone == err && ! iPdlHandler )
     {
-        //
-        //  Create member variables for embedded use cases that are not PDL
-        //
-        CreatePlaybackUtilityMemberVariablesL();
-
         TFileName filename;
         aFile.FullName(filename);
 
@@ -367,13 +383,13 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
         }
         else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
         {
-            iPlaybackUtility->InitStreamingL( aFile, iAccessPointId );
+            PlaybackUtilityL().InitStreamingL( aFile, iAccessPointId );
             ActivatePlaybackViewL();
         }
         else
         {
             iViewUtility->PreLoadViewL( KVideoPlaybackViewUid );
-            iPlaybackUtility->InitL( aFile );
+            PlaybackUtilityL().InitL( aFile );
             ActivatePlaybackViewL();
         }
     }
@@ -393,11 +409,8 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
                    _L("aFileName = %S"), &aFileName);
 
     //
-    //  Create member variables for embedded use cases that are not PDL
+    //  pre load the view and initialize the playback framework
     //
-    CreatePlaybackUtilityMemberVariablesL();
-
-    // pre load the view and initialize the playback framework
     iViewUtility->PreLoadViewL( KVideoPlaybackViewUid );
 
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(aFileName);
@@ -406,7 +419,7 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
     {
         InitializeFileL( aFileName );
     }
-    // check if aFileName is a path to a ram or asx file
+    //  check if aFileName is a path to a ram or asx file
     //          eg. c:\\data\\videos\\ramfile.ram
     else if ( mediaType == CMediaRecognizer::ELocalRamFile ||
               mediaType == CMediaRecognizer::ELocalAsxFile )
@@ -451,8 +464,6 @@ void CMpxVideoPlayerAppUiEngine::OpenMediaL( const CMPXMedia& aMedia )
     playList->SetSingleItemPlaylist();
     playList->SetToFirst();
 
-    CreatePlaybackUtilityMemberVariablesL();
-
     iViewUtility->PreLoadViewL( KVideoPlaybackViewUid );
 
     InitializePlaylistL( *playList, ETrue );
@@ -478,7 +489,7 @@ void CMpxVideoPlayerAppUiEngine::ActivatePlaybackViewL()
         iUpdateSeekInfo = EFalse;
     }
 
-    MMPXPlayer* player = iPlaybackUtility->PlayerManager().CurrentPlayer();
+    MMPXPlayer* player = PlaybackUtilityL().PlayerManager().CurrentPlayer();
 
     TUid pluginUid( KNullUid );
     RArray<TUid> array;
@@ -510,21 +521,6 @@ void CMpxVideoPlayerAppUiEngine::ActivatePlaybackViewL()
 void CMpxVideoPlayerAppUiEngine::StartStandAloneL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::StartStandAloneL()"));
-
-    //
-    //  Create the utilities for the stand alone player
-    //
-    CreatePlaybackUtilityMemberVariablesL();
-
-    // Fetch the video collection UID
-    RArray<TUid> uid;
-    CleanupClosePushL( uid );
-
-    uid.AppendL( TUid::Uid( KVcxMediaIdMyVideos ) );
-
-    iVideoCollectionId = iCollectionUtility->CollectionIDL( uid.Array() );
-
-    CleanupStack::PopAndDestroy( &uid );
 
     iViewUtility->SetAsDefaultViewL( KUidMyVideosViewType );
 }
@@ -903,7 +899,7 @@ void CMpxVideoPlayerAppUiEngine::HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCate
 
     if ( aErr == KErrNone )
     {
-        iPlaybackUtility->CommandL( EPbCmdDisableEffect );
+        PlaybackUtilityL().CommandL( EPbCmdDisableEffect );
     }
 }
 
@@ -937,7 +933,7 @@ void CMpxVideoPlayerAppUiEngine::HandleSoftKeyBackL()
 //
 TBool CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL( TApaCommand aCommand,
                                                              TFileName& aDocumentName,
-                                                             const TDesC8& aTail )
+                                                             const TDesC8& /*aTail*/ )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL()"));
 
@@ -1022,7 +1018,7 @@ void CMpxVideoPlayerAppUiEngine::UpdatePbPluginMediaL()
 
     cmd->SetTObjectValueL<TBool>( KMPXMediaGeneralExtVideoSeekable, iSeekable );
 
-    iPlaybackUtility->CommandL( *cmd );
+    PlaybackUtilityL().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
 }
@@ -1061,7 +1057,7 @@ void CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL( const TDesC& aUri )
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL()"),
                    _L("aUri = %S"), &aUri );
 
-    iPlaybackUtility->InitStreamingL( aUri,
+    PlaybackUtilityL().InitStreamingL( aUri,
                                       (TDesC8*)(&KDATATYPEVIDEOHELIX),
                                       iAccessPointId );
 
@@ -1077,7 +1073,7 @@ void CMpxVideoPlayerAppUiEngine::InitializeFileL( const TDesC& aFileName )
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeFileL()"),
                    _L("aFileName = %S"), &aFileName );
 
-    iPlaybackUtility->InitL( aFileName );
+    PlaybackUtilityL().InitL( aFileName );
 
     ActivatePlaybackViewL();
 }
@@ -1091,7 +1087,7 @@ void CMpxVideoPlayerAppUiEngine::InitializePlaylistL( const CMPXCollectionPlayli
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializePlaylistL()"));
 
-    iPlaybackUtility->InitL( aPlaylist, aPlay );
+    PlaybackUtilityL().InitL( aPlaylist, aPlay );
 
     ActivatePlaybackViewL();
 }
@@ -1113,7 +1109,7 @@ void CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
     }
     else
     {
-        if (iPlaybackUtility)
+        if ( iPlaybackUtility )
         {
             iPlaybackUtility->CommandL( EPbCmdClose );
         }
@@ -1121,12 +1117,12 @@ void CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::SignalViewPdlReloading()
+//   CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::SignalViewPdlReloading()
+void CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SignalViewPdlReloading"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL"));
 
     if ( iViewUtility->ActiveViewType() == TUid::Uid( KMpxPlaybackPluginTypeUid ) )
     {
@@ -1137,5 +1133,50 @@ void CMpxVideoPlayerAppUiEngine::SignalViewPdlReloading()
     }
 }
 
+// -----------------------------------------------------------------------------
+// CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL
+// -----------------------------------------------------------------------------
+//
+void CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL()"));
+	
+    if ( !iConstructTimer )
+    {
+        const TTimeIntervalMicroSeconds32 timeout  = 250000; // 250 ms
+    
+        TCallBack callback ( CMpxVideoPlayerAppUiEngine::LateConstructCallback, this );
+    
+        iConstructTimer = CPeriodic::NewL( CActive::EPriorityIdle );
+
+        iConstructTimer->Start( timeout, 0, callback );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::LateConstructCallback
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayerAppUiEngine::LateConstructCallback( TAny* aPtr )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::LateConstructCallback()"));
+    
+    TRAP_IGNORE( static_cast<CMpxVideoPlayerAppUiEngine*>(aPtr)->DoLateConstructL() );
+    
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::DoLateConstructL
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerAppUiEngine::DoLateConstructL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::DoLateConstructL()"));
+
+    iConstructTimer->Cancel(); 
+        
+    PlaybackUtilityL();
+}
 
 // EOF

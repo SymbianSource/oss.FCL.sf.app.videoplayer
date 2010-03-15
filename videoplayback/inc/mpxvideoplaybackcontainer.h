@@ -15,9 +15,8 @@
 *
 */
 
-// Version : %version: 6 %
 
-
+// Version : %version: 8 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKCONTAINER_H__
@@ -158,6 +157,8 @@ class CMPXVideoPlaybackContainer : public CCoeControl
 
         void AddFileDetailsL( CMPXVideoPlaybackViewFileDetails* aDetails );
 
+        TBool IsRealOneBitmapTimerActive();
+
     private:
 
         /**
@@ -214,6 +215,12 @@ class CMPXVideoPlaybackContainer : public CCoeControl
         */
         void HandleSeekBackL(TEventCode aType);
 
+        /*
+        *  Handles the Controls Timer Timout
+        */
+        static TInt HandleRealOneBitmapTimeout( TAny* aPtr );
+
+        void DoHandleRealOneBitmapTimeout();
 
     protected:   // data
         CMPXVideoBasePlaybackView*              iView;
@@ -232,6 +239,13 @@ class CMPXVideoPlaybackContainer : public CCoeControl
         TKeyResponse                            iKeyResponse;
 
         CMPXVideoPlaybackUserInputHandler*      iUserInputHandler;  // owned
+
+        //
+        //  Members to control Real One Bitmap
+        //  iDelayedFileDetails is not owned
+        //
+        CPeriodic*                              iRealOneBitmapTimer;
+        CMPXVideoPlaybackViewFileDetails*       iDelayedFileDetails;
 };
 
 #endif  // __CMPXVIDEOPLAYBACKCONTAINER_H__

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 27 %
+
+// Version : %version: e003sa33#30 %
 
 
 // INCLUDE FILES
@@ -66,6 +67,7 @@ using namespace AknLayoutScalable_Avkon;
 const TInt KMPXControlsTimeOut = 4000000;
 
 const TInt KMP4LayoutSet = 6;
+
 // ================= MEMBER FUNCTIONS ==============================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -77,8 +79,8 @@ CMPXVideoPlaybackControlsController::CMPXVideoPlaybackControlsController(
     CMPXVideoPlaybackContainer* aContainer, TRect aRect )
     : iControls( EMPXControlsCount ),
       iRect( aRect ),
-      iContainer( aContainer ),
-      iSurfaceCreated(EFalse)
+      iSurfaceCreated( EFalse ),
+      iContainer( aContainer )
 {
 }
 
@@ -115,12 +117,7 @@ void CMPXVideoPlaybackControlsController::ConstructL( CMPXVideoPlaybackViewFileD
     iFileDetails = aDetails;
     iTvOutConnected = iFileDetails->iTvOutConnected;
 
-    iFileDetails->iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
-
-    if ( iFileDetails->iRNFormat )
-    {
-    	CreateRealOneBitmapL();
-    }
+    iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
 
     iControlsPolicy = CMPXVideoPlaybackControlPolicy::NewL();
     iControlsConfig = CMPXVideoPlaybackControlConfiguration::NewL( this );
@@ -167,9 +164,8 @@ EXPORT_C CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsControll
 
     iFs.Close();
 
-
 #ifdef RD_TACTILE_FEEDBACK
-    if (iFeedback)
+    if ( iFeedback )
     {
         iFeedback->RemoveFeedbackForControl( iContainer );
     }
@@ -224,8 +220,6 @@ EXPORT_C void CMPXVideoPlaybackControlsController::AddFileDetailsL(
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::AddFileDetailsL()"));
 
     iFileDetails = aDetails;
-
-    iFileDetails->iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
 
     iControlsConfig->UpdateControlsWithFileDetailsL();
 
@@ -377,14 +371,16 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
             break;
         }
         case EMPXControlCmdSurfaceCreated:
-		{
-			//
-			//  When surface is created, remove the Real One Bitmap
-			//
-			iSurfaceCreated = ETrue;
-			SetRealOneBitmapVisibility( EFalse );
-			break;
-		}
+        {
+            iSurfaceCreated = ETrue;
+            SetRealOneBitmapVisibility( EFalse );
+            break;
+        }
+        case EMPXControlCmdSurfaceRemoved:
+        {
+            iSurfaceCreated = EFalse;
+            break;
+        }
     }
 }
 
@@ -402,8 +398,8 @@ void CMPXVideoPlaybackControlsController::HandleStateChange( TMPXPlaybackState a
     //
     if ( aNewState != iState )
     {
-    	TBool hideControls( EFalse );
-    	
+        TBool hideControls( EFalse );
+
         iState = aNewState;
 
         switch ( aNewState )
@@ -416,8 +412,10 @@ void CMPXVideoPlaybackControlsController::HandleStateChange( TMPXPlaybackState a
                 if ( iFileDetails->iPlaybackMode == EMPXVideoStreaming ||
                      iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
                 {
-                    iControlsConfig->UpdateControlListL( EMPXControlCmdPluginInitialized );
-                    ControlsListUpdatedL();
+                    TRAP_IGNORE(
+                        iControlsConfig->UpdateControlListL( EMPXControlCmdPluginInitialized );
+                        ControlsListUpdatedL();
+                        );
                 }
 
                 break;
@@ -453,7 +451,7 @@ void CMPXVideoPlaybackControlsController::HandleStateChange( TMPXPlaybackState a
                 }
                 else
                 {
-                	UpdateControlsVisibility();
+                    UpdateControlsVisibility();
                 }
 
                 break;
@@ -496,7 +494,6 @@ void CMPXVideoPlaybackControlsController::CreateControlsL()
 void CMPXVideoPlaybackControlsController::CreateRealOneBitmapL()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::CreateRealOneBitmapL()"));
-
 
     TFileName iconsPath;
     LocateBitmapFileL( iconsPath );
@@ -880,7 +877,7 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
             CMPXVideoPlaybackBrandingAnimation* brandingAnimation =
                 CMPXVideoPlaybackBrandingAnimation::NewL( this,
                                                           brandingLogoRect,
-                                                          iFileDetails->iRNFormat );
+                                                          iRNFormat );
 
             CleanupStack::PushL( brandingAnimation );
 
@@ -1084,7 +1081,7 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
             label->SetAlignment( EHRightVBottom );
         }
     }
-    
+
     skRect = label->Rect();
 
     // Enlarge the button region to make it easy to be touched.
@@ -1583,13 +1580,18 @@ TBool CMPXVideoPlaybackControlsController::RealFormatForLocalL()
     _LIT(KMPXReal, "real" );
     _LIT(KMPXRN, "rn" );
 
-    if (iFileDetails->iMimeType)
+    if ( iFileDetails->iMimeType )
     {
         iFileDetails->iMimeType->Des().LowerCase();
 
         if ( iFileDetails->iMimeType->Find( KMPXReal ) >= 0 ||
              iFileDetails->iMimeType->Find( KMPXRN ) >= 0 )
         {
+            //
+            // RN clip and local mode, add RN logo bitmap to show while initializing
+            //
+            CreateRealOneBitmapL();
+            SetRealOneBitmapVisibility( ETrue );
             realFormat = ETrue;
         }
     }
@@ -1719,7 +1721,7 @@ void CMPXVideoPlaybackControlsController::SetRealOneBitmapVisibility( TBool aVis
 
     if ( iRealOneBitmap )
     {
-    	iRealOneBitmap->MakeVisible( aVisible );
+        iRealOneBitmap->MakeVisible( aVisible );
     }
 }
 
@@ -1742,10 +1744,6 @@ void CMPXVideoPlaybackControlsController::HandleErrors()
                 StopBrandingAnimation();
             }
 
-            break;
-        }
-        default :
-        {
             break;
         }
     }
@@ -1925,13 +1923,46 @@ void CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackControlsController::SetBackgroundBlack
+// -------------------------------------------------------------------------------------------------
+//
 TBool CMPXVideoPlaybackControlsController::SetBackgroundBlack()
 {
-    TBool backgroundBlack = iSurfaceCreated && !iTvOutConnected;
+    TBool backgroundBlack = iSurfaceCreated && ! iTvOutConnected;
 
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::SetBackgroundBlack(%d)"), backgroundBlack);
     return backgroundBlack;
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackControlsController::IsSameAspectRatio
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackControlsController::IsSameAspectRatio()
+{
+	MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackControlsController::IsSameAspectRatio()" ) );
+	
+    TBool retVal = EFalse;
+
+    if ( iFileDetails->iVideoEnabled &&
+    	 iFileDetails->iVideoHeight > 0 &&
+  	     iFileDetails->iVideoWidth > 0 )
+    {
+        TRect displayRect = iContainer->Rect();
+        TReal displayAspectRatio = ( TReal32 )displayRect.Width() / ( TReal32 )displayRect.Height();
+        TReal videoAspectRatio = ( TReal32 )iFileDetails->iVideoWidth / 
+        		                 ( TReal32 )iFileDetails->iVideoHeight;
+
+        if ( displayAspectRatio == videoAspectRatio )
+        {
+            retVal = ETrue;
+        }
+    }
+
+    MPX_DEBUG( _L( "CMPXVideoPlaybackControlsController::IsSameAspectRatio(%d)" ), retVal );
+    
+    return retVal;
+}
 
 // End of File

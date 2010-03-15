@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#3 %
+// Version : %version: ou1cpsw#4 %
 
 #ifndef USERINPUTHANDLER_TEST_H
 #define USERINPUTHANDLER_TEST_H
@@ -162,18 +162,7 @@ NONSHARABLE_CLASS(CUserinputhandlertest) : public CScriptBase
         */
         TInt CheckExpectedCommand( CStifItemParser&  aItem );
  
-        /**
-        * Check the HAL backlight state
-        * @return Symbian OS error code.
-        */
-        TInt CheckBacklightState( CStifItemParser&  aItem );
         
-        /**
-        * Issue TVOut Connect/Disconnect event
-        * @return Symbian OS error code.
-        */
-        TInt TvOutEvent( CStifItemParser& aItem );
-
     private:    
 
         CMPXVideoPlaybackContainer*          iContainer; 

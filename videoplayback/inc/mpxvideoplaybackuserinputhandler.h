@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  ou1cpsw#7 %
 
 
 
@@ -37,7 +37,7 @@ class CMPXVideoPlaybackControlsController;
 class CRemConInterfaceSelector; // Side volume key
 class CRemConCoreApiTarget;
 class CMPXVideoPlaybackContainer;
-class CHWRMLight;
+
 
 // CLASS DECLARATION
 
@@ -50,7 +50,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         /**
         * Two-phased constructor.
         */
-        IMPORT_C static CMPXVideoPlaybackUserInputHandler* NewL(CMPXVideoPlaybackContainer* iContainer, TBool aTvOutConnected);
+        IMPORT_C static CMPXVideoPlaybackUserInputHandler* NewL(CMPXVideoPlaybackContainer* iContainer );
 
         /**
         * Destructor.
@@ -67,7 +67,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         /**
         * Symbian 2nd phase constructor.
         */
-        void ConstructL( TBool aTvOutConnected );
+        void ConstructL( );
 
     public:
 
@@ -104,7 +104,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         */
         void SetForeground(TBool aForeground);
  
-        void HandleTVOutEvent(TBool aTVOutConnected);
+  
                 
 	private:
         /**
@@ -131,18 +131,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
                                   const TPointerEvent& aPointerEvent,
                                   TMPXVideoControlType aMPXControl);
         
-        // Handles the Display light timer timeout
-        static TInt  HandleDisplayTimeout( TAny* aPtr );
-        
-        // Disable the display backlight
-        void DisableBacklight();
-        
-        // Enable the display backlight
-        void EnableBacklight();
-        
-        // Restarts the timer for display light time-out
-        void RestartDisplayTimer();
-
+       
     private:
 
         TMPXVideoUserInputType                  iProcessingInputType; 	// the type of input being processed
@@ -156,11 +145,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         CPeriodic*                              iVolumeRepeatTimer;     // owned
         TBool                                   iVolumeRepeatUp;
         TBool                                   iForeground;
-        TBool                                   iTVOutConnected;        // Flag to indicate if TV is connected
-        CPeriodic*                              iDisplayTimer;          // Timer to timeout the lights time-out
-        TInt                                    iDisplayTimeOut;        // Value of the lights time-out
-
-        CHWRMLight*                             iLight;
+        
         CMPXVideoPlaybackContainer*             iContainer;	  // not owned
 
 

@@ -15,7 +15,9 @@
 *
 */
 
-// Version : %version: 10 %
+
+// Version : %version: 11 %
+
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -26,14 +28,19 @@
 #include "mpxvideoplaybackdisplayhandler.h"
 #include "mpxvideoregion.h"
 #include "mpxvideoplaybackviewfiledetails.h"
+#include "mpxvideoplaybackcontainer.h"
+#include "mpxcommonvideoplaybackview.hrh"
 #include <mpxvideoplaybackdefs.h>
 
 
 _LIT( KAspectRatioFile, "c:\\private\\200159b2\\mpxvideoplayer_aspect_ratio.dat" );
 
 
-CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil )
+CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler(
+                                     MMPXPlaybackUtility* aPlayUtil,
+                                     CMPXVideoPlaybackContainer* aContainer)
     : iPlaybackUtility( aPlayUtil )
+    , iContainer( aContainer )
 #ifdef SYMBIAN_BUILD_GCE
     , iScaleWidth( 100.0f )
     , iScaleHeight( 100.0f )
@@ -65,12 +72,13 @@ CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
 }
 
 CMPXVideoPlaybackDisplayHandler*
-CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil )
+CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
+                                       CMPXVideoPlaybackContainer* aContainer )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::NewL()"));
 
     CMPXVideoPlaybackDisplayHandler* self =
-        new(ELeave) CMPXVideoPlaybackDisplayHandler( aPlayUtil );
+        new(ELeave) CMPXVideoPlaybackDisplayHandler( aPlayUtil, aContainer );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -91,9 +99,8 @@ void CMPXVideoPlaybackDisplayHandler::ConstructL()
 //   CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
-                                          CWsScreenDevice& aScreenDevice,
-                                          RWindow& aWin )
+void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL( CWsScreenDevice& aScreenDevice,
+                                                            RWindow& aWin )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()"));
 
@@ -114,6 +121,7 @@ void CMPXVideoPlaybackDisplayHandler::SignalSurfaceRemovedL()
     CleanupStack::PushL( cmd );
 
     cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
     cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
                                                      EPbCmdSurfaceRemoved );
@@ -127,13 +135,22 @@ void CMPXVideoPlaybackDisplayHandler::SignalSurfaceRemovedL()
 //   CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
+void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow( TBool aSignalPlaybackPlugin )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()"),
+                   _L("aSignalPlaybackPlugin = %d"), aSignalPlaybackPlugin );
 
 #ifdef SYMBIAN_BUILD_GCE
     if ( iVideoDisplay )
     {
+        //
+        //  Surface is being removed, signal the container so it can reset the background
+        //
+        if ( iContainer )
+        {
+            iContainer->HandleCommandL( EMPXPbvSurfaceRemoved );
+        }
+
         delete iVideoDisplay;
         iVideoDisplay = NULL;
     }
@@ -141,29 +158,32 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 
     if ( ! iSurfaceId.IsNull() )
     {
-        //
-        //  Signal to the Playback Plugin that the surface has been removed
-        //
-        TRAP_IGNORE( SignalSurfaceRemovedL() );
+        if ( aSignalPlaybackPlugin )
+        {
+            //
+            //  Signal to the Playback Plugin that the surface has been removed
+            //
+            TRAP_IGNORE( SignalSurfaceRemovedL() );
+        }
 
         iSurfaceId = TSurfaceId::CreateNullId();
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
+//   CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL()
 // -------------------------------------------------------------------------------------------------
 //
-TMPXVideoDisplayCommand
-CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessage )
+void
+CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL( CMPXMessage* aMessage )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessage()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL()"));
 
     TMPXVideoDisplayCommand message =
         ( *(aMessage->Value<TMPXVideoDisplayCommand>(KMPXMediaVideoDisplayCommand)) );
 
     MPX_DEBUG(
-      _L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL() message = %d"), message );
+      _L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL() message = %d"), message );
 
     switch ( message )
     {
@@ -185,22 +205,17 @@ CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessa
         }
         case EPbMsgVideoRemoveDisplayWindow:
         {
-            if ( iVideoDisplay )
-            {
-                delete iVideoDisplay;
-                iVideoDisplay = NULL;
-            }
-
-            iSurfaceId = TSurfaceId::CreateNullId();
-
+            RemoveDisplayWindow( EFalse );
             break;
         }
 #endif
     }
 
-    return message;
+    //
+    //  Signal Sync Message handling is complete
+    //
+    iPlaybackUtility->CommandL( EPbCmdSyncMsgComplete );
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::SetAspectRatioL()
@@ -228,7 +243,6 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 
     return aspectRatio;
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
@@ -363,7 +377,6 @@ void CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL()
     CleanupStack::PopAndDestroy();
 }
 
-
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL
 // -------------------------------------------------------------------------------------------------
@@ -427,7 +440,8 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
 
     TRect cropRect = TRect( aWin->Size() );
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() cropRect (%d, %d), (%d, %d)"),
+    MPX_DEBUG(
+        _L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() cropRect (%d, %d), (%d, %d)"),
         cropRect.iTl.iX, cropRect.iTl.iY, cropRect.iBr.iX, cropRect.iBr.iY);
 
     MPX_TRAPD( dispError,
@@ -452,6 +466,11 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
     if ( iSurfaceCached )
     {
         iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
+
+        if ( iContainer )
+        {
+            iContainer->HandleCommandL( EMPXPbvSurfaceCreated );
+        }
 
         iSurfaceCached = EFalse;
     }
@@ -488,6 +507,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
         //  Add new surface
         //
         iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
+
+        if ( iContainer )
+        {
+            iContainer->HandleCommandL( EMPXPbvSurfaceCreated );
+        }
     }
     else
     {
@@ -535,6 +559,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
 
     if ( iVideoDisplay )
     {
+        if ( iContainer )
+        {
+            iContainer->HandleCommandL( EMPXPbvSurfaceRemoved );
+        }
+
         iVideoDisplay->RemoveSurface();
     }
 

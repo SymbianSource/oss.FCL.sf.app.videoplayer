@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -204,6 +204,11 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         inline void HandleOpenL( const CMPXCollectionPlaylist& /*aPlaylist*/, TInt /*aError*/ ) {}
 
+        /*
+         *  Handle actions when the surface is being removed
+         */
+        void RemoveBackgroundSurfaceL();
+
     public:
         /**
         * Set property
@@ -342,6 +347,8 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TInt OpenDrmFileHandleL( RFile& aFile );
         void LaunchDRMDetailsL();
 
+        void HandleRealOneBitmapTimeoutL();
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt OpenDrmFileHandle64L( RFile64& aFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
@@ -366,6 +373,7 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iPlaylistView;
         TBool                               iCollectionMediaRequested;
         TBool                               iPdlReloading;
+        TBool                               iRealOneDelayedPlay;
 
         HBufC*                              iClipName;
 };

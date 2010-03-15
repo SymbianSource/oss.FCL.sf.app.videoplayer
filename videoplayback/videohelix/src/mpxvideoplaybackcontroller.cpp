@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 47 %
+// Version : %version: ou1cpsw#49 %
 
 
 //
@@ -41,6 +41,9 @@
 #include <e32std.h>
 #include <devsoundif.h>
 #include <avkondomainpskeys.h>
+#include <hwrmlight.h>  
+#include <centralrepository.h>  // For display timeout setting
+#include <hwrmlightdomaincrkeys.h>
 
 #include "mpxvideoregion.h"
 #include "mpxvideoplaybackcontroller.h"
@@ -61,7 +64,9 @@
 //
 //  Backlight Timeout in Micro Seconds
 //
-#define KMPXBackLightTimeOut 3500000
+const TInt KMPXBackLightTimeOut = 3500000;
+const TInt KMPXInactivityTimeout  = 3 * KMPXBackLightTimeOut;
+const TInt KMPXMicroSecondsInASecond = 1000000;
 
 #define KOneKilobyte 1024
 
@@ -150,7 +155,7 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
     // Initiliaze to True
     iSeekable = ETrue;
 
-    InitVolumeWatchers();
+    InitVolumeWatchersL();
 
     CreatePreInitStatesL();
 
@@ -159,6 +164,8 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
     iBackLightTimer = CPeriodic::NewL( CActive::EPriorityStandard );
 
     iDrmHelper = CMpxVideoDrmHelper::NewL();
+    
+    iSavedPosition = 0;
 }
 
 //  ----------------------------------------------------------------------------
@@ -168,7 +175,6 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
 void CMPXVideoPlaybackController::CloseController()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::CloseController()"));
-
     ChangeState( EMPXVideoNotInitialized );
 }
 
@@ -178,7 +184,8 @@ void CMPXVideoPlaybackController::CloseController()
 //
 void CMPXVideoPlaybackController::OpenFileL( const TDesC& aMediaFile,
                                              RFile& aFile,
-                                             TInt aAccessPointId )
+                                             TInt aPosition,
+                                             TInt aAccessPointId ) 
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::OpenFileL()"),
                    _L("file = %S"), &aMediaFile );
@@ -208,6 +215,8 @@ void CMPXVideoPlaybackController::OpenFileL( const TDesC& aMediaFile,
     DetermineMediaTypeL();
     SetPlaybackModeL();
 
+    iSavedPosition = aPosition;
+    
     //
     //  Create accessory monitor to search for TV-Out events
     //
@@ -257,6 +266,7 @@ CMPXVideoPlaybackController::CMPXVideoPlaybackController()
     , iForegroundPause(EFalse)
     , iAllowAutoPlay(ETrue)
     , iHelixLoadingStarted(EFalse)
+    , iLightStatus(CHWRMLight::ELightStatusUnknown)
 {
 }
 
@@ -339,6 +349,17 @@ CMPXVideoPlaybackController::~CMPXVideoPlaybackController()
         delete iPlayer;
         iPlayer = NULL;
     }
+   
+    if ( iUserActivityTimer )
+    {
+        iUserActivityTimer->Cancel();
+        delete iUserActivityTimer;
+        iUserActivityTimer = NULL;
+    }
+    
+    ReleaseLights();
+    
+    CancelDisplayTimer();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
@@ -979,8 +1000,12 @@ void CMPXVideoPlaybackController::HandleSettingChange( const TUid& aRepositoryUi
         {
             case KMPXVideoPlaybackMute:
             {
+                TInt muteValue( EFalse );
+
+                TRAP_IGNORE( muteValue = iMuteWatcher->CurrentValueL() );
+
                 iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPMuteChanged,
-                                                  iMuteWatcher->CurrentValueL(),
+                                                  muteValue,
                                                   KErrNone );
                 // fall through
             }
@@ -991,10 +1016,6 @@ void CMPXVideoPlaybackController::HandleSettingChange( const TUid& aRepositoryUi
                 //  let the state decide if it needs to do something
                 //
                 iState->HandleVolumeChange();
-                break;
-            }
-            default:
-            {
                 break;
             }
         }
@@ -1190,11 +1211,11 @@ void CMPXVideoPlaybackController::ChangeState(TMPXVideoPlaybackState aChangeToSt
                 //
                 if ( iFileDetails->iVideoEnabled )
                 {
-                    StartBackLightTimer();
+                    StartLightsControl();
                 }
                 else
                 {
-                    CancelBackLightTimer();
+                    CancelLightsControl();
                 }
                 
                 break;
@@ -1202,42 +1223,44 @@ void CMPXVideoPlaybackController::ChangeState(TMPXVideoPlaybackState aChangeToSt
             case EMPXVideoPaused:
             {
                 iState = iPausedState;
-                CancelBackLightTimer();
+                CancelLightsControl();
                 break;
             }
             case EMPXVideoInitializing:
             {
                 iState = iInitialisingState;
-                StartBackLightTimer();
+                StartLightsControl();
                 break;
             }
             case EMPXVideoInitialized:
             {
                 iState = iInitialisedState;
+                StartLightsControl();
                 break;
             }
             case EMPXVideoBuffering:
             {
                 iState = iBufferingState;
-                StartBackLightTimer();
+                StartLightsControl();
                 break;
             }
             case EMPXVideoSeeking:
             {
                 iState = iSeekingState;
+                StartLightsControl();
                 break;
             }
             case EMPXVideoStopped:
             {
                 iState = iStoppedState;
-                CancelBackLightTimer();
+                CancelLightsControl();
                 break;
             }
             case EMPXVideoNotInitialized:
             {
                 ResetMemberVariables();
                 iState = iNotIntialisedState;
-                CancelBackLightTimer();
+                CancelLightsControl();
                 break;
             }
         }
@@ -1308,11 +1331,11 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
     //
     iFileDetails->iMaxVolume = iPlayer->MaxVolume();
 
-    // 
+    //
     //  FourCC Code
     //
-    iFileDetails->iFourCCCode  = iPlayer->FourCCCode();    
-    
+    iFileDetails->iFourCCCode  = iPlayer->FourCCCode();
+
     //
     //  Mime Type
     //
@@ -1427,7 +1450,7 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
             {
                 iFileDetails->iKeywords = metaData->Value().AllocL();
             }
-            
+
             CleanupStack::PopAndDestroy( metaData );
         }
 
@@ -1770,6 +1793,22 @@ void CMPXVideoPlaybackController::HandleTvOutEventL( TBool aConnected )
 
             iState->SendErrorToViewL( KMPXVideoTvOutPlaybackNotAllowed );
         }
+        else
+        {
+            // If lights are being controlled enable display timer so that screen backlight will be turned
+            // of after timeout.
+            if ( iBackLightTimer->IsActive() )
+            {
+                RestartDisplayTimer();
+            }
+         } 
+    }
+    else 
+    {
+        // TV out disconnected
+        CancelDisplayTimer();
+        // Ensure that lights are on after this 
+        ReleaseLights();
     }
 
     //
@@ -1801,6 +1840,7 @@ void  CMPXVideoPlaybackController::CancelBackLightTimer()
     {
         iBackLightTimer->Cancel();
     }
+    
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1815,17 +1855,18 @@ void  CMPXVideoPlaybackController::StartBackLightTimer()
         iBackLightTimer->Start(
             0,
             KMPXBackLightTimeOut,
-            TCallBack( CMPXVideoPlaybackController::HandleBackLightTimout, this ));
+            TCallBack( CMPXVideoPlaybackController::HandleBackLightTimeout, this ));
     }
+    
 }
 
 // -------------------------------------------------------------------------------------------------
 // Handle back light timer timeout callback
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackController::HandleBackLightTimout( TAny* aPtr )
+TInt CMPXVideoPlaybackController::HandleBackLightTimeout( TAny* aPtr )
 {
-    static_cast<CMPXVideoPlaybackController*>(aPtr)->DoHandleBackLightTimout();
+    static_cast<CMPXVideoPlaybackController*>(aPtr)->DoHandleBackLightTimeout();
     return KErrNone;
 }
 
@@ -1833,35 +1874,419 @@ TInt CMPXVideoPlaybackController::HandleBackLightTimout( TAny* aPtr )
 // Handle back light timer timeout
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackController::DoHandleBackLightTimout()
+void CMPXVideoPlaybackController::DoHandleBackLightTimeout()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DoHandleBackLightTimout()"));
-
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DoHandleBackLightTimeout()"));
+    
+    TBool tvOutConnected( EFalse );
+    if ( iAccessoryMonitor )
+    {
+        tvOutConnected = iAccessoryMonitor->IsTvOutConnected();
+    }
+    
+    // User activity timer runs always when TV-out is connected
+    // it keeps resetting display timer and keeps lights on whenever there is user activity
+    if ( tvOutConnected )
+    {
+        MPX_DEBUG ( _L("CMPXVideoPlaybackController::DoHandleBackLightTimeout() inactivity time = %d"), User::InactivityTime().Int() );
+        // Cancel activity timer. Otherwise resetting inactivity time would fire user activity detection
+        CancelUserActivityTimer();
+    }
+        
     User::ResetInactivityTime();
+    
+    if ( tvOutConnected )
+    {
+        // Restart user activity timer. It must be running between backlight timer intervals so that backlight
+        // can be turned on if user activity is detected.
+        RestartUserActivityTimer();
+    }
+}
+
+// -----------------------------------------------------------------------------
+// CMPXVideoPlaybackController::StartLightsControl
+// -----------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::StartLightsControl()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::StartLightsControl()"));
+
+    StartBackLightTimer();
+             
+    if (iAccessoryMonitor )
+    {
+        if ( iAccessoryMonitor->IsTvOutConnected() )
+        {
+            RestartDisplayTimer();
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// CMPXVideoPlaybackController::CancelLightsControl
+// -----------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::CancelLightsControl()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::CancelLightsControl()"));
+	
+    // This is called whenever there is no need to keep screensaver of anymore
+    // This means that also displaytimer and activity monitoring can be stopped. 
+    // This method is not correct place for these calls
+    CancelBackLightTimer();
+   
+    CancelUserActivityTimer();
+    
+    CancelDisplayTimer();
+	
+    // Ensure that lights are on
+    EnableDisplayBacklight();
+    
+	// Release lights if releserved
+    ReleaseLights();  
+}
+
+
+// -----------------------------------------------------------------------------
+// CMPXVideoPlaybackController::InitDisplayTimerL
+// -----------------------------------------------------------------------------
+//
+TTimeIntervalMicroSeconds32 CMPXVideoPlaybackController::InitDisplayTimerL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::InitDisplayTimerL()"));
+	
+    if ( !iDisplayTimer )
+    {
+        iDisplayTimer = CPeriodic::NewL( CPeriodic::EPriorityStandard );
+		
+        MPX_DEBUG(_L("CMPXVideoPlaybackController::InitDisplayTimerL() - created") );	
+        
+    }
+   
+    if ( iDisplayTimerTimeout.Int() == 0 )
+    {
+        // Get the display light time-out value from CenRep
+        CRepository* repository = CRepository::NewLC( KCRUidLightSettings  );    
+        // What's the timeout value (in seconds ) for the display light?
+        TInt displayTimeOut ( 0 );
+        repository->Get( KDisplayLightsTimeout, displayTimeOut );
+        
+        if ( ( displayTimeOut * KMPXMicroSecondsInASecond ) > KMaxTInt )
+        {
+            iDisplayTimerTimeout = KMaxTInt;
+        }
+        else
+        {
+            iDisplayTimerTimeout = displayTimeOut * KMPXMicroSecondsInASecond;
+        }
+        
+        CleanupStack::PopAndDestroy( repository );
+    }     
+    
+    
+    MPX_DEBUG( _L("CMPXVideoPlaybackController::InitDisplayTimerL Timeout(%d)"), iDisplayTimerTimeout.Int() );
+	
+    // Convert the timeout value to microseconds
+    return iDisplayTimerTimeout;   
+}
+
+// -----------------------------------------------------------------------------
+// CMPXVideoPlaybackController::RestartDisplayTimer
+// -----------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::RestartDisplayTimer()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::RestartDisplayTimer"));
+
+    TTimeIntervalMicroSeconds32 displayTimeOut(0);
+    // Leave system to safe state if following leaves. Lights stay on
+    MPX_TRAPD(err, displayTimeOut=InitDisplayTimerL(); )
+    if ( err == KErrNone )
+    {   
+        // check if the display timer is running and cancel it
+        if ( iDisplayTimer->IsActive() )
+        {
+            iDisplayTimer->Cancel();
+        }
+      
+        MPX_DEBUG( _L("CMPXVideoPlaybackController::RestartDisplayTimer() restarting displayTimer to=%d ms"), displayTimeOut.Int() );
+        
+        iDisplayTimer->Start( displayTimeOut, displayTimeOut,
+            TCallBack( CMPXVideoPlaybackController::HandleDisplayTimeout, this ) );
+    }
+    
+}
+
+// -----------------------------------------------------------------------------
+// CMPXVideoPlaybackController::CancelDisplayTimer
+// -----------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::CancelDisplayTimer() 
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::CancelDisplayTimer"));
+    
+    if ( iDisplayTimer )
+    {
+        if ( iDisplayTimer->IsActive() )
+        {
+            iDisplayTimer->Cancel();
+        }
+        delete iDisplayTimer;
+        iDisplayTimer = NULL;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackUserInputHandler::HandleDisplayTimeout
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoPlaybackController::HandleDisplayTimeout( TAny* aPtr )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::HandleDisplayTimeout"));
+
+    static_cast<CMPXVideoPlaybackController*>(aPtr)->DoHandleDisplayTimeout();
+
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackUserInputHandler::DoHandleDisplayTimeout
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::DoHandleDisplayTimeout( )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DoHandleDisplayTimeout"));
+
+    DisableDisplayBacklight();
+    // Avoid missing user activity immediately after lights are turned off
+    RestartUserActivityTimer();
+}
+
+
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::EnableDisplayBacklight
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::EnableDisplayBacklight()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::EnableDisplayBacklight()"));
+    
+    // ELightStatusUnknown - We are not controlling lights and we don't care about lights
+    // ELightOn            - Ligths are certainly on 
+    MPX_DEBUG(_L("CMPXVideoPlaybackController::EnableDisplayBacklight() iLightStatus=%d"), iLightStatus );
+    
+    // We are responsible of turning lights on only if we have switched them off.
+    if ( iLightStatus == CHWRMLight::ELightOff )
+    {
+
+        MPX_TRAPD( err,
+        {   
+            // Following GetLightsL() call will not leave.
+            // This call should not result to creation of CHWRMLight in this case
+            // because CHWRMLight was created when lights were turned off.
+            CHWRMLight* lights= GetLightsL();
+            if ( lights->LightStatus(CHWRMLight::EPrimaryDisplay) == CHWRMLight::ELightOff )
+            {
+                MPX_DEBUG(_L("CMPXVideoPlaybackController::EnableDisplayBacklight() enabling") );
+			
+                lights->LightOnL( CHWRMLight::EPrimaryDisplay, 0  );
+                iLightStatus = CHWRMLight::ELightOn;
+            }
+        } );
+        
+    }
+   
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::DisableDisplayBacklight
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::DisableDisplayBacklight()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DisableDisplayBacklight()"));
+       
+    // No major harm done if following block leaves. Lights are left on
+    MPX_TRAPD( err,
+    {  
+        CHWRMLight* lights = GetLightsL();
+        if ( lights->LightStatus(CHWRMLight::EPrimaryDisplay) == CHWRMLight::ELightOn )
+        {
+           MPX_DEBUG(_L("CMPXVideoPlaybackController::DisableDisplayBacklight() disabling") );
+		   
+           lights->LightOffL( CHWRMLight::EPrimaryDisplay, 0  );
+           iLightStatus = CHWRMLight::ELightOff;
+        }
+    } );
+   
+}
+
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::InitUserActivityTimer
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::InitUserActivityTimerL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::InitUserActivityTimerL()"));
+    
+    iUserActivityTimer = CPeriodic::NewL( CActive::EPriorityStandard);
+    
+    // This timer will not run to the end. Timer will be canceled and reset at backlight timeout.    
+    iUserActivityTimer->Start(
+        0,
+        KMPXInactivityTimeout,
+        TCallBack( CMPXVideoPlaybackController::HandleUserActivityTimeout, this ));
+    
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::RestartUserActivityTimer
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::RestartUserActivityTimer() 
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::RestartUserActivityTimer()"));
+    
+    if ( !iUserActivityTimer )
+    {
+       // This is first call. Create and initialize timer
+       MPX_TRAPD( err,
+       {   
+           InitUserActivityTimerL();
+       } );
+       // If user activity timer creation fails we can't detect user activity and 
+       // get lights back on when user taps screen. 
+       // Leave lights on.
+       if ( err != KErrNone )
+       { 
+           EnableDisplayBacklight(); 
+       }  
+    }
+      
+    if ( iUserActivityTimer )
+    {
+        if ( iUserActivityTimer->IsActive() )
+        {
+            iUserActivityTimer->Cancel();
+        }            
+        // Not interested about inactivity callback, only activity
+        // If CPeriodic::Inactivity is started with argument 0 
+        // timer will fire when system's user inactivity timer resets.
+        iUserActivityTimer->Inactivity( 0 );
+    } 
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::CancelUserActivityTimer
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::CancelUserActivityTimer() 
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::CancelUserActivityTimer()"));
+	
+    if  ( iUserActivityTimer ) 
+    {   
+        if ( iUserActivityTimer->IsActive() )
+        {
+            iUserActivityTimer->Cancel();
+        }
+    }
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::HandleUserActivityTimeout
+//  ------------------------------------------------------------------------------------------------
+// 
+TInt CMPXVideoPlaybackController::HandleUserActivityTimeout( TAny* aPtr )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::HandleUserActivityTimeout()"));
+	
+    static_cast<CMPXVideoPlaybackController*>(aPtr)->DoHandleUserActivityTimeout();
+    return KErrNone;     
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::DoHandleUserActivityTimeout
+//  ------------------------------------------------------------------------------------------------
+// 
+void CMPXVideoPlaybackController::DoHandleUserActivityTimeout()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DoHandleUserActivityTimeout()"));
+    
+    // Act only once for detected activity.
+    if ( iUserActivityTimer->IsActive() ) 
+    {
+        iUserActivityTimer->Cancel();
+    }
+    
+    // iUserActivityTimer runs when TV-out is connected and playback with video is going on
+    // This timer fires in two situations. 
+    // a) Lights are off and user activity is detected - Turn lights on and restart display timer
+    // b) Lights are on and user activity is detected - restart display timer to prevent lights go off
+    EnableDisplayBacklight();
+    
+    // Start counting down to next lights off
+    RestartDisplayTimer();
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::GetLightsL
+//  ------------------------------------------------------------------------------------------------
+//
+CHWRMLight* CMPXVideoPlaybackController::GetLightsL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::GetLightsL()"));
+	
+    if ( !iLight ) 
+    {
+        MPX_DEBUG( _L("CMPXVideoPlaybackController::GetLightsL() - creating") );
+        iLight = CHWRMLight::NewL();
+    }
+    return iLight;
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXVideoPlaybackController::ReleaseLights
+//  ------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::ReleaseLights()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::ReleaseLights()"));
+	
+    if ( iLight )
+    {
+        // If iLights was created when ReleaseLights was called then TV out must be connected and lights may be off. 
+        // This call ensures that lights are on again.
+        EnableDisplayBacklight();
+		
+        MPX_DEBUG( _L("CMPXVideoPlaybackController::ReleaseLights() - deleting") );
+        delete iLight;
+        iLight = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackController::InitVolumeWatchers()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackController::InitVolumeWatchers()
+void CMPXVideoPlaybackController::InitVolumeWatchersL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::InitVolumeWatchers()"));
 
     if ( ! iVolumeWatcher )
     {
-        MPX_TRAPD( err,
-                iVolumeWatcher = CMPXCenRepWatcher::NewL( KCRUidMPXVideoSettings,
-                                                          KMPXVideoPlaybackVolume,
-                                                          this ) );
+        iVolumeWatcher = CMPXCenRepWatcher::NewL( KCRUidMPXVideoSettings,
+                                                  KMPXVideoPlaybackVolume,
+                                                  this );
     }
 
     if ( ! iMuteWatcher )
     {
-        MPX_TRAPD( err,
-                iMuteWatcher = CMPXCenRepWatcher::NewL( KCRUidMPXVideoSettings,
-                                                        KMPXVideoPlaybackMute,
-                                                        this ) );
+        iMuteWatcher = CMPXCenRepWatcher::NewL( KCRUidMPXVideoSettings,
+                                                KMPXVideoPlaybackMute,
+                                                this );
     }
 
     //
@@ -1916,7 +2341,7 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
     // goes back to Not Initialised state.
     //
     if ( iAccessoryMonitor )
-    {    
+    {
         delete iAccessoryMonitor;
         iAccessoryMonitor = NULL;
     }
@@ -1965,6 +2390,8 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
     //  Reset the flag to retrieve the Buffering percentage from Helix
     //
     iHelixLoadingStarted = EFalse;
+
+    iSavedPosition = 0;
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -2022,10 +2449,11 @@ void CMPXVideoPlaybackController::SetVolumeSteps( TInt aVolumeSteps )
 //
 void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
                                                RFile64& aFile,
+                                               TInt aPosition,
                                                TInt aAccessPointId )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::OpenFile64L( RFile64 )"),
-                   _L("file = %S"), &aMediaFile );
+                   _L("file = %S, position = %d"), &aMediaFile, aPosition );
 
     TBool fileExists = EFalse;
 
@@ -2052,6 +2480,8 @@ void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
     DetermineMediaTypeL();
     SetPlaybackModeL();
 
+    iSavedPosition = aPosition; 
+    
     //
     //  Create accessory monitor to search for TV-Out events
     //

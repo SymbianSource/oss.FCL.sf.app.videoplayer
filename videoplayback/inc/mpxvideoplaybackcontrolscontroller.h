@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 8 %
+
+// Version : %version: e003sa33#11 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -134,6 +135,13 @@ class CMPXVideoPlaybackControlsController : public CBase
         void SetRealOneBitmapVisibility( TBool aVisible );
 
         TBool SetBackgroundBlack();
+
+        inline TBool IsRealMediaFormat();
+
+        /**
+         *  Check if video clip's aspect ratio is equal to screen display aspect ratio
+         */
+        TBool IsSameAspectRatio();
 
     private:
         /**
@@ -354,6 +362,7 @@ class CMPXVideoPlaybackControlsController : public CBase
 
         TBool                                   iSurfaceCreated;
         TBool                                   iTvOutConnected;
+        TBool                                   iRNFormat;
 
 #ifdef RD_TACTILE_FEEDBACK
         MTouchFeedback*                         iFeedback;
@@ -392,6 +401,13 @@ TBool CMPXVideoPlaybackControlsController::IsTvOutPlaybackAllowed()
     TBool playable = ( ! iFileDetails->iTvOutConnected || iFileDetails->iTvOutPlayAllowed );
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsTvOutPlaybackAllowed() [%d]"), playable);
     return playable;
+}
+
+inline
+TBool CMPXVideoPlaybackControlsController::IsRealMediaFormat()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsRealFormat() [%d]"), iRNFormat);
+    return iRNFormat;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_*/

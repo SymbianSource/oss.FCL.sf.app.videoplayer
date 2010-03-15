@@ -19,10 +19,8 @@
 
 // INCLUDE FILES
 #include <aknmessagequerydialog.h>
-#include <mpxmedia.h>
 #include <mpxmediageneraldefs.h>
 #include <vcxmyvideosdefs.h>
-#include <StringLoader.h>
 #include <vcxhgmyvideos.rsg>
 #include "vcxhgmyvideosvideodetailsdialog.h"
 #include <MPFileDetailsDialog.h>
@@ -34,20 +32,104 @@
 // ============================ MEMBER FUNCTIONS =============================
 
 // ---------------------------------------------------------------------------
-// TVcxHgMyVideosVideoDetailsDialog::TVcxHgMyVideosVideoDetailsDialog()
+// CVcxHgMyVideosVideoDetailsDialog::CVcxHgMyVideosVideoDetailsDialog()
 // ---------------------------------------------------------------------------
 //
-TVcxHgMyVideosVideoDetailsDialog::TVcxHgMyVideosVideoDetailsDialog()
+CVcxHgMyVideosVideoDetailsDialog::CVcxHgMyVideosVideoDetailsDialog()
     {
+    
     }
 
 // ---------------------------------------------------------------------------
-// TVcxHgMyVideosVideoDetailsDialog::ShowVideoDetailsDialogL()
+// CVcxHgMyVideosVideoDetailsDialog::CVcxHgMyVideosVideoDetailsDialog()
 // ---------------------------------------------------------------------------
 //
-void TVcxHgMyVideosVideoDetailsDialog::ShowVideoDetailsDialogL( const CMPXMedia& aMedia )
+CVcxHgMyVideosVideoDetailsDialog::~CVcxHgMyVideosVideoDetailsDialog()
     {
-    CFileDetailsPluginIF* fdPlugin = CFileDetailsPluginIF::NewL();
-    fdPlugin->ShowFileDetails( aMedia );
-    delete fdPlugin;
+    if ( iDetailsAo->IsActive() )
+        {
+        iDetailsAo->Cancel();
+        }
+    delete iDetailsAo;
+    delete iDetailsMedia;
     }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDetailsDialog::NewL
+//
+// -----------------------------------------------------------------------------
+//
+CVcxHgMyVideosVideoDetailsDialog* CVcxHgMyVideosVideoDetailsDialog::NewL()
+    {
+    CVcxHgMyVideosVideoDetailsDialog* self =
+            new (ELeave) CVcxHgMyVideosVideoDetailsDialog();
+	CleanupStack::PushL( self );		
+    self->ConstructL();
+	CleanupStack::Pop( self );
+    return self;        
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDetailsDialog::ConstructL
+//
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDetailsDialog::ConstructL()
+    {
+    iDetailsAo = CIdle::NewL( CActive::EPriorityStandard );
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDetailsDialog::ShowVideoDetailsDialogL()
+// ---------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDetailsDialog::ShowVideoDetailsDialogL( const CMPXMedia& aMedia )
+    {
+    if ( iDetailsMedia )
+        {
+        delete iDetailsMedia;
+        iDetailsMedia = NULL;
+        }
+    iDetailsMedia = CMPXMedia::NewL( aMedia );
+    
+    ActivateDetailsActiveObject();
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoDetailsDialog::ActivateDetailsActiveObject
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDetailsDialog::ActivateDetailsActiveObject()
+    {
+    if ( !iDetailsAo->IsActive() )
+        {
+        iDetailsAo->Start( TCallBack( CVcxHgMyVideosVideoDetailsDialog::ShowDetailsL, this ) );
+        }
+    }
+
+// -------------------------------------------------------------------------------------------------
+//   CVcxHgMyVideosVideoDetailsDialog::ShowDetailsL
+// -------------------------------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosVideoDetailsDialog::ShowDetailsL( TAny* aPtr )
+{
+    static_cast<CVcxHgMyVideosVideoDetailsDialog*>(aPtr)->DoShowDetailsL();
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CVcxHgMyVideosVideoDetailsDialog::DoShowDetailsL
+// -------------------------------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoDetailsDialog::DoShowDetailsL()
+    {
+    if ( iDetailsMedia )
+        {
+        CFileDetailsPluginIF* fdPlugin = CFileDetailsPluginIF::NewL();
+        CleanupStack::PushL( fdPlugin );
+        fdPlugin->ShowFileDetailsL( *iDetailsMedia );
+        CleanupStack::PopAndDestroy();
+        }
+    }
+
+

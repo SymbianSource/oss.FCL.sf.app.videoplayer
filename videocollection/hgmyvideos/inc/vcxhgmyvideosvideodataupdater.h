@@ -123,6 +123,14 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          */
         void ReleaseData( TMPXItemId aMPXItemId );
         
+        /**
+         * Called when user wants to move or delete video from UI. Removes
+         * data item from buffer and cancels ongoing thumbnail generation.
+         * 
+         * @param aMPXItemId MPX item id of video data.         
+         */
+        void PrepareForMoveOrDelete( TMPXItemId aMPXItemId );
+        
     public: // From MThumbnailManagerObserver
         
         /**
@@ -191,9 +199,11 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         
         /**
          * Selects next index to be fetched.
-         * @param aSelectForPeekOnly  
+         * 
+         * @param aSelectForPeekOnly    Select for peek only.
+         * @return ETrue if selected otherwise EFalse.
          */
-        void SelectNextIndexL( TBool aSelectForPeekOnly );
+        TBool SelectNextIndexL( TBool aSelectForPeekOnly );
         
         /**
          * Removes item from fetch array.
@@ -201,6 +211,13 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          * @param aIndex Index of fetch array.
          */
         void RemoveItem( TInt aIndex );
+        
+        /**
+         * Removes item from fetch array and cancel thumbnail generation.
+         * 
+         * @param aIndex Index of fetch array.         
+         */
+        void RemoveAndCancelThumbnailGeneration( TInt aIndex );
                 
         /**
          * Cancels possibly ongoing activities (thumbnail generation, DRM check).
@@ -251,18 +268,82 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
 
         /**
          * Checks DRM properties
+		 *
+		 * @param aVideoData	Reference to video data.
          */
         void CheckDrmL( CVcxHgMyVideosVideoData& aVideoData );
 
         /**
          * Gets active request count
-         */
+         *
+		 * @param aPeekRequests	On return number of peek requests.
+		 * @param aGetRequests	On return number of get requests.
+		 */
         void GetActiveRequestCount( TInt& aPeekRequests, TInt& aGetRequests );
 
         /**
          * Starts thumbnail fetch
          */
         void StartThumbnailL( CVcxHgMyVideosVideoData& aItem, TBool aPeek );
+
+        /**
+         * Tries to select item for fetch.
+		 * 
+		 * @param aIndex				Index
+		 * @param aSelectForPeekOnly	ETrue
+		 * @return ETrue if selected, otherwise EFalse
+         */
+        TBool TrySelectL( TInt aIndex, TBool aSelectForPeekOnly );
+
+        /**
+         * Tries to select item for fetch.
+		 *
+		 * @param aPos                Scroller position.
+		 * @param aSelectForPeekOnly  Select for peek only status.
+		 * @return ETrue if selected, otherwise EFalse.
+         */
+        TBool TrySelectFromScrollerL( TInt aPos, TBool aSelectForPeekOnly );
+
+        /**
+         * Tries to select item for fetch.
+		 *
+		 * @param aStartPos           Start position.
+         * @param aEndPos             End position.
+		 * @param aSelectForPeekOnly  Select for peek only status.
+		 * @return ETrue if selected, otherwise EFalse.
+         */
+        TBool TrySelectFromScrollerAreaL( TInt aStartPos, 
+                                          TInt aEndPos,
+                                          TBool aSelectForPeekOnly );
+
+        /**
+         * Starts final actions for finished thumbnails
+         */
+        void StartFinalActions();
+
+        /**
+         * Checks if cancellation of activities is needed for item
+		 *
+		 * @param aItem		Reference to data item.
+		 * @return ETrue if cancel is needed, otherwise EFalse.
+         */
+        TBool CancelNeeded( CVcxHgMyVideosVideoData& aItem );
+
+        /**
+         * Callback method for RetryTimer.  
+         */
+        static TInt RetryTimerCallBack( TAny* aAny );
+
+        /**
+         * Gets scroller area
+		 *
+		 * @param aFirstIndexOnScreen     First index on screen.
+ 		 * @param aLastIndexOnScreen      Last index on screen.
+		 * @param aLastIndex              Last index.
+         */
+        void GetScrollerArea( TInt& aFirstIndexOnScreen, 
+							  TInt& aLastIndexOnScreen,
+        					  TInt& aLastIndex );
 
     protected:
 
@@ -300,11 +381,28 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          * Flag for pause state.
          */
         TBool iPaused;
-                
+
         /**
-         * Flag indicates that list refresh is delayed. 
+         * Stores previous first scroller index for checking scroll direction 
          */
-        TBool iListRefreshIsDelayed;
+        TInt iPreviousFirstScrollerIndex;
+
+        /**
+         * Stores time of previous scroller first index update
+         */
+        TInt64 iPreviousFirstScrollerIndexTime;
+
+        /** 
+         * Used for restarting thumbnail creation after scroll
+         * Own.
+         */
+        CPeriodic* iRetryTimer;
+
+        /**
+         * For refresh logic
+         */
+        TBool iPreviousModifiedIndexOnScreen;
+
     };
 
 #endif // VCXHGMYVIDEOSVIDEODATAUPDATER_H

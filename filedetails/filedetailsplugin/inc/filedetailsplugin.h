@@ -49,7 +49,7 @@ NONSHARABLE_CLASS( CFileDetailsPlugin ) : public CFileDetailsPluginIF
            * @param    aDetails  Already constructed details to be shown    
            * @return   None
            */  
-        void ShowFileDetails( const CMPXMedia& aMedia );
+        void ShowFileDetailsL( const CMPXMedia& aMedia );
 
     private:// Constructors and destructor
 

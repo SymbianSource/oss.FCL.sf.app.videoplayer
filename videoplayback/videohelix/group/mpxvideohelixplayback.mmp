@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 13 %
+// Version : %version: ou1cpsw#14 %
 
 
 
@@ -74,6 +74,8 @@ LIBRARY  hal.lib
 LIBRARY  drmutility.lib
 LIBRARY  caf.lib
 LIBRARY  mmcommon.lib 
+LIBRARY  hwrmlightclient.lib   // Lights control
+LIBRARY  centralrepository.lib // For display backlight timeout value
 
 #ifdef __ACCESSORY_FW
 LIBRARY accclient.lib
