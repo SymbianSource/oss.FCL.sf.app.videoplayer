@@ -53,7 +53,7 @@ public:
      * @param aUiEngine Ui engine
      * @param aConnUtil Connection util
      */
-    static CVcxNsContentClientHandler* CVcxNsContentClientHandler::NewL( 
+    static CVcxNsContentClientHandler* NewL( 
                     CVcxNsUiEngine& aUiEngine, CVcxConnectionUtility& aConnUtil );
     
     virtual ~CVcxNsContentClientHandler();

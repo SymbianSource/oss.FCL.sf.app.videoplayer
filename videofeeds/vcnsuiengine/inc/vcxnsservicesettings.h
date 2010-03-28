@@ -227,7 +227,7 @@ private:
     /**
      * GetServiceManagementClientL
      */    
-    CIptvServiceManagementClient* CVcxNsServiceSettings::GetServiceManagementClientL();
+    CIptvServiceManagementClient* GetServiceManagementClientL();
 
  // Data
 

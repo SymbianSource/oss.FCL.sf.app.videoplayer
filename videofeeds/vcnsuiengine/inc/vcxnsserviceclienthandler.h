@@ -46,7 +46,7 @@ public:
      * 
      * @param aUiEngine Ui engine
      */
-    static CVcxNsServiceClientHandler* CVcxNsServiceClientHandler::NewL( CVcxNsUiEngine& aUiEngine );
+    static CVcxNsServiceClientHandler* NewL( CVcxNsUiEngine& aUiEngine );
     
     virtual ~CVcxNsServiceClientHandler();
 

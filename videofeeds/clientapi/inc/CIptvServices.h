@@ -99,7 +99,7 @@ class CIptvServices : public CBase
          *               does not contain valid data.
          * @return       Reference to CIptvService class.
          */
-        IMPORT_C CIptvService& CIptvServices::Service( TUint32 aIndex, TInt& aError );        
+        IMPORT_C CIptvService& Service( TUint32 aIndex, TInt& aError );        
         
         /**
          * Adds a service.
