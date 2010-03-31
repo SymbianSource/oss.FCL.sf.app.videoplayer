@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 #include <sysutil.h>
@@ -182,29 +182,30 @@ CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL( CMPXMessage* aM
     TMPXVideoDisplayCommand message =
         ( *(aMessage->Value<TMPXVideoDisplayCommand>(KMPXMediaVideoDisplayCommand)) );
 
-    MPX_DEBUG(
-      _L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplaySyncMessageL() message = %d"), message );
-
     switch ( message )
     {
 #ifdef SYMBIAN_BUILD_GCE
         case EPbMsgVideoSurfaceCreated:
         {
+            MPX_DEBUG(_L(" message = EPbMsgVideoSurfaceCreated"));
             SurfaceCreatedL( aMessage );
             break;
         }
         case EPbMsgVideoSurfaceChanged:
         {
+            MPX_DEBUG(_L(" message = EPbMsgVideoSurfaceChanged"));
             SurfaceChangedL( aMessage );
             break;
         }
         case EPbMsgVideoSurfaceRemoved:
         {
+            MPX_DEBUG(_L(" message = EPbMsgVideoSurfaceRemoved"));
             SurfaceRemoved();
             break;
         }
         case EPbMsgVideoRemoveDisplayWindow:
         {
+            MPX_DEBUG(_L(" message = EPbMsgVideoRemoveDisplayWindow"));
             RemoveDisplayWindow( EFalse );
             break;
         }
@@ -249,10 +250,12 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 // -------------------------------------------------------------------------------------------------
 //
 TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
-                                          CMPXVideoPlaybackViewFileDetails* aFileDetails,
-                                          TReal aDisplayAspectRatio )
+                                          CMPXVideoPlaybackViewFileDetails* aFileDetails )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
+
+    TRect displayRect = iContainer->Rect();
+    TReal displayAspectRatio = (TReal32)displayRect.Width() / (TReal32)displayRect.Height();
 
     TInt newAspectRatio = EMMFNatural;
 
@@ -272,7 +275,7 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         for ( ; i < cnt ; i++ )
         {
             if ( iAspectRatioArray[i].videoRatio == videoAspectRatio &&
-                 iAspectRatioArray[i].screenRatio == aDisplayAspectRatio &&
+                 iAspectRatioArray[i].screenRatio == displayAspectRatio &&
                  ( scalingType = iAspectRatioArray[i].scalingType ) > 0 )
             {
                 break;
@@ -288,11 +291,11 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         //
         if ( i == cnt )
         {
-            if ( videoAspectRatio - aDisplayAspectRatio > 0.1 )
+            if ( videoAspectRatio - displayAspectRatio > 0.1 )
             {
                 scalingType = EMMFZoom;
             }
-            else if ( videoAspectRatio != aDisplayAspectRatio )
+            else if ( videoAspectRatio != displayAspectRatio )
             {
                 scalingType = EMMFStretch;
             }
@@ -300,7 +303,7 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
             TMPXAspectRatio ratio;
 
             ratio.videoRatio = videoAspectRatio;
-            ratio.screenRatio = aDisplayAspectRatio;
+            ratio.screenRatio = displayAspectRatio;
             ratio.scalingType = scalingType;
 
             iAspectRatioArray.Append( ratio );
@@ -363,7 +366,9 @@ void CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL()
             {
                 for ( TInt i = 0 ; i < cnt ; i++ )
                 {
-                    //Save (videoRatio + screenRatio + scalingType)
+                    //
+                    //  Save (videoRatio + screenRatio + scalingType)
+                    //
                     out.WriteReal32L( iAspectRatioArray[i].videoRatio );
                     out.WriteReal32L( iAspectRatioArray[i].screenRatio );
                     out.WriteInt8L( iAspectRatioArray[i].scalingType );
@@ -463,7 +468,7 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
     //
     //  Check if surface was created before window was ready
     //
-    if ( iSurfaceCached )
+    if ( iSurfaceCached && ! iContainer->IsRealOneBitmapTimerActive() )
     {
         iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
 
@@ -493,7 +498,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
     iCropRect = aMessage->ValueTObjectL<TRect>( KMPXMediaVideoDisplayCropRect );
     iAspectRatio = aMessage->ValueTObjectL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio );
 
-    if ( iVideoDisplay )
+    //
+    //  Add the surface unless the video display hasn't been created or
+    //  the Real One bitmap is being shown.
+    //
+    if ( iVideoDisplay && ! iContainer->IsRealOneBitmapTimerActive() )
     {
         //
         //  Remove old surface if one exists
@@ -516,8 +525,7 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
     else
     {
         //
-        //  Video display has not been created yet, save surface information to create
-        //  the surface when the display is created
+        //  Save the surface information to add it when the display is ready
         //
         iSurfaceCached = ETrue;
     }
@@ -538,7 +546,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
     iCropRect = aMessage->ValueTObjectL<TRect>( KMPXMediaVideoDisplayCropRect );
     iAspectRatio = aMessage->ValueTObjectL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio );
 
-    if ( iVideoDisplay )
+    //
+    //  Check if the surface has been cached
+    //  If surface has been cached, exit since the surface parameters have been saved
+    //
+    if ( ! iSurfaceCached && iVideoDisplay )
     {
         //
         //  Add new surface
@@ -614,5 +626,30 @@ TInt CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL( TMPXVideoPlaybackComma
 }
 
 #endif
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackDisplayHandler::DoHandleRealOneBitmapTimeoutL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackDisplayHandler::DoHandleRealOneBitmapTimeoutL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::DoHandleRealOneBitmapTimeoutL()"));
+
+    //
+    //  Check if surface was created before window was ready
+    //
+    if ( iSurfaceCached && iVideoDisplay )
+    {
+        iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
+
+        if ( iContainer )
+        {
+            iContainer->HandleCommandL( EMPXPbvSurfaceCreated );
+        }
+
+        iSurfaceCached = EFalse;
+    }
+}
+
 
 // End of File

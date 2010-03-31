@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#30 %
+// Version : %version: e003sa33#31 %
 
 
 // INCLUDE FILES
@@ -627,15 +627,18 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
             buttonBarRect.LayoutRect( buttonBarPaneRect.Rect(),
                                       grid_sctrl_middle_pane( 0 ).LayoutLine() );
 
+            TRect btBarRect( buttonBarRect.Rect() );
+            btBarRect.iBr.iY -= 25;
+            btBarRect.iTl.iY += 15;
             CMPXVideoPlaybackButtonBar* buttonBar =
-                CMPXVideoPlaybackButtonBar::NewL( this, buttonBarRect.Rect() );
+                CMPXVideoPlaybackButtonBar::NewL( this, btBarRect );
 
             CleanupStack::PushL( buttonBar );
 
             CMPXVideoPlaybackControl* control =
                 CMPXVideoPlaybackControl::NewL( this,
                                                 buttonBar,
-                                                buttonBarRect.Rect(),
+                                                btBarRect,
                                                 aControlIndex,
                                                 properties );
 
@@ -650,12 +653,8 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
         case EMPXVolumeBar:
         {
             TAknLayoutRect volumeLayoutRect;
-            volumeLayoutRect.LayoutRect( iRect, popup_slider_window_cp01().LayoutLine() );
-
-            TRect temp = volumeLayoutRect.Rect();
-            TRect rect = temp;
-            rect.iTl.iY = temp.iTl.iY + temp.Height() / 10;
-            rect.iBr.iY = temp.iTl.iY + temp.Height() / 10 * 9;
+            volumeLayoutRect.LayoutRect( iRect, popup_slider_window_cp02().LayoutLine() );
+            TRect rect = volumeLayoutRect.Rect();
 
             CMPXVideoPlaybackVolumeBar* volBar = CMPXVideoPlaybackVolumeBar::NewL( this, rect );
 
@@ -1085,7 +1084,7 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
     skRect = label->Rect();
 
     // Enlarge the button region to make it easy to be touched.
-    skRect.iTl.iY -= 6;
+    skRect.iTl.iY -= 26;
     skRect.iBr.iY += 6;
 
     CMPXVideoPlaybackControl* control = CMPXVideoPlaybackControl::NewL( this,

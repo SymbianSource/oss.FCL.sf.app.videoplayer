@@ -172,10 +172,10 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         /**
          * Returns video's name.
          * 
-         * @param aIndex Video's index on UI list.
+         * @param aId Video's unique id.
          * @return Video's name or empty string.
          */
-        const TDesC& GetVideoName( TInt aIndex );
+        const TDesC& GetVideoName( TInt aId );
         
         /**
          * Returns video's URI.

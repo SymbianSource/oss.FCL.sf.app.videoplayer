@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: e003sa33#26 %
 
 
 // INCLUDE FILES
@@ -652,7 +652,7 @@ void CMPXVideoPlaybackContainer::DoHandleRealOneBitmapTimeout()
 
     if ( iDelayedFileDetails )
     {
-        iControlsController->AddFileDetailsL( iDelayedFileDetails );
+        MPX_TRAPD( err, iControlsController->AddFileDetailsL( iDelayedFileDetails ) );
 
         //
         //  Delete the temp file details since plugin initialization is complete
@@ -673,7 +673,7 @@ void CMPXVideoPlaybackContainer::DoHandleRealOneBitmapTimeout()
         iRealOneBitmapTimer = NULL;
     }
 
-    iView->HandleCommandL( EMPXPbvCmdRealOneBitmapTimeout );
+    MPX_TRAPD( err, iView->HandleCommandL( EMPXPbvCmdRealOneBitmapTimeout ) );
 }
 
 // EOF

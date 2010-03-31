@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_68 %
+// Version : %version: e92_69 %
 
 
 #include <eikon.hrh>
@@ -942,7 +942,7 @@ TBool CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL( TApaCommand aComman
     //
     //  If we are embedded or the command is to open a document
     //
-    if ( iAppUi->IsEmbedded() || aCommand != EApaCommandRun )
+    if ( iAppUi->IsEmbedded() || ( aCommand != EApaCommandRun && aDocumentName.Length() > 0 ) )
     {
         if ( iRecognizer->IsValidStreamingPrefix( aDocumentName ) )
         {

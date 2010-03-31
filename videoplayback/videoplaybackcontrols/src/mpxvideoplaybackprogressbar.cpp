@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: e003sa33#19 %
 
 
 // INCLUDE FILES
@@ -219,7 +219,7 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     //
 
     TRect progressRect = Rect();
-    TInt topMarginHeight = ( progressRect.iBr.iY - KMPXProgressBarHeight ) / 2;
+    TInt topMarginHeight = ( progressRect.iBr.iY - KMPXProgressBarHeight ) / 2 - 10;
     progressRect.iTl.iY += topMarginHeight;
     progressRect.iBr.iY = progressRect.iTl.iY + KMPXProgressBarHeight;
 
@@ -860,7 +860,7 @@ void CMPXVideoPlaybackProgressBar::Reset()
     {
         TPointerEvent event;
         event.iType = TPointerEvent::EButton1Up;
-        HandlePointerEventL(event);
+        MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }
 

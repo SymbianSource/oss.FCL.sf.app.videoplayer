@@ -461,9 +461,9 @@ CMyVideosIndicator& CVcxHgMyVideosVideoModelHandler::VideoIndicator()
 // CVcxHgMyVideosVideoModelHandler::GetVideoName()
 // -----------------------------------------------------------------------------
 //
-const TDesC& CVcxHgMyVideosVideoModelHandler::GetVideoName( TInt aIndex )
+const TDesC& CVcxHgMyVideosVideoModelHandler::GetVideoName( TInt aId )
     {
-    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
+    CMPXMedia* media = iVideoArray->MPXMediaByMPXItemId( TMPXItemId( aId, 0 ) );
 
     if ( media && media->IsSupported( KMPXMediaGeneralTitle ) )
         {
@@ -1193,15 +1193,7 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
     TInt videoCount = iVideoArray->VideoCount();         
     if (  videoCount > 0 )
         {
-        if ( videoCount == iScroller.ItemCount() )
-	        {
-            iScroller.DisableScrollBuffer();
-            iScroller.EnableScrollBufferL( *this, KHgBufferSize, KHgBufferTreshold );
-            }
-        else
-	        {
-            ResizeScrollerL( iVideoArray->VideoCount() );
-            }
+        ResizeScrollerL( videoCount );
             		
         TInt highlight( KErrNotFound );
 		
@@ -1285,6 +1277,7 @@ void CVcxHgMyVideosVideoModelHandler::VideoModifiedL( TMPXChangeEventType aEvent
                     {                    
                     // Re-fetch current list completely, MMC card has 
                     // removed or inserted.
+                    IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # VideoModifiedL - Re-fetching list" );
                     iModel.CollectionClient().GetVideoListL( iCurrentCategoryIndex );
                     }
                 }

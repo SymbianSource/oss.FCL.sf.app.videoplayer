@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: ou1cpsw#49 %
+// Version : %version: 50 %
 
 
 //
@@ -1807,8 +1807,12 @@ void CMPXVideoPlaybackController::HandleTvOutEventL( TBool aConnected )
     {
         // TV out disconnected
         CancelDisplayTimer();
+        
         // Ensure that lights are on after this 
         ReleaseLights();
+        
+        // Pause playback since TV-Out accessory has been disconnected.
+        DoHandleCommandL( EPbCmdPause );
     }
 
     //

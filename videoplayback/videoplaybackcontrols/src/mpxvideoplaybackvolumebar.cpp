@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 16 %
+// Version : %version: e003sa33#19 %
 
 
 // INCLUDE FILES
@@ -28,6 +28,7 @@
 #include <AknsDrawUtils.h>
 #include <data_caging_path_literals.hrh>
 #include <aknlayoutscalable_avkon.cdl.h>
+#include <aknlayoutscalable_apps.cdl.h>
 #include <mpxvideoplaybackcontrols.mbg>
 
 #include "mpxcommonvideoplaybackview.hrh"
@@ -43,9 +44,11 @@
 // CONSTANTS
 const TInt KMPXSliderHeight = 30;
 const TInt KMPXSliderWidth = 18;
-const TInt KMPXVolumeBarWidth = 24;
 const TInt KMPXVolumeDragEventTimeOut = 100000;
 const TInt KMPXPtrEventRepeatRequestTime = 200000;
+
+using namespace AknLayoutScalable_Apps;
+using namespace AknLayoutScalable_Avkon;
 
 // ============================ MEMBER FUNCTIONS ===================================================
 
@@ -206,66 +209,58 @@ void CMPXVideoPlaybackVolumeBar::SetLayout()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::SetLayout()"));
 
-    //
-    // Calculate icon rects
-    //
-    iRect = TRect(0, 0, iRect.Width(), iRect.Height() );
-    TInt volumeUpDownIndicatorSize = iRect.Width() / 3;
+    TAknLayoutRect tmpLayoutRect;
 
-    iVolumeControlRect = TRect( volumeUpDownIndicatorSize,
-                                iRect.iTl.iY,
-                                iRect.iBr.iX,
-                                iRect.iTl.iY + iRect.Height() * 4 / 5 );
+    iRect = TRect( 0, 0, iRect.Width(), iRect.Height() );
 
-    iVolumeBarRect =  TRect( iVolumeControlRect.iTl.iX + iVolumeControlRect.Width() / 3,
-                             iVolumeControlRect.iTl.iY + iVolumeControlRect.Height() / 20,
-                             iVolumeControlRect.iTl.iX + iVolumeControlRect.Width() / 3 * 2,
-                             iVolumeControlRect.iTl.iY + iVolumeControlRect.Height() );
+    tmpLayoutRect.LayoutRect( iRect, bg_popup_window_pane_cp19( 9 ).LayoutLine() );
+    iVolumeControlRect = tmpLayoutRect.Rect();
 
-    iVolumeBarRectTop = TRect( iRect.Width() / 2 - KMPXVolumeBarWidth / 2 ,
-                               iVolumeBarRect.iTl.iY,
-                               iRect.Width() / 2 + KMPXVolumeBarWidth / 2,
-                               iVolumeBarRect.iTl.iY + iVolumeBarRect.Height() / 10 );
+
+    tmpLayoutRect.LayoutRect( iRect, aid_touch_area_slider( 6 ).LayoutLine() );
+    iVolumeBarRect = tmpLayoutRect.Rect();
+
+    tmpLayoutRect.LayoutRect( iRect, slider_pane( 6 ).LayoutLine() );
+    TRect sliderBarRect( tmpLayoutRect.Rect() );
+    TInt volumeBarEndHeight = sliderBarRect.Height() / 10;
+    iVolumeBarRectTop = TRect( sliderBarRect.iTl.iX,
+                               sliderBarRect.iTl.iY,
+                               sliderBarRect.iBr.iX,
+                               sliderBarRect.iTl.iY + volumeBarEndHeight );
+
+    iVolumeBarRectBottom = TRect( sliderBarRect.iTl.iX,
+                                  sliderBarRect.iBr.iY - volumeBarEndHeight,
+                                  sliderBarRect.iBr.iX,
+                                  sliderBarRect.iBr.iY );
 
     iVolumeBarRectMiddle = TRect( iVolumeBarRectTop.iTl.iX,
                                   iVolumeBarRectTop.iBr.iY,
                                   iVolumeBarRectTop.iBr.iX,
-                                  iVolumeBarRectTop.iBr.iY + iVolumeBarRectTop.Height() * 8 );
+                                  iVolumeBarRectBottom.iTl.iY );
 
-    iVolumeBarRectBottom = TRect( iVolumeBarRectTop.iTl.iX,
-                                  iVolumeBarRectMiddle.iBr.iY,
-                                  iVolumeBarRectTop.iBr.iX,
-                                  iVolumeBarRect.iBr.iY );
+    TInt volumeBarMiddleX = sliderBarRect.iTl.iX + sliderBarRect.Width() / 2;
+    iSliderRect = TRect( volumeBarMiddleX - KMPXSliderWidth / 2,
+                         sliderBarRect.iBr.iY - KMPXSliderHeight,
+                         volumeBarMiddleX + KMPXSliderWidth / 2,
+                         sliderBarRect.iBr.iY );
 
-    iSliderRect = TRect( iRect.Width() / 2 - KMPXSliderWidth / 2 + 3,
-                         iVolumeBarRect.iBr.iY - KMPXSliderHeight,
-                         iRect.Width() / 2 + KMPXSliderWidth / 2 + 3,
-                         iVolumeBarRect.iBr.iY );
+    tmpLayoutRect.LayoutRect( iRect, aid_touch_area_increase( 6 ).LayoutLine() );
+    iVolumeUpControlRect = tmpLayoutRect.Rect();
 
-    iVolumeUpControlRect = TRect( iRect.iTl,
-                           TSize( volumeUpDownIndicatorSize,
-                                  iVolumeControlRect.Height() / 2 ) );
+    tmpLayoutRect.LayoutRect( iRect, aid_touch_area_decrease( 6 ).LayoutLine() );
+    iVolumeDownControlRect = tmpLayoutRect.Rect();
 
-    iVolumeDownControlRect = TRect( TPoint ( iRect.iTl.iX, iVolumeControlRect.Height() / 2 ),
-                                    iVolumeUpControlRect.Size() );
+    tmpLayoutRect.LayoutRect( iRect, popup_slider_window_g4( 6 ).LayoutLine() );
+    iVolumeUpRect = tmpLayoutRect.Rect();
 
-    iVolumeUpRect = TRect( iVolumeUpControlRect.iTl.iX + 2,
-                           iVolumeUpControlRect.iTl.iY + 8,
-                           iVolumeUpControlRect.iBr.iX + 2,
-                           iVolumeUpControlRect.iTl.iY + volumeUpDownIndicatorSize );
+    tmpLayoutRect.LayoutRect( iRect, popup_slider_window_g5( 6 ).LayoutLine() );
+    iVolumeDownRect = tmpLayoutRect.Rect();
 
-    iVolumeDownRect = TRect( iVolumeUpRect.iTl.iX,
-                             iVolumeDownControlRect.iBr.iY - volumeUpDownIndicatorSize,
-                             iVolumeUpRect.iBr.iX,
-                             iVolumeDownControlRect.iBr.iY  );
+    tmpLayoutRect.LayoutRect( iRect, aid_touch_area_mute( 4 ).LayoutLine() );
+    iSpeakerControlRect = tmpLayoutRect.Rect();
 
-    iSpeakerControlRect = TRect( TPoint( iRect.iTl.iX, iVolumeControlRect.iBr.iY ),
-                                 iRect.iBr );
-
-    iSpeakerRect = TRect( iSpeakerControlRect.iTl.iX + iSpeakerControlRect.Width() / 5,
-                          iSpeakerControlRect.iTl.iY + iSpeakerControlRect.Height() / 5,
-                          iSpeakerControlRect.iBr.iX - iSpeakerControlRect.Width() / 5,
-                          iSpeakerControlRect.iBr.iY - iSpeakerControlRect.Height() / 5 );
+    tmpLayoutRect.LayoutRect( iRect, popup_slider_window_g6( 2 ).LayoutLine() );
+    iSpeakerRect = tmpLayoutRect.Rect();
 
     iOneVolumeIncrementHeight = (TReal)( iVolumeBarRect.Height() - KMPXSliderHeight )
                                 / (TReal)KPbPlaybackVolumeLevelMax;
@@ -413,7 +408,7 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     if ( iVolumeFrameIconTop )
     {
         AknIconUtils::SetSize( iVolumeFrameIconTop->Bitmap(),
-                               TSize( KMPXVolumeBarWidth, iVolumeBarRectTop.Height() ),
+                               TSize( iVolumeBarRectTop.Width(), iVolumeBarRectTop.Height() ),
                                EAspectRatioNotPreserved );
     }
 
@@ -429,7 +424,7 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     if ( iVolumeFrameIconMiddle )
     {
         AknIconUtils::SetSize( iVolumeFrameIconMiddle->Bitmap(),
-                               TSize( KMPXVolumeBarWidth, iVolumeBarRectMiddle.Height() ),
+                               TSize( iVolumeBarRectMiddle.Width(), iVolumeBarRectMiddle.Height() ),
                                EAspectRatioNotPreserved );
     }
 
@@ -445,8 +440,34 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     if ( iVolumeFrameIconBottom )
     {
         AknIconUtils::SetSize( iVolumeFrameIconBottom->Bitmap(),
-                               TSize( KMPXVolumeBarWidth, iVolumeBarRectBottom.Height() ),
+                               TSize( iVolumeBarRectBottom.Width(), iVolumeBarRectBottom.Height() ),
                                EAspectRatioNotPreserved );
+    }
+
+    // Calculate the X coordinate to center the icon of sliderbar
+    TRect volumeBarRectPart;
+    CGulIcon* volumeFrameIconPart = NULL;
+    if ( iVolumeFrameIconTop )
+    {
+        volumeFrameIconPart = iVolumeFrameIconTop;
+        volumeBarRectPart = iVolumeBarRectTop;
+    }
+    else if ( iVolumeFrameIconMiddle )
+    {
+        volumeFrameIconPart = iVolumeFrameIconMiddle;
+        volumeBarRectPart = iVolumeBarRectMiddle;
+    }
+    else if ( iVolumeFrameIconBottom )
+    {
+        volumeFrameIconPart = iVolumeFrameIconBottom;
+        volumeBarRectPart = iVolumeBarRectBottom;
+    }
+
+    if ( volumeFrameIconPart )
+    {
+        iCenteredSliderbarIconX = volumeBarRectPart.iTl.iX +
+            ( volumeBarRectPart.Width() -
+              volumeFrameIconPart->Bitmap()->SizeInPixels().iWidth ) / 2;
     }
 }
 
@@ -742,7 +763,7 @@ void CMPXVideoPlaybackVolumeBar::DoHandleVolumeDragEventTimeOut()
 
     if ( iDragging == EVolumeBarDragging )
     {
-        SetVolumeL( iVolumeWhileDraggingEvent );
+        MPX_TRAPD( err, SetVolumeL( iVolumeWhileDraggingEvent ) );
     }
 }
 
@@ -887,9 +908,11 @@ void CMPXVideoPlaybackVolumeBar::Draw( const TRect& aRect ) const
                          ETrue );
     }
 
+    TPoint srcPoint( iCenteredSliderbarIconX, 0 );
     if ( iVolumeFrameIconTop )
     {
-        gc.BitBltMasked( iVolumeBarRectTop.iTl,
+        srcPoint.iY = iVolumeBarRectTop.iTl.iY;
+        gc.BitBltMasked( srcPoint,
                          iVolumeFrameIconTop->Bitmap(),
                          TRect(iVolumeBarRectTop.Size()),
                          iVolumeFrameIconTop->Mask(),
@@ -898,7 +921,8 @@ void CMPXVideoPlaybackVolumeBar::Draw( const TRect& aRect ) const
 
     if ( iVolumeFrameIconMiddle )
     {
-        gc.BitBltMasked( iVolumeBarRectMiddle.iTl,
+        srcPoint.iY = iVolumeBarRectMiddle.iTl.iY;
+        gc.BitBltMasked( srcPoint,
                          iVolumeFrameIconMiddle->Bitmap(),
                          TRect(iVolumeBarRectMiddle.Size()),
                          iVolumeFrameIconMiddle->Mask(),
@@ -907,7 +931,8 @@ void CMPXVideoPlaybackVolumeBar::Draw( const TRect& aRect ) const
 
     if ( iVolumeFrameIconBottom )
     {
-        gc.BitBltMasked( iVolumeBarRectBottom.iTl,
+        srcPoint.iY = iVolumeBarRectBottom.iTl.iY;
+        gc.BitBltMasked( srcPoint,
                          iVolumeFrameIconBottom->Bitmap(),
                          TRect(iVolumeBarRectBottom.Size()),
                          iVolumeFrameIconBottom->Mask(),

@@ -237,6 +237,7 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
     IPTVLOGSTRING2_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL() Enter! Category id = %d", aCategoryId );
 
     CGulIcon* icon( NULL );
+    TAknsItemID skinId = KAknsIIDNone;
     TInt bitmapId( 0 );
     TInt maskId( 0 );
     TInt key( KErrNotFound );
@@ -248,26 +249,23 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
         case KVcxMvcCategoryIdDownloads:    // fall through
         case KVcxMvcCategoryIdAll:          // fall through
         case KVcxMvcCategoryIdOther:
+            skinId.Set( KAknsIIDQgnPropDownloadThumbnailVideo );
             iconFile = KVcxHgMyVideosMifFile;
             bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_download_thumbnail_video;
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_download_thumbnail_video_mask;
             break;
         case KVcxMvcCategoryIdCaptured:
+            skinId.Set( KAknsIIDQgnPropCapturedThumbnailVideo );
             iconFile = KVcxHgMyVideosMifFile;
             bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_captured_thumbnail_video;
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_captured_thumbnail_video_mask;
             break;
         case KCategoryIdLastWatched:
-            // If no last watched, dont show default icon
-            if ( iLastWatched )
-                {
-                iconFile = KVcxHgMyVideosMifFile;
-                bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video;
-                maskId = EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video_mask;
-                }
+            // Dont set default lw icon here, it'd just blink.
             break;
         case KCategoryIdExtraItem1:
             // ExtraItem1 is always interpreted as Ovi Store
+            skinId.Set( KAknsIIDQgnPropOviThumbnailVideo );
             iconFile = KVcxHgMyVideosMifFile;
             bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_ovi_thumbnail_video;
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_ovi_thumbnail_video_mask;
@@ -298,6 +296,7 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
             }
         else
             { // Use default service icon
+            skinId.Set( KAknsIIDQgnPropServiceThumbnailVideo );
             iconFile = KVcxHgMyVideosMifFile;
             bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_service_thumbnail_video;
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_service_thumbnail_video_mask;
@@ -318,7 +317,7 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
             iconFile = parse.FullName();
             IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::GetCategoryIconLC() get %d from file %S", bitmapId, &iconFile );
 
-            icon = CreateHgListIconL( iconFile, bitmapId, maskId );
+            icon = CreateHgListIconL( skinId, iconFile, bitmapId, maskId );
             }
         else
             {
@@ -944,6 +943,11 @@ void CVcxHgMyVideosCategoryModelHandler::PlayLastWatchedVidedoL()
 
         iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
         }
+    else
+        {
+        // Refresh the list to remove the highlight.
+        iScroller.DrawDeferred();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -1051,7 +1055,9 @@ void CVcxHgMyVideosCategoryModelHandler::ThumbnailReadyL(
         else
             {
             TFileName iconFile( KVcxHgMyVideosMifFile );
-            thumbnail = CreateHgListIconL( iconFile, 
+            thumbnail = CreateHgListIconL( 
+                KAknsIIDQgnPropRecentThumbnailVideo,
+                iconFile, 
                 EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video, 
                 EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video_mask );
 
@@ -1134,10 +1140,12 @@ void CVcxHgMyVideosCategoryModelHandler::HandleExtraItemSelectionL(
 // -----------------------------------------------------------------------------
 // 
 CGulIcon* CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL(
+        const TAknsItemID& aSkinId,
         const TFileName& aFileName,
         TInt aBitmapId,
         TInt aMaskId )
     {
+    IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL() skin major=%d, skin minor=%d", aSkinId.iMajor, aSkinId.iMinor );
     IPTVLOGSTRING4_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL() bitmap=%d mask=%d file %S", aBitmapId, aMaskId, &aFileName );
     
     CFbsBitmap* bitmap( NULL );
@@ -1145,7 +1153,9 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL(
     CGulIcon* icon( NULL );
 
     // Create default icon for Hg list.
-    AknIconUtils::CreateIconLC(
+    AknsUtils::CreateIconLC(
+            AknsUtils::SkinInstance(),
+            aSkinId,
             bitmap,
             mask,
             aFileName, 
@@ -1167,7 +1177,7 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL(
 
     // Ownership of bitmap and mask is transferred to icon.
     icon = CGulIcon::NewL( bitmap, mask );
-    CleanupStack::Pop( 2, bitmap ); // mask and bitmap
+    CleanupStack::Pop( 2 ); // mask and bitmap
 
     IPTVLOGSTRING2_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::CreateHgListIconL() icon=0x%08x", icon );
 

@@ -300,6 +300,21 @@ private:
     void DoHandleQueryNewResultsL(CMdEQuery& aQuery,
             TInt aFirstNewItemIndex, TInt aNewItemCount);
 
+    /**
+     * Sets Creation Date and Modified properties to object. Uses current date
+     * value.
+     * 
+     * @param aObject  Object to modify.
+     */
+    void SetCreationAndModifiedDatesL( CMdEObject& aObject );
+
+    /**
+     * Sets creation date to aObject from aVideo.
+     * 
+     * @param aVideo  Creation date is copied from here.
+     * @param aObject Creation date is written here.
+     */
+    void SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject );
 public:
 
     /**

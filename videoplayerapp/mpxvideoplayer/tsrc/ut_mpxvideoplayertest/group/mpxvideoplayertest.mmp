@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: ou1cpsw#11 %
 
 
 #include <platform_paths.hrh>
@@ -44,6 +44,7 @@ SOURCE          mpxviewutilityimp_stub.cpp
 SOURCE          mpxvideoplayerappui_stub.cpp
 SOURCE          mpxcollectionutility_stub.cpp
 SOURCE          mpxcollectionutilityimp_stub.cpp
+SOURCE          mpxcollectionuihelper_stub.cpp
 SOURCE          stifutilities.cpp
 SOURCE          coneutils_stub.cpp
 SOURCE          timeoutcontroller.cpp
@@ -77,7 +78,6 @@ LIBRARY         ServiceHandler.lib
 LIBRARY         ecom.lib
 LIBRARY         estor.lib
 LIBRARY         videoplaylistutility.lib
-LIBRARY         mpxcollectionhelper.lib
 LIBRARY         mpxcollectionutility.lib
 LIBRARY	        bafl.lib
 

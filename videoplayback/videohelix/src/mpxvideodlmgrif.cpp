@@ -15,6 +15,7 @@
 *
 */
 
+
 // Version : %version: 23 %
 
 
@@ -501,6 +502,7 @@ void CMPXVideoDlMgrIf::HandleDownloadComplete()
     //
     //  Notify the player and the UI view that the download is complete
     //
+    HandleCustomCommand( EMMFROPControllerSetDownloadSize, iDlTotalSize );
     HandleCustomCommand( EMMFROPControllerSetDownloadComplete, ETrue );
 }
 

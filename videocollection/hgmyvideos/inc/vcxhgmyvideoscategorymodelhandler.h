@@ -34,6 +34,7 @@ class CHgScroller;
 class CMPXMedia;
 class CMyVideosIndicator;
 class CVcxHgMyVideosThumbnailManager;
+class TAknsItemID;
 
 // ENUMERATIONS
 enum TVcxHgMyVideosCategoryItemType
@@ -328,12 +329,14 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
         /**
          * Create hg list icon from file
          * 
+         * @param aSkinId Skin-Id of the icon
          * @param aFileName mif file name
-         * @param aBitmapId bitmap index in mif file
-         * @param aMaskId mask index in mif file
+         * @param aBitmapId bitmap index in mif file (used if skin-Id is not found)
+         * @param aMaskId mask index in mif file (used if skin-Id is not found)
          * @return Icon
          */
         CGulIcon* CreateHgListIconL(
+                const TAknsItemID& aSkinId,
                 const TFileName& aFileName,
                 TInt aBitmapId,
                 TInt aMaskId );

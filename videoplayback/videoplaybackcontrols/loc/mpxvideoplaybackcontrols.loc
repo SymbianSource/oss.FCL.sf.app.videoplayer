@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 //
 //  LOCALISATION STRINGS
@@ -110,5 +110,12 @@
 //r:5.2
 //
 #define qtn_mpx_license_heading  "Click here for License information"
+
+//d:Command text for "Details softkey
+//d:Opens a popup for detailed information.
+//l:control_pane_t1/opt7
+//r:5.2
+//
+#define qtn_mpx_details "Details"
 
 // End of File

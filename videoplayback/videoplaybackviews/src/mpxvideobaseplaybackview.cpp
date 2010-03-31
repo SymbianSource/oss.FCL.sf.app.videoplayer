@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 66 %
+// Version : %version: 68 %
 
 
 //  Include Files
@@ -184,7 +184,8 @@ CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
 //
 void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd )
 {
-    MPX_DEBUG(_L("CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL(%d)"), aCmd );
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()"),
+                   _L("aCmd = %d"), aCmd );
 
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
@@ -363,6 +364,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case KMpxVideoPlaybackPdlReloading:
         {
             iPdlReloading = ETrue;
+            iMediaRequested = EFalse;
             break;
         }
         case EMPXPbvCmdRealOneBitmapTimeout:
@@ -451,18 +453,6 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
         //  Create Video Playback Display Handler
         //
         iDisplayHandler = CMPXVideoPlaybackDisplayHandler::NewL( iPlaybackUtility, iContainer );
-
-        //
-        //  Delay the adding of the display window while the Real One Bitmap is being shown
-        //
-        if ( ! iContainer->IsRealOneBitmapTimerActive() )
-        {
-            //
-            //  Setup the display window
-            //
-            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
-                                                   iContainer->GetWindow() );
-        }
     }
 
     //
@@ -773,7 +763,10 @@ void CMPXVideoBasePlaybackView::DoHandlePlaybackMessageL( CMPXMessage* aMessage 
     }
     else if ( KMPXMediaIdVideoDisplaySyncMessage == id )
     {
-        iDisplayHandler->HandleVideoDisplaySyncMessageL( aMessage );
+        if ( iDisplayHandler )
+        {
+            iDisplayHandler->HandleVideoDisplaySyncMessageL( aMessage );
+        }
     }
 }
 
@@ -788,7 +781,7 @@ void CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL( CMPXMessage* aMes
     TInt data( *aMessage->Value<TInt>( KMPXMessageGeneralData ) );
 
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL()"),
-                   _L("event = %d type = %d  value = %d"), event, type, data );
+                   _L("event = %d type = %d value = %d"), event, type, data );
 
     switch ( event )
     {
@@ -1000,20 +993,6 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
                         iMediaRequested = EFalse;
 
                         iContainer->HandleCommandL( EMPXPbvCmdResetControls );
-
-                        //
-                        //  Delay the adding of the display window while the Real One Bitmap
-                        //  is being shown
-                        //
-                        if ( ! iContainer->IsRealOneBitmapTimerActive() && iDisplayHandler )
-                        {
-                            //
-                            //  Setup the display window since it was destroyed to free the surface
-                            //
-                            iDisplayHandler->CreateDisplayWindowL(
-                                                 *(CCoeEnv::Static()->ScreenDevice()),
-                                                 iContainer->GetWindow() );
-                        }
 
                         if ( iFileDetails )
                         {
@@ -1295,12 +1274,15 @@ void CMPXVideoBasePlaybackView::DoHandleMediaL( const CMPXMessage& aMedia, TInt 
 
         if ( iFileDetails->iVideoEnabled )
         {
-            TRect displayRect = iContainer->Rect();
+            //
+            //  Calculate the aspect ratio and setup the display hanlder with the display window
+            //  Aspect ratio should be calculated 1st so the auto scale will be set when
+            //  the display window is created.
+            //
+            TInt newAspectRatio = iDisplayHandler->SetDefaultAspectRatioL( iFileDetails );
 
-            TReal displayAspectRatio = (TReal32)displayRect.Width() / (TReal32)displayRect.Height();
-
-            TInt newAspectRatio = iDisplayHandler->SetDefaultAspectRatioL( iFileDetails,
-                                                                           displayAspectRatio );
+            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
+                                                   iContainer->GetWindow() );
 
             iContainer->HandleEventL( EMPXControlCmdSetAspectRatio, newAspectRatio );
         }
@@ -2209,11 +2191,7 @@ void CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()
     {
         if ( iDisplayHandler )
         {
-            //
-            //  Setup the display window
-            //
-            iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
-                                                   iContainer->GetWindow() );
+            iDisplayHandler->DoHandleRealOneBitmapTimeoutL();
         }
     }
     else

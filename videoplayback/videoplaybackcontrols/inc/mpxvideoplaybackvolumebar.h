@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: e003sa33#8 %
 
 
 
@@ -169,6 +169,8 @@ class CMPXVideoPlaybackVolumeBar : public CCoeControl
         CPeriodic*              iDraggingHandlerTimer;
 
         CMPXVideoPlaybackControlsController* iController;
+
+        TInt iCenteredSliderbarIconX;
 
 #ifdef RD_TACTILE_FEEDBACK
         MTouchFeedback*         iFeedback;

@@ -15,18 +15,18 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: 9 %
 
 // APPLICATION TITLES
 //
 
 //d:Application title for the grid view
 //d: Title of the icon in grid view for the user to start the application
-//d: This string will be shown in the task switcher when Videos & Tv is running.
+//d: This string will be shown in the task switcher when Videos is running.
 //d: Translation should be identical with qtn_vcx_title_suite
 //l:cell_app_pane_t1
 //r:5.2
-#define qtn_mpxvideoplayer_short_caption        "Videos & TV"
+#define qtn_mpxvideoplayer_short_caption        "Videos"
 
 //d:Application title for the list view
 //d: Title of the icon in list view for the user to start the application.
@@ -34,16 +34,6 @@
 //d: The translation for this string should be equal to qtn_vcx_title_suite
 //l:list_single_large_graphic_pane_t1
 //r:5.2
-#define qtn_mpxvideoplayer_caption              "Videos & TV"
-
-// VIEW TITLES
-//
-
-//d:Text in the title pane
-//d:This text is shown when the application is starting up.
-//d:The translation should be identical to qtn_vcx_title_suite
-//l:title_pane_t2/opt9
-//r:5.2
-#define qtn_mpxvideoplayer_title                "Videos & TV"
+#define qtn_mpxvideoplayer_caption              "Videos"
 
 // End of File

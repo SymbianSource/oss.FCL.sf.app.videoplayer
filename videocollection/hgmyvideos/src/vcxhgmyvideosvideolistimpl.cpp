@@ -321,7 +321,7 @@ void CVcxHgMyVideosVideoListImpl::DeleteVideosL()
     OperationTargetsToMpxIdsL( operationTargetIndexes, operationTargetIds );
 
     if ( ConfirmDeleteVideosL( operationTargetIndexes.Count(),
-                               iVideoModel->GetVideoName( operationTargetIndexes[0] ) ) )
+                               iVideoModel->GetVideoName( operationTargetIds[0] ) ) )
         {
         HandleMarkCommandL( EVcxHgMyVideosCmdUnmarkAll );
 

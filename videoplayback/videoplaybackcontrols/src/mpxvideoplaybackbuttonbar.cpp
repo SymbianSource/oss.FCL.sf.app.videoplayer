@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: e003sa33#17 %
 
 
 
@@ -188,18 +188,18 @@ void CMPXVideoPlaybackButtonBar::SkinChangeL()
     //
     iButtons[EMPXButtonFastForward]->CreateDefaultButtonL(
             KAknsIIDQgnPropImageTbNext,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next_mask );
 
     iButtons[EMPXButtonFastForward]->CreateDimmedButtonL(
             KAknsIIDQgnPropImageTbNextDimmed,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next_dimmed,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next_dimmed_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next_dimmed,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next_dimmed_mask );
 
     iButtons[EMPXButtonFastForward]->CreatePressedButtonL(
             KAknsIIDQgnPropImageTbNextFocused,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next_focused,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_next_focused_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next_focused,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_next_focused_mask );
 
     //
     // Play button
@@ -227,18 +227,18 @@ void CMPXVideoPlaybackButtonBar::SkinChangeL()
     //
     iButtons[EMPXButtonRewind]->CreateDefaultButtonL(
             KAknsIIDQgnPropImageTbPrev,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev_mask );
 
     iButtons[EMPXButtonRewind]->CreateDimmedButtonL(
             KAknsIIDQgnPropImageTbPrevDimmed,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev_dimmed,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev_dimmed_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev_dimmed,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev_dimmed_mask );
 
     iButtons[EMPXButtonRewind]->CreatePressedButtonL(
             KAknsIIDQgnPropImageTbPrevFocused,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev_focused,
-            EMbmMpxvideoplaybackcontrolsQgn_prop_image_tb_prev_focused_mask );
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev_focused,
+            EMbmMpxvideoplaybackcontrolsQgn_prop_fusionplayer_tb_prev_focused_mask );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -691,7 +691,7 @@ void CMPXVideoPlaybackButtonBar::Reset()
         // Abandon the ongoing seek operation
         TPointerEvent event;
         event.iType = TPointerEvent::EButton1Up;
-        HandlePointerEventL(event);
+        MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }
 

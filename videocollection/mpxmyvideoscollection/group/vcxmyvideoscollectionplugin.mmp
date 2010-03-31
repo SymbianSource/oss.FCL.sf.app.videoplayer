@@ -44,6 +44,7 @@ SOURCE          vcxmyvideosdriveinfo.cpp
 SOURCE          vcxmyvideosdrivemonitorevent.cpp
 SOURCE          vcxmyvideosactivetask.cpp
 SOURCE          vcxmyvideosopenhandler.cpp
+SOURCE          vcxmyvideosasyncfilecopy.cpp
 
 SOURCEPATH      ../download/src
 SOURCE          vcxmyvideosdownloadutil.cpp

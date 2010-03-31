@@ -32,13 +32,13 @@
 //
 #define qtn_iptv_new_service_main               "Add new services"
 
-//d:Title of the Videos & TV suite in the main screen
+//d:Title of the Videos application in the main screen
 //d: Used also in general settings plugin title.
 //d: Ui Spec sec 1.4 Corrections April 2009 (p9)
 //l:title_pane_t2/opt9
-//r:5.0
+//r:5.2
 
-#define qtn_vcx_title_suite          "Videos & TV"
+#define qtn_vcx_title_suite          "Videos"
 
 //d:last is an addejective meaning the most recently watched
 //d: UI Spec sec 5 Main View(p19)

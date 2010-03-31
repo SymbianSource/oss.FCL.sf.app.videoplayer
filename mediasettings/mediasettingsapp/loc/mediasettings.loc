@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -41,7 +41,7 @@
 //l:list_single_large_graphic_pane_t1
 //r:5.2
 //
-#define qtn_set_folder_media_player "Video Player"
+#define qtn_set_folder_media_player "Videos"
 
 
 // ** MAIN view **

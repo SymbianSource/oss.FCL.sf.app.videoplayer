@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 //  RESOURCE IDENTIFIER
 NAME    FUSN // 4 letter ID
@@ -88,14 +88,3 @@ RESOURCE LOCALISABLE_APP_INFO r_mpxvideoplayer_localisable_app_info
         };
     }
 
-// -----------------------------------------------------------------------------
-//   
-// r_mpxvideoplayer_title
-// Default title text 
-//
-// -----------------------------------------------------------------------------
-//
-RESOURCE TBUF r_mpxvideoplayer_title
-    { 
-    buf = qtn_mpxvideoplayer_title;
-    }

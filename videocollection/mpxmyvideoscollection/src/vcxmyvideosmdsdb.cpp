@@ -230,16 +230,9 @@ void CVcxMyVideosMdsDb::AddVideoL(
     CMdEObject* object = iMDSSession->NewObjectLC(
             *iVideoObjectDef, aVideo.ValueText( KMPXMediaGeneralUri ) ); // 1->
 
-    // check if the file exists and use the creation time from the file
+    // Value from aVideo is taken in use in Media2ObjectL if aVideo contains creation date
+    SetCreationAndModifiedDatesL( *object ); // use current time
     
-    TTime time;
-    time.UniversalTime();
-	TTimeIntervalSeconds timeOffset = User::UTCOffset();
-	TTime localTime = time + timeOffset;
-        
-    object->AddTimePropertyL( *iCreationDatePropertyDef, localTime ); 
-	object->AddInt16PropertyL( *iTimeOffsetPropertyDef, timeOffset.Int() / 60 );
-    object->AddTimePropertyL( *iLastModifiedDatePropertyDef, localTime );
     object->AddUint8PropertyL( *iOriginPropertyDef,
             aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ) );
 
@@ -1056,22 +1049,9 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
         }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-#if 0    
+#if 1
     // 6. KMPXMediaGeneralDate ( creation date )
-    if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
-        {
-        TInt64 creationDateInt64 = 0;
-        creationDateInt64 = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-        TTime creationDate( creationDateInt64 );
-        if ( aObject.Property( *iCreationDatePropertyDef, property, 0 ) != KErrNotFound )
-            {
-            static_cast<CMdETimeProperty*>(property)->SetValueL( creationDate );
-            }
-        else
-            {
-            aObject.AddTimePropertyL( *iCreationDatePropertyDef, creationDate );
-            }
-        }
+    SetCreationDateToObjectL( aVideo, aObject );
 #endif
     
     // 7. KMPXMediaGeneralFlags (including DRM flag)
@@ -1397,6 +1377,37 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
     }
 
 // ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::SetCreationDateToObjectL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject )
+    {
+    CMdEProperty* property;
+    
+    if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
+        {
+        TInt64 creationDateInt64 = 0;
+        creationDateInt64 = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
+        TTime creationDate( creationDateInt64 );
+        if ( aObject.Property( *iCreationDatePropertyDef, property, 0 ) != KErrNotFound )
+            {
+            static_cast<CMdETimeProperty*>(property)->SetValueL( creationDate );
+            }
+        else
+            {
+            aObject.AddTimePropertyL( *iCreationDatePropertyDef, creationDate );
+            }
+#ifdef _DEBUG
+        TDateTime dT = creationDate.DateTime();
+        TBuf<200> buf;
+        buf.Format(_L("date from aVideo to aObject: %2d.%2d.%4d %2d:%2d:%2d"),
+                dT.Day()+1, dT.Month()+1, dT.Year(), dT.Hour(), dT.Minute(), dT.Second() ); 
+        MPX_DEBUG2("%S", &buf ); 
+#endif
+        }
+    }
+
+// ---------------------------------------------------------------------------
 // CVcxMyVideosMdsDb::GetSchemaDefinitionsL
 // ---------------------------------------------------------------------------
 //
@@ -1506,3 +1517,19 @@ void CVcxMyVideosMdsDb::DoHandleObjectNotificationL(
             
     }
 
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::SetCreationAndModifiedDatesL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::SetCreationAndModifiedDatesL( CMdEObject& aObject )
+    {
+    TTime time;
+    time.UniversalTime();
+    TTimeIntervalSeconds timeOffset = User::UTCOffset();
+    TTime localTime = time + timeOffset;
+
+    const TInt secondsInMinute( 60 );    
+    aObject.AddTimePropertyL( *iCreationDatePropertyDef, localTime ); 
+    aObject.AddInt16PropertyL( *iTimeOffsetPropertyDef, timeOffset.Int() / secondsInMinute );
+    aObject.AddTimePropertyL( *iLastModifiedDatePropertyDef, localTime );
+    }

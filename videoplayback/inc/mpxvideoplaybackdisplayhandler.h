@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -71,8 +71,9 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 
-        TInt SetDefaultAspectRatioL( CMPXVideoPlaybackViewFileDetails* aFileDetails,
-                                     TReal aDisplayAspectRatio );
+        TInt SetDefaultAspectRatioL( CMPXVideoPlaybackViewFileDetails* aFileDetails );
+
+        void DoHandleRealOneBitmapTimeoutL();
 
     private:
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 35 %
+// Version : %version: e003sa33#36 %
 
 
 //
@@ -990,7 +990,7 @@ void CMPXInitialisingState::HandleOpenComplete( TInt aError )
             TInt64 pos( iVideoPlaybackCtlr->iSavedPosition );
             pos *= KPbMilliMultiplier;
             
-            iVideoPlaybackCtlr->iPlayer->SetPositionL( pos );
+            MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->SetPositionL( pos ) );
         }
                
         MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  Sending Prepare()"));
@@ -1576,7 +1576,7 @@ void CMPXPausedState::HandleForeground()
     }
     else
     {
-        iVideoPlaybackCtlr->iPlayer->RefreshFrameL();
+        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
     }
 }
 

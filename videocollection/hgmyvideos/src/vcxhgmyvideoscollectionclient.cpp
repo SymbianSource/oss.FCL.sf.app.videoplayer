@@ -1007,8 +1007,8 @@ void CVcxHgMyVideosCollectionClient::HandleMyVideosMoveOrCopyMessageL( CMPXMessa
 
         for ( TInt i = 0; i < messageArray->Count(); i++ )
             {
-            if ( messageArray->AtL( i )->ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value )
-                 != KErrNone )
+            TInt err = messageArray->AtL( i )->ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
+            if ( err != KErrNone && err != KErrAlreadyExists )
                 {
                 failedCount++;
 
