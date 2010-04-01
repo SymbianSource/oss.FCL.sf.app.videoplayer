@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
-
 
 
 
@@ -22,6 +21,7 @@
 #define VCXMYVIDEOSCOLLECTIONUTIL_H
 
 // INCLUDES
+#include <vcxmyvideosdefs.h>
 
 // FORWARD DECLARATIONS
 class CMPXMedia;
@@ -81,6 +81,15 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
                 RArray<CMPXMedia*>& aFromArray,
                 CMPXMedia& aToList,
                 RArray<TUint32>& aMdsIds );
+
+        /**
+        * Appends all items from aFromList to aToList. New items will point to
+        * same shared memory.
+        *
+        * @param aToList   List in which items are appended to.
+        * @param aFromList List in which items are copied from.
+        */
+        static void AppendToListL( CMPXMedia& aToList, CMPXMedia& aFromList );
 
         /**
         * Converts drive letter to drive number.
@@ -206,6 +215,44 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         *                     returns also KErrNotFound.
         */
         static TInt Origin( TInt aCategoryId );
+
+        /**
+         * Gets KMPXMediaArrayContents attribute from aMedia. Leaves
+         * with KErrArgument is attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Pointer to media array.
+         */
+        static CMPXMediaArray* MediaArrayL( CMPXMedia& aMedia );
+        
+        /**
+         * Gets KVcxMediaMyVideosInt32Value attribute from aMedia. Leaves
+         * with KErrArgument if attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Value of KVcxMediaMyVideosInt32Value attribute.
+         */
+        static TInt32 Int32ValueL( CMPXMedia& aMedia );
+
+        /**
+         * Gets KVcxMediaMyVideosUint32Value attribute from aMedia. Leaves
+         * with KErrArgument if attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Value of KVcxMediaMyVideosUint32Value attribute.
+         */
+        static TUint32 Uint32ValueL( CMPXMedia& aMedia );
+        
+        /**
+         * Gets KMPXMediaGeneralId attributes from aMediaArray and
+         * puts them to aIdArray. aIdArray is reset before adding.
+         * 
+         * @param aMediaArray  Media array containing media items which
+         *                     have KMPXMediaGeneralId attribute set.
+         * @param aIdArray     Array where to the IDs are written to.
+         */
+        static void GetIdsFromMediaArrayL( CMPXMediaArray& aMediaArray,
+                RArray<TUint32>& aIdArray );
 
 #ifdef _DEBUG
         /**

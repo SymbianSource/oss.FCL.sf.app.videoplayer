@@ -17,18 +17,22 @@
 */
 
 // INCLUDES
+
+
+
 #define private public
 #include "videosortfilterproxymodel.h"
 #undef private
 
 #include "filterproxytester.h"
+#include "videolistdatamodel.h"
 
 // ---------------------------------------------------------------------------
 // FilterProxyTester
 // ---------------------------------------------------------------------------
 //
-FilterProxyTester::FilterProxyTester(QObject *parent) :
-VideoSortFilterProxyModel(parent)    
+FilterProxyTester::FilterProxyTester(int type, QObject *parent) :
+VideoSortFilterProxyModel(type, parent)    
 {
     // NOP
 }

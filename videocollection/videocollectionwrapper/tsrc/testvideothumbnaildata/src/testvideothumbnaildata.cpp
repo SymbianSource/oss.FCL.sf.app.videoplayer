@@ -47,12 +47,19 @@ int main(int argc, char *argv[])
 
     TestVideoThumbnailData tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\TestVideoThumbnailData.txt";
-
-    int res = QTest::qExec(&tv, 3, pass);
+    int res;
+    if(argc > 1)
+    {   
+        res = QTest::qExec(&tv, argc, argv);
+    }
+    else
+    {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\TestVideoThumbnailData.txt";
+        res = QTest::qExec(&tv, 3, pass);
+    }
 
     return res;
 }
@@ -80,19 +87,6 @@ void TestVideoThumbnailData::testInstance()
 {
     VideoThumbnailData &instance = VideoThumbnailData::instance();
     QCOMPARE(VideoThumbnailDataPrivate::mConstructCallCount, 1);
-}
-
-
-// ---------------------------------------------------------------------------
-// testStartFetchingThumbnail
-// ---------------------------------------------------------------------------
-//
-void TestVideoThumbnailData::testStartFetchingThumbnail()
-{
-    VideoThumbnailData &instance = VideoThumbnailData::instance();
-    QCOMPARE(VideoThumbnailDataPrivate::mConstructCallCount, 1);
-    QVERIFY(instance.startFetchingThumbnail(0, 0) == 0);
-    QCOMPARE(VideoThumbnailDataPrivate::mStartFetchingThumbnailCallCount, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -153,8 +147,20 @@ void TestVideoThumbnailData::testStartBackgroundFetching()
 {
     VideoThumbnailData &instance = VideoThumbnailData::instance();
     QCOMPARE(VideoThumbnailDataPrivate::mConstructCallCount, 1);
-    instance.startBackgroundFetching(0);
+    instance.startBackgroundFetching(0, 0);
     QCOMPARE(VideoThumbnailDataPrivate::mStartBackgroundFetchingCallCount, 1);    
+}
+
+// ---------------------------------------------------------------------------
+// testEnableThumbnailCreation
+// ---------------------------------------------------------------------------
+//
+void TestVideoThumbnailData::testEnableThumbnailCreation()
+{
+    VideoThumbnailData &instance = VideoThumbnailData::instance();
+    QCOMPARE(VideoThumbnailDataPrivate::mConstructCallCount, 1);
+    instance.enableThumbnailCreation(true);
+    QCOMPARE(VideoThumbnailDataPrivate::mEnableThumbnailCreationCallCount, 1);
 }
 
 // End of file

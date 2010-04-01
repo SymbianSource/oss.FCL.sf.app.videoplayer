@@ -23,6 +23,7 @@
 
 #include "videosortfilterproxymodel.h"
 
+class VideoListDataModel;
 
 class  FilterProxyTester : public VideoSortFilterProxyModel
 {
@@ -35,7 +36,7 @@ public: // Constructors and destructor
      * Constructor
      *
      */
-    FilterProxyTester(QObject *parent=0);
+    FilterProxyTester(int type, QObject *parent=0);
 
     /**
      * destructor

@@ -48,9 +48,11 @@ HEADERS += inc/videodatasignalreceiver.h \
            inc/videolistdatamodel_p.h \
            inc/videothumbnaildata.h \
            inc/videothumbnaildata_p.h \
+           inc/videothumbnailfetcher.h \
            inc/videocollectionutils.h \
            inc/videosortfilterproxymodel.h \
            inc/videodatacontainer.h \
+           inc/videodeleteworker.h \
            ../inc/videocollectionexport.h
            
 SOURCES += src/videocollectionclient.cpp \
@@ -61,8 +63,10 @@ SOURCES += src/videocollectionclient.cpp \
            src/videolistdatamodel_p.cpp \
            src/videothumbnaildata.cpp \
            src/videothumbnaildata_p.cpp \
+           src/videothumbnailfetcher.cpp \
            src/videocollectionutils.cpp \
            src/videosortfilterproxymodel.cpp \
+           src/videodeleteworker.cpp \
            src/videodatacontainer.cpp
           
 LIBS += -lmpxcommon.dll \

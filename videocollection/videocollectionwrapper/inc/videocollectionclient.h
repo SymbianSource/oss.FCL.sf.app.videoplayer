@@ -19,7 +19,7 @@
 
 #include <vcxmyvideosdefs.h>
 #include <QList>
-
+#include "videocollectioncommon.h"
 // FORWARD DECLARATIONS
 
 class MMPXCollectionUtility;
@@ -52,21 +52,14 @@ public:
     /**
      * Initializes object and allocates members
      * 
+     * @param signal receiver
+     * 
      * @return 0 if ok, < 0 in case of error
      */
-    int initialize();
+    int initialize(VideoDataSignalReceiver *signalReceiver);
 
 public:
    
-    /**
-     * Collection level app browsed to
-     */
-    enum TCollectionLevels
-    {
-        ELevelInvalid = -1,
-    	ELevelCategory = 2,
-        ELevelVideos   = 3
-    };
         
     /**
      * Collection opening status
@@ -101,11 +94,10 @@ public:
     int getCollectionLevel();
     
     /**
-     * Returns the current category
+     * Returns the current category requested to open
      * 
-     * @return int
      */
-    void getCategoryIds(int& id, int& type);
+    void getCategoryId(TMPXItemId &id);
 
     /**
      * Returns reference to collection open status. Client can use
@@ -146,12 +138,12 @@ public:
     int deleteVideos(QList<TMPXItemId> *mediaIds);
     
     /**
-     * calls collection to open video object defined by the given id
+     * Calls collection to open item defined by the given id.
      * 
      * @param aMediaId id of the item
      * @return KErrNone if ok  
      */
-    int openVideo(TMPXItemId &mediaId);
+    int openItem(TMPXItemId &mediaId);
 
     /**
      * calls collection to go back to collection level
@@ -181,16 +173,29 @@ public:
     int getVideoDetails(TMPXItemId& aMediaId);
     
     /**
-     * Creates a new collection (album).
+     * Add a new album.
      * 
-     * @param name Name for the collection.
-     * @param thumbnail Path for the image file to use as a thumbnail for the
-     *      collection. Can be empty.
-     * @param mediaIds Media ids of the videos that are added to the collection 
-     *      at creation time. Size can be zero.
-     * @return 0, if collection creation was success, below 0 if there was an error.
+     * @param title, Album title.
+     * @return TMPXItemId id of created album TMPXItemId:::InvalidId() in case of failure
      */
-    int addNewCollection(QString name, QString thumbnail, QList<TMPXItemId> mediaIds);
+    TMPXItemId addNewAlbum(const QString &title);
+
+    /**
+     * Add a new album.
+     * 
+     * @param mediaIds, list of album id's to be removed.
+     * @return 0 if no errors.
+     */
+    int removeAlbums(const QList<TMPXItemId> &mediaIds);
+
+    /**
+     * Add items in existing album.
+     * 
+     * @param albumId, Album where to add items.
+     * @param mediaIds, Items which to add.
+     * @return 0 if no errors.
+     */
+    int addItemsInAlbum(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);
 
 private:
     
@@ -234,16 +239,14 @@ private:
      * @param videoId id of the video to get details from 
      */
     void getVideoDetailsL(TMPXItemId &videoId);
-    
+        
     /**
-     * Creates a new collection (album).
+     * Removes user created albums.
      * 
-     * @param name Name for the collection.
-     * @param mediaIds Media ids of the videos that are added to the collection 
-     *      at creation time. Size can be zero.
+     * @param mediaIds, list of album id's to be removed
      */
-    void addNewCollectionL(QString name, QString thumbnail, QList<TMPXItemId> mediaIds);
-    
+    void removeAlbumsL(const QList<TMPXItemId> &mediaIds);
+
     /**
      * Private implementation to handle leaving code while starting to fetch video 
      * object from collection
@@ -251,6 +254,23 @@ private:
      * @param mpxId mpxif for the video object to fetch from collection
      */
     void fetchMpxMediaByMpxIdL(TMPXItemId &mpxId);    
+    
+    /**
+     * Create a new album.
+     * 
+     * @param title, Album title.
+     * @return album id.
+     */
+    TMPXItemId createAlbumL(const QString &title);
+    
+    /**
+     * Add items in an album.
+     * 
+     * @param albumId, Album where to add items.
+     * @param mediaIds, Items to add in the album.
+     * @return None.
+     */
+    void addItemsInAlbumL(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);
     
 private:
     
@@ -279,7 +299,7 @@ private:
     /**
      * Variable for storing My Videos collection path level.
      */
-    TCollectionLevels mCollectionPathLevel;
+    VideoCollectionCommon::TCollectionLevels mCollectionPathLevel;
  };
 
 #endif // __VIDEOCOLLECTIONCLIENT_H

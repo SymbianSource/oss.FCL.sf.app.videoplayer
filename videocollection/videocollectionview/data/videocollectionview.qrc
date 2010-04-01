@@ -13,4 +13,7 @@
         <file>images/services_icon.svg</file>
         <file>images/services_icon_pressed.svg</file>
     </qresource>
+    <qresource prefix="/style" >
+        <file>hblistviewitem.css</file>
+    </qresource>
 </RCC>

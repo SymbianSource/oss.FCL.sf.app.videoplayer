@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#28 %
+// Version : %version: da1mmcf#30 %
 
 
 
@@ -23,8 +23,8 @@
 
 
 
-#include <qtimer>
-#include <qgraphicssceneevent>
+#include <QTimer>
+#include <QGraphicsSceneEvent>
 
 #include <hbmenu.h>
 #include <hbaction.h>
@@ -34,7 +34,7 @@
 
 #include <textresolver.h>
 #include <mmf/common/mmferrors.h>
-#include <drmhelper.h>
+#include <DRMHelper.h>
 
 #include <mpxvideoplaybackdefs.h>
 #include <mpxplaybackcommanddefs.h>
@@ -361,19 +361,6 @@ bool HbVideoBasePlaybackView::event( QEvent *event )
     }
 
     return consumed;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::closePlaybackView()
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::paint( QPainter *painter,
-                                     const QStyleOptionGraphicsItem *option,
-                                     QWidget *widget )
-{
-    Q_UNUSED( widget );
-
-    painter->fillRect( option->exposedRect, Qt::black );
 }
 
 // -------------------------------------------------------------------------------------------------

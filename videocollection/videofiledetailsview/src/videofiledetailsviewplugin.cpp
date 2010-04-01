@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,26 +12,26 @@
 * Contributors:
 *
 * Description:   VideoCollectionViewPlugin class implementation
-* 
+*
 */
 
 // INCLUDE FILES
+#include <qcoreapplication.h>
 #include <xqserviceutil.h>
 #include <xqplugin.h>
 #include <hbview.h>
 #include <hbinstance.h>
-#include <hblabel.h>
 #include <hbstackedwidget.h>
 #include <hbmarqueeitem.h>
 #include <hbpushbutton.h>
 #include <hbaction.h>
-#include <hbratingslider.h>
-#include <hbscrollarea.h>
 #include <qabstractitemmodel.h>
 #include <qdebug.h>
 #include <hbmessagebox.h>
+#include <hblistwidget.h>
+#include <hblistwidgetitem.h>
+#include <hblistviewitem.h>
 #include <cmath>
-#include <hbframedrawer.h>
 #include <thumbnailmanager_qt.h>
 #include "videocollectionclient.h"
 #include "videofiledetailsviewplugin.h"
@@ -40,24 +40,19 @@
 #include "videocollectionwrapper.h"
 #include "videosortfilterproxymodel.h"
 #include "videoservices.h"
+#include "videodetailslabel.h"
 
 const char* const VIDEO_DETAILS_DOCML = ":/xml/videofiledetails.docml";
 const char* const VIDEO_DETAILS_GFX_PLAY = ":/gfx/play.png";
 const char* const VIDEO_DETAILS_GFX_DEFAULT = ":/gfx/pri_large_video.svg";
 const char* const VIDEO_DETAILS_VIEW = "videofiledetailsview";
 const char* const VIDEO_DETAILS_TITLE = "mLblTitle";
-const char* const VIDEO_DETAILS_RATING = "mRatingSlider";
-const char* const VIDEO_DETAILS_LAYOUT_VIDEO_INFO = "mLayoutVideoInfo";
-const char* const VIDEO_DETAILS_DETAIL_SCROLL_AREA = "mDetailScrollArea";
-const char* const VIDEO_DETAILS_ITEM = "mLblDetail";
-const char* const VIDEO_DETAILS_BUTTON_PLAY = "mBtnPlay";
-const char* const VIDEO_DETAILS_BUTTON_ATTACH = "mBtnAttach";
+const char* const VIDEO_DETAILS_THUMBNAIL = "mDetailsLabel";
+const char* const VIDEO_DETAILS_BUTTON = "mButton";
 const char* const VIDEO_DETAILS_MENUACTION_DELETE = "mOptionsDelete";
-const char* const VIDEO_DETAILS_MENUACTION_SHARE = "mOptionsShare";
+const char* const VIDEO_DETAILS_LISTWIDGET ="mDetailsList";
 
-const int VIDEO_DETAILS_DETAIL_AMOUNT = 6;
-
-// Just for testing, remove this 
+// Just for testing, remove this
 void _DebugNotImplementedYet()
 {
     HbMessageBox::information(QObject::tr("Not implemented yet"));
@@ -73,12 +68,15 @@ VideoFileDetailsViewPlugin::VideoFileDetailsViewPlugin()
       mActivated(false),
       mIsService(false),
       mCreated(VideoFileDetailsViewPlugin::ENotCreated),
-      mVideoIndex(-1),
-      mSecSkAction(0),
+      mVideoId(TMPXItemId::InvalidId()),
+      mDeletedIndex(-1),
+      mNavKeyBackAction(0),
       mTitleAnim(0),
-      mThumbnailManager(0)
+      mThumbLabel(0),
+      mThumbnailManager(0),
+      mCollectionWrapper(VideoCollectionWrapper::instance())
 {
-    mCollectionWrapper = VideoCollectionWrapper::instance();
+
 }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +85,7 @@ VideoFileDetailsViewPlugin::VideoFileDetailsViewPlugin()
 //
 VideoFileDetailsViewPlugin::~VideoFileDetailsViewPlugin()
 {
-    destroyView();
+	destroyView();
 }
 
 // ---------------------------------------------------------------------------
@@ -114,7 +112,7 @@ void VideoFileDetailsViewPlugin::preCreateView()
 {
 	mActivated = false;
 	mCreated = VideoFileDetailsViewPlugin::EPreCreated;
-	
+
 	if (!mThumbnailManager)
 	{
 		mThumbnailManager = new ThumbnailManager();
@@ -132,10 +130,7 @@ void VideoFileDetailsViewPlugin::finalizeCreateView()
 	bool ok = false;
 	mView.load(VIDEO_DETAILS_DOCML, &ok);
 
-	if(mCollectionWrapper)
-	{
-		mModel = mCollectionWrapper->getModel();
-	}
+	mModel = mCollectionWrapper.getModel(VideoCollectionWrapper::EAllVideos);
 
 	if (!mModel)
 		{
@@ -149,47 +144,53 @@ void VideoFileDetailsViewPlugin::finalizeCreateView()
 	// no deallocation needed for this since
 	// stackedwidget takes ownership
 	mTitleAnim = new HbMarqueeItem;
-	mTitleAnim->setLoopCount(-1);
+	HbFontSpec spec = mTitleAnim->fontSpec();
+    spec.setRole( HbFontSpec::Primary );
+    mTitleAnim->setFontSpec( spec );
+    mTitleAnim->setLoopCount(-1);
+
+	connect(mModel->sourceModel(),
+			SIGNAL(shortDetailsReady(TMPXItemId)),
+			this, SLOT(shortDetailsReadySlot(TMPXItemId)));
 
 	connect(mModel,
-			SIGNAL(shortDetailsReady(int)),
-			this, SLOT(shortDetailsReadySlot(int)));
-
-	connect(mModel,
-			SIGNAL(fullDetailsReady(int)),
-			this, SLOT(fullDetailsReadySlot(int)));
+			SIGNAL(fullDetailsReady(TMPXItemId)),
+			this, SLOT(fullDetailsReadySlot(TMPXItemId)));
 
 	connect(mModel,
 			SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
 			this, SLOT(rowsRemovedSlot(const QModelIndex&, int, int)));
 
-	HbPushButton* playBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON_PLAY);
-	HbStackedWidget* title = findObject<HbStackedWidget>(VIDEO_DETAILS_TITLE);
+	HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
 
+	// no deallocation needed for this since
+	// stackedwidget takes ownership
+	mThumbLabel = new VideoDetailsLabel;
+
+	mThumbLabel->setAlignment(Qt::AlignCenter);
+
+	connect(mThumbLabel, SIGNAL(clicked(bool)), this, SLOT(startPlaybackSlot()));
+
+	thumbWidget->addWidget(mThumbLabel);
+
+	HbStackedWidget* title = findObject<HbStackedWidget>(VIDEO_DETAILS_TITLE);
 	title->addWidget(mTitleAnim);
 
-	HbFrameDrawer* drawer = new HbFrameDrawer("VideoDetailsFrameGraphic", HbFrameDrawer::OnePiece);
-	drawer->setFillWholeRect(true);
-	playBtn->setFrameBackground(drawer);
-
-	connect(playBtn, SIGNAL(clicked(bool)), this, SLOT(startPlaybackSlot()));
-
 	HbAction* deleteAction = findObject<HbAction>(VIDEO_DETAILS_MENUACTION_DELETE);
-	HbAction* shareAction = findObject<HbAction>(VIDEO_DETAILS_MENUACTION_SHARE);
 
 	if (mIsService)
 	{
 		deleteAction->setVisible(false);
-		shareAction->setVisible(false);
 	}
 	else
 	{
 		connect(deleteAction, SIGNAL(triggered(bool)), this, SLOT(deleteVideoSlot()));
-		connect(shareAction, SIGNAL(triggered(bool)), this, SLOT(sendVideoSlot()));
 	}
-	mSecSkAction = new HbAction( Hb::BackAction );
 	
-	connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap,void*,int,int)), 
+	// Create navigation keys.
+	mNavKeyBackAction = new HbAction(Hb::BackNaviAction);
+	
+	connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap,void*,int,int)),
 			this, SLOT(thumbnailReadySlot(QPixmap,void*,int,int)));
 }
 
@@ -210,13 +211,7 @@ void VideoFileDetailsViewPlugin::destroyView()
     	mVideoServices = 0;
     }
 
-    if(mCollectionWrapper)
-    {
-        mCollectionWrapper->decreaseReferenceCount();
-        mCollectionWrapper = 0;
-    }
-    
-    delete mSecSkAction; mSecSkAction = 0;
+    delete mNavKeyBackAction; mNavKeyBackAction = 0;
     delete mThumbnailManager; mThumbnailManager = 0;
     disconnect();
     mView.reset();
@@ -228,34 +223,35 @@ void VideoFileDetailsViewPlugin::destroyView()
 //
 void VideoFileDetailsViewPlugin::activateView()
 {
-	
 	if ( !mActivated && (VideoFileDetailsViewPlugin::EFinalized == mCreated))
     {
         HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-        mainWnd->addSoftKeyAction( Hb::SecondarySoftKey, mSecSkAction );
 
+        HbView *currentView = mainWnd->currentView();
+        if(currentView && mNavKeyBackAction)
+        {
+        	if (connect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back())))
+        	{
+        		currentView->setNavigationAction(mNavKeyBackAction);
+        	}
+        	else
+        	{
+        		return;
+        	}
+        }
+        
+        mainWnd->setOrientation(Qt::Vertical, false);
+
+        // following if is for the future implementations where we should support
+        // also landscape configuration.
         Qt::Orientation orientation = mainWnd->orientation();
         if ( orientation == Qt::Vertical )
         {
-        	if (mIsService)
-        	{
-            	mView.load(VIDEO_DETAILS_DOCML, "portrait_fetch");
-        	}
-        	else
-        	{
-        		mView.load(VIDEO_DETAILS_DOCML, "portrait");
-        	}
+    		mView.load(VIDEO_DETAILS_DOCML, "portrait");
         }
         else if ( orientation == Qt::Horizontal )
         {
-        	if (mIsService)
-        	{
-        		mView.load(VIDEO_DETAILS_DOCML, "landscape_fetch");
-        	}
-        	else
-        	{
-        		mView.load(VIDEO_DETAILS_DOCML, "landscape");
-        	}
+    		mView.load(VIDEO_DETAILS_DOCML, "landscape");
         }
 
     	if (mIsService && !mVideoServices)
@@ -266,30 +262,38 @@ void VideoFileDetailsViewPlugin::activateView()
 			{
 				return;
 			}
-			else
-			{
-	    		HbPushButton* attachBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON_ATTACH);
-	    		connect(attachBtn, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
-				connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
-			}
+    	}
+    	if (mIsService && mVideoServices)
+		{
+			HbPushButton* attachBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
+			attachBtn->setText(tr("Attach")); //TODO: Localisation
+
+			connect(attachBtn, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
+			connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
+
+            HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
+
+            mainWnd->currentView()->setTitle(mVideoServices->contextTitle());
+		}
+    	else if(!mIsService)
+    	{
+    		HbPushButton* shareBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
+			connect(shareBtn, SIGNAL(triggered(bool)), this, SLOT(sendVideoSlot()));
+			shareBtn->setText(hbTrId("txt_videos_opt_share"));
     	}
 
-        connect(mainWnd->softKeyAction(Hb::SecondarySoftKey),
-                SIGNAL(triggered()), this, SLOT(back()));
         connect(mainWnd,
                 SIGNAL(orientationChanged(Qt::Orientation)),
                 this, SLOT(orientationChange(Qt::Orientation)));
-        connect(mCollectionWrapper, 
-               SIGNAL(asyncStatus(int, QVariant&)), 
+
+        connect(&mCollectionWrapper,
+               SIGNAL(asyncStatus(int, QVariant&)),
                this, SLOT(handleErrorSlot(int, QVariant&)));
 
-        // scroll the scrollarea back to top.
-        findWidget<HbScrollArea>(VIDEO_DETAILS_DETAIL_SCROLL_AREA)->scrollContentsTo(QPointF(0, 0));
-        
         // setup title size in order for animation to be enabled if needed
-        mTitleAnim->setPreferredSize(findObject<HbStackedWidget>(VIDEO_DETAILS_TITLE)->preferredSize());
+        mTitleAnim->setMinimumWidth(hbInstance->allMainWindows().value(0)->width()-50);
         mTitleAnim->adjustSize();
-        
+
         mActivated = true;
     }
 }
@@ -302,35 +306,47 @@ void VideoFileDetailsViewPlugin::deactivateView()
 {
     if ( mActivated )
     {
-        mVideoIndex = -1; // set video index as invalid.
-        
+        mVideoId = TMPXItemId::InvalidId();
+
+        mDeletedIndex = -1;  // set index as invalid.
+
         HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-        
-        disconnect(mainWnd->softKeyAction(Hb::SecondarySoftKey),
-                        SIGNAL(triggered()), this, SLOT(back()));
+
+        mainWnd->unsetOrientation();
+
+        HbView *currentView = mainWnd->currentView();
+        if(currentView)
+        {
+       		currentView->setNavigationAction(0);
+        }
+
+        disconnect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back()));
 
         disconnect(mainWnd, SIGNAL( orientationChanged( Qt::Orientation ) ),
              this, SLOT( orientationChange( Qt::Orientation ) ));
 
-        disconnect(mCollectionWrapper, 
-                       SIGNAL(asyncStatus(int, QVariant&)), 
+        disconnect(&mCollectionWrapper,
+                       SIGNAL(asyncStatus(int, QVariant&)),
                        this, SLOT(handleErrorSlot(int, QVariant&)));
 
-        mainWnd->removeSoftKeyAction(Hb::SecondarySoftKey, mSecSkAction);
-        
         mTitleAnim->stopAnimation();
         mTitleAnim->setText("");
-        
+
         mActivated = false;
 
-        findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON_PLAY)->setIcon(QIcon());
+    	mThumbLabel->setIcon(HbIcon());
+
+   		HbPushButton* button = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
 
     	if (mIsService)
     	{
-    		HbPushButton* attachBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON_ATTACH);
-			disconnect(attachBtn, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
+			disconnect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
 			disconnect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
     	}
+		else
+		{
+			disconnect(button, SIGNAL(triggered(bool)), this, SLOT(sendVideoSlot()));
+		}
 
     }
 }
@@ -349,29 +365,15 @@ QGraphicsWidget* VideoFileDetailsViewPlugin::getView()
 // ---------------------------------------------------------------------------
 //
 void VideoFileDetailsViewPlugin::orientationChange( Qt::Orientation orientation )
-{    
-    if ( orientation == Qt::Vertical ) 
+{
+    if ( orientation == Qt::Vertical )
     {
-      	if (mIsService)
-       	{
-           	mView.load(VIDEO_DETAILS_DOCML, "portrait_fetch");
-       	}
-       	else
-       	{
-       		mView.load(VIDEO_DETAILS_DOCML, "portrait");
-       	}
+    	mView.load(VIDEO_DETAILS_DOCML, "portrait");
     }
-      		   
-    else if ( orientation == Qt::Horizontal ) 
+
+    else if ( orientation == Qt::Horizontal )
     {
-       	if (mIsService)
-       	{
-       		mView.load(VIDEO_DETAILS_DOCML, "landscape_fetch");
-       	}
-       	else
-       	{
-       		mView.load(VIDEO_DETAILS_DOCML, "landscape");
-       	}
+       	mView.load(VIDEO_DETAILS_DOCML, "landscape");
     }
     mTitleAnim->adjustSize();
     mTitleAnim->startAnimation();
@@ -393,27 +395,21 @@ void VideoFileDetailsViewPlugin::back()
 // Slot: shortDetailsReadySlot
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::shortDetailsReadySlot(int index)
+void VideoFileDetailsViewPlugin::shortDetailsReadySlot(TMPXItemId id)
 {
     // first clear all details, so that the view doesn't display the old data.
-    int detailCount = sizeof(VideoCollectionCommon::VideoDetailLabelKeys) / sizeof(int);
-    for(int i = 0; i<detailCount; i++) {
-        HbLabel* detail = findWidget<HbLabel>(VIDEO_DETAILS_ITEM + 
-                QString::number(i+1));
-        detail->setPlainText(QString());
-    }
+    findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET)->clear();
 
-    QModelIndex modelIndex = mModel->index(index, 0);
+    QModelIndex modelIndex = mModel->indexOfId(id);
 
-    mVideoIndex = index;
-    
-    // index assumed to come from source model, so data will be fetched from there
-    QVariant variant = mModel->sourceModel()->data(modelIndex, Qt::DisplayRole);
+    mVideoId = id;
 
-    if (variant.isValid() && mTitleAnim) 
+    QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
+
+    if (variant.isValid() && mTitleAnim)
     {
-        mTitleAnim->setText(variant.toStringList().first());      
-    } 
+        mTitleAnim->setText(variant.toStringList().first());
+    }
     startFetchingThumbnail();
 }
 
@@ -421,49 +417,40 @@ void VideoFileDetailsViewPlugin::shortDetailsReadySlot(int index)
 // Slot: fullDetailsReadySlot
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::fullDetailsReadySlot(int index)
+void VideoFileDetailsViewPlugin::fullDetailsReadySlot(TMPXItemId id)
 {
     using namespace VideoCollectionCommon;
-    
+
     int detailCount = sizeof(VideoDetailLabelKeys) / sizeof(int);
 
-    QModelIndex modelIndex = mModel->index(index, 0);
-    int detailAmount = 1;
-    int heightOfVisibleItems = 0;
-    
-    // index received comes from source model so we need to fetch data
-    // directly from there
-    QVariant variant = mModel->sourceModel()->data(modelIndex, KeyMetaData);
-    QMap<QString, QVariant> metadata = variant.toMap();
-    
-    for(int i = 0; i< detailCount; i++) {
-        if (metadata.contains(VideoDetailLabelKeys[i])) {
-            HbLabel* detail = findWidget<HbLabel>(VIDEO_DETAILS_ITEM + 
-                    QString::number(detailAmount));
-            detail->setTextWrapping(Hb::TextWordWrap);
-            detail->setElideMode(Qt::ElideNone);
-            detail->setPlainText(tr(VideoDetailLabels[i]).arg(
-                    metadata[VideoDetailLabelKeys[i]].toString()));
+    QModelIndex modelIndex = mModel->indexOfId(id);
 
-            detailAmount++;
-            heightOfVisibleItems += detail->preferredHeight(); 
+    QVariant variant = mModel->data(modelIndex, KeyMetaData);
+
+    QMap<QString, QVariant> metadata = variant.toMap();
+
+    HbListWidget* list = findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET);
+
+    if(list->count())
+    {
+        list->clear();
+    }
+
+    //TODO: define maximum line count once >3 supported
+    HbListViewItem *prototype = list->listItemPrototype();
+    prototype->setSecondaryTextRowCount(1, 3);
+
+    for(int i = 0; i< detailCount; i++) {
+        if (metadata.contains(VideoDetailLabelKeys[i]))
+        {
+            HbListWidgetItem* listWidgetItem = new HbListWidgetItem();
+            listWidgetItem->setEnabled(false);
+
+            listWidgetItem->setText( hbTrId(VideoDetailLabels[i]) );
+            listWidgetItem->setSecondaryText( metadata[VideoDetailLabelKeys[i]].toString() );
+            list->addItem( listWidgetItem );
         }
     }
-
-    for(; detailAmount <= VIDEO_DETAILS_DETAIL_AMOUNT; detailAmount++) {
-        HbLabel* detail = findWidget<HbLabel>(VIDEO_DETAILS_ITEM + 
-                QString::number(detailAmount));
-        detail->hide();
-    }
-
-    findWidget<HbWidget>(VIDEO_DETAILS_LAYOUT_VIDEO_INFO)->setPreferredHeight(heightOfVisibleItems);
-    findWidget<HbWidget>(VIDEO_DETAILS_LAYOUT_VIDEO_INFO)->adjustSize();
- 
-    int rating = 0;
-    if (metadata.contains(MetaKeyStarRating)) {
-        rating = metadata[MetaKeyStarRating].toInt();
-    }
-    findWidget<HbRatingSlider>(VIDEO_DETAILS_RATING)->setCurrentRating(rating); 
 
     // start title animation
     mTitleAnim->startAnimation();
@@ -475,9 +462,10 @@ void VideoFileDetailsViewPlugin::fullDetailsReadySlot(int index)
 //
 void VideoFileDetailsViewPlugin::getFileUri()
 {
-    if (mVideoIndex >= 0)
+	if (mVideoId != TMPXItemId::InvalidId())
     {
-		QVariant variant = mModel->data(mModel->index(mVideoIndex, 0), VideoCollectionCommon::KeyFilePath);
+        QModelIndex modelIndex = mModel->indexOfId(mVideoId);
+		QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
 		if ( variant.isValid()  )
 		{
 			QString itemPath = variant.value<QString>();
@@ -492,9 +480,10 @@ void VideoFileDetailsViewPlugin::getFileUri()
 //
 void VideoFileDetailsViewPlugin::startPlaybackSlot()
 {
-    if (mVideoIndex >= 0) {
-        mModel->openItem(mModel->index(mVideoIndex, 0));
-    }
+	if (mVideoId != TMPXItemId::InvalidId())
+	{
+    	mModel->openItem(mVideoId);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -512,15 +501,17 @@ void VideoFileDetailsViewPlugin::sendVideoSlot()
 //
 void VideoFileDetailsViewPlugin::deleteVideoSlot()
 {
-    if (mVideoIndex > -1)
+	if (mVideoId != TMPXItemId::InvalidId())
         {
-        QModelIndex modelIndex = mModel->index(mVideoIndex, 0);
-        QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
+		QModelIndex modelIndex = mModel->indexOfId(mVideoId);
+		QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
 
-        if (variant.isValid()) {
-            QString text = tr("Do you want to delete \"%1\"?").arg(variant.toStringList().first());
+        if (variant.isValid())
+        {
+            QString text = tr("Do you want to delete \"%1\"?").arg(variant.toStringList().first()); //TODO: Localisation: txt_common_menu_delete
 
-            if (HbMessageBox::question(text)){
+            if (HbMessageBox::question(text))
+            {
                 deleteItem(modelIndex);
             }
         }
@@ -533,6 +524,8 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
 //
 void VideoFileDetailsViewPlugin::deleteItem(QModelIndex index)
 {
+    mDeletedIndex = index.row();
+
     QModelIndexList list;
     list.append(index);
     mModel->deleteItems(list);
@@ -543,11 +536,13 @@ void VideoFileDetailsViewPlugin::deleteItem(QModelIndex index)
 // Slot: rowsRemovedSlot
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::rowsRemovedSlot(const QModelIndex& /*parent*/,
+void VideoFileDetailsViewPlugin::rowsRemovedSlot(const QModelIndex& parent,
                                                  int first, int last)
 {
-    if(mActivated && mVideoIndex > -1 &&
-       (mVideoIndex >= first && mVideoIndex <= last))
+	Q_UNUSED(parent);
+
+	if(mActivated && mDeletedIndex > -1 &&
+       (mDeletedIndex >= first && mDeletedIndex <= last))
     {
         // item is withing the group of removed items, deactivate view
         emit command(MpxHbVideoCommon::ActivateCollectionView);
@@ -564,7 +559,7 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
     QString msg("");
     if(errorCode == VideoCollectionCommon::statusSingleDeleteFail)
     {
-        QString format = tr("Unable to delete item %1. It is currently open.");
+        QString format = tr("Unable to delete item %1. It is currently open."); //TODO: Localisation
         if(additional.isValid())
         {
            msg = format.arg(additional.toString());
@@ -574,56 +569,74 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
     {
         // show msg box if there's something to show
         HbMessageBox::warning(msg);
-    }  
+    }
 }
 
 // ---------------------------------------------------------------------------
 // Slot: thumbnailReadySlot
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap, 
+void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
         void * clientData, int id, int errorCode)
 {
     Q_UNUSED(clientData);
     Q_UNUSED(id);
 
-	HbPushButton* playBtn = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON_PLAY);
-	QSize size(playBtn->size().toSize());
+	QSize size(mThumbLabel->size().toSize());
 	QImage play(VIDEO_DETAILS_GFX_PLAY);
 
-	if (!errorCode) {
-
+	if (!errorCode)
+	{
 		QImage sourceImage = pixmap.toImage();
 
-		if ((sourceImage.size().height() > size.height()) || (sourceImage.size().width() > size.width()))
+		if ((sourceImage.size().height() != size.height()) || (sourceImage.size().width() != size.width()))
 		{
 			// Smooth scaling is very expensive (size^2). Therefore we reduce the size
 			// to 2x of the destination size and using fast transformation before doing final smooth scaling.
 			if (sourceImage.size().width() > (4*size.width()) || sourceImage.size().height() > (4*size.height()))
 			{
 				QSize intermediate_size = QSize( size.width() * 2, size.height() * 2 );
-				sourceImage = sourceImage.scaled(intermediate_size, Qt::KeepAspectRatio, Qt::FastTransformation );
+				sourceImage = sourceImage.scaled(intermediate_size, Qt::KeepAspectRatioByExpanding, Qt::FastTransformation );
 			}
-			sourceImage = sourceImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+			sourceImage = sourceImage.scaled(size, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
 		}
 
+		int difference(0);
+		QRect rect = mThumbLabel->rect().toRect();
+
+		if(sourceImage.width() > size.width())
+		{
+			difference = sourceImage.width() - size.width();
+			difference = (difference/2)+1;
+			rect.moveLeft(rect.left()+difference);
+		}
+		else if(sourceImage.height() > size.height())
+		{
+			difference = sourceImage.height() - size.height();
+			difference = (difference/2)+1;
+			rect.moveBottom(rect.bottom()+difference);
+		}
+
+		sourceImage = sourceImage.copy(rect);
 		QImage resultImage = QImage(sourceImage.size(), QImage::Format_ARGB32_Premultiplied);
+
 		QPainter painter(&resultImage);
 		painter.setCompositionMode(QPainter::CompositionMode_Source);
 		painter.fillRect(resultImage.rect(), Qt::transparent);
 		painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-		painter.drawImage( (int)(sourceImage.width() - play.width())/2, 
-				           (int)(sourceImage.height() - play.height())/2, 
+		painter.drawImage( (int)(sourceImage.width() - play.width())/2,
+				           (int)(sourceImage.height() - play.height())/2,
 				            play );
 		painter.setCompositionMode(QPainter::CompositionMode_Screen);
 		painter.drawImage(0, 0, sourceImage);
 		painter.end();
 
 		HbIcon compsedIcon(QPixmap::fromImage(resultImage));
-	    playBtn->setIcon(compsedIcon);
+	    mThumbLabel->setIcon(compsedIcon);
 	}
-    else {
-		playBtn->setIcon(HbIcon(VIDEO_DETAILS_GFX_DEFAULT));
+    else
+    {
+		mThumbLabel->setIcon(HbIcon(VIDEO_DETAILS_GFX_DEFAULT));
 	}
 }
 
@@ -634,19 +647,25 @@ void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
 void VideoFileDetailsViewPlugin::startFetchingThumbnail()
 {
     int tnId = -1;
-    
-    if(mModel && mThumbnailManager) {
-        QVariant variant = mModel->data(mModel->index(mVideoIndex, 0), VideoCollectionCommon::KeyFilePath);
-        if(variant.isValid()) {
+
+    if(mModel && mThumbnailManager)
+    {
+    	QModelIndex modelIndex = mModel->indexOfId(mVideoId);
+		QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
+        if(variant.isValid())
+        {
             mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailLarge);
             tnId = mThumbnailManager->getThumbnail(variant.toString(), 0, 5000);
         }
-    } else {
+    }
+    else
+    {
         qWarning() << "Tried to start fetching thumbnail when either mModel or mThumbnailManager is NULL!";
     }
-    
-    if(tnId == -1) {
-        // TODO set default thumbnail here
+
+    if(tnId == -1)
+    {
+    	mThumbLabel->setIcon(HbIcon(VIDEO_DETAILS_GFX_DEFAULT));
     }
 }
 

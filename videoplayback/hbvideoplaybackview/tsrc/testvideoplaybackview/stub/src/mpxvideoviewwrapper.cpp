@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -93,7 +93,7 @@ TBool CMPXVideoViewWrapper::IsPlaylist()
 //
 void CMPXVideoViewWrapper::CreateGeneralPlaybackCommandL( int aCmd )
 {
-
+    Q_UNUSED( aCmd );
 }
 
 // -------------------------------------------------------------------------------------------------

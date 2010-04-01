@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -35,11 +35,9 @@
 #include <mpxcollectionhelperfactory.h>
 #include <mpxcollectionplugin.hrh>
 #include <mpxmediageneralextdefs.h>
+#include <mmf/common/mmfcontrollerframeworkbase.h>
 
 #include <streaminglinkmodel.h>
-#include <ApSettingsHandlerUi.h>
-#include <aputils.h>
-#include <MPSettingsModel.h>
 #include <coeutils.h>
 #include <videoplaylistutility.h>
 #include <mpxvideoplaybackdefs.h>
@@ -61,7 +59,7 @@ CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine( QMpxVideoPlaybackWrapper
       iCollectionUtility( NULL ),
       iExitAo( NULL ),
       iRecognizer( NULL ),
-      iExtAccessPointId( KErrUnknown ),
+      iAccessPointId( KUseDefaultIap ),
       iMultilinkPlaylist( EFalse ),
       iSeekable( ETrue ),
       iUpdateSeekInfo( EFalse ),
@@ -331,7 +329,7 @@ TInt CMpxVideoPlayerAppUiEngine::HandleAiwGenericParamListL( const CAiwGenericPa
             {
                 TInt32 apId = KErrUnknown;
                 genParamAccessPoint->Value().Get( apId );
-                iExtAccessPointId = apId;
+                iAccessPointId = apId;
             }
         }
     }
@@ -373,7 +371,6 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
         }
         else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
         {
-            SetAccessPointL();
             iPlaybackUtility->InitStreamingL( aFile, iAccessPointId );
         }
         else
@@ -422,7 +419,6 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
     }
     else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
     {
-        SetAccessPointL();
         iPlaybackUtility->InitStreamingL( aFileName,
                                          (TDesC8*)(&KDATATYPEVIDEOHELIX),
                                          iAccessPointId );
@@ -850,7 +846,6 @@ void CMpxVideoPlayerAppUiEngine::DoHandleMultiLinksFileL( CVideoPlaylistUtility*
         }
         else
         {
-            SetAccessPointL();
             iPlaybackUtility->InitStreamingL( link,
                                              (TDesC8*)(&KDATATYPEVIDEOHELIX),
                                              iAccessPointId );
@@ -859,10 +854,6 @@ void CMpxVideoPlayerAppUiEngine::DoHandleMultiLinksFileL( CVideoPlaylistUtility*
     }
     else
     {
-        if ( ! aLocalFile )
-        {
-            SetAccessPointL();
-        }
 
         CMPXMedia* playlist = aPlaylistUtil->GetPlayListL( iAccessPointId );
         CleanupStack::PushL( playlist );
@@ -892,194 +883,9 @@ void CMpxVideoPlayerAppUiEngine::HandleUrlDesL( const TDesC& aUrl )
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandleUrlDesL()"),
                    _L("aUrl = %S"), &aUrl );
 
-    SetAccessPointL();
-
     iPlaybackUtility->InitStreamingL( aUrl,
                                       (TDesC8*)(&KDATATYPEVIDEOHELIX),
                                       iAccessPointId );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::SetAccessPointL
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::SetAccessPointL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SetAccessPointL()"));
-
-    // a value was passed in for argument aAPId
-    if ( ( iExtAccessPointId != KErrUnknown ) && IsWLANAccessPointL( iExtAccessPointId ) )
-    {
-        // if the external AP(passed in by an embedding app)
-        // is a WLAN AP - it must be used
-        iAccessPointId = iExtAccessPointId;
-    }
-    else
-    {
-        // attempt to read the default AP
-        TInt defaultAPId(0);
-
-        MPX_TRAPD( err, defaultAPId = GetDefaultAccessPointL() );
-
-        if ( (err == KErrNone) && (defaultAPId != 0))
-        {
-            // a valid default AP has been read and should be used
-            iAccessPointId = defaultAPId;
-        }
-        else
-        {
-            // a valid AP was NOT read ...
-
-            if (iExtAccessPointId != KErrUnknown)
-            {
-                // use the AP passed in by embedding app, regardless of bearer type
-                iAccessPointId = iExtAccessPointId;
-            }
-            else
-            {
-                // open the Access Point selection dialog and make a selection
-                TUint32 apUid = SelectAPFromListL();
-
-                // if the user actually selected an AP from the dialog
-                // i.e. the user did not "cancel" the dialog
-                if ( apUid != 0 )
-                {
-                    // convert the AccessPoint-Uid to AccessPoint-Id
-                    iAccessPointId = GetAccessPointIdForUIDL(apUid);
-                }
-            }
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::IsWLANAccessPointL
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMpxVideoPlayerAppUiEngine::IsWLANAccessPointL( TInt aAPId )
-{
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::IsWLANAccessPointL(%d)"), aAPId);
-
-    TBool wlanAP(EFalse);
-
-    TApBearerType apBearerType = EApBearerTypeAllBearers;
-
-    CCommsDatabase* commsDb = CCommsDatabase::NewL( EDatabaseTypeIAP );
-    CleanupStack::PushL( commsDb );
-
-    CApUtils* apUtils = CApUtils::NewLC( *commsDb );
-
-    // in case there's some reserved IAP (i.e. DVB-H), which can potentially cause
-    // a mismatch between WAP ID and IAP ID database, we should always
-    // check to get the correct WAP record ID for a given IAP record ID
-    // before we obtain the bearer type
-
-    MPX_TRAPD( err,
-    {
-        TInt32 wapId = apUtils->WapIdFromIapIdL( aAPId );
-        apBearerType = apUtils->BearerTypeL( wapId );
-    } );
-
-    CleanupStack::PopAndDestroy(2); // apUtils, commsDb
-
-    //
-    //  Only use AP passed in if it's of WLAN bearer type
-    //  This method is being called only for Embedded.
-    //
-    if ( ! err && apBearerType == EApBearerTypeWLAN)
-    {
-        wlanAP = ETrue;
-    }
-
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::IsWLANAccessPointL() return %d"), wlanAP);
-
-    return wlanAP;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::GetDefaultAccessPointL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayerAppUiEngine::GetDefaultAccessPointL()
-{
-    TInt defaultAP(0);
-    TUint32 iap;
-
-    CMPSettingsModel* ropSettings = CMPSettingsModel::NewL( KSettingsModelForROPUid );
-
-    CleanupStack::PushL( ropSettings );
-
-    ropSettings->LoadSettingsL( EConfigDefault );
-
-    User::LeaveIfError( ropSettings->GetDefaultAp( iap ) );
-
-    CleanupStack::PopAndDestroy(); // ropSettings
-
-    defaultAP = GetAccessPointIdForUIDL( iap );
-
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::GetDefaultAccessPointL(%d)"), defaultAP);
-
-    return defaultAP;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::GetAccessPointIdForUIDL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayerAppUiEngine::GetAccessPointIdForUIDL( TUint32 aAPUid )
-{
-    TInt apId(0);
-
-    CCommsDatabase* commsDb = CCommsDatabase::NewL( EDatabaseTypeIAP );
-    CleanupStack::PushL( commsDb );
-
-    CApUtils* apUtils = CApUtils::NewLC( *commsDb );
-
-    apId = static_cast<TInt32>( apUtils->IapIdFromWapIdL( aAPUid ) );
-
-    CleanupStack::PopAndDestroy(2); // apUtils, commsDb
-
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::GetAccessPointIdForUIDL(%d)"), apId);
-
-    return apId;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::SelectAPFromListL
-// -------------------------------------------------------------------------------------------------
-//
-TUint32 CMpxVideoPlayerAppUiEngine::SelectAPFromListL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SelectAPFromListL()"));
-
-    TUint32 apUid(0);
-    TUint32 returnVal(0);
-
-    CApSettingsHandler* dlg =
-        CApSettingsHandler::NewLC( ETrue,
-                                   EApSettingsSelListIsPopUp,
-                                   EApSettingsSelMenuSelectNormal,
-                                   KEApIspTypeAll,
-                                   EApBearerTypeAll,
-                                   KEApSortNameAscending,
-                                   EIPv4 | EIPv6 );
-
-    if ( dlg->RunSettingsL( iAccessPointId, apUid ) )
-    {
-        if ( apUid > 0 )
-        {
-            returnVal = apUid;
-        }
-    }
-
-    if ( apUid <= 0 )
-    {
-        User::Leave( KErrCancel );
-    }
-
-    CleanupStack::PopAndDestroy( dlg );
-
-    return returnVal;
 }
 
 // -------------------------------------------------------------------------------------------------

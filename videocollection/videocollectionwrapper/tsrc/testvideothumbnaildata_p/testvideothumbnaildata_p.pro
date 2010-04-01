@@ -19,9 +19,12 @@ TARGET =
 DEFINES     += BUILD_VIDEOCOLLECTION_DLL
 DEPENDPATH += . \
     inc \
-    src
+    src \
+    stub/src \
+    stub/inc
 
-INCLUDEPATH = stub/inc \
+INCLUDEPATH = . \
+    stub/inc \
 	/epoc32/include \
 	/epoc32/include/osextensions/stdapis \
 	/epoc32/include/osextensions/stdapis/sys \
@@ -50,7 +53,7 @@ RESOURCES += data/testvideothumbnaildata_p.qrc
 # Input
 HEADERS += inc/testvideothumbnaildata_p.h \
            inc/videothumbnaildatatester.h \
-           stub/inc/thumbnailmanager_qt.h  \
+           stub/inc/videothumbnailfetcher.h  \
            stub/inc/videocollectionwrapper.h \
            stub/inc/videosortfilterproxymodel.h \
            ../../inc/videothumbnaildata_p.h \
@@ -58,7 +61,7 @@ HEADERS += inc/testvideothumbnaildata_p.h \
                
 SOURCES += src/testvideothumbnaildata_p.cpp \
            src/videothumbnaildatatester.cpp \
-           stub/src/thumbnailmanager_qt.cpp \
+           stub/src/videothumbnailfetcher.cpp  \
            stub/src/videocollectionwrapper.cpp \
            stub/src/videosortfilterproxymodel.cpp \
            ../../src/videothumbnaildata_p.cpp

@@ -29,6 +29,7 @@ HEADERS += stub/inc/videolistdatamodel.h \
            stub/inc/videocollectionwrapper.h \
            stub/inc/videocollectionutils.h \
            stub/inc/videodatacontainer.h \
+           stub/inc/videocollectionclient.h \
            ../../inc/videodatasignalreceiver.h \
            ../../inc/videolistdatamodel_p.h \           
            inc/testvideomodel_p.h \
@@ -38,6 +39,8 @@ HEADERS += stub/inc/videolistdatamodel.h \
 SOURCES += stub/src/videocollectionwrapper.cpp \
            stub/src/videocollectionutils.cpp \
            stub/src/videodatacontainer.cpp \
+           stub/src/videocollectionclient.cpp \
+           stub/src/videolistdatamodel.cpp \
            ../../src/videolistdatamodel_p.cpp \
            src/testvideomodel_p.cpp \
            src/mediaobjectfactory.cpp \           

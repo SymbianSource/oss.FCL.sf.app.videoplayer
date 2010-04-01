@@ -22,13 +22,16 @@
 #include <qdebug.h>
 #include <hbinstance.h>
 #include <hbwidget.h>
+#include <hblistwidget.h>
+#include <hblistwidgetitem.h>
 #include <hbpushbutton.h>
 #include <hblabel.h>
 #include <hbaction.h>
 #include <hbapplication.h>
-#include <hbscrollarea.h>
 #include <hbmarqueeitem.h>
+#include <hbstackedwidget.h>
 
+#include "videodetailslabel.h"
 #include "hbmessagebox.h"
 #include "thumbnailmanager_qt.h"
 #include "videocollectioncommon.h"
@@ -44,15 +47,11 @@
 
 const char *TEST_VIDEO_DETAILS_VIEW = "videofiledetailsview";
 const char *TEST_VIDEO_DETAILS_WIDGET = "mContent";
-
 const char *TEST_VIDEO_DETAILS_TITLE = "mLblTitle";
-const char *TEST_VIDEO_DETAILS_ITEM = "mLblDetail";
-const char *TEST_VIDEO_DETAILS_BUTTON_PLAY = "mBtnPlay";
-const char* const VIDEO_DETAILS_BUTTON_ATTACH = "mBtnAttach";
-const char *TEST_VIDEO_DETAILS_MENUACTION_SHARE = "mOptionsShare";
+const char *TEST_VIDEO_DETAILS_LISTWIDGET ="mDetailsList";
+const char* const VIDEO_DETAILS_THUMBNAIL = "mDetailsLabel";
+const char* const VIDEO_DETAILS_BUTTON = "mButton";
 const char *TEST_VIDEO_DETAILS_MENUACTION_DELETE = "mOptionsDelete";
-
-const char *TEST_VIDEO_DETAILS_SCROLLAREA = "mDetailScrollArea";
 
 // ---------------------------------------------------------------------------
 // initTestCase
@@ -60,12 +59,11 @@ const char *TEST_VIDEO_DETAILS_SCROLLAREA = "mDetailScrollArea";
 //
 void TestVideoFileDetails::initTestCase()
 {
-   mWrapper = VideoCollectionWrapper::instance();
    mDummyModel = 0;
    mDummyModel = new VideoSortFilterProxyModel();
    
-   connect(this, SIGNAL(shortDetailsReady(int)), mDummyModel, SIGNAL(shortDetailsReady(int)));
-   connect(this, SIGNAL(fullDetailsReady(int)), mDummyModel, SIGNAL(fullDetailsReady(int)));
+   connect(this, SIGNAL(shortDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(shortDetailsReady(TMPXItemId)));
+   connect(this, SIGNAL(fullDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(fullDetailsReady(TMPXItemId)));
 
    connect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
            mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
@@ -73,7 +71,7 @@ void TestVideoFileDetails::initTestCase()
    connect(this, SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
            mDummyModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)));
    
-   mWrapper->setModel(mDummyModel);
+   VideoCollectionWrapper::instance().setModel(mDummyModel);
 }
 
 // ---------------------------------------------------------------------------
@@ -90,8 +88,6 @@ void TestVideoFileDetails::cleanupTestCase()
             mDummyModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)));
     delete mDummyModel; mDummyModel = 0;
     delete mPlugin; mPlugin = 0;
-    mWrapper->decreaseReferenceCount();
-    QCOMPARE(mWrapper->mReferenceCount, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +136,7 @@ void TestVideoFileDetails::activateView()
 // Helper function that populates a qmap with dummy data.
 // ---------------------------------------------------------------------------
 //
-QMap<QString, QVariant> TestVideoFileDetails::createDummyMetadata(int ratingStartCount)
+QMap<QString, QVariant> TestVideoFileDetails::createDummyMetadata()
 {
     using namespace VideoCollectionCommon;
     
@@ -160,10 +156,6 @@ QMap<QString, QVariant> TestVideoFileDetails::createDummyMetadata(int ratingStar
             map[VideoDetailLabelKeys[i]] = txt;
         }
     }
-    if(ratingStartCount > -1)
-    {
-        map[MetaKeyStarRating] = ratingStartCount;
-    }
     return map;
 }
 
@@ -175,74 +167,35 @@ inline void TestVideoFileDetails::activateViewTestRound()
     {
     init();
     
-    HbScrollArea* area = findWidget<HbScrollArea>(TEST_VIDEO_DETAILS_SCROLLAREA);
-    
-    // won't scroll without these
-    area->contentWidget()->adjustSize();
-    area->setHorizontalScrollBarPolicy(HbScrollArea::ScrollBarAutoHide);
-    
-    area->scrollContentsTo(QPointF(0, 200));
-    
-    QSignalSpy spy(area, SIGNAL(scrollPositionChanged(const QPointF)));
-    
     activateView();
     
     QVERIFY( mPlugin->getView() != 0 );
     QVERIFY( mPlugin->viewPlugin() == mPlugin );
-    QCOMPARE( mPlugin->mVideoIndex, -1 );
-    
-    verifyOrientation();
+    QCOMPARE( mPlugin->mVideoId, TMPXItemId::InvalidId() );
     
     // verify that actions are currently disabled.
-    HbPushButton* playBtn = findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY);
-    HbAction* shareAction = findObject<HbAction>(TEST_VIDEO_DETAILS_MENUACTION_SHARE);
+    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+    VideoDetailsLabel* thumbLabel = (VideoDetailsLabel*)thumbWidget->widgetAt(0);
     HbAction* deleteAction = findObject<HbAction>(TEST_VIDEO_DETAILS_MENUACTION_DELETE);
     
-    QVERIFY( playBtn != 0 );
-    QVERIFY( shareAction != 0 );
-    QVERIFY( deleteAction != 0 );
-    QVERIFY( playBtn->isEnabled() );
-    QVERIFY( shareAction->isEnabled() );
-    QVERIFY( deleteAction->isEnabled() );
+    HbPushButton* button = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
     
-    // verify that the scroll area has been scrolled to the top.
-    QCOMPARE( spy.count(), 1 );
-    QPointF scrollPoint = spy.takeFirst().at(0).toPointF();
-    QCOMPARE( scrollPoint, QPointF(0, 0) );
+    QVERIFY( button != 0 );
+    QVERIFY( thumbLabel != 0 );
+    QVERIFY( deleteAction != 0 );
+    QVERIFY( deleteAction->isEnabled() );
     
     QVERIFY(mPlugin->mActivated);    
      // second activation should not affect
     activateView();
     QVERIFY(mPlugin->mActivated);
-    QVERIFY( playBtn != 0 );
-    QVERIFY( shareAction != 0 );
+    QVERIFY( button != 0 );
+    QVERIFY( thumbLabel != 0 );
     QVERIFY( deleteAction != 0 );
-    QVERIFY( playBtn->isEnabled() );
-    QVERIFY( shareAction->isEnabled() );
     QVERIFY( deleteAction->isEnabled() );
-        
     
     cleanup();
     }
-
-// ---------------------------------------------------------------------------
-// Verifies that correct orientation is loaded from xml
-// ---------------------------------------------------------------------------
-//
-inline void TestVideoFileDetails::verifyOrientation()
-{
-    HbWidget* info = findWidget<HbWidget>(TEST_VIDEO_DETAILS_SCROLLAREA);
-    
-    // this verifies that we have correct orientation loaded from the xml.
-    if (hbInstance->allMainWindows().at(0)->orientation() == Qt::Vertical)
-    {
-        QVERIFY( info->pos().x() < 300 );
-        QVERIFY( info->pos().x() > 0 );
-    } else {
-        QVERIFY( info->pos().x() > 300 );
-        QVERIFY( info->pos().x() < 640 );
-    }
-}
 
 // ---------------------------------------------------------------------------
 // Slot: create view
@@ -267,7 +220,7 @@ void TestVideoFileDetails::testCreateView()
     QVERIFY( mPlugin->mVideoServices == 0);
     // testing the special case where the model is null.
     cleanup();
-    mWrapper->setModel(0);
+    VideoCollectionWrapper::instance().setModel(0);
     init();
     QVERIFY( mPlugin->mModel == 0 );
     QVERIFY( mPlugin->mIsService == false);
@@ -276,7 +229,7 @@ void TestVideoFileDetails::testCreateView()
     //      then it needs to be added here.
     
     // restoring the proper model.
-    mWrapper->setModel(mDummyModel);
+    VideoCollectionWrapper::instance().setModel(mDummyModel);
     cleanup();
 }
 
@@ -327,10 +280,10 @@ void TestVideoFileDetails::testDeactivateView()
     activateView();
     mPlugin->deactivateView();
     QVERIFY( mPlugin->mActivated == false );
-    QCOMPARE( mPlugin->mVideoIndex, -1 );
+    QCOMPARE( mPlugin->mVideoId, TMPXItemId::InvalidId() );
     mPlugin->deactivateView();
     QVERIFY( mPlugin->mActivated == false );
-    QCOMPARE( mPlugin->mVideoIndex, -1 );
+    QCOMPARE( mPlugin->mVideoId, TMPXItemId::InvalidId() );
     cleanup();
 }
 
@@ -370,8 +323,6 @@ void TestVideoFileDetails::testOrientationChange()
     mPlugin->getView()->setGeometry(hbInstance->allMainWindows().at(0)->rect());
     // give fw some time to update content
     QTest::qWait(100);
-    
-    verifyOrientation();
     
     cleanup();
 }
@@ -431,7 +382,7 @@ void TestVideoFileDetails::testBack()
 //
 void TestVideoFileDetails::testShortDetailsReadySlot()
 {
-    const int testIndex = 5;
+    TMPXItemId testIndex(5,0);
     QStringList display;
     display.append("first row");
     display.append("second row");
@@ -445,10 +396,9 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
      // no data 
     emit shortDetailsReady(testIndex);
     
-    QCOMPARE( mPlugin->mVideoIndex, testIndex );
+    QCOMPARE( mPlugin->mVideoId, testIndex );
     QVERIFY( mPlugin->mTitleAnim->text().isEmpty() );
     QCOMPARE( mPlugin->mThumbnailManager->mRequests.count(), 0 );
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->primitive(HbStyle::P_PushButton_background)->isVisible() == false );
     
     mDummyModel->setData(Qt::DisplayRole, display);
     mDummyModel->setData(VideoCollectionCommon::KeyFilePath, filepath);
@@ -457,39 +407,36 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     ThumbnailManager *tmpTnManager = mPlugin->mThumbnailManager;
     mPlugin->mThumbnailManager = 0;
     emit shortDetailsReady(testIndex);
-    QCOMPARE( mPlugin->mVideoIndex, testIndex );
+    QCOMPARE( mPlugin->mVideoId, testIndex );
     QCOMPARE( mPlugin->mTitleAnim->text(), display.at(0) );
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->primitive(HbStyle::P_PushButton_background)->isVisible() == false );    
     mPlugin->mThumbnailManager = tmpTnManager;
 
     // data exists
     emit shortDetailsReady(testIndex);
     
-    QCOMPARE( mDummyModel->lastIndex().row(), testIndex );
+    QCOMPARE( mPlugin->mVideoId, testIndex );
+    QCOMPARE( mDummyModel->lastId(), testIndex );
     QCOMPARE( mPlugin->mTitleAnim->text(), display.at(0) );
     QVERIFY( ThumbnailManager::mRequests.contains(0) );
     ThumbnailManager::TnRequest request = ThumbnailManager::mRequests[0];
     QCOMPARE( request.name, filepath );
     // 20 == priorityHight in this case
     QCOMPARE( request.priority, 5000 );
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->primitive(HbStyle::P_PushButton_background)->isVisible() == false );
 
     
     mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
     emit fullDetailsReady(testIndex);
              
     emit shortDetailsReady(testIndex);
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->primitive(HbStyle::P_PushButton_background)->isVisible() == false );
     
    int detailCount = sizeof(VideoCollectionCommon::VideoDetailLabelKeys) / sizeof(int);
-    for(int i = 1; i<=detailCount; i++) {
-        HbLabel* detail = findWidget<HbLabel>(TEST_VIDEO_DETAILS_ITEM + QString::number(i));
-        QVERIFY( detail->text().isEmpty() );
-    }
+
+   HbListWidget* list = findWidget<HbListWidget>(TEST_VIDEO_DETAILS_LISTWIDGET);
    
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->icon().isNull() );
-            
-    cleanup();
+   QVERIFY(list);
+   QVERIFY(list->count() == 0);
+
+   cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -498,62 +445,59 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
 //
 void TestVideoFileDetails::testFullDetailsReadySlot()
 {
-    const int testIndex = 6;
+    TMPXItemId testIndex(6,0);
     init();
     activateView();
     
     int detailCount = sizeof(VideoCollectionCommon::VideoDetailLabelKeys) / sizeof(int);
-    for(int i = 1; i<=detailCount; i++) {
-        HbLabel* detail = findWidget<HbLabel>(TEST_VIDEO_DETAILS_ITEM + QString::number(i));
-        if(detail == 0)
-        {
-            QFAIL(QString("Found a null label at %1, check that the xml is "
-                "correct, and that the resource files have been regenerated (by running abld "
-                "reallyclean before build)").arg(TEST_VIDEO_DETAILS_ITEM + QString::number(i)).
-                toStdString().data());
-        }
-    }
+
+    HbListWidget* list = findWidget<HbListWidget>(TEST_VIDEO_DETAILS_LISTWIDGET);
+    QVERIFY(list);
+    QVERIFY(list->count() == 0);
     
     mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
        
     emit fullDetailsReady(testIndex);
     
     // verify that actions are currently enabled.
-    HbPushButton* playBtn = findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY);
-    HbAction* shareAction = findObject<HbAction>(TEST_VIDEO_DETAILS_MENUACTION_SHARE);
+    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+    VideoDetailsLabel* thumbLabel = (VideoDetailsLabel*)thumbWidget->widgetAt(0);
     HbAction* deleteAction = findObject<HbAction>(TEST_VIDEO_DETAILS_MENUACTION_DELETE);
     
-    QVERIFY( playBtn != 0 );
-    QVERIFY( shareAction != 0 );
+    QVERIFY( thumbLabel != 0 );
     QVERIFY( deleteAction != 0 );
-    QVERIFY( playBtn->isEnabled() );
-    QVERIFY( shareAction->isEnabled() );
     QVERIFY( deleteAction->isEnabled() );
     
-    for(int i = 0; i<detailCount; i++) {        
+    QVERIFY(list->count() == detailCount);
+
+    for(int i = 0; i<detailCount; i++) 
+    {        
         QString expected = tr(VideoCollectionCommon::VideoDetailLabels[i]).arg(
                 VideoCollectionCommon::VideoDetailLabelKeys[i]);
-        HbLabel* detail = findWidget<HbLabel>(TEST_VIDEO_DETAILS_ITEM + QString::number(i+1));
+        HbListWidgetItem* detail = list->item(i);
         QVERIFY( detail != 0 );
         QVERIFY( detail->text().contains(expected) );
     }
     
     // for coverity sake, retest without star-rating
     mDummyModel->reset();
-    mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata(1) );
+    mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
     emit fullDetailsReady(testIndex);
+
+    int ii = 0;
     for(int i = 0; i<detailCount; i++) 
-    {   
+    {        
         if(VideoCollectionCommon::VideoDetailLabelKeys[i] != VideoCollectionCommon::MetaKeyStarRating)
         {
             QString expected = tr(VideoCollectionCommon::VideoDetailLabels[i]).arg(
                     VideoCollectionCommon::VideoDetailLabelKeys[i]);
-            HbLabel* detail = findWidget<HbLabel>(TEST_VIDEO_DETAILS_ITEM + QString::number(i+1));
+            HbListWidgetItem* detail = list->item(ii);
             QVERIFY( detail != 0 );
             QVERIFY( detail->text().contains(expected) );
         }
+        ++ii;
     }
-    
+
     cleanup();
 }
 
@@ -563,7 +507,7 @@ void TestVideoFileDetails::testFullDetailsReadySlot()
 //
 void TestVideoFileDetails::testStartPlaybackSlot()
 {
-    const int testIndex = 6;
+    TMPXItemId testIndex(6,0);
     mDummyModel->reset();
     init();
     activateView();
@@ -571,22 +515,23 @@ void TestVideoFileDetails::testStartPlaybackSlot()
     // Note that if the details view has not received signal in it's 
     // fullDetailsReadySlot, the button is disabled and should not do anything.
     
-    HbPushButton* playBtn = findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY);
-    QVERIFY( playBtn != 0 );
-    playBtn->click();
+    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+    VideoDetailsLabel* thumbLabel = (VideoDetailsLabel*)thumbWidget->widgetAt(0);
+    QVERIFY( thumbLabel != 0 );
+    thumbLabel->click();
     
-    QCOMPARE( mDummyModel->startPlaybackIndex(), -1 );
+    QCOMPARE( mDummyModel->startPlaybackIndex(), TMPXItemId::InvalidId() );
     
     emit fullDetailsReady(testIndex);
-    mPlugin->mVideoIndex = testIndex;
+    mPlugin->mVideoId = testIndex;
     
-    playBtn->click();
+    thumbLabel->click();
     
     QCOMPARE( mDummyModel->startPlaybackIndex(), testIndex );
     
     // invalid index
-    mPlugin->mVideoIndex = -1;
-    playBtn->click();
+    mPlugin->mVideoId = TMPXItemId::InvalidId();
+    thumbLabel->click();
     // startplayback index has not changed since previous
     QCOMPARE( mDummyModel->startPlaybackIndex(), testIndex );
     
@@ -616,8 +561,8 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     QVERIFY( deleteAction != 0 ); 
     deleteAction->trigger();
     QCOMPARE( mDummyModel->dataAccessCount(), 0 );    
-    mPlugin->mVideoIndex = 0;
-    
+    mPlugin->mVideoId = (0,0);
+
     mDummyModel->setDataReturnInvalid(true);
     QModelIndex expected = mDummyModel->index(0, 0);
     deleteAction->trigger();
@@ -626,7 +571,7 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     QCOMPARE( mDummyModel->deleteFileIndex(), -1 ); // verify that no file was deleted.
     mDummyModel->setDataReturnInvalid(false);
 
-    mPlugin->mVideoIndex = 0;
+    mPlugin->mVideoId = (0,0);
     expected = mDummyModel->index(0, 0);
     deleteAction->trigger();
     QCOMPARE( mDummyModel->dataAccessCount(), 2 );
@@ -674,6 +619,7 @@ void TestVideoFileDetails::testDeleteVideoSlot()
 void TestVideoFileDetails::testRowsRemovedSlot()
 {
     const int testIndex = 9;
+    TMPXItemId testID(9,0);
     init();
     connect(mPlugin, SIGNAL(command(int)), this, SLOT(handleCommand(int)));
     
@@ -687,8 +633,9 @@ void TestVideoFileDetails::testRowsRemovedSlot()
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
     
-    emit fullDetailsReady(testIndex);
-    mPlugin->mVideoIndex = testIndex;
+    emit fullDetailsReady(testID);
+    mPlugin->mVideoId = testID;
+    mPlugin->mDeletedIndex = testIndex;
     
     emit rowsRemoved(QModelIndex(), testIndex+1, testIndex-1);
     QCOMPARE( mCommandReceived, false );
@@ -754,7 +701,7 @@ void TestVideoFileDetails::testHandleErrorSlot()
 //
 void TestVideoFileDetails::testThumbnailReadySlot()
 {
-    int testIndex = 9;
+    TMPXItemId testIndex(9,0);
     QStringList display;
     display.append("first row");
     display.append("second row");
@@ -771,13 +718,15 @@ void TestVideoFileDetails::testThumbnailReadySlot()
     mPlugin->mThumbnailManager->mThumbnailReadyError = -1;
     mPlugin->mThumbnailManager->emitThumbnailReady(0);
     
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->icon().qicon().isNull() == false );
-    
+    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+    VideoDetailsLabel* thumbLabel = (VideoDetailsLabel*)thumbWidget->widgetAt(0);
+    QVERIFY( thumbLabel->icon().qicon().isNull() == false );
+
     mPlugin->mThumbnailManager->mThumbnailReadyError = 0;
     emit shortDetailsReady(testIndex);
     mPlugin->mThumbnailManager->emitThumbnailReady(0);
     
-    QVERIFY( findWidget<HbPushButton>(TEST_VIDEO_DETAILS_BUTTON_PLAY)->icon().qicon().isNull() == false );
+    QVERIFY( thumbLabel->icon().qicon().isNull() == false );
     
     cleanup();
 }

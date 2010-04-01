@@ -24,6 +24,7 @@
 #include <QString>
 #include <qabstractitemmodel.h>
 #include <qdatetime.h>
+#include <mpxitemid.h>
 #include "videocollectioncommon.h"
 
 // CVideoListDataModel::Data returns valid variant when used this and name exists for the row. 
@@ -61,16 +62,16 @@ public: // Constructors and destructor
      * 
      * @return int: 0 if everything ok
      */
-	int initialize( VideoCollectionClient* collection);
+	int initialize();
     
 	/**
      * Method calls video list data to check if there are valid media object 
      * at the given index. If there is, item id is returned.
      * 
      * @param index index of the item to be opened
-     * @return int item id ( > 0), < 0 if no valid item.
+     * @return TMPXItemId item id ( > 0), < 0 if no valid item.
      */ 
-	int mediaIdAtIndex(int index) const;
+	TMPXItemId mediaIdAtIndex(int index) const;
 
     /**
      * Method calls video list data to check if there are valid media object 
@@ -91,6 +92,31 @@ public: // Constructors and destructor
      * @return bool true if removal startup succeeds
      */
     bool removeRows(const QModelIndexList &indexList);
+    
+    /**
+     * sets mAlbumInUse
+     */
+    void setAlbumInUse(TMPXItemId itemId);
+    
+    /**
+     * returns mAlbumInUse
+     */
+    TMPXItemId albumInUse();
+    
+    /**
+     * returns mBelongsToAlbum
+     */
+    bool belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId = TMPXItemId::InvalidId());
+    
+    /**
+     * returns index of first occurence of provided id
+     */
+    QModelIndex indexOfId(TMPXItemId id);
+    
+    /**
+     * returns collection client
+     */
+    VideoCollectionClient* getCollectionClient();
             
 public: // from QAbstractItemModel
     
@@ -154,37 +180,46 @@ public: // from QAbstractItemModel
 
     
 public: // helper methods for test
-    
+
     /**
-     * sets given value tomRowCount
-     *
-     * @param count - value to set
+     * emit album changed signal
      */
-    void setUsedRowCount(int count);
+    void emitAlbumChanged();
     
     /**
-     * appends given string to mNames
+     * clears mData
+     */
+    void removeAll();
+    
+    
+    /**
+     * adds provided id to mData
+     */
+    void appendData(TMPXItemId data);
+    
+    /**
+     * appends given string to mData
      *
      * @param data - value to append to list
      */
     void appendData(QString data);
     
     /**
-     * appends given uint to mSizes
+     * appends given uint to mData
      *
      * @param data - value to append to list
      */
     void appendData(uint data);
     
     /**
-     * appends given QDate to mDates
+     * appends given QDate to mData
      *
      * @param data - value to append to list
      */
     void appendData(QDateTime data);
     
     /**
-     * Appends given status to mStatuses.
+     * Appends given status to mData.
      *
      * @param status - value to append to list.
      */
@@ -196,52 +231,72 @@ signals:
 	* This signal is connected to video list's details ready
 	* -signal indicating that video details data is fetched ok
 	* 
-	* @param index index of the video item
+	* @param id of the item
 	*/
-	void fullVideoDetailsReady(int index);
+	void fullVideoDetailsReady(TMPXItemId);
 	
     /**
      * Signals that the model is ready, ie. loaded all data from
      * myvideocollection.
      */
     void modelReady();	
+    
+    /**
+     * signals when model's internal data has changed 
+     */
+    void modelChanged();
+    
+    /**
+     * signals when album data has changed
+     */
+    void albumChanged();
 	
 public:
     
 	static bool mInitFails;
+	
 	static bool mRemoveRowsFails;
-	static bool mGetMediaIdAtIndexFails;
+	
+	static bool mGetMediaIdAtIndexFails;	
+	
+	static bool mBelongsToAlbum;
+	
+	static bool mReturnInvalid;
+	
 	static QString mMediaFilePathReturnValue;
 	
 	static int mLastDeletedIndexRow;
     
+	TMPXItemId mAlbumInUse;
+	
 private:
-    
-    /**
-     * Setted count of rows. Not necessary match the actual count.
-     */
-    int mRowCount;
+        
+    class DummyData
+    {
+    public:
+        DummyData() :
+        mId(TMPXItemId::InvalidId()),
+        mName(""),
+        mSize(666),
+        mDate(QDateTime()),
+        mStatus(-1)
+        {}
+        TMPXItemId mId;
+        QString mName;
+        uint mSize;
+        QDateTime mDate;
+        int mStatus;
+    };
     
     /**
      * List of strings when fetching Qt::DisplayRole 
      */
-    QList<QString> mNames;
-    
+    QList<DummyData*> mData;
+
     /**
-     * List of uints when fetching  VideoCollectionCommon::KeySizeValue
+     * colleciton client object, owned
      */
-    QList<uint> mSizes;
-    
-    /**
-    * List of QDates when fetching  VideoCollectionCommon::KeyDate
-    */
-    QList<QDateTime> mDates;
-    
-    /**
-    * List of statuses when fetching  VideoCollectionCommon::KeyStatus
-    */
-    QList<int> mStatuses;    
-    
+    VideoCollectionClient *mCollectionClient;
 };
 
 #endif // __STUB_VIDEOLISTDATAMODELFORPROXY_H

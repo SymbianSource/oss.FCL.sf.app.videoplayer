@@ -19,6 +19,7 @@
 #include <QModelIndexList>
 #include <hbapplication.h>
 
+#include "videocollectionwrapper.h"
 #include "videocollectioncommon.h"
 #include "testvideosortfilterproxymodel.h"
 #include "filterproxytester.h"
@@ -37,12 +38,19 @@ int main(int argc, char *argv[])
     
     TestVideoSortFilterProxyModel tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\testvideosortfilterproxymodel.txt";
-    
-    int res = QTest::qExec(&tv, 3, pass);
+    int res;
+    if(argc > 1)
+    {   
+        res = QTest::qExec(&tv, argc, argv);
+    }
+    else
+    {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\testvideosortfilterproxymodel.txt";
+        res = QTest::qExec(&tv, 3, pass);
+    }    
     
     return res;
 }
@@ -54,6 +62,8 @@ int main(int argc, char *argv[])
 //
 void TestVideoSortFilterProxyModel::init()
 {
+    qRegisterMetaType<TMPXItemId>("TMPXItemId");
+    
 	VideoListDataModel::mInitFails = false;
 	VideoListDataModel::mRemoveRowsFails = false;
 	VideoListDataModel::mGetMediaIdAtIndexFails = false;
@@ -67,7 +77,7 @@ void TestVideoSortFilterProxyModel::init()
 	VideoCollectionClient::mAddNewCollectionIds = QList<TMPXItemId>();
 	VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
 	
-    mTestObject = new FilterProxyTester();
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::EGeneric);
     QVERIFY(mTestObject);
     
     mStubModel = new VideoListDataModel();
@@ -75,6 +85,8 @@ void TestVideoSortFilterProxyModel::init()
     
     mCollectionClient = new VideoCollectionClient();
     QVERIFY(mCollectionClient);
+    
+    mCollectionModel = new VideoSortFilterProxyModel(VideoCollectionWrapper::ECollections);
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +103,9 @@ void TestVideoSortFilterProxyModel::cleanup()
  
     delete mTestObject;
     mTestObject = 0;
+    
+    delete mCollectionModel;
+    mCollectionModel = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,28 +127,6 @@ void TestVideoSortFilterProxyModel::testInitializeSignalConnectFail()
 }
 
 // ---------------------------------------------------------------------------
-// testInitializeDataModelInitFail
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testInitializeDataModelInitFail()
-{
-	VideoListDataModel::mInitFails = true; 
-	
-	QVERIFY(mTestObject->initialize(mStubModel) == -1);
-}
-
-// ---------------------------------------------------------------------------
-// testInitializeCollectionInitFail
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testInitializeCollectionInitFail()
-{
-	VideoCollectionClient::mFailInit = true; 
-	
-	QVERIFY(mTestObject->initialize(mStubModel) == -1);
-}
-
-// ---------------------------------------------------------------------------
 // testSecondInitialize
 // ---------------------------------------------------------------------------
 //
@@ -144,22 +137,16 @@ void TestVideoSortFilterProxyModel::testSecondInitialize()
 }
 
 // ---------------------------------------------------------------------------
-// testSecondInitializeModelInitFail
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testSecondInitializeModelInitFail()
-{
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	VideoListDataModel::mInitFails = true; 
-	QVERIFY(mTestObject->initialize(mStubModel) == -1);
-}
-
-// ---------------------------------------------------------------------------
 // testOpen
 // ---------------------------------------------------------------------------
 //
 void TestVideoSortFilterProxyModel::testOpen()
 {
+    // no mCollectionClient
+    QVERIFY(mTestObject->open(1) == -1);
+    
+    mTestObject->initialize(mStubModel);
+    
 	// First open.
 	QVERIFY(mTestObject->open(1) == 0); 
 	// Open again with same level.
@@ -175,20 +162,20 @@ void TestVideoSortFilterProxyModel::testOpen()
 //
 void TestVideoSortFilterProxyModel::testDeleteItems()
 {
+    VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
     QString name1 = "cc";
     QString name2 = "bb";
     QString name3 = "aa";
     QString name4 = "11";
     QString name5 = "12";
-    mStubModel->appendData(name1); // to source model index 0, proxy index after sort 4
+   
+    mStubModel->appendData(name1); // to source model index 0, proxy index after sort 4   
     mStubModel->appendData(name2); // to source model index 1, proxy index after sort 3
     mStubModel->appendData(name3); // to source model index 2, proxy index after sort 2
-    mStubModel->appendData(name4); // to source model index 3, proxy index after sort 0 
+    mStubModel->appendData(name4); // to source model index 3, proxy index after sort 0
     mStubModel->appendData(name5); // to source model index 4, proxy index after sort 1
-
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	
-	mStubModel->setUsedRowCount(5);
 	
 	// sort to make sure that list order is different compared to source model
 	mTestObject->doSorting(Qt::DisplayRole, Qt::AscendingOrder);
@@ -196,7 +183,8 @@ void TestVideoSortFilterProxyModel::testDeleteItems()
     // processing time.
     QTest::qWait(500);
     QVERIFY(mTestObject->sortRole() == Qt::DisplayRole);
-	
+    
+	int count = mTestObject->rowCount();
     QModelIndexList list;
     QModelIndex index; 
     for(int i = 0; i < 5; ++i)
@@ -205,14 +193,11 @@ void TestVideoSortFilterProxyModel::testDeleteItems()
         list.append(index);
     }
     QModelIndexList emptyList;
-	User::Heap().__DbgMarkStart();
     VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
 	QVERIFY(mTestObject->deleteItems(emptyList) == 0);
 	QVERIFY(mTestObject->deleteItems(list) == 0);
 	QVERIFY(mStubModel->mLastDeletedIndexRow == 0);
 	QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 2);
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -222,19 +207,14 @@ void TestVideoSortFilterProxyModel::testDeleteItems()
 void TestVideoSortFilterProxyModel::testDeleteItemsModelNull()
 {
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
 	QVERIFY(mTestObject->initialize(NULL) == -1);
 
 	QModelIndex index = mStubModel->index(0, 0);
 	QModelIndexList list;
 	list.append(index);	
-
-	User::Heap().__DbgMarkStart();
 	
 	QVERIFY(mTestObject->deleteItems(list) == -1);
 
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -244,81 +224,54 @@ void TestVideoSortFilterProxyModel::testDeleteItemsModelNull()
 void TestVideoSortFilterProxyModel::testDeleteItemsRemoveRowsFail()
 {
 	VideoListDataModel::mRemoveRowsFails = true;
-	
+	VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
+    
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
 	
 	QModelIndex index = mTestObject->index(0, 0);
 	QModelIndexList list;
 	list.append(index);
-
-	User::Heap().__DbgMarkStart();
 	
 	QVERIFY(mTestObject->deleteItems(list) == -1);
-
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
-// testOpenItem
+// testOpenItemInvalidId
 // ---------------------------------------------------------------------------
 //
-void TestVideoSortFilterProxyModel::testOpenItem()
-{	
-	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	QModelIndex index = mTestObject->index(0, 0);
-	
-	User::Heap().__DbgMarkStart();
-
-	QVERIFY(mTestObject->openItem(index) == 0);
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
-}
-
-// ---------------------------------------------------------------------------
-// testOpenItemGetMediaIdFail
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testOpenItemGetMediaIdFail()
+void TestVideoSortFilterProxyModel::testOpenItemInvalidId()
 {
 	VideoListDataModel::mGetMediaIdAtIndexFails = true;
-	
+	VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
+    
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
 	QModelIndex index = mTestObject->index(0, 0);
-	
-	User::Heap().__DbgMarkStart();
+	TMPXItemId itemId = TMPXItemId::InvalidId();
 		
-	QVERIFY(mTestObject->openItem(index) == -1);
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
+	QVERIFY(mTestObject->openItem(itemId) == -1);
 }
 
 // ---------------------------------------------------------------------------
-// testOpenItemModelNull
+// testOpenItemCollectionNull
 // ---------------------------------------------------------------------------
 //
-void TestVideoSortFilterProxyModel::testOpenItemModelNull()
+void TestVideoSortFilterProxyModel::testOpenItemCollectionNull()
 {	
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
-	QVERIFY(mTestObject->initialize(NULL) == -1); 
 	
-	QModelIndex index = mTestObject->index(0, 0);
-	User::Heap().__DbgMarkStart();
-		
-	QVERIFY(mTestObject->openItem(index) == -1);
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
+	TMPXItemId itemId(1,0);
+
+	QVERIFY(mTestObject->openItem(itemId) == -1);
 }
+
 // ---------------------------------------------------------------------------
 // testOpenItemOpenVideoFails
 // ---------------------------------------------------------------------------
@@ -328,16 +281,31 @@ void TestVideoSortFilterProxyModel::testOpenItemOpenVideoFails()
 	VideoCollectionClient::mFailMediaPlayback = true;
 	
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+	TMPXItemId itemId(1,0);
 	
-	QModelIndex index = mTestObject->index(0, 0);
-	User::Heap().__DbgMarkStart();
-		
-	QVERIFY(mTestObject->openItem(index) == -1);
+	QVERIFY(mTestObject->openItem(itemId) == -1);
 	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
+	VideoCollectionClient::mFailMediaPlayback = false;
+}
+
+// ---------------------------------------------------------------------------
+// testOpenItem
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testOpenItem()
+{   
+    mStubModel->appendData("Test");
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    TMPXItemId itemId(1,0);
+    
+    // open video
+    QVERIFY(mTestObject->openItem(itemId) == 0);
+    
+    // open category or album
+    itemId = TMPXItemId(1,2);
+    QVERIFY(mTestObject->openItem(itemId) == 0);
+            
 }
 
 // ---------------------------------------------------------------------------
@@ -346,17 +314,14 @@ void TestVideoSortFilterProxyModel::testOpenItemOpenVideoFails()
 //
 void TestVideoSortFilterProxyModel::testBack()
 {	
-	//mStubModel->appendData("Test");
-	//mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	//QModelIndex index = mTestObject->index(0, 0);
-	
-	User::Heap().__DbgMarkStart();
 
 	QVERIFY(mTestObject->back() == 0);
 	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
+	mTestObject->open(VideoCollectionCommon::ELevelAlbum);
+	QVERIFY(mTestObject->back() == 0);
+	
 }
 
 // ---------------------------------------------------------------------------
@@ -365,19 +330,12 @@ void TestVideoSortFilterProxyModel::testBack()
 //
 void TestVideoSortFilterProxyModel::testBackClientNull()
 {	
-	//mStubModel->appendData("Test");
-	//mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	//QModelIndex index = mTestObject->index(0, 0);
 	VideoCollectionClient *tmpCollectionClient = mTestObject->getClient();
 	mTestObject->setClient(0);
-	
-	User::Heap().__DbgMarkStart();
 
 	QVERIFY(mTestObject->back() == -1);
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 
 	mTestObject->setClient(tmpCollectionClient);
 }
@@ -388,17 +346,15 @@ void TestVideoSortFilterProxyModel::testBackClientNull()
 //
 void TestVideoSortFilterProxyModel::testFetchItemDetails()
 {
+    VideoCollectionClient::mFailStartOpen = false;
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	
-	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(int)));
+	mTestObject->open(3);
+	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(TMPXItemId)));
 	
 	QModelIndex index = mTestObject->index(0, 0);	
 
 	QList<QVariant> arguments;
-	
-	User::Heap().__DbgMarkStart();
 	QVERIFY(mTestObject->fetchItemDetails(index) == 0);
 
 	QVERIFY(fetchSpy.count() == 1);
@@ -406,9 +362,6 @@ void TestVideoSortFilterProxyModel::testFetchItemDetails()
 	QVERIFY(arguments.at(0).toInt() == 0);
 	arguments.clear();
 	fetchSpy.clear();
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -420,21 +373,16 @@ void TestVideoSortFilterProxyModel::testFetchItemDetailsGetMediaIdFail()
 	VideoListDataModel::mGetMediaIdAtIndexFails = true;
 	
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
 	
-	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(int)));
+	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(TMPXItemId)));
 	
 	QModelIndex index = mTestObject->index(0, 0);
-	
-	User::Heap().__DbgMarkStart();
 	
 	QVERIFY(mTestObject->fetchItemDetails(index) == -1);
 	
 	QVERIFY(fetchSpy.count() == 0);
-	
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -446,30 +394,23 @@ void TestVideoSortFilterProxyModel::testFetchItemDetailsGetVideoDetailsFails()
 	VideoCollectionClient::mFailMediaDetails = true;
 	
 	mStubModel->appendData("Test");
-	mStubModel->setUsedRowCount(1);
+
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
 	
-	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(int)));
+	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(TMPXItemId)));
 	QModelIndex index = mTestObject->index(0, 0);
-	
-	User::Heap().__DbgMarkStart();
-		
+
 	QVERIFY(mTestObject->fetchItemDetails(index) == -1);
 	
 	QVERIFY(fetchSpy.count() == 0);
-
-	int remHeap = User::Heap().__DbgMarkEnd(0);
-	QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
 // testLessThanProxyModelNotInitialized
 // ---------------------------------------------------------------------------
 //
-void TestVideoSortFilterProxyModel::testLessThanProxyModelNotInitialized()
+void TestVideoSortFilterProxyModel::testLessThanNoModel()
 {
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	
     // "normal" comparisation
     QString name1 = "cc";
     QString name2 = "bb";
@@ -482,19 +423,13 @@ void TestVideoSortFilterProxyModel::testLessThanProxyModelNotInitialized()
     mStubModel->appendData(name3); // to index 2, position 2
     mStubModel->appendData(name4); // to index 3, position 0 or 1
     mStubModel->appendData(name5); // to index 4, position 0 or 1
-    mStubModel->setUsedRowCount(5);
    
     mTestObject->setSortRole(Qt::DisplayRole);
-    
-    User::Heap().__DbgMarkStart();  
 
     QModelIndex left = mStubModel->index(0,0);
     QModelIndex right = mStubModel->index(1,0);
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    
-    int remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
 }
 // ---------------------------------------------------------------------------
 // testLessThanName
@@ -502,7 +437,9 @@ void TestVideoSortFilterProxyModel::testLessThanProxyModelNotInitialized()
 //
 void TestVideoSortFilterProxyModel::testLessThanName()
 {
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
 	
     // "normal" comparisation
     QString name1 = "cc";
@@ -516,11 +453,8 @@ void TestVideoSortFilterProxyModel::testLessThanName()
     mStubModel->appendData(name3); // to index 2, position 2
     mStubModel->appendData(name4); // to index 3, position 0 or 1
     mStubModel->appendData(name5); // to index 4, position 0 or 1
-    mStubModel->setUsedRowCount(5);
    
     mTestObject->setSortRole(Qt::DisplayRole);
-    
-    User::Heap().__DbgMarkStart();  
 
     QModelIndex left = mStubModel->index(0,0);
     QModelIndex right = mStubModel->index(1,0);
@@ -545,17 +479,10 @@ void TestVideoSortFilterProxyModel::testLessThanName()
     right = mStubModel->index(0,0);
     
     QVERIFY(mTestObject->callLessThan(left, right));
-    
-    int remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
+
     // reset model
-    delete mStubModel;
-    mStubModel = 0;
-    
-    mStubModel = new VideoListDataModel();
-    QVERIFY(mStubModel);
-    QVERIFY(mTestObject->initialize(mStubModel) == 0);
-    
+    mStubModel->removeAll();;
+        
     // case sensitive check
     name1 = "cc";
     name2 = "CC";
@@ -565,7 +492,7 @@ void TestVideoSortFilterProxyModel::testLessThanName()
     QString name6 = "2Aa";
     QString name7 = "1Aa";
     QString name8 = "1cc";
-    
+    mStubModel->removeAll();
     mStubModel->appendData(name1); // to index 0, position can be 5, 6 or 7
     mStubModel->appendData(name2); // to index 1, position can be 5, 6 or 7
     mStubModel->appendData(name3); // to index 2, position can be 5, 6 or 7
@@ -575,11 +502,9 @@ void TestVideoSortFilterProxyModel::testLessThanName()
     mStubModel->appendData(name7); // to index 6, position is 0
     mStubModel->appendData(name8); // to index 7, position is 1
     
-    mStubModel->setUsedRowCount(8);
     
     mTestObject->setSortRole(Qt::DisplayRole);
-    
-    User::Heap().__DbgMarkStart();  
+
 
     left = mStubModel->index(0,0);  // "cc"
     right = mStubModel->index(1,0); // "CC"
@@ -625,10 +550,6 @@ void TestVideoSortFilterProxyModel::testLessThanName()
     left = mStubModel->index(7,0);  // "1cc"
     right = mStubModel->index(0,0); // "cc"
     QVERIFY(mTestObject->callLessThan(left, right));
-    
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
-    
 }
   
 // ---------------------------------------------------------------------------
@@ -637,7 +558,9 @@ void TestVideoSortFilterProxyModel::testLessThanName()
 //
 void TestVideoSortFilterProxyModel::testLessThanSize()
 {
+    VideoCollectionClient::mFailStartOpen = false;
     QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
 
     quint32 size1 = 300;
     quint32 size2 = 200;
@@ -650,11 +573,8 @@ void TestVideoSortFilterProxyModel::testLessThanSize()
     mStubModel->appendData(size3); // to index 2    
     mStubModel->appendData(size4); // to index 3
     mStubModel->appendData(size5); // to index 4
-    mStubModel->setUsedRowCount(5);
-    
+ 
     mTestObject->setSortRole(VideoCollectionCommon::KeySizeValue);
-
-    User::Heap().__DbgMarkStart();  
     
     QModelIndex left = mStubModel->index(0,0);
     QModelIndex right = mStubModel->index(1,0);
@@ -680,9 +600,6 @@ void TestVideoSortFilterProxyModel::testLessThanSize()
     right = mStubModel->index(0,0);
     
     QVERIFY(mTestObject->callLessThan(left, right));
-    
-    int remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
 }
  
 // ---------------------------------------------------------------------------
@@ -691,7 +608,9 @@ void TestVideoSortFilterProxyModel::testLessThanSize()
 //
 void TestVideoSortFilterProxyModel::testLessThanDateTime()
 {
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
 	
 	QDateTime date1(QDate(2010, 11, 5), QTime(0,0));
     QDateTime date2(QDate(2009, 9, 5), QTime(0,0));
@@ -704,11 +623,8 @@ void TestVideoSortFilterProxyModel::testLessThanDateTime()
     mStubModel->appendData(date3); // to index 2    
     mStubModel->appendData(date4); // to index 3
     mStubModel->appendData(date5); // to index 4
-    mStubModel->setUsedRowCount(5);
     
     mTestObject->setSortRole(VideoCollectionCommon::KeyDateTime);
-
-    User::Heap().__DbgMarkStart();  
     
     QModelIndex left = mStubModel->index(0,0);
     QModelIndex right = mStubModel->index(1,0);
@@ -734,9 +650,6 @@ void TestVideoSortFilterProxyModel::testLessThanDateTime()
     right = mStubModel->index(0,0);
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    
-    int remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -745,20 +658,17 @@ void TestVideoSortFilterProxyModel::testLessThanDateTime()
 //
 void TestVideoSortFilterProxyModel::testLessThanInvalid()
 {
-	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    VideoCollectionClient::mFailStartOpen = false;
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
 	
     // invalid role
 	mTestObject->setSortRole(10000);
-    
-    User::Heap().__DbgMarkStart();  
     
     QModelIndex left = mStubModel->index(0,0);
     QModelIndex right = mStubModel->index(0,0);
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    
-    int remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
     
     // invalid role but valid data.
     
@@ -770,38 +680,26 @@ void TestVideoSortFilterProxyModel::testLessThanInvalid()
 	mStubModel->appendData(name1); // to index 0, position 4
 	mStubModel->appendData(name2); // to index 1, position 3
 	mStubModel->appendData(name3); // to index 2, position 2
-	mStubModel->setUsedRowCount(3);
    
 	mTestObject->setSortRole(INVALID_ROLE_FOR_SORTING);
 	
     left = mStubModel->index(0,0);
     right = mStubModel->index(1,0);
     
-    User::Heap().__DbgMarkStart();
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
     
     // reset model
-    delete mStubModel;
-    mStubModel = 0;  
-    
-    mStubModel = new VideoListDataModel();
-    QVERIFY(mStubModel);
-    QVERIFY(mTestObject->initialize(mStubModel) == 0);
-    
+    mStubModel->removeAll();
+        
     // invalid left index
     mTestObject->setSortRole(Qt::DisplayRole);
-    User::Heap().__DbgMarkStart(); 
+
     left = QModelIndex();
     right = mStubModel->index(0,0);
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
-    
+
     // invalid right index
     mTestObject->setSortRole(Qt::DisplayRole);
     User::Heap().__DbgMarkStart(); 
@@ -809,8 +707,6 @@ void TestVideoSortFilterProxyModel::testLessThanInvalid()
     right = QModelIndex();
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
     
     // both invalid
     mTestObject->setSortRole(Qt::DisplayRole);
@@ -819,9 +715,7 @@ void TestVideoSortFilterProxyModel::testLessThanInvalid()
     right = QModelIndex();
     
     QVERIFY(!mTestObject->callLessThan(left, right));
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
-    
+
     // both same index, use size
     quint32 size1 = 99;
     
@@ -829,15 +723,12 @@ void TestVideoSortFilterProxyModel::testLessThanInvalid()
     
     mTestObject->setSortRole(VideoCollectionCommon::KeySizeValue);
     mTestObject->setSortRole(Qt::DisplayRole); 
-    
-    User::Heap().__DbgMarkStart(); 
+
     
     left = mStubModel->index(0,0);
     right = mStubModel->index(0,0);
     QVERIFY(!mTestObject->callLessThan(left, right));
-    remHeap = User::Heap().__DbgMarkEnd(0);
-    QVERIFY(remHeap == 0);
- 
+
 }
 
 // ---------------------------------------------------------------------------
@@ -846,9 +737,9 @@ void TestVideoSortFilterProxyModel::testLessThanInvalid()
 //
 void TestVideoSortFilterProxyModel::testDoSorting()
 {
-    QWARN("Waiting for resolving of potential memory leak in QSortFilterProxy before adding heap allocation checks here");
-    
+    VideoCollectionClient::mFailStartOpen = false;
     QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
     
     // these signals are emitted during sorting procedure from the fw
     QSignalSpy spyAboutToChange(mTestObject, SIGNAL(layoutAboutToBeChanged()));
@@ -888,9 +779,8 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     mStubModel->appendData(size4); // to index 3
     mStubModel->appendData(size5); // to index 4
     
-    mStubModel->setUsedRowCount(5);
-
-    // User::Heap().__DbgMarkStart();  
+    int sortingRole;
+    Qt::SortOrder  sortingOrder;
 
     // first sort call, includes timer creation and setup
     VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
@@ -903,7 +793,10 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
-   
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
+    
     // reset spys
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -917,6 +810,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::DescendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::DescendingOrder);
     
     // reset spys
     spyAboutToChange.clear();
@@ -932,6 +828,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -944,6 +843,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::DescendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::DescendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -955,6 +857,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -967,6 +872,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)Qt::DisplayRole);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 0);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)Qt::DisplayRole);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -980,6 +888,9 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyDateTime);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -992,6 +903,10 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(),  (int)VideoCollectionCommon::KeySizeValue);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    mTestObject->getSorting(sortingRole, sortingOrder);
+    QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeySizeValue);
+    QCOMPARE(sortingOrder, Qt::AscendingOrder);
+    
     
     spyAboutToChange.clear();
     spyChanged.clear();
@@ -1006,20 +921,6 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     spyAboutToChange.clear();
     spyChanged.clear();
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
-    
-   // cleanup();
-   // int remHeap = User::Heap().__DbgMarkEnd(0);
-   // QVERIFY(remHeap == 0);  
-}
-
-// ---------------------------------------------------------------------------
-// testFilterAcceptsRow
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testFilterAcceptsRowProxyModelNotInitialized()
-{	
-	QModelIndex index = QModelIndex(); // index can be anything, test model doesn't use it.
-    QVERIFY(mTestObject->callFilterAcceptsRow(0, index) == false);    
 }
 
 // ---------------------------------------------------------------------------
@@ -1028,40 +929,26 @@ void TestVideoSortFilterProxyModel::testFilterAcceptsRowProxyModelNotInitialized
 //
 void TestVideoSortFilterProxyModel::testFilterAcceptsRow()
 {	
+    QWARN("tests for different model types are still missing");
+    
 	QModelIndex index = QModelIndex(); // index can be anything, test model doesn't use it.
 		
-	// Not initialized.
+	// Not initialized: no rouce model
 	QVERIFY(mTestObject->callFilterAcceptsRow(0, index) == false);	
 	
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+	mTestObject->open(3);
 	
-	// Test invalid row.
+	// Test invalid row: below 0
 	QVERIFY(mTestObject->callFilterAcceptsRow(-1, index) == false);
 	
-	// Model data has no status role.
+	// invalid row: larger than count
 	mStubModel->appendData("test");
-	mStubModel->setUsedRowCount(1);
+	QVERIFY(mTestObject->callFilterAcceptsRow(2, index) == false);
+	
+	// correct row
 	QVERIFY(mTestObject->callFilterAcceptsRow(0, index) == true);
 	
-    // reset model
-    delete mStubModel;
-    mStubModel = 0;
-    
-    mStubModel = new VideoListDataModel();
-    QVERIFY(mStubModel);
-    QVERIFY(mTestObject->initialize(mStubModel) == 0);
-	
-    // add data with status roles.  
-	mStubModel->appendStatus(VideoCollectionCommon::StatusNone);
-    mStubModel->appendStatus(VideoCollectionCommon::StatusDeleted);
-    mStubModel->setUsedRowCount(2);
-    
-    // Test when status is not deleted.
-    QVERIFY(mTestObject->callFilterAcceptsRow(0, index) == true);
-    
-    // Test when status is deleted.
-    index = mStubModel->index(0,0);
-    QVERIFY(mTestObject->callFilterAcceptsRow(1, index) == false);
 }
 
 // ---------------------------------------------------------------------------
@@ -1087,10 +974,8 @@ void TestVideoSortFilterProxyModel::testGetMediaFilePathForId()
 void TestVideoSortFilterProxyModel::testAddNewCollectionNoCollectionClient()
 {
     QString name("testname");
-    QString thumb("testthumb");
-    QList<TMPXItemId> ids;
-    
-    QCOMPARE(mTestObject->addNewCollection(name, thumb, ids), -1);
+    VideoCollectionClient::mNewAlbumId = TMPXItemId(1,1);
+    QVERIFY(mTestObject->addNewAlbum(name) == TMPXItemId::InvalidId());
     QVERIFY(VideoCollectionClient::mAddNewCollectionName != name);
 }
 
@@ -1101,50 +986,239 @@ void TestVideoSortFilterProxyModel::testAddNewCollectionNoCollectionClient()
 void TestVideoSortFilterProxyModel::testAddNewCollectionSucceed()
 {
     QString name("testname");
-    QString thumb("testthumb");
-    QList<TMPXItemId> ids;
-    ids.append(TMPXItemId(5, 0));
-    ids.append(TMPXItemId(9, 0));
-    
+
     mTestObject->initialize(mStubModel);
-    
-    QCOMPARE(mTestObject->addNewCollection(name, thumb, ids), 0);
+    VideoCollectionClient::mNewAlbumId = TMPXItemId(1,1);
+    QVERIFY(mTestObject->addNewAlbum(name) == TMPXItemId(1,1));
     QCOMPARE(VideoCollectionClient::mAddNewCollectionName, name);
-    QCOMPARE(VideoCollectionClient::mAddNewCollectionThumb, thumb);
-    QCOMPARE(VideoCollectionClient::mAddNewCollectionIds, ids);
 }
 
 // ---------------------------------------------------------------------------
-// testAddNewCollectionFail
+// testResolveAlbumName
 // ---------------------------------------------------------------------------
 //
-void TestVideoSortFilterProxyModel::testAddNewCollectionFail()
+void TestVideoSortFilterProxyModel::testResolveAlbumName()
 {
-    QString name("testname");
-    QString thumb("testthumb");
-    QList<TMPXItemId> ids;
-    ids.append(TMPXItemId(5,0));
-    ids.append(TMPXItemId(9,0));
+    QString name("test");
+    QString resolved("");
+    // no model, same name can be used
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved.length());
+    QVERIFY(resolved == name);  
     
     mTestObject->initialize(mStubModel);
     
-    VideoCollectionClient::mFailAddNewCollection = true;
+    // no collections proxy model, same name    
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved.length());
+    QVERIFY(resolved == name);  
     
-    QCOMPARE(mTestObject->addNewCollection(name, thumb, ids), -1);
+   
+    mCollectionModel->initialize(mStubModel);
+    VideoCollectionWrapper::instance().mProxyModel = mCollectionModel;
     
-    // this makes sure that the collection client has been called.
-    QCOMPARE(VideoCollectionClient::mAddNewCollectionName, name);
-    QCOMPARE(VideoCollectionClient::mAddNewCollectionThumb, thumb);
-    QCOMPARE(VideoCollectionClient::mAddNewCollectionIds, ids);
+    mStubModel->appendData(name);
+    
+    // invalid data from model, same name can be used
+    VideoListDataModel::mReturnInvalid = true;
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved.length());
+    QVERIFY(resolved == name);  
+    VideoListDataModel::mReturnInvalid = false;
+    
+    // same name, name to be different
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved.length());
+    QVERIFY(resolved != name);
+    QVERIFY(resolved.contains("1"));
+    
+    // different name, no changes
+    name = "Another";
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved == name); 
+    
 }
 
 // ---------------------------------------------------------------------------
-// testShortDetailsReadySlot
+// testResolveAlbumName
 // ---------------------------------------------------------------------------
 //
-int TestVideoSortFilterProxyModel::testShortDetailsReadySlot(int index)
+void TestVideoSortFilterProxyModel::testAddItemsInAlbum()
 {
-	return 1;
+    TMPXItemId albumId(1,2);
+    QList<TMPXItemId> items;
+    items.append(TMPXItemId(1,0));
+    // no collection client
+    QVERIFY(mTestObject->addItemsInAlbum(albumId, items) == -1);
+    
+    mTestObject->initialize(mStubModel);
+       
+    QVERIFY(mTestObject->addItemsInAlbum(albumId, items) == 0);
+}
+
+// ---------------------------------------------------------------------------
+// testGetOpenItem
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testGetOpenItem()
+{
+    // no collection client
+    QVERIFY(mTestObject->getOpenItem() == TMPXItemId::InvalidId());
+    
+    mTestObject->initialize(mStubModel);
+    
+    // type neither EAllVideos or ECollectionContent
+    QVERIFY(mTestObject->getOpenItem() == TMPXItemId::InvalidId());
+    
+    TMPXItemId id;
+    // type EAllVideos
+    delete mTestObject;    
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::EAllVideos);
+    mTestObject->initialize(mStubModel);
+    id = mTestObject->getOpenItem();
+    QVERIFY(id != TMPXItemId::InvalidId());
+    QVERIFY(id.iId1 == KVcxMvcCategoryIdAll);
+    QVERIFY(id.iId2 == KVcxMvcMediaTypeCategory);
+
+    // type ECollectionContent
+    delete mTestObject;    
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::ECollectionContent);
+    mTestObject->initialize(mStubModel);
+    id.iId1 = 1;
+    id.iId2 = KVcxMvcMediaTypeAlbum;
+    mTestObject->openItem(id);
+    id = TMPXItemId::InvalidId();
+    id = mTestObject->getOpenItem();
+    QVERIFY(id != TMPXItemId::InvalidId());
+    QVERIFY(id.iId1 == 1);
+    QVERIFY(id.iId2 == KVcxMvcMediaTypeAlbum);
+ 
+}
+
+// ---------------------------------------------------------------------------
+// testRemoveAlbums
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testRemoveAlbums()
+{
+    QModelIndexList indexList;
+    // no collection 
+    QVERIFY(mTestObject->removeAlbums(indexList) == -1);
+    
+    mTestObject->initialize(mStubModel);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
+    
+    // empty list provided
+    QVERIFY(mTestObject->removeAlbums(indexList) == -1);
+    
+    mStubModel->appendData(TMPXItemId(1,0));
+    mStubModel->appendData(TMPXItemId(2,0));
+    mStubModel->appendData(TMPXItemId(3,0));
+    
+    indexList.append(mTestObject->index(0,0));
+    indexList.append(mTestObject->index(1,0));
+    indexList.append(mTestObject->index(2,0));
+    
+    // no albums in model
+    QVERIFY(mTestObject->removeAlbums(indexList) == -1);
+    
+    mStubModel->removeAll();
+    delete mTestObject;
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::ECollections);
+    QVERIFY(mTestObject);
+    QVERIFY(mTestObject->initialize(mStubModel) == 0);
+    QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelCategory) == 0);
+    mStubModel->appendData(TMPXItemId(1,2));
+    mStubModel->appendData(TMPXItemId(2,2));
+    mStubModel->appendData(TMPXItemId(3,2));
+    indexList.append(mTestObject->index(0,2));
+    indexList.append(mTestObject->index(1,2));
+    indexList.append(mTestObject->index(2,2));
+
+    // succeed
+    QVERIFY(mTestObject->removeAlbums(indexList) == 0);
+}
+
+// ---------------------------------------------------------------------------
+// testAlbumChangedSlot
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testAlbumChangedSlot()
+{
+    // cannot test anything here, just for the coverage
+    // level incorrect
+    mTestObject->initialize(mStubModel);
+    mStubModel->emitAlbumChanged();
+    delete mTestObject;
+    mTestObject = 0;
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::ECollectionContent);
+    QVERIFY(mTestObject);
+    mTestObject->initialize(mStubModel);
+    mStubModel->emitAlbumChanged();        
+}
+
+// ---------------------------------------------------------------------------
+// testIndexOfId
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testIndexOfId()
+{
+    QModelIndex index;
+    // no model
+    TMPXItemId id(1,0);
+    index = mTestObject->indexOfId(id);
+    QVERIFY(!index.isValid());
+    
+    mTestObject->initialize(mStubModel);
+    mTestObject->open(VideoCollectionCommon::ELevelVideos);
+    
+    // fetching invalid
+    id = TMPXItemId::InvalidId();
+    index = mTestObject->indexOfId(id);
+    QVERIFY(!index.isValid());
+    
+    mStubModel->appendData(TMPXItemId(1,0));
+    mStubModel->appendData(TMPXItemId(2,0));
+    mStubModel->appendData(TMPXItemId(3,0));
+    
+    id = TMPXItemId(2,0);
+    index = mTestObject->indexOfId(id);
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == 1);
+}
+ 
+// ---------------------------------------------------------------------------
+// testSetGenericIdFilter
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testSetGenericIdFilter()
+{
+    // type VideoCollectionWrapper::EGeneric    
+    mTestObject->initialize(mStubModel);   
+    mTestObject->open(VideoCollectionCommon::ELevelVideos);
+    mTestObject->setGenericIdFilter(TMPXItemId(0,1), true);
+    
+    mStubModel->appendData(TMPXItemId(1,0));
+    mStubModel->appendData(TMPXItemId(2,0));
+    mStubModel->appendData(TMPXItemId(3,0));
+    mTestObject->invalidate();
+    QModelIndex index;
+    index = mTestObject->indexOfId(TMPXItemId(1,0));
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == 0);        
+    
+    // other type
+    delete mTestObject;
+    mTestObject = new FilterProxyTester(VideoCollectionWrapper::EAllVideos);
+    mTestObject->initialize(mStubModel);   
+    mTestObject->open(VideoCollectionCommon::ELevelVideos);
+    
+    mTestObject->setGenericIdFilter(TMPXItemId(1,1), true);
+    mTestObject->invalidate();
+    index = mTestObject->indexOfId(TMPXItemId(1,0));
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == 0);    
+    
 }
 
 

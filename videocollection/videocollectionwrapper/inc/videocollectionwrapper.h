@@ -77,6 +77,14 @@ class VIDEOCOLLECTION_DLL_EXPORT VideoCollectionWrapper : public QObject
     
 public: // Constructor
     
+    enum TModelType
+    {
+        EAllVideos,
+        ECollections,
+        ECollectionContent,
+        EGeneric
+    };
+    
     /**
      * Returns singleton instance for this class.
      * 
@@ -84,20 +92,16 @@ public: // Constructor
      * 
      * @return The singleton instance.
      */
-    static VideoCollectionWrapper *instance();
-    
-    /**
-     * Decreases the reference count, when count reaches zero cleanup is done.
-     * 
-     */
-    void decreaseReferenceCount();    
+    static VideoCollectionWrapper &instance();  
     
 	/**
      * Returns pointer to model
      * 
+     * @param type of the model
+     * 
      * @return address to model or NULL if fails.
      */    
-    VideoSortFilterProxyModel* getModel();
+    VideoSortFilterProxyModel* getModel(int type);
 
     /**
      * Method can be used by client to emit status signal
@@ -153,10 +157,6 @@ private:
      */
     int mReferenceCount;
     
-    /**
-     * Singleton instance.
-     */
-    static VideoCollectionWrapper* mInstance;
 };
 
 #endif  // __VIDEOCOLLECTIONWRAPPER_H__

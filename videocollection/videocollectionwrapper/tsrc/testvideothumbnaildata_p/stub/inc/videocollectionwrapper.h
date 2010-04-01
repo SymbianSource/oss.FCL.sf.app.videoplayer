@@ -35,6 +35,14 @@ class VideoCollectionWrapper : public QObject
     Q_OBJECT
 
 public: // Constructor
+
+    enum TModelType
+    {
+        EAllVideos,
+        ECollections,
+        ECollectionContent,
+        EGeneric
+    };    
     
     /**
      * Returns singleton instance for this class.
@@ -43,20 +51,14 @@ public: // Constructor
      * 
      * @return The singleton instance.
      */
-    static VideoCollectionWrapper *instance();
-
-    /**
-     * Decreases the reference count, when count reaches zero cleanup is done.
-     * 
-     */
-    void decreaseReferenceCount();    
+    static VideoCollectionWrapper &instance();
 
 	/**
      * Returns pointer to model
      *
      * @return address to model or NULL if fails.
      */
-    VideoSortFilterProxyModel* getModel();
+    VideoSortFilterProxyModel* getModel(TModelType type);
 
 /* Additional functions needed for testing purposes */
 

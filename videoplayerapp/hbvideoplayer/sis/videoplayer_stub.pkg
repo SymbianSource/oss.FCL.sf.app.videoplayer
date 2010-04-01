@@ -63,5 +63,6 @@
 "" - "z:\sys\bin\videoplayer.exe" 
 "" - "z:\resource\apps\videoplayer.r*" 
 "" - "z:\private\10003a3f\import\apps\videoplayer_reg.r*" 
+"" - "z:\resource\qt\translations\videos.qm"
 
 

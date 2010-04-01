@@ -24,11 +24,13 @@
 #include <mpxmediaarray.h>
 #include <mpxmedia.h>
 #include <Qlist>
+#include "videodatasignalreceiver.h"
 
-
-class  StubSignalReceiver : public QObject
+class  StubSignalReceiver : public VideoDataSignalReceiver
 {
     Q_OBJECT
+    
+    Q_DISABLE_COPY(StubSignalReceiver)
  
 public:
     
@@ -75,6 +77,11 @@ public slots:
     void newVideoListSlot(CMPXMediaArray* aVideoList);
     
     /**
+     * Saves provided address to mLatestPtr
+     */
+    void appendVideoListSlot( CMPXMediaArray* videoList );
+    
+    /**
      * Saves provided address to mLatestPtr 
      */
     void videoListAppendedSlot(CMPXMediaArray* aVideoList);
@@ -95,9 +102,26 @@ public slots:
     void videoDeleteCompletedSlot(int count, QList<TMPXItemId> *failedMediaIds);
     
     /**
-     * Saves provided integer to mLatestInt
+     * Saves provided integer to mLatestItemId
      */
     void videoDetailsCompletedSlot(TMPXItemId videoId);
+    
+    /**
+     * Saves provided integer to mLatestItemId and provided pointer to
+     * mLatestPtr
+     */
+    void albumListAvailableSlot(TMPXItemId albumId,
+            CMPXMediaArray *albumItems);
+    
+    /**
+     * copies provided list data to mLatesListData
+     */
+    void albumRemoveFailureSlot(QList<TMPXItemId> *items);
+
+    /**
+     * saves provided item id into mLatestItemId
+     */
+    void itemDeletedSlot(TMPXItemId id);
     
 private:
     /**

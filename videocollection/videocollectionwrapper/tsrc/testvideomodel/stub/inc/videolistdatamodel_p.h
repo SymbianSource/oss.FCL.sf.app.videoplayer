@@ -35,6 +35,10 @@ class VideoThumbnailData;
 
 class VideoListDataModel;
 class CMPXMediaArray;
+class DummyData;
+
+
+
 
 class VideoListDataModelPrivate : public VideoDataSignalReceiver
 {    
@@ -47,7 +51,9 @@ class VideoListDataModelPrivate : public VideoDataSignalReceiver
      * disable copy-constructor and assignment operator
      */
     Q_DISABLE_COPY(VideoListDataModelPrivate) 
-
+    
+    friend class DummyData;
+    
 public:
 
     /**
@@ -61,40 +67,6 @@ public:
     ~VideoListDataModelPrivate();  
 	
 	/**
-	 * Set global init failure flag value
-	 */
-	static void setInitFailureStatus(bool fail);
-
-	/**
-	 * if override is true returns given size when 
-	 * getvideosizeFromIndex is called
-	 * 
-	 * @param override if true value is overridden
-	 * @value value to override
-	 */
-	static void overrideSizeValue(bool override, quint32 value);
-	
-	/**
-     * if override is true returns given size when 
-     * getvideoDurationFromIndex is called
-     * 
-     * @param override if true value is overridden
-     * @param value value to override
-     */
-	static void overrideDurationValue(bool override, float value);
-	
-	/**
-     * Set counter which is decreased after every getVideoCount -call
-     * When counter reaches zero, getVideoCount -call returns 0 
-     * 
-     * @param override if true value is overridden
-     * @param value value to override
-     */
-    static void setGetVideoCountFailAfterNCall(int counter);
-    
- 
-
-	/**
      * returns 0 or -1 based on global init failure flag
      * if flag is true, return 0
      * 
@@ -102,7 +74,16 @@ public:
      */
 	int initialize();
 	
-
+	/**
+	 * calls model's sidconnect -method (implemented for coverity's sake)
+	 */
+	void callModelDisconnect();
+	
+	/**
+	 * calls model object's reportAsyncStatus
+	 */
+	void callModelAsyncReport(int status, QVariant data);
+	
 signals:
 
     /**
@@ -115,7 +96,7 @@ signals:
      * Not emitted from here but had to be defined in order to 
      * get stub into use to testable object 
      */
-    void videoDetailsReady(int index);
+    void videoDetailsReady(TMPXItemId index);
 
     
 public: // services
@@ -133,7 +114,7 @@ public: // services
      * @param index
      * @return int
      */
-    int getMediaIdFromIndex(int index) const;
+    TMPXItemId getMediaIdFromIndex(int index) const;
     
     /**
     * return video path of the item with given media id
@@ -210,20 +191,21 @@ public: // services
     int getVideoStatusFromIndex(int index) const;
     
     /**
-     * marks video to be removed: it's id and index are saved to 
-     * mItemsUnderDeletion
+     * marks videos to be removed: it's id and index are saved to 
+     * remove buffer in data container
      * 
-     * @param indexes: indexes of videos to be removes
+     * @param itemIndex: index of item to be removed
+     * @return TMPXItemId: id of the item marked
      *
      */
-    QList<TMPXItemId> markVideosRemoved(const QModelIndexList &indexes);
+    TMPXItemId markVideoRemoved(const QModelIndex &itemIndex);
 
     /**
      * Removes provided ids from the remove -list
      * 
      * @param itemIds ids of the items to be removed
      */
-    void unMarkVideosRemoved(QList<TMPXItemId> &itemIds);
+    void restoreRemoved(QList<TMPXItemId> *idList);
 	
 	/**
      * Returns the file path of the video.
@@ -231,7 +213,17 @@ public: // services
      * @param index: item position where client wants the file path from.
      */
     const QString getFilePathFromIndex(int index) const;
-   
+    
+    /**
+     * returns mBelongsToAlbum;
+     */
+    bool belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId);
+    
+    /**
+     * returns mBelongsToAlbum;
+     */
+    void setAlbumInUse(TMPXItemId albumId);
+    
 private: // private methods
     
     /**
@@ -298,8 +290,23 @@ public slots:
      * 
      */
     void videoDetailsCompletedSlot(TMPXItemId videoId);
-     
-private:
+    
+    /**
+     * not used in stub
+     */
+    void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+    
+    /**
+     * not used in stub
+     */
+    void albumRemoveFailureSlot(QList<TMPXItemId> *items);
+
+    /**
+     * not used in stub
+     */
+    void itemDeletedSlot(TMPXItemId id);
+
+public:    
     
     /**
     * Pointer to the public class
@@ -307,6 +314,11 @@ private:
     */
     VideoListDataModel *q_ptr;
  
+    /**
+     * dummy media data wrapper
+     */
+    DummyData &mMediaData;
+    
     /**
      * pointer to shared-array of medias
      */
@@ -320,9 +332,82 @@ private:
     /**
      * marked as removed -map
      */
-    QSet<TMPXItemId> mItemsUnderDeletion;
+    QList<TMPXItemId> mItemsUnderDeletion;
+    
+    /**
+     * setted in setAlbumInUse
+     */
+    TMPXItemId mCurrentAlbum;
+    
+    /**
+     * if true, markVideoRemoved returns invalid id
+     */
+    static bool mReturnInvalidMarked;
+    
+    /**
+     * if true, initialize fails
+     */
+    static bool mFailInit;
+
+    /**
+     * if true, size returned is mSize
+     */
+    static bool mOverrideSize;
+    
+    /**
+     * overrided size value
+     */
+    static quint32 mSize;
+
+    /**
+     * if true, dureation returned is mDuration
+     */
+    static bool mOverrideDuration;
+    
+    /**
+     * overrided duration
+     */
+    static quint32 mDuration;
+
+    /**
+     * value from videocount to be returned
+     */
+    static int mGetVideoCountFail;
+    
+    /**
+     * value from belongsToAlbum to be returned
+     */
+    static bool mBelongsToAlbum;
     
 };
+
+/**
+ * dummy data wrapper class
+ */
+class DummyData
+{
+public:
+    
+    int indexOfId(TMPXItemId id)
+    {
+        if(!mObj->mMediaArray)
+        {
+            return -1;
+        }
+
+        for(int i = 0; i < mObj->getVideoCount(); ++i)
+        {
+            if(id == mObj->getMediaIdFromIndex(i))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    VideoListDataModelPrivate *mObj;
+};
+
 #endif  // __VIDEOLISTDATA_H__
 
 // End of file

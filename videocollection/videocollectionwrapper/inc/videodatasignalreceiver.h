@@ -23,7 +23,7 @@
 #include <QObject>
 #include <mpxcollectionmessagedefs.h>
 #include <mpxitemid.h>
-#include <Qlist>
+#include <QList>
 
 // FORWARD DECLARATIONS
 class CMPXMediaArray;
@@ -69,11 +69,11 @@ public slots:
     virtual void newVideoAvailableSlot( CMPXMedia* aVideo ) = 0;
     
     /**
-     * Signaled when received an avent about externally removed video.
+     * Signaled when received an avent about externally removed item.
      * 
-     * @param videoId video id
+     * @param itemId item id
      */
-    virtual void videoDeletedSlot( TMPXItemId videoId ) = 0;
+    virtual void itemDeletedSlot( TMPXItemId itemId ) = 0;
            
     /**
      * Signaled when multiple video deletion command is completed.
@@ -84,11 +84,27 @@ public slots:
     virtual void videoDeleteCompletedSlot( int overallCount, QList<TMPXItemId> *failedMediaIds ) = 0;
     
     /**
+     * Signaled when album remove command is completed and some albums were not removed.
+     * 
+     * @param failedMediaIds media-array containing failed medias
+     */
+    virtual void albumRemoveFailureSlot( QList<TMPXItemId> *failedMediaIds ) = 0;
+    
+    /**
      * Signaled when all details for a video have been fetched.
      * 
      * @param aMedia MPX Media that contains all details.
      */
     virtual void videoDetailsCompletedSlot( TMPXItemId videoId ) = 0;
+    
+    /**
+     * Signalled when album items are recieved.
+     * 
+     * @param albumId, Album which items are received.
+     * @param albumItems, Items belonging to the current album.
+     */
+    virtual void albumListAvailableSlot(TMPXItemId albumId,
+        CMPXMediaArray *albumItems) = 0;
 };
 
 #endif // __VIDEOMODELOBSERVER_H

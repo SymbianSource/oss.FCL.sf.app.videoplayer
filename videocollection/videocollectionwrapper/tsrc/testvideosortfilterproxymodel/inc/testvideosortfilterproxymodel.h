@@ -25,6 +25,7 @@
 class VideoListDataModel;
 class FilterProxyTester;
 class VideoCollectionClient;
+class VideoSortFilterProxyModel;
 
 class TestVideoSortFilterProxyModel : public QObject
 {
@@ -55,26 +56,11 @@ private slots:
      * Test initialize with null model causing connect to fail.
      */
     void testInitializeSignalConnectFail();
-    
-    /**
-     * Test when model init fails. 
-     */
-    void testInitializeDataModelInitFail();
-    
-    /**
-	 * Test when collection init fails. 
-	 */
-    void testInitializeCollectionInitFail();
         
     /**
      * Test second call to initialize with valid data.
      */
     void testSecondInitialize();
-    
-    /**
-	 * Test second call to initialize when model init fails. 
-	 */
-    void testSecondInitializeModelInitFail();
     
     /**
      * Test open.
@@ -97,24 +83,24 @@ private slots:
     void testDeleteItemsRemoveRowsFail();
 
     /**
-     * Test openItem with valid data.
-     */
-    void testOpenItem();
-
-    /**
      * Test openItem when getMediaId fails.
      */
-    void testOpenItemGetMediaIdFail();    
+    void testOpenItemInvalidId();    
 
     /**
-     * Test openItem when model is NULL.
+     * Test openItem when collection is NULL.
      */
-    void testOpenItemModelNull();
+    void testOpenItemCollectionNull();
     
     /**
      * Test openItem when openVideo fails.
      */
     void testOpenItemOpenVideoFails();
+    
+    /**
+    * Test openItem with valid data.
+    */
+    void testOpenItem();
 
     /**
      * Test back with valid data.
@@ -142,9 +128,9 @@ private slots:
     void testFetchItemDetailsGetVideoDetailsFails();
 
     /**
-     * Test lessThan when initialize has not been called.
+     * Test lessThan when there's no mModel.
      */
-    void testLessThanProxyModelNotInitialized();
+    void testLessThanNoModel();
     
     /**
      * Calls sure lessThan with Qt::DisplayRole setted on 
@@ -178,11 +164,6 @@ private slots:
     void testDoSorting();
     
     /**
-     * Test filterAcceptsRow when initialize has not been called.
-     */
-    void testFilterAcceptsRowProxyModelNotInitialized();
-    
-    /**
      * Calls filterAcceptsRow.
      * Tests that return values are correct with items with varying statuses. 
      * 
@@ -205,13 +186,39 @@ private slots:
     void testAddNewCollectionSucceed();
     
     /**
-     * Tests calling addNewCollection where collection client returns -1.
+     * tests resolveAlbumName
      */
-    void testAddNewCollectionFail();
+    void testResolveAlbumName();
     
-public slots:
-	
-	int testShortDetailsReadySlot(int index);
+    /**
+     * tests addItemsInAlbum
+     */
+    void testAddItemsInAlbum();
+    
+    /**
+     * tests getOpenItem
+     */
+    void testGetOpenItem();
+    
+    /**
+     * tests removeAlbums
+     */
+    void testRemoveAlbums();
+    
+    /**
+     * tests albumChangedSlot
+     */
+    void testAlbumChangedSlot();
+    
+    /**
+     * tests indexOfId
+     */
+    void testIndexOfId();
+    
+    /**
+     * tests setGenericIdFilter
+     */
+    void testSetGenericIdFilter();
     
 private:
     
@@ -230,6 +237,11 @@ private:
      * implemented to be able to call protected objects
      */
     FilterProxyTester *mTestObject;
+    
+    /**
+     * dummy collections content proxy
+     */
+    VideoSortFilterProxyModel *mCollectionModel;
 };
 
 

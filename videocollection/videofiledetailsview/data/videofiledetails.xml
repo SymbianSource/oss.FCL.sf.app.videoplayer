@@ -1,378 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hbdocument version="0.9">
     <object name="mOptionsDelete" type="HbAction">
-        <string name="iconText" value="Delete"/>
-        <string name="text" value="Delete"/>
-        <string name="toolTip" value="Delete"/>
-    </object>
-    <object name="mOptionsShare" type="HbAction">
-        <string name="iconText" value="Share"/>
-        <string name="text" value="Share"/>
-        <string name="toolTip" value="Share"/>
+        <string locid="txt_common_opt_delete" name="text" value="Delete"/>
     </object>
     <widget name="videofiledetailsview" type="HbView">
         <widget name="mOptionsMenu" role="HbView:menu" type="HbMenu">
             <ref object="mOptionsDelete" role="HbMenu:addAction"/>
-            <ref object="mOptionsShare" role="HbMenu:addAction"/>
         </widget>
         <widget name="mContent" role="HbView:widget" type="HbWidget">
-            <widget name="mDetailScrollArea" type="HbScrollArea">
-                <widget name="mLayoutVideoInfo" role="HbScrollArea:contents" type="HbWidget">
-                    <widget name="mLblDetail1" type="HbLabel">
-                        <real name="z" value="0.0019"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail2" type="HbLabel">
-                        <real name="z" value="0.002"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail3" type="HbLabel">
-                        <real name="z" value="0.0021"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail4" type="HbLabel">
-                        <real name="z" value="0.0068"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail5" type="HbLabel">
-                        <real name="z" value="0.0069"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail6" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail7" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail8" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail9" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail10" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail11" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail12" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail13" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail14" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail15" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <widget name="mLblDetail16" type="HbLabel">
-                        <real name="z" value="0.007"/>
-                        <sizehint height="30" type="PREFERRED" width="300"/>
-                        <sizehint height="25" type="MINIMUM" width="24"/>
-                    </widget>
-                    <real name="z" value="0"/>
-                    <layout orientation="Vertical" type="linear">
-                        <linearitem itemname="mLblDetail1"/>
-                        <linearitem itemname="mLblDetail2"/>
-                        <linearitem itemname="mLblDetail3"/>
-                        <linearitem itemname="mLblDetail4"/>
-                        <linearitem itemname="mLblDetail5"/>
-                        <linearitem itemname="mLblDetail6"/>
-                        <linearitem itemname="mLblDetail7"/>
-                        <linearitem itemname="mLblDetail8"/>
-                        <linearitem itemname="mLblDetail9"/>
-                        <linearitem itemname="mLblDetail10"/>
-                        <linearitem itemname="mLblDetail11"/>
-                        <linearitem itemname="mLblDetail12"/>
-                        <linearitem itemname="mLblDetail13"/>
-                        <linearitem itemname="mLblDetail14"/>
-                        <linearitem itemname="mLblDetail15"/>
-                        <linearitem itemname="mLblDetail16"/>
-                    </layout>
-                </widget>
-                <real name="z" value="0.0071"/>
-                <sizehint height="288" type="PREFERRED" width="320"/>
-                <sizehint height="235" type="MINIMUM" width="320"/>
-            </widget>
             <widget name="mLblTitle" type="HbStackedWidget">
                 <real name="z" value="0.0079"/>
-                <sizehint height="30" type="PREFERRED" width="320"/>
+                <sizehint height="4.47761un" type="PREFERRED" width="47.7612un"/>
+            </widget>
+            <widget name="mDetailsContainer" type="HbWidget">
+                <widget name="mDetailsList" type="HbListWidget"/>
+                <real name="z" value="2"/>
+                <sizehint height="23.8806un" type="PREFERRED" width="11.9403un"/>
+                <layout orientation="Vertical" type="linear">
+                    <linearitem itemname="mDetailsList"/>
+                </layout>
             </widget>
             <widget name="mThumbRating" type="HbWidget">
-                <widget name="mRatingSlider" type="HbRatingSlider">
-                    <real name="z" value="1"/>
-                    <sizehint height="50" type="PREFERRED" width="291"/>
-                    <sizehint height="50" type="MINIMUM" width="291"/>
-                    <contentsmargins bottom="5" left="5" right="5" top="5"/>
-                    <bool name="readOnly" value="TRUE"/>
-                </widget>
-                <widget name="mBtnPlay" type="HbPushButton">
+                <widget name="mDetailsLabel" type="HbStackedWidget">
                     <real name="z" value="2"/>
-                    <sizehint height="199" type="PREFERRED" width="320"/>
+                    <sizehint height="34.47761un" type="PREFERRED" width="47.91045un"/>
+                    <bool name="visible" value="TRUE"/>
+                    <string name="state" value="normal"/>
                 </widget>
                 <real name="z" value="1"/>
-                <sizehint height="250" type="PREFERRED" width="320"/>
-                <layout orientation="Vertical" type="linear">
-                    <linearitem itemname="mBtnPlay"/>
-                    <linearitem itemname="mRatingSlider"/>
+                <sizehint height="37.31343un" type="PREFERRED" width="47.7612un"/>
+                <layout type="anchor">
+                    <anchoritem dst="mDetailsLabel" dstEdge="LEFT" spacing="1.34328un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="TOP" spacing="1.34328un" src="" srcEdge="TOP"/>
                 </layout>
             </widget>
         </widget>
-        <string name="title" value="File details"/>
     </widget>
     <section name="portrait">
-        <widget name="mDetailScrollArea" type="HbScrollArea">
-            <widget name="mLayoutVideoInfo" role="HbScrollArea:contents" type="HbWidget">
-                <widget name="mLblDetail1" type="HbLabel"/>
-                <widget name="mLblDetail2" type="HbLabel"/>
-                <widget name="mLblDetail3" type="HbLabel"/>
-                <widget name="mLblDetail4" type="HbLabel"/>
-                <widget name="mLblDetail5" type="HbLabel"/>
-                <widget name="mLblDetail6" type="HbLabel"/>
-                <widget name="mLblDetail7" type="HbLabel"/>
-                <widget name="mLblDetail8" type="HbLabel"/>
-                <widget name="mLblDetail9" type="HbLabel"/>
-                <widget name="mLblDetail10" type="HbLabel"/>
-                <widget name="mLblDetail11" type="HbLabel"/>
-                <widget name="mLblDetail12" type="HbLabel"/>
-                <widget name="mLblDetail13" type="HbLabel"/>
-                <widget name="mLblDetail14" type="HbLabel"/>
-                <widget name="mLblDetail15" type="HbLabel"/>
-                <widget name="mLblDetail16" type="HbLabel"/>
-                <sizehint height="908" type="PREFERRED" width="323"/>
-                <layout orientation="Vertical" type="linear">
-                    <linearitem itemname="mLblDetail1"/>
-                    <linearitem itemname="mLblDetail2"/>
-                    <linearitem itemname="mLblDetail3"/>
-                    <linearitem itemname="mLblDetail4"/>
-                    <linearitem itemname="mLblDetail5"/>
-                    <linearitem itemname="mLblDetail6"/>
-                    <linearitem itemname="mLblDetail7"/>
-                    <linearitem itemname="mLblDetail8"/>
-                    <linearitem itemname="mLblDetail9"/>
-                    <linearitem itemname="mLblDetail10"/>
-                    <linearitem itemname="mLblDetail11"/>
-                    <linearitem itemname="mLblDetail12"/>
-                    <linearitem itemname="mLblDetail13"/>
-                    <linearitem itemname="mLblDetail14"/>
-                    <linearitem itemname="mLblDetail15"/>
-                    <linearitem itemname="mLblDetail16"/>
-                </layout>
+        <widget name="mDetailsContainer" type="HbWidget">
+            <widget name="mButton" type="HbPushButton">
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                <sizehint height="7.46269un" type="PREFERRED" width="14.92537un"/>
+                <sizehint height="7.46269un" type="MINIMUM" width="7.46269un"/>
+                <sizehint height="7.46269un" type="MAXIMUM" width="74.62687un"/>
+                <string name="state" value="normal"/>
             </widget>
-        </widget>
-        <widget name="mThumbRating" type="HbWidget">
-            <widget name="container" type="HbWidget">
-                <widget name="mRatingSlider" type="HbRatingSlider">
-                    <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-                    <sizehint height="50" type="PREFERRED" width="100"/>
-                    <sizehint height="50" type="MINIMUM" width="50"/>
-                    <sizehint height="50" type="MAXIMUM" width="500"/>
-                </widget>
-                <real name="z" value="0"/>
-                <sizehint height="50" type="PREFERRED" width="320"/>
-                <layout orientation="Horizontal" type="linear">
-                    <contentsmargins bottom="0px" left="20px" right="9px" top="0px"/>
-                    <linearitem itemname="mRatingSlider"/>
-                </layout>
-            </widget>
+            <sizehint height="49.55224un" type="PREFERRED" width="50.74626un"/>
             <layout orientation="Vertical" type="linear">
-                <linearitem itemname="mBtnPlay"/>
-                <linearitem itemname="container"/>
+                <linearitem itemname="mDetailsList"/>
+                <linearitem itemname="mButton"/>
             </layout>
         </widget>
         <widget name="mContent" role="HbView:widget" type="HbWidget">
+            <widget name="mThumbRating" type="HbWidget">
+                <widget name="mDetailsLabel" type="HbStackedWidget">
+                    <real name="z" value="2"/>
+                    <sizehint height="28.54477688un" type="FIXED" width="50.74627un"/>
+                    <string name="state" value=""/>
+                </widget>
+                <real name="z" value="1"/>
+                <sizehint height="28.69402688un" type="PREFERRED" width="50.74626un"/>
+                <layout type="anchor">
+                    <anchoritem dst="mDetailsLabel" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+                </layout>
+            </widget>
             <layout type="anchor">
-                <anchoritem dst="mDetailScrollArea" dstEdge="TOP" spacing="303" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="7" src="" srcEdge="TOP"/>
-                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="1.04478un" src="" srcEdge="TOP"/>
+                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="1.49254un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mLblTitle" dstEdge="RIGHT" spacing="-1.49254un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="LEFT" spacing="1.49254un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="RIGHT" spacing="-1.49254un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="BOTTOM" spacing="-1.49254un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="6.71642un" src="" srcEdge="TOP"/>
+                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="1.49254un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mThumbRating" dstEdge="RIGHT" spacing="-1.49254un" src="" srcEdge="RIGHT"/>
             </layout>
         </widget>
     </section>
     <section name="landscape">
         <widget name="mContent" role="HbView:widget" type="HbWidget">
-            <layout type="anchor">
-                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="10" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="10" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="7" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="RIGHT" spacing="10" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="LEFT" spacing="320" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-            </layout>
-        </widget>
-    </section>
-    <section name="portrait_fetch">
-        <widget name="mDetailScrollArea" type="HbScrollArea">
-            <widget name="mLayoutVideoInfo" role="HbScrollArea:contents" type="HbWidget">
-                <widget name="mLblDetail1" type="HbLabel"/>
-                <widget name="mLblDetail2" type="HbLabel"/>
-                <widget name="mLblDetail3" type="HbLabel"/>
-                <widget name="mLblDetail4" type="HbLabel"/>
-                <widget name="mLblDetail5" type="HbLabel"/>
-                <widget name="mLblDetail6" type="HbLabel"/>
-                <widget name="mLblDetail7" type="HbLabel"/>
-                <widget name="mLblDetail8" type="HbLabel"/>
-                <widget name="mLblDetail9" type="HbLabel"/>
-                <widget name="mLblDetail10" type="HbLabel"/>
-                <widget name="mLblDetail11" type="HbLabel"/>
-                <widget name="mLblDetail12" type="HbLabel"/>
-                <widget name="mLblDetail13" type="HbLabel"/>
-                <widget name="mLblDetail14" type="HbLabel"/>
-                <widget name="mLblDetail15" type="HbLabel"/>
-                <widget name="mLblDetail16" type="HbLabel"/>
-                <sizehint height="908" type="PREFERRED" width="323"/>
-                <layout orientation="Vertical" type="linear">
-                    <linearitem itemname="mLblDetail1"/>
-                    <linearitem itemname="mLblDetail2"/>
-                    <linearitem itemname="mLblDetail3"/>
-                    <linearitem itemname="mLblDetail4"/>
-                    <linearitem itemname="mLblDetail5"/>
-                    <linearitem itemname="mLblDetail6"/>
-                    <linearitem itemname="mLblDetail7"/>
-                    <linearitem itemname="mLblDetail8"/>
-                    <linearitem itemname="mLblDetail9"/>
-                    <linearitem itemname="mLblDetail10"/>
-                    <linearitem itemname="mLblDetail11"/>
-                    <linearitem itemname="mLblDetail12"/>
-                    <linearitem itemname="mLblDetail13"/>
-                    <linearitem itemname="mLblDetail14"/>
-                    <linearitem itemname="mLblDetail15"/>
-                    <linearitem itemname="mLblDetail16"/>
-                </layout>
-            </widget>
-        </widget>
-        <widget name="mThumbRating" type="HbWidget">
-            <widget name="container" type="HbWidget">
-                <widget name="mRatingSlider" type="HbRatingSlider">
-                    <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-                    <sizehint height="50" type="PREFERRED" width="100"/>
-                    <sizehint height="50" type="MINIMUM" width="50"/>
-                    <sizehint height="50" type="MAXIMUM" width="500"/>
+            <widget name="mDetailsContainer" type="HbWidget">
+                <widget name="mDetailsList" type="HbListWidget">
+                    <sizehint height="26.71642un" type="PREFERRED" width="42.83582un"/>
                 </widget>
-                <real name="z" value="0"/>
-                <sizehint height="50" type="PREFERRED" width="320"/>
-                <layout orientation="Horizontal" type="linear">
-                    <contentsmargins bottom="0px" left="20px" right="9px" top="0px"/>
-                    <linearitem itemname="mRatingSlider"/>
-                </layout>
-            </widget>
-            <layout orientation="Vertical" type="linear">
-                <linearitem itemname="mBtnPlay"/>
-                <linearitem itemname="container"/>
-            </layout>
-        </widget>
-        <widget name="mContent" role="HbView:widget" type="HbWidget">
-            <widget name="mBtnAttach" type="HbPushButton">
                 <real name="z" value="2"/>
-                <sizehint height="47.52147" type="PREFERRED" width="317"/>
-                <string name="text" value="Attach"/>
-            </widget>
-            <layout type="anchor">
-                <anchoritem dst="mDetailScrollArea" dstEdge="TOP" spacing="303" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="7" src="" srcEdge="TOP"/>
-                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="LEFT" spacing="20" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mBtnAttach" dstEdge="LEFT" spacing="19" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mBtnAttach" dstEdge="BOTTOM" spacing="1.65" src="" srcEdge="BOTTOM"/>
-            </layout>
-        </widget>
-    </section>
-    <section name="landscape_fetch">
-        <widget name="mLayoutVideoInfo" role="HbScrollArea:contents" type="HbWidget">
-            <widget name="container" type="HbWidget">
-                <widget name="mRatingSlider" type="HbRatingSlider">
-                    <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-                    <sizehint height="50" type="PREFERRED" width="100"/>
-                    <sizehint height="50" type="MINIMUM" width="50"/>
-                    <sizehint height="50" type="MAXIMUM" width="500"/>
-                </widget>
-                <real name="z" value="0"/>
-                <sizehint height="50" type="PREFERRED" width="320"/>
-                <layout orientation="Horizontal" type="linear">
-                    <contentsmargins bottom="0px" left="20px" right="9px" top="0px"/>
-                    <linearitem itemname="mRatingSlider"/>
+                <sizehint height="37.01493un" type="PREFERRED" width="45.52239un"/>
+                <layout type="anchor">
+                    <anchoritem dst="mDetailsList" dstEdge="LEFT" spacing="1.34328un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="mDetailsList" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                    <anchoritem dst="mDetailsList" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
                 </layout>
             </widget>
-            <layout orientation="Vertical" type="linear">
-                <linearitem itemname="container"/>
-                <linearitem itemname="mLblDetail1"/>
-                <linearitem itemname="mLblDetail2"/>
-                <linearitem itemname="mLblDetail3"/>
-                <linearitem itemname="mLblDetail4"/>
-                <linearitem itemname="mLblDetail5"/>
-                <linearitem itemname="mLblDetail6"/>
-                <linearitem itemname="mLblDetail7"/>
-                <linearitem itemname="mLblDetail8"/>
-                <linearitem itemname="mLblDetail9"/>
-                <linearitem itemname="mLblDetail10"/>
-                <linearitem itemname="mLblDetail11"/>
-                <linearitem itemname="mLblDetail12"/>
-                <linearitem itemname="mLblDetail13"/>
-                <linearitem itemname="mLblDetail14"/>
-                <linearitem itemname="mLblDetail15"/>
-                <linearitem itemname="mLblDetail16"/>
-            </layout>
-        </widget>
-        <widget name="mThumbRating" type="HbWidget">
-            <widget name="mBtnAttach" type="HbPushButton">
-                <rect height="47.52147" name="geometry" width="302" x="9" y="193.47853"/>
-                <string name="text" value="Attach"/>
+            <widget name="mThumbRating" type="HbWidget">
+                <widget name="mDetailsLabel" type="HbStackedWidget">
+                    <real name="z" value="2"/>
+                    <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                    <sizehint height="26.865675un" type="FIXED" width="47.7612un"/>
+                    <string name="state" value=""/>
+                </widget>
+                <widget name="mButton" type="HbPushButton">
+                    <real name="z" value="3"/>
+                    <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                    <sizehint height="7.46269un" type="PREFERRED" width="45.07463un"/>
+                    <sizehint height="7.46269un" type="MINIMUM" width="7.46269un"/>
+                    <sizehint height="7.46269un" type="MAXIMUM" width="74.62687un"/>
+                    <string name="state" value=""/>
+                </widget>
+                <real name="z" value="1"/>
+                <sizehint height="37.31343un" type="PREFERRED" width="47.7612un"/>
+                <layout type="anchor">
+                    <anchoritem dst="mButton" dstEdge="LEFT" spacing="1.34328un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="mButton" dstEdge="TOP" spacing="28.50746un" src="" srcEdge="TOP"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                    <anchoritem dst="mDetailsLabel" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                </layout>
             </widget>
-            <layout orientation="Vertical" type="linear">
-                <linearitem itemname="mBtnPlay"/>
-                <linearitem itemname="mBtnAttach"/>
+            <layout type="anchor">
+                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="1.49254un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="1.04478un" src="" srcEdge="TOP"/>
+                <anchoritem dst="mLblTitle" dstEdge="RIGHT" spacing="1.49254un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="TOP" spacing="6.71642un" src="" srcEdge="TOP"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="LEFT" spacing="49.40299un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="1.49254un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="6.71642un" src="" srcEdge="TOP"/>
+                <anchoritem dst="mDetailsContainer" dstEdge="LEFT" spacing="0.14925un" src="mThumbRating" srcEdge="RIGHT"/>
             </layout>
         </widget>
-        <widget name="mContent" role="HbView:widget" type="HbWidget">
-            <layout type="anchor">
-                <anchoritem dst="mThumbRating" dstEdge="LEFT" spacing="10" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mThumbRating" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="LEFT" spacing="10" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mLblTitle" dstEdge="TOP" spacing="7" src="" srcEdge="TOP"/>
-                <anchoritem dst="mLblTitle" dstEdge="RIGHT" spacing="10" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="LEFT" spacing="320" src="" srcEdge="LEFT"/>
-                <anchoritem dst="mDetailScrollArea" dstEdge="TOP" spacing="45" src="" srcEdge="TOP"/>
-            </layout>
+        <widget name="mLayoutVideoInfo" role="HbScrollArea:contents" type="HbWidget">
+            <layout orientation="Vertical" type="linear"/>
         </widget>
     </section>
-    <metadata activeUIState="portrait" display="QHD portrait" unit="px">
+    <metadata activeUIState="portrait" display="NHD portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
         <uistate name="portrait" sections="#common portrait"/>
         <uistate name="landscape" sections="#common landscape"/>
-        <uistate name="portrait_fetch" sections="#common portrait_fetch"/>
-        <uistate name="landscape_fetch" sections="#common landscape_fetch"/>
     </metadata>
 </hbdocument>

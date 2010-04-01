@@ -43,8 +43,8 @@ VideoCollectionClient::VideoCollectionClient() :
 mCollectionUtility(0),
 mCollectionOpenStatus(ECollectionNotOpen),  
 mCollectionListener(0),
-mOpenCategoryAlbum(0,9),
-mCollectionPathLevel(VideoCollectionClient::ELevelInvalid)
+mOpenCategoryAlbum(TMPXItemId::InvalidId()),
+mCollectionPathLevel(VideoCollectionCommon::ELevelInvalid)
 {
 
 }
@@ -53,8 +53,12 @@ mCollectionPathLevel(VideoCollectionClient::ELevelInvalid)
 // initialize()
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::initialize()
+int VideoCollectionClient::initialize(VideoDataSignalReceiver *signalReceiver)
 {
+    if(!signalReceiver)
+    {
+        return -1;
+    }
     if(mCollectionUtility && mCollectionListener)
     {
         // already initialized
@@ -62,7 +66,7 @@ int VideoCollectionClient::initialize()
     }
     if(!mCollectionListener)
     {
-        mCollectionListener = new VideoCollectionListener(*this);
+        mCollectionListener = new VideoCollectionListener(*this, *signalReceiver);
         if(!mCollectionListener)
         {
             return -1;
@@ -95,73 +99,14 @@ VideoCollectionClient::~VideoCollectionClient()
     delete mCollectionListener;
 }
 
-
-// -----------------------------------------------------------------------------
-// setVideoModelObserver
-// -----------------------------------------------------------------------------
-//
-int VideoCollectionClient::connectCollectionSignalReceiver(
-                                            VideoDataSignalReceiver *signalReceiver)
-{
-    if(!mCollectionListener || !signalReceiver)
-    {   
-        return -1;
-    }
-
-
-    if(!QObject::connect(mCollectionListener, SIGNAL(newVideoList(CMPXMediaArray*)),
-                       signalReceiver, SLOT(newVideoListSlot(CMPXMediaArray*)),
-                       Qt::DirectConnection))
-    {
-        return -1;
-    }
-    
-    if(!QObject::connect(mCollectionListener, SIGNAL(videoListAppended(CMPXMediaArray*)),
-                           signalReceiver, SLOT(appendVideoListSlot(CMPXMediaArray*)),
-                           Qt::DirectConnection))
-    {
-        return -1;
-    }
-    
-    if(!QObject::connect(mCollectionListener, SIGNAL(newVideoAvailable(CMPXMedia*)),
-                       signalReceiver, SLOT(newVideoAvailableSlot(CMPXMedia*)),
-                       Qt::DirectConnection))
-    {
-        return -1;
-    }
-    
-    if(!QObject::connect(mCollectionListener, SIGNAL(videoDeleted(TMPXItemId)),
-                       signalReceiver, SLOT(videoDeletedSlot(TMPXItemId)),
-                       Qt::DirectConnection))
-    {
-        return -1;
-    }
-    
-    if(!QObject::connect(mCollectionListener, SIGNAL(videoDeleteCompleted(int, QList<TMPXItemId>*)),
-                       signalReceiver, SLOT(videoDeleteCompletedSlot(int, QList<TMPXItemId>*)),
-                       Qt::DirectConnection))
-    {
-        return -1;
-    }
-    
-    if(!QObject::connect(mCollectionListener, SIGNAL(videoDetailsCompleted(TMPXItemId)),
-                       signalReceiver, SLOT(videoDetailsCompletedSlot(TMPXItemId)),
-                       Qt::DirectConnection))
-    {
-        return -1;
-    }
-    return 0;
-}
-
-
 // ---------------------------------------------------------------------------
 // categoryIds
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionClient::getCategoryIds(int& id, int& type)
+
+void VideoCollectionClient::getCategoryId(TMPXItemId &id)
 {
-    id = mOpenCategoryAlbum.iId1; //unique id
-    type = mOpenCategoryAlbum.iId2; //category or album
+    id = mOpenCategoryAlbum;
 }
 
 // ---------------------------------------------------------------------------
@@ -244,10 +189,10 @@ int VideoCollectionClient::deleteVideos(QList<TMPXItemId> *mediaIds)
 }
 
 // -----------------------------------------------------------------------------
-// openMedia
+// openItem
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::openVideo(TMPXItemId &mediaId)
+int VideoCollectionClient::openItem(TMPXItemId &mediaId)
 {
     if(!mCollectionUtility)
     {
@@ -255,7 +200,7 @@ int VideoCollectionClient::openVideo(TMPXItemId &mediaId)
     } 
     
     TInt error;
-    if (getCollectionLevel() == VideoCollectionClient::ELevelVideos)
+    if (mediaId.iId2 == KVcxMvcMediaTypeVideo)
     {
     	TRAP(error, openVideoL(mediaId));
     }
@@ -312,19 +257,57 @@ int VideoCollectionClient::getVideoDetails(TMPXItemId &mediaId)
 }
 
 // -----------------------------------------------------------------------------
-// addNewCollection
+// addNewAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::addNewCollection(QString name, QString thumbnail, QList<TMPXItemId> mediaIds)
+TMPXItemId VideoCollectionClient::addNewAlbum(const QString &title)
 {
-    if(!mCollectionUtility)
+    TMPXItemId id = TMPXItemId::InvalidId();
+    
+    if (mCollectionUtility && title.length())
     {
-        return -1;
+        TRAPD(err, id = createAlbumL(title));
+        if(err)
+        {
+            id = TMPXItemId::InvalidId();
+        }
+    }
+
+    return id;
+}
+
+// -----------------------------------------------------------------------------
+// removeAlbums
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::removeAlbums(const QList<TMPXItemId> &mediaIds)
+{
+    int err(-1);
+    
+    if (mCollectionUtility)
+    {
+        TRAP(err, removeAlbumsL(mediaIds));
+    }
+
+    return err;
+}
+
+// -----------------------------------------------------------------------------
+// addItemsInAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::addItemsInAlbum(TMPXItemId albumId,
+    const QList<TMPXItemId> &mediaIds)
+{
+    int err(-1);
+    
+    if (mCollectionUtility && albumId != TMPXItemId::InvalidId() &&
+        albumId.iId2 == KVcxMvcMediaTypeAlbum)
+    {
+        TRAP(err, addItemsInAlbumL(albumId, mediaIds));
     }
     
-    TRAPD(error, addNewCollectionL(name, thumbnail, mediaIds));
-    
-    return error;
+    return err;
 }
 
 // -----------------------------------------------------------------------------
@@ -341,25 +324,24 @@ void VideoCollectionClient::startOpenCollectionL(int level)
     CleanupStack::PushL( collectionPath );
   
     collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
-    if (level == VideoCollectionClient::ELevelVideos)
+    if (level == VideoCollectionCommon::ELevelVideos)
     {
     	collectionPath->AppendL( KVcxMvcCategoryIdAll );
     	
 		mOpenCategoryAlbum.iId1 = KVcxMvcCategoryIdAll;
     	mOpenCategoryAlbum.iId2 = 1;
     	
-    	mCollectionPathLevel = VideoCollectionClient::ELevelVideos;
+    	mCollectionPathLevel = VideoCollectionCommon::ELevelVideos;
     }
     else
     {
-    	mOpenCategoryAlbum.iId1 = 0;
-    	mOpenCategoryAlbum.iId2 = 9;
+        mOpenCategoryAlbum = TMPXItemId::InvalidId();
     	
-    	mCollectionPathLevel = VideoCollectionClient::ELevelCategory;
+    	mCollectionPathLevel = VideoCollectionCommon::ELevelCategory;
     }
     mCollectionUtility->Collection().OpenL( *collectionPath );
     CleanupStack::PopAndDestroy( collectionPath );  
-    mCollectionListener->setRequestNewMediaArray(true);
+
     mCollectionOpenStatus = ECollectionOpening;
 }
 
@@ -419,8 +401,8 @@ void VideoCollectionClient::openVideoL(TMPXItemId &videoId)
     CleanupStack::PushL( path );
     path->AppendL( KVcxUidMyVideosMpxCollection );
     path->AppendL( KVcxMvcCategoryIdAll );
-    path->AppendL( TMPXItemId( videoId, 0 ) );
-    path->SelectL( TMPXItemId( videoId, 0 ) );
+    path->AppendL( videoId );
+    path->SelectL( videoId );
       
     mCollectionUtility->Collection().OpenL( *path );
     CleanupStack::PopAndDestroy( path );  
@@ -443,13 +425,9 @@ void VideoCollectionClient::openCategoryL(TMPXItemId &id)
     collectionPath->AppendL( id );
     mCollectionUtility->Collection().OpenL( *collectionPath );
     CleanupStack::PopAndDestroy( collectionPath );  
-    mCollectionListener->setRequestNewMediaArray(true);
     
-	mOpenCategoryAlbum.iId1 = id;
-	mOpenCategoryAlbum.iId2 = 1;
-    
-	mCollectionPathLevel = VideoCollectionClient::ELevelVideos;
-    
+	mOpenCategoryAlbum = id;
+	mCollectionPathLevel = VideoCollectionCommon::ELevelAlbum;
     mCollectionOpenStatus = ECollectionOpening;
 }
 
@@ -468,11 +446,10 @@ void VideoCollectionClient::backL()
     {
     	mCollectionUtility->Collection().BackL();
     	mCollectionOpenStatus = ECollectionOpening;
-    	mCollectionListener->setRequestNewMediaArray(true);
-    	mOpenCategoryAlbum.iId1 = 0;
-    	mOpenCategoryAlbum.iId2 = 9;
     	
-    	mCollectionPathLevel = VideoCollectionClient::ELevelCategory;
+    	mOpenCategoryAlbum = TMPXItemId::InvalidId();
+
+    	mCollectionPathLevel = VideoCollectionCommon::ELevelCategory;
     }
 }
 
@@ -498,61 +475,109 @@ void VideoCollectionClient::getVideoDetailsL(TMPXItemId &videoId)
 }
 
 // -----------------------------------------------------------------------------
-// addNewCollectionL
+// removeAlbumsL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::addNewCollectionL(QString name, QString thumbnail, QList<TMPXItemId> mediaIds)
+void VideoCollectionClient::removeAlbumsL(const QList<TMPXItemId> &mediaIds)
 {
     if(!mCollectionUtility)
     {
         User::Leave(KErrGeneral);
     }
+
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+    cmd->SetTObjectValueL( KMPXCommandGeneralId, KVcxCommandIdMyVideos );
+    cmd->SetTObjectValueL(KVcxMediaMyVideosCommandId, KVcxCommandMyVideosRemoveAlbums);
+    cmd->SetTObjectValueL(KMPXCommandGeneralDoSync, EFalse);
+    cmd->SetTObjectValueL(KMPXCommandGeneralCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
+  
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL( array );
+    CMPXMedia* media = 0;
+    int count = mediaIds.count();
+    for (int i = 0; i < count; i++)
+    {
+        media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+        media->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
+        array->AppendL(*media);
+        CleanupStack::PopAndDestroy(media);
+    }
+    cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+
+    mCollectionUtility->Collection().CommandL(*cmd);
+
+    CleanupStack::PopAndDestroy( array );  
+    CleanupStack::PopAndDestroy( cmd );  
+}
+
+// -----------------------------------------------------------------------------
+// createAlbumL
+// -----------------------------------------------------------------------------
+//
+TMPXItemId VideoCollectionClient::createAlbumL(const QString &title)
+{
+    TMPXItemId albumId = TMPXItemId::InvalidId();
     
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
+
+    // 1. create album
+    TPtrC titlePtrC(title.utf16());
+    cmd->SetTObjectValueL(KMPXCommandGeneralId, KVcxCommandIdMyVideos);
+    cmd->SetTObjectValueL(KVcxMediaMyVideosCommandId, KVcxCommandMyVideosAddAlbum);
+    cmd->SetTextValueL(KMPXMediaGeneralTitle, titlePtrC);
+    cmd->SetTObjectValueL(KMPXCommandGeneralDoSync, ETrue);
+    cmd->SetTObjectValueL(KMPXCommandGeneralCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
     
-    cmd->SetTObjectValueL( KMPXCommandGeneralId, KVcxCommandIdMyVideos );
-    cmd->SetTObjectValueL( KVcxMediaMyVideosCommandId, -1 );
-    cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, ETrue );
-    cmd->SetTObjectValueL( KMPXMediaGeneralTitle, name );
-    cmd->SetTObjectValueL( KMPXMediaGeneralThumbnail1, thumbnail );
+    mCollectionUtility->Collection().CommandL(*cmd);
     
-    // TODO real command id missing, uncomment only after the collection supports adding collections
-//    mCollectionUtility->Collection().CommandL( *cmd );
-    
-    CleanupStack::PopAndDestroy( cmd );
-    
-    if(mediaIds.size() > 0) {
-        cmd = CMPXCommand::NewL();
-        CleanupStack::PushL( cmd );
-        CMPXMediaArray* idMediaArray = CMPXMediaArray::NewL();
-        CleanupStack::PushL( idMediaArray );
-        
-        cmd->SetTObjectValueL( KMPXCommandGeneralId, KVcxCommandIdMyVideos );
-        cmd->SetTObjectValueL( KVcxMediaMyVideosCommandId, -1 );
-        cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId,
-                                       TUid::Uid( KVcxUidMyVideosMpxCollection ) );
-        
-        // TODO need to add the mpxid of the newly created collection here.
-        
-        TMPXItemId mediaId;
-        foreach(mediaId, mediaIds) {
-            CMPXMedia* media = CMPXMedia::NewL();
-            CleanupStack::PushL( media );
-            media->SetTObjectValueL( KMPXMessageMediaGeneralId, mediaId );
-            idMediaArray->AppendL( *media );
-            CleanupStack::PopAndDestroy( media );
-        }
-        
-        cmd->SetCObjectValueL<CMPXMediaArray>( KMPXMediaArrayContents, idMediaArray );
-        cmd->SetTObjectValueL( KMPXMediaArrayCount, idMediaArray->Count() );
-        
-        // TODO real command id missing, only uncomment after collection supports adding collections.
-//        mCollectionUtility->Collection().CommandL( *cmd );
-        
-        CleanupStack::PopAndDestroy( idMediaArray );
-        CleanupStack::PopAndDestroy( cmd );
+    // get album id
+    if (cmd->IsSupported(KMPXMediaGeneralId))
+    {
+        albumId = cmd->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId);        
     }
+
+    // cleanup
+    CleanupStack::PopAndDestroy(cmd);
+
+    return albumId;
+}
+
+// -----------------------------------------------------------------------------
+// addItemsInAlbumL
+// -----------------------------------------------------------------------------
+//
+void VideoCollectionClient::addItemsInAlbumL(TMPXItemId albumId,
+    const QList<TMPXItemId> &mediaIds)
+{
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL(cmd);
+    cmd->SetTObjectValueL(KMPXCommandGeneralId, KVcxCommandIdMyVideos);
+    cmd->SetTObjectValueL(KVcxMediaMyVideosCommandId, KVcxCommandMyVideosAddToAlbum);
+    cmd->SetTObjectValueL(KVcxMediaMyVideosUint32Value, albumId.iId1);
+    cmd->SetTObjectValueL(KMPXCommandGeneralDoSync, EFalse);
+    cmd->SetTObjectValueL(KMPXCommandGeneralCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
+
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL( array );
+    CMPXMedia* video = 0;
+    int count = mediaIds.count();
+    for (int i = 0; i < count; i++)
+    {
+        video = CMPXMedia::NewL();
+        CleanupStack::PushL(video);
+        video->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
+        array->AppendL(*video);
+        CleanupStack::PopAndDestroy(video);
+    }
+    cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+
+    mCollectionUtility->Collection().CommandL(*cmd);
+
+    CleanupStack::PopAndDestroy(array);
+    CleanupStack::PopAndDestroy(cmd);
 }
 
 // -----------------------------------------------------------------------------
@@ -587,5 +612,4 @@ void VideoCollectionClient::fetchMpxMediaByMpxIdL(TMPXItemId &aMpxId)
     CleanupStack::PopAndDestroy( idMediaArray );  
     CleanupStack::PopAndDestroy( cmd );  
 }
-
 

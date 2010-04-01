@@ -19,20 +19,18 @@
 #ifndef VIDEOLISTWIDGET_H
 #define VIDEOLISTWIDGET_H
 
-#include <QGraphicsWidget>
-#include <QPixmap>
-#include <QModelIndex>
-#include <qmap.h>
-#include <qpoint.h>
 #include <hbview.h>
 #include <hblistview.h>
+#include <qmap.h>
 #include <mpxitemid.h>
+#include "videocollectioncommon.h"
 
 class VideoSortFilterProxyModel;
+class VideoServices;
+class VideoCollectionUiLoader;
 class HbAction;
 class HbMenu;
 class QTimer;
-
 class QItemSelection;
 class VideoServices;
 
@@ -47,29 +45,16 @@ class VideoListWidget : public HbListView
 {
     Q_OBJECT
     Q_DISABLE_COPY(VideoListWidget)
+    
 public:
 
-	enum TVideoListLevel
-    {
-        ELevelCategory = 2,
-        ELevelVideos   = 3
-    };
-
-	enum TVideoListType
-    {
-        EUnknown,
-		EAllVideos,        // list displaying all videos
-        ECollections,      // list displaying all collections
-        EDefaultColItems,  // list displying videos in default collection
-        EUserColItems      // list displaying videos in user defined collection
-    };
 
     /**
      * Contructor.
-     *
+     * @param uiloader
      * @param parent parent of this widget
      */
-    VideoListWidget(HbView *parent = 0);
+    VideoListWidget(VideoCollectionUiLoader *uiLoader, HbView *parent = 0);
 
     /**
      * Destructor.
@@ -98,20 +83,20 @@ public:
      *
      * @return int 0 initialization ok, < 0 if fails.
      */
-    int activate(VideoListWidget::TVideoListLevel role);
+    int activate(VideoCollectionCommon::TCollectionLevels level);
 
     /**
      * Method disables and hides current active view
      *
      */
     void deactivate();
-
+    
     /**
-     * Used for resolving widget's current type
-     *
-     * @return TVideoListType current level.
+     * returns current level provided by activate
+     * 
+     * @return TCollectionLevels
      */
-    TVideoListType getType();
+    VideoCollectionCommon::TCollectionLevels getLevel();
     
     /**
      * returns widget's model
@@ -120,7 +105,7 @@ public:
      */
     VideoSortFilterProxyModel& getModel();
     
-protected:
+public:
     
     /**
      * Called by the fw when some item is tapped. Method check that
@@ -130,6 +115,16 @@ protected:
      * @param midelIndex, item's index
      */
     void emitActivated (const QModelIndex &modelIndex);
+    
+    /**
+     * Overwritten from Abstractitemview.
+     * Sets local selection mode variable value used locally in checks. 
+     * If provided value is mode provided by HbAbstractitemview sets 
+     * it as view selection mode othervise NoSelection is setted
+     * 
+     * @param mode 
+	 */
+    void setSelectionMode(int mode);
 
 signals:
 
@@ -147,7 +142,7 @@ signals:
      * @param true if opened, false if closed.
      * @param optional name string
      */
-    void collectionOpened(bool, const QString&);
+    void collectionOpened(bool, const QString&, const QModelIndex&);
 
     /**
      * signal is connected to service's itemSelected -slot
@@ -189,17 +184,17 @@ private slots:
     void playAllSlot();
 
     /**
-     * Signaled to add an item into currently open collection.
-     *
-     */
-    void addItemSlot();
-
-    /**
      * Signaled to add an item into a collection.
      *
      */
     void addToCollectionSlot();
 
+    /**
+     * Signaled to remove a user created collection.
+     *
+     */
+    void removeCollectionSlot();
+    
     /**
      * Signaled when details will be selected from the videolist's
      * context menu. Maps mCurrentIndex to model's source index and
@@ -222,8 +217,14 @@ private slots:
     void back();
 	
 	/**
+	 * Signaled when view scrolling starts, pauses thumbnail creation.
+	 *
+	 */
+	void scrollingStartedSlot();	
+	
+	/**
 	 * Signaled when view scrolling ends, initiates thumbnail fetching
-	 * at index of first visible item. 
+	 * at index of first visible item and enables creation of thumbnails.
 	 *
 	 */
 	void scrollingEndedSlot();
@@ -231,8 +232,24 @@ private slots:
 	/**
 	 * Signaled when view scroll position changes, initiates timer to 
 	 * fetch thumbnails at index of first visible item.
+	 *
+	 * @param newPosition scroll position 
+	 *
 	 */
 	void scrollPositionChangedSlot(const QPointF &newPosition);
+	
+	/**
+	 * Signaled when scroll position timer triggers. Starts fetching thumbnails
+	 * for visible items.
+	 * 
+	 */
+	void scrollPositionTimerSlot();
+
+    /**
+     * Fetches thumbnails for the visible items.
+     *
+     */
+    void fetchThumbnailsForVisibleItems();
 	
     // TODO: following can be removed after all implementation ready
     /**
@@ -240,7 +257,7 @@ private slots:
      * Slot shows "Not yet implemented" note
      */
     void debugNotImplementedYet();
-
+    
 private:
 
     enum TContextActionIds
@@ -251,9 +268,7 @@ private:
         EACtionRemoveFromCollection,
         EACtionAddToCollection,
         EACtionRemoveCollection,
-        EActionAddVideos,
         EActionRename,
-        EActionSetThumb,
     	EActionPlay
     };
 
@@ -267,7 +282,7 @@ private:
      * Method sets correct popup menu for specific list items.
      *
      */
-    void setContextMenu(bool isDefaultCollection);
+    void setContextMenu();
 
     /**
      * Method connects signals needed by the widget
@@ -304,7 +319,7 @@ private:
      * current level indicating content currently showing: 
      * category or videos
      */
-	VideoListWidget::TVideoListLevel mCurrentLevel;
+    VideoCollectionCommon::TCollectionLevels mCurrentLevel;
 
 	/**
      * True if signals have been connected
@@ -322,26 +337,35 @@ private:
 	bool                       mIsService;
 
 	/**
-     * Secondary softkey action object
+     * Navigation softkey action object for back.
      */
-	HbAction 				   *mSecSkAction;
+	HbAction 				   *mNavKeyBackAction;
+
+    /**
+     * Navigation softkey action object for quit.
+     */
+    HbAction                   *mNavKeyQuitAction;
 
     /**
      * Item sensitive context menu
      */
     HbMenu                      *mContextMenu;
-
+    
     /**
-     * Last opened item id is saved when collection is opened from the 
-	 * collections -list. Value used to indentify the type of list.
-     */
-    TMPXItemId                 mLastOpenItemId;
+     * loacal selection mode
+	 */
+    int                        mSelectionMode;
     
     /**
      * Timer used to report thumbnail fetches class index of 
      * first visible item when view is scrolling. 
      */
     QTimer                      *mScrollPositionTimer;
+    
+    /**
+     * ui loade object, not owned
+     */
+    VideoCollectionUiLoader     *mUiLoader;
 };
 
 #endif // VIDEOLISTWIDGET_H

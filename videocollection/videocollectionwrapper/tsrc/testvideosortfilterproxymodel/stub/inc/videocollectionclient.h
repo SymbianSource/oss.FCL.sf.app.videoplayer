@@ -49,8 +49,8 @@ class  VideoCollectionClient
 
     /**
      *
-     * if gFailInit is true returns -1
-     * if gFailInit is false returns 0
+     * if mFailInit is true returns -1
+     * if mFailInit is false returns 0
      *
      * @return int
      */
@@ -58,8 +58,8 @@ class  VideoCollectionClient
 
     /**
      *
-     * if gFailStartOpen is true returns -1
-     * if gFailStartOpen is false returns 0
+     * if mFailStartOpen is true returns -1
+     * if mFailStartOpen is false returns 0
      *
      * @return int
      */
@@ -67,69 +67,41 @@ class  VideoCollectionClient
 
     /**
      *
-     * if gFailMediaPlayback is true returns -1
-     * if gFailMediaPlayback is false returns 0
+     * if mFailMediaPlayback is true returns -1
+     * if mFailMediaPlayback is false returns 0
      *
      * @return int
      */
-    int openVideo(int mpxId1);
-
+    int openItem(int mpxId1);
+   
     /**
      *
-     * if gFailMediaDetails is true returns -1
-     * if gFailMediaDetails is false returns 0
+     * if mFailMediaDetails is true returns -1
+     * if mFailMediaDetails is false returns 0
      *
      * @return int
      */
     int getVideoDetails(int mpxId1);
 
     /**
-     * @return int
+     * @return mNewAlbumId
      */
-    int addNewCollection(QString name, QString thumbnail, QList<TMPXItemId> mediaIds);
-
+    TMPXItemId addNewAlbum(QString name);
+    
     /**
-     * sets gFailInit
-     *
-     * @param bool
+     * no funtionality needed here for unit tests
      */
-    static void setInitFailure(bool fails);
-
+    int addItemsInAlbum(TMPXItemId albumId, QList<TMPXItemId> items);
+    
     /**
-     * sets gFailStartOpen
-     *
-     * @param bool
+     * no funtionality needed here for unit tests
      */
-    static void setStartopenFailure(bool fails);
-
-
+    int removeAlbums(const QList<TMPXItemId> &items);
+    
     /**
-     * sets gFailMediaPlayback
-     *
-     * @param bool
+     * saves contant id (1,2) into provided id
      */
-    static void setOpenMediaplaybackFailure(bool fails);
-
-    /**
-     * sets gFailMediaDetails
-     *
-     * @param bool
-     */
-    static void setOpenMediaDetailsFailure(bool fails);
-
-    /**
-     * sets gFailSetSort
-     *
-     * @param bool
-     */
-    static void setSortMediasFailure(bool fails);
-
-    /**
-     * returns gSettedSortOrder
-     *
-     * @return TVcxMyVideosSortingOrder
-     */
-    static TVcxMyVideosSortingOrder getSettedSortOrder();
+    void getCategoryId(TMPXItemId &id);
     
     /**
      * calls collection to go back to collection level
@@ -144,6 +116,7 @@ public:
     static bool mFailMediaDetails;
     static bool mFailSetSort;
     static bool mFailAddNewCollection;
+    static TMPXItemId mNewAlbumId;
     static TVcxMyVideosSortingOrder mSettedSortOrder;
     static int mSortOrderSetCount;
     static QString mAddNewCollectionName;

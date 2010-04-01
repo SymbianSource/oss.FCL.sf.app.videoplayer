@@ -25,7 +25,7 @@
 // FORWARD DECLARATIONS
 class VideoCollectionClient;
 class VideoCollectionUtils;
-
+class VideoDataSignalReceiver;
 
 // CLASS DECLARATION
 class VideoCollectionListener : public QObject, public MMPXCollectionObserver
@@ -45,17 +45,13 @@ public:
     /**
      * Constructor
      */
-    VideoCollectionListener(VideoCollectionClient &collectionClient);
+    VideoCollectionListener(VideoCollectionClient &collectionClient,
+                            VideoDataSignalReceiver &mSignalReceiver);
 
     /**
      * Destructor.
      */
     virtual ~VideoCollectionListener();
-    
-    /**
-     * Sets provided value for mNewArrayRequest
-     */
-    void setRequestNewMediaArray(bool request = true );
      
 signals:
 
@@ -107,6 +103,14 @@ signals:
      * @param id of video whose details have bee fetched.
      */
     void videoDetailsCompleted(TMPXItemId);
+    
+    /**
+     * Emitted when album items are recieved.
+     * 
+     * @param albumId, Album which items are received.
+     * @param albumItems, Items belonging to the current album.
+     */
+    void albumListAvailable(TMPXItemId albumId, CMPXMediaArray *albumItems);
         
 private: // From MMPXCollectionObserver
 
@@ -251,17 +255,16 @@ private:
     VideoCollectionClient &mCollectionClient;
     
     /**
+     * reference to collection message signal receiver.
+     * Used as observer for performance.
+     */
+    VideoDataSignalReceiver &mSignalReceiver;
+    
+    /**
      * Reference to utility objetc used to parse CMPXMessages and
      * CMPXMedias
      */
     VideoCollectionUtils &mVideoUtils;
-    
-    /**
-     * tells wether we have new array requests pending.
-     * if true, newVideoList is emitted to notify model we have totally new video list.
-     * If false, videoListAppended is emitted.
-     */
-    bool mNewArrayRequest;
         
  };
 

@@ -36,7 +36,9 @@ HEADERS += inc/testvideocollectionlistener.h \
            stub/inc/stubcollection.h  \ 
            stub/inc/videocollectionclient.h  \
            stub/inc/stubsignalreceiver.h \  
+           stub/inc/stubsignalreceiver.h \  
            ../../inc/videocollectionutils.h \
+           ../../inc/videodatasignalreceiver.h \
            ../../inc/videocollectionlistener.h
 
 SOURCES += src/testvideocollectionlistener.cpp \

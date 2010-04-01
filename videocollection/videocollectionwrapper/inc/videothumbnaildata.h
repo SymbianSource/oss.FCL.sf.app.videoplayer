@@ -18,18 +18,16 @@
 #define __VIDEOTHUMBNAILDATA_H__
 
 // INCLUDES
-#include <QObject>
-#include <QHash>
-#include <QPair>
-#include <QIcon>
-#include <QSet>
-#include <QPointer>
+#include <qobject.h>
+#include <qicon.h>
+#include <qpointer.h>
 #include <mpxitemid.h>
 
 #include "videocollectionexport.h"
 
 // FORWARD DECLARATIONS
 class VideoThumbnailDataPrivate;
+class VideoSortFilterProxyModel;
 
 // CLASS DECLARATIONS
 
@@ -64,24 +62,6 @@ public:
      *
      */
     static VideoThumbnailData &instance();
-
-    /**
-     * Method starts fetching thumbnail for the video specified by given mediaId
-     * Media IDs are used as a key identification in the thumbnail map where data is
-     * collected. Id is passed to thumbnail manager as internal data and when
-     * thumbnail is fetched and thumbnailReadySlot is signaled, id is used to notify
-     * client about which item's thumbnail is ready.
-     *
-     * If thumbnail fetching is started succesfully, method saves thumbnail item
-     * into local repository with default thumbnail data.
-     *
-     * @param mediaId media id for which to start fetching thumbnail
-     * @param priority priority for the fetch
-     *
-     * @return int: thumbnail id or -1 if fetch starting fails.
-     *
-     */
-    int startFetchingThumbnail(int mediaId, int priority);
     
     /**
      * Method removes thumbnail data from the local repository.
@@ -108,12 +88,14 @@ public:
     const QIcon* getThumbnail(TMPXItemId mediaId);
 
     /**
-     * Starts background thumbnail fetching.
+     * Starts background thumbnail fetching, the model used for the background fetching
+     * is also changed.
      *
+     * @param model model of the items for the fetching.
      * @param fetchIndex index where to start the background thumbnail fetching.
      *  
      */
-    void startBackgroundFetching(int fetchIndex);
+    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);
     
     /**
      * Enables or disables thumbnail background fetching. Default is enabled.
@@ -121,6 +103,14 @@ public:
      * @param enable true enables and false disables thumbnail background fetching.
      */
     void enableBackgroundFetching(bool enable);
+    
+    /**
+     * Enables or disables thumbnail creation. Default is enabled. Thumbnails
+     * that have been already generated are fetched still.  
+     * 
+     * @param enable true enables and false disables thumbnail creation.
+     */
+    void enableThumbnailCreation(bool enable);    
     
     /**
      * Frees allocated data for thumbnails and cancels ongoing fetches.

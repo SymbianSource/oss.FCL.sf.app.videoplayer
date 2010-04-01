@@ -15,13 +15,13 @@
 *
 */
 
-// Version : %version: da1mmcf#13 %
+// Version : %version: da1mmcf#16 %
 
 
 
 // INCLUDE FILES
 
-#include <qgraphicswidget>
+#include <QGraphicsWidget>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -74,6 +74,8 @@ void QMPXVideoPlaybackControlConfiguration::createControlList()
     }
 
     addControlToList( EMPXStatusPane );
+
+    emit controlListUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -103,6 +105,8 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
     {
         case EMPXControlCmdFullScreenViewOpened:
         {
+            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() full screen view"));
+
             widget->setVisible( true );
 
             deleteControlFromList( EMPXDetailsViewPlaybackWindow );
@@ -113,6 +117,8 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
         }
         case EMPXControlCmdDetailsViewOpened:
         {
+            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() details view"));
+
             widget->setVisible( false );
 
             deleteControlFromList( EMPXIndicatorBitmap );
@@ -126,6 +132,8 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
         case EMPXControlCmdTvOutConnected:
         case EMPXControlCmdAudionOnlyViewOpened:
         {
+            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() audion only view"));
+
             widget->setVisible( false );
 
             deleteControlFromList( EMPXDetailsViewPlaybackWindow );
@@ -188,6 +196,8 @@ void QMPXVideoPlaybackControlConfiguration::updateControlsWithFileDetails()
 
     if ( mControlsController->fileDetails()->mVideoEnabled )
     {
+        MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlsWithFileDetails() video enabled"));
+
         QGraphicsWidget *widget = 
                 mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
         widget->setVisible( true );

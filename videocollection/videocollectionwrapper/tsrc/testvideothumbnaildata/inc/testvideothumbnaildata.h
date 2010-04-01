@@ -36,12 +36,12 @@ class TestVideoThumbnailData : public QObject
     // test functions for the test framework
 private slots:
     void testInstance();
-    void testStartFetchingThumbnail();
     void testRemoveThumbnail();
     void testGetThumbnail();
     void testEnableBackgroundFetching();
     void testFreeThumbnailData();
     void testStartBackgroundFetching();
+    void testEnableThumbnailCreation();
 
 signals:
 

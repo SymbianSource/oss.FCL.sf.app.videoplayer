@@ -96,6 +96,15 @@ void StubSignalReceiver::newVideoListSlot(CMPXMediaArray* aVideoList)
 }
 
 // -----------------------------------------------------------------------------
+// appendVideoListSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::appendVideoListSlot( CMPXMediaArray* videoList )
+{
+    mLatestPtr = videoList;
+}
+
+// -----------------------------------------------------------------------------
 // videoListAppendedSlot
 // -----------------------------------------------------------------------------
 //
@@ -152,3 +161,44 @@ void StubSignalReceiver::videoDetailsCompletedSlot(TMPXItemId videoId)
 {
     mLatestItemId = videoId;
 }
+
+// -----------------------------------------------------------------------------
+// albumListAvailableSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::albumListAvailableSlot(TMPXItemId albumId, 
+                                                CMPXMediaArray *albumItems)
+{
+    mLatestItemId = albumId;
+    mLatestPtr = albumItems;
+}
+
+// -----------------------------------------------------------------------------
+// itemDeletedSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::itemDeletedSlot(TMPXItemId id)
+{
+    mLatestItemId = id;
+}
+
+// -----------------------------------------------------------------------------
+// albumRemoveFailureSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::albumRemoveFailureSlot(QList<TMPXItemId> *items)
+{
+    mLatestPtr = items;
+      
+    if(!items)
+    {
+        return;
+    }
+    mLatesListData.clear();
+    TMPXItemId data = 0;
+    foreach(data, (*items))
+    {
+        mLatesListData.append(data);
+    }
+}
+

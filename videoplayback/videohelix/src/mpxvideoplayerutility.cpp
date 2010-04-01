@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 18 %
 
 
 #include <AudioPreference.h>
@@ -77,6 +77,12 @@ void CMpxVideoPlayerUtility::Close()
         iControllerEventMonitor->Cancel();
         delete iControllerEventMonitor;
         iControllerEventMonitor = NULL;
+    }
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoRemoveDisplayWindow ) );
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
 
     iController.Close();
@@ -271,6 +277,21 @@ void CMpxVideoPlayerUtility::SetDisplayWindowL( const TRect& aScreenRect,
                 iVideoPlayControllerCustomCommands.DirectScreenAccessEvent( EResumeDSA ) );
 
         iDirectScreenAccessAbort = EFalse;
+    }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SurfaceRemovedFromView()"));
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
 }
 
@@ -569,19 +590,17 @@ TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     TInt error = KErrNone;
 
-    if ( iSurfaceId.IsNull() )
+    if ( !iSurfaceId.IsNull() )
     {
-        error = KErrNotFound;
+        //
+        //  Send command to view to remove the surface
+        //
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
+
+        error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
+
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
-
-    //
-    //  Send command to view to remove the surface
-    //
-    MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
-
-    error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
-
-    iSurfaceId = TSurfaceId::CreateNullId();
 
     return error;
 }

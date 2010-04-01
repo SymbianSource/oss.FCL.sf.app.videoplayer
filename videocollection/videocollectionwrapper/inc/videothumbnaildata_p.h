@@ -29,11 +29,11 @@
 #include <mpxitemid.h>
 
 // FORWARD DECLARATIONS
-class ThumbnailManager;
 class VideoCollectionWrapper;
 class VideoSortFilterProxyModel;
 class QModelIndex;
 class QTimer;
+class VideoThumbnailFetcher;
 
 class VideoThumbnailDataPrivate : public QObject
 {
@@ -43,8 +43,7 @@ class VideoThumbnailDataPrivate : public QObject
     Q_OBJECT
 
 public:
-    
-    
+
     /**
      * Default constructor
      */
@@ -54,38 +53,6 @@ public:
      * Destructor
      */
     virtual ~VideoThumbnailDataPrivate();
-
-    /**
-     * Starts fetching thumbnails for medias in the model defined by the indexes 
-     * parameter. Priority for the thumbnails is ascending starting from the 
-     * defined priority. Uses method startFetchingThumbnail for the actual 
-     * fetching.
-
-     *
-     * param @indexes indexes of the medias in the model
-     * param @priority starting priority for the thumbnails
-     *
-     * @return int count of fetches started or -1 in case of error.
-     */
-    int startFetchingThumbnails(const QList<QModelIndex> &indexes, int priority);
-
-    /**
-     * Method starts fetching thumbnail for the video specified by given mediaId
-     * Media IDs are used as a key identification in the thumbnail map where data is
-     * collected. Id is passed to thumbnail manager as internal data and when
-     * thumbnail is fetched and thumbnailReadySlot is signaled, id is used to notify
-     * client about which item's thumbnail is ready.
-     *
-     * If thumbnail fetching is started succesfully, method saves thumbnail item
-     * into local repository with default thumbnail data.
-     *
-     * @param mediaId media id for which to start fetching thumbnail
-     * @param priority priority for the fetch
-     *
-     * @return int: thumbnail id or -1 if fetch starting fails.
-     *
-     */
-    int startFetchingThumbnail(TMPXItemId mediaId, int priority);
 
     /**
      * Method returns a pointer to video's thumbnail.
@@ -102,7 +69,7 @@ public:
     const QIcon* getThumbnail(TMPXItemId mediaId);
 
     /**
-     * Method removes thumbnail data from the local repository.
+     * Method removes thumbnail data from the icon cache.
      *
      * @param mediaId id for media whose thumbnail is to be removed
      *
@@ -114,9 +81,10 @@ public:
     /**
      * Starts background thumbnail fetching from the given fetch index.
      *
+     * @param model model of the items for the fetching.  
      * @param fetchIndex index where to start the background thumbnail fetching.
      */
-    void startBackgroundFetching(int fetchIndex);
+    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);
     
     /**
      * Enables or disables thumbnail background fetching.
@@ -124,7 +92,15 @@ public:
      * @param enable true enables and false disables thumbnail background fetching.
      */
     void enableBackgroundFetching(bool enable);
-     
+
+    /**
+     * Enables or disables thumbnail creation. Default is enabled. Thumbnails
+     * that have been already generated are fetched still.  
+     * 
+     * @param enable true enables and false disables thumbnail creation.
+     */
+    void enableThumbnailCreation(bool enable); 
+    
     /**
      * Frees allocated data for thumbnails and cancels ongoing fetches.
      */
@@ -159,6 +135,31 @@ protected:
     void disconnectSignals();
     
     /**
+     * Starts fetching thumbnails for medias in the model defined by the indexes 
+     * parameter. Priority for the thumbnails is ascending starting from the 
+     * defined priority.
+     *
+     * param @indexes indexes of the medias in the model
+     * param @priority starting priority for the thumbnails
+     *
+     * @return int count of fetches started or -1 in case of error.
+     */
+    int startFetchingThumbnails(const QList<QModelIndex> &indexes, int priority);
+
+    /**
+     * Method starts fetching thumbnail for the video specified by given mediaId
+     * Media IDs are used as a key identification in the thumbnail map where data is
+     * collected.
+     *
+     * @param mediaId media id for which to start fetching thumbnail
+     * @param priority priority for the fetch
+     *
+     * @return int: thumbnail id or -1 if fetch starting fails.
+     *
+     */
+    int startFetchingThumbnail(TMPXItemId mediaId, int priority);
+    
+    /**
      * Appends indexes in the source model to the list between start and end.
      *
      * @param indexes list of indexes
@@ -178,18 +179,6 @@ protected:
     const QIcon* defaultThumbnail(TMPXItemId mediaId);
 
     /**
-     * Removes given id from the fetch list. Fetch list is an internal id list containing
-     * thumbnail ids currently under fetching.
-     *
-     * When list is emptied the background thumbnail fetching is continued.
-     *
-     * @param tnId thumbnail id to be removed from the list
-     *
-     * @return true if id was found from fetch list, otherwise false.
-     */
-    bool removeFromFetchList(int tnId);
-
-    /**
      * Starts timer that continues the background thumbnail fetching at timeout.
      */
     void continueBackgroundFetch();
@@ -207,29 +196,21 @@ signals:
 private slots:
 
     /**
-     * Thumbnail manager signals this slot when thumbnail is ready
-     * for some item.
+     * Thumbnail fetcher signals this slot when thumbnail is ready
+     * for some item. Thumbnail data is saved to icon cache.
      *
      * @param tnData: thumbnail
      * @param internal: internal data contains pointer to the media id used in emitted signal
-     * @param id: thumbnail id
      * @param error: possible error code from thumbnail manager ( 0 == ok )
      *
      */
-    void thumbnailReadySlot(QPixmap tnData, void *internal , int id , int error);
+    void thumbnailReadySlot(QPixmap tnData, void *internal, int error);
 
     /**
-     * VideoSortFilterProxyModel signals this slot when the layout of items in the model have
-     * changed.
+     * VideoListDataModel signals this slot when the model has been changed.
      *
      */
-    void layoutChangedSlot();
-
-    /**
-     * VideoSortFilterProxyModel signals this slot when the rows have been inserted to the model.
-     *
-     */
-    void rowsInsertedSlot(const QModelIndex & parent, int start, int end);
+    void modelChangedSlot();
 
     /**
      * Fetches thumbnails around of mCurrentFetchIndex in batches of THUMBNAIL_BACKGROUND_FETCH_AMOUNT.
@@ -251,29 +232,23 @@ private slots:
      * 
      */
     void reportThumbnailsReadySlot();
+
+    /**
+     * Thumbnail fetcher signals this when all thumbnails have been fetched.
+     */
+    void allThumbnailsFetchedSlot();
     
 private: // Data
 
-    /**
-     * Thumbnail manager object.
-     */
-    ThumbnailManager                *mThumbnailManager;
-
-    /**
-     * list containing thumbnails ids which data is
-     * currently being fetched from the tn wrapper.
-     * empty if there are no thumbnail fetching
-     * ongoing
-     */
-    QSet<int>                       mFetchList;
-
+    VideoThumbnailFetcher            *mThumbnailFetcher;
+    
     /**
      * Local data map for thumbnail data:
      * - key is the video's media id
      * - data is the actual thumbnail data.
      * If thumbnail data is not yet fetched, QIcon is default thumbnail.
      */
-    QCache<TMPXItemId, QIcon>       mThumbnailData;
+    QCache<TMPXItemId, QIcon>        mThumbnailData;
 
     /**
      * Default thumbnail for a video.
@@ -286,15 +261,10 @@ private: // Data
     QIcon                           *mDefaultTnCategory;
 
     /**
-     * Wrapper to collection.
+     * Current model, set at call to startBackgroundFetching.
      */
-    VideoCollectionWrapper          *mCollectionWrapper;
-
-    /**
-     * Model containing the media, not owned.
-     */
-    QPointer<VideoSortFilterProxyModel>     mModel;
-
+    QPointer<VideoSortFilterProxyModel>     mCurrentModel;
+    
     /**
      * Current index for background thumbnail fetching.
      */

@@ -16,7 +16,6 @@
 
 
 
-
 #include <bldvariant.hrh>
 #include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
@@ -38,18 +37,15 @@ SOURCE          vcxmyvideosvideocache.cpp
 SOURCE          vcxmyvideoscategories.cpp
 SOURCE          vcxmyvideosmessagelist.cpp
 SOURCE          vcxmyvideosasyncfileoperations.cpp
-SOURCE          vcxmyvideosdownloadcache.cpp
 SOURCE          vcxmyvideosdrivemonitor.cpp
 SOURCE          vcxmyvideosdriveinfo.cpp
 SOURCE          vcxmyvideosdrivemonitorevent.cpp
 SOURCE          vcxmyvideosactivetask.cpp
 SOURCE          vcxmyvideosopenhandler.cpp
-
-SOURCEPATH      ../download/src
-SOURCE          vcxmyvideosdownloadutil.cpp
-
-SOURCEPATH      ../src
-SOURCE          vcxmyvideostimer.cpp
+SOURCE          vcxmyvideosmdsalbums.cpp
+SOURCE          vcxmyvideosmdscmdqueue.cpp
+SOURCE          vcxmyvideosalbums.cpp
+SOURCE          vcxmyvideosalbum.cpp
 
 SOURCEPATH      ../data
 
@@ -58,7 +54,6 @@ TARGET          vcxmyvideoscollectionplugin.rsc
 END
 
 USERINCLUDE     ../inc
-USERINCLUDE     ../download/inc
 USERINCLUDE     ../../inc
 
 APP_LAYER_SYSTEMINCLUDE
@@ -72,10 +67,6 @@ LIBRARY         bafl.lib
 LIBRARY         flogger.lib
 LIBRARY         mdeclient.lib
 LIBRARY         efsrv.lib
-LIBRARY         downloadmgr.lib
 LIBRARY         charconv.lib
-LIBRARY         vcxconnectionutility.lib
-LIBRARY         mediatorclient.lib
 LIBRARY         centralrepository.lib
-LIBRARY         drmutility.lib
-LIBRARY         platformenv.lib
+LIBRARY         PlatformEnv.lib

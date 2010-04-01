@@ -39,7 +39,7 @@ public:
      * @param parent parent of this widget
      * @param client Collection client pointer to use.
      */
-    VideoSortFilterProxyModel(QObject *parent=0);
+    VideoSortFilterProxyModel(int type, QObject *parent=0);
     
     /**
      * Destructor.
@@ -59,7 +59,7 @@ public:
     int initialize(VideoListDataModel *sourceModel);
 
 public:
-    
+           
     /**
      * First call opens the collection at the defined level. Subsequent calls only change the level.
      * This starts populating the model data from the MyVideos collection plugin.
@@ -81,6 +81,15 @@ public:
      *      is true.
      */
     void doSorting(int sortingRole, Qt::SortOrder order, bool async = true);
+
+    /**
+     * To get current actice sorting parameters of the model
+     * 
+     * @param sortingRole The role that sorting is done by.
+     * @param sortingOrder The sorting order, e.g. ascending or descending.
+     */
+    void getSorting(int &sortingRole, Qt::SortOrder &order);
+
     
     /**
      * Method to delete items at provided indeces
@@ -95,10 +104,10 @@ public:
     * on the type of the item, the behaviour or result could be
     * quite different.
     * 
-    * @param index index of the item to be opened
+    * @param item id id of the item to be opened
     * @return int 0 succeeds, <0 if opening does not succeed.
     */    
-    int openItem(const QModelIndex &index);
+    int openItem(TMPXItemId mediaId);
 
     /**
     * Return to collection level
@@ -122,8 +131,16 @@ public:
      * @return TMPXItemId mpx id if succeeds TMPXItemId::InvalidId() in case of error
      *  
      */
-    TMPXItemId getMediaIdAtIndex(const QModelIndex &index);
-
+    TMPXItemId getMediaIdAtIndex(const QModelIndex &index) const;
+  
+    /**
+     * returns qmodelindex of item id provided.
+     * 
+     * @param item id
+     * @return QModelIndex;
+     */
+    QModelIndex indexOfId(TMPXItemId id);
+    
     /**
      * Method checks that model exists and asks for file path from
      * given object.
@@ -135,40 +152,90 @@ public:
     QString getMediaFilePathForId(TMPXItemId mediaId);
         
     /**
-     * Adds a collection (album).
+     * Add a new album.
      * 
-     * @param name Name for the collection.
-     * @param thumbnail Path for the image file to use as a thumbnail for the
-     *      collection. Can be empty.
-     * @param mediaIds Media ids of the videos that are added to the collection 
-     *      at creation time. Size can be zero.
-     * @return 0, if collection creation was success, below 0 if there was an error.
+     * @param title, Album title.
+     * @param mediaIds, Media items to add in the album.
+     * @return TMPXItemId id of created album TMPXItemId:::InvalidId() in case of failure
      */
-    int addNewCollection(QString name, QString thumbnail, QList<TMPXItemId> mediaIds);
+    TMPXItemId addNewAlbum(const QString &title);
+	
+    /**
+     * Remove an album.
+     * 
+     * @param indexList, list of album indexes to be removed.
+     * @return 0 if no errors.
+     */
+    int removeAlbums(const QModelIndexList &indexList);
 
+	/**
+	 * Add items in an existing album.
+	 * 
+	 * @param albumId, Album where to add items.
+	 * @param mediaIds, list of item ids
+	 * @return 0 if no errors.
+	 */
+    int addItemsInAlbum(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);    
+	
+	/**
+	 * Resolves duplicate album names and returns the resolved name.
+	 * 'New collection' -> 'New collection (1)' -> 'New collection (2)', etc.
+	 * 
+	 * @param albumName, Name specified by the user.
+	 * @return Resolved name given to the album.
+	 */
+    QString resolveAlbumName(const QString& albumName) const;
+	
+    /**
+     * sets item id filter used in generic proxy model
+     * while filtering rows. 
+     * 
+     * If provided filterValue -flag is true, we filter off items that 
+     * do not exist in container indicated as itemId. 
+     * If false, filtering works other way around. 
+     * 
+     * 
+     * @param TMPXItemId item id used as filter
+     */
+    void setGenericIdFilter(TMPXItemId itemId, bool filterValue);
+    
+	/**
+	 * Gets the currently opened item.
+	 * 
+	 * @param None.
+	 * @return TMPXItemId.
+	 */
+    TMPXItemId getOpenItem() const;
+	
 signals:
 
-// TODO should the index be QModelIndex instead?
 
     /**
     * Signal to be emitted if detail fetching started ok
     * 
     * @param index, index of the item
     */ 
-    void shortDetailsReady(int index);
+    void shortDetailsReady(TMPXItemId itemId);
     
     /**
     * Signal to be emitted after all details are being fetched.
     * 
     * @param index, index of the item
     */ 
-    void fullDetailsReady(int index);
+    void fullDetailsReady(TMPXItemId itemId);
     
     /**
      * Signals that the model is ready, ie. that all data has been
      * loaded from myvideoscollection.
      */
     void modelReady();
+    
+    /**
+     * notifies that model's physical data structure has changed:
+     * - item inserted
+     * - item removed 
+     */
+    void modelChanged();
  
 protected: // from QSortFilterProxyModel
     
@@ -197,6 +264,31 @@ private slots:
      */
     void processSorting();
     
+    /**
+     * signaled when particular album content has changed and 
+     * refiltering is required
+     */
+    void albumChangedSlot();
+    
+private:
+    
+    /**
+     * disabled contructor
+     */
+    VideoSortFilterProxyModel(QObject *parent=0);
+    
+    /**
+     * connects all signals emitted from or throught this object
+     * 
+     * @return bool
+     */
+    bool connectSignals();
+    
+    /**
+     * disconnects all signals
+     */
+    void disconnectSignals();
+    
 private:
     
     /**
@@ -212,9 +304,24 @@ private:
     VideoCollectionClient *mCollectionClient;
     
     /**
+     * type of data excepted
+     */
+    int mType;
+    
+    /**
      * Currently open level.
      */
     int mLevel;
+    
+    /**
+     * item id used as filter if model type is generic model
+     */
+    TMPXItemId mGenericFilterId;
+    
+    /**
+     * flag used 
+     */
+    bool mGenericFilterValue;
     
     /**
      * Timer object. Owned.

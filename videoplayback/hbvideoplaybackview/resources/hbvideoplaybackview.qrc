@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RCC>
     <qresource prefix="hbvideoplaybackview">
-        <file>images/natural.png</file>
-        <file>images/pause.png</file>
-        <file>images/play.png</file>
-        <file>images/stretch.png</file>
-        <file>images/volume.png</file>
-        <file>images/zoom.png</file>
-        <file>images/next.png</file>
-        <file>images/previous.png</file>
-        <file>images/qgn_prop_video_corrupted.svg</file>
+        <file>images/qtg_mono_aspect_ratio_zoom.png</file>
+        <file>images/qtg_large_corrupted.png</file>
         <file>images/connecting_loading.gif</file>
-        <file>images/qgn_indi_onimage_audio.svg</file>
-        <file>images/tv_out.png</file>
-        <file>images/realplay.png</file>
-        <file>images/details.png</file>
+        <file>images/qtg_large_just_audio.png</file>
+        <file>images/qtg_large_tv_out.png</file>
+        <file>images/qtg_large_realplayer.png</file>
+        <file>images/qtg_mono_info.png</file>
         <file>hbvideoplaybackview.docml</file>
-        <file>hblistwidget.css</file>
     </qresource>
 </RCC>

@@ -15,15 +15,16 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 8 %
 
 
 
 #ifndef MPXVIDEOPLAYBACKFILEDETAILSWIDGET_H_
 #define MPXVIDEOPLAYBACKFILEDETAILSWIDGET_H_
 
+#include <QObject>
+
 #include <hbwidget.h>
-#include <hbstyleloader.h>
 
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;

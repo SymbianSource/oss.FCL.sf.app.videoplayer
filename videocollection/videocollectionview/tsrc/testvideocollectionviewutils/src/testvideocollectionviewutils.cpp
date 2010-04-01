@@ -16,12 +16,14 @@
 */
 
 #include <qapplication.h>
-#include "stub/inc/centralrepository.h"
+#include "centralrepository.h"
 #include "testvideocollectionviewutils.h"
 #include "hblabel.h"
 #include "hbaction.h"
 #include "videocollectioncommon.h"
 #include "centralrepository.h"
+#include "hbmessageboxdata.h"
+
 #define private public
 #include "videocollectionviewutils.h"
 #undef private
@@ -36,13 +38,20 @@ int main(int argc, char *argv[])
     
     TestVideoVideoCollectionViewUtils tv;
 
-    char *pass[3];
-    pass[0] = argv[0];
-    pass[1] = "-o";
-    pass[2] = "c:\\data\\testvideocollectionviewutils.txt";
-    
-    int res = QTest::qExec(&tv, 3, pass);
-    
+    int res;
+    if(argc > 1)
+    {   
+        res = QTest::qExec(&tv, argc, argv);
+    }
+    else
+    {
+        char *pass[3];
+        pass[0] = argv[0];
+        pass[1] = "-o";
+        pass[2] = "c:\\data\\testvideocollectionviewutils.txt";
+        res = QTest::qExec(&tv, 3, pass);
+    }
+        
     return res;
 }
 
@@ -74,48 +83,48 @@ void TestVideoVideoCollectionViewUtils::testShowErrorMsgSlot()
     QVariant additional;
     QString txt = "__test__";      
     additional = txt;
-    HbMessageBox::mWarningCallCount = 0;
-    HbMessageBox::mInformationCallCount = 0;
+    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mInformationCallCount = 0;
     
     // status: VideoCollectionCommon::statusSingleDeleteFail
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleDeleteFail, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 1);
-    QVERIFY(HbMessageBox::mInformationCallCount == 0);
-    HbMessageBox::mWarningCallCount = 0;
-    HbMessageBox::mInformationCallCount = 0;
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 0);
+    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mInformationCallCount = 0;
     additional = QVariant();
     
     // - invalid additional
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleDeleteFail, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 0);
-    QVERIFY(HbMessageBox::mInformationCallCount == 0);
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 0);
     
     // status: VideoCollectionCommon::statusMultipleDeleteFail (additional not needed)
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteFail, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 1);
-    QVERIFY(HbMessageBox::mInformationCallCount == 0);
-    HbMessageBox::mWarningCallCount = 0;
-    HbMessageBox::mInformationCallCount = 0;
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 0);
+    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mInformationCallCount = 0;
     additional = QVariant();
     
     additional = 5;
     // status: VideoCollectionCommon::statusMultipleDeleteSucceed
-    testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteSucceed, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 0);
-    QVERIFY(HbMessageBox::mInformationCallCount == 1);
-    HbMessageBox::mWarningCallCount = 0;
-    HbMessageBox::mInformationCallCount = 0;
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusDeleteSucceed, additional);
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 1);
+    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mInformationCallCount = 0;
     additional = QVariant();
     
     // -> invalid additional
-    testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteSucceed, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 0);
-    QVERIFY(HbMessageBox::mInformationCallCount == 0);
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusDeleteSucceed, additional);
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 0);
     
     // status: invalid
-    testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteSucceed + 1, additional);
-    QVERIFY(HbMessageBox::mWarningCallCount == 0);
-    QVERIFY(HbMessageBox::mInformationCallCount == 0);
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusDeleteSucceed + 1, additional);
+    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mInformationCallCount == 0);
     
     
 /*    
@@ -139,7 +148,7 @@ void TestVideoVideoCollectionViewUtils::testShowErrorMsgSlot()
     additional = txt;
     testObject.showErrorMsgSlot(VideoCollectionCommon::errorCollectionSingleDelete, additional);
     QVERIFY(HbMessageBox::staticInstance);
-    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBox::MessageTypeWarning);
+    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBoxData::messageTypeWarning);
     QVERIFY(!HbMessageBox::staticInstance->mBGFaded);
     QVERIFY(!HbMessageBox::staticInstance->mModal);
     QVERIFY(HbMessageBox::staticInstance->mText.count() > 0);
@@ -152,7 +161,7 @@ void TestVideoVideoCollectionViewUtils::testShowErrorMsgSlot()
     additional.clear();
     testObject.showErrorMsgSlot(VideoCollectionCommon::errorCollectionMultipleDelete, additional);
     QVERIFY(HbMessageBox::staticInstance);
-    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBox::MessageTypeWarning);
+    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBoxData::messageTypeWarning);
     QVERIFY(!HbMessageBox::staticInstance->mBGFaded);
     QVERIFY(!HbMessageBox::staticInstance->mModal);
     QVERIFY(HbMessageBox::staticInstance->mText.count() > 0);
@@ -165,7 +174,7 @@ void TestVideoVideoCollectionViewUtils::testShowErrorMsgSlot()
     additional = txt;
     testObject.showErrorMsgSlot(VideoCollectionCommon::errorCollectionMultipleDelete, additional);
     QVERIFY(HbMessageBox::staticInstance);
-    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBox::MessageTypeWarning);
+    QVERIFY(HbMessageBox::staticInstance->mType == HbMessageBoxData::messageTypeWarning);
     QVERIFY(!HbMessageBox::staticInstance->mBGFaded);
     QVERIFY(!HbMessageBox::staticInstance->mModal);
     QVERIFY(HbMessageBox::staticInstance->mText.count() > 0);
@@ -234,6 +243,63 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder) == 0);
     QCOMPARE(sortRole, (int)Qt::DisplayRole);
     QCOMPARE(sortOrder, Qt::DescendingOrder);
+}
+
+// -----------------------------------------------------------------------------
+// testGetServiceIconStrings
+// -----------------------------------------------------------------------------
+//
+void TestVideoVideoCollectionViewUtils::testGetServiceIconStrings()
+{
+    VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
+    CRepository::setNewLLeave(true);
+    _LIT(KExpectedTDesValue, "expected");
+    CRepository::setTDesValue(KExpectedTDesValue());
+    QString expected((QChar*)KExpectedTDesValue().Ptr(),KExpectedTDesValue().Length());
+    
+    QString icon;
+    QString pressed;
+    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
+    QVERIFY(icon.isNull());
+    QVERIFY(pressed.isNull());
+    
+    CRepository::setNewLLeave(false);
+    CRepository::setGetFail(0);
+    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
+    QVERIFY(icon.isNull());
+    QVERIFY(pressed.isNull());
+    
+    CRepository::setGetFail(1);
+    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
+    QVERIFY(icon.isNull());
+    QVERIFY(pressed.isNull());
+    
+    CRepository::setGetFail(255);
+    QVERIFY(testObject.getServiceIconStrings(icon, pressed) == 0);
+    QCOMPARE(icon, expected);
+    QCOMPARE(pressed, expected);
+}
+
+// -----------------------------------------------------------------------------
+// testGetServiceIconStrings
+// -----------------------------------------------------------------------------
+//
+void TestVideoVideoCollectionViewUtils::testGetServiceUriString()
+{
+    VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
+    CRepository::setNewLLeave(true);
+    _LIT(KExpectedTDesValue, "expected");
+    CRepository::setTDesValue(KExpectedTDesValue());
+    QString expected((QChar*)KExpectedTDesValue().Ptr(),KExpectedTDesValue().Length());
+    
+    QVERIFY(testObject.getServiceUriString().isNull());
+    
+    CRepository::setNewLLeave(false);
+    CRepository::setGetFail(0);
+    QVERIFY(testObject.getServiceUriString().isNull());
+    
+    CRepository::setGetFail(255);
+    QCOMPARE(testObject.getServiceUriString(), expected);
 }
 
 // End of file

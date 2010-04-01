@@ -19,7 +19,9 @@
 #define __VIDEOCOLLECTIONCOMMON_H__
 
 
-#include <QObject>
+#include <qobject.h>
+#include <qhash.h>
+#include <mpxitemid.h>
 
 namespace VideoCollectionCommon
 {
@@ -71,23 +73,23 @@ namespace VideoCollectionCommon
      * order than the VideoDetailLabelKeys.
      */
     const char * const VideoDetailLabels[] = {
-            QT_TR_NOOP("DRM: %1"),
-            QT_TR_NOOP("Service: %1"),
-            QT_TR_NOOP("Description: %1"),
-            QT_TR_NOOP("Length: %1"),
-            QT_TR_NOOP("Date: %1"),
-            QT_TR_NOOP("Modified: %1"),
-            QT_TR_NOOP("Location: %1"),
-            QT_TR_NOOP("Author: %1"),
-            QT_TR_NOOP("Copyright: %1"),
-            QT_TR_NOOP("Audio Type: %1"),
-            QT_TR_NOOP("Language: %1"),
-            QT_TR_NOOP("Keywords: %1"),
-            QT_TR_NOOP("Size: %1"),
-            QT_TR_NOOP("Resolution: %1"),
-            QT_TR_NOOP("Format: %1"),
-            QT_TR_NOOP("Bitrate: %1")
-    };
+    		QT_TR_NOOP("txt_videos_list_drm"),
+            QT_TR_NOOP("Service:"), //TODO: localisation
+            QT_TR_NOOP("txt_videos_list_description"),
+            QT_TR_NOOP("txt_videos_list_duration"),
+            QT_TR_NOOP("txt_videos_list_date"),
+            QT_TR_NOOP("txt_videos_list_modified"),
+            QT_TR_NOOP("txt_videos_list_location"),
+            QT_TR_NOOP("txt_videos_list_author"),
+            QT_TR_NOOP("txt_videos_list_copyright"),
+            QT_TR_NOOP("Audio Type:"), //TODO: localisation
+            QT_TR_NOOP("txt_videos_list_language"),
+            QT_TR_NOOP("txt_videos_list_keywords"),
+            QT_TR_NOOP("txt_videos_list_file_size"),
+            QT_TR_NOOP("txt_videos_list_resolution"),
+            QT_TR_NOOP("txt_videos_list_format"),
+            QT_TR_NOOP("txt_videos_list_bitrate")
+};
 
     /**
      * Order of keys in the labels const array.
@@ -111,6 +113,26 @@ namespace VideoCollectionCommon
             MetaKeyBitRate
     };
     
+    /**
+     * Collection level app browsed to
+     */
+    enum TCollectionLevels
+    {
+        ELevelInvalid 	  = -1,
+    	ELevelCategory 	  = 2,
+        ELevelVideos   	  = 3,
+        ELevelDefaultColl = 4,
+        ELevelAlbum    	  = 5
+    };
+    
+    /**
+     * Container path levels.
+     */
+    enum ContainerPathLevels
+    {
+        PathLevelCategories = 1,
+        PathLevelVideos = 2
+    };
     
     /**
      * Collection related asyncronous 
@@ -120,9 +142,29 @@ namespace VideoCollectionCommon
     {
         statusSingleDeleteFail = 1,
         statusMultipleDeleteFail,
-        statusMultipleDeleteSucceed        
+        statusDeleteInProgress,
+        statusDeleteSucceed,
+        statusSingleRemoveFail,
+        statusMultiRemoveFail,
+        statusRemoveSucceed,
+        statusVideosAddedToCollection,
+        statusAllVideosAlreadyInCollection
     };
     
-   
+    /**
+     * Utility macro to trace heap consumption.
+     */
+#ifdef _DEBUG
+    #define TRACE_HEAP(prefix)\
+    {\
+        int totalAllocSpace = 0;\
+        User::AllocSize( totalAllocSpace );\
+        qDebug("[VIDEOCOLLECTION][HEAP]: %s, Total allocated space : %d",\
+            prefix,\
+            totalAllocSpace);\
+    }
+#else
+    #define TRACE_HEAP(prefix)
+#endif
 }
 #endif	// __VIDEOCOLLECTIONCOMMON_H__

@@ -15,19 +15,20 @@
 #
 
 TEMPLATE = app
+
 TARGET = 
+
 DEPENDPATH += . \
     inc \
     src
+    
 INCLUDEPATH += . \
-    /epoc32/include/domain \
-    /epoc32/include/domain/middleware \
-    /epoc32/include/domain/applications \
-    /epoc32/include/osextensions \
-    /epoc32/include/middleware \
-    /epoc32/include/osextensions/stdapis/stlport \
-    stub/inc \
+    inc \
+    ../../../tsrc/stubs/inc \
+    \ # keep these at bottom so that stubbed headers are taken first
     ../../../inc \
+    ../../../videocollectionview/inc \
+    ../../../videocollectionwrapper/inc
     
 CONFIG += qtestlib \
     Hb \
@@ -38,18 +39,35 @@ LIBS += -lestor.dll \
     -lbitgdi.dll \
     -lgdi.dll \
     -lxqplugins.dll \
-    -lmpxviewframeworkqt.dll
+    -lmpxviewframeworkqt.dll \
+    -lvideocollectionwrapper.dll
 
-# Input
-HEADERS += inc/testcollectionview.h \
-           stub/inc/videolistview.h \
-           stub/inc/videocollectionuiloader.h \
-           ../../inc/videocollectionviewplugin.h \
-               
-SOURCES += src/testcollectionview.cpp \
-           stub/src/videolistview.cpp \
-           stub/src/videocollectionuiloader.cpp \
-           ../../src/videocollectionviewplugin.cpp
+HEADERS +=  inc/testcollectionview.h \
+    \ # headers needed in test
+    ../../inc/videocollectionviewplugin.h \
+    \ # headers needed in stubs
+    ../../../videocollectionview/inc/videocollectionuiloader.h \
+    ../../../videocollectionview/inc/videocollectionviewutils.h \
+    ../../../videocollectionview/inc/videolistview.h \
+    ../../../videocollectionview/inc/videolistwidget.h \
+    ../../../videocollectionview/inc/videolistselectiondialog.h \
+    ../../../videocollectionview/inc/videohintwidget.h
+           
+SOURCES +=  src/testcollectionview.cpp \
+    \ # sources needed in test
+    ../../src/videocollectionviewplugin.cpp \
+    \ # sources needed in stubs
+    ../../../tsrc/stubs/src/hbmainwindow.cpp \
+    ../../../tsrc/stubs/src/hblistview.cpp \
+    ../../../tsrc/stubs/src/hbwidget.cpp \
+    ../../../tsrc/stubs/src/hbscrollbar.cpp \
+    ../../../tsrc/stubs/src/hbdialog.cpp \
+    ../../../tsrc/stubs/src/hbaction.cpp \
+    ../../../tsrc/stubs/src/videocollectionuiloader.cpp \
+    ../../../tsrc/stubs/src/videocollectionviewutils.cpp \
+    ../../../tsrc/stubs/src/videolistview.cpp \
+    ../../../tsrc/stubs/src/videolistwidget.cpp \
+    ../../../tsrc/stubs/src/videolistselectiondialog.cpp \
+    ../../../tsrc/stubs/src/videohintwidget.cpp
 
 RESOURCES += ../../data/videocollectionview.qrc
-

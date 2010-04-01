@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    Implementation of My Videos collection Plugin interface*
+* Description:   Implementation of My Videos collection Plugin interface*
 */
-
 
 
 
@@ -35,19 +34,13 @@
 #include "vcxmyvideoscollectionplugin.h"
 #include "vcxmyvideoscollection.hrh"
 #include "vcxmyvideoscollectionutil.h"
-#include "vcxmyvideosdownloadutil.h"
 #include "vcxmyvideosvideocache.h"
 #include "vcxmyvideoscategories.h"
 #include "vcxmyvideosmessagelist.h"
 #include "vcxmyvideosasyncfileoperations.h"
 #include "vcxmyvideosopenhandler.h"
-
-const TInt KMaxFileDeleteAttempts = 4;
-const TInt KFileDeleteLoopDelay = 100000;
-
-//       Add 2000 new videos to memory card. Reboot phone, mds starts harvesting,
-//       open my videos -> mds server crashes and lots of events is sent to client.
-//       If one waits until all are harvested before opening my videos, it works.
+#include "vcxmyvideosmdsalbums.h"
+#include "vcxmyvideosalbums.h"
 
 
 // ============================ MEMBER FUNCTIONS ==============================
@@ -78,13 +71,13 @@ CVcxMyVideosCollectionPlugin::~CVcxMyVideosCollectionPlugin()
     MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: this = %x", this);
         
     delete iMyVideosMdsDb;
-    delete iDownloadUtil;
     delete iCache;
     delete iMessageList;
     delete iCategories;
     delete iAsyncFileOperations;
     delete iActiveTask;
     delete iOpenHandler;
+    delete iAlbums;
     iFs.Close();
     }
 
@@ -108,7 +101,7 @@ void CVcxMyVideosCollectionPlugin::ConstructL ()
     
     User::LeaveIfError( iFs.Connect() );
         
-    iMyVideosMdsDb = CVcxMyVideosMdsDb::NewL( this, iFs );    
+    iMyVideosMdsDb = CVcxMyVideosMdsDb::NewL( this, &AlbumsL(), iFs );    
     iActiveTask    = CVcxMyVideosActiveTask::NewL( *this );
     iCache         = CVcxMyVideosVideoCache::NewL( *this );
     iMessageList   = CVcxMyVideosMessageList::NewL( *this );
@@ -137,7 +130,7 @@ void CVcxMyVideosCollectionPlugin::MediaL(
     const TArray<TCapability>& /*aCaps*/,
     CMPXAttributeSpecs* /*aSpecs*/)
     {
-    MPX_FUNC("CMPXMyVideosDbPlugin::MediaL");
+    MPX_FUNC("CVcxMyVideosCollectionPlugin::MediaL");
     MPX_DEBUG_PATH(aPath);
     
     RArray<TInt> supportedIds;
@@ -170,7 +163,7 @@ void CVcxMyVideosCollectionPlugin::MediaL(
 
     if ( ids.Count() == 0 )
         {
-        MPX_DEBUG1("CMPXMyVideosDbPlugin:: request didn't contain any items ids, aborting");
+        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: request didn't contain any items ids, aborting");
         
         iObs->HandleMedia( NULL, KErrArgument );
         CleanupStack::PopAndDestroy( &ids );          // <-2
@@ -186,27 +179,27 @@ void CVcxMyVideosCollectionPlugin::MediaL(
     if ( videoInCache )
         {
         // 0 attributes means "get all" -> can't use cache
-        MPX_DEBUG2("CMPXMyVideosDbPlugin:: client is requesting %d attributes", aAttrs.Count());
+        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: client is requesting %d attributes", aAttrs.Count());
         if ( aAttrs.Count() > 0 )
             {
             TBool nonSupportedAttrCanBeFoundFromMds;
             if ( TVcxMyVideosCollectionUtil::AreSupported( *videoInCache, aAttrs,
                     nonSupportedAttrCanBeFoundFromMds ) )
                 {
-                MPX_DEBUG1("CMPXMyVideosDbPlugin:: all attributes found from cache");
+                MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: all attributes found from cache");
                 useCachedVideo = ETrue;
                 }
             else
                 {
-                MPX_DEBUG1("CMPXMyVideosDbPlugin:: all attributes NOT found from cache");
+                MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: all attributes NOT found from cache");
                 if ( !nonSupportedAttrCanBeFoundFromMds )
                     {
-                    MPX_DEBUG1("CMPXMyVideosDbPlugin:: none of the non cached attrs can be found from MDS -> use cached version");
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: none of the non cached attrs can be found from MDS -> use cached version");
                     useCachedVideo = ETrue;
                     }
                 else
                     {
-                    MPX_DEBUG1("CMPXMyVideosDbPlugin:: at least one of the non cached attributes can be found from MDS");
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: at least one of the non cached attributes can be found from MDS");
                     }
                 }
             }
@@ -216,12 +209,12 @@ void CVcxMyVideosCollectionPlugin::MediaL(
 
     if ( useCachedVideo )
         {
-        MPX_DEBUG1("CMPXMyVideosDbPlugin:: using cached video");
+        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: using cached video");
         video = CMPXMedia::CopyL( *videoInCache );
         }
     else
         {
-        MPX_DEBUG1("CMPXMyVideosDbPlugin:: fetching from MDS");
+        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: fetching from MDS");
         video = iMyVideosMdsDb->CreateVideoL( ids[0].iId1, ETrue /* full details */ );    
         }
         
@@ -316,6 +309,13 @@ void CVcxMyVideosCollectionPlugin::CommandL(
                         {
                         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: sync KVcxCommandMyVideosCancelDelete arrived");
                         iActiveTask->Cancel();
+                        }
+                        break;
+                    
+                    case KVcxCommandMyVideosAddAlbum:
+                        {
+                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: sync KVcxCommandMyVideosAddAlbum arrived");
+                        AlbumsL().AddAlbumL( aCmd );
                         }
                         break;
                     }
@@ -427,6 +427,10 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
     {
     MPX_FUNC("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL");
     
+    RArray<TUint32> nonVideoIds;
+    nonVideoIds.Reset();
+    CleanupClosePushL( nonVideoIds );
+    
     switch ( aEvent )
         {
         case EMPXItemDeleted:
@@ -435,7 +439,8 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() Items from MDS deleted, deleting from cache |" );
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() --------------------------------------------'");
                         
-            iCache->RemoveL( aId );            
+            iCache->RemoveL( aId );
+            AlbumsL().RemoveAlbumsL( aId );
             }
             break;
         
@@ -448,22 +453,31 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             if ( iMyVideosMdsDb->iVideoListFetchingIsOngoing )
                 {
                 MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: video list fetching is ongoing, ignoring add event");
+                CleanupStack::PopAndDestroy( &nonVideoIds );
                 return;
                 }
                 
             TBool videoListFetchingWasCancelled = EFalse;
-            
+
             // After the call, aId will contain only items which were actually inserted to cache.
             // We receive add events for all object types. When fetching the item from MDS we use
-            // video condition and only video objects are added to cache.
-            iCache->AddVideosFromMdsL( aId, videoListFetchingWasCancelled );
+            // video condition and only video objects are added to cache. Items which were detected
+            // to not be videos are added to nonVideoIds.
+            iCache->AddVideosFromMdsL( aId, videoListFetchingWasCancelled, &nonVideoIds );
+
+#if 0 //TODO: do this if we want to support albums which are being added by someone else than My Videos Collection
+            
+            //After the call nonVideoIds will contain only items which were actually added
+            //to albums.
+            AlbumsL().AddAlbumsFromMdsL( nonVideoIds );
+#endif
+            
             if ( videoListFetchingWasCancelled )
                 {
                 RestartVideoListFetchingL();
                 }
-             
-            SyncWithDownloadsL( aId );
             }
+            
             break;
         
         case EMPXItemModified:
@@ -488,24 +502,41 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                     }
                 }
             }
-            SyncWithDownloadsL( aId );
+            
+            //TODO: handle album modify events
             break;
         }
-        
-    TInt pos;
-    for ( TInt i = 0; i < aId.Count(); i++ )
-        {
+
+        TInt pos;
+        TInt count = aId.Count();
+        for ( TInt i = 0; i < count; i++ )
+            {
+            if ( aEvent == EMPXItemInserted )
+                {
+                // add item from cache to the message if we have it.
+                CMPXMedia* video = iCache->FindVideoByMdsIdL( aId[i], pos );
+                TRAP_IGNORE( iMessageList->AddEventL( TMPXItemId( aId[i], KVcxMvcMediaTypeVideo),
+                        aEvent, 0, video ) );
+                }
+            else
+                {
+                TRAP_IGNORE( iMessageList->AddEventL( TMPXItemId( aId[i], KVcxMvcMediaTypeVideo),
+                        aEvent ) );
+                }
+            }
+
         if ( aEvent == EMPXItemInserted )
             {
-            // add item from cache to the message if we have it.
-            CMPXMedia* video = iCache->FindVideoByMdsIdL( aId[i], pos );
-            TRAP_IGNORE( iMessageList->AddEventL( TMPXItemId( aId[i], 0), aEvent, 0, video ) );
+            //nonVideoIds are albums
+            TInt count = nonVideoIds.Count();
+            for ( TInt i = 0; i < count; i++ )
+                {
+                TRAP_IGNORE( iMessageList->AddEventL(
+                        TMPXItemId( nonVideoIds[i], KVcxMvcMediaTypeAlbum ), aEvent ) );
+                }
             }
-        else
-            {
-            TRAP_IGNORE( iMessageList->AddEventL( TMPXItemId( aId[i], 0), aEvent ) );
-            }
-        }
+
+    CleanupStack::PopAndDestroy( &nonVideoIds );
     
     iMessageList->SendL();
     }
@@ -514,11 +545,11 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
 // CVcxMyVideosCollectionPlugin::HandleStepL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosCollectionPlugin::HandleStepL()
+MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosCollectionPlugin::HandleStepL()
     {
     MPX_FUNC("CVcxMyVideosCollectionPlugin::HandleStepL");
 
-    TBool done(ETrue);
+    MVcxMyVideosActiveTaskObserver::TStepResult stepResult(MVcxMyVideosActiveTaskObserver::EDone);
 
     switch ( iActiveTask->GetTask() )
         {
@@ -537,8 +568,7 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
             
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: async KMPXCommandIdCollectionSet out");
             
-            done = ETrue;
-            
+            stepResult = MVcxMyVideosActiveTaskObserver::EDone;            
             break;
             }
         case KVcxCommandIdMyVideos:
@@ -553,183 +583,7 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
             TInt myVideosCmd( cmd.ValueTObjectL<TUint>( KVcxMediaMyVideosCommandId ) );
 
             switch ( myVideosCmd )
-                {
-                case KVcxCommandMyVideosStartDownload:
-                    {
-                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: Handling KVcxCommandMyVideosStartDownload command.");
-                    
-                    CMPXMedia* video = CMPXMedia::NewL( *(iActiveTask->GetCommand().Value<CMPXMedia>(
-                            KMPXCommandColAddMedia)) );
-                    CleanupStack::PushL( video ); // 1->
-
-                    if ( !iCache->iVideoList )
-                        {
-                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: iVideoListCache = NULL -> creating new empty iVideoListCache");
-                        iCache->iVideoListIsPartial = ETrue;
-                        iCache->iVideoList          = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
-                        }
-
-                    TBool resume = EFalse;
-                    
-                    if ( video->IsSupported( KVcxMediaMyVideosDownloadId ) )
-                        {
-                        TUint32 downloadId = video->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-                        if ( downloadId != 0 )
-                            {
-                            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: download id %d given by the client -> this is download resume",
-                                    downloadId);
-                            resume = ETrue;
-                            
-                            // load the existing item to cache if its not there already
-                            }
-                        }
-                    
-                    if ( !resume )
-                        {    
-                        if ( !video->IsSupported( KVcxMediaMyVideosRemoteUrl ) )
-                            {
-                            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: KVcxMediaMyVideosRemoteUrl not supported -> leaving with KErrArgument");
-                            User::Leave( KErrArgument );
-                            }
-
-                        if ( video->ValueText( KVcxMediaMyVideosRemoteUrl ).Length() >
-                                KVcxMvcMaxUrlLength )
-                            {
-                            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: url longer than 1024 -> leaving with KErrArgument");
-                            User::Leave( KErrArgument );
-                            }
-                        
-                        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: starting download for url: %S", 
-                            &video->ValueText( KVcxMediaMyVideosRemoteUrl ) );
-
-                        video->SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, EVcxMyVideosOriginDownloaded );    
-                        video->SetTObjectValueL<TUint8>( KVcxMediaMyVideosDownloadState,
-                                static_cast<TUint8>(EVcxMyVideosDlStateDownloading) );
-                        video->SetTObjectValueL<TUint32>( KMPXMediaGeneralFlags, EVcxMyVideosVideoNew );
-                            
-                        HBufC* fileName = DownloadUtilL().CreateFilePathL( *video );
-                        CleanupStack::PushL( fileName ); // 2->
-                        video->SetTextValueL( KMPXMediaGeneralUri, *fileName );
-                        CleanupStack::PopAndDestroy( fileName ); // <-2
-                        }
-
-                    TRAPD( err, DownloadUtilL().StartDownloadL( *video ) ); //download id is written to video object
-                    
-                    if ( err != KErrNone )
-                        {
-                        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: StartDownloadL left: %d", err);
-                        User::Leave( err );
-                        }
-                    
-                    if ( !resume )
-                        {    
-                        TUint32 newDownloadId = video->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId ); 
-                        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: new download ID: %d",
-                            newDownloadId);
-
-                        AddVideoToMdsAndCacheL( *video );
-                        }
-                    else
-                        {
-                        // clear old error codes from the dl item
-                        TInt pos;
-                        
-                        CMPXMedia* videoInCache = iCache->FindVideoByMdsIdL(
-                                TVcxMyVideosCollectionUtil::IdL( *video ), pos );
-                        if ( videoInCache )
-                            {
-                            videoInCache->SetTObjectValueL<TInt>( KVcxMediaMyVideosDownloadError, 0 );
-                            videoInCache->SetTObjectValueL<TInt>( KVcxMediaMyVideosDownloadGlobalError, 0 );
-                            }
-                        }
-                        
-                    CleanupStack::PopAndDestroy( video ); // <-1
-                    done = ETrue;
-                    }
-                    break;
-                    
-                case KVcxCommandMyVideosCancelDownload:
-                    {
-                    // Error code is returned to client if dl item was left to system.
-                    // If file delete fails, then mds item is also left to system.
-                    
-                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: Handling KVcxCommandMyVideosCancelDownload command.");
-                    
-                    CMPXMedia* video = CMPXMedia::NewL( *(iActiveTask->GetCommand().Value<CMPXMedia>(
-                            KMPXCommandColAddMedia)) );
-                    CleanupStack::PushL( video ); // 1->
-
-                    if ( !video->IsSupported( KVcxMediaMyVideosDownloadId ) ||
-                            !video->IsSupported( KMPXMediaGeneralId ) ||
-                            !video->IsSupported( KMPXMediaGeneralUri ) )
-                        {
-                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: parameter missing, can't cancel dl, leaving with KErrArgument");
-                        User::Leave( KErrArgument );
-                        }
-
-                    TUint32 downloadId = video->ValueTObjectL<TUint32>(
-                            KVcxMediaMyVideosDownloadId );
-                    DownloadUtilL().CancelDownload( downloadId, ETrue /* remove file */ );
- 
-                    if ( BaflUtils::FileExists( iFs, video->ValueText( KMPXMediaGeneralUri ) ) )
-                        {
-                        TMPXItemId mpxItemId = video->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
-                        TInt err( KErrNone );
-                        
-                        for ( TInt i = 0; i < KMaxFileDeleteAttempts; i++ )
-                            {
-                            TRAP( err, AsyncFileOperationsL().DeleteVideoL( mpxItemId.iId1, ETrue ) );
-                                        
-                            if ( err == KErrInUse )
-                                {
-                                MPX_DEBUG1( "CVcxMyVideosCollectionPlugin:: file is already in use, waiting a moment and try again");
-                                User::After( KFileDeleteLoopDelay );
-                                }
-                            else
-                                {
-                                break;
-                                }
-                            }
-                        
-                        if ( err != KErrNone && err != KErrNotFound )
-                            {
-#ifdef _DEBUG                        
-                            if ( err == KErrInUse )
-                                {
-                                TVcxMyVideosCollectionUtil::PrintOpenFileHandlesL(
-                                        video->ValueText( KMPXMediaGeneralUri ), iFs );
-                                }
-#endif
-							
-                            // Some error occured when cancelling download operation, dl item is however gone and file is left
-                            // -> change dl id to 0 and leave mpx collection item there. Report operation to client as a success.
-                            MPX_DEBUG1( "CVcxMyVideosCollectionPlugin:: dl item is gone from dl manager, file and mpx item are left, setting dl id to 0");
-                            TRAP_IGNORE( SetDownloadIdToZeroL( downloadId ) );
-                            }
-                        }
-                    
-                    CleanupStack::PopAndDestroy( video ); // <-1
-                    done = ETrue;
-                    }
-                    break;
-                                        
-                case KVcxCommandMyVideosPauseDownload:
-                    {
-                    CMPXMedia& cmd = iActiveTask->GetCommand();
-                    if ( !cmd.IsSupported( KVcxMediaMyVideosDownloadId ) )
-                        {
-                        User::Leave( KErrArgument );
-                        }
-                    else
-                        {
-                        TInt err = DownloadUtilL().PauseDownload(
-                                cmd.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId ) );
-                        User::LeaveIfError( err );
-                        }
-                    done = ETrue;
-                    }
-                    break;
-                
+                {                
                 case KVcxCommandMyVideosGetMediaFullDetailsByMpxId:
                     {
                     MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: KVcxCommandMyVideosGetMediaFullDetailsByMpxId received");
@@ -743,25 +597,16 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
 
                     CMPXMedia* video = iMyVideosMdsDb->CreateVideoL(
                             mpxId.iId1, ETrue /* full details */ );
-
-                    if ( !video )
-                        {
-                        User::Leave( KErrGeneral );
-                        }
                     
                     CleanupStack::PushL( video ); // 1->
-                    
-                    TBool eventsAdded;
-                    SyncVideoWithDownloadsL( *video, eventsAdded,
-                            EFalse /* dont add event to iMessageList */ );
-                    
+                                        
                     cmd.SetCObjectValueL<CMPXMedia>( KMPXCommandColAddMedia, video );
                     CleanupStack::PopAndDestroy( video ); // <-1
 
                     cmd.SetTObjectValueL<TUid>(KMPXMessageCollectionId, TUid::Uid(
                             KVcxUidMyVideosMpxCollection));
                     
-                    done = ETrue;
+                    stepResult = MVcxMyVideosActiveTaskObserver::EDone;            
                     }
                     break;
                     
@@ -817,12 +662,8 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
                         {                            
                         // Load items to cache
                         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: loading requested items to iCache->iVideoList");
-
+                        
                         iCache->AddVideosFromMdsL( mdsIds, videoListFetchingWasCancelled );
-                        if ( mdsIds.Count() > 0 )
-                            {
-                            SyncWithDownloadsL( mdsIds );
-                            }
                         }
                     else
                         {
@@ -855,7 +696,7 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
                     CleanupStack::PopAndDestroy( &mdsIds2 ); //  <-2
                     CleanupStack::PopAndDestroy( &mdsIds );  //  <-1
                         
-                    done = ETrue;
+                    stepResult = MVcxMyVideosActiveTaskObserver::EDone;            
                     }
                     break;
                 
@@ -863,16 +704,44 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
                 case KVcxCommandMyVideosMove:
                     {
                     MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: KVcxCommandMyVideosMove or Copy step");
-                    done = AsyncFileOperationsL().HandleMoveOrCopyStepL();
+                    stepResult = AsyncFileOperationsL().HandleMoveOrCopyStepL();
                     }
                     break;
                     
                 case KVcxCommandMyVideosDelete:
                     {
                     MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: KVcxCommandMyVideosDelete step");
-                    done = AsyncFileOperationsL().HandleDeleteStepL();
+                    stepResult = AsyncFileOperationsL().HandleDeleteStepL();
                     }
                     break;
+                    
+                case KVcxCommandMyVideosAddToAlbum:
+                    iAlbums->AddVideosToAlbumL( &iActiveTask->GetCommand() );
+                    stepResult = MVcxMyVideosActiveTaskObserver::EStopStepping;
+                    break;
+
+                case KVcxCommandMyVideosRemoveFromAlbum:
+                    iAlbums->RemoveVideosFromAlbumL( &iActiveTask->GetCommand() );
+                    stepResult = MVcxMyVideosActiveTaskObserver::EStopStepping;
+                    break;
+                    
+                case KVcxCommandMyVideosAddAlbum:
+                    {
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: async KVcxCommandMyVideosAddAlbum arrived");
+                    AlbumsL().AddAlbumL( iActiveTask->GetCommand() );
+                    stepResult = MVcxMyVideosActiveTaskObserver::EDone;
+                    break;
+                    }
+
+                case KVcxCommandMyVideosRemoveAlbums:
+                    {
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: async KVcxCommandMyVideosRemoveAlbums arrived");
+                    AlbumsL().RemoveAlbumsFromMdsOnlyL( iActiveTask->Command() );
+                    stepResult = MVcxMyVideosActiveTaskObserver::EStopStepping;
+                    break;
+                    }
+
+                    
                 }
             }
             break;
@@ -883,7 +752,7 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
             TMPXItemId mpxId = iActiveTask->GetCommand().ValueTObjectL<TMPXItemId>(
                     KMPXMediaGeneralId );
             AsyncFileOperationsL().DeleteVideoL( mpxId.iId1 );
-            done = ETrue;
+            stepResult = MVcxMyVideosActiveTaskObserver::EDone;            
             break;
             }
             
@@ -894,7 +763,7 @@ TBool CVcxMyVideosCollectionPlugin::HandleStepL()
             break;
             }
         }
-    return done;
+    return stepResult;
     }
 
 
@@ -910,10 +779,14 @@ void CVcxMyVideosCollectionPlugin::HandleOperationCompleted(
     if ( aErr != KErrNone )
         {
         MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: Leave or cancel happened during the operation: %d", aErr);
-        TRAPD( err, AsyncFileOperationsL().CancelOperationL( aErr ) ); // generates resp message for move,copy or delete operations
-        if ( err != KErrNone )
+        
+        if ( iAsyncFileOperations )
             {
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: failed to generate resp msg: %d", err);
+            TRAPD( err, AsyncFileOperationsL().CancelOperationL( aErr ) ); // generates resp message for move,copy or delete operations
+            if ( err != KErrNone )
+                {
+                MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: failed to generate resp msg: %d", err);
+                }
             }
         }
 
@@ -923,435 +796,6 @@ void CVcxMyVideosCollectionPlugin::HandleOperationCompleted(
     TRAP_IGNORE( cmd.SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, aErr ) );
 
     iObs->HandleCommandComplete( &cmd, KErrNone );
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::HandleDlEvent
-// From CVcxMyVideosDownloadUtilObserver
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::HandleDlEvent( TVcxMyVideosDownloadState aState,
-                TUint32 aDownloadId,
-                TInt aProgress,
-                TInt64 aDownloaded,
-                TInt32 aError,
-                TInt32 aGlobalError )
-    {
-    TRAPD( err, DoHandleDlEventL( aState, aDownloadId, aProgress,
-            aDownloaded, aError, aGlobalError ) );
-    if ( err != KErrNone )
-        {
-        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: DoHandleDlEventL left with error code: %d", err);
-        }
-    }
-    
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::DoHandleDlEventL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::DoHandleDlEventL( TVcxMyVideosDownloadState aState,
-                TUint32 aDownloadId,
-                TInt aProgress,
-                TInt64 aDownloaded,
-                TInt32 aError,
-                TInt32 aGlobalError )
-    {
-    MPX_FUNC("CVcxMyVideosCollectionPlugin::DoHandleDlEventL");
-    
-    CMPXMedia* video = iCache->FindVideoByDownloadIdL( aDownloadId );
-
-    MPX_DEBUG3("CVcxMyVideosCollectionPlugin:: dl event for download ID %d, pointer = %x) arrived.", aDownloadId, video);
-    
-    TBool sendEvent = EFalse;
-    if ( video )
-        {
-        TMPXItemId mpxId( TVcxMyVideosCollectionUtil::IdL( *video ) );
-        MPX_DEBUG4("CVcxMyVideosCollectionPlugin:: MPX item (MDS ID %d) (DL ID %d) %S",
-                mpxId.iId1, aDownloadId, &TVcxMyVideosCollectionUtil::Title( *video ) );
-                
-        TUint8 currentState = TVcxMyVideosCollectionUtil::DownloadStateL( *video );
-        
-        if ( currentState == EVcxMyVideosDlStateDownloaded )
-            {
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: already in Downloaded state, discarding event");
-            return;
-            }
-            
-        if ( currentState != aState )
-            {
-            MPX_DEBUG5("CVcxMyVideosCollectionPlugin:: updating (mds id: %d) (dl id: %d) state: %S -> %S",
-                        mpxId.iId1, aDownloadId, &DownloadState( currentState ), &DownloadState( aState ) );
-            video->SetTObjectValueL<TUint8>( KVcxMediaMyVideosDownloadState, static_cast<TUint8>(aState) );
-            sendEvent = ETrue;
-
-            if ( aState == EVcxMyVideosDlStateDownloaded )
-                {
-                MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: downloaded state received -> setting download id to 0");
-                
-                //1. set download id to 0
-                video->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, 0 );
-                
-                //2. update drm flag
-#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-                RFile64 dlFile;
-#else
-                RFile dlFile;
-#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-                TInt err = dlFile.Open( iFs, video->ValueText( KMPXMediaGeneralUri ), EFileRead );
-                if ( err == KErrNone )
-                    {
-                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: file opened ok for drm reading");
-                    CleanupClosePushL( dlFile ); // 1->
-                    DRM::CDrmUtility* drmUtil = DRM::CDrmUtility::NewLC(); // 2->
-                    if ( drmUtil->IsProtectedL( dlFile ) )
-                        {
-                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: file is DRM protected, setting the property flag");
-                        TUint32 flags = video->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
-                        flags |= EVcxMyVideosVideoDrmProtected;
-                        video->SetTObjectValueL<TUint32>( KMPXMediaGeneralFlags, flags );
-                        }
-                    else
-                        {
-                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: file is not DRM protected");
-                        }
-                    CleanupStack::PopAndDestroy( drmUtil ); // <-2
-                    CleanupStack::PopAndDestroy( &dlFile ); // <-1
-                    }
-                else
-                    {
-                    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: file didnt open for drm reading, %d", err);
-                    }
-                NotifyDownloadCompletedL( *video );
-                    
-                //3. Update file size using iCache->UpdateVideoL function since it changes item position and
-                //   sends category modified events if necessarry.
-                CMPXMedia* updateObject = CMPXMedia::NewL();
-                CleanupStack::PushL( updateObject ); // 1->
-                updateObject->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, mpxId );
-#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-                updateObject->SetTObjectValueL<TInt64>( KMPXMediaGeneralExtSizeInt64,
-                        static_cast<TInt64>( aDownloaded ) );
-                // set current value to 0 to force event sending and video list position updating    
-                video->SetTObjectValueL<TInt64>( KMPXMediaGeneralExtSizeInt64, 0 );                
-#else
-                updateObject->SetTObjectValueL<TInt>( KMPXMediaGeneralSize,
-                        static_cast<TInt>( aDownloaded ) );
-                // set current value to 0 to force event sending and video list position updating    
-                video->SetTObjectValueL<TInt>( KMPXMediaGeneralSize, 0 );                
-#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-                iCache->UpdateVideoL( *updateObject );
-                CleanupStack::PopAndDestroy( updateObject ); // <-1                
-                // find video again since it might have been deleted in iCache->UpdateVideoL
-                TInt pos;
-                video = iCache->FindVideoByMdsIdL( mpxId.iId1, pos );
-
-                //file size and download id are saved to database
-                iMyVideosMdsDb->UpdateVideoL( *video );
-                sendEvent = EFalse; // MDS will send the event, this avoids duplicate
-                }
-                
-            if ( aState == EVcxMyVideosDlStateFailed )
-                {
-                video->SetTObjectValueL<TInt32>( KVcxMediaMyVideosDownloadError, aError );
-                video->SetTObjectValueL<TInt32>( KVcxMediaMyVideosDownloadGlobalError,
-                        aGlobalError );
-                }            
-            }
-        else
-            {
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: state was already same(%S), skipping state update.", &DownloadState( currentState ));
-            }
- 
-        TInt8 currentProgress = video->ValueTObjectL<TInt8>( KVcxMediaMyVideosDownloadProgress );
-        if ( currentProgress != aProgress )
-            {
-            MPX_DEBUG4("CVcxMyVideosCollectionPlugin:: (dl id: %d) progress: %d -> %d",
-                        aDownloadId, currentProgress, aProgress );
-
-            video->SetTObjectValueL<TInt8>( KVcxMediaMyVideosDownloadProgress,
-                    static_cast<TInt8>( aProgress ) );
-            // Don't send the update event for progress.
-            //sendEvent = ETrue;
-            }
-        else
-            {
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: progress was already same(%d), skipping progress update.", currentProgress);
-            }
-            
-        TInt64 currentFileSize = 0;
-#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-        if ( video->IsSupported( KMPXMediaGeneralExtSizeInt64 ) )
-            {
-            currentFileSize = video->ValueTObjectL<TInt64>( KMPXMediaGeneralExtSizeInt64 );
-            }
-#else
-        if ( video->IsSupported( KMPXMediaGeneralSize ) )
-            {
-            currentFileSize = video->ValueTObjectL<TInt>( KMPXMediaGeneralSize );
-            }
-#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-        if ( currentFileSize != aDownloaded )
-            {
-            MPX_DEBUG4("CVcxMyVideosCollectionPlugin:: updating (dl id: %d) size: %ld -> %ld",
-                        aDownloadId, currentFileSize, aDownloaded );
-                        
-#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-            video->SetTObjectValueL<TInt64>( KMPXMediaGeneralExtSizeInt64, aDownloaded );
-#else
-            TInt newFileSize( aDownloaded );
-            video->SetTObjectValueL<TInt>( KMPXMediaGeneralSize, newFileSize );
-#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-            //sendEvent = ETrue;
-            }
-        
-        if ( sendEvent )
-            {
-            iMessageList->AddEventL( mpxId, EMPXItemModified );
-            iMessageList->SendL();
-            }
-        }
-    else
-        {
-        if ( (aState != EVcxMyVideosDlStateDownloaded) && (aProgress < 100) &&
-                !iCache->iVideoListIsPartial )
-            {
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -----------------------------------------------------------------------.");
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: Event for progressing download arrived, but the MPX/MDS item not found!|");
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -> deleting download.                                                  |");
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -----------------------------------------------------------------------'");
-            
-            RHttpDownload* download = DownloadUtilL().Download( aDownloadId );
-            if ( download )
-                {
-                MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: Download ID (%d) not found from MPX/MDS, deleting download!",
-                        aDownloadId );                
-                DownloadUtilL().DeleteDownloadAsync( aDownloadId, ETrue );
-                }
-            }
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::SyncWithDownloadsL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::SyncWithDownloadsL(
-        RArray<TUint32>& aItemsInCache )
-    {
-    MPX_FUNC("CVcxMyVideosCollectionPlugin::SyncWithDownloadsL()");
-    
-    TBool eventsAdded = EFalse;
-    for ( TInt i = 0; i < aItemsInCache.Count(); i++ )
-        {
-        TInt pos;
-        CMPXMedia* video = iCache->FindVideoByMdsIdL( aItemsInCache[i], pos );
-        if ( video )
-            {
-            SyncVideoWithDownloadsL( *video, eventsAdded );
-            }
-        }
-    if ( eventsAdded )
-        {
-        iMessageList->SendL();
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::SyncVideoWithDownloadsL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::SyncVideoWithDownloadsL( CMPXMedia& aVideo,
-        TBool& aEventAdded, TBool aAddEvent )
-    {    
-    TInt downloadId( TVcxMyVideosCollectionUtil::DownloadIdL( aVideo ) );
-    
-    if ( downloadId )
-        {
-        RHttpDownload* download( DownloadUtilL().Download( downloadId ) );
-
-        if ( download )
-            {
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin::SyncVideoWithDownloadsL() item (DL ID: %d) found from dl manager", downloadId);
-    
-            TBool modified = EFalse;
-            SyncVideoAndDownloadL( aVideo, *download, modified );
-            if ( modified && aAddEvent )
-                {
-                iMessageList->AddEventL( TVcxMyVideosCollectionUtil::IdL( aVideo ),
-                        EMPXItemModified );
-                aEventAdded = ETrue;
-                }
-            }
-        else
-            {
-            //download id != 0 and it is not found from download manager -> we set download id to 0
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: download id %d != 0 and no corresponding download found from Download Manager",
-                    downloadId);
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -> setting download id to 0");
-            aVideo.SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, 0 );
-            iMyVideosMdsDb->UpdateVideoL( aVideo ); // if video list fetching is ongoing, this will leave with KErrNotReady
-            }
-        }
-    }
- 
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::SyncVideoAndDownloadL
-// ----------------------------------------------------------------------------
-//
-void  CVcxMyVideosCollectionPlugin::SyncVideoAndDownloadL(
-        CMPXMedia& aVideo,
-        RHttpDownload& aDownload,
-        TBool& aModified )
-    {
-    MPX_FUNC("CVcxMyVideosCollectionPlugin::SyncVideoAndDownloadL()");
-        
-    aModified = EFalse;
-         
-    TBuf<KMaxUrlLength> downloadUrl;
-    aDownload.GetStringAttribute( EDlAttrReqUrl, downloadUrl );
-    if ( aVideo.ValueText( KVcxMediaMyVideosRemoteUrl ) 
-            != downloadUrl )
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: urls in MPX and DL Manager differ!");
-        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: remote url in MPX: %S",
-                &(aVideo.ValueText( KVcxMediaMyVideosRemoteUrl )));
-        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: remote url in DL Manager: %S",
-                &downloadUrl);
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -> updating MPX cache");
-        
-        aVideo.SetTextValueL( KVcxMediaMyVideosRemoteUrl, downloadUrl );
-        aModified = ETrue;
-        }
-    else
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: remote urls already same in dl manager and mpx");
-        }
-
-    // KVcxMediaMyVideosDownloadState
-    TVcxMyVideosDownloadState dlStateInDlManager;
-    DownloadUtilL().GetDownloadState( aDownload, dlStateInDlManager );
-    
-    TUint8 dlStateInMpxCache; 
-    if ( aVideo.IsSupported( KVcxMediaMyVideosDownloadState ))
-        {
-        dlStateInMpxCache = aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-        }
-    else
-        {
-        dlStateInMpxCache = static_cast<TUint8>( EVcxMyVideosDlStateNone );
-        }
-
-    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: dl state in dl manager: %S", &DownloadState( dlStateInDlManager ));
-    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: dl state in mpx cache: %S", &DownloadState( dlStateInMpxCache ));
-    
-    if ( static_cast<TUint8>( dlStateInDlManager ) != dlStateInMpxCache )
-        {        
-        if ( dlStateInDlManager == EVcxMyVideosDlStateDownloaded )
-            {
-            // Download finished event has arrived when we weren't around, call event handler to get things right.
-            // Collection is updated and download is deleted from Download Manager.
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: Download is in Finished state and collection has download id != 0");
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: -> we have missed download finished event, lets generate it by ourselves.");
-            
-            TUint64 downloaded( 0 );
-            TUint8 progress( DownloadUtilL().DownloadProgress( aDownload, downloaded, EFalse ) );            
-            TUint32 downloadId( aVideo.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId ) );
-            HandleDlEvent( dlStateInDlManager, downloadId,
-                    progress, downloaded, KErrNone, KErrNone );
-            DownloadUtilL().DeleteDownloadAsync( downloadId, EFalse /* don't delete content */ );
-            }
-        else
-            {
-            MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: dl state in dl manager differs of mpx cache-> updating mpx cache");
-            aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosDownloadState,
-                    static_cast<TUint8>( dlStateInDlManager ) );
-            aModified = ETrue;
-            }
-        }
-    else
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: download state already same in dl manager and mds");
-        }
-    
-    // KVcxMediaMyVideosDownloadProgress
-    TUint64 downloaded = 0;
-    TInt8 dlProgressInDlManager = DownloadUtilL().DownloadProgress(
-            aDownload, downloaded, EFalse );
-    
-    TInt8 dlProgressInMpxCache;
-    if ( aVideo.IsSupported( KVcxMediaMyVideosDownloadProgress ) )
-        {
-        dlProgressInMpxCache = aVideo.ValueTObjectL<TInt8>( KVcxMediaMyVideosDownloadProgress );
-        }
-    else
-        {
-        aVideo.SetTObjectValueL<TInt8>( KVcxMediaMyVideosDownloadProgress, 0 );
-        dlProgressInMpxCache = 0;
-        }
-
-    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: dl progress in dl manager: %d", dlProgressInDlManager);
-    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: dl progress in mpx cache: %d", dlProgressInMpxCache);
-
-    if ( dlProgressInDlManager != dlProgressInMpxCache )
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: dl progress in dl manager differs of mpx cache-> updating mpx cache");
-        aVideo.SetTObjectValueL<TInt8>( KVcxMediaMyVideosDownloadProgress,
-                static_cast<TInt8>( dlProgressInDlManager ) );
-        aModified = ETrue;
-        }
-    else
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: download progress already same in dl manager and mds");
-        }        
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::SyncVideoListWithDownloadsL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::SyncVideoListWithDownloadsL( CMPXMedia& aVideoList,
-        TBool aSendEvents, TInt aStartPos )
-    {
-    MPX_FUNC("CVcxMyVideosCollectionPlugin::SyncVideoListWithDownloadsL");
-
-    CMPXMediaArray* videoArray = aVideoList.Value<CMPXMediaArray>(
-                                KMPXMediaArrayContents);    
-
-    CMPXMedia* video;
-    
-    TBool eventsAdded = EFalse;
-    for ( TInt i = aStartPos; i < videoArray->Count(); i++ )
-        {
-        video = (*videoArray)[i];        
-        SyncVideoWithDownloadsL( *video, eventsAdded, aSendEvents );        
-        }
-    if ( eventsAdded )
-        {
-        iMessageList->SendL();
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::DownloadUtil
-// ----------------------------------------------------------------------------
-//
-CVcxMyVideosDownloadUtil& CVcxMyVideosCollectionPlugin::DownloadUtilL()
-    {
-    if ( !iDownloadUtil )
-        {
-        iDownloadUtil = CVcxMyVideosDownloadUtil::NewL( *this, iFs );        
-        }
-    
-    if ( !iOrphanDownloadsCleared )
-        {
-        if ( !iCache->iVideoListIsPartial )
-            {
-            iOrphanDownloadsCleared = ETrue;
-            iDownloadUtil->ClearOrphanDownloadsL( *iCache->iVideoList );
-            }
-        }
-    
-    return *iDownloadUtil;
     }
 
 // ----------------------------------------------------------------------------
@@ -1365,6 +809,20 @@ CVcxMyVideosCategories& CVcxMyVideosCollectionPlugin::CategoriesL()
         iCategories = CVcxMyVideosCategories::NewL( *this );
         }
     return *iCategories;
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosCollectionPlugin::AlbumsL
+// TODO: Unecessarry func since we always load this
+// ----------------------------------------------------------------------------
+//
+CVcxMyVideosAlbums& CVcxMyVideosCollectionPlugin::AlbumsL()
+    {
+    if ( !iAlbums )
+        {
+        iAlbums = CVcxMyVideosAlbums::NewL( *this );
+        }
+    return *iAlbums;
     }
 
 // ----------------------------------------------------------------------------
@@ -1438,6 +896,7 @@ void CVcxMyVideosCollectionPlugin::SetVideoL( CMPXMedia& aVideo )
 		}
     }
 
+#if 0
 // ----------------------------------------------------------------------------
 // CVcxMyVideosCollectionPlugin::NotifyDownloadCompletedL
 // ----------------------------------------------------------------------------
@@ -1464,6 +923,7 @@ void CVcxMyVideosCollectionPlugin::NotifyDownloadCompletedL( CMPXMedia& aVideo )
     
     CleanupStack::PopAndDestroy( buffer );
     }
+#endif
 
 // ----------------------------------------------------------------------------
 // CVcxMyVideosCollectionPlugin::NotifyNewVideosCountDecreasedL
@@ -1486,9 +946,7 @@ void CVcxMyVideosCollectionPlugin::NotifyNewVideosCountDecreasedL( CMPXMedia& aV
     stream.CommitL();
     
     CleanupStack::PopAndDestroy( &stream );    
-    
-    DownloadUtilL().NotifyNewVideosCountDecreased( *buffer );
-    
+        
     CleanupStack::PopAndDestroy( buffer );
     }
 
@@ -1626,6 +1084,7 @@ void CVcxMyVideosCollectionPlugin::DoHandleObjectPresentNotificationL()
     iMessageList->SendL();    
     }
 
+#if 0
 // ----------------------------------------------------------------------------
 // CVcxMyVideosCollectionPlugin::SetDownloadIdToZeroL
 // ----------------------------------------------------------------------------
@@ -1676,3 +1135,4 @@ const TDesC& CVcxMyVideosCollectionPlugin::DownloadState( TUint8 aDlState )
     }
 #endif
 
+#endif

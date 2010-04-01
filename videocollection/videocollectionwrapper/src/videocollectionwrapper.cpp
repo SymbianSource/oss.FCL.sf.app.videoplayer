@@ -22,36 +22,15 @@
 #include "videocollectionwrapper_p.h"
 #include "videosortfilterproxymodel.h"
 
-VideoCollectionWrapper *VideoCollectionWrapper::mInstance = 0;
-
 // -----------------------------------------------------------------------------
 // VideoCollectionWrapper::CVideoCollectionWrapper()
 // -----------------------------------------------------------------------------
 //
-VideoCollectionWrapper *VideoCollectionWrapper::instance()
+VideoCollectionWrapper &VideoCollectionWrapper::instance()
 {
-    if(!mInstance)
-    {
-        mInstance = new VideoCollectionWrapper();
-    }
-    mInstance->mReferenceCount++;
-    return mInstance;
-}
+    static VideoCollectionWrapper _staticWrapper;
 
-// -----------------------------------------------------------------------------
-// VideoCollectionWrapper::cleanup()
-// -----------------------------------------------------------------------------
-//
-void VideoCollectionWrapper::decreaseReferenceCount()
-{
-    if(mInstance)
-    {
-        if(--mInstance->mReferenceCount == 0)
-        {
-            delete mInstance;
-            mInstance = NULL;
-        }
-    }
+    return _staticWrapper;
 }
 
 // -----------------------------------------------------------------------------
@@ -71,19 +50,18 @@ VideoCollectionWrapper::VideoCollectionWrapper() :
 //
 VideoCollectionWrapper::~VideoCollectionWrapper()
 {
-    delete d;
-    d = 0;
+    // NOP
 }
 
 // -----------------------------------------------------------------------------
 // CVideoCollectionWrapper::getModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel()
+VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
 {
     if(d)
     {
-        return d->getModel();
+        return d->getModel(type);
     }
     return 0;
 }

@@ -21,11 +21,13 @@
 
 #include <hbview.h>
 #include <qnamespace.h>
-#include <QtCore/QtGlobal>
+#include <qabstractitemmodel.h>
+#include <hbaction.h>
+
+#include "videohintwidget.h"
 
 class QGraphicsItem;
 class VideoListWidget;
-class VideoHintWidget;
 class QActionGroup;
 class QVariant;
 class VideoCollectionViewUtils;
@@ -95,7 +97,6 @@ public:
      */
     void back();
 
-
 signals:
 
     /**
@@ -143,6 +144,12 @@ private slots:
      *
      */
     void openCollectionViewSlot();
+    
+    /**
+     * Slot is connected to model's about to insert rows signal.
+     * Opens the new album which was created. 
+     */
+    void openNewAlbumSlot(const QModelIndex &parent, int start, int end);
 
     /**
      * Slot is connected into toolbar's Service tab's
@@ -219,17 +226,28 @@ private slots:
      * @param collectionOpened
      * @param collection contains the name of the collection opened
      */
-    void collectionOpenedSlot(bool collectionOpened, const QString& collection);
+    void collectionOpenedSlot(bool collectionOpened,
+        const QString& collection,
+        const QModelIndex &index);
 
     /**
      * Slot is connected into toolbar's sort by tab's
      * triggered signal.
      *
      * Activates sort by popup menu.
-     *
      */
     void openSortByMenuSlot();
-
+    
+    /**
+     * Slot which is called when a widget has been loaded.
+     */
+    void widgetReadySlot(QGraphicsWidget *widget, const QString &name);
+    
+    /**
+     * Slot which is called when an object has been loaded.
+     */
+    void objectReadySlot(QObject *object, const QString &name);
+    
     // TODO: following can be removed after all implementation ready
     /**
      * Slot is connected into item signals that are not yet implemented.
@@ -263,31 +281,8 @@ private:
      * @param slot Slot for the triggered signal of the action.
      * @return HbAction pointer if creation ok, otherwise 0
      */
-    HbAction* createAction(QString tooltip, QString icon, QActionGroup* actionGroup, const char *slot);
+    HbAction* createAction(QString icon, QActionGroup* actionGroup, const char *slot);
 
-    /**
-     * Method creates collection view's main menu and actions
-     *
-     * @return 0 creation ok, < 0 creation fails
-     */
-    int createMainMenu();
-
-    /**
-     * Method initialises all videos widget used to show all videos
-     * either in list or grid. Method also connects signals emitted by the view into
-     * corresponding slots.
-     *
-     * @return 0 creation ok, < 0 creation fails
-     */
-    int createVideoWidget();
-    
-    /**
-     * Method initializes the mVideoHintWidget.
-     * 
-     * @return 0 creation ok, < 0 creation fails.
-     */
-    int createHintWidget();
-    
     /**
      * Shows or hides the hint. Only shows the hint if model does not have any
      * items.
@@ -297,10 +292,30 @@ private:
     void showHint(bool show = true);
     
     /**
+     * 
+     */
+    void setHintLevel(VideoHintWidget::HintLevel level);
+    
+    /**
      * Updates the sublabel text.
      */
     void updateSubLabel();
-
+    
+    /**
+     * Shows or hides a menu action.
+     */
+    void showAction(bool show, const QString &name);
+    
+    /**
+     * Check if menu action is checked.
+     */
+    bool isActionChecked(const QString &name);
+    
+    /**
+     * Sets an action as checked.
+     */
+    void setActionChecked(bool setChecked, const QString &name);
+    
 private:
 
     /**
@@ -308,28 +323,13 @@ private:
      */
     enum TViewActionIds
     {
-        EActionSortBy = 1,
-        EActionSortByDate,
-        EActionSortByName,
-        EACtionSortByItemCount,
-        EActionSortByLength,
-        EActionSortBySize,
-        EActionNewCollection,
-        EActionAddToCollection,
-        EActionDelete,
-        ETBActionAllVideos,
-        ETBActionCollections,
-        ETBActionServices,
-        ETBActionAddVideos,
-        ETBActionRemoveVideos,
-        ETBActionSortVideos
+        ETBActionAllVideos     = 10,
+        ETBActionCollections   = 11,
+        ETBActionServices      = 12,
+        ETBActionAddVideos     = 13,
+        ETBActionRemoveVideos  = 14,
+        ETBActionSortVideos    = 15
     };
-
-
-    /**
-     * sort menu object.
-     */
-    HbMenu                   *mSortMenu;
 
     /**
      * reference to video collection view utils
@@ -339,18 +339,13 @@ private:
     /**
      * pointer to videocollectionwrapper
      */
-    VideoCollectionWrapper *mWrapper;
+    VideoCollectionWrapper &mWrapper;
 
     /**
      * Pointer to the XML UI (DocML) loader, not owned
      */
     VideoCollectionUiLoader* mUiLoader;
     
-    /**
-     * view model object.
-     */
-    VideoSortFilterProxyModel *mModel;
-
     /**
      * Boolean for knowing when the app was started as a service.
      */
@@ -362,30 +357,15 @@ private:
     bool mModelReady;
 
     /**
-     * HbGroupBox object loaded from docml
-     */
-    HbGroupBox* mSubLabel;
-
-    /**
-     * Options menu object loaded from docml
-     */
-    HbMenu* mOptionsMenu;
-
-    /**
      * pointer to videoservices instance
      */
     VideoServices* mVideoServices;
 
     /**
-     * Widget for showing all videos
+     * Currently used list
      */
-    VideoListWidget* mVideoListWidget;
+    VideoListWidget* mCurrentList;
     
-    /**
-     * Widget for showing the hint text.
-     */
-    VideoHintWidget* mVideoHintWidget;
-
     /**
      * Action group for the toolbar.
      */
@@ -395,11 +375,6 @@ private:
      * Action group for the toolbar.
      */
     QActionGroup* mToolbarCollectionActionGroup;
-
-    /**
-     * map containing pointers to main menu actions
-     */
-    QMap<TViewActionIds, HbAction*> mMenuActions;
 
     /**
      * map containing toolbar actions
@@ -415,12 +390,6 @@ private:
      * String containing the name of the currently open collection
      */
     QString mCollectionName;
-    
-    /**
-     * selection dialog
-     */
-    VideoListSelectionDialog *mSelectionDialog;
-
 };
 
 #endif // VIDEOLISTVIEW_H

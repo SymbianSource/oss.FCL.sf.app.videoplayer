@@ -21,6 +21,7 @@
 // INCLUDES
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <mpxmedia.h>
 
 class VideoCollectionUtils
@@ -124,6 +125,14 @@ public:
     QString prepareLengthString(quint32 length);
     
     /**
+     * Prepares length strings from given value.
+     * 
+     * @param length Length value in seconds.
+     * @return Lengths as QStringList, first item tells the minutes, second tells seconds
+     */
+    const QStringList prepareLengthStrings(quint32 total);
+    
+    /**
      * Prepares size string from the given value.
      * 
      * @param size Size value in bytes
@@ -151,5 +160,3 @@ private:
 
 // End of file
     
-
-

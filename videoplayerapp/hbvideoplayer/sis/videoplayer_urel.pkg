@@ -45,22 +45,23 @@
 ;
 ; Playback Plugin
 ;
-"/epoc32/release/armv5/urel/mpxvideohelixplayback.dll"                  - "!:/sys/bin/mpxvideohelixplayback.dll"
-"/epoc32/data/z/resource/plugins/mpxvideohelixplayback.rsc"             - "!:/resource/plugins/mpxvideohelixplayback.rsc"
+"/epoc32/release/armv5/urel/mpxvideohelixplayback.dll"            - "!:/sys/bin/mpxvideohelixplayback.dll"
+"/epoc32/data/z/resource/plugins/mpxvideohelixplayback.rsc"       - "!:/resource/plugins/mpxvideohelixplayback.rsc"
 
 ; Collection view and wrapper
-"/epoc32/release/armv5/urel/videocollectionview.dll"    - "!:/sys/bin/videocollectionview.dll"
-"/epoc32/data/z/resource/plugins/videocollectionview.rsc" -"!:/resource/plugins/videocollectionview.rsc"
-"/epoc32/release/armv5/urel/videocollectionwrapper.dll"    - "!:/sys/bin/videocollectionwrapper.dll"
-"/epoc32/data/z/resource/plugins/videofiledetailsview.rsc" -"!:/resource/plugins/videofiledetailsview.rsc"
-"/epoc32/release/armv5/urel/videofiledetailsview.dll"    - "!:/sys/bin/videofiledetailsview.dll"
+"/epoc32/release/armv5/urel/videocollectionview.dll"              - "!:/sys/bin/videocollectionview.dll"
+"/epoc32/data/z/resource/plugins/videocollectionview.rsc"         - "!:/resource/plugins/videocollectionview.rsc"
+"/epoc32/release/armv5/urel/videocollectionwrapper.dll"           - "!:/sys/bin/videocollectionwrapper.dll"
+"/epoc32/data/z/resource/plugins/videofiledetailsview.rsc"        - "!:/resource/plugins/videofiledetailsview.rsc"
+"/epoc32/release/armv5/urel/videofiledetailsview.dll"             - "!:/sys/bin/videofiledetailsview.dll"
 
 ; Executable and default resource files
-"/epoc32/release/armv5/urel/videoplayerengine.dll"   - "!:/sys/bin/videoplayerengine.dll"
-"/epoc32/release/armv5/urel/videoplayer.exe"    - "!:/sys/bin/videoplayer.exe"
-"/epoc32/data/z/resource/apps/videoplayer.rsc"    - "!:/resource/apps/videoplayer.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/videoplayer_reg.rsc"    - "!:/private/10003a3f/import/apps/videoplayer_reg.rsc"
+"/epoc32/release/armv5/urel/videoplayerengine.dll"                - "!:/sys/bin/videoplayerengine.dll"
+"/epoc32/release/armv5/urel/videoplayer.exe"                      - "!:/sys/bin/videoplayer.exe"
+"/epoc32/data/z/resource/apps/videoplayer.rsc"                    - "!:/resource/apps/videoplayer.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/videoplayer_reg.rsc" - "!:/private/10003a3f/import/apps/videoplayer_reg.rsc"
+"/epoc32/data/z/resource/qt/translations/videos_en.qm"            - "!:/resource/qt/translations/videos.qm"
 
-"/epoc32/data/z/resource/plugins/hbvideoplaybackviewplugin.rsc" - "!:/resource/plugins/hbvideoplaybackviewplugin.rsc"
-"/epoc32/release/armv5/urel/hbvideoplaybackview.dll"    - "!:/sys/bin/hbvideoplaybackview.dll"
-"/epoc32/release/armv5/urel/hbvideoplaybackviewplugin.dll"    - "!:/sys/bin/hbvideoplaybackviewplugin.dll"
+"/epoc32/data/z/resource/plugins/hbvideoplaybackviewplugin.rsc"   - "!:/resource/plugins/hbvideoplaybackviewplugin.rsc"
+"/epoc32/release/armv5/urel/hbvideoplaybackview.dll"              - "!:/sys/bin/hbvideoplaybackview.dll"
+"/epoc32/release/armv5/urel/hbvideoplaybackviewplugin.dll"        - "!:/sys/bin/hbvideoplaybackviewplugin.dll"

@@ -59,6 +59,16 @@ private slots:
      * verifies loadSortingValues
      */
     void testLoadSortingValues();
+    
+    /**
+     * verifies getServiceIconStrings
+     */
+    void testGetServiceIconStrings();
+    
+    /**
+     * verifies getServiceUriString
+     */
+    void testGetServiceUriString();
 
 };
 

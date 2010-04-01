@@ -36,7 +36,7 @@ public:
      * @param parent parent of this widget
      * @param client Collection client pointer to use.
      */
-    VideoSortFilterProxyModel(QObject *parent=0);
+    VideoSortFilterProxyModel( int type, QObject *parent=0);
     
     /**
      * Destructor.
@@ -56,49 +56,7 @@ public:
     int initialize(VideoListDataModel *sourceModel);
     
 public:
-    
-    /**
-     * First call opens the collection at the defined level. Subsequent calls only change the level.
-     * This starts populating the model data from the MyVideos collection plugin.
-     * 
-     * @param level The level where the collection is opened.
-     * @return 0 if opening was successful, negative if not.
-     */
-    int open(int level);
-    
-    /**
-     * Starts sorting using idle timer: starts timer with zero 
-     * interval. When system has time to run timer sort() -method
-     * is called.
-     *  
-     */
-    void doSorting(int role, Qt::SortOrder order, bool async = true);
-    
-    /**
-     * Method to delete items at provided indeces
-     *
-     * @param indexList list of indeces.
-     * @return int 0 succeeds, -1 does not succeed.
-     */
-    int deleteItems(const QModelIndexList &indexList);
-    
-    /**
-    * Opens the defined item. This is quite abstract as depending
-    * on the type of the item, the behaviour or result could be
-    * quite different.
-    * 
-    * @param index index of the item to be opened
-    * @return int 0 succeeds, <0 if opening does not succeed.
-    */    
-    int openItem(const QModelIndex &index);
-     
-    /**
-     * Starts fetching full details for the defined item.
-     * 
-     * @param index index of the item from where to get details from
-     * @return int 0 succeeds, < 0 if detail fetching startup does not succeed.
-     */   
-    int fetchItemDetails(const QModelIndex &index);
+ 
     
     /**
      * sets gInitFails
@@ -106,24 +64,7 @@ public:
      * @param bool
      */
     static void setInitFailure(bool fails);
-    
-signals:
 
-    /**
-    * Signal to be emitted if detail fetching started ok
-    * 
-    * @param index, index of the item
-    */ 
-    void shortDetailsReady(int index);
-    
-    /**
-    * Signal to be emitted after all details are being fetched.
-    * 
-    * @param index, index of the item
-    */ 
-    void fullDetailsReady(int index);
- 
-private:
     
     /**
      * Pointer to the actual model.
@@ -132,20 +73,10 @@ private:
     VideoListDataModel *mModel;
     
     /**
-     * Currently open level.
+     * type
      */
-    int mLevel;
-    
-    /**
-     * sort role
-     */
-    int mWantedSortRole;
-    
-    /**
-     * sort order
-     */
-    Qt::SortOrder mWantedSortOrder;
-    
+    int mType;
+
 };
 
 

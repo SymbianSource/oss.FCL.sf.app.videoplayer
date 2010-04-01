@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #ifndef MPXCOMMONVIDEOPLAYBACKVIEW_HRH
@@ -57,7 +57,9 @@ enum TMPXVideoPlaybackViewCommandIds
     EMPXPbvCmdCustomPlay,
     EMPXPbvCmdExit,
     EMPXPbvLaunchDRMDetails,
-    EMPXPbvSurfaceCreated
+    EMPXPbvSurfaceCreated,
+    EMPXPbvSurfaceRemoved,
+    EMPXPbvCmdRealOneBitmapTimeout
 };
 
 #endif  // MPXCOMMONVIDEOPLAYBACKVIEW_HRH

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -72,6 +72,7 @@ void HbVideoBasePlaybackView::handleDeactivateView()
 //
 void HbVideoBasePlaybackView::mousePressEvent( QGraphicsSceneMouseEvent *event ) 
 {
+    Q_UNUSED( event );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -91,6 +92,8 @@ void HbVideoBasePlaybackView::paint( QPainter *painter,
                                      const QStyleOptionGraphicsItem *option, 
                                      QWidget *widget )
 {
+    Q_UNUSED( painter );
+    Q_UNUSED( option );
     Q_UNUSED( widget );    
 }
 
@@ -101,6 +104,7 @@ void HbVideoBasePlaybackView::paint( QPainter *painter,
 //
 bool HbVideoBasePlaybackView::event( QEvent *event )
 {
+    Q_UNUSED( event );
     bool consumed = false;
 
     return consumed;

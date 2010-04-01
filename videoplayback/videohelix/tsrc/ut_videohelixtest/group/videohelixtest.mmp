@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: ou1cpsw#8 %
 
 
 
@@ -88,5 +88,6 @@ LIBRARY         etelmm.lib
 LIBRARY         centralrepository.lib
 LIBRARY         flogger.lib
 LIBRARY         playbackhelper.lib
+LIBRARY         hwrmlightclient.lib   // Lights control
 
 // End of File

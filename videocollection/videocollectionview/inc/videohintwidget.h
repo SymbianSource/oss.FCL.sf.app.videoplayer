@@ -20,6 +20,7 @@
 #define VIDEOHINTWIDGET_H
 
 #include <hbwidget.h>
+#include <hbicon.h>
 
 class HbPushButton;
 class HbLabel;
@@ -71,11 +72,19 @@ public:
     void setLevel(HintLevel level);
     
     /**
-     * Overridden from QGraphicsItem. Sets the visibility of this widget.
-     * 
-     * @param visible true if widget is set visible, false othervise.
+     * Adjusts if the button is shown in landscape.
      */
-    void setVisible(bool visible);
+    void setButtonShown(bool shown);
+    
+    /**
+     * Method enables and displays this widget.
+     */
+    void activate();
+
+    /**
+     * Method disables and hides this widget.
+     */
+    void deactivate();
     
 private slots:
     
@@ -85,18 +94,6 @@ private slots:
     void orientationChangedSlot(Qt::Orientation orientation);
     
 private:
-    
-    /**
-     * Method enables and displays current active view
-     *
-     * @return int 0 initialization ok, < 0 if fails.
-     */
-    void activate();
-
-    /**
-     * Method disables and hides current active view
-     */
-    void deactivate();
     
     /**
      * Shows/hides the correct UI components for current state.
@@ -111,16 +108,6 @@ private:
      * Pointer to the XML UI (DocML) loader, not owned
      */
     VideoCollectionUiLoader     *mUiLoader;
-    
-	/**
-     * Service button object.
-     */
-    HbPushButton                *mServiceButton;
-    
-    /**
-     * Hint text label (ie. the second row label).
-     */
-    HbLabel                     *mHintLabel;
     
     /**
      * Service icon resource string.
@@ -138,9 +125,24 @@ private:
     HbIcon                      *mServiceIcon;
     
     /**
+     * Add videos icon.
+     */
+    HbIcon                       *mAddVideosIcon;
+    
+    /**
      * Current hint level.
      */
     HintLevel mCurrentLevel;
+    
+    /**
+     * If button is shown in landscape at all.
+     */
+    bool mButtonShown;
+    
+    /**
+     * true if widget has been activated.
+     */
+    bool mActivated;
 
 };
 

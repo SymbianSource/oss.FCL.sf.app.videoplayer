@@ -55,15 +55,6 @@ VideoThumbnailData::~VideoThumbnailData()
 }
 
 // -----------------------------------------------------------------------------
-// VideoThumbnailData::startFetchingThumbnail()
-// -----------------------------------------------------------------------------
-//
-int VideoThumbnailData::startFetchingThumbnail(int mediaId, int priority)
-{
-    return d_ptr->startFetchingThumbnail(mediaId, priority);
-}
-
-// -----------------------------------------------------------------------------
 // VideoThumbnailData::removeThumbnail()
 // -----------------------------------------------------------------------------
 //
@@ -85,9 +76,9 @@ const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 // VideoThumbnailData::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailData::startBackgroundFetching(int fetchIndex)
+void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
-    d_ptr->startBackgroundFetching(fetchIndex);
+    d_ptr->startBackgroundFetching(model, fetchIndex);
 }
 
 // -----------------------------------------------------------------------------
@@ -97,6 +88,15 @@ void VideoThumbnailData::startBackgroundFetching(int fetchIndex)
 void VideoThumbnailData::enableBackgroundFetching(bool enable)
 {
     d_ptr->enableBackgroundFetching(enable);
+}
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailData::enableThumbnailCreation()
+// -----------------------------------------------------------------------------
+//
+void VideoThumbnailData::enableThumbnailCreation(bool enable)
+{
+    d_ptr->enableThumbnailCreation(enable);
 }
 
 // -----------------------------------------------------------------------------

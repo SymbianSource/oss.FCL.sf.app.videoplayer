@@ -22,6 +22,7 @@
 #include <QObject>
 #include <qicon.h>
 #include <qdatetime.h>
+#include <qhash.h>
 #include <qset.h>
 #include <qabstractitemmodel.h>
 #include <e32const.h>
@@ -32,6 +33,7 @@
 // FORWARD DECLARATIONS
 class VideoListDataModel;
 class CMPXMediaArray;
+class CMPXMedia;
 class VideoThumbnailData;
 
 class VideoListDataModelPrivate : public VideoDataSignalReceiver
@@ -45,6 +47,11 @@ class VideoListDataModelPrivate : public VideoDataSignalReceiver
      * disable copy-constructor and assignment operator
      */
 	Q_DISABLE_COPY(VideoListDataModelPrivate) 
+    
+	/**
+	 * we're friend of the actual model object
+	 */
+    friend class VideoListDataModel;
 
 public: // Constructor
 
@@ -85,10 +92,10 @@ signals:
      * This signal is emitted, collection notifies details for item has been
      * fetched
      * 
-     * @param rowindex
+     * @param itemId
      * 
      */
-    void videoDetailsReady(int rowIndex);
+    void videoDetailsReady(TMPXItemId itemId);
 
 private slots:
 
@@ -135,12 +142,12 @@ private slots: //slots from VideoDataSignalReceiver
     
     /**
      * Signaled by the collection client when
-     * video removal has detected.
+     * item removal has detected.
      * 
-     * @param videoId id of the removed video
+     * @param itemId id of the removed item
      */
-    void videoDeletedSlot(TMPXItemId videoId);
-    
+    void itemDeletedSlot(TMPXItemId itemId);
+
     /**
      * Signaled by the collection client video deletion request
      * has completed
@@ -148,8 +155,16 @@ private slots: //slots from VideoDataSignalReceiver
      * @param overallCount count of ALL videos in this delete procedure
      * @param failedMediaIds list of item ids that failed to be removed.
      */
-    void videoDeleteCompletedSlot( int overallCount, QList<TMPXItemId> *failedMediaIds);
+    void videoDeleteCompletedSlot(int overallCount, QList<TMPXItemId> *failedMediaIds);
      
+    
+    /**
+     * Signaled when album remove command is completed and some albums were not removed.
+     * 
+     * @param failedMediaIds media-array containing failed medias
+     */
+    void albumRemoveFailureSlot(QList<TMPXItemId> *failedMediaIds);
+    
     /**
      * Signaled by the collection client when video details fetching
      * has completed.
@@ -157,6 +172,14 @@ private slots: //slots from VideoDataSignalReceiver
      */
     void videoDetailsCompletedSlot(TMPXItemId videoId);      
     
+    /**
+     * Signalled when album items are recieved.
+     * 
+     * @param albumId, Album which items are received.
+     * @param albumItems, Items belonging to the current album.
+     */
+    void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+
 public: // services 
     
     /**
@@ -247,30 +270,22 @@ public: // services
     QMap<QString, QVariant> getMetaDataFromIndex(int index) const;
     
     /**
-     * Returns video status
-     * 
-     * @param index: item position where client wants the status from.
-     * 
-     * @return int status code
-     */
-    int getVideoStatusFromIndex(int index) const;
-    
-    /**
      * marks videos to be removed: it's id and index are saved to 
-     * mItemsUnderDeletion
+     * remove buffer in data container
      * 
-     * @param itemIndexes: indexes of items to be removed
-     * @return QList: list of ids about removed items
+     * @param itemIndex: index of item to be removed
+     * @return TMPXItemId: id of the item marked
      *
      */
-    QList<TMPXItemId> markVideosRemoved(const QModelIndexList &itemIndexes);
+    TMPXItemId markVideoRemoved(const QModelIndex &itemIndex);
     
     /**
      * Removes provided ids from the remove -list
+     * and restores them into actual container in case
+     * our current collection level is correct.
      * 
-     * @param itemIds ids of the items to be removed
      */
-    void unMarkVideosRemoved(QList<TMPXItemId> &itemIds);
+    void restoreRemoved(QList<TMPXItemId> *idList);
 	
 	/**
      * Returns the file path of the video.
@@ -286,6 +301,23 @@ public: // services
      */
     const QString getFilePathForId(TMPXItemId mediaId) const;
     
+    /**
+     * Checks if the specified item belongs to currently open album.
+     * 
+     * @albumId, Album where the item is to be checked.
+     * @param itemId, Item to be checked.
+     * @return true if item belongs to the album.
+     */
+    bool belongsToAlbum(const TMPXItemId &itemId, TMPXItemId albumId = TMPXItemId::InvalidId()) const;
+    
+    /**
+     * Set album in use.
+     * 
+     * @param albumId, Album to set in use.
+     * @return None.
+     */
+    void setAlbumInUse(TMPXItemId albumId);
+
 private: // private methods
   
     /**
@@ -321,7 +353,34 @@ private: // private methods
      *  
      */
     void appendDataToContainerL(CMPXMediaArray *videoArray, unsigned int startIndex = 0);
-      
+    
+    /**
+     * Check that a media item is valid.
+     * 
+     * @param itemId, Item to be checked.
+     * @return true if valid.
+     */
+    bool isValid(const CMPXMedia &media, const TMPXItemId &itemId) const;
+    
+    /**
+     * Appends data in album.
+     */
+    void appendDataToAlbumL(TMPXItemId albumId, CMPXMediaArray *videoArray);
+
+    /**
+     * Called when an album has been removed.
+     * 
+     * @param albumId, Album which items are received.
+     */
+    void albumRemoved(TMPXItemId albumId);
+   
+    /**
+     * Called when a video has been removed.
+     * 
+     * @param videoId id of the removed video
+     */
+    void videoDeleted(TMPXItemId videoId);
+
 private:
     
     /**
@@ -334,23 +393,27 @@ private:
     * media object container
     */
     VideoDataContainer mMediaData;  
-      
-    /**
-    * set containing item(s)' ids whose, removal 
-    * is underway. 
-    */
-    QSet<TMPXItemId>      mItemsUnderDeletion;  
     
     /**
-     * Thumbnail handler object.
+     * Thumbnail handler object, not owned
      */
-   VideoThumbnailData &mVideoThumbnailData;
+    VideoThumbnailData *mVideoThumbnailData;
    
 	/**
 	 * Object is initialized.
 	 */
 	bool mInitialized;
-   
+
+	/** 
+	 * "wrapped" album container, contains item ids belongint into a particular album
+	 * or category 
+	 */
+	QHash<TMPXItemId, QSet<TMPXItemId> > mAlbumData;
+	
+	/** 
+	 * currently open album 
+	 */
+	TMPXItemId mCurrentAlbum;
 };
 
 #endif  // __VIDEOLISTDATAMODEL_P_H__

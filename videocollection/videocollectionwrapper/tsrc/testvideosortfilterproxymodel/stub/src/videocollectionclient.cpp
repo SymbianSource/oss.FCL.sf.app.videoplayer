@@ -28,6 +28,7 @@ bool VideoCollectionClient::mFailMediaPlayback = false;
 bool VideoCollectionClient::mFailMediaDetails = false;
 bool VideoCollectionClient::mFailSetSort = false;
 bool VideoCollectionClient::mFailAddNewCollection = false;
+TMPXItemId VideoCollectionClient::mNewAlbumId = TMPXItemId::InvalidId();
 TVcxMyVideosSortingOrder VideoCollectionClient::mSettedSortOrder = EVcxMyVideosSortingNone;
 int VideoCollectionClient::mSortOrderSetCount = 0;
 QString VideoCollectionClient::mAddNewCollectionName = QString();
@@ -70,6 +71,7 @@ int VideoCollectionClient::initialize()
 //
 int VideoCollectionClient::startOpenCollection(int level)
 {
+    Q_UNUSED(level);
     if(mFailStartOpen)
     {
         return -1;
@@ -78,15 +80,46 @@ int VideoCollectionClient::startOpenCollection(int level)
 }
 
 // -----------------------------------------------------------------------------
-// openVideo
+// openItem
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::openVideo(int /*mpxId1*/)
+int VideoCollectionClient::openItem(int /*mpxId1*/)
 {
     if(mFailMediaPlayback)
     {
         return -1;
     }
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
+// addNewAlbum
+// -----------------------------------------------------------------------------
+//
+TMPXItemId VideoCollectionClient::addNewAlbum(QString title)
+{
+    mAddNewCollectionName = title;
+    return mNewAlbumId;
+}
+
+// -----------------------------------------------------------------------------
+// addItemsInAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::addItemsInAlbum(TMPXItemId albumId, QList<TMPXItemId> items)
+{
+    Q_UNUSED(albumId);
+    Q_UNUSED(items);
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
+// revoveAlbums
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::removeAlbums(const QList<TMPXItemId> &items)
+{
+    Q_UNUSED(items);
     return 0;
 }
 
@@ -104,20 +137,14 @@ int VideoCollectionClient::getVideoDetails(int /*mpxId1*/)
 }
 
 // -----------------------------------------------------------------------------
-// addNewCollection
+// getCategoryId
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::addNewCollection(QString name, QString thumbnail, QList<TMPXItemId> mediaIds)
+void VideoCollectionClient::getCategoryId(TMPXItemId &id)
 {
-    mAddNewCollectionName = name;
-    mAddNewCollectionThumb = thumbnail;
-    mAddNewCollectionIds = mediaIds;
-    if(mFailAddNewCollection) {
-        return -1;
-    }
-    return 0;
+    id.iId1 = 1;
+    id.iId2 = 2;
 }
-
 // -----------------------------------------------------------------------------
 // back
 // -----------------------------------------------------------------------------

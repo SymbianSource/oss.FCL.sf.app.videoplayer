@@ -20,12 +20,14 @@
 
 #include <qobject.h>
 
+class HbListView;
+class VideoSortFilterProxyModel;
+
 class VideoCollectionViewUtils : public QObject
 {
     Q_OBJECT
     
 public:
-    
     /**
      * Returns singleton instance for this class.
      * 
@@ -68,7 +70,19 @@ public:
      * @return Service URI string. Invalid string in error cases.
      */
     QString getServiceUriString();
-      
+    
+public:
+    /**
+     * Initializes list view for collection and selection dialog with common
+     * properties.
+     */
+    static void initListView(HbListView *view);
+    
+    /**
+     * Initilizes model sort values.
+     */
+    static void sortModel(VideoSortFilterProxyModel *model, bool async);
+
 public slots:
     
     /**
@@ -96,7 +110,12 @@ private:
      */
     virtual ~VideoCollectionViewUtils();
 
+private:
+    /** current sorting role */
+    int mSortRole;
     
+    /** current sorting order */
+    Qt::SortOrder mSortOrder;
 };
 
 #endif //__VIDEOCOLLECTIONUIUTILS_H__

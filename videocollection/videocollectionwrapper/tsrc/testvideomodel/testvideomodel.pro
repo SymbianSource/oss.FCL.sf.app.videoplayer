@@ -28,20 +28,25 @@ LIBS += -lmpxcommon.dll -lestor.dll \
 # Input
 HEADERS += ../../inc/videolistdatamodel.h \
            ../../inc/videodatasignalreceiver.h \
-           ../../inc/videocollectionutils.h \
+           ../../../inc/videocollectioncommon.h \           
            inc/testvideolistdatamodel.h \ 
            inc/mediaobjectfactory.h \
+           stub/inc/videocollectionutils.h \
            stub/inc/videolistdatamodel_p.h \
            stub/inc/videocollectionclient.h \
+           stub/inc/videodeleteworker.h \
+           stub/inc/videocollectionwrapper.h 
          
 
 
-SOURCES += ../../src/videolistdatamodel.cpp \
-           ../../src/videocollectionutils.cpp \
+SOURCES += ../../src/videolistdatamodel.cpp \           
            src/testvideolistdatamodel.cpp \
            src/mediaobjectfactory.cpp \
+           stub/src/videocollectionutils.cpp \
            stub/src/videolistdatamodel_p.cpp \
            stub/src/videocollectionclient.cpp \
+           stub/src/videodeleteworker.cpp \
+           stub/src/videocollectionwrapper.cpp 
          
            
 RESOURCES += data/testvideolistdatamodel.qrc           

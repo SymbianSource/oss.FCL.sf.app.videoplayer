@@ -15,15 +15,18 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  11 %
 
 
 
-#include <qfileinfo>
-#include <qgraphicsscenemouseevent>
+#include <QFileInfo>
+#include <QGraphicsSceneMouseEvent>
+
 
 #include <hblabel.h>
+#include <hbframeitem.h>
 #include <hbpushbutton.h>
+#include <hbframedrawer.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -74,13 +77,22 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         // Connect signal and slot for play button
         //
         QGraphicsWidget *widget = loader->findWidget( QString( "detailsViewPlayButton" ) );
-        HbPushButton *playButton = qobject_cast<HbPushButton*>( widget );
-        playButton->setFlag( QGraphicsItem::ItemIsFocusable, false );
+        mPlayButton = qobject_cast<HbPushButton*>( widget );
+        mPlayButton->setFlag( QGraphicsItem::ItemIsFocusable, false );
 
-        connect( playButton, SIGNAL( released() ), this, SLOT( playPause() ) );
+        connect( mPlayButton, SIGNAL( released() ), this, SLOT( playPause() ) );
         
-        QGraphicsItem *widget1 = playButton->primitive( HbStyle::P_PushButton_background );
+        QGraphicsItem *widget1 = mPlayButton->primitive( HbStyle::P_PushButton_background );
         widget1->setVisible( false );
+
+        //
+        // Set framedrawer for semi transparent background
+        //
+        HbFrameItem *frameItem = new HbFrameItem ( mPlayButton );
+        frameItem->setGeometry( mPlayButton->boundingRect() );
+        frameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+        frameItem->frameDrawer().setFillWholeRect( true );
+        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );
     }
 
     updateState( mController->state() );
@@ -94,20 +106,16 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::updateState( TMPXPlaybackState stat
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackDetailsPlaybackWindow::updateState() state = %d"), state );
 
-    QMPXVideoPlaybackDocumentLoader *loader = mController->layoutLoader();
-
-    QGraphicsWidget *widget = loader->findWidget( QString( "detailsViewPlayButton" ) );
-
     switch ( state )
     {
         case EPbStatePaused:
         {
-            widget->setVisible( true );
+            mPlayButton->setVisible( true );
             break;
         }
         default:
         {
-            widget->setVisible( false );
+            mPlayButton->setVisible( false );
             break;
         }
     }
@@ -125,27 +133,27 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::playPause()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::event()
+// QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent
 // -------------------------------------------------------------------------------------------------
 //
-bool QMPXVideoPlaybackDetailsPlaybackWindow::event( QEvent *event )
+void QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-    bool consumed = false;
+    MPX_DEBUG(_L("QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent"));
 
-    //
-    // Ignore touch event if the gesture event was just received and is being processed
-    //
-    if ( event->type() == QEvent::UngrabMouse )
-    {
-        playPause();
-        consumed = true;
-    }
-    else
-    {
-         consumed = QGraphicsWidget::event( event );
-    }
+    event->accept();
+}
 
-    return consumed;
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent"));
+
+    Q_UNUSED( event );
+
+    playPause();
 }
 
 //End of file

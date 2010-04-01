@@ -49,12 +49,13 @@ private slots:
     void testThumbnailReadySlot();
     void testDefaultThumbnail();
     void testRemoveThumbnail();
-    void testLayoutChangedSlot();
-    void testRowsInsertedSlot();
-    void testRemoveFromFetchList();
+    void testModelChangedSlot();
     void testStartBackgroundFetching();
     void testEnableBackgroundFetching();
     void testFreeThumbnailData();
+    void testAllThumbnailsFetchedSlot();
+    void testEnableThumbnailCreation();
+    void testAboutToQuitSlot();
 
 signals:
     void testSignal();

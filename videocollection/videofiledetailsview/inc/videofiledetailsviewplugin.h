@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   VideoFileDetailsViewPlugin class definition
-* 
+*
 */
 
 #ifndef VIDEOFILEDETAILSPLUGIN_H
@@ -20,10 +20,11 @@
 
 
 // INCLUDES
-#include <qobject>
+#include <qobject.h>
 #include <mpxviewpluginqt.h>
 #include <hbdocumentloader.h>
 #include <qpixmap.h>
+#include <mpxitemid.h>
 
 class VideoSortFilterProxyModel;
 class QModelIndex;
@@ -32,10 +33,11 @@ class HbMarqueeItem;
 class ThumbnailManager;
 class VideoServices;
 class VideoCollectionWrapper;
+class VideoDetailsLabel;
 
 class VideoFileDetailsViewPlugin : public MpxViewPlugin
 	{
-    
+
     Q_OBJECT
 
 public: // Constructor / destructor
@@ -43,40 +45,40 @@ public: // Constructor / destructor
     /**
      * Contructor.
      *
-     */ 
+     */
     VideoFileDetailsViewPlugin();
-    
+
     /**
      * Destructor.
      *
-     */ 
+     */
     virtual ~VideoFileDetailsViewPlugin();
 
 public: // from QViewPlugin
-    
+
     /**
      * Initializes view creation.
      *
      */
     void createView();
-    
+
     /**
      * Deallocates view and it's objects.
      */
     void destroyView();
-    
+
     /**
      * Activates view
      *
      */
     void activateView();
-    
+
     /**
      * Deactivates view
      *
      */
     void deactivateView();
-    
+
     /**
      * Returns a pointer to the view read from the XML
      *
@@ -109,9 +111,9 @@ public slots: // from QViewPlugin
      * @param orientation new orientation
      */
     void orientationChange( Qt::Orientation orientation );
-    
+
     /**
-     * Plugin user can notify oback button changes by connecting into this slot
+     * Plugin user can notify back button changes by connecting into this slot
      *
      */
     void back();
@@ -128,55 +130,55 @@ private slots:
 
     /**
      * Signaled when short details are ready.
-     * 
-     * @param index Index of the clip, needed when getting the data from model.
+     *
+     * @param id Mpx id of the clip, needed when getting the data from model.
      */
-    void shortDetailsReadySlot(int index);
-    
+    void shortDetailsReadySlot(TMPXItemId id);
+
     /**
      * Signaled when full details are ready.
-     * 
-     * @param index Index of the clip, needed when getting the data from model.
+     *
+     * @param id Mpx id of the clip, needed when getting the data from model.
      */
-    void fullDetailsReadySlot(int index);
-    
+    void fullDetailsReadySlot(TMPXItemId id);
+
     /**
      * Slot that receives signal from play button to start playback.
      */
     void startPlaybackSlot();
-    
+
     /**
      * Slot that receives signal from send button
      */
     void sendVideoSlot();
-    
+
     /**
      * Slot that receives signal from delete button
      */
     void deleteVideoSlot();
-    
+
     /**
-     * Slot that receives signal when video(s) removed. 
+     * Slot that receives signal when video(s) removed.
      * If video to be removed is the one whose details
-     * are visible, this view is deactivated and collection 
+     * are visible, this view is deactivated and collection
      * list view is put back on.
-     * 
+     *
      * @param parent parent item index (not used at the moment)
      * @param first first item to remove
      * @param last last item to remove
      */
     void rowsRemovedSlot(const QModelIndex &parent, int first, int last);
-    
+
     /**
      * Slot is connected into videocollection wrapper's asyncStatus -signal
      *
      * Handles possible collection error; usually by just showing error msg
      *
      * @param errorCode error code
-     * @param additional additional data gotten from the error 
+     * @param additional additional data gotten from the error
      */
     void handleErrorSlot(int errorCode, QVariant &additional);
-    
+
     /**
      * Slot that is connected to thumbnailReady signal in tnwrapper, which
      * signals when thumbnail loading has been completed.
@@ -195,9 +197,9 @@ private:
      *
      */
     void preCreateView();
-    
+
     /**
-     * Allocates view and rest of it's objects to be ready to 
+     * Allocates view and rest of it's objects to be ready to
      * be activated.
      *
      */
@@ -208,7 +210,7 @@ private:
      *
      */
     void deleteItem(QModelIndex index);
-    
+
     /**
      * Starts fetching the large thumbnail with tnwrapper.
      */
@@ -217,18 +219,18 @@ private:
     /**
      * Finds and return the widget from document loader with the given name. Casts
      * to templated type.
-     * 
+     *
      * @param name Name of the widget
      * @return The widget.
      */
-    template<class T> 
+    template<class T>
     T* findWidget(QString name);
-    
+
     template<class T>
     T* findObject(QString name);
 
 private:
-    
+
     /**
      * Details view create status
      */
@@ -243,7 +245,7 @@ private:
      * Document loader that holds the view object
      */
     HbDocumentLoader mView;
-    
+
     /**
      * Pointer to the model that holds video details. Not owned.
      */
@@ -272,32 +274,42 @@ private:
      * if EFinalized, view creation has been finalised
      */
     TViewStatus mCreated;
+
+    /**
+     * Mpx id of the video clip.
+     */
+    TMPXItemId mVideoId;
     
     /**
-     * Index of the video clip in the model.
+     * Index of the clip to be deleted in the proxy model.
      */
-    int mVideoIndex;
-    
-    /**
-     * Defined action to be set to top right button, when view is activated
+    int mDeletedIndex;
+
+	/**
+     * Navigation softkey action object for back.
      */
-    HbAction *mSecSkAction;
-    
+	HbAction 				   *mNavKeyBackAction;
+
     /**
      * Title animation widget
      */
     HbMarqueeItem *mTitleAnim;
-    
+
+    /**
+     * Thumbnail label
+     */
+    VideoDetailsLabel *mThumbLabel;
+
     /**
      * Thumbnail manager.
      */
     ThumbnailManager* mThumbnailManager;
-    
+
     /**
      * Collection wrapper.
      */
-    VideoCollectionWrapper *mCollectionWrapper;
-    
+    VideoCollectionWrapper &mCollectionWrapper;
+
     };
 
 #endif  // VIDEOFILEDETAILSPLUGIN_H

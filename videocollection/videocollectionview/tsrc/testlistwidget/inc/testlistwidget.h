@@ -31,6 +31,7 @@ class VideoCollectionWrapper;
 class HbMainWindow;
 class ListWidgetTester;
 class VideoServices;
+class VideoListDataModel;
 
 class TestListWidget : public QObject
 {
@@ -38,6 +39,7 @@ class TestListWidget : public QObject
 
 public:
 
+    void setRowCount(int count, int type = 0, VideoListDataModel *model = 0);
     
     // test functions for the test framework
 private slots:
@@ -71,9 +73,9 @@ private slots:
     void testDeactivate();
 
     /**
-     * verifies getType
+     * verifies getLevel
      */
-    void testGetType();
+    void testGetLevel();
     
     /**
      * verifies getModel
@@ -158,22 +160,10 @@ signals:
     void testSignal(const QPointF&);
     
 private:
-
-    
     /**
      * object under test, ListWidgetTester is inherited from VideoListWidget
      */
     ListWidgetTester* mTestWidget;
-
-    /**
-     * dummy model
-     */
-    DummyDataModel* mDummyModel;
-    
-    /**
-     * dummy proxy model
-     */
-    VideoSortFilterProxyModel *mDummyProxyModel;
 
     /**
      * dummy view

@@ -131,5 +131,10 @@ QModelIndex VideoSortFilterProxyModel::mapToSource(const QModelIndex &proxyIndex
     return QModelIndex(proxyIndex);
 }
 
+VideoSortFilterProxyModel* VideoSortFilterProxyModel::sourceModel()
+{
+    return this;
+}
+
 // end of file
 

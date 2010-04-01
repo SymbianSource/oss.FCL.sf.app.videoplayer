@@ -18,13 +18,14 @@
 #define __VIDEOTHUMBNAILDATA_H__
 
 // INCLUDES
-#include <QObject>
-#include <QHash>
-#include <QPair>
-#include <QIcon>
-#include <QSet>
+#include <qobject.h>
+#include <qhash.h>
+#include <qpair.h>
+#include <qicon.h>
+#include <qset.h>
 
 // FORWARD DECLARATIONS
+class VideoSortFilterProxyModel;
 
 class VideoThumbnailData : public QObject
 {
@@ -60,27 +61,12 @@ public: // Constructor
     static VideoThumbnailData &instance();
  	
     /**
-     * Starts fetching thumbnails for medias in the model defined by the indexes parameter.
-     * Priority for the thumbnails is ascending starting from the defined priority. Uses method 
-     * startFetchingThumbnail for the actual fetching.
-     * 
-     * Clears all other thumbnail fetches.
-     * 
-     * param @indexes indexes of the medias in the model
-     * param @priority starting priority for the thumbnails
-     * param @setFetchIndex whether index for background thumbnail fetcing is set 
-     *   
-     * @return int count of fetches started or -1 in case of error. 
-     */
-    int startFetchingThumbnails(const QList<int> &indexes, VideoThumbnailPriority priority, bool setFetchIndex = true);
-    
-    /**
      * Starts background thumbnail fetching.
      *
      * @param fetchIndex index where to start the background thumbnail fetching.
      *  
      */
-    void startBackgroundFetching(int fetchIndex);
+    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);
     
     /**
      * Enables or disables thumbnail background fetching. Default is enabled.

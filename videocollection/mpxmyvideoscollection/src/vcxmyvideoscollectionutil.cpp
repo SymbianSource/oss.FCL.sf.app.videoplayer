@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
-
 
 
 
@@ -166,7 +165,25 @@ void TVcxMyVideosCollectionUtil::CopyFromListToListL(
             }
         }
     }
-    
+
+// ---------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::AppendToListL
+// New items in aToList will point to same shared memory as items in aFromList.
+// ---------------------------------------------------------------------------
+//
+void TVcxMyVideosCollectionUtil::AppendToListL( CMPXMedia& aToList, CMPXMedia& aFromList )
+    {
+    CMPXMedia* media;
+    CMPXMediaArray* toArray   = aToList.Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    CMPXMediaArray* fromArray = aFromList.Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    TInt count = fromArray->Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        media = CMPXMedia::NewL( *(fromArray->AtL( i )) ); // points to same shared memory
+        toArray->AppendL( media ); //ownership moves
+        }
+    }
+
 // ---------------------------------------------------------------------------
 // This helper function converts drive letter to drive number
 // ---------------------------------------------------------------------------
@@ -213,7 +230,8 @@ void TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( RFs& aFs, const TDesC& aPa
             {
             aUniquePath  = aPath.Mid( 0, pos );
             }
-        counterDigits.Format(_L("%d"), counter++);
+        _LIT(KPercentD, "%d");
+        counterDigits.Format( KPercentD, counter++ );
         aUniquePath.Append( '_' );
         aUniquePath.Append( '(' );
         aUniquePath.AppendJustify( counterDigits, KMaxDigits, TAlign( ERight ), '0' );
@@ -458,7 +476,63 @@ TInt TVcxMyVideosCollectionUtil::Origin( TInt aCategoryId )
         }
     return KErrNotFound;
     }
-    
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::MediaArrayL
+// ----------------------------------------------------------------------------
+//
+CMPXMediaArray* TVcxMyVideosCollectionUtil::MediaArrayL( CMPXMedia& aMedia )
+    {
+    if ( !aMedia.IsSupported( KMPXMediaArrayContents ) )
+        {
+        User::Leave( KErrArgument );
+        }
+
+    return aMedia.Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::Int32ValueL
+// ----------------------------------------------------------------------------
+//
+TInt32 TVcxMyVideosCollectionUtil::Int32ValueL( CMPXMedia& aMedia )
+    {
+    if ( !aMedia.IsSupported( KVcxMediaMyVideosInt32Value ) )
+        {
+        User::Leave( KErrArgument );
+        }
+    return aMedia.ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::Uint32ValueL
+// ----------------------------------------------------------------------------
+//
+TUint32 TVcxMyVideosCollectionUtil::Uint32ValueL( CMPXMedia& aMedia )
+    {
+    if ( !aMedia.IsSupported( KVcxMediaMyVideosUint32Value ) )
+        {
+        User::Leave( KErrArgument );
+        }
+    return aMedia.ValueTObjectL<TUint32>( KVcxMediaMyVideosUint32Value );
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::GetIdsFromMediaArrayL
+// ----------------------------------------------------------------------------
+//
+void TVcxMyVideosCollectionUtil::GetIdsFromMediaArrayL( CMPXMediaArray& aMediaArray,
+        RArray<TUint32>& aIdArray )
+    {
+    TInt count = aMediaArray.Count();
+    aIdArray.Reset();
+    aIdArray.ReserveL( count );
+    for ( TInt i = 0; i < count; i++ )
+        {
+        aIdArray.AppendL( IdL( *aMediaArray.AtL( i ) ).iId1 );
+        }
+    }
+
 #ifdef _DEBUG
 // ----------------------------------------------------------------------------
 // TVcxMyVideosCollectionUtil::PrintOpenFileHandlesL
@@ -500,7 +574,8 @@ void TVcxMyVideosCollectionUtil::PrintOpenFileHandlesL( const TDesC& aFileName, 
 //
 void TVcxMyVideosCollectionUtil::GetProcessName( TInt aThreadId, TFullName& aProcessName )
     {
-  	TFindThread find(_L("*"));
+    _LIT(KAsterixDes, "*");
+  	TFindThread find( KAsterixDes );
   	while( find.Next( aProcessName ) == KErrNone )
         {
       	RThread thread;

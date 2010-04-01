@@ -182,6 +182,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
     CleanupClosePushL( newVideosIncrements ); // 2->
 
     TInt i;
+    videosIncrements.ReserveL( categoryCount );
+    newVideosIncrements.ReserveL( categoryCount );
     for ( i = 0; i < categoryCount; i++ )
         {
         videosIncrements.AppendL( 0 );
@@ -280,12 +282,14 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             {
             category = aCategoryArray.AtL( i );
 
+            //codescanner warning: aVideosIncrements count is same as aCategoryArray count, so the range is checked
             UpdateVideosCountL( *category, aVideosIncrements[i], KVcxMediaMyVideosCategoryItemCount,
                     EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
 
+        //codescanner warning: aNewVideosIncrements count is same as aCategoryArray count, so the range is checked
         if ( aNewVideosIncrements[i] != 0 )
             {
             category = aCategoryArray.AtL( i );

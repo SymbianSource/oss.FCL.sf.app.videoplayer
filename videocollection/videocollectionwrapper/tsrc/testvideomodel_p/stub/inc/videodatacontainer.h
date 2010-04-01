@@ -22,6 +22,8 @@
 #include <qlist.h>
 #include <qpair.h>
 #include <mpxitemid.h>
+#include <qabstractitemmodel.h>
+
 
 // FORWARD DECLARATIONS
 class CMPXMedia;
@@ -98,8 +100,48 @@ public:  // from QHash
      * @return int 
      */
     int count() const;
+    
+    /**
+    * Method removes item from data container at provided index and 
+    * appends it into removed buffer
+    * 
+    * @param inteIndex index of item
+    * @return TMPXItemId id of the item marked as removed
+    */
+    TMPXItemId markItemRemoved(const int &itemIndex);
+   
+    /**
+     * Method removes provided items from mRemovedMedia
+     * 
+     * @param itemIds ids of items to be removed. If null, removes all
+     * @return int count of items actually removed
+     */
+    int clearRemoved(QList<TMPXItemId> *itemIds = 0);
+    
+    /**
+     * Method removed provided items from mRemovedMedia and returns them
+     * int actual container
+     * 
+     * @param itemIds ids of items to be restored. If null, restores all
+     * 
+     * @return int count of items actually restored
+     */
+    int restoreRemovedItems(QList<TMPXItemId> *itemIds = 0);
+    
+    /**
+     * Returns item from removed buffer
+     * 
+     * @param itemId id of item to be returned
+     */
+    CMPXMedia* getRemovedMedia(TMPXItemId itemId);
+    
+    /**
+     * decrements indexes of items after provided index by one.
+     */
+    void decHashIndexesAfter(int fromIndex);
+    
 
-private: // data
+public: // data
     
     /**
      * list of media ids used to fetch item thought index.
@@ -114,6 +156,12 @@ private: // data
      * value: pair, where first is item index and second is item data
      */
     QMultiHash<TMPXItemId, QPair<int, CMPXMedia*> > mMediaData;
+    
+    /**
+     * lookup hash for media items that are deleted, but not yet completely
+     * removed from the filesystem.
+     */
+    QHash<TMPXItemId, CMPXMedia*> mRemovedMedia;
 
 };
 

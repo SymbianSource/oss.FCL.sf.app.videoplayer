@@ -31,6 +31,7 @@ HEADERS +=  inc/testvideosortfilterproxymodel.h \
             stub/inc/videolistdatamodel.h \
             stub/inc/videocollectionclient.h \
             stub/inc/videothumbnaildata.h \
+            stub/inc/videocollectionwrapper.h \
             ../../inc/videosortfilterproxymodel.h \
             ../../../inc/videocollectionexport.h
     

@@ -130,7 +130,7 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
         {
         message->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, aExtraInfo );
         }
-        
+    
     MPX_DEBUG1("CVcxMyVideosMessageList:: appending to message array");
     
     iMessageArray->AppendL( message ); // ownership moves
@@ -299,9 +299,7 @@ void CVcxMyVideosMessageList::CreateMessageListL()
 
         iMessageList->SetTObjectValueL<TMPXMessageId>(KMPXMessageGeneralId, KVcxCommandIdMyVideos);
         iMessageList->SetTObjectValueL<TInt>(KVcxMediaMyVideosCommandId, KVcxMessageMyVideosMessageArray );
-        iMessageList->SetTObjectValueL<TUid>(KMPXMessageCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));        
-        //iMessageList->SetTObjectValueL<TMPXChangeEventType>(KMPXMessageChangeEventType, aChange);        
-        //iMessageList->SetTObjectValueL<TMPXItemId>(KMPXMessageMediaGeneralId, TMPXItemId(0, 0) );
+        iMessageList->SetTObjectValueL<TUid>(KMPXMessageCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
         iMessageCount = 0;
         }
     }

@@ -43,49 +43,22 @@
 ; None
 
 ; Install files
-"/epoc32/release/armv5/udeb/VCXMyVideosCollectionPluginTest.dll"   - "!:/Sys/Bin/VCXMyVideosCollectionPluginTest.dll"
-"/epoc32/release/armv5/udeb/MediatorEventVerifier.dll"             - "!:/Sys/Bin/MediatorEventVerifier.dll"
-"/epoc32/release/armv5/udeb/VCXTestUtilModule.dll"                 - "!:/Sys/Bin/VCXTestUtilModule.dll"
-"/epoc32/release/armv5/udeb/VCXTestCommon.dll"                     - "!:/Sys/Bin/VCXTestCommon.dll"
-"/epoc32/release/armv5/udeb/VCXTestMyVideosCollectionClient.dll"   - "!:/Sys/Bin/VCXTestMyVideosCollectionClient.dll"
-"../conf/VCXMyVideosCollectionPluginTestAttributes.cfg"            - "C:/TestFramework/VCXMyVideosCollectionPluginTestAttributes.cfg"
-"../conf/VCXMyVideosCollectionPluginTestDelete.cfg"                - "C:/TestFramework/VCXMyVideosCollectionPluginTestDelete.cfg"
-"../conf/VCXMyVideosCollectionPluginTestDownload.cfg"              - "C:/TestFramework/VCXMyVideosCollectionPluginTestDownload.cfg"
-"../conf/VCXMyVideosCollectionPluginTestDownload2.cfg"             - "C:/TestFramework/VCXMyVideosCollectionPluginTestDownload2.cfg"
-"../conf/VCXMyVideosCollectionPluginTestMultipleDls.cfg"           - "C:/TestFramework/VCXMyVideosCollectionPluginTestMultipleDls.cfg"
-"../conf/VCXMyVideosCollectionPluginTestFullMemory.cfg"            - "C:/TestFramework/VCXMyVideosCollectionPluginTestFullMemory.cfg"
-"../conf/VCXMyVideosCollectionPluginTestLists.cfg"                 - "C:/TestFramework/VCXMyVideosCollectionPluginTestLists.cfg"
-"../conf/VCXMyVideosCollectionPluginTestMoveCopy.cfg"              - "C:/TestFramework/VCXMyVideosCollectionPluginTestMoveCopy.cfg"
-"../conf/VCXMyVideosCollectionPluginTestMultiDrives.cfg"           - "C:/TestFramework/VCXMyVideosCollectionPluginTestMultiDrives.cfg"
-"../conf/VCXMyVideosCollectionPluginTestSideload.cfg"              - "C:/TestFramework/VCXMyVideosCollectionPluginTestSideload.cfg"
-"../conf/VCXMyVideosCollectionPluginTestSorting.cfg"               - "C:/TestFramework/VCXMyVideosCollectionPluginTestSorting.cfg"
-"../conf/VCXMyVideosCollectionPluginTestRobustness.cfg"            - "C:/TestFramework/VCXMyVideosCollectionPluginTestRobustness.cfg"
-"../conf/VCXMyVideosCollectionPluginTestHelium.cfg"                - "C:/TestFramework/VCXMyVideosCollectionPluginTestHelium.cfg"
-"../conf/VCXMyVideosCollectionPluginTestMediator.cfg"              - "C:/TestFramework/VCXMyVideosCollectionPluginTestMediator.cfg"
+"/epoc32/release/armv5/urel/VCXMyVideosCollectionPluginTest.dll"   - "!:/Sys/Bin/VCXMyVideosCollectionPluginTest.dll"
+
+"../conf/VCXMyVideosCollectionPluginTest.cfg"                      - "C:/TestFramework/VCXMyVideosCollectionPluginTest.cfg"
+"../conf/VCXMyVideosCollectionPluginTestCategories.cfg"            - "C:/TestFramework/VCXMyVideosCollectionPluginTestCategories.cfg"
+"../conf/VCXMyVideosCollectionPluginTestAlbums.cfg"                - "C:/TestFramework/VCXMyVideosCollectionPluginTestAlbums.cfg"
+
 "../conf/vcxmvcollectionplugintest.inc"                            - "C:/TestFramework/vcxmvcollectionplugintest.inc"
-"../conf/VCXConsts.inc"                                            - "C:/TestFramework/VCXConsts.inc"
 "../conf/VCXDrives.inc"                                            - "C:/TestFramework/VCXDrives.inc"
 "../conf/VCXErrors.inc"                                            - "C:/TestFramework/VCXErrors.inc"
 
-; The cenrep and testframework.ini files won't install with sis, only for ATS test runs.
+; The testframework.ini files won't install with sis, only for ATS test runs.
 "../init/TestFramework.ini"                                    -  "C:/TestFramework/TestFramework.ini"
-"../data/cccccc00.cre"                                         -   "c:\private\10202be9\persists\cccccc00.cre"
 
 "../Data/MMC/video_3gp.3gp"                                     -  "e:/testing/data/video_3gp.xxx"
-"../Data/MMC/video_3gp2.3g2"                                    -  "e:/testing/data/video_3gp2.xxx"
 "../Data/MMC/video_wmv.dat"                                     -  "e:/testing/data/video_wmv.xxx"
-"../Data/MMC/video_mp2.mp2"                                     -  "e:/testing/data/video_mp2.xxx"
-"../Data/MMC/video_mpeg1.mpg"                                   -  "e:/testing/data/video_mpeg1.xxx"
-"../Data/MMC/video_mpeg2.mpg"                                   -  "e:/testing/data/video_mpeg2.xxx"
-"../Data/MMC/video_supervideocd.mpg"                            -  "e:/testing/data/video_supervideocd.xxx"
-"../Data/MMC/video_mp3.mp3"                                     -  "e:/testing/data/video_mp3.xxx"
-"../Data/MMC/video_applempeg.mp4"                               -  "e:/testing/data/video_applempeg.xxx"
 "../Data/MMC/video_mpeg4.mp4"                                   -  "e:/testing/data/video_mpeg4.xxx"
-"../Data/MMC/video_mpegavc.mp4"                                 -  "e:/testing/data/video_mpegavc.xxx"
-"../Data/MMC/video_quicktime.mov"                               -  "e:/testing/data/video_quicktime.xxx"
-"../Data/MMC/video_realvideo.rm"                                -  "e:/testing/data/video_realvideo.xxx"
-"../Data/MMC/video_avi.avi"                                     -  "e:/testing/data/video_avi.xxx"
-"../Data/MMC/video_aviac3.avi"                                  -  "e:/testing/data/video_aviac3.xxx"
 
 ; Embedded SIS
 ; None

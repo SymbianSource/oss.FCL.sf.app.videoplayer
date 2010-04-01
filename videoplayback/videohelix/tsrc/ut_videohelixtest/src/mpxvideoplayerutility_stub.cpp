@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -741,6 +741,10 @@ TInt CMpxVideoPlayerUtility::SurfaceParametersChanged()
 TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     return KErrNone;
+}
+
+void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+{
 }
 
 #endif

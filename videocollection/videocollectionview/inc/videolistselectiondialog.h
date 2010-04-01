@@ -19,17 +19,20 @@
 #define VIDEOLISTSELECTIONDIALOG_H
 
 #include <hbdialog.h>
-#include <qlist.h>
+#include <qset.h>
 #include <qitemselectionmodel.h>
+#include <mpxitemid.h>
 
 class QGraphicItem;
 class QItemSelection;
+class HbWidget;
 class HbLabel;
 class HbCheckBox;
 class HbStackedWidget;
-class VideoListWidget;
 class VideoCollectionUiLoader;
+class VideoCollectionWrapper;
 class VideoSortFilterProxyModel;
+class VideoListWidget;
 
 class VideoListSelectionDialog: public HbDialog
 {     
@@ -45,6 +48,13 @@ class VideoListSelectionDialog: public HbDialog
 
     
 public: 
+    
+    enum TSelectionFunction
+    {
+        EDeleteVideos,
+        EAddToCollection,
+        ESelectCollection
+    };
     
     /**
      * Constructor
@@ -65,19 +75,11 @@ public:
      * If either provided title is empty or widget is NULL, dialog
      * is in invalid state and cannot be shown using exec.
      *
-     * @param title title of the dialog
-     * @param videoList videolist widget.
+     * @param type selection dialog function typy
+     * @param activeItem id of item that the selection concerns
      */
-    void setContent(const QString &title, VideoListWidget *videoList);
+    void setupContent(int type, TMPXItemId activeItem = TMPXItemId::InvalidId());
     
-    /**
-     * Returns selection (mSelection). Selection will be empty in case
-     * dialog is closed using cancell button,
-     *
-     * @return HbAction primary action if "OK" iis pressed
-     */
-    const QItemSelection& getSelection() const;
-      
 public slots:
 
     /**
@@ -111,12 +113,49 @@ private slots:
     void selectionChangedSlot(const QItemSelection &selected, const QItemSelection &deselected); 
     
     /**
+     * connected to list's activated -signal. Called when singel item is selected.
+     * If dialog's selection type is ESelectCollection, saves mpx id from provided index.
+     * and closes dialog by triggering primary action
+     *
+     * @param index of item selected
+     */
+    void singleItemSelectedSlot(const QModelIndex &index); 
+    
+    /**
+     * handles model ready signal from model.
+     * In case dialog type is ESelectCollection and there are no data
+     * in model, opens up a selection dialog for user to input new album name
+     * In case type is something else than ESelectCollection, calls
+     * updateCounterSlot()
+     */
+    void modelReadySlot();
+    
+    /**
      * Changes the counter value. Sets the checkbutton state based on selection count.
      *
      */
     void updateCounterSlot();
     
+    /**
+     * Primary action triggered signal slot.
+     * 
+     */
+    void primaryActionTriggeredSlot();
+      
 private:
+    
+    /**
+     * Method initializes dialog by getting all ui components and 
+     * checking if they are valid
+     * 
+     * @return bool true if inisializaion ok
+     */
+    bool initDialog();
+    
+    /**
+     * Method activated dialog based on value in mTypeOfSelection
+     */
+    void activateSelection();
     
     /**
      * connects all required signals into appropriate slots 
@@ -129,17 +168,32 @@ private:
      */
     void disconnectSignals();
     
-private:    
+    /**
+     * Gets selected item's name from appropriate model.
+     * 
+     * @return QString item's name
+     */
+    QString getSelectedName();
+    
+    /**
+     * opens an input dialog for a user to input new album name
+     * If everything goes well and user accepts, method returns new album id
+     * 
+     * @return TMPXItemId new album id or TMPXItemID::Invalid() in case of cancel
+     */
+    TMPXItemId queryNewAlbum();
+    
+private:
    
     /**
      * docml UI loader, not owned
      */
     VideoCollectionUiLoader *mUiLoader;
-        
+    
     /**
-     * content videolist, not owned
+     * type for defining selection functionality
      */
-    VideoListWidget *mVideoList;
+    int mTypeOfSelection;
     
     /**
      * Selection 
@@ -147,9 +201,24 @@ private:
     QItemSelection mSelection;
     
     /**
+     * Selected video items
+     */
+    QSet<TMPXItemId> mSelectedVideos;
+    
+    /**
+     * selected single items album id
+     */
+    TMPXItemId mSelectedAlbumId;
+    
+    /**
      * header label
      */
     HbLabel *mHeading;
+    
+    /**
+     * container widget for itemcount and checkbox;
+     */
+    HbWidget *mCheckboxContainer;
     
     /**
      * counter label from docml
@@ -170,8 +239,17 @@ private:
      * flag indicating that we've changed check-btn state 
      * explicitly and don't wanna handle selection based on that 
      */
-    bool mForcedCheck;
+    bool mForcedCheck;  
     
+    /**
+     * Video list model
+     */
+    VideoSortFilterProxyModel *mModel;
+    
+    /** 
+     * List widget to show in selection
+     * */
+    VideoListWidget *mListWidget;
 };
 
 #endif  //VIDEOLISTSELECTIONDIALOG_H

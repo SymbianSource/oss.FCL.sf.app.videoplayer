@@ -32,6 +32,7 @@ int VideoThumbnailDataPrivate::mRemoveThumbnailCallCount = 0;
 int VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled = true;
 int VideoThumbnailDataPrivate::mFreeThumbnailDataCallCount = 0;
 int VideoThumbnailDataPrivate::mStartBackgroundFetchingCallCount = 0;
+int VideoThumbnailDataPrivate::mEnableThumbnailCreationCallCount = 0;
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -116,9 +117,17 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
 // VideoThumbnailData::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::startBackgroundFetching(int fetchIndex)
+void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
     mStartBackgroundFetchingCallCount++;
 }
 
+// -----------------------------------------------------------------------------
+// VideoThumbnailData::enableThumbnailCreation()
+// -----------------------------------------------------------------------------
+//
+void VideoThumbnailDataPrivate::enableThumbnailCreation(bool enable)
+{
+    mEnableThumbnailCreationCallCount++;
+}
 // End of file

@@ -15,12 +15,16 @@
 * 
 */
 
+#include <hblistview.h>
+#include <hbscrollbar.h>
+#include <hblistviewitem.h>
 #include <hbdialog.h>
 #include <hbmessagebox.h>
 #include <centralrepository.h>
 
 #include "videocollectioncommon.h"
 #include "videocollectionviewutils.h"
+#include "videosortfilterproxymodel.h"
 
 const int KVideoCollectionViewCenrepUid(0x2002BC63);
 const int KVideoCollectionViewCenrepServiceIconKey(0x2);
@@ -43,7 +47,9 @@ VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 // VideoCollectionViewUtils
 // ---------------------------------------------------------------------------
 //
-VideoCollectionViewUtils::VideoCollectionViewUtils()
+VideoCollectionViewUtils::VideoCollectionViewUtils():
+    mSortRole(-1),
+    mSortOrder(Qt::AscendingOrder)
 {
     
 }
@@ -75,6 +81,10 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
         }
         delete cenRep;
     }
+    
+    mSortRole = role;
+    mSortOrder = order;
+    
     return status;    
 }
 
@@ -82,28 +92,36 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
 // loadSortingValues
 // ---------------------------------------------------------------------------
 //
-int VideoCollectionViewUtils::loadSortingValues(int& role, Qt::SortOrder& order)
+int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order)
 {
-    int status = -1;
-    CRepository *cenRep = 0;
-    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-    if(cenRep)
+    int err(0);
+    
+    if (mSortRole == -1)
     {
-        TInt roleValue(KErrNotFound);
-        TInt orderValue(KErrNotFound);
-        status = cenRep->Get(KVideoCollectionViewCenrepSortingRoleKey, roleValue);
-        if(status == KErrNone)
+        CRepository *cenRep = 0;
+        TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
+        if(cenRep)
         {
-            status = cenRep->Get(KVideoCollectionViewCenrepSortingOrderKey, orderValue);
-            if(status == KErrNone)
+            int sortRole(-1);
+            int sortOrder(-1);
+            err = cenRep->Get(KVideoCollectionViewCenrepSortingRoleKey, sortRole);
+            if(err == KErrNone)
             {
-                role = roleValue;
-                order = static_cast<Qt::SortOrder>(orderValue);
+                mSortRole = sortRole;
+                err = cenRep->Get(KVideoCollectionViewCenrepSortingOrderKey, sortOrder);
+                if(err == KErrNone)
+                {
+                    mSortOrder = static_cast<Qt::SortOrder>(sortOrder);
+                }
             }
+            delete cenRep;
         }
-        delete cenRep;
     }
-    return status;        
+    
+    role = mSortRole;
+    order = mSortOrder;
+    
+    return err;        
 }
 
 // ---------------------------------------------------------------------------
@@ -161,33 +179,110 @@ QString VideoCollectionViewUtils::getServiceUriString()
 }
 
 // ---------------------------------------------------------------------------
+// initListView
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::initListView(HbListView *view)
+{
+    if (view)
+    {
+        HbListViewItem *prototype = view->listItemPrototype();
+        if(prototype)
+        {
+            //Use image layout in prototype
+            prototype->setGraphicsSize(HbListViewItem::Thumbnail);
+        }
+        view->setItemRecycling(true);
+        view->setClampingStyle(HbScrollArea::BounceBackClamping);
+        view->setScrollingStyle(HbScrollArea::PanOrFlick);
+        view->setFrictionEnabled(true);
+        view->setUniformItemSizes(true);  
+        view->setSelectionMode(HbAbstractItemView::NoSelection);
+        
+        //Use scrollbar
+        HbScrollBar *scrollBar = view->verticalScrollBar();
+        if (scrollBar)
+        {
+            scrollBar->setInteractive(true);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// sortModel
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::sortModel(
+    VideoSortFilterProxyModel *model,
+    bool async)
+{
+    if (model)
+    {
+        // setup sorting order for model
+        int sortRole(VideoCollectionCommon::KeyDateTime);
+        Qt::SortOrder sortOrder(Qt::AscendingOrder);
+            
+        // return value ignored, as in case of error the sortRole and sortOrder variables
+        // stay at their predefined values, and in error cases those are the sorting values
+        // that are used.
+        VideoCollectionViewUtils &self = VideoCollectionViewUtils::instance();
+        self.loadSortingValues(sortRole, sortOrder);
+        model->doSorting(sortRole, sortOrder, async);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // showStatusMsgSlot
 // ---------------------------------------------------------------------------
 //
 void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &additional)
 {
     QString msg("");
+    QString format("");
     bool error(true);
-    if(statusCode == VideoCollectionCommon::statusSingleDeleteFail)
+    switch(statusCode)
     {
-        QString format = tr("Unable to delete item %1. It is currently open.");
-        if(additional.isValid())
-        {
-           msg = format.arg(additional.toString());
-        }
-    }
-    else if(statusCode == VideoCollectionCommon::statusMultipleDeleteFail)
-    {
-        msg = tr("Unable to delete some items which are currently open.");
-    }
-    else if(statusCode == VideoCollectionCommon::statusMultipleDeleteSucceed)
-    {
-        QString format = tr("%1 videos deleted");
-        if(additional.isValid())
-        {
-            msg = format.arg(additional.toString());
-        }
-        error = false;
+        case VideoCollectionCommon::statusSingleDeleteFail:
+            format = tr("Unable to delete item %1. It is currently open."); //TODO: localisation
+            if(additional.isValid())
+            {
+                msg = format.arg(additional.toString());
+            }
+        break;
+        case VideoCollectionCommon::statusMultipleDeleteFail:
+            msg = tr("Unable to delete some items which are currently open.");
+        break;
+        case VideoCollectionCommon::statusSingleRemoveFail:
+            format = tr("Unable to remove collection %1."); //TODO: localisation
+            if(additional.isValid())
+            {
+                msg = format.arg(additional.toString());
+            }
+        break;
+        case VideoCollectionCommon::statusMultiRemoveFail:
+            msg = tr("Unable to remove some collections.");
+        break;
+        case VideoCollectionCommon::statusVideosAddedToCollection:
+            format = tr("Videos added to %1 collection."); //TODO: localisation
+            if(additional.isValid())
+            {
+                msg = format.arg(additional.toString());
+            }
+            error = false;
+        break;
+        case VideoCollectionCommon::statusAllVideosAlreadyInCollection:
+            msg = tr("All videos already added to this collection.");            
+        break;
+        case VideoCollectionCommon::statusDeleteInProgress:
+            format = tr("%1 videos are being deleted."); //TODO: localisation
+            if(additional.isValid())
+            {
+                msg = format.arg(additional.toString());
+            }
+            error = false;
+        break;
+        default: // no msg to show
+        return;    
     }
         
     if(msg.count() > 0)
@@ -203,6 +298,4 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
      
     }  
 }
-
-
 

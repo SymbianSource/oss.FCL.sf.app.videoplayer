@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#25 %
+// Version : %version: da1mmcf#27 %
 
 
 
@@ -23,11 +23,11 @@
 #include <coecntrl.h>
 #include <bautils.h>
 #include <barsread.h>
-#include <stringloader.h>
+#include <StringLoader.h>
 #include <f32file.h>
 
-#include <qtimer>
-#include <qfileinfo>
+#include <QTimer>
+#include <QFileInfo>
 #include <thumbnailmanager_qt.h>
 
 #include <hblabel.h>
@@ -92,18 +92,6 @@ void QMPXVideoPlaybackControlsController::initializeController()
 
     setParent( mView );
 
-    mControlsPolicy = new QMPXVideoPlaybackControlPolicy();
-    mControlsConfig = new QMPXVideoPlaybackControlConfiguration( this );
-
-    connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
-    
-    mControlsTimer = new QTimer( this );
-    mControlsTimer->setInterval( KMPXControlsTimeOut );
-    mControlsTimer->setSingleShot( false );
-    connect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
-
-    connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
-
     //
     // Create layout loader
     //
@@ -115,11 +103,6 @@ void QMPXVideoPlaybackControlsController::initializeController()
     {
         QGraphicsWidget *widget = mLoader->findWidget( QString( "content" ) );
         mView->setWidget( widget );
-
-        //
-        // Update controls list based on configuration + volume
-        //
-        controlsListUpdated();
 
         widget = mLoader->findWidget( QString( "volumeSlider" ) );
         mVolumeControl = qobject_cast<QMPXVideoPlaybackNonTouchVolumeBar*>( widget );
@@ -134,6 +117,18 @@ void QMPXVideoPlaybackControlsController::initializeController()
         delete mLoader;
         mLoader = NULL;
     }
+
+    mControlsPolicy = new QMPXVideoPlaybackControlPolicy();
+    mControlsConfig = new QMPXVideoPlaybackControlConfiguration( this );
+
+    connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
+    
+    mControlsTimer = new QTimer( this );
+    mControlsTimer->setInterval( KMPXControlsTimeOut );
+    mControlsTimer->setSingleShot( false );
+    connect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
+
+    connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 
@@ -28,6 +28,7 @@
 
 class HbLabel;
 class HbAction;
+class HbFrameItem;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 
@@ -72,6 +73,7 @@ class QMPXVideoPlaybackStatusPaneControl : public QMPXVideoPlaybackFullScreenCon
         bool                     mVisible;
         HbAction                *mActionBack;
         HbLabel                 *mTitleLabel;
+        HbFrameItem             *mFrameItem;
 };
 
 #endif /*MPXVIDEOPLAYBACKSTATUSPANECONTROL_H_*/

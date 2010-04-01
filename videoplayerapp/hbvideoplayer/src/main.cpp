@@ -15,10 +15,12 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 #include <QObject>
+#include <QTranslator>
+#include <QLocale>
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <xqserviceutil.h>
@@ -29,20 +31,36 @@ int main(int argc, char *argv[])
 {
     HbApplication app(argc, argv);
 
+    // Load the translation file.
+    QString lang = QLocale::system().name();
+
+    QTranslator translator;
+
+    bool loaded(false);
+
+    loaded = translator.load( "videos_" + lang, QString("c:/resource/qt/translations") );
+
+    if (!loaded)
+    {
+        translator.load("videos_" + lang, QString("z:/resource/qt/translations") );
+    }
+
+    // Install the translator
+    app.installTranslator(&translator);
+
     // has the application been launched via XQ Service Framework
-    bool isService = XQServiceUtil::isService(); 
-    
+    bool isService = XQServiceUtil::isService();
+
      if (!isService)
      {
-    	 app.setApplicationName( QObject::tr("Videos") );
+        app.setApplicationName(hbTrId("txt_videos_title_videos"));
      }
 
     HbMainWindow mainWindow( 0, Hb::WindowFlagTransparent );
     mainWindow.setAttribute( Qt::WA_OpaquePaintEvent );
-    
+
     QVideoPlayerEngine *engine = new QVideoPlayerEngine(isService);
     engine->initialize();
     mainWindow.show();
     return app.exec();
-   
 }

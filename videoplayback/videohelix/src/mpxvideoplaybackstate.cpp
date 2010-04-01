@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 33 %
+// Version : %version: 35 %
 
 
 //
@@ -979,7 +979,20 @@ void CMPXInitialisingState::HandleOpenComplete( TInt aError )
     if ( aError == KErrNone )
     {
         iVideoPlaybackCtlr->iPlaybackMode->HandleOpenComplete();
-
+		
+        //
+		//  call setposition with converted value saved in openfile
+        //
+		if ( iVideoPlaybackCtlr->iSavedPosition > 0 )
+        {    
+            MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  iSavedPosition %d"), iVideoPlaybackCtlr->iSavedPosition );
+                
+            TInt64 pos( iVideoPlaybackCtlr->iSavedPosition );
+            pos *= KPbMilliMultiplier;
+            
+            iVideoPlaybackCtlr->iPlayer->SetPositionL( pos );
+        }
+               
         MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  Sending Prepare()"));
 
         iVideoPlaybackCtlr->iPlayer->Prepare();
@@ -1876,7 +1889,7 @@ void CMPXSeekingState::HandlePlay()
 void CMPXSeekingState::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXSeekingState::HandleBackground()"));
-    MPX_TRAPD( err, iVideoPlaybackCtlr->iState->HandleStopSeekL() );
+    MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandleBackground();
 }
 
@@ -1886,6 +1899,7 @@ void CMPXSeekingState::HandleBackground()
 void CMPXSeekingState::HandlePause()
 {
     MPX_DEBUG(_L("CMPXSeekingState::HandlePause()"));
+    MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
 }
 

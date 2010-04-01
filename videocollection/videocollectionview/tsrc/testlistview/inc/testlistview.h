@@ -43,6 +43,11 @@ class TestListView : public QObject
      */
     int visibleMenuActions();
     
+    /**
+     * Set row count in model.
+     */
+    void setRowCount(int count);
+    
     // Test functions for the test framework.
     
 private slots:

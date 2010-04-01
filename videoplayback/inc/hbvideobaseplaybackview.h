@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#11 %
+// Version : %version:  da1mmcf#12 %
 
 
 
@@ -91,10 +91,6 @@ class HbVideoBasePlaybackView : public HbView
         virtual void handleClosePlaybackView();
         
         bool event( QEvent *event );
-
-        void paint( QPainter *painter, 
-                    const QStyleOptionGraphicsItem *option,
-                    QWidget *widget );
 
         RWindow *getWindow();
 

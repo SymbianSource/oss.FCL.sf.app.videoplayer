@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -123,6 +123,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
                                   const TSurfaceId& aSurfaceId,
                                   const TRect& aCropRect,
                                   TVideoAspectRatio aAspectRatio );
+        
+        void SurfaceRemovedFromView();
 
 #endif
 

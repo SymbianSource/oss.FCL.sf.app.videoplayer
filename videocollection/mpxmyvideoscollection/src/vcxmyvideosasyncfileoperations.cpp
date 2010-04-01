@@ -34,7 +34,6 @@
 #include "vcxmyvideoscollectionplugin.h"
 #include "vcxmyvideoscollection.hrh"
 #include "vcxmyvideoscollectionutil.h"
-#include "vcxmyvideosdownloadutil.h"
 #include "vcxmyvideosvideocache.h"
 #include "vcxmyvideoscategories.h"
 #include "vcxmyvideosmessagelist.h"
@@ -221,13 +220,13 @@ void CVcxMyVideosAsyncFileOperations::DeleteVideoL( TUint32 aMdsId, TBool aForce
 // CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
+MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     {
     CMPXMedia& cmd = iCollection.iActiveTask->GetCommand();
     
-    TBool done;
+    MVcxMyVideosActiveTaskObserver::TStepResult stepResult;
     
-    TBool isMoveOperation = EFalse;    
+    TBool isMoveOperation = EFalse;
     TUint32 cmdId = cmd.ValueTObjectL<TUint32>( KVcxMediaMyVideosCommandId );    
     if ( cmdId == KVcxCommandMyVideosMove )
         {
@@ -285,7 +284,7 @@ TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     if ( iCurrentOperationIndex > (iOperationIdArray.Count() - 1) )
         {
         iCurrentOperationIndex = 0;
-        done                   = ETrue;
+        stepResult = MVcxMyVideosActiveTaskObserver::EDone;
         if ( isMoveOperation )
             {
             SendOperationRespL( KVcxMessageMyVideosMoveResp );
@@ -297,10 +296,10 @@ TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
         }
     else
         {
-        done = EFalse;
+        stepResult = MVcxMyVideosActiveTaskObserver::EMoreToCome;
         }
         
-    return done;
+    return stepResult;
     }
 
 // ----------------------------------------------------------------------------
@@ -431,12 +430,6 @@ void CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL( TUint32 aMdsId, TInt aTa
         video = iCollection.iMyVideosMdsDb->CreateVideoL( aMdsId, EFalse /* brief details */ );
         }
         
-    if ( !video )
-        {
-        MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: mds id %d not found from mds or cache", aMdsId);
-        User::Leave( KErrNotFound );
-        }
-
     CleanupStack::PushL( video ); // 1->
     
     // sanity checks
@@ -665,13 +658,13 @@ void CVcxMyVideosAsyncFileOperations::GenerateTargetPathForMoveOrCopyL(
 // CVcxMyVideosAsyncFileOperations::HandleDeleteStepL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
+MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     {
     CMPXMedia& cmd = iCollection.iActiveTask->GetCommand();
     
     //no sanity checks for array items, since we want to generate all events, even if there is nothing to delete
     
-    TBool done;
+    MVcxMyVideosActiveTaskObserver::TStepResult stepResult;
     
     TUint32 cmdId = cmd.ValueTObjectL<TUint32>( KVcxMediaMyVideosCommandId );    
         
@@ -717,16 +710,15 @@ TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     if ( iCurrentOperationIndex > (iOperationIdArray.Count() - 1) )
         {
         iCurrentOperationIndex = 0;
-        done                   = ETrue;
-
+        stepResult = MVcxMyVideosActiveTaskObserver::EDone;
         SendOperationRespL( KVcxMessageMyVideosDeleteResp );
         }
     else
         {
-        done = EFalse;
+        stepResult = MVcxMyVideosActiveTaskObserver::EMoreToCome;
         }
         
-    return done;
+    return stepResult;
     }
 
 

@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    Implementation of My Videos MPX Collection Plugin interface*
+* Description:   Implementation of My Videos MPX Collection Plugin interface*
 */
-
 
 
 
@@ -30,18 +29,17 @@
 #include "vcxmyvideosactivetask.h"
 
 #include "vcxmyvideosmdsdb.h"
-#include "vcxmyvideosdownloadutil.h"
 
 // FORWARD DECLARATIONS
 class CVcxMyVideosMdsDb;
 class CMPXResource;
 class CMPXMediaArray;
-class CVcxMyVideosDownloadUtil;
 class CVcxMyVideosVideoCache;
 class CVcxMyVideosCategories;
 class CVcxMyVideosMessageList;
 class CVcxMyVideosAsyncFileOperations;
 class CVcxMyVideosOpenHandler;
+class CVcxMyVideosAlbums;
 
 // CONSTANTS
 
@@ -55,13 +53,13 @@ class CVcxMyVideosOpenHandler;
 NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
     public CMPXCollectionPlugin,
     public MVcxMyVideosMdsDbObserver,
-    public MVcxMyVideosActiveTaskObserver,
-    public MVcxMyVideosDownloadUtilObserver
+    public MVcxMyVideosActiveTaskObserver
     {    
     public: // Constructors and destructor
 
         friend class CVcxMyVideosOpenHandler;
         friend class CVcxMyVideosVideoCache;
+        friend class CVcxMyVideosAlbums;
         
         /**
         * Two-phased constructor
@@ -190,7 +188,7 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         /**
         * From MMPXDbActiveTaskObserver
         */
-        TBool HandleStepL();
+        MVcxMyVideosActiveTaskObserver::TStepResult HandleStepL();
 
         /**
         * From MMPXDbActiveTaskObserver
@@ -226,26 +224,12 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * From MVcxMyVideosMdsDbObserver. Called when media is removed or inserted.
         */
         void HandleObjectPresentNotification();
-
+        
         /**
         * Leaving version of HandleObjectPresentNotification.
         */
         void DoHandleObjectPresentNotificationL();
-                
-        /**
-        * From CVcxMyVideosDownloadUtilObserver.
-        */
-        void HandleDlEvent( TVcxMyVideosDownloadState aState,
-                TUint32 aDownloadId, TInt aProgress, TInt64 aDownloaded,
-                TInt32 aError, TInt32 aGlobalError );
-
-        /**
-        * Leaving version of HandleDlEvent.
-        */
-        void DoHandleDlEventL( TVcxMyVideosDownloadState aState,
-                TUint32 aDownloadId, TInt aProgress, TInt64 aDownloaded,
-                TInt32 aError, TInt32 aGlobalError );
- 
+                 
     private:
         /**
         * Constructor
@@ -256,38 +240,6 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * Symbian 2nd phase constructor.
         */
         void ConstructL ();
-
-        /**
-        * Synchronizes set of videos in cache with Download Manager.
-        * Download related attributes are set in cache if corresponding
-        * download is found.
-        *
-        * @param aItemsInCache  Array of MDS IDs. 
-        */
-        void SyncWithDownloadsL( RArray<TUint32>& aItemsInCache );
-
-        /**
-        * Synchronizes video with Download Manager.
-        *
-        * @aVideo       Video to synchronize.
-        * @aEventAdded  Set to ETrue if event was added to iMessageList, does not change the
-        *               value otherwise.
-        */
-        void SyncVideoWithDownloadsL( CMPXMedia& aVideo, TBool& aEventAdded,
-                TBool aAddEvent = ETrue );
-
-        /**
-        * Copies download attributes from aDownload to aVideo.
-        *
-        * @param aVideo        Video in cache.
-        * @param aDownload     Corresponding download in Download Manager.
-        * @param aSendMpxEvent ETrue if MPX item has been modified and caller should
-        *                      send the modification event.
-        */
-        void SyncVideoAndDownloadL(
-                CMPXMedia& aVideo,
-                RHttpDownload& aDownload,
-                TBool& aSendMpxEvent );
                         
         /**
         * Copies KVcxMediaMyVideosTransactionId field from aRequest to aResp.
@@ -318,24 +270,7 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * fetching ongoing.
         */
         void RestartVideoListFetchingL();
-
-
-        /**
-        * Sets download ID to 0 and download state to none. Updates MDS and sends
-        * modified event.
-        *
-        * @param aDownloadId  Download ID of the MPX item.
-        */
-        void SetDownloadIdToZeroL( TUint aDownloadId );
-
-
-#ifdef _DEBUG
-        /**
-        * Returns download state as a descriptor.
-        */
-        const TDesC& DownloadState( TUint8 aDlState );
-#endif
-
+        
     public:
 
         /**
@@ -363,23 +298,6 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         void SendMyVideosMessageL( TUint32 aMessageId, CMPXCommand* aCommand = NULL );
 
         /**
-        * Synchronizes video list with Download Manager.
-        *
-        * @param aVideoList  Video list to synchronize.
-        * @param aStartPos   Items before aStartPos index are left out from synchronizing.
-        * @param aSendEvents If ETrue and modifications are done to the list, then
-        *                    MPX events are sent.
-        */
-        void SyncVideoListWithDownloadsL( CMPXMedia& aVideoList, 
-                TBool aSendEvents, TInt aStartPos = 0 );
-        
-        /**
-        * Returns reference to iDownloadUtil. If iDownloadUtil is NULL then
-        * it is created.
-        */
-        CVcxMyVideosDownloadUtil& DownloadUtilL();
-
-        /**
         * Sends messages to clients. If udeb version, adds messageid
         * parameter to the message for debugging purposes. May or may not
         * contain media list as parameter.
@@ -394,13 +312,13 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * @return Reference to iCategories member.
         */
         CVcxMyVideosCategories& CategoriesL();
-        
+
         /**
-        * Notifies to mediator listeners that a download has completed.
+        * Creates iAlbums if its not created yet and returns reference to it.
         *
-        * @param aVideo Downloaded video.
+        * @return Reference to iAlbums member.
         */
-        void NotifyDownloadCompletedL( CMPXMedia& aVideo );
+        CVcxMyVideosAlbums& AlbumsL();
 
         /**
         * Notifies to mediator listeners that count of new videos has decreased.
@@ -435,7 +353,7 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * Executes command in several small steps.
         */
         CVcxMyVideosActiveTask* iActiveTask;
-                
+                        
     private:
 
         /**
@@ -443,12 +361,12 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * Own.
         */
         CVcxMyVideosCategories* iCategories;
-                            
+        
         /**
-        * Download util, own.
+        * Albums related functionality (except mds db operations). Own.
         */
-        CVcxMyVideosDownloadUtil* iDownloadUtil;
-                                                                        
+        CVcxMyVideosAlbums* iAlbums;
+                                                                                                    
         /**
         * Target drive for Move operation.
         */

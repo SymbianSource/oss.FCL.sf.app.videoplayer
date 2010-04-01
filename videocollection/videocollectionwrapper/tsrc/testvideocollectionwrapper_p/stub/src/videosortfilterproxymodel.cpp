@@ -43,11 +43,10 @@ void VideoSortFilterProxyModel::setInitFailure(bool fails)
 // VideoSortFilterProxyModel::VideoSortFilterProxyModel
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel::VideoSortFilterProxyModel(QObject *parent) : 
+VideoSortFilterProxyModel::VideoSortFilterProxyModel(int type, QObject *parent) : 
  QObject(parent),
  mModel(0),
- mLevel(-1),
- mWantedSortRole(VideoCollectionCommon::KeyDateTime)
+ mType(type)
 {
 }
 
@@ -68,53 +67,4 @@ int VideoSortFilterProxyModel::initialize(VideoListDataModel *sourceModel)
     mModel = sourceModel;
     return gInitFails ? -1 : 0;
 }
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::open
-// -----------------------------------------------------------------------------
-//
-int VideoSortFilterProxyModel::open(int level)
-{
-    mLevel = level;
-    return 0;
-}
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::doSorting
-// -----------------------------------------------------------------------------
-//
-void VideoSortFilterProxyModel::doSorting(int role, Qt::SortOrder order, bool async)
-{
-    Q_UNUSED(async);
-    mWantedSortRole = role;
-    mWantedSortOrder = order;
-}
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::deleteItems
-// -----------------------------------------------------------------------------
-//
-int VideoSortFilterProxyModel::deleteItems(const QModelIndexList &indexList)
-{
-    return -1;
-}
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::openItem
-// -----------------------------------------------------------------------------
-//
-int VideoSortFilterProxyModel::openItem(const QModelIndex &index)
-{
-    return -1;
-}
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::fetchItemDetails
-// -----------------------------------------------------------------------------
-//
-int VideoSortFilterProxyModel::fetchItemDetails(const QModelIndex &index)
-{
-    return -1;  
-}
-
 // end of file

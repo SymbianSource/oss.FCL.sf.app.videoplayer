@@ -17,6 +17,7 @@
 
 #include "videolistwidget.h"
 
+#include <qcoreapplication.h>
 #include <qtimer.h>
 #include <hbscrollbar.h>
 #include <xqserviceutil.h>
@@ -26,8 +27,13 @@
 #include <hbmainwindow.h>
 #include <hblistviewitem.h>
 #include <hbmessagebox.h>
+#include <hbstyleloader.h>
 #include <vcxmyvideosdefs.h>
+#include "videocollectionuiloader.h"
 
+#include "videocollectionviewutils.h"
+#include "videocollectionuiloader.h"
+#include "videolistselectiondialog.h"
 #include "videoservices.h"
 #include "videothumbnaildata.h"
 #include "videosortfilterproxymodel.h"
@@ -41,18 +47,20 @@ const int SCROLL_POSITION_TIMER_TIMEOUT = 100;
 // Constructor
 // ---------------------------------------------------------------------------
 //
-VideoListWidget::VideoListWidget(HbView *parent) :
+VideoListWidget::VideoListWidget(VideoCollectionUiLoader *uiLoader, HbView *parent) :
 HbListView(parent),
 mModel(0),
 mVideoServices(0),
-mCurrentLevel(VideoListWidget::ELevelVideos),
+mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
 mSignalsConnected(false),
 mDetailsReady(false),
 mIsService(false),
-mSecSkAction(0),
+mNavKeyBackAction(0),
+mNavKeyQuitAction(0),
 mContextMenu(0),
-mLastOpenItemId(TMPXItemId::InvalidId()),
-mScrollPositionTimer(0)
+mSelectionMode(HbAbstractItemView::NoSelection),
+mScrollPositionTimer(0),
+mUiLoader(uiLoader)
 {
     // NOP
 }
@@ -63,14 +71,17 @@ mScrollPositionTimer(0)
 //
 VideoListWidget::~VideoListWidget()
 {
+    HbStyleLoader::unregisterFilePath( ":/style/hblistviewitem.css" );
     delete mScrollPositionTimer;
     mScrollPositionTimer = 0;
 	mContextMenuActions.clear();
 	disconnect();
     delete mContextMenu;
     mContextMenu = 0;
-    delete mSecSkAction;
-    mSecSkAction = 0;
+    delete mNavKeyBackAction;
+    mNavKeyBackAction = 0;
+    delete mNavKeyQuitAction;
+    mNavKeyQuitAction = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -88,36 +99,15 @@ int VideoListWidget::initialize(VideoSortFilterProxyModel &model, VideoServices*
 		mIsService = true;
 	}
 
-    // init widget
-    HbListViewItem *prototype = listItemPrototype();
-    if(!prototype)
-    {
-        return -1;
-    }
-    //Use image layout in prototype
-    prototype->setGraphicsSize(HbListViewItem::Thumbnail);
-    setItemRecycling(true);
-    setClampingStyle(HbScrollArea::BounceBackClamping);
-    setScrollingStyle(HbScrollArea::PanOrFlick);
-    setFrictionEnabled(true);
-    setUniformItemSizes(true);  
-    setSelectionMode(HbAbstractItemView::NoSelection);
-    
-    //Use scrollbar
-    HbScrollBar *scrollBar = verticalScrollBar();
-    if (!scrollBar)
-    {
-        return -1;
-    }
-    scrollBar->setInteractive(true);
+    // init list view
+    VideoCollectionViewUtils::initListView(this);
 
-    mSecSkAction = new HbAction( Hb::BackAction );
+    // Navigation keys.
+    mNavKeyBackAction = new HbAction(Hb::BackNaviAction);
+	
+    mNavKeyQuitAction = new HbAction(Hb::QuitNaviAction);
 
-	if(!mSecSkAction)
-    {
-        return -1;
-    }
-	// initial setup for widget is hidden
+    // initial setup for widget is hidden
 	setVisible(false);
 
 	mScrollPositionTimer = new QTimer();
@@ -127,6 +117,15 @@ int VideoListWidget::initialize(VideoSortFilterProxyModel &model, VideoServices*
 	{
 		connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
 	}
+
+    bool ret = HbStyleLoader::registerFilePath( ":/style/hblistviewitem.css" );
+
+    if(!ret)
+    {
+        return -1;
+    }
+	
+	setModel(mModel);
 
     return 0;
 }
@@ -144,30 +143,49 @@ int VideoListWidget::activate()
 // activate
 // ---------------------------------------------------------------------------
 //
-int VideoListWidget::activate(VideoListWidget::TVideoListLevel level)
+int VideoListWidget::activate(VideoCollectionCommon::TCollectionLevels level)
 {
-    mLastOpenItemId = TMPXItemId::InvalidId();
     if(!mModel)
     {
         return -1;
     }
 	mCurrentLevel = level;
-	setModel(mModel);
 	setVisible(true);
-
-	if(mContextMenu)
-	{
-	    mContextMenu->setEnabled(true);
-	}
 
     if ( connectSignals() < 0)
     {
         return -1;
     }
 
+    HbView *currentView = hbInstance->allMainWindows().value(0)->currentView();
+
+    // Set navigation key only when widget is not in selection mode.
+    if(currentView && mSelectionMode == HbAbstractItemView::NoSelection)
+    {
+        if(level != VideoCollectionCommon::ELevelDefaultColl && 
+           level != VideoCollectionCommon::ELevelAlbum)
+        {
+            if(mNavKeyQuitAction)
+            {
+                currentView->setNavigationAction(mNavKeyQuitAction);
+            }
+        }
+        else if(mNavKeyBackAction)
+        {
+            currentView->setNavigationAction(mNavKeyBackAction);
+        }
+    }
+    // open model to the current level in case not in album or category
+    if(level != VideoCollectionCommon::ELevelAlbum &&
+        level != VideoCollectionCommon::ELevelDefaultColl)
+    {
+         mModel->open(level);
+    }
+    
     // Enable thumbnail background fetching.
     VideoThumbnailData &thumbnailData = VideoThumbnailData::instance();
     thumbnailData.enableBackgroundFetching(true);
+    thumbnailData.startBackgroundFetching(mModel, 0);
 
     return 0;
 }
@@ -182,11 +200,22 @@ void VideoListWidget::deactivate()
     {
         mContextMenu->hide();
     }
+    setVisible(false);  
     disConnectSignals();
+    
     // Free allocated memory for list thumbnails and disable background fetching.
     VideoThumbnailData &thumbnailData = VideoThumbnailData::instance();
     thumbnailData.enableBackgroundFetching(false);
     thumbnailData.freeThumbnailData();
+}
+
+// ---------------------------------------------------------------------------
+// getLevel
+// ---------------------------------------------------------------------------
+//
+VideoCollectionCommon::TCollectionLevels VideoListWidget::getLevel()
+{
+    return mCurrentLevel;
 }
 
 // ---------------------------------------------------------------------------
@@ -195,14 +224,16 @@ void VideoListWidget::deactivate()
 //
 int VideoListWidget::connectSignals()
 {
-
     if (!mSignalsConnected)
     {
-        if(!connect(this, SIGNAL(scrollingEnded()), this, SLOT(scrollingEndedSlot())) ||
+        if(!connect(this, SIGNAL(scrollingStarted()), this, SLOT(scrollingStartedSlot())) ||
+           !connect(this, SIGNAL(scrollingEnded()), this, SLOT(scrollingEndedSlot())) ||
            !connect(this, SIGNAL(scrollPositionChanged(const QPointF &)), 
                    this, SLOT(scrollPositionChangedSlot(const QPointF &))) ||
-           !connect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollingEndedSlot()))
-        )
+           !connect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollPositionTimerSlot())) || 
+           !connect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back())) ||
+           !connect(mNavKeyQuitAction, SIGNAL(triggered()), qApp, SLOT(quit()))) 
+           
         {
             return -1;
         }
@@ -217,10 +248,14 @@ int VideoListWidget::connectSignals()
 //
 void VideoListWidget::disConnectSignals()
 {
-	disconnect(this, SIGNAL(scrollingEnded()), this, SLOT(scrollingEndedSlot()));
+    disconnect(this, SIGNAL(scrollingStarted()), this, SLOT(scrollingStartedSlot()));
+    disconnect(this, SIGNAL(scrollingEnded()), this, SLOT(scrollingEndedSlot()));
     disconnect(this, SIGNAL(scrollPositionChanged(const QPointF&)), 
                this, SLOT(scrollPositionChangedSlot(const QPointF&)));
-    disconnect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollingEndedSlot()));
+    disconnect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollPositionTimerSlot()));
+    disconnect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back()));
+    disconnect(mNavKeyQuitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
 	mSignalsConnected = false;
 }
 
@@ -250,16 +285,13 @@ void VideoListWidget::deleteItemSlot()
 
     if (variant.isValid())
     {
-        QString text = tr("Do you want to delete \"%1\"?").arg(
+        QString text = tr("Do you want to delete \"%1\"?").arg( //TODO: localisation
                 variant.toStringList().first());
         if(HbMessageBox::question(text))
         {
             QModelIndexList list;
             list.append(index);
             mModel->deleteItems(list);
-
-            // exec filtering
-            mModel->invalidate();
         }
     }
 }
@@ -278,21 +310,18 @@ void VideoListWidget::createContextMenu()
 
     if (mIsService)
     {
-		mContextMenuActions[EActionPlay]    = mContextMenu->addAction(tr("Play"),    this, SLOT(playItemSlot()));
-		mContextMenuActions[EActionDetails] = mContextMenu->addAction(tr("Details"), this, SLOT(openDetailsSlot()));
-
+		mContextMenuActions[EActionPlay]    = mContextMenu->addAction(hbTrId("txt_videos_menu_play"),    this, SLOT(playItemSlot())); //TODO: localisation
+		mContextMenuActions[EActionDetails] = mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
     }
     else
     {
-        mContextMenuActions[EACtionAddToCollection]      = mContextMenu->addAction(tr("Add to collection"), this, SLOT(addToCollectionSlot()));
-        mContextMenuActions[EActionAddVideos]            = mContextMenu->addAction(tr("Add videos..."), this, SLOT(addItemSlot()));
-        mContextMenuActions[EACtionRemoveFromCollection] = mContextMenu->addAction(tr("Remove from collection"), this, SLOT(debugNotImplementedYet()));
-        mContextMenuActions[EActionShare]                = mContextMenu->addAction(tr("Share"), this, SLOT(shareItemSlot()));
-        mContextMenuActions[EActionRename]               = mContextMenu->addAction(tr("Rename"), this, SLOT(renameSlot()));
-        mContextMenuActions[EActionSetThumb]             = mContextMenu->addAction(tr("Set thumbnail..."), this, SLOT(debugNotImplementedYet()));
-        mContextMenuActions[EACtionRemoveCollection]     = mContextMenu->addAction(tr("Remove collection"), this, SLOT(debugNotImplementedYet()));   
-        mContextMenuActions[EActionDelete]               = mContextMenu->addAction(tr("Delete"), this, SLOT(deleteItemSlot()));
-        mContextMenuActions[EActionDetails]              = mContextMenu->addAction(tr("Details"), this, SLOT(openDetailsSlot()));
+        mContextMenuActions[EACtionAddToCollection]      = mContextMenu->addAction(hbTrId("txt_videos_menu_add_to_collection"), this, SLOT(addToCollectionSlot()));
+        mContextMenuActions[EACtionRemoveFromCollection] = mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(debugNotImplementedYet()));
+        mContextMenuActions[EActionShare]                = mContextMenu->addAction(hbTrId("txt_videos_menu_share"), this, SLOT(shareItemSlot()));
+        mContextMenuActions[EActionRename]               = mContextMenu->addAction(hbTrId("txt_common_menu_rename_item"), this, SLOT(renameSlot()));
+        mContextMenuActions[EACtionRemoveCollection]     = mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(removeCollectionSlot()));   
+        mContextMenuActions[EActionDelete]               = mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
+        mContextMenuActions[EActionDetails]              = mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
     }
 }
 
@@ -300,7 +329,7 @@ void VideoListWidget::createContextMenu()
 // setContextMenu
 // -------------------------------------------------------------------------------------------------
 //
-void VideoListWidget::setContextMenu(bool isDefaultCollection)
+void VideoListWidget::setContextMenu()
 {
     if(!mContextMenu)
     {
@@ -327,10 +356,8 @@ void VideoListWidget::setContextMenu(bool isDefaultCollection)
 
     HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
 
-    TVideoListType type = getType();
-    
-    if(type == EAllVideos ||
-       type == EDefaultColItems)
+    if(mCurrentLevel == VideoCollectionCommon::ELevelVideos ||
+       mCurrentLevel == VideoCollectionCommon::ELevelDefaultColl)
     {
     	if (!mIsService)
     	{
@@ -344,17 +371,15 @@ void VideoListWidget::setContextMenu(bool isDefaultCollection)
     	}
 		mContextMenuActions[EActionDetails]->setVisible(true);
     }
-    else if(type == ECollections) 
+    else if(mCurrentLevel == VideoCollectionCommon::ELevelCategory) 
     {
 		if(!mIsService)
 		{
-            mContextMenuActions[EActionAddVideos]->setVisible(true);
             mContextMenuActions[EActionRename]->setVisible(true);
-            mContextMenuActions[EActionSetThumb]->setVisible(true);
             mContextMenuActions[EACtionRemoveCollection]->setVisible(true);
 		}
     }
-    else if(type == EUserColItems)
+    else if(mCurrentLevel == VideoCollectionCommon::ELevelAlbum)
     {
     	if (!mIsService)
     	{
@@ -370,37 +395,6 @@ void VideoListWidget::setContextMenu(bool isDefaultCollection)
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// getLevel
-// -------------------------------------------------------------------------------------------------
-//
-VideoListWidget::TVideoListType VideoListWidget::getType()
-{
-	TVideoListType type(EUnknown);
-	HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-
-	if(mCurrentLevel == ELevelVideos)
-    {
-	    type = EAllVideos;
-    }
-    else if(mCurrentLevel == ELevelCategory)
-    {
-        if(mLastOpenItemId == TMPXItemId::InvalidId())
-        {
-            type = ECollections;
-        }
-        else if(mLastOpenItemId.iId2 == KVcxMvcCategoryIdDownloads ||
-                mLastOpenItemId.iId2 == KVcxMvcCategoryIdCaptured)
-        {
-            type = EDefaultColItems;
-        }
-        else
-        {
-            type = EUserColItems;
-        }
-    }
-    return type;
-}
 
 // ---------------------------------------------------------------------------
 // getModel
@@ -418,34 +412,32 @@ VideoSortFilterProxyModel& VideoListWidget::getModel()
 //
 void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
 {
-    if(selectionMode() == HbAbstractItemView::MultiSelection)
+    if(mSelectionMode != HbAbstractItemView::NoSelection)
     {
-         // do nothing in case selection mode
-         return;
+        // no custom functionality defined
+        emit activated(modelIndex);
+        return;
     }
 
     if (!mModel || !modelIndex.isValid())
     {
         return;
     }
-    if (mCurrentLevel == ELevelCategory)
+    
+    if (mCurrentLevel == VideoCollectionCommon::ELevelCategory)
     {
-        if (getType() == ECollections)
+        QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
+        if (variant.isValid())
         {
-            QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
-            if (variant.isValid())
-            {
-                HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-                mainWnd->addSoftKeyAction( Hb::SecondarySoftKey, mSecSkAction );
-
-                connect(mainWnd->softKeyAction(Hb::SecondarySoftKey),
-                        SIGNAL(triggered()), this, SLOT(back()));
-                mLastOpenItemId = mModel->getMediaIdAtIndex(modelIndex);
-                emit(collectionOpened(true, variant.toStringList().first()));
-            }
+            // signal view that item has been activated
+            emit(collectionOpened(true,
+                variant.toStringList().first(),
+                modelIndex));
+            
+            return;
         }
     }
-    if(mIsService && (mCurrentLevel == ELevelCategory) && (getType() != ECollections))
+    if(mIsService && (mCurrentLevel != VideoCollectionCommon::ELevelCategory))
     {
     	QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
 		if ( variant.isValid()  )
@@ -456,8 +448,26 @@ void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
     }
     else
     {
-    	mModel->openItem(modelIndex);
+    	mModel->openItem(mModel->getMediaIdAtIndex(modelIndex));
     }
+}
+
+// ---------------------------------------------------------------------------
+// setSelectionMode
+// called by the fw when user long presses some item
+// ---------------------------------------------------------------------------
+//
+//
+void VideoListWidget::setSelectionMode(int mode)
+{
+    HbAbstractItemView::SelectionMode selMode = HbAbstractItemView::NoSelection;
+    if(mode >= HbAbstractItemView::NoSelection && mode <= HbAbstractItemView::ContiguousSelection)
+    {
+        selMode = HbAbstractItemView::SelectionMode(mode);
+    }
+
+    HbListView::setSelectionMode(selMode);
+    mSelectionMode = mode;
 }
 
 // ---------------------------------------------------------------------------
@@ -473,7 +483,7 @@ void VideoListWidget::longPressGesture (const QPointF &point)
         emit command(MpxHbVideoCommon::LoadVideoDetailsView);
         mDetailsReady = true;
     }
-    if(selectionMode() == HbAbstractItemView::MultiSelection)
+    if(mSelectionMode != HbAbstractItemView::NoSelection)
     {
         // do not activate context menu during selection mode
         return;
@@ -481,29 +491,22 @@ void VideoListWidget::longPressGesture (const QPointF &point)
 
 	QModelIndex index = currentIndex();
     if(mModel && index.isValid())
-    {
-        
+    {   
     	TMPXItemId mpxId = mModel->getMediaIdAtIndex(index);
-
-    	bool defaultCollection(true);    	
-    	if ( ((mpxId.iId2 == 1) && //Category
-    		 ((mpxId.iId1 != KVcxMvcCategoryIdDownloads) &&
-    		  (mpxId.iId1 != KVcxMvcCategoryIdCaptured))) ||
-    		  (mCurrentLevel != ELevelCategory))
+    	// Only videos and user created albums have context menu.
+    	if((mpxId.iId2 == KVcxMvcMediaTypeVideo) ||
+    	   (!mIsService && mpxId.iId2 == KVcxMvcMediaTypeAlbum ))
     	{
-    	    defaultCollection = false;
-		}
-    	
-      	
-        setContextMenu(defaultCollection);
-        // if menu not yet exists, it has been created
-        // setup might fails causing menu to be removed
-        if(mContextMenu)
-        {
-            mContextMenu->exec(point);
-        }
+            setContextMenu();
+            // if menu not yet exists, it has been created
+            // setup might fail causing menu to be removed
+            if(mContextMenu)
+            {
+                mContextMenu->exec(point);
+            }
+    	}
     }
-    HbListView::longPressGesture(point);
+	HbListView::longPressGesture(point);
 }
 
 // ---------------------------------------------------------------------------
@@ -512,7 +515,7 @@ void VideoListWidget::longPressGesture (const QPointF &point)
 //
 void VideoListWidget::playItemSlot()
 {
-    mModel->openItem(currentIndex());
+    mModel->openItem(mModel->getMediaIdAtIndex(currentIndex()));
 }
 
 // ---------------------------------------------------------------------------
@@ -526,21 +529,12 @@ void VideoListWidget::openDetailsSlot()
         emit command(MpxHbVideoCommon::ActivateVideoDetailsView);
     }
 }
+
 // ---------------------------------------------------------------------------
 // renameSlot
 // ---------------------------------------------------------------------------
 //
 void VideoListWidget::renameSlot()
-{
-	debugNotImplementedYet();
-}
-
-
-// ---------------------------------------------------------------------------
-// addItemSlot
-// ---------------------------------------------------------------------------
-//
-void VideoListWidget::addItemSlot()
 {
 	debugNotImplementedYet();
 }
@@ -551,9 +545,48 @@ void VideoListWidget::addItemSlot()
 //
 void VideoListWidget::addToCollectionSlot()
 {
-	debugNotImplementedYet();
+    VideoListSelectionDialog *dialog =
+       mUiLoader->findWidget<VideoListSelectionDialog>(
+           DOCML_NAME_DIALOG);
+    if (!dialog || !mModel)
+    {
+        return;
+    }
+    TMPXItemId itemId = mModel->getMediaIdAtIndex(currentIndex());
+    if(itemId != TMPXItemId::InvalidId())
+    {
+        dialog->setupContent(VideoListSelectionDialog::ESelectCollection, itemId);
+        dialog->exec();
+    }
 }
 
+// ---------------------------------------------------------------------------
+// removeCollectionSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::removeCollectionSlot()
+{
+    if(!mModel)
+    {
+        return;
+    }
+    
+    QVariant variant;
+    QModelIndex index = currentIndex();
+    variant = mModel->data(index, Qt::DisplayRole);
+
+    if (variant.isValid())
+    {
+        QString text = tr("Do you want to remove collection \"%1\"?").arg( //TODO: localisation
+                variant.toStringList().first());
+        if(HbMessageBox::question(text))
+        {
+            QModelIndexList list;
+            list.append(index);
+        	mModel->removeAlbums(list);
+        }
+    }
+}
 
 // ---------------------------------------------------------------------------
 // playAllSlot
@@ -570,20 +603,19 @@ void VideoListWidget::playAllSlot()
 //
 void VideoListWidget::back()
 {
-    mLastOpenItemId = TMPXItemId::InvalidId();
     if(mModel)
     {
-        HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-    
-        disconnect(mainWnd->softKeyAction(Hb::SecondarySoftKey),
-                SIGNAL(triggered()), this, SLOT(back()));
-    
-        mainWnd->removeSoftKeyAction(Hb::SecondarySoftKey, mSecSkAction);
-            
-        emit(collectionOpened(false, QString("")));
-    
-        mModel->back();
+    	emit collectionOpened(false, QString(), QModelIndex());
     }
+}
+
+// ---------------------------------------------------------------------------
+// scrollingStartedSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::scrollingStartedSlot()
+{
+    VideoThumbnailData::instance().enableThumbnailCreation(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -593,15 +625,9 @@ void VideoListWidget::back()
 void VideoListWidget::scrollingEndedSlot()
 {
     if(mScrollPositionTimer)
-        mScrollPositionTimer->stop();
-
-    const QList<HbAbstractViewItem *> itemsVisible = visibleItems();
-
-    if(itemsVisible.count() > 0)
-    {
-        int row = itemsVisible.value(0)->modelIndex().row();
-        VideoThumbnailData::instance().startBackgroundFetching(row);
-    }
+        mScrollPositionTimer->stop();	
+    VideoThumbnailData::instance().enableThumbnailCreation(true);
+    fetchThumbnailsForVisibleItems();
 }
 
 // ---------------------------------------------------------------------------
@@ -613,6 +639,30 @@ void VideoListWidget::scrollPositionChangedSlot(const QPointF &newPosition)
     Q_UNUSED(newPosition);
 	if(mScrollPositionTimer && !mScrollPositionTimer->isActive())
 	    mScrollPositionTimer->start(SCROLL_POSITION_TIMER_TIMEOUT);
+}
+
+// ---------------------------------------------------------------------------
+// scrollPositionTimerSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::scrollPositionTimerSlot()
+{
+    fetchThumbnailsForVisibleItems();
+}
+
+// ---------------------------------------------------------------------------
+// fetchThumbnailsForVisibleItems
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::fetchThumbnailsForVisibleItems()
+{
+    const QList<HbAbstractViewItem *> itemsVisible = visibleItems();
+
+    if(itemsVisible.count() > 0)
+    {
+        int row = itemsVisible.value(0)->modelIndex().row();
+        VideoThumbnailData::instance().startBackgroundFetching(mModel, row);
+    }
 }
 
 // ---------------------------------------------------------------------------

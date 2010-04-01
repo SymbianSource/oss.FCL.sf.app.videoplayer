@@ -15,17 +15,11 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 11 %
 
 #include <platform_paths.hrh>
 
-#include "../videoplayersettingsengine/group/bld.inf"
 #include "../mediasettingsengine/group/bld.inf"
-#include "../feedsettingsplugin/group/bld.inf"
-#include "../feedsettingsviews/group/bld.inf"
-#include "../mpsettbase/group/bld.inf"
-#include "../mediasettingsapp/group/bld.inf"
-#include "../gsvideoplugin/group/bld.inf"
 
 PRJ_PLATFORMS
 DEFAULT

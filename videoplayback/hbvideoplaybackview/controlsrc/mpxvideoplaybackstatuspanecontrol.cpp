@@ -15,13 +15,15 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 12 %
 
 
 #include <hbmenu.h>
 #include <hblabel.h>
 #include <hbaction.h>
 #include <hbinstance.h>
+#include <hbframeitem.h>
+#include <hbframedrawer.h>
 
 #include <w32std.h>
 
@@ -43,6 +45,7 @@ QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
         TUint controlproperties )
     : QMPXVideoPlaybackFullScreenControl( controller, index, widget, controlproperties )
     , mActionBack( NULL )
+    , mFrameItem( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl()"));
 
@@ -160,22 +163,59 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails()"));
 
-    //
-    // If it's details view, need to go back to the default playback view with secondary key
-    // If not, we need to go back to the collection view with the secondary key
-    //
-    if ( mController->viewMode() == EDetailsView )
+    switch( mController->viewMode() )
     {
-        disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
-        connect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
-    }
-    else
-    {
-        disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
-        connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
+        case EFullScreenView:
+        {
+            //
+            // Set TitleBar transparent and go back to preview view with back key
+            // 
+            disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
+            connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
+
+            mController->view()->setTitleBarFlags( HbView::TitleBarTransparent );
+            break;
+        }
+        case EDetailsView:
+        {
+            //
+            // Set TitleBar opaque and go back to full screen view with back key
+            // 
+            disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
+            connect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
+
+            mController->view()->setTitleBarFlags( HbView::TitleBarFlagNone );
+
+            break;
+        }
+        case EAudioOnlyView:
+        {
+            //
+            // Set TitleBar opaque and go back to preview view with back key
+            // 
+            disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
+            connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
+
+            mController->view()->setTitleBarFlags( HbView::TitleBarFlagNone );
+            break;
+        }
     }
 
     setMenu( details );
+
+    //
+    // Set framedrawer for semi transparent background
+    //
+    if ( ! mFrameItem )
+    {
+        mFrameItem = new HbFrameItem ( mTitleLabel );
+        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+        mFrameItem->frameDrawer().setFillWholeRect( true );
+        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );    
+    }
+
+    mFrameItem->setGeometry( mTitleLabel->boundingRect() );
+    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse ); 
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -187,17 +227,9 @@ void QMPXVideoPlaybackStatusPaneControl::setMenu( QMPXVideoPlaybackViewFileDetai
     MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::setMenu()"));
 
     //
-    // Set menu
+    // No available menu for now
     //
-    mController->view()->menu()->clearActions();
-
-    if ( ! details->mTvOutConnected || ! details->mTvOutPlayAllowed )
-    {
-        if ( details->mVideoEnabled && mController->viewMode() != EDetailsView )
-        {
-            mController->view()->menu()->addAction( tr( "Subtitle" ) );
-        }
-    }
+    Q_UNUSED( details );
 }
 
 // -------------------------------------------------------------------------------------------------

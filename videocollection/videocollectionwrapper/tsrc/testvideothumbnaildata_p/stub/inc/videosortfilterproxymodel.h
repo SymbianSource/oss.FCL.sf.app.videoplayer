@@ -67,6 +67,12 @@ public:
     *
     */
     void back();
+    
+    /**
+     * Return source model.
+     * 
+     */
+    VideoSortFilterProxyModel* sourceModel();    
 
 public: // Simplified data access.
     /**
@@ -87,6 +93,21 @@ public: // Simplified data access.
      */
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
 
+signals:
+
+    /**
+     * Signals that the model is ready, ie. that all data has been
+     * loaded from myvideoscollection.
+     */
+    void modelReady();
+    
+    /**
+     * notifies that model's physical data structure has changed:
+     * - item inserted
+     * - item removed 
+     */
+    void modelChanged();    
+    
 public: // Test helper methods.
 
     static void reset();

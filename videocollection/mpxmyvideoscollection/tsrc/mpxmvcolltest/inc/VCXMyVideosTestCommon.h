@@ -11,10 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
-
 
 #ifndef VCXMYVIDEOSTESTCOMMON_H
 #define VCXMYVIDEOSTESTCOMMON_H
@@ -45,18 +43,22 @@ const TInt KVCXMYVideosTestMessageCommandCanceled                = 2012;
 
 // These are only handled when WaitForMessage is called.
 const TInt KVCXMYVideosTestMessageCollectionGeneral              = 3000;
-const TInt KVCXMYVideosTestMessageCollectionItemChanged          = 3001;
-const TInt KVCXMYVideosTestMessageCollectionCategoryChanged      = 3002;
 
-const TInt KVCXMYVideosTestMessageMpxItemInserted                = 4000;
-const TInt KVCXMYVideosTestMessageMpxItemDeleted                 = 4001;
-const TInt KVCXMYVideosTestMessageMpxItemModified                = 4002;
+const TInt KVCXMYVideosTestMessageMpxVideoInserted               = 4000;
+const TInt KVCXMYVideosTestMessageMpxCategoryInserted            = 4001;
+const TInt KVCXMYVideosTestMessageMpxAlbumInserted               = 4002;
+const TInt KVCXMYVideosTestMessageMpxCategoryDeleted             = 4003;
+const TInt KVCXMYVideosTestMessageMpxVideoDeleted                = 4004;
+const TInt KVCXMYVideosTestMessageMpxAlbumDeleted                = 4005;
+const TInt KVCXMYVideosTestMessageMpxVideoModified               = 4006;
+const TInt KVCXMYVideosTestMessageMpxCategoryModified            = 4007;
+const TInt KVCXMYVideosTestMessageMpxAlbumModified               = 4008;
 
 const TInt KVCXMyVideosTestMessageVideoListOrderChanged          = 5000;                 
 
 const TInt KVCXMYVideosTestErrorDownloadNotFound                 = 10001;
 const TInt KVCXMYVideosTestErrorFileNotFound                     = 10002;
 
-#endif      // VCXMyVideosTestCommon.h
+#endif      // VCXMYVIDEOSTESTCOMMON_H
 
 // End of File

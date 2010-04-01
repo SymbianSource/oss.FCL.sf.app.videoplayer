@@ -19,8 +19,10 @@
 #define _VIDEOTHUMBNAILDATATESTER_H_
 
 // INCLUDES
-#include <QObject>
+#include <qobject.h>
 #include "videothumbnaildata_p.h"
+
+class VideoSortFilterProxyModel;
 
 class VideoThumbnailDataTester : public VideoThumbnailDataPrivate
 {
@@ -53,29 +55,18 @@ public:
     void emitReportThumbnailsReady();    
     
     /**
-     * Emits layoutChanged signal to itself.
+     * Emits modelChanged signal to itself.
      */
-    void emitLayoutChanged();
+    void emitModelChanged();
     
     /**
-     * Emits rowsInserted signal to itself.
-     *
-     * @param parent parent
-     * @param start start index
-     * @param end end index
+     * Emits aboutToQuit signal to itself.
      */
-    void emitRowsInserted(const QModelIndex & parent, int start, int end);
+    void emitAboutToQuit();    
     
     //
     // Test methods for VideoThumbnailData's methods.
     //
-    
-    /**
-     * Calls CVideoThumbnailDataPrivate::removeFromFetchList
-     *
-     * @param tnId id of thumbnail to be removed.
-     */
-    void removeFromFetchList(int tnId);
 
     /**
      * Calls CVideoThumbnailDataPrivate::initialize
@@ -101,17 +92,22 @@ public:
      * Calls CVideoThumbnailDataPrivate::defaultThumbnail
      */
     const QIcon* defaultThumbnail(TMPXItemId mediaId);
-    
-    /**
-     * Calls CVideoThumbnailDataPrivate::startBackgroundFetching
-     */
-    void startBackgroundFetching(int fetchIndex);    
-    
+        
     /**
      * Calls CVideoThumbnailDataPrivate::continueBackgroundFetch
      */
     void continueBackgroundFetch();
     
+    /**
+     * Calls CVideoThumbnailDataPrivate::startFetchingThumbnails
+     */
+    int startFetchingThumbnails(const QList<QModelIndex> &indexes, int priority);
+    
+    /**
+    * Calls CVideoThumbnailDataPrivate::startFetchingThumbnail
+    */
+    int startFetchingThumbnail(TMPXItemId mediaId, int priority);
+        
 signals:
 
     /**
@@ -122,17 +118,17 @@ signals:
     /**
      * Signal.
      */
-    void layoutChangedSignal();
+    void modelChangedSignal();
 
     /**
      * Signal.
      */
-    void rowsInsertedSignal(const QModelIndex & parent, int start, int end);
+    void reportThumbnailsReadySignal();
 
     /**
      * Signal.
      */
-    void reportThumbnailsReadySignal();    
+    void aboutToQuitSignal();       
 
 private:
 

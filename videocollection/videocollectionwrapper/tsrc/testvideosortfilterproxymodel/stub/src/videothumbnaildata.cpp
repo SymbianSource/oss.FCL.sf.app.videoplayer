@@ -16,9 +16,9 @@
 */
 
 // INCLUDE FILES
-#include <QDebug>
-#include <QPixmap>
-#include <QTimer>
+#include <qdebug.h>
+#include <qpixmap.h>
+#include <qtimer.h>
 #include <mpxmediageneraldefs.h>
 #include <thumbnailmanager_qt.h>
 
@@ -61,22 +61,13 @@ VideoThumbnailData::~VideoThumbnailData()
 }
 
 // -----------------------------------------------------------------------------
-// VideoThumbnailData::startFetchingThumbnails()
-// -----------------------------------------------------------------------------
-//
-int VideoThumbnailData::startFetchingThumbnails(const QList<int> &indexes, VideoThumbnailPriority /* priority */, bool /*setFetchIndex*/)
-{
-    mStartFetchingThumbnailsCallCount++;
-    mStartFetchingThumbnailsThumbnailCount += indexes.count();
-    return 0;
-}
-
-// -----------------------------------------------------------------------------
 // VideoThumbnailData::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailData::startBackgroundFetching(int fetchIndex)
+void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
+    Q_UNUSED(model);
+    Q_UNUSED(fetchIndex);
     mStartBackgroundFetchingCallCount++;
 }
 

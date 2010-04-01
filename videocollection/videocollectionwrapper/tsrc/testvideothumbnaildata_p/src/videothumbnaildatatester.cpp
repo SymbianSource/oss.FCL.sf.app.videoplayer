@@ -29,9 +29,9 @@
 VideoThumbnailDataTester::VideoThumbnailDataTester()
 {
     connect(this, SIGNAL(doBackgroundFetchingSignal()), this, SLOT(doBackgroundFetching()));
-    connect(this, SIGNAL(layoutChangedSignal()), this, SLOT(layoutChangedSlot()));
-    connect(this, SIGNAL(rowsInsertedSignal(const QModelIndex &, int, int)), this, SLOT(rowsInsertedSlot(const QModelIndex &, int, int)));
+    connect(this, SIGNAL(modelChangedSignal()), this, SLOT(modelChangedSlot()));
     connect(this, SIGNAL(reportThumbnailsReadySignal()), this, SLOT(reportThumbnailsReadySlot()));
+    connect(this, SIGNAL(aboutToQuitSignal()), this, SLOT(aboutToQuitSlot()));
 }
 
 // -----------------------------------------------------------------------------
@@ -41,9 +41,9 @@ VideoThumbnailDataTester::VideoThumbnailDataTester()
 VideoThumbnailDataTester::~VideoThumbnailDataTester()
 {
     disconnect(this, SIGNAL(doBackgroundFetchingSignal()), this, SLOT(doBackgroundFetching()));
-    disconnect(this, SIGNAL(layoutChangedSignal()), this, SLOT(layoutChangedSlot()));
-    disconnect(this, SIGNAL(rowsInsertedSignal(const QModelIndex &, int, int)), this, SLOT(rowsInsertedSlot(const QModelIndex &, int, int)));
+    disconnect(this, SIGNAL(modelChangedSignal()), this, SLOT(modelChangedSlot()));
     disconnect(this, SIGNAL(reportThumbnailsReadySignal()), this, SLOT(reportThumbnailsReadySlot()));
+    disconnect(this, SIGNAL(aboutToQuitSignal()), this, SLOT(aboutToQuitSlot()));
 }
 
 // -----------------------------------------------------------------------------
@@ -65,30 +65,21 @@ void VideoThumbnailDataTester::emitReportThumbnailsReady()
 }
 
 // -----------------------------------------------------------------------------
-// VideoThumbnailDataTester::emitLayoutChanged()
+// VideoThumbnailDataTester::emitModelChanged()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataTester::emitLayoutChanged()
+void VideoThumbnailDataTester::emitModelChanged()
 {
-    emit layoutChangedSignal();
+    emit modelChangedSignal();
 }
 
 // -----------------------------------------------------------------------------
-// VideoThumbnailDataTester::emitRowsInserted()
+// VideoThumbnailDataTester::emitAboutToQuit()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataTester::emitRowsInserted(const QModelIndex & parent, int start, int end)
+void VideoThumbnailDataTester::emitAboutToQuit()
 {
-    emit rowsInsertedSignal(parent, start, end);
-}
-
-// -----------------------------------------------------------------------------
-// VideoThumbnailDataTester::removeFromFetchList()
-// -----------------------------------------------------------------------------
-//
-void VideoThumbnailDataTester::removeFromFetchList(int tnId)
-{
-    VideoThumbnailDataPrivate::removeFromFetchList(tnId);
+    emit aboutToQuitSignal();
 }
 
 // -----------------------------------------------------------------------------
@@ -137,21 +128,31 @@ const QIcon* VideoThumbnailDataTester::defaultThumbnail(TMPXItemId mediaId)
 }
 
 // -----------------------------------------------------------------------------
-// VideoThumbnailDataTester::startBackgroundFetching()
-// -----------------------------------------------------------------------------
-//
-void VideoThumbnailDataTester::startBackgroundFetching(int fetchIndex)
-{
-    VideoThumbnailDataPrivate::startBackgroundFetching(fetchIndex);
-}
-
-// -----------------------------------------------------------------------------
 // VideoThumbnailDataTester::continueBackgroundFetch()
 // -----------------------------------------------------------------------------
 //
 void VideoThumbnailDataTester::continueBackgroundFetch()
 {
     VideoThumbnailDataPrivate::continueBackgroundFetch();
+}
+
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailDataTester::startFetchingThumbnails()
+// -----------------------------------------------------------------------------
+//
+int VideoThumbnailDataTester::startFetchingThumbnails(const QList<QModelIndex> &indexes, int priority)
+{
+    return VideoThumbnailDataPrivate::startFetchingThumbnails(indexes, priority);
+}
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailDataTester::continueBackgroundFetch()
+// -----------------------------------------------------------------------------
+//
+int VideoThumbnailDataTester::startFetchingThumbnail(TMPXItemId mediaId, int priority)
+{
+    return VideoThumbnailDataPrivate::startFetchingThumbnail(mediaId, priority);
 }
 
 // End of file

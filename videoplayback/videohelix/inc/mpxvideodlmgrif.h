@@ -15,13 +15,13 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #ifndef __MPXVIDEODLMGRIF_H__
 #define __MPXVIDEODLMGRIF_H__
 
-#include <downloadmgrclientapiext.h>
+#include <DownloadMgrClientApiExt.h>
 #include <mpxplaybackcommanddefs.h>
 
 //

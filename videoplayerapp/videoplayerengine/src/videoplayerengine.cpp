@@ -15,10 +15,10 @@
 *
 */
 
-// Version : %version: 20 %
+// Version : %version: da1mmcf#21 %
 
 
-#include <qapplication>
+#include <QApplication>
 
 #include <hbinstance.h>
 #include <xqpluginloader.h>

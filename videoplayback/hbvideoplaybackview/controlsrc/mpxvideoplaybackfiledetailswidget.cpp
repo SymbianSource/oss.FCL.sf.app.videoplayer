@@ -15,18 +15,18 @@
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  19 %
 
 
+#include <QDir>
+#include <QDateTime>
+#include <QFileInfo>
 
-#include <qfileinfo>
-#include <qgraphicslinearlayout>
-#include <qdatetime>
-#include <qdir>
-
+#include <hbglobal.h>
 #include <hblistwidgetitem.h>
 #include <hbratingslider.h>
 #include <hblistwidget.h>
+#include <hblistviewitem.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -58,8 +58,6 @@ QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()"));
 
-    HbStyleLoader::unregisterFilePath( ":/hbvideoplaybackview/hblistwidget.css" );
-    
     if ( mListWidget ) 
     {
         delete mListWidget;
@@ -78,7 +76,7 @@ void QMPXVideoPlaybackFileDetailsWidget::initialize()
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFileDetailsWidget::updateControlsWithFileDetails
+// QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
@@ -98,13 +96,14 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         //
         mListWidget = qobject_cast<HbListWidget*>( widget );
 
+        //
+        // set the min/max number of lines in the second row
+        //
+        HbListViewItem *prototype = mListWidget->listItemPrototype();
+        prototype->setSecondaryTextRowCount(1, 3);
+        
         if ( ! mFileDetailsUpdated )
-        {        
-            //
-            // load file details style sheet
-            //
-            bool ret = HbStyleLoader::registerFilePath( ":/hbvideoplaybackview/hblistwidget.css" );
-            
+        {                    
             mFileDetailsUpdated = true;
             
             QFileInfo fileInfo( details->mClipName );     
@@ -117,7 +116,9 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             //
             // Description
             //
-            addItemToListWidget( "Description", details->mDescription ); 
+            addItemToListWidget( 
+                    hbTrId( "txt_videos_list_description" ), details->mDescription ); 
+
             
             //
             // Duration
@@ -126,7 +127,7 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             {
                 QString duration = QString("%1").arg( 
                         valueToReadableFormat( (qreal)details->mDuration / (qreal)KPbMilliMultiplier ) );                    
-                addItemToListWidget( "Duration", duration );                                                                        
+                addItemToListWidget( hbTrId( "txt_videos_list_duration" ), duration );                                                                        
             }    
             
             //
@@ -139,39 +140,39 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
                 // Date created
                 //
                 QString date = QString("%1").arg( fileInfo.created().toString( KDATETIMEFORMAT ) );                
-                addItemToListWidget( "Date", date );      
+                addItemToListWidget( hbTrId( "txt_videos_list_date" ), date );      
                 
                 //
                 // Date modified
                 //
                 QString modified = QString("%1").arg( fileInfo.lastModified().toString( KDATETIMEFORMAT ) );                
-                addItemToListWidget( "Modified", modified );                                                                        
+                addItemToListWidget( hbTrId( "txt_videos_list_modified" ), modified );                                                                        
             }
 
             //
             // Location
             //
-            addItemToListWidget( "Location", details->mLocation );                                                
+            addItemToListWidget( hbTrId( "txt_videos_list_location" ), details->mLocation );                                                
             
             //
             // Author
             //
-            addItemToListWidget( "Author", details->mArtist );                                            
+            addItemToListWidget( hbTrId( "txt_videos_list_author" ), details->mArtist );                                            
             
             //
             // Copyright
             //
-            addItemToListWidget( "Copyright", details->mCopyright );                                        
+            addItemToListWidget( hbTrId( "txt_videos_list_copyright" ), details->mCopyright );                                        
             
             //
             // Language
             //
-            addItemToListWidget( "Language", details->mLanguage );                                    
+            addItemToListWidget( hbTrId( "txt_videos_list_language" ), details->mLanguage );                                    
             
             //
             // Keywords
             //
-            addItemToListWidget( "Keywords", details->mKeywords );                                
+            addItemToListWidget( hbTrId( "txt_videos_list_keywords" ), details->mKeywords );                                
             
             //
             // Size
@@ -185,13 +186,13 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             {
                 QString resolution = QString("%1 x %2")
                        .arg( details->mVideoWidth ).arg( details->mVideoHeight );            
-                addItemToListWidget( "Resolution", resolution );                    
+                addItemToListWidget( hbTrId( "txt_videos_list_resolution" ), resolution );                    
             }
             
             //
             // Format
             //
-            addItemToListWidget( "Format", details->mMimeType );                    
+            addItemToListWidget( hbTrId( "txt_videos_list_format" ), details->mMimeType );                    
             
             //
             // Bitrate
@@ -204,8 +205,8 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             if ( details->mPlaybackMode == EMPXVideoLocal ||
                  details->mPlaybackMode == EMPXVideoProgressiveDownload)
             {
-                QString folder = fileInfo.dir().dirName();                    
-                addItemToListWidget( "Collection", folder );    
+                QString folder = fileInfo.dir().dirName();
+                addItemToListWidget( hbTrId( "txt_videos_list_collection_name" ), folder );
             }
             
         }
@@ -233,6 +234,11 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
 
         bool ok = false;
         loader->load( KMPXPLAYBACKVIEW_XML, sectionName, &ok );
+
+        if ( ! ok )
+        {
+            MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget failed to load section"));
+        }
     }
 }
 
@@ -304,7 +310,7 @@ void QMPXVideoPlaybackFileDetailsWidget::makeTitleItem( QMPXVideoPlaybackViewFil
             // populate Title and its associated text
             //
             HbListWidgetItem* listWidgetItem = new HbListWidgetItem();
-            listWidgetItem->setText( "Title" );
+            listWidgetItem->setText( hbTrId( "txt_videos_title_videos" ) );
             listWidgetItem->setSecondaryText( title );
             mListWidget->insertItem( 0, listWidgetItem );
         }
@@ -331,12 +337,24 @@ void QMPXVideoPlaybackFileDetailsWidget::makeSizeItem( QMPXVideoPlaybackViewFile
          details->mPlaybackMode == EMPXVideoProgressiveDownload )
     {
         QFileInfo fileInfo( details->mClipName );     
-        float size = fileInfo.size();
-          
-        if ( size > 0.0 )
+        
+        //
+        // to prevent overflow, get an unsigned value of file size
+        //
+        ulong fileSize = fileInfo.size();
+                
+        //
+        // convert file size to KB, MB, GB accordingly
+        //
+        if ( fileSize > 0 )
         {        
             QString scale(" KB");
         
+            //
+            // cast for later conversion with floating point
+            //
+            float size = (float) fileSize;
+                
             if ( size > KILOBYTE )
             {
                 size /= KILOBYTE;
@@ -360,7 +378,7 @@ void QMPXVideoPlaybackFileDetailsWidget::makeSizeItem( QMPXVideoPlaybackViewFile
             QString text = QString("%1").arg( size );
             text.append( scale );
             
-            addItemToListWidget( "Size", text );                            
+            addItemToListWidget( hbTrId( "txt_videos_list_file_size" ), text );                            
         }    
     }
 }
@@ -394,7 +412,7 @@ void QMPXVideoPlaybackFileDetailsWidget::makeBitRateItem( QMPXVideoPlaybackViewF
         QString text = QString("%1").arg( bitrate );
         text.append( scale );
         
-        addItemToListWidget( "Bitrate", text );            
+        addItemToListWidget( hbTrId( "txt_videos_list_bitrate" ), text );            
     }
 }
 

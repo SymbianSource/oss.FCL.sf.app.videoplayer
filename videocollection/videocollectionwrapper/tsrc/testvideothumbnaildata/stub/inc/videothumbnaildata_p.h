@@ -28,6 +28,11 @@
 #include <mpxitemid.h>
 
 // FORWARD DECLARATIONS
+class VideoSortFilterProxyModel 
+{
+public:
+    int ooo;
+};
 
 class VideoThumbnailDataPrivate : public QObject
 {
@@ -121,9 +126,15 @@ public:
     /**
      * Starts background thumbnail fetching from the given fetch index.
      *
+     * @param model
      * @param fetchIndex index where to start the background thumbnail fetching.
      */
-    void startBackgroundFetching(int fetchIndex);    
+    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);    
+    
+    /**
+     * Enables thumbnail creation.
+     */
+    void enableThumbnailCreation(bool enable);
     
 signals:
 
@@ -146,6 +157,7 @@ public: // Data
     static int mFreeThumbnailDataCallCount;
     static int mBackgroundThumbnailFetchingEnabled;
     static int mStartBackgroundFetchingCallCount;
+    static int mEnableThumbnailCreationCallCount;
 };
 
 #endif  // __VIDEOTHUMBNAILDATAPRIVATE_H__

@@ -59,6 +59,11 @@ public:
      *
      */
     VideoServices::TVideoService currentService();
+    
+    /** 
+    * Returns context title.
+    */
+    QString contextTitle() { return QString(""); }
 
 private:
 

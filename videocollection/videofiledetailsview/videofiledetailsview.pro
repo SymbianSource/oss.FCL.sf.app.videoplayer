@@ -56,8 +56,10 @@ INCLUDEPATH += ../../inc \
 
 # Input
 HEADERS += inc/videofiledetailsviewplugin.h \
-   
-SOURCES += src/videofiledetailsviewplugin.cpp 
+           inc/videodetailslabel.h
+
+SOURCES += src/videofiledetailsviewplugin.cpp \
+           src/videodetailslabel.cpp
    
 LIBS += -lmpxviewframeworkqt.dll \
         -lvideocollectionwrapper.dll \

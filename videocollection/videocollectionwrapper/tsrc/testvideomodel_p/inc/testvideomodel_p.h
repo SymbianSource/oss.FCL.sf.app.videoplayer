@@ -24,7 +24,6 @@
 // INCLUDES
 #include <QtTest/QtTest>
 #include <QList>
-#include "videocollectionwrapper.h"
 #include <e32const.h>
 #include <mpxitemid.h>
 
@@ -154,6 +153,11 @@ private slots:
     void testGetMetaDataFromIndex();
     
     /**
+     * verifies markVideoRemoved and restoreRemoved
+     */
+    void testVideoMarkAndRestoreDeleted();
+    
+    /**
      * verifies getFilePathFromIndex
      */
     void testGetFilePathFromIndex();
@@ -162,12 +166,7 @@ private slots:
      * verifies getFilePathForId
      */
     void testGetFilePathForId();
-
-    /**
-     * verifies markVideoRemoved and getVideoStatusFromIndex 
-     */
-    void testVideoStatus();
-            
+         
     /**
      * verifies thumbnailsFetchedSlot
      */
@@ -206,7 +205,7 @@ private slots:
     /**
      * verifies getVideoCount when fetching collections
      */
-    void testCollectionItemCount();
+     void testCollectionItemCount();
 
     /**
      * verifies getMediaIdFromIndex when fetching collections

@@ -33,6 +33,7 @@
 
 
 class VideoCollectionClient;
+class StubSignalReceiver;
 
 class TestVideoCollectionClient : public QObject
 {
@@ -73,16 +74,16 @@ private slots:
     void testInitializeUtilCreateFail();
     
     /**
+     * initialization and collection utility creation fails
+     *
+     */
+    void testInitializeNullReceiverCreateFail();
+    
+    /**
      * succeeded initialization test
      *
      */
     void testInitializeSucceed();
-    
-    /**
-     * verifies connectCollectionSignalReceiver -call
-     *
-     */
-    void testConnectCollectionSignalReceiver();
     
     /**
      * verifies collectionLevel -call
@@ -147,14 +148,14 @@ private slots:
     void testGetVideoDetails();
     
     /**
-     * Data for the testAddNewCollection test.
-     */
-    void testAddNewCollection_data();
-
-    /**
      * verifies addNewCollection -call.
      */
     void testAddNewCollection();
+    
+    /**
+     * verifies addItemsInAlbum
+     */
+    void testAddItemsInAlbum();
     
     /**
      * verifies back -call
@@ -169,6 +170,11 @@ private:
      * testobject
      */
     VideoCollectionClient* mTestObject;
+    
+    /**
+     * stubbed signal receiver
+     */
+    StubSignalReceiver* mSignalReceiver;
 
 };
 

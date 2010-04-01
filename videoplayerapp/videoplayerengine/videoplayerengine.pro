@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 19 %
+# Version : %version: da1mmcf#20 %
 
 
 TEMPLATE = lib
@@ -44,12 +44,8 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lmpxcommon.dll \
         -lestor.dll  \
         -lfbscli.dll \
-        -lapengine.dll \
-        -lapsettingshandlerui.dll \
-        -lmpsettengine.dll \
         -lplaybackhelper.dll \
         -lvideoplaylistutility.dll \
-        -lcommdb.dll \
         -lservicehandler.dll \
         -lxqservice.dll \
         -lxqserviceutil.dll \

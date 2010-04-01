@@ -31,10 +31,11 @@
 VideoHintWidget::VideoHintWidget(VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent) :
 HbWidget(parent),
 mUiLoader(uiLoader),
-mServiceButton(0),
-mHintLabel(0),
 mServiceIcon(0),
-mCurrentLevel(AllVideos)
+mAddVideosIcon(0),
+mCurrentLevel(AllVideos),
+mButtonShown(false),
+mActivated(false)
 {
     // NOP
 }
@@ -46,6 +47,7 @@ mCurrentLevel(AllVideos)
 VideoHintWidget::~VideoHintWidget()
 {
     delete mServiceIcon;
+    delete mAddVideosIcon;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,13 +56,6 @@ VideoHintWidget::~VideoHintWidget()
 //
 int VideoHintWidget::initialize()
 {
-    mServiceButton = mUiLoader->findWidget<HbPushButton>(DOCML_NAME_HINT_BUTTON);
-    mHintLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_HINT_LABEL);
-    if(!mServiceButton || !mHintLabel)
-    {
-        return -1;
-    }
-    
     VideoCollectionViewUtils& utils = VideoCollectionViewUtils::instance();
     return utils.getServiceIconStrings(mServiceIconString, mServiceIconPressedString);
 }
@@ -72,23 +67,20 @@ int VideoHintWidget::initialize()
 void VideoHintWidget::setLevel(HintLevel level)
 {
     mCurrentLevel = level;
-    if(isVisible()) {
+    if(mActivated) {
         updateUiComponents();
     }
 }
 
 // ---------------------------------------------------------------------------
-// setVisible
+// setButtonShown
 // ---------------------------------------------------------------------------
 //
-void VideoHintWidget::setVisible(bool visible)
+void VideoHintWidget::setButtonShown(bool shown)
 {
-    HbWidget::setVisible(visible);
-    
-    if(visible) {
-        activate();
-    } else {
-        deactivate();
+    mButtonShown = shown;
+    if(mActivated) {
+        updateUiComponents();
     }
 }
 
@@ -96,8 +88,9 @@ void VideoHintWidget::setVisible(bool visible)
 // orientationChanged
 // ---------------------------------------------------------------------------
 //
-void VideoHintWidget::orientationChangedSlot(Qt::Orientation /*targetOrientation*/)
+void VideoHintWidget::orientationChangedSlot(Qt::Orientation targetOrientation)
 {
+    Q_UNUSED(targetOrientation);
     updateUiComponents();
 }
 
@@ -107,20 +100,30 @@ void VideoHintWidget::orientationChangedSlot(Qt::Orientation /*targetOrientation
 //
 void VideoHintWidget::activate()
 {
-    if(mServiceIconString.isNull() || mServiceIconString.isEmpty() || 
-       mServiceIconPressedString.isNull() || mServiceIconPressedString.isEmpty())
+    if (!mActivated)
     {
-        return;
-    }
-    
-    HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-    connect(mainWnd, SIGNAL(orientationChanged(Qt::Orientation)),
+        if(mServiceIconString.isEmpty() || 
+           mServiceIconPressedString.isEmpty())
+        {
+            return;
+        }
+        
+        HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
+        connect(
+            mainWnd, SIGNAL(orientationChanged(Qt::Orientation)),
             this, SLOT(orientationChangedSlot(Qt::Orientation)));
-    
-    mServiceIcon = new HbIcon(mServiceIconString);
-    mServiceIcon->setIconName(mServiceIconPressedString, QIcon::Normal, QIcon::On);
-    
-    updateUiComponents();
+        
+        mServiceIcon = new HbIcon(mServiceIconString);
+        mServiceIcon->setIconName(mServiceIconPressedString, QIcon::Normal, QIcon::On);
+        
+        mAddVideosIcon = new HbIcon(":/images/mono_video_addvideos.svg");
+        
+        updateUiComponents();
+        
+        setVisible(true);
+        
+        mActivated = true;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -129,12 +132,33 @@ void VideoHintWidget::activate()
 //
 void VideoHintWidget::deactivate()
 {
-    disconnect(this, SLOT(orientationChangedSlot(Qt::Orientation)));
-    
-    mServiceButton->setIcon(HbIcon());
-    if(mServiceIcon) {
-        delete mServiceIcon;
-        mServiceIcon = 0;
+    if (mActivated)
+    {
+        mActivated = false;
+        
+        setVisible(false);
+        
+        HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
+        disconnect(
+            mainWnd, SIGNAL(orientationChanged(Qt::Orientation)),
+            this, SLOT(orientationChangedSlot(Qt::Orientation)));
+        
+        HbPushButton *serviceButton =
+            mUiLoader->findWidget<HbPushButton>(
+                DOCML_NAME_HINT_BUTTON);
+        if (serviceButton)
+        {
+            serviceButton->setIcon(HbIcon());
+        }
+        if(mServiceIcon) {
+            delete mServiceIcon;
+            mServiceIcon = 0;
+        }
+        
+        if(mAddVideosIcon) {
+            delete mAddVideosIcon;
+            mAddVideosIcon = 0;
+        }
     }
 }
 
@@ -145,16 +169,31 @@ void VideoHintWidget::deactivate()
 void VideoHintWidget::updateUiComponents()
 {
     HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-    mServiceButton->setVisible(mainWnd->orientation() == Qt::Horizontal);
-    
-    if(mCurrentLevel == Collection) {
-        mHintLabel->setVisible(false);
-        mServiceButton->setIcon(HbIcon());
-        mServiceButton->setText(tr("Add videos"));
-    } else {
-        mHintLabel->setVisible(true);
-        mServiceButton->setText(QString());
-        mServiceButton->setIcon(*mServiceIcon);
+    if (mainWnd)
+    {
+        HbPushButton *serviceButton =
+            mUiLoader->findWidget<HbPushButton>(
+                DOCML_NAME_HINT_BUTTON);
+        HbLabel *hintLabel =
+            mUiLoader->findWidget<HbLabel>(
+                DOCML_NAME_HINT_LABEL);
+        HbLabel *noVideosLabel =
+            mUiLoader->findWidget<HbLabel>(
+                DOCML_NAME_NO_VIDEOS_LABEL);
+        if (serviceButton && hintLabel && noVideosLabel)
+        {
+            serviceButton->setVisible(mainWnd->orientation() == Qt::Horizontal && mButtonShown);
+            noVideosLabel->setVisible(true);
+            if (mCurrentLevel == Collection)
+            {
+                hintLabel->setVisible(false);                
+                serviceButton->setIcon(*mAddVideosIcon);
+            }
+            else
+            {               
+                serviceButton->setIcon(*mServiceIcon);
+            }
+        }
     }
 }
 

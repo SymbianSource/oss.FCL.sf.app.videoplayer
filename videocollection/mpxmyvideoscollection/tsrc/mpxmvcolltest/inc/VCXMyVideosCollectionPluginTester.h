@@ -11,10 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
-
 
 #ifndef VCXMYVIDEOSCOLLECTIONPLUGINTESTER_H
 #define VCXMYVIDEOSCOLLECTIONPLUGINTESTER_H
@@ -27,7 +25,7 @@
 #include "MVCXMyVideosCollectionPluginTesterObserver.h"
 #include <mpxmediabase.h>
 #include <f32file.h>
-#include "MIptvTestTimerObserver.h"
+#include "MVcxTestTimerObserver.h"
 #include "VCXMyVideosTestTransactions.h"
 
 // CONSTANTS
@@ -42,12 +40,8 @@ const TUint KRemoveMediaActionId =           10000006;
 
 // FORWARD DECLARATIONS
 class MMPXCollectionUtility;
-class CVCXTestCommon;
-class CVCXMyVideosTestDlWatcher;
-class CIptvTestActiveWait;
-class CVCXMyVideosTestDownload;
-class CIptvTestTimer;
-class CVCXTestStatsKeeper;
+class CVCXMyVideosTestUtils;
+class CVcxTestActiveWait;
 
 // DATA TYPES
 
@@ -60,8 +54,7 @@ class CVCXTestStatsKeeper;
 *  @since ?Series60_version
 */
 class CVCXMyVideosCollectionPluginTester : public CBase, 
-                                           public MMPXCollectionObserver,
-                                           public MIptvTestTimerObserver
+                                           public MMPXCollectionObserver
     {
     public:  // Constructors and destructor
 
@@ -69,7 +62,7 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         * Two-phased constructor.
         */
         static CVCXMyVideosCollectionPluginTester* NewL( MVCXMyVideosCollectionPluginTesterObserver* aObserver,
-                CVCXTestCommon* aTestCommon, CVCXTestStatsKeeper* aStatsKeeper );
+                CVCXMyVideosTestUtils* aTestUtil );
 
         /**
         * Destructor.
@@ -88,7 +81,13 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          * Opens MPX collection level.
          * Observer gets message when action is finished.
          */
-        void OpenLevelL( TInt aIndex );
+        void OpenLevelL( const TDesC& aLevelName );
+
+        /**
+         * Opens MPX collection level at specified index of current mpx item list. 
+         * Observer gets message when action is finished.
+         */
+        void OpenLevelL( TInt aIndex );        
 
         /**
          * Gets medias by their MPX IDs. A collection must be opened before calling this.
@@ -130,9 +129,8 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         void GetAllMediaFullDetailsL();
 
         /**
-         * Prints details for items in the current MPX level and
-         * updates the downloads. This is done when collection or collection
-         * level is opened.
+         * Prints details for items in the current MPX level. This is done when collection
+         * or collection level is opened.
          */
         void ProcessCurrentEntriesL();
 
@@ -145,6 +143,16 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          * Prints MPX media object properties to debug output.
          */
         void PrintMPXMediaL( const CMPXMedia& aMedia, TBool aPrintAllDetails );
+        
+        /**
+         * Updates local data that keeps track of albums.
+         */
+        void UpdateAlbumsListL();
+        
+        /**
+         * Returns mpx id of album if it's found from local data. 
+         */
+        TMPXItemId GetAlbumIdL( const TDesC& aAlbumName );
         
         /**
          * Returns count of items of the open MPX level.
@@ -187,6 +195,13 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          * Gets MPX media from current entries. Contains only brief details of the item.
          */
         CMPXMedia* GetMediaL( TInt aDrive, TInt aIndex );
+        
+        /**
+         * Gets index of media with specified name.
+         * 
+         * @return index
+         */
+        TInt GetIndexOfMediaWithNameL( const TDesC& aName );
 
         /**
          * Moves multiple medias to specified drive.
@@ -235,6 +250,44 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         void CancelDeleteL( TBool aSync );
         
         /**
+         * Creates an album.
+         */
+        void CreateAlbumL( const TDesC& aAlbumName, TBool aSync, TBool aInvalidRequest = EFalse );
+        
+        /**
+         * Deletes albums.
+         */
+        void DeleteAlbumsL( RArray<TPtrC>& aAlbumNames );
+        
+        /**
+         * Deletes all albums.
+         */
+        void DeleteAllAlbumsL();
+        
+        /**
+         * Adds medias to an album.
+         *
+         * @param aDestAlbumName
+         * @param aStartIndex
+         * @param aEndIndex 
+         */
+        void AddMediasToAlbumL( const TDesC& aAlbumName, TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex );
+
+        /**
+         * Removes medias from an album.
+         *
+         * @param aDestAlbumName
+         * @param aStartIndex
+         * @param aEndIndex 
+         */
+        void RemoveMediasFromAlbumL( const TDesC& aAlbumName, TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex );
+        
+        /**
+         * Checks the count of albums.
+         */
+        bool CheckAlbumCount( int aExpectedCount );
+
+        /**
          * Use to toggle automatic refresh of contents when open collection changes.
          */
         void SetAutomaticRefresh( TBool aValue );
@@ -249,79 +302,6 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          */
         void SetQuietMode( TBool aValue );
 
-        /**
-         * Starts MPX My Videos download.
-         * @param aTitle
-         * @param aIapId
-         * @param aServiceId
-         * @param aContentId
-         * @param aUrl
-         * @param aSync
-         * @param aUserName
-         * @param aPassword
-         * @param aMedia
-         */
-        void StartDownloadL( const TDesC& aTitle, TInt aIapId, TInt aServiceId, TInt aContentId,
-                const TDesC& aUrl, TBool aSync, const TDesC& aUserName, const TDesC& aPassword,
-                CMPXMedia* aMedia );
-        
-        /**
-         * Resumes MPX My Videos download.
-         * If download is not found from cache then fake download ID is used.
-         * 
-         * @param aTitle
-         * @param aIapId
-         * @param aServiceId
-         * @param aContentId
-         * @param aUrl
-         * @param aSync
-         * @param aUserName
-         * @param aPassword
-         * @param aMedia
-         */
-        void ResumeDownloadL( const TDesC& aTitle, TInt aIapId, TInt aServiceId, TInt aContentId,
-                const TDesC& aUrl, TBool aSync, const TDesC& aUserName, const TDesC& aPassword,
-                CMPXMedia* aMedia );        
-
-        /**
-         * Resumes MPX My Videos downloads.
-         */
-        void ResumeAllDownloadsL();
-        
-        /**
-         * Cancels MPX My Videos download.
-         */
-        void CancelDownloadL( CVCXMyVideosTestDownload* aDownload, TBool aSync );
-
-        /**
-         * Cancels MPX My Videos download.
-         */
-        void CancelDownloadL( TInt aMpxId, TInt aDownloadId, const TPtrC& aDownloadPath, TBool aSync );
-
-        /**
-         * Pauses MPX My Videos download.
-         */
-        void PauseDownloadL( TInt aServiceId, TInt aContentId, const TDesC& aUrl, TBool aSync );
-
-        /**
-         * Pauses MPX My Videos download.
-         */
-        void PauseDownloadL( const TDesC& aUrl, TBool aSync  );
-
-        /**
-         * Returns instance of the download watcher.
-         */
-        CVCXMyVideosTestDlWatcher* GetDownloadWatcher();
-
-        /**
-         * Returns number of active downloads.
-         */
-        TInt GetActiveDownloadCountL();
-
-        /**
-         * Sets automatic resuming of paused download.
-         */
-        void SetAutoResume( TBool aValue );
 
         /**
          * Returns the index of current collection level.
@@ -373,11 +353,14 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          */
         CMPXMediaArray* SelectMediasL( TInt aDriveFilter, TInt aStartIndex, TInt aEndIndex );
         
-    private:
         /**
-         * Updates the downloads using current MPX entries.
-         */
-        void UpdateDownloadsL( TBool aQuietMode );
+        * With this method the SelectMediasL method can be set to use copied media array
+        * instead of current medias. After that move, copy, delete etc. operations for 
+        * multiple medias will use the copied media array and not current medias.
+        */
+        void SetUseCopiedMediasL( TBool aUseCopiedMedias );
+        
+    private:
         
         /** 
          * Creates a MPX command.
@@ -413,6 +396,11 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          * Sets status of refresh.
          */
         void SetRefreshStatus( TBool aRefreshingCollection );
+        
+        /**
+         * Creates copy of iMediaArray to iMediaArrayCopy.    
+         */
+        void CreateCopyOfCurrentMediasL();
         
     public: // Functions from base classes
 
@@ -473,21 +461,13 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         void HandleCommandComplete( CMPXCommand* aCommandResult,
                                     TInt aError);
 
-        /**
-        * From MIptvTestTimerObserver Handles timer completion
-        * @since
-        * @param aTimerId
-        * @param aError
-        */
-        void TimerComplete(TInt aTimerId, TInt aError);
-        
     private:
 
         /**
         * C++ default constructor.
         */
         CVCXMyVideosCollectionPluginTester( MVCXMyVideosCollectionPluginTesterObserver* aObserver, 
-                CVCXTestCommon* aTestCommon, CVCXTestStatsKeeper* aStatsKeeper );
+                CVCXMyVideosTestUtils* aTestUtils );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -519,14 +499,17 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         // Media array of videos tests uses.
         CMPXMediaArray* iMediaArray;
 
+        // Media array of videos tests uses, copy.
+        CMPXMediaArray* iMediaArrayCopy;
+
         // Media array of previous videos.
         CMPXMediaArray* iOldMediaArray;
 
         // Count of current medias in iMediaArray.
         TUint32 iMediaCount;
 
-        // CVCXTestCommon.
-        CVCXTestCommon* iTestCommon;
+        // CVCXMyVideosTestUtils.
+        CVCXMyVideosTestUtils* iTestUtils;
 
         // RFs.
         RFs iFs;
@@ -534,26 +517,16 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         // Refresh is already ongoing.
         TBool iRefreshingCollection;
 
-        // Member to keep track of downnloads.
-        CVCXMyVideosTestDlWatcher* iDlWatcher;
-
         // Active wait
-        CIptvTestActiveWait* iActiveWait;
+        CVcxTestActiveWait* iActiveWait;
 
         // Refresh contents of open collection when they change
         TBool iAutomaticContentRefresh;
 
         // Tester is waiting for item change.
         TBool iWaitingForItemChange;
-
-        // Autoresume downloads
-        TBool iAutoResume;
-
-        // Downloads do not start updating before we get DL related commands from script.
-        TBool iUpdateDownloads;
-
-        TUint32 iCurrentMyVideosMessageId;
-
+        
+        // Ids of medias for commands that use multiple medias.
         RArray<TInt32> iRequestedMediaIds;
         
         // Full details of media got from GetMediaDetailsL
@@ -574,24 +547,15 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
         // Canceling Move, Copy or Delete cause commmand completion with error KErrCancel  
         TBool iCancelRequested;
         
-        // Update downloads only after first one is started.
-        TBool iDownloadsStarted;
-        
         TInt iActionCount;
-        
-        // Download progress update timer.
-        CIptvTestTimer* iProgressTimer;
         
         TInt iVideosOnRomCount;
         
-        // Variable to follow what kind of collection opening is going on.  
-        TInt iCurrentActionId; 
+        // Arrays to hold info of albums.
+        RPointerArray<HBufC> iAlbumNames;
+        RArray<TMPXItemId>   iAlbumIds;
         
-        // Variable to follow where action ending should be handled. 
-        TBool iCurrentActionHasResponse;
-        
-        // Class to hold robustness and performance data.
-        CVCXTestStatsKeeper* iStats;
+        TBool iUseCopiedMedias;
     };
 
 #endif      // VCXMYVIDEOSCOLLECTIONPLUGINTESTER_H

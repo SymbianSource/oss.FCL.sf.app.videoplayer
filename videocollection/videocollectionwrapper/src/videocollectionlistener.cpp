@@ -31,16 +31,19 @@
 
 #include "videocollectionlistener.h"
 #include "videocollectionclient.h"
+#include "videodatasignalreceiver.h"
 #include "videocollectionutils.h"
+#include "videocollectioncommon.h"
 
 // -----------------------------------------------------------------------------
 // VideoCollectionListener
 // -----------------------------------------------------------------------------
 //
-VideoCollectionListener::VideoCollectionListener(VideoCollectionClient &collectionClient) : 
+VideoCollectionListener::VideoCollectionListener(VideoCollectionClient &collectionClient,
+                                                VideoDataSignalReceiver &signalReceiver) : 
 mCollectionClient(collectionClient),
-mVideoUtils(VideoCollectionUtils::instance()),
-mNewArrayRequest(true)
+mSignalReceiver(signalReceiver),
+mVideoUtils(VideoCollectionUtils::instance())
 {
 
 }
@@ -66,16 +69,6 @@ void VideoCollectionListener::HandleCollectionMediaL(
 }
 
 // -----------------------------------------------------------------------------
-// setRequestNewMediaArray
-// -----------------------------------------------------------------------------
-//
-void VideoCollectionListener::setRequestNewMediaArray(bool request)
-{
-    mNewArrayRequest = request;
-}
-
-
-// -----------------------------------------------------------------------------
 // HandleOpenL
 // -----------------------------------------------------------------------------
 //
@@ -90,42 +83,48 @@ void VideoCollectionListener::HandleOpenL(
         return;
     }
 
-    int level = mCollectionClient.getCollectionLevel();
-    
-    if((level != VideoCollectionClient::ELevelVideos) &&
-	   (level != VideoCollectionClient::ELevelCategory))
+    // Check that current level is valid and entries has collection path. 
+    if(mCollectionClient.getCollectionLevel() < VideoCollectionCommon::ELevelCategory || 
+       !aEntries.IsSupported(KMPXMediaGeneralContainerPath))
     {
         return;
     }
+    
     CMPXMediaArray *array =
                     mVideoUtils.mediaValuePtr<CMPXMessageArray>(&aEntries, KMPXMediaArrayContents);
-
     if(!array)
     {
         // no videos!
         return;
     }
-    // if there's item's, compare gotten items' level to wanted level. 
-    // If they do not match, do nothing
-    if(array->Count() > 0)
+
+    CMPXCollectionPath* path = aEntries.Value<CMPXCollectionPath>(KMPXMediaGeneralContainerPath); 
+    if(!path)
+	{
+        return;
+	}
+
+    TMPXItemId pathId = path->Id();
+    
+    TBool categoryOrAlbumVideoList = false;
+    if(path->Levels() == VideoCollectionCommon::PathLevelVideos && pathId.iId2 != 0)
+	{
+        categoryOrAlbumVideoList = true;
+	}
+
+    if(categoryOrAlbumVideoList)
     {
-        TMPXItemId id( 0, 0 );
-        mVideoUtils.mediaValue<TMPXItemId>((*array)[0], KMPXMediaGeneralId, id );
-        if((id.iId2 == 1 && level != VideoCollectionClient::ELevelCategory) ||
-            id.iId2 != 1 && level != VideoCollectionClient::ELevelVideos)  
-        {
-            return;
-        }
-        
-    }
-    if(mNewArrayRequest)
-    {
-       emit newVideoList(array);
-       mNewArrayRequest = false;
+        mSignalReceiver.albumListAvailableSlot(pathId, array);
+
+        // Update also all video list in case this is a default category. 
+        if(pathId.iId2 == KVcxMvcMediaTypeCategory)
+		{
+            mSignalReceiver.newVideoListSlot(array);
+		}
     }
     else
     {
-        emit videoListAppended(array);
+        mSignalReceiver.newVideoListSlot(array);
     }
  }
 
@@ -160,6 +159,46 @@ void VideoCollectionListener::HandleCommandComplete(
         {
             handleGetVideoDetailsResp(aCommandResult);
         }
+        else if(commandId == KVcxCommandMyVideosRemoveAlbums)
+        {
+			CMPXMediaArray *messageArray = 
+				mVideoUtils.mediaValuePtr<CMPXMediaArray>(aCommandResult, KMPXMediaArrayContents);
+			
+			if(!messageArray || messageArray->Count() == 0)
+			{
+				return;
+			}
+			QList<TMPXItemId> failedIds;    
+			TMPXItemId itemId;  
+			int count = messageArray->Count();
+			int failedFlag = 0;
+			CMPXMedia* item = NULL;
+			
+			// go throught all removed albums and see if some has failed
+			for (int i = 0; i < count; ++i)
+			{
+				item = (*messageArray)[i];
+				if(!mVideoUtils.mediaValue<TMPXItemId>(item, KMPXMediaGeneralId, itemId))
+				{
+					// invalid message, return 
+					return;
+				}
+				// if there's error while fetching value, it means that value does not exists,
+				// so we can assume remove was succefull
+				if(mVideoUtils.mediaValue<int>(item, KVcxMediaMyVideosInt32Value, failedFlag))
+				{
+					if (failedFlag)
+					{
+						failedIds.append(itemId);
+					}
+					failedFlag = 0;
+				}       
+			}
+			if (failedIds.count())
+			{
+				mSignalReceiver.albumRemoveFailureSlot(&failedIds);
+			}
+        }
     }
 }
 
@@ -185,7 +224,7 @@ void VideoCollectionListener::HandleCollectionMessage(
     if(mCollectionClient.getOpenStatus() == VideoCollectionClient::ECollectionOpened )
     {
         // after colletion has been opened we handle messages from our collection plugin only
-        TUid collectionUid;
+        TUid collectionUid = {0};
         bool status = mVideoUtils.mediaValue<TUid>(aMessage, KMPXMessageCollectionId, collectionUid);
         if(!status || collectionUid.iUid != KVcxUidMyVideosMpxCollection)
         {
@@ -347,19 +386,16 @@ void VideoCollectionListener::handleGeneralMPXMessage(CMPXMessage* aMessage)
 //
 void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
 {
-    if(mCollectionClient.getCollectionLevel() != VideoCollectionClient::ELevelVideos)
-    {
-        // we do not handle events from other levels than ones concerning videos
-        return;
-    }
- 
-    TMPXChangeEventType eventType; 
-    if(!mVideoUtils.mediaValue<TMPXChangeEventType>(aMessage,KMPXMessageChangeEventType, eventType))
+
+    TMPXChangeEventType eventType = EMPXItemModified; 
+    if(!mVideoUtils.mediaValue<TMPXChangeEventType>(
+        aMessage,KMPXMessageChangeEventType, eventType))
     {
         return;
     }
-    TMPXItemId eventData; 
-    if(!mVideoUtils.mediaValue<TMPXItemId>(aMessage,KMPXMessageMediaGeneralId, eventData))
+    TMPXItemId itemId = TMPXItemId::InvalidId(); 
+    if(!mVideoUtils.mediaValue<TMPXItemId>(
+        aMessage,KMPXMessageMediaGeneralId, itemId))
     {       
         return;
     }
@@ -367,53 +403,39 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
     switch(eventType)
     {
         case EMPXItemDeleted:
-            emit videoDeleted(eventData);
-        break;
-        case EMPXItemInserted:        
-            if(eventData.iId2 < 2)
+        {
+            mSignalReceiver.itemDeletedSlot(itemId);
+            break;
+        }
+        case EMPXItemInserted:
+        {
+            CMPXMedia *media = mVideoUtils.mediaValuePtr<CMPXMedia>(
+                aMessage, KMPXCommandColAddMedia);
+            if (media)
             {
-                CMPXMedia *media = mVideoUtils.mediaValuePtr<CMPXMedia>(aMessage, KMPXCommandColAddMedia);
-
-                if(media)
-                {
-                    //TODO: album support                    
-                	TUint8 origin = EVcxMyVideosOriginOther;                	
-                	mVideoUtils.mediaValue<TUint8>(media, KVcxMediaMyVideosOrigin, origin);
-
-                    int id = -1;
-                    int type = -1;
-                    
-                    mCollectionClient.getCategoryIds(id, type);
-
-                    if ((1 == type) || (0 == type)) //TODO: KVcxMvcCategoryIdAll has type 0, but it should be 1
-                    {
-						if (id == KVcxMvcCategoryIdAll)
-						{
-							emit newVideoAvailable(media);
-						}
-						else if ((id == KVcxMvcCategoryIdDownloads) && (origin == EVcxMyVideosOriginDownloaded) && (1 == type))
-						{
-							emit newVideoAvailable(media);
-						}
-						else if ((id == KVcxMvcCategoryIdCaptured) && (origin == EVcxMyVideosOriginCapturedWithCamera) && (1 == type))
-						{
-							emit newVideoAvailable(media);
-						}
-                    }
-                    else if (2 == type) //album
-                    {
-                    	//TODO: check album
-                    }
-                    	
-                }
-                else
-                {
-                    mCollectionClient.fetchMpxMediaByMpxId(eventData);
-                }
+                mSignalReceiver.newVideoAvailableSlot(media); 
             }
-        break;
-    default:
-        break;
+            else
+            {
+                mCollectionClient.fetchMpxMediaByMpxId(itemId);
+            }
+            break;
+        }
+        case EMPXItemModified:
+        {
+            if (itemId.iId2 == KVcxMvcMediaTypeAlbum)
+            {
+                // re-open the album in case album corresponds recently opened.
+                // to fetch the album contents.
+                mCollectionClient.openItem(itemId);
+            }
+            break;
+        }
+        default:
+        {
+            // invalid event type
+            break;
+        }
     }
 }
 
@@ -457,7 +479,7 @@ void VideoCollectionListener::handleMyVideosDeleteMessage(CMPXMessage* aMessage)
             failedFlag = 0;
         }       
     }
-    emit videoDeleteCompleted(count, &failedIds);
+    mSignalReceiver.videoDeleteCompletedSlot(count, &failedIds);
 }
 
 // -----------------------------------------------------------------------------
@@ -473,7 +495,7 @@ void VideoCollectionListener::handleGetMediasByMpxIdResp(CMPXMessage* aMessage)
     {
         return;
     }
-    emit newVideoAvailable((*array)[0]);    
+    mSignalReceiver.newVideoAvailableSlot((*array)[0]);    
 }
 
 // -----------------------------------------------------------------------------
@@ -492,8 +514,6 @@ void VideoCollectionListener::handleGetVideoDetailsResp(CMPXMessage* aMessage)
     {
         return;
     }
-    emit videoDetailsCompleted(itemId);
+    mSignalReceiver.videoDetailsCompletedSlot(itemId);
 }
-
-
 

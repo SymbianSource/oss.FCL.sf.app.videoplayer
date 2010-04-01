@@ -59,7 +59,8 @@ HEADERS += inc/testvideofiledetails.h \
            stub/inc/thumbnailmanager_qt.h \
            stub/inc/videoservices.h \
            stub/inc/videoserviceurifetch.h \
-           ../../inc/videofiledetailsviewplugin.h
+           ../../inc/videofiledetailsviewplugin.h \
+           ../../inc/videodetailslabel.h
    
 SOURCES += src/testvideofiledetails.cpp \
            stub/src/videocollectionwrapper.cpp \
@@ -68,7 +69,8 @@ SOURCES += src/testvideofiledetails.cpp \
            stub/src/thumbnailmanager_qt.cpp \
            stub/src/videoservices.cpp \
            stub/src/videoserviceurifetch.cpp \
-           ../../src/videofiledetailsviewplugin.cpp
+           ../../src/videofiledetailsviewplugin.cpp \
+           ../../src/videodetailslabel.cpp
 
 RESOURCES += ../../data/videofiledetails.qrc
 TARGET.CAPABILITY = All \

@@ -43,14 +43,14 @@ HEADERS += inc/testvideocollectionclient.h \
            stub/inc/mpxmedia.h \
            stub/inc/mpxmediaarray.h \
            stub/inc/mpxattribute.h \
-           stub/inc/stubcollectionsignalclasses.h \
+           stub/inc/stubcollectionsignalreceiver.h \
            stub/inc/videocollectionlistener.h \
            ../../inc/videodatasignalreceiver.h \
            ../../inc/videocollectionclient.h
 
 SOURCES += src/testvideocollectionclient.cpp \
            stub/src/mpxcollectionutility.cpp \
+           stub/src/mpxmedia.cpp \
            stub/src/mpxcollectionpath.cpp \
-           stub/src/stubcollectionsignalclasses.cpp \
            stub/src/videocollectionlistener.cpp \
            ../../src/videocollectionclient.cpp

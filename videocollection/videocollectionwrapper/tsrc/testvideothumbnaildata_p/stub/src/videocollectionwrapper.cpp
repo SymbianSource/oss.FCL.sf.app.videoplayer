@@ -28,30 +28,10 @@ VideoCollectionWrapper *VideoCollectionWrapper::mInstance = 0;
 // VideoCollectionWrapper::instance()
 // -----------------------------------------------------------------------------
 //
-VideoCollectionWrapper *VideoCollectionWrapper::instance()
+VideoCollectionWrapper &VideoCollectionWrapper::instance()
 {
-    if(!mInstance)
-    {
-        mInstance = new VideoCollectionWrapper();
-    }
-    mInstance->mReferenceCount++;
-    return mInstance;
-}
-
-// -----------------------------------------------------------------------------
-// VideoCollectionWrapper::decreaseReferenceCount()
-// -----------------------------------------------------------------------------
-//
-void VideoCollectionWrapper::decreaseReferenceCount()
-{
-    if(mInstance)
-    {
-        if(--mInstance->mReferenceCount == 0)
-        {
-            delete mInstance;
-            mInstance = NULL;
-        }
-    }
+    static VideoCollectionWrapper _staticWrapper;
+    return _staticWrapper;
 }
 
 // -----------------------------------------------------------------------------
@@ -75,7 +55,7 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
 // VideoCollectionWrapper::open()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel()
+VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(TModelType type)
 {
     return mModel;
 }
