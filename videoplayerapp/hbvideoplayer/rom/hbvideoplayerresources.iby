@@ -22,7 +22,8 @@
 #include <bldvariant.hrh>
 #include <data_caging_paths_for_iby.hrh>
 
-/*
 S60_APP_RESOURCE(videoplayer)
-*/
+
+data=DATAZ_\QT_TRANSLATIONS_DIR\videos.qm                       QT_TRANSLATIONS_DIR\videos.qm 
+
 #endif  // __HBVIDEOPLAYERRESOURCES_IBY__
