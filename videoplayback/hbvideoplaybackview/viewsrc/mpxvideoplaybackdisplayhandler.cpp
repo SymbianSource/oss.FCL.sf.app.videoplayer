@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  17 %
+// Version : %version:  18 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -531,7 +531,7 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
     //
     if ( cropRect.Width() < cropRect.Height() )
     {
-        iRotation = EVideoRotationClockwise270;
+        iRotation = EVideoRotationClockwise90;
     }
     
     iWindowRect = cropRect;
