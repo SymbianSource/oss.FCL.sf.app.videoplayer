@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: ou1cpsw#41 %
+// Version : %version: 43 %
 
 
 //
@@ -75,6 +75,12 @@ _LIT( KFormat, "MimeType" );
 _LIT( KTrue, "1" );
 _LIT( KFalse, "0" );
 _LIT (KMPStreamingPauseSupported, "StreamingPauseSupported");
+_LIT( KDescription, "Description" );
+_LIT( KAbstract, "Abstract" );
+_LIT( KLocation, "Location" );
+_LIT( KRightCopy, "Copyright" );
+_LIT( KLanguage, "Language" );
+_LIT( KKeywords, "Keywords" );
 
 
 // ============================ MEMBER FUNCTIONS ===================================================
@@ -1273,12 +1279,12 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
     //
     if ( iFileHandle.SubSessionHandle() )
     {
-        iFileDetails->iDrmProtected = iDrmHelper->IsProtected( iFileHandle );
+        iFileDetails->iDrmProtected = iDrmHelper->IsProtectedL( iFileHandle );
     }
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
     else if ( iFileHandle64.SubSessionHandle() )
     {
-        iFileDetails->iDrmProtected = iDrmHelper->IsProtected64( iFileHandle64 );
+        iFileDetails->iDrmProtected = iDrmHelper->IsProtected64L( iFileHandle64 );
     }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
@@ -1364,7 +1370,13 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
             else if ( ( ! metaData->Name().CompareF( KArtist ) ) ||
                       ( ! metaData->Name().CompareF( KAuthor ) ) )
             {
-                iFileDetails->iArtist = metaData->Value().AllocL();
+                //
+                //  Do not overwrite the artist
+                //
+                if ( ! iFileDetails->iArtist )
+                {
+                    iFileDetails->iArtist = metaData->Value().AllocL();
+                }
             }
             else if ( ! metaData->Name().CompareF( KFormat ) )
             {
@@ -1384,7 +1396,34 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
                     iFileDetails->iPausableStream = EFalse;
                 }
             }
-
+            else if ( ( ! metaData->Name().CompareF( KDescription ) ) ||
+                      ( ! metaData->Name().CompareF( KAbstract ) ) )
+            {
+                //
+                //  Do not overwrite the description
+                //
+                if ( ! iFileDetails->iDescription )
+                {
+                    iFileDetails->iDescription = metaData->Value().AllocL();
+                }
+            }
+            else if ( !metaData->Name().CompareF( KLocation ) )
+            {
+                iFileDetails->iLocation = metaData->Value().AllocL();
+            }
+            else if ( !metaData->Name().CompareF( KRightCopy ) )
+            {
+                iFileDetails->iCopyright = metaData->Value().AllocL();
+            }
+            else if ( !metaData->Name().CompareF( KLanguage ) )
+            {
+                iFileDetails->iLanguage = metaData->Value().AllocL();
+            }
+            else if ( !metaData->Name().CompareF( KKeywords ) )
+            {
+                iFileDetails->iKeywords = metaData->Value().AllocL();
+            }
+            
             CleanupStack::PopAndDestroy( metaData );
         }
 

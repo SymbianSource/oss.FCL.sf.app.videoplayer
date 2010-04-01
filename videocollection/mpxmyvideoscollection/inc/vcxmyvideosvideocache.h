@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    Contains cached MDS media items*
+* Description:   Contains cached MDS media items*
 */
-
 
 
 
@@ -348,6 +347,10 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         */
         TVcxMyVideosSortingOrder iLastSortingOrder;
         
+        /**
+         * Set to ETrue when doing videolist fetching.
+         */
+        TBool IsFetchingVideoList;
     private:
         
         /**

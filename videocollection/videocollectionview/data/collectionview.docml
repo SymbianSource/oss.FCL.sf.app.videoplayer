@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <object name="vc:mAddtoCollection" type="HbAction">
+        <string locid="Add to collection..." name="text"/>
+    </object>
+    <object name="vc:mCreateNewCollection" type="HbAction">
+        <string locid="Create new collection..." name="text"/>
+    </object>
+    <object name="vc:mDeleteMultiple" type="HbAction">
+        <string locid="Delete..." name="text"/>
+    </object>
+    <object name="vc:mDate" type="HbAction">
+        <string locid="Date" name="text"/>
+    </object>
+    <object name="vc:mName" type="HbAction">
+        <string locid="Name" name="text"/>
+    </object>
+    <object name="vc:mNumberOfItems" type="HbAction">
+        <string locid="Number of items" name="text"/>
+    </object>
+    <object name="vc:mTotalLength" type="HbAction">
+        <string locid="Total length" name="text"/>
+    </object>
+    <object name="vc:mSize" type="HbAction">
+        <string locid="Size" name="text"/>
+    </object>
+    <widget name="view" type="VideoListView">
+        <widget name="vc:mOptionsMenu" role="HbView:menu" type="HbMenu">
+            <ref object="vc:mAddtoCollection" role="HbMenu:addAction"/>
+            <ref object="vc:mCreateNewCollection" role="HbMenu:addAction"/>
+            <ref object="vc:mDeleteMultiple" role="HbMenu:addAction"/>
+            <widget name="vc:mSortBy" role="HbMenu:menu" type="HbMenu">
+                <ref object="vc:mDate" role="HbMenu:addAction"/>
+                <ref object="vc:mName" role="HbMenu:addAction"/>
+                <ref object="vc:mNumberOfItems" role="HbMenu:addAction"/>
+                <ref object="vc:mTotalLength" role="HbMenu:addAction"/>
+                <ref object="vc:mSize" role="HbMenu:addAction"/>
+                <string locid="Sort by" name="title"/>
+            </widget>
+        </widget>
+        <widget name="content" role="HbView:widget" type="HbWidget">
+            <widget name="vc:mBanner" type="HbGroupBox"/>
+            <widget name="vc:mStackedLayout" type="HbWidget">
+                <widget name="vc:mListWidget" type="VideoListWidget">
+                    <sizehint height="47.7612un" type="PREFERRED" width="35.8209un"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="vc:mHintWidget" type="VideoHintWidget">
+                    <widget name="vc:mNoVideosLabel" type="HbLabel">
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                        <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
+                        <bool name="visible" value="TRUE"/>
+                        <string name="plainText" value="(No videos)"/>
+                        <sizehint height="6un" type="PREFERRED"/>
+                    </widget>
+                    <widget name="vc:mHintTextLabel" type="HbLabel">
+                        <enums name="textWrapping" value="TextWordWrap"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                        <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
+                        <bool name="visible" value="TRUE"/>
+                        <string name="plainText" value="To get videos, visit OVI store"/>
+                        <sizehint height="6un" type="PREFERRED"/>
+                    </widget>
+                    <widget name="vc:mHintButtonLayout" type="HbWidget">
+                        <widget name="vc:mHintButton" type="HbPushButton">
+                            <real name="z" value="1"/>
+                            <sizehint height="6un" type="MAXIMUM" width="12un"/>
+                            <bool name="visible" value="TRUE"/>
+                            <sizehint type="PREFERRED" width="12un"/>
+                        </widget>
+                        <real name="z" value="0"/>
+                        <sizehint height="11.9403un" type="PREFERRED" width="23.8806un"/>
+                        <layout orientation="Horizontal" type="linear">
+                            <stretchitem stretchfactor="1"/>
+                            <linearitem itemname="vc:mHintButton"/>
+                            <stretchitem stretchfactor="1"/>
+                        </layout>
+                    </widget>
+                    <real name="z" value="0"/>
+                    <sizehint height="23.8806un" type="PREFERRED" width="23.8806un"/>
+                    <layout orientation="Vertical" type="linear">
+                        <stretchitem stretchfactor="1"/>
+                        <linearitem itemname="vc:mNoVideosLabel"/>
+                        <linearitem itemname="vc:mHintTextLabel"/>
+                        <linearitem itemname="vc:mHintButtonLayout"/>
+                        <stretchitem stretchfactor="1"/>
+                    </layout>
+                </widget>
+                <real name="z" value="0"/>
+                <sizehint height="23.8806un" type="PREFERRED" width="23.8806un"/>
+                <layout type="stacked">
+                    <stackitem itemname="vc:mListWidget"/>
+                    <stackitem itemname="vc:mHintWidget"/>
+                </layout>
+            </widget>
+            <layout orientation="Vertical" type="linear">
+                <linearitem itemname="vc:mBanner"/>
+                <linearitem itemname="vc:mStackedLayout"/>
+            </layout>
+        </widget>
+    </widget>
+    <metadata activeUIState="Common ui state" display="QHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>

@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    Video list cache. Contains cached data from MDS.*
+* Description:   Video list cache. Contains cached data from MDS.*
 */
-
 
 
 
@@ -385,6 +384,8 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
             {
             MPX_DEBUG2("CVcxMyVideosVideoCache:: MDSID(%d) not found from cache, ok", aMdsIds[j]);
             
+            //TODO: This doesnt work with new mds cmd queue. Cancel must be done if there is _any_ async req going on.
+            //      Maybe the fetching could be changed to asynchronous...
             if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing )
                 {
                 // If list fetching is not canceled, CreateVideoObjectL will leave with KErrNotReady.
@@ -588,7 +589,7 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
     
     TVcxMyVideosSortingOrder sortingOrder = SortingOrderL();
         
-    if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing
+    if ( IsFetchingVideoList
             && sortingOrder == iLastSortingOrder && !aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList creation is already ongoing, skipping");
@@ -599,10 +600,11 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList was partial or in wrong order or aForce was ETrue, recreating");
 
-        if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing )
+        if ( IsFetchingVideoList )
             {
             MPX_DEBUG1("CVcxMyVideosVideoCache:: video list fetching is ongoing, canceling it");
-            iCollection.iMyVideosMdsDb->Cancel();
+            iCollection.iMyVideosMdsDb->Cancel( CVcxMyVideosMdsDb::EGetVideoList );
+            IsFetchingVideoList = EFalse;
             }
         
         ResetVideoListL();
@@ -628,6 +630,7 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
                 EFalse /* brief list */,
                 iVideoList /* use existing */ );
 
+        IsFetchingVideoList = ETrue;
         iLastSortingOrder   = sortingOrder;
         iVideoListIsPartial = ETrue;
         }
@@ -1030,7 +1033,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
             }
         }
     
-    // 23
+    // 22
     if ( aVideo.IsSupported( KMPXMediaVideoHeight ) )
         {
         TUint16 height = aVideo.ValueTObjectL<TUint16>( KMPXMediaVideoHeight ); 
@@ -1491,7 +1494,8 @@ void CVcxMyVideosVideoCache::ResetVideoListL()
     {
     MPX_FUNC("CVcxMyVideosVideoCache::ResetVideoListL");
 
-    iCollection.iMyVideosMdsDb->Cancel();
+    //TODO: when should we cancel...
+    //iCollection.iMyVideosMdsDb->Cancel();
 
     CMPXMediaArray* mediaArray =
             iVideoList->ValueCObjectL<CMPXMediaArray>( KMPXMediaArrayContents );

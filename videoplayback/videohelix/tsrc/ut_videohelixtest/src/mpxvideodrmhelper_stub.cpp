@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 #include "mpxvideodrmhelper.h"
@@ -46,10 +46,10 @@ void CMpxVideoDrmHelper::ConstructL()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsProtected()
+//    CMpxVideoDrmHelper::IsProtectedL()
 //  ------------------------------------------------------------------------------------------------
 //
-TBool CMpxVideoDrmHelper::IsProtected( RFile& aFile )
+TBool CMpxVideoDrmHelper::IsProtectedL( RFile& aFile )
 {
     TBool drmProtected = EFalse;
 
@@ -118,10 +118,10 @@ TBool CMpxVideoDrmHelper::IsTvOutAllowedL( RFile& aFile )
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
 //  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsProtected64()
+//    CMpxVideoDrmHelper::IsProtected64L()
 //  ------------------------------------------------------------------------------------------------
 //
-TBool CMpxVideoDrmHelper::IsProtected64( RFile64& aFile )
+TBool CMpxVideoDrmHelper::IsProtected64L( RFile64& aFile )
 {
     TBool drmProtected = EFalse;
 

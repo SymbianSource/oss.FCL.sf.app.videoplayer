@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.8">
+    <widget name="content" type="HbWidget">
+        <widget name="buttonBarLayout" type="HbWidget">
+            <widget name="aspectRatioButtons" type="HbWidget">
+                <widget name="naturalButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/natural.png" name="icon"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="stretchButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/stretch.png" name="icon"/>
+                    <real name="z" value="1"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="zoomButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/zoom.png" name="icon"/>
+                    <real name="z" value="2"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                </widget>
+                <real name="z" value="0"/>
+                <sizehint height="150" type="PREFERRED" width="150"/>
+                <sizehint height="52" type="MINIMUM" width="120"/>
+                <layout type="stacked">
+                    <stackitem itemname="naturalButton"/>
+                    <stackitem itemname="stretchButton"/>
+                    <stackitem itemname="zoomButton"/>
+                </layout>
+            </widget>
+            <widget name="rwButton" type="HbPushButton">
+                <icon iconName=":/hbvideoplaybackview/images/previous.png" name="icon"/>
+                <sizehint height="50" type="PREFERRED" width="150"/>
+                <sizehint height="50" type="MINIMUM" width="120"/>
+            </widget>
+            <widget name="playPauseButtons" type="HbWidget">
+                <widget name="playButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/play.png" name="icon"/>
+                    <real name="z" value="1"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="pauseButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/pause.png" name="icon"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                </widget>
+                <real name="z" value="0"/>
+                <sizehint height="150" type="PREFERRED" width="150"/>
+                <sizehint height="52" type="MINIMUM" width="120"/>
+                <layout type="stacked">
+                    <stackitem itemname="playButton"/>
+                    <stackitem itemname="pauseButton"/>
+                </layout>
+            </widget>
+            <widget name="ffButton" type="HbPushButton">
+                <icon iconName=":/hbvideoplaybackview/images/next.png" name="icon"/>
+                <real name="z" value="7"/>
+                <sizehint height="50" type="PREFERRED" width="150"/>
+                <sizehint height="50" type="MINIMUM" width="120"/>
+            </widget>
+            <widget name="detailsButton" type="HbPushButton">
+                <icon iconName=":/hbvideoplaybackview/images/details.png" name="icon"/>
+                <sizehint height="50" type="PREFERRED" width="150"/>
+                <sizehint height="50" type="MINIMUM" width="120"/>
+            </widget>
+            <real name="z" value="1"/>
+            <sizehint height="60" type="PREFERRED" width="640"/>
+            <sizehint height="50" type="MINIMUM" width="178"/>
+            <bool name="visible" value="FALSE"/>
+            <layout orientation="Horizontal" type="linear">
+                <linearitem itemname="aspectRatioButtons"/>
+                <linearitem itemname="rwButton"/>
+                <linearitem itemname="playPauseButtons"/>
+                <linearitem itemname="ffButton"/>
+                <linearitem itemname="detailsButton"/>
+            </layout>
+        </widget>
+        <widget name="progressBarLayout" type="HbWidget">
+            <widget name="positionLabel" type="HbLabel">
+                <enums name="alignment" value="AlignRight|AlignVCenter|AlignTrailing"/>
+                <real name="z" value="0"/>
+                <sizehint height="30" type="PREFERRED" width="30"/>
+                <string name="textColor" value="#0000ff"/>
+            </widget>
+            <widget name="progressSlider" type="HbProgressBar">
+                <integer name="progressValue" value="0"/>
+                <real name="z" value="1"/>
+                <sizehint height="30" type="PREFERRED" width="200"/>
+            </widget>
+            <widget name="durationLabel" type="HbLabel">
+                <enums name="alignment" value="AlignLeft|AlignVCenter|AlignTrailing"/>
+                <real name="z" value="2"/>
+                <sizehint height="30" type="PREFERRED" width="30"/>
+                <string name="textColor" value="#0000ff"/>
+            </widget>
+            <real name="z" value="3"/>
+            <sizehint height="66" type="PREFERRED" width="640"/>
+            <sizehint height="38" type="MINIMUM" width="88"/>
+            <contentsmargins bottom="0" left="30" right="28" top="20"/>
+            <sizehint height="524287" type="MAXIMUM" width="524287"/>
+            <bool name="visible" value="FALSE"/>
+            <layout orientation="Horizontal" type="linear">
+                <linearitem itemname="positionLabel"/>
+                <linearitem itemname="progressSlider"/>
+                <linearitem itemname="durationLabel"/>
+            </layout>
+        </widget>
+        <widget name="bufferingIcon" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <icon iconName=":/hbvideoplaybackview/images/connecting_loading.gif" name="icon"/>
+            <real name="z" value="5"/>
+            <sizehint height="57" type="PREFERRED" width="63"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
+                <integer name="currentRating" value="3"/>
+                <sizehint height="30" type="PREFERRED" width="200"/>
+                <contentsmargins bottom="3" left="0" right="3" top="3"/>
+            </widget>
+            <widget name="fileDetails" type="HbListWidget"/>
+            <real name="z" value="2"/>
+            <sizehint height="193" type="PREFERRED" width="320"/>
+            <bool name="visible" value="FALSE"/>
+            <layout orientation="Vertical" type="linear">
+                <contentsmargins bottom="9px" left="9px" right="9px" top="9px"/>
+                <linearitem itemname="fileDetails"/>
+                <linearitem itemname="fileDetailsRatingSlider"/>
+            </layout>
+        </widget>
+        <widget name="volumeSlider" type="HbLabel">
+            <real name="z" value="3"/>
+            <sizehint height="179" type="PREFERRED" width="79"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+        <widget name="bitmapLayout" type="HbWidget">
+            <widget name="audioOnlyBitmap" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName=":/hbvideoplaybackview/images/qgn_indi_onimage_audio.svg" name="icon"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <widget name="partialAudioOnlyBitmap" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName=":/hbvideoplaybackview/images/qgn_prop_video_corrupted.svg" name="icon"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <widget name="realAudioOnlyBitmap" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName=":/hbvideoplaybackview/images/realplay.png" name="icon"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <widget name="tvOutBitmap" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName=":/hbvideoplaybackview/images/tv_out.png" name="icon"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+            <real name="z" value="1"/>
+            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+            <sizehint height="193" type="PREFERRED" width="320"/>
+            <sizehint height="18" type="MINIMUM" width="18"/>
+            <sizehint height="16777215" type="MAXIMUM" width="16777215"/>
+            <bool name="visible" value="FALSE"/>
+            <layout type="stacked">
+                <stackitem itemname="audioOnlyBitmap"/>
+                <stackitem itemname="partialAudioOnlyBitmap"/>
+                <stackitem itemname="realAudioOnlyBitmap"/>
+                <stackitem itemname="tvOutBitmap"/>
+            </layout>
+        </widget>
+        <widget name="detailsPlaybackWindow" type="HbWidget">
+            <widget name="small_transparentWindow" type="HbTransparentWindow">
+                <widget name="detailsViewPlayButton" type="HbPushButton">
+                    <icon iconName=":/hbvideoplaybackview/images/play.png" name="icon"/>
+                    <real name="z" value="2"/>
+                    <sizehint height="229" type="PREFERRED" width="320"/>
+                    <contentsmargins bottom="80" left="120" right="120" top="80"/>
+                </widget>
+                <real name="z" value="0"/>
+                <sizehint height="229" type="PREFERRED"/>
+                <layout type="anchor">
+                    <anchoritem dst="detailsViewPlayButton" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="detailsViewPlayButton" dstEdge="TOP" spacing="0" src="" srcEdge="TOP"/>
+                    <anchoritem dst="detailsViewPlayButton" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+                    <anchoritem dst="detailsViewPlayButton" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+                </layout>
+            </widget>
+            <widget name="starRatingSlider" type="HbRatingSlider">
+                <integer name="currentRating" value="3"/>
+                <real name="z" value="1"/>
+                <sizehint height="40" type="PREFERRED" width="320"/>
+            </widget>
+            <real name="z" value="4"/>
+            <sizehint height="160" type="PREFERRED" width="80"/>
+            <bool name="visible" value="FALSE"/>
+            <layout orientation="Vertical" type="linear">
+                <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
+                <linearitem itemname="small_transparentWindow"/>
+                <linearitem itemname="starRatingSlider"/>
+            </layout>
+        </widget>
+        <widget name="title" type="HbLabel">
+            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <real name="z" value="6"/>
+            <sizehint height="33" type="PREFERRED" width="640"/>
+            <bool name="visible" value="FALSE"/>
+            <string name="plainText" value=""/>
+            <string name="textColor" value="#48a4ff"/>
+        </widget>
+        <widget name="transparentWindow" type="HbTransparentWindow">
+            <real name="z" value="0"/>
+            <bool name="visible" value="FALSE"/>
+            <layout type="anchor"/>
+        </widget>
+        <size height="360" name="size" width="640"/>
+        <real name="z" value="1"/>
+        <rect height="360" name="geometry" width="640" x="-140" y="140"/>
+        <sizehint height="524287" type="MAXIMUM" width="524287"/>
+        <layout type="anchor">
+            <anchoritem dst="buttonBarLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="buttonBarLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="buttonBarLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="progressBarLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="progressBarLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="progressBarLayout" dstEdge="BOTTOM" spacing="0" src="buttonBarLayout" srcEdge="TOP"/>
+            <anchoritem dst="bufferingIcon" dstEdge="CENTERH" spacing="0" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="bufferingIcon" dstEdge="CENTERV" spacing="0" src="" srcEdge="CENTERV"/>
+            <anchoritem dst="title" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="title" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="title" dstEdge="TOP" spacing="65" src="" srcEdge="TOP"/>
+            <anchoritem dst="volumeSlider" dstEdge="TOP" spacing="0" src="title" srcEdge="BOTTOM"/>
+            <anchoritem dst="volumeSlider" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="volumeSlider" dstEdge="RIGHT" spacing="80" src="" srcEdge="LEFT"/>
+            <anchoritem dst="volumeSlider" dstEdge="BOTTOM" spacing="10" src="progressBarLayout" srcEdge="TOP"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-116" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0" src="title" srcEdge="BOTTOM"/>
+            <anchoritem dst="bitmapLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="bitmapLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="bitmapLayout" dstEdge="BOTTOM" spacing="-116" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="bitmapLayout" dstEdge="TOP" spacing="65" src="" srcEdge="TOP"/>
+            <anchoritem dst="detailsPlaybackWindow" dstEdge="TOP" spacing="0" src="title" srcEdge="BOTTOM"/>
+            <anchoritem dst="detailsPlaybackWindow" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="detailsPlaybackWindow" dstEdge="RIGHT" spacing="0" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="detailsPlaybackWindow" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="transparentWindow" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="transparentWindow" dstEdge="TOP" spacing="0" src="" srcEdge="TOP"/>
+            <anchoritem dst="transparentWindow" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="transparentWindow" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+        </layout>
+    </widget>
+    <section name="detailsView">
+        <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
+            <sizehint height="0" type="PREFERRED" width="200"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="262" type="PREFERRED" width="320"/>
+        </widget>
+        <widget name="content" type="HbWidget">
+            <layout type="anchor">
+                <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0" src="title" srcEdge="BOTTOM"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+    </section>
+    <section name="audioOnlyViewWithLocalPlayback">
+        <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
+            <sizehint height="30" type="PREFERRED" width="200"/>
+            <bool name="visible" value="TRUE"/>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="179" type="PREFERRED" width="320"/>
+        </widget>
+        <widget name="content" type="HbWidget">
+            <layout type="anchor">
+                <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0" src="title" srcEdge="TOP"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-116" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+    </section>
+    <section name="audioOnlyViewWithNonLocalPlayback">
+        <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
+            <sizehint height="0" type="PREFERRED" width="200"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="179" type="PREFERRED" width="320"/>
+        </widget>
+        <widget name="content" type="HbWidget">
+            <layout type="anchor">
+                <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0" src="title" srcEdge="TOP"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-116" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+    </section>
+    <section name="nonLocalPlayback">
+        <widget name="starRatingSlider" type="HbRatingSlider">
+            <sizehint height="0" type="PREFERRED" width="320"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
+    </section>
+    <metadata activeUIState="Common ui state" display="QHD landscape" unit="px">
+        <resource location="hbvideoplaybackview.qrc"/>
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>

@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/layout" >
+        <file alias="collectionview.docml">collectionview.docml</file>
+        <file alias="videolistselectiondialog.docml">videolistselectiondialog.docml</file>
+    </qresource>
+    <qresource prefix="/" >
+        <file>images/qtg_mono_video_all.svg</file>
+        <file>images/qtg_mono_video_collection.svg</file>
+        <file>images/qtg_mono_video_services.svg</file>
+        <file>images/mono_video_addvideos.svg</file>
+        <file>images/mono_video_removevideos.svg</file>
+        <file>images/mono_video_sortvideos.svg</file>
+        <file>images/services_icon.svg</file>
+        <file>images/services_icon_pressed.svg</file>
+    </qresource>
+</RCC>

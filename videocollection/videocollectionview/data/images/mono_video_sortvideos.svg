@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generator: Mobile Designer 3.0 2.0 -->
+<svg width="40" height="40" viewBox="0 0 40 40"
+	stroke-miterlimit="2" enable-background="new" zoomAndPan="disable"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:ev="http://www.w3.org/2001/xml-events"
+	xml:space="preserve" version="1.1" baseProfile="Normal">
+ 
+<!-- Scene 1 -->
+<g id="Scene_1">
+	<rect x="0" y="0" width="40" height="40" opacity="0.5019" fill="none"/>
+	<path
+		d="M16 28 c0 -0.33 0.02 -0.67 0.05 -1 h-3.05 v-16 
+			h12 v5.39 c0.96 -0.24 1.96 -0.39 3 -0.39 v-2 
+			h3 v2.39 c1.06 0.27 2.07 0.68 3 1.22 v-14.61 
+			h-3 v3 h-3 v-3 h-3 v5 
+			h-12 v-5 h-3 v3 h-3 v-3 
+			h-3 v32 h3 v-3 h3 v3 
+			h3 v-5 h3.18 c-0.1 -0.65 -0.17 -1.31 -0.17 -2 
+			Z M28 8 h3 v4 h-3 v-4 Z M10 30 
+			h-3 v-4 h3 v4 Z M10 24 h-3 
+			v-4 h3 v4 Z M10 18 h-3 v-4 
+			h3 v4 Z M10 12 h-3 v-4 h3 
+			v4 Z"/>
+	<ellipse cx="19.87" cy="19.49" rx="2.74" ry="2.62"/>
+	<ellipse cx="26.24" cy="25.37" rx="2.74" ry="2.62"/>
+	<ellipse cx="32.75" cy="31.74" rx="2.74" ry="2.62"/>
+</g>
+ 
+</svg>

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -157,6 +157,10 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         HBufC8*   iTitle;
         HBufC8*   iDescription;
         HBufC8*   iArtist;
+        HBufC8*   iLocation;
+        HBufC8*   iCopyright;
+        HBufC8*   iLanguage;
+        HBufC8*   iKeywords;
 
         TSize    iSize;
 

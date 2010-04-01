@@ -15,8 +15,7 @@
 *
 */
 
-
-
+#define MVCOLLECTION_10_1_DISABLE_DOWNLOADS
 
 // INCLUDE FILES
 #include <mpxlog.h>
@@ -130,12 +129,17 @@ CVcxMyVideosDownloadUtil* CVcxMyVideosDownloadUtil::NewL(
 CVcxMyVideosDownloadUtil::~CVcxMyVideosDownloadUtil()
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::~CVcxMyVideosDownloadUtil");
+
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+
     iDownloadManager.Disconnect(); //disconnects all downloads and puts them to pause
     iDownloadManager.Close();
     delete iDownloadDeleteTimer;
     iDownloadsToDelete.Close();
     iDeleteContent.Close();
-
+ 
     if ( iConnUtil )
         {
         iConnUtil->RemoveObserver( this );
@@ -165,6 +169,10 @@ void CVcxMyVideosDownloadUtil::ConstructL ()
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::ConstructL");
     
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     TUid uid = TUid::Uid( KVcxUidMyVideosMpxCollection );
 
     iDownloadManager.ConnectL( uid, *this, ETrue );
@@ -188,6 +196,11 @@ void CVcxMyVideosDownloadUtil::ConstructL ()
 void CVcxMyVideosDownloadUtil::StartDownloadL( CMPXMedia& aDownload )
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::StartDownloadL");
+    
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     // Requesting a new connection, update state
     iRoamingOngoing = EFalse;
     TInt err( KErrNone );
@@ -294,6 +307,10 @@ void CVcxMyVideosDownloadUtil::StartDownloadL( CMPXMedia& aDownload )
 //
 TInt CVcxMyVideosDownloadUtil::PauseDownload( TUint32 aDownloadId )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     RHttpDownload* download = Download( aDownloadId );
     
     if ( !download )
@@ -313,6 +330,9 @@ void CVcxMyVideosDownloadUtil::HandleDMgrEventL( RHttpDownload& aDownload,
     THttpDownloadEvent aEvent )
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::HandleDMgrEventL");
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
 
     TInt32 downloadId;
     aDownload.GetIntAttribute( EDlAttrId, downloadId );
@@ -457,6 +477,10 @@ void CVcxMyVideosDownloadUtil::HandleDMgrEventL( RHttpDownload& aDownload,
 //        
 RHttpDownload* CVcxMyVideosDownloadUtil::Download( TUint32 aDownloadId )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     if ( aDownloadId == 0 )
         {
         return NULL;
@@ -486,6 +510,9 @@ RHttpDownload* CVcxMyVideosDownloadUtil::Download( TUint32 aDownloadId )
 RHttpDownload* CVcxMyVideosDownloadUtil::Download( const TDesC& aFileName )
     {    
     MPX_FUNC("CVcxMyVideosDownloadUtil::Download()");
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
 
     TInt count = iDownloadManager.CurrentDownloads().Count();
     TInt i;
@@ -525,6 +552,11 @@ TInt CVcxMyVideosDownloadUtil::CancelDownload( TInt32 aId, TBool aDeleteContent 
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::CancelDownload");
 
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+
+
     if ( iDownloadManager.CurrentDownloads().Count() < 1 )
         {
         return KErrNotFound;
@@ -559,6 +591,10 @@ TInt CVcxMyVideosDownloadUtil::CancelDownload( TInt32 aId, TBool aDeleteContent 
 TBool CVcxMyVideosDownloadUtil::RequestIsRoamingAllowedL()
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::RequestIsRoamingAllowedL");
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return EFalse;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     iDownloadManager.Disconnect();
     iRoamingOngoing = ETrue;
     return ETrue;
@@ -571,6 +607,10 @@ TBool CVcxMyVideosDownloadUtil::RequestIsRoamingAllowedL()
 void  CVcxMyVideosDownloadUtil::IapChangedL()
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::IapChangedL");	
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     if ( !iRoamingOngoing )
         {
 		// This is not roaming situation, must not call GetIap()
@@ -601,6 +641,10 @@ void CVcxMyVideosDownloadUtil::GetDownloadState(
         RHttpDownload& aDownload,
         TVcxMyVideosDownloadState& aDownloadState )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     TInt32 dlStateInDlManager;
     aDownload.GetIntAttribute( EDlAttrState, dlStateInDlManager );
 
@@ -636,6 +680,10 @@ void CVcxMyVideosDownloadUtil::GetDownloadState(
 TInt8 CVcxMyVideosDownloadUtil::DownloadProgress( RHttpDownload& aDownload, TUint64& aDownloaded,
                                                    TBool aAllowSilentReset )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     TInt64 downloaded;
     TInt32 fullSize;
 
@@ -703,6 +751,10 @@ TInt8 CVcxMyVideosDownloadUtil::DownloadProgress( RHttpDownload& aDownload, TUin
 //
 const TDesC& CVcxMyVideosDownloadUtil::GetS60DlStateDes( TInt32 aState )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return KVcxUnknownStateDes;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     switch ( aState )
         {
         case EHttpDlCreated:
@@ -764,6 +816,10 @@ const TDesC& CVcxMyVideosDownloadUtil::GetS60DlStateDes( TInt32 aState )
 //
 const TDesC& CVcxMyVideosDownloadUtil::GetS60DlProgressDes( TInt32 aProgress )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return KVcxUnknownProgressDes;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     switch ( aProgress )
         {
         case EHttpProgNone:
@@ -850,6 +906,10 @@ const TDesC& CVcxMyVideosDownloadUtil::GetS60DlProgressDes( TInt32 aProgress )
 //
 void CVcxMyVideosDownloadUtil::DeleteDownloadAsync( TInt32 aDownloadId, TBool aDeleteContent )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     iDownloadsToDelete.Append( aDownloadId );
     iDeleteContent.Append( aDeleteContent );
     if ( !iDownloadDeleteTimer->IsActive() )
@@ -864,6 +924,10 @@ void CVcxMyVideosDownloadUtil::DeleteDownloadAsync( TInt32 aDownloadId, TBool aD
 //
 void CVcxMyVideosDownloadUtil::TimerExpired( CVcxMyVideosTimer* aTimer )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     if ( aTimer == iDownloadDeleteTimer )
         {
         for ( TInt i = 0; i < iDownloadsToDelete.Count(); i++ )
@@ -911,6 +975,9 @@ void CVcxMyVideosDownloadUtil::TimerExpired( CVcxMyVideosTimer* aTimer )
 void CVcxMyVideosDownloadUtil::ClearOrphanDownloadsL( CMPXMedia& aVideoList )
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::ClearOrphanDownloadsL");
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
     
     const CDownloadArray& downloads = Downloads();
 
@@ -950,6 +1017,10 @@ void CVcxMyVideosDownloadUtil::ClearOrphanDownloadsL( CMPXMedia& aVideoList )
 //
 void CVcxMyVideosDownloadUtil::NotifyDownloadStarted()
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     iMediatorEventProvider->RaiseEvent( TUid::Uid( KVcxNsMpxMediatorDomain ),
                                         TUid::Uid( KVcxNsMpxMediatorCategory ), 
                                         KVcxNsMpxEventDownloadStarted ,
@@ -963,6 +1034,10 @@ void CVcxMyVideosDownloadUtil::NotifyDownloadStarted()
 //
 void CVcxMyVideosDownloadUtil::NotifyIfNoActiveDownloads()
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     if ( !ActiveDownloadCount() )
         {
         iMediatorEventProvider->RaiseEvent( TUid::Uid( KVcxNsMpxMediatorDomain ),
@@ -979,6 +1054,10 @@ void CVcxMyVideosDownloadUtil::NotifyIfNoActiveDownloads()
 //
 void CVcxMyVideosDownloadUtil::NotifyDownloadCompleted( const TDesC8& aMsg )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     iMediatorEventProvider->RaiseEvent( TUid::Uid( KVcxNsMpxMediatorDomain ),
                                         TUid::Uid( KVcxNsMpxMediatorCategory ), 
                                         KVcxNsMpxEventDownloadCompleted,
@@ -992,6 +1071,10 @@ void CVcxMyVideosDownloadUtil::NotifyDownloadCompleted( const TDesC8& aMsg )
 //
 void CVcxMyVideosDownloadUtil::NotifyNewVideosCountDecreased( const TDesC8& aMsg )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     iMediatorEventProvider->RaiseEvent( TUid::Uid( KVcxNsMpxMediatorDomain ),
                                         TUid::Uid( KVcxNsMpxMediatorCategory ), 
                                         KVcxNsMpxEventNewVideosCountDecreased,
@@ -1005,6 +1088,10 @@ void CVcxMyVideosDownloadUtil::NotifyNewVideosCountDecreased( const TDesC8& aMsg
 //
 TInt32 CVcxMyVideosDownloadUtil::ActiveDownloadCount()
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     const CDownloadArray& dlarray = Downloads();
     
     TInt32 dlCount( 0 );
@@ -1032,6 +1119,12 @@ HBufC* CVcxMyVideosDownloadUtil::CreateFilePathL( const CMPXMedia& aMedia )
     MPX_FUNC("CVcxMyVideosDownloadUtil::CreateFilePathL");
     
     HBufC* path = HBufC::NewL( KMaxPathLength );
+
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return path;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+
+
     CleanupStack::PushL( path ); // 1->
     
     TPtr pathPtr( path->Des() );
@@ -1089,6 +1182,9 @@ HBufC* CVcxMyVideosDownloadUtil::CreateFilePathL( const CMPXMedia& aMedia )
 void CVcxMyVideosDownloadUtil::GeneratePathL( const CMPXMedia& aMedia, TDes& aPath, TInt aCounter )
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::GeneratePathL");
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
 
     _LIT( KBasePathNormal, "\\My Videos\\Downloads\\" );
     _LIT( KBasePathSystemDrive, "\\Data\\My Videos\\Downloads\\" );
@@ -1236,6 +1332,10 @@ void CVcxMyVideosDownloadUtil::GeneratePathL( const CMPXMedia& aMedia, TDes& aPa
 //
 void CVcxMyVideosDownloadUtil::FindSubDirL( const TDesC& aPath )
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     MPX_FUNC("CVcxMyVideosDownloadUtil::FindSubDirL");
 
     MPX_DEBUG2("CVcxMyVideosDownloadUtil:: aPath = %S", &aPath);
@@ -1291,6 +1391,10 @@ void CVcxMyVideosDownloadUtil::FindSubDirL( const TDesC& aPath )
 TInt CVcxMyVideosDownloadUtil::FileCountL( const TDesC& aPath )
     {
     TInt count = 0; // return 0 in case of fail
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return 0;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    
     
     CDir* dir = NULL;
     TInt err = iFs.GetDir( aPath, KEntryAttNormal | KEntryAttMatchMask, ESortBySize, dir );
@@ -1314,6 +1418,10 @@ const TDesC& CVcxMyVideosDownloadUtil::UsedMemoryDesL()
     {
     MPX_FUNC("CVcxMyVideosDownloadUtil::UsedMemoryDesL");
 
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return iUsedMemoryDrivePath;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+
     CVcxMyVideosDriveMonitor* driveMonitor = CVcxMyVideosDriveMonitor::NewL( iFs );
     CleanupStack::PushL( driveMonitor ); // 1->
     driveMonitor->GetUsedMemoryL( iUsedDrive );    
@@ -1333,6 +1441,10 @@ const TDesC& CVcxMyVideosDownloadUtil::UsedMemoryDesL()
 //
 void CVcxMyVideosDownloadUtil::StopProgressTimer()
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+        
     if ( ActiveDownloadCount() == 0 )
         {
         MPX_DEBUG1("CVcxMyVideosDownloadUtil:: stopped iDownloadProgressTimer");
@@ -1346,6 +1458,10 @@ void CVcxMyVideosDownloadUtil::StopProgressTimer()
 //
 void CVcxMyVideosDownloadUtil::StartProgressTimer()
     {
+#ifdef MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+    return;
+#endif // MVCOLLECTION_10_1_DISABLE_DOWNLOADS
+
     if ( !iDownloadProgressTimer->IsActive() && ActiveDownloadCount() > 0 )
         {
         MPX_DEBUG1("CVcxMyVideosDownloadUtil:: started iDownloadProgressTimer");
