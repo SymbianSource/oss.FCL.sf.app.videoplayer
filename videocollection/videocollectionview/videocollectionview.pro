@@ -23,7 +23,10 @@ TARGET =
 symbian: { 
     TARGET.UID2 = 0x10009D8D
     TARGET.UID3 = 0x200211FB
-    BLD_INF_RULES.prj_exports += "rom/videocollectionview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videocollectionview.iby)"
+    BLD_INF_RULES.prj_exports += \
+    	"rom/videocollectionview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videocollectionview.iby)" \
+    	"conf/videolistview.confml                      APP_LAYER_CONFML(videolistview.confml)" \
+    	"conf/videolistview_2002BC63.crml               APP_LAYER_CRML(videolistview_2002BC63.crml)"
     
     TARGET.CAPABILITY = ALL -TCB -DRM
 
