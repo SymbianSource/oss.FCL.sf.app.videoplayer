@@ -284,7 +284,7 @@ int VideoCollectionClient::removeAlbums(const QList<TMPXItemId> &mediaIds)
 {
     int err(-1);
     
-    if (mCollectionUtility)
+    if (mCollectionUtility && mediaIds.count())
     {
         TRAP(err, removeAlbumsL(mediaIds));
     }
@@ -296,15 +296,33 @@ int VideoCollectionClient::removeAlbums(const QList<TMPXItemId> &mediaIds)
 // addItemsInAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::addItemsInAlbum(TMPXItemId albumId,
+int VideoCollectionClient::addItemsInAlbum(TMPXItemId &albumId,
     const QList<TMPXItemId> &mediaIds)
 {
     int err(-1);
     
     if (mCollectionUtility && albumId != TMPXItemId::InvalidId() &&
-        albumId.iId2 == KVcxMvcMediaTypeAlbum)
+        albumId.iId2 == KVcxMvcMediaTypeAlbum && mediaIds.count())
     {
         TRAP(err, addItemsInAlbumL(albumId, mediaIds));
+    }
+    
+    return err;
+}
+
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::removeItemsFromAlbum(TMPXItemId &albumId, 
+            const QList<TMPXItemId> &mediaIds)
+{
+    int err(-1);
+        
+    if (mCollectionUtility && albumId != TMPXItemId::InvalidId() &&
+        albumId.iId2 == KVcxMvcMediaTypeAlbum && mediaIds.count())
+    {
+        TRAP(err, removeItemsFromAlbumL(albumId, mediaIds));
     }
     
     return err;
@@ -498,15 +516,25 @@ void VideoCollectionClient::removeAlbumsL(const QList<TMPXItemId> &mediaIds)
     int count = mediaIds.count();
     for (int i = 0; i < count; i++)
     {
-        media = CMPXMedia::NewL();
-        CleanupStack::PushL(media);
-        media->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
-        array->AppendL(*media);
-        CleanupStack::PopAndDestroy(media);
+        if(mediaIds.at(i).iId2 == KVcxMvcMediaTypeAlbum)
+        {
+            media = CMPXMedia::NewL();
+            CleanupStack::PushL(media);
+            media->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
+            array->AppendL(*media);
+            CleanupStack::PopAndDestroy(media);
+        }
     }
-    cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
-
-    mCollectionUtility->Collection().CommandL(*cmd);
+    if(array->Count())
+    {
+        cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+        mCollectionUtility->Collection().CommandL(*cmd);
+    }
+    else
+    {
+        // invalid data provided
+        User::Leave(KErrGeneral);   
+    }
 
     CleanupStack::PopAndDestroy( array );  
     CleanupStack::PopAndDestroy( cmd );  
@@ -549,7 +577,7 @@ TMPXItemId VideoCollectionClient::createAlbumL(const QString &title)
 // addItemsInAlbumL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::addItemsInAlbumL(TMPXItemId albumId,
+void VideoCollectionClient::addItemsInAlbumL(TMPXItemId &albumId,
     const QList<TMPXItemId> &mediaIds)
 {
     CMPXCommand* cmd = CMPXCommand::NewL();
@@ -557,7 +585,6 @@ void VideoCollectionClient::addItemsInAlbumL(TMPXItemId albumId,
     cmd->SetTObjectValueL(KMPXCommandGeneralId, KVcxCommandIdMyVideos);
     cmd->SetTObjectValueL(KVcxMediaMyVideosCommandId, KVcxCommandMyVideosAddToAlbum);
     cmd->SetTObjectValueL(KVcxMediaMyVideosUint32Value, albumId.iId1);
-    cmd->SetTObjectValueL(KMPXCommandGeneralDoSync, EFalse);
     cmd->SetTObjectValueL(KMPXCommandGeneralCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
 
     CMPXMediaArray* array = CMPXMediaArray::NewL();
@@ -566,16 +593,69 @@ void VideoCollectionClient::addItemsInAlbumL(TMPXItemId albumId,
     int count = mediaIds.count();
     for (int i = 0; i < count; i++)
     {
-        video = CMPXMedia::NewL();
-        CleanupStack::PushL(video);
-        video->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
-        array->AppendL(*video);
-        CleanupStack::PopAndDestroy(video);
+        if(mediaIds.at(i).iId2 == KVcxMvcMediaTypeVideo)
+        {
+            video = CMPXMedia::NewL();
+            CleanupStack::PushL(video);
+            video->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
+            array->AppendL(*video);
+            CleanupStack::PopAndDestroy(video);
+        }
     }
-    cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+    if(array->Count())
+    {
+        cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+        mCollectionUtility->Collection().CommandL(*cmd);
+    }
+    else
+    {
+        // invalid data provided
+        User::Leave(KErrGeneral);   
+    }
 
-    mCollectionUtility->Collection().CommandL(*cmd);
+    CleanupStack::PopAndDestroy(array);
+    CleanupStack::PopAndDestroy(cmd);
+}
 
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbumL
+// -----------------------------------------------------------------------------
+//
+void VideoCollectionClient::removeItemsFromAlbumL(TMPXItemId &albumId, 
+                                                const QList<TMPXItemId> &mediaIds)
+{
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL(cmd);
+    cmd->SetTObjectValueL(KMPXCommandGeneralId, KVcxCommandIdMyVideos);
+    cmd->SetTObjectValueL(KVcxMediaMyVideosCommandId, KVcxCommandMyVideosRemoveFromAlbum);
+    cmd->SetTObjectValueL(KVcxMediaMyVideosUint32Value, albumId.iId1);
+    cmd->SetTObjectValueL(KMPXCommandGeneralCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
+
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL( array );
+    CMPXMedia* video = 0;
+    int count = mediaIds.count();
+    for (int i = 0; i < count; i++)
+    {
+        if(mediaIds.at(i).iId2 == KVcxMvcMediaTypeVideo)
+        {
+            video = CMPXMedia::NewL();
+            CleanupStack::PushL(video);
+            video->SetTObjectValueL(KMPXMediaGeneralId, mediaIds.at(i));
+            array->AppendL(*video);
+            CleanupStack::PopAndDestroy(video);
+        }
+    }
+    if(array->Count())
+    {
+        cmd->SetCObjectValueL(KMPXMediaArrayContents, array);
+        mCollectionUtility->Collection().CommandL(*cmd);
+    }
+    else
+    {
+        // invalid data provided
+        User::Leave(KErrGeneral);   
+    }
     CleanupStack::PopAndDestroy(array);
     CleanupStack::PopAndDestroy(cmd);
 }

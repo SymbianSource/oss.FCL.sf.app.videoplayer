@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 12 %
+// Version : %version: ou1cpsw#13 %
 
 
 #include <hbmenu.h>
@@ -49,13 +49,16 @@ QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl()"));
 
-    mActionBack = new HbAction( Hb::BackAction );
+    mActionBack = new HbAction( Hb::BackNaviAction );
 
     //
     // Press "back" key means going back to previous view if it's avaiable
     //
     connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
-    hbInstance->allMainWindows()[0]->addSoftKeyAction( Hb::SecondarySoftKey , mActionBack );
+    
+    HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
+    HbView *currentView = mainWnd->currentView();
+    currentView->setNavigationAction(mActionBack);
 
     connect( mController->view()->menu(), SIGNAL( aboutToShow() ), this, SLOT( handleAboutToShow() ) );
     connect( mController->view()->menu(), SIGNAL( aboutToHide() ), this, SLOT( handleAboutToHide() ) );
@@ -74,7 +77,10 @@ QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl()
 
     disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
     disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
-    hbInstance->allMainWindows()[0]->removeSoftKeyAction( Hb::SecondarySoftKey , mActionBack );
+
+    HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
+    HbView *currentView = mainWnd->currentView();
+    currentView->setNavigationAction(0);
 
     disconnect( mController->view()->menu(), SIGNAL( aboutToShow() ), this, SLOT( handleAboutToShow() ) );
     disconnect( mController->view()->menu(), SIGNAL( aboutToHide() ), this, SLOT( handleAboutToHide() ) );

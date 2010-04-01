@@ -26,50 +26,55 @@
 #include "hbicon.h"
 #include "hbmenu.h"
 
-class  HbAction : public QAction
+class  HbAction : public QObject
 {
     Q_OBJECT
+
 public:
     
     /**
      * Constructor
      */
-    explicit HbAction(QObject *parent = 0) : QAction(parent)
+    explicit HbAction(QObject *parent = 0)
     {
         Q_UNUSED(parent);
         initializeCount++;
+        mTriggeredCount = 0;
     }
     
     /**
      * Contructor.
      */       
-    explicit HbAction(const QString &txt, QObject *parent = 0) : mTxt(txt), QAction(parent) 
+    explicit HbAction(const QString &txt, QObject *parent = 0) : mTxt(txt) 
     {
         Q_UNUSED(parent);
         initializeCount++;
+        mTriggeredCount = 0;
     }
     
     /**
      * Contructor.
      */ 
-    explicit HbAction(Hb::SoftKeyAction actType, QObject *parent = 0) : mTxt(""), QAction(parent) 
+    explicit HbAction(Hb::SoftKeyAction actType, QObject *parent = 0) : mTxt("")
     {
         Q_UNUSED(parent);
         Q_UNUSED(actType);
         initializeCount++;
+        mTriggeredCount = 0;
     }
     
-    explicit HbAction(Hb::NavigationAction action, QObject* parent = 0) : mTxt(""), QAction(parent)
+    explicit HbAction(Hb::NavigationAction action, QObject* parent = 0) : mTxt("")
     {
         Q_UNUSED(parent);
         Q_UNUSED(action);
         initializeCount++;
+        mTriggeredCount = 0;
     }
     
     /**
      * destructor
      */
-   virtual ~HbAction(){initializeCount--;}
+    virtual ~HbAction(){initializeCount--;}
     
     /**
      * sets mDisable;
@@ -97,6 +102,25 @@ public:
     HbMenu *menu() const { return 0; }
     
     /**
+     * Trigger stub
+     */
+    void trigger() { mTriggeredCount++; };
+    
+    /**
+     * SetText stub
+     */
+    void setText(QString text) { mText = text; };
+
+signals:
+        
+        /**
+         * dummy triggered
+         */
+        void triggered();
+        
+public: // data
+    
+    /**
      * dummy member 
      */
     bool mDisable;
@@ -116,13 +140,15 @@ public:
      */
     static int initializeCount;
     
-signals:
+    /**
+     * Count how many times this was triggered.
+     */
+    int mTriggeredCount;
     
     /**
-     * dummy triggered
+     * Set text.
      */
-    void triggered();
-        
+    QString mText;    
 };
 
 #endif

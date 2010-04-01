@@ -15,11 +15,8 @@
 *
 */
 
-
-
 #ifndef __TESTVIDEOMODEL_P_H__
 #define __TESTVIDEOMODEL_P_H__
-
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -57,19 +54,29 @@ signals:
     void signalAppendVideoList(CMPXMediaArray*);
     
     /**
+     * emitted to verify albumListAvailableSlot
+     */
+    void signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*);
+    
+    /**
      * emitted to test newVideoAvailableSlot
      */
     void signalNewVideoAvailable(CMPXMedia*);
     
     /**
-     * emitted to get deleteVideoSlot to be called.
+     * emitted to get deleteItemSlot to be called.
      */
-    void signalDeleteVideo(TMPXItemId);
-    
+    void signalDeleteItem(TMPXItemId);
+         
     /**
     * emitted to get videoDeleteCompletedSlot to be called.
     */
    void signalDeleteCompleted(int, QList<TMPXItemId>*);
+   
+   /**
+    * emitted to get albumRemoveFailureSlot to be called.
+    */
+   void signalAlbumDeleteFailure(QList<TMPXItemId>*);
    
    /**
     * emitted to get videoDetailsCompletedSlot to be called.
@@ -128,6 +135,11 @@ private slots:
     void testGetVideoThumbnailFromIndex();
     
     /**
+     * verifies getCategoryVideoCountFromIndex
+     */
+    void testGetCategoryVideoCountFromIndex();
+    
+    /**
      * verifies getVideoSizeFromIndex
      */
     void testGetVideoSizeFromIndex();
@@ -166,6 +178,16 @@ private slots:
      * verifies getFilePathForId
      */
     void testGetFilePathForId();
+    
+    /**
+     * verifies belongsToAlbum
+     */
+    void testBelongsToAlbum();
+    
+    /**
+     * verifies removeItemsFromAlbum
+     */
+    void testRemoveItemsFromAlbum();
          
     /**
      * verifies thumbnailsFetchedSlot
@@ -181,6 +203,11 @@ private slots:
      * verifies appendVideoListSlot
      */
     void testAppendVideoListSlot();
+    
+    /**
+     * verifies albumListAvailableSlot
+     */
+    void testAlbumListAvailableSlot();
         
     /**
      * verifies newVideoAvailableSlot
@@ -188,14 +215,19 @@ private slots:
     void testNewVideoAvailableSlot();
      
     /**
-     * verifies videoDeletedSlot
+     * verifies itemDeletedSlot
      */
-    void testVideoDeletedSlot();
+    void testItemDeletedSlot();
     
     /**
      * verifies videoDeleteCompletedSlot
      */
     void testVideoDeleteCompletedSlot();
+    
+    /**
+     * verifies albumRemoveFailureSlot
+     */
+    void testAlbumRemoveFailureSlot();
       
     /**
      * verifies videoDetailsCompletedSlot

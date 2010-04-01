@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#30 %
+// Version : %version: da1mmcf#32 %
 
 
 
@@ -31,6 +31,7 @@
 #include <hbgesture.h>
 #include <hbinstance.h>
 #include <hbnotificationdialog.h>
+#include <hblabel.h>
 
 #include <textresolver.h>
 #include <mmf/common/mmferrors.h>
@@ -66,8 +67,8 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 //
 void HbVideoBasePlaybackView::initializeVideoPlaybackView()
 {
-    MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::initializeVideoPlaybackView()"));
-
+    MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::initializeVideoPlaybackView()"));  
+      
     //
     // Need to set to control full screen including status pane area
     //
@@ -100,11 +101,6 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
         mTimerForClosingView = NULL;
     }
 
-    if ( mVideoMpxWrapper )
-    {
-        delete mVideoMpxWrapper;
-        mVideoMpxWrapper = NULL;
-    }
 
     setParentItem( 0 );
 }
@@ -116,7 +112,14 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
 void HbVideoBasePlaybackView::handleActivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleActivateView()"));
-
+    
+    TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) ); 
+    
+    //
+    //  Request the needed Media from the Playback Plugin
+    //
+    TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() ); 
+    
     menu()->close();
 
     hideItems( Hb::AllItems );
@@ -124,21 +127,10 @@ void HbVideoBasePlaybackView::handleActivateView()
     //
     // Landscape orientation
     //
-    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal );
+    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal );  
 
-    TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
-
-    mActivated = true;
-
-    //
-    //  Retrieve PDL information for container
-    //
-    retrievePdlInformation();
-
-    //
-    //  Request the needed Media from the Playback Plugin
-    //
-    TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() );
+    mActivated = true;   
+       
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -210,27 +202,25 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
         case KErrCANoPermission:
         {
             const QString qString = "License has expired or it is missing";
-            displayErrorMessage( qString );
-            handleClosePlaybackView();
+            showDialog( qString );
             break;
         }
         case KMPXVideoCallOngoingError:
         {
-            const QString qString = "FMP cannot be used during video call";
-            displayInfoMessage( qString );
+            const QString qString = "Video playback is not allowed during video call";
+            showDialog( qString, false );
             break;
         }
         case KMPXVideoTvOutPlaybackNotAllowed:
         {
             const QString qString = "Protected clip, can not be played through TV-Out";
-            displayInfoMessage( qString );
+            showDialog( qString, false );
             break;
         }
         case KMPXVideoTvOutPlaybackNotAllowedClose:
         {
             const QString qString = "Protected clip, can not be played through TV-Out";
-            displayInfoMessage( qString );
-            handleClosePlaybackView();
+            showDialog( qString );
             break;
         }
         default:
@@ -252,37 +242,62 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
                 // convert to QString
                 //
                 const QString qString( (QChar*)text.Ptr(), text.Length() );
-                displayErrorMessage( qString );
-    
+                
+                //
+                // clean up textresolver
+                //
                 CleanupStack::PopAndDestroy( textresolver );
+
+                //
+                // display error and close playback view
+                //
+                showDialog( qString );
     
-                handleClosePlaybackView();
-            
             );
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::displayInfoMessage
+//   HbVideoBasePlaybackView::showDialog
 // -------------------------------------------------------------------------------------------------
 //
-void HbVideoBasePlaybackView::displayInfoMessage(  const QString& qString )
+void HbVideoBasePlaybackView::showDialog( const QString& qString, bool closeView )
 {
-    MPX_DEBUG(_L("HbVideoBasePlaybackView::displayInfoMessage()"));
-
-    HbNotificationDialog::launchDialog( qString );             
-}
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::displayErrorMessage
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::displayErrorMessage( const QString& qString )
-{
-    MPX_DEBUG(_L("HbVideoBasePlaybackView::displayErrorMessage()"));
-
-    HbNotificationDialog::launchDialog( qString );
+    MPX_DEBUG(_L("HbVideoBasePlaybackView::showDialog( %s, %d )"), qString.data(), closeView );
+        
+    //
+    // create pop-up dialog for error notes, 
+    //     set its position to the middle of the screen
+    //     and make sure pop-up dialog gets deleted on close.
+    //
+    QRectF screenRect = hbInstance->allMainWindows()[0]->rect();
+    HbNotificationDialog* dlg = new HbNotificationDialog();    
+    dlg->setAttribute( Qt::WA_DeleteOnClose );
+    dlg->setMinimumSize( QSizeF(200, 100) );    
+    dlg->setPreferredPos( QPointF( screenRect.height()/2, screenRect.width()/2 ), 
+                          HbPopup::Center );
+    
+	if ( closeView )
+	{
+        //
+        // connect aboutToClose() signal to handleClosePopupDialog() slot so that
+        // when pop-up dialog is closed, playback view is closed also
+        //
+        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( handleClosePopupDialog() ) );        
+    }
+	
+    //
+    // convert string to label so text alignment can be set
+    //
+    HbLabel *label = new HbLabel( qString );
+    label->setAlignment( Qt::AlignCenter );
+    
+    //
+    // set label as content widget and show pop-up dialog
+    //
+    dlg->setContentWidget( label );
+    dlg->show();    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -396,5 +411,17 @@ void HbVideoBasePlaybackView::mouseReleaseEvent( QGraphicsSceneMouseEvent *event
 
     emit tappedOnScreen();
 }
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::handleClosePopupDialog()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::handleClosePopupDialog()
+{
+    MPX_DEBUG(_L("HbVideoBasePlaybackView::handleClosePopupDialog()") );
+
+    handleClosePlaybackView();
+}
+
 
 // EOF

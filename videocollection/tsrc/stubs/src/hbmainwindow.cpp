@@ -48,7 +48,11 @@ QList<HbView *> HbMainWindow::views() const
     return mViews;
 }
 
-HbView *currentView() const
+HbView* HbMainWindow::currentView() const
 {
+    if(mViews.count())
+    {
+        return mViews.at(0);
+    }
     return 0;
 }

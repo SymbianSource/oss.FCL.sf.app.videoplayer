@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #include <qdebug>
@@ -32,7 +32,7 @@
 #include "mpxvideoplaybackfiledetailswidget.h"
 #undef private
 
-const QString KFILEPATH = "C:\\data\\qvptestconf.txt";
+const QString KFILEPATH = "C:\\sample1.wav";
 
 
 // ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ void TestMPXVideoPlaybackFileDetailsWidget::testTitle()
     details->mClipName = KFILEPATH;
 
     mWidget->updateWithFileDetails( details );
-    verifyResult( "Title", true, "qvptestconf" );
+    verifyResult( "Title", true, "sample1" );
 
     mWidget->mListWidget->clear();
     mWidget->mFileDetailsUpdated = false;
@@ -485,7 +485,7 @@ void TestMPXVideoPlaybackFileDetailsWidget::testFolder()
 
     mWidget->updateWithFileDetails( details );
 
-    verifyResult( "Collection", true, "", false );
+    verifyResult( "Collection", false );
 
     cleanup();
 

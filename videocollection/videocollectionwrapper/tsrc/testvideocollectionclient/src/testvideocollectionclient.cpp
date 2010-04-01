@@ -418,6 +418,49 @@ void TestVideoCollectionClient::testGetVideoDetails()
     
 }
 
+// -----------------------------------------------------------------------------
+// testRemoveAlbums
+// -----------------------------------------------------------------------------
+//
+void TestVideoCollectionClient::testRemoveAlbums()
+{
+    TMPXItemId id(1,1); 
+    QList<TMPXItemId> albums;
+    
+    // no collectionutility
+    QVERIFY(mTestObject->removeAlbums(albums) == -1); 
+    
+    // collection exists
+    QVERIFY(mTestObject->initialize(mSignalReceiver) == 0); 
+    
+    // command leaves, no items
+    MMPXCollection::setCommandLLeave(true);
+    QVERIFY(mTestObject->removeAlbums(albums) < 0); 
+    
+    // command leaves items exists
+    albums.append(TMPXItemId(1,2));
+    albums.append(TMPXItemId(1,2));
+    QVERIFY(mTestObject->removeAlbums(albums) < 0); 
+    
+    // command does not leave, no items
+    albums.clear();
+    MMPXCollection::setCommandLLeave(false);
+    QVERIFY(mTestObject->removeAlbums(albums) < 0);
+    
+    // command does not leave, items exist, both albums and non abums
+    albums.append(TMPXItemId(1,2));
+    albums.append(TMPXItemId(2,0));
+    albums.append(TMPXItemId(2,2));
+    QVERIFY(mTestObject->removeAlbums(albums) == 0); 
+    
+    // command does not leave, items exist, only non abums
+    albums.clear();
+    albums.append(TMPXItemId(1,0));
+    albums.append(TMPXItemId(2,0));
+    albums.append(TMPXItemId(3,0));
+    QVERIFY(mTestObject->removeAlbums(albums) < 0); 
+    
+}
 
 // -----------------------------------------------------------------------------
 // testAddNewCollection
@@ -489,13 +532,69 @@ void TestVideoCollectionClient::testAddItemsInAlbum()
     MMPXCollection::setCommandLLeave(false);
     
     // empty list
-    QVERIFY(mTestObject->addItemsInAlbum(albumId, mediaIds) == 0);
+    QVERIFY(mTestObject->addItemsInAlbum(albumId, mediaIds) < 0);
     
     mediaIds.append(TMPXItemId(1,0));
+    mediaIds.append(TMPXItemId(2,2));
     mediaIds.append(TMPXItemId(2,0));
-    // list contains items
+    // list contains items, both videos and non-videos
     QVERIFY(mTestObject->addItemsInAlbum(albumId, mediaIds) == 0);
+    
+    // list contains only non-videos
+    mediaIds.clear();
+    mediaIds.append(TMPXItemId(1,2));
+    mediaIds.append(TMPXItemId(2,2));
+    mediaIds.append(TMPXItemId(2,1));
+       
+   QVERIFY(mTestObject->addItemsInAlbum(albumId, mediaIds) < 0);
    
+}
+
+// -----------------------------------------------------------------------------
+// testRemoveItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+void TestVideoCollectionClient::testRemoveItemsFromAlbum()
+{
+    TMPXItemId albumId = TMPXItemId(1,2);
+    QList<TMPXItemId> mediaIds;
+    
+    // no collectionutility
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    
+    albumId = TMPXItemId::InvalidId();
+    mTestObject->initialize(mSignalReceiver);
+    // invalid album id
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+       
+    albumId = TMPXItemId(1,0);
+    // media type not album
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    
+    // command leaves
+    albumId = TMPXItemId(1,2);
+    MMPXCollection::setCommandLLeave(true);
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    MMPXCollection::setCommandLLeave(false);
+    
+    // empty list
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    
+    mediaIds.append(TMPXItemId(1,0));
+    mediaIds.append(TMPXItemId(2,2));
+    mediaIds.append(TMPXItemId(2,0));
+    
+    // list contains items, both videos and non-videos
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) == 0);
+    
+    // list contains only non-videos
+    mediaIds.clear();
+    mediaIds.append(TMPXItemId(1,2));
+    mediaIds.append(TMPXItemId(2,2));
+    mediaIds.append(TMPXItemId(2,1));
+    
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    
 }
 
 // -----------------------------------------------------------------------------

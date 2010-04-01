@@ -70,11 +70,11 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
         {
             if(hours == 1)
             {
-                lengthStr = QObject::tr("%1 hour ").arg(QString::number(hours)); //TODO: Localisation
+                lengthStr = QObject::tr("%1 hour ").arg(QString::number(hours)); //localisation
             }
             else
             {
-                lengthStr += QObject::tr("%1 hours ").arg(QString::number(hours)); //TODO: Localisation
+                lengthStr += QObject::tr("%1 hours ").arg(QString::number(hours)); //localisation
             }
         }
 
@@ -82,22 +82,22 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
         {
             if(minutes == 1)
             {
-                lengthStr += QObject::tr("%1 minute ").arg(QString::number(minutes)); //TODO: Localisation
+                lengthStr += QObject::tr("%1 minute ").arg(QString::number(minutes)); //localisation
             }
             else
             {
-                lengthStr += QObject::tr("%1 minutes ").arg(QString::number(minutes)); //TODO: Localisation
+                lengthStr += QObject::tr("%1 minutes ").arg(QString::number(minutes)); //localisation
             }
         }
         if (seconds > 0 && hours == 0)
         {
             if(seconds == 1)
             {
-                lengthStr += QObject::tr("%1 second").arg(QString::number(seconds)); //TODO: Localisation
+                lengthStr += QObject::tr("%1 second").arg(QString::number(seconds)); //localisation
             }
             else
             {
-                lengthStr += QObject::tr("%1 seconds").arg(QString::number(seconds)); //TODO: Localisation
+                lengthStr += QObject::tr("%1 seconds").arg(QString::number(seconds)); //localisation
             }
         }
     } else {
@@ -113,18 +113,25 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 const QStringList VideoCollectionUtils::prepareLengthStrings(quint32 total)
 {
     const int secondsInMinute( 60 );
+    const int secondsInHour( 3600 );
 
+    quint32 hours(0);
     quint32 minutes(0);
     quint32 seconds(0);
     
+    QString hrs("");
+    QString mins("");
+    QString secs("");
+
     if ( total > 0 )
     {
-        minutes = (total / secondsInMinute);
+    	hours =   (total / secondsInHour);
+    	total = total - (hours * secondsInHour);
+    	minutes = (total / secondsInMinute);
         seconds = (total % secondsInMinute);
     }
     
-    QString mins("");
-    QString secs("");
+    hrs = QString::number(hours); 
     
     if (minutes < 10)
     {
@@ -135,9 +142,7 @@ const QStringList VideoCollectionUtils::prepareLengthStrings(quint32 total)
     {
         mins = QString::number(minutes);
     }
-      
-    QString secondsStr("");
-    
+
     if (seconds < 10)
     {
         secs = "0" + QString::number(seconds); 
@@ -150,6 +155,7 @@ const QStringList VideoCollectionUtils::prepareLengthStrings(quint32 total)
     
     QStringList retVal;
     
+    retVal.append(hrs);
     retVal.append(mins);
     retVal.append(secs);
     
@@ -180,23 +186,23 @@ QString VideoCollectionUtils::prepareSizeString(quint32 size)
         {
             dispSize  = size + videoSizeHalfGB;
             dispSize /= videoSizeGB;
-            sizeStr = QString(QObject::tr("%1 GB").arg(QString::number(dispSize))); //TODO: Localisation
+            sizeStr = QString(QObject::tr("%1 GB").arg(QString::number(dispSize))); //localisation
         }
         else if ( size >= videoSizeMB )
         {
             dispSize  = size + videoSizeHalfMB;
             dispSize /= videoSizeMB;
-            sizeStr = QString(QObject::tr("%1 MB").arg(QString::number(dispSize))); //TODO: Localisation
+            sizeStr = QString(QObject::tr("%1 MB").arg(QString::number(dispSize))); //localisation
         }
         else if (size >= videoSizeKB) 
         {
             dispSize  = size + videoSizeHalfKB;
             dispSize /= videoSizeKB;
-            sizeStr = QString(QObject::tr("%1 kB").arg(QString::number(dispSize))); //TODO: Localisation
+            sizeStr = QString(QObject::tr("%1 kB").arg(QString::number(dispSize))); //localisation
         }
         else
         {
-            sizeStr = QString(QObject::tr("%1B").arg(QString::number(size))); //TODO: Localisation
+            sizeStr = QString(QObject::tr("%1B").arg(QString::number(size))); //localisation
         }
     }
     

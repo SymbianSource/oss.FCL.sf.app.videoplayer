@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -190,5 +190,12 @@ RWindow *HbVideoBasePlaybackView::getWindow()
     return static_cast<RWindow*>( hbInstance->allMainWindows()[0]->effectiveWinId()->DrawableWindow() );
 }
 
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::handleClosePopupDialog()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::handleClosePopupDialog()
+{
+}
 
 // EOF

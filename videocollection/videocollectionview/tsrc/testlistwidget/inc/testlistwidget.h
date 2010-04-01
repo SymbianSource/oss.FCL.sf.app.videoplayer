@@ -32,6 +32,7 @@ class HbMainWindow;
 class ListWidgetTester;
 class VideoServices;
 class VideoListDataModel;
+class VideoCollectionUiLoader;
 
 class TestListWidget : public QObject
 {
@@ -45,13 +46,19 @@ public:
 private slots:
 
     /**
-     * will be called automaticallybefore each testfunction is executed.
+     * will be called automatically when test starts
+     *
+     */
+    void initTestCase();
+
+    /**
+     * will be called automatically before each testfunction is executed.
      *
      */
     void init();
 
     /**
-     * will be called automaticallybefore after every testfunction.
+     * will be called automatically after every testfunction.
      *
      */
     void cleanup();
@@ -98,9 +105,9 @@ private slots:
     void testSetContextMenu();
     
     /**
-     * verifies shareItemSlot
+     * verifies doDelayedsSlot
      */
-    void testShareItemSlot();
+    void testDoDelayedsSlot();
     
     /**
      * verifies deleteItemSlot
@@ -113,19 +120,29 @@ private slots:
     void testRenameSlot();
     
     /**
+     * verifies playItemSlot
+     */
+    void testPlayItemSlot();
+    
+    /**
      * verifies playAllSlot
      */
     void testPlayAllSlot();
     
     /**
-     * verifies addItemSlot
-     */
-    void testAddItemSlot();
-    
-    /**
-     * verifies addToCollectionSlot()
+     * verifies addToCollectionSlot
      */
     void testAddToCollectionSlot();
+
+    /**
+     * verifies removeFromCollectionSlot
+     */
+    void testRemoveFromCollectionSlot();
+    
+    /**    
+     * verifies removeCollectionSlot
+     */
+    void testRemoveCollectionSlot();
     
     /**
      * verifies openDetailsSlot()
@@ -138,6 +155,11 @@ private slots:
     void testBack();
     
     /**
+     * verifies scrollingStartedSlot
+     */
+    void testScrollingStartedSlot();
+    
+    /**
      * verifies scrollingEndedSlot();
      */
     void testScrollingEndedSlot();
@@ -146,6 +168,11 @@ private slots:
      * verifies scrollPositionChangedSlot();
      */
     void testScrollPositionChangedSlot();
+    
+    /**
+     * verifies scrollPositionTimerSlot()
+     */
+    void testScrollPositionTimerSlot();
 
 signals:
     
@@ -174,7 +201,11 @@ private:
      * dummy main wnd
      */
     HbMainWindow *mDummyMainWnd;
-
+    
+    /**
+     * stub -uiloader
+     */
+    VideoCollectionUiLoader *mTestUiLoader;
 };
 
 

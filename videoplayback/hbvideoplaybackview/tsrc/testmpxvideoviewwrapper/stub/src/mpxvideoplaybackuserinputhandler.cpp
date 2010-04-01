@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 // INCLUDE FILES
@@ -23,7 +23,6 @@
 #include <e32std.h>
 #include <w32std.h> // RWindowBase
 #include <e32base.h>
-#include <aknutils.h>
 #include <eikclbd.h>
 #include <aknconsts.h>
 #include <remconcoreapi.h>
@@ -35,7 +34,7 @@
 #include <hwrmlightdomaincrkeys.h>
 #include <mpxvideoplaybackdefs.h>
 
-#include <HAL.h>
+#include <hal.h>
 #include <hal_data.h>
 
 #include "mpxvideo_debug.h"

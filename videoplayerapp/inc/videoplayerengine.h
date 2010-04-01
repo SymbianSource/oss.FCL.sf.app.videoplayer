@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#9 %
+// Version : %version: ou1cpsw#10 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -71,10 +71,13 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         void switchView();    
     
         void loadPlugin( MpxHbVideoCommon::MpxHbVideoViewType viewType );
+        
+        void doDelayedLoad();
 
     private:
         bool                      mIsService;
-        bool                      mEmbedded;   
+        bool                      mEmbedded;
+        bool					  mDelayedLoadDone;
 
         MpxViewPlugin*            mCurrentViewPlugin;
         MpxViewPlugin*            mPlaybackViewPlugin; 

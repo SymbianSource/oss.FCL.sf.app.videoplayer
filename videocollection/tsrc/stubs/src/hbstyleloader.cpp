@@ -18,5 +18,6 @@
 #include "hbstyleloader.h"
 
 int HbStyleLoader::initializeCount = 0;
+bool HbStyleLoader::mRegisterFilePathReturnValue = true;
 
 

@@ -221,6 +221,16 @@ public: // services
     const QIcon* getVideoThumbnailFromIndex(int index)  const;
     
     /**
+     * Returns the value for item count attribute from given index. 
+	 * If there is no item at that index, 0 is returned.
+     * 
+     * @param index: item position where client wants the count from 
+     * 
+     * @return guint32 size in bytes
+     */
+    quint32 getCategoryVideoCountFromIndex( int index ) const;
+    
+    /**
      * Returns the size of the video from given index.
      * If there is no item at that index, 0 is returned
      * 
@@ -317,6 +327,16 @@ public: // services
      * @return None.
      */
     void setAlbumInUse(TMPXItemId albumId);
+    
+    /**
+     * removes provided items from album provided
+     * 
+     * @param albumId album from where to remove
+     * @param items to remove
+     * 
+     * @return count of item removed;
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);
 
 private: // private methods
   
@@ -363,9 +383,12 @@ private: // private methods
     bool isValid(const CMPXMedia &media, const TMPXItemId &itemId) const;
     
     /**
-     * Appends data in album.
+     * Album data changed, resets album data from array provided
+     * 
+     * @param albumId id of album
+     * @param videoarray array of videos in album 
      */
-    void appendDataToAlbumL(TMPXItemId albumId, CMPXMediaArray *videoArray);
+    void albumDataChangedL(TMPXItemId albumId, CMPXMediaArray *videoArray);
 
     /**
      * Called when an album has been removed.

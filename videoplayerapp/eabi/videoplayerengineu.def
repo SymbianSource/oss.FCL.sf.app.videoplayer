@@ -43,4 +43,5 @@ EXPORTS
 	_ZTI18QVideoPlayerEngine @ 42 NONAME
 	_ZTV13VideoServices @ 43 NONAME
 	_ZTV18QVideoPlayerEngine @ 44 NONAME
+	_ZN18QVideoPlayerEngine13doDelayedLoadEv @ 45 NONAME
 

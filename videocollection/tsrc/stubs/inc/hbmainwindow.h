@@ -98,6 +98,12 @@ public:
         Q_UNUSED(animate);
         mOrientation = Qt::Vertical;
     }
+
+signals:
+
+    void orientationChanged(Qt::Orientation orientation);
+    
+public:
     
     /**
      * value to return from softKeyAction

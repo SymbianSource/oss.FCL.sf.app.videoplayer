@@ -93,7 +93,7 @@ CVcxMyVideosAlbum* CVcxMyVideosAlbum::NewLC( CVcxMyVideosCollectionPlugin& aColl
 CVcxMyVideosAlbum* CVcxMyVideosAlbum::NewL( CVcxMyVideosCollectionPlugin& aCollectionPlugin )
     {
     CVcxMyVideosAlbum* self = CVcxMyVideosAlbum::NewLC( aCollectionPlugin );
-    CleanupStack::Pop(); // self;
+    CleanupStack::Pop( self );
     return self;
     }
 

@@ -17,6 +17,7 @@
 
 // INCLUDE FILES
 #include <xqplugin.h>
+#include <xqserviceutil.h>
 #include <hbaction.h>
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -24,6 +25,7 @@
 #include "videocollectionviewplugin.h"
 #include "videolistview.h"
 #include "videocollectionuiloader.h"
+#include "mpxhbvideocommondefs.h"
 
 // ---------------------------------------------------------------------------
 // Constructor
@@ -32,7 +34,8 @@
 VideoCollectionViewPlugin::VideoCollectionViewPlugin()
     : mUiLoader(0),
       mView(0),
-      mActivated(false)
+      mActivated(false),
+      mIsService(false)
 {
 }
 
@@ -61,6 +64,13 @@ void VideoCollectionViewPlugin::createView()
 
         mUiLoader->reset();
 
+        if (XQServiceUtil::isService())
+        {
+        	mIsService = true;
+        }
+        
+        mUiLoader->setIsService(mIsService);
+
 		bool ok(false);
 
 		QList<QObject *> objects = mUiLoader->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
@@ -78,15 +88,35 @@ void VideoCollectionViewPlugin::createView()
             return;
         }
 
-        if(!connect( mView, SIGNAL(command(int)), this, SIGNAL(command(int)) ) ) {
+        if(!connect( mView, SIGNAL(command(int)), this, SIGNAL(command(int)) ) ||
+           !connect( this, SIGNAL(doDelayeds()), mView, SLOT(doDelayedsSlot()) )) {
             // TODO: handle error: connecting signal
             delete mView;
             mView = 0;
             return;
         }
-
+        mTimerId = startTimer(DELAYED_LOAD_TIMEOUT);
         mView->initializeView();
+    }
+}
 
+
+// ---------------------------------------------------------------------------
+// timerEvent
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewPlugin::timerEvent(QTimerEvent *event)
+{
+    if (event)
+    {
+        if (event->timerId() == mTimerId)
+        {
+        	killTimer(mTimerId);
+        	mTimerId = 0;
+
+        	emit command(MpxHbVideoCommon::DoDelayedLoad);
+        	emit doDelayeds();
+        }
     }
 }
 

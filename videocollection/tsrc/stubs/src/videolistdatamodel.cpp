@@ -46,15 +46,19 @@ int VideoListDataModel::initialize()
     {
         int newCount = VideoListDataModelData::mRowCount;
         int oldCount = VideoListDataModelData::mData.count();
-        if (newCount < oldCount)
+        if(newCount == oldCount)
         {
-            beginInsertRows(QModelIndex(), oldCount, newCount - 1);
-            endInsertRows();
+            return 0;
         }
-        else
+        if (newCount < oldCount)
         {
             beginRemoveRows(QModelIndex(), newCount, oldCount);
             endRemoveRows();
+        }
+        else
+        {
+            beginInsertRows(QModelIndex(), oldCount, newCount-1);
+            endInsertRows();
         }
     }
     else

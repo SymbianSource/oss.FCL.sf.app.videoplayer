@@ -195,7 +195,16 @@ public:
      * @param mediaIds, Items which to add.
      * @return 0 if no errors.
      */
-    int addItemsInAlbum(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);
+    int addItemsInAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    
+    /**
+     * Removes items from existing album.
+     * 
+     * @param albumId, Album from where to remove items.
+     * @param mediaIds, Items which to remove.
+     * @return 0 if no errors.
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
 
 private:
     
@@ -270,7 +279,16 @@ private:
      * @param mediaIds, Items to add in the album.
      * @return None.
      */
-    void addItemsInAlbumL(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);
+    void addItemsInAlbumL(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    
+    /**
+     * Removes items from an album.
+     * 
+     * @param albumId, Album where to remove items.
+     * @param mediaIds, Items to remove from album.
+     * @return None.
+     */
+    void removeItemsFromAlbumL(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
 private:
     

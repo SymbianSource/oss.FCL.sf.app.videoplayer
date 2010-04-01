@@ -1,125 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hbdocument version="0.9">
     <widget name="content" type="HbWidget">
-        <widget name="buttonBarLayout" type="HbWidget">
-            <widget name="aspectRatioButtons" type="HbWidget">
-                <widget name="naturalButton" type="HbPushButton">
-                    <icon iconName="qtg_mono_aspect_ratio_natural.svg" name="icon"/>
-                    <sizehint height="50" type="PREFERRED" width="150"/>
-                    <sizehint height="50" type="MINIMUM" width="120"/>
-                    <bool name="visible" value="FALSE"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <widget name="stretchButton" type="HbPushButton">
-                    <icon iconName="qtg_mono_aspect_ratio_stretched.svg" name="icon"/>
-                    <real name="z" value="1"/>
-                    <sizehint height="50" type="PREFERRED" width="150"/>
-                    <sizehint height="50" type="MINIMUM" width="120"/>
-                    <bool name="visible" value="FALSE"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <widget name="zoomButton" type="HbPushButton">
-                    <icon iconName=":/hbvideoplaybackview/images/qtg_mono_aspect_ratio_zoom.png" name="icon"/>
-                    <real name="z" value="2"/>
-                    <sizehint height="50" type="PREFERRED" width="150"/>
-                    <sizehint height="50" type="MINIMUM" width="120"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <real name="z" value="0"/>
-                <sizehint height="150" type="PREFERRED" width="150"/>
-                <sizehint height="52" type="MINIMUM" width="120"/>
-                <layout type="stacked">
-                    <stackitem itemname="naturalButton"/>
-                    <stackitem itemname="stretchButton"/>
-                    <stackitem itemname="zoomButton"/>
-                </layout>
-            </widget>
-            <widget name="rwButton" type="HbPushButton">
-                <icon iconName="qtg_mono_previous.svg" name="icon"/>
-                <sizehint height="50" type="PREFERRED" width="150"/>
-                <sizehint height="50" type="MINIMUM" width="120"/>
-                <string name="state" value="normal"/>
-            </widget>
-            <widget name="playPauseButtons" type="HbWidget">
-                <widget name="playButton" type="HbPushButton">
-                    <icon iconName="qtg_mono_play.svg" name="icon"/>
-                    <real name="z" value="1"/>
-                    <sizehint height="50" type="PREFERRED" width="150"/>
-                    <sizehint height="50" type="MINIMUM" width="120"/>
-                    <bool name="visible" value="FALSE"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <widget name="pauseButton" type="HbPushButton">
-                    <icon iconName="qtg_mono_pause.svg" name="icon"/>
-                    <sizehint height="50" type="PREFERRED" width="150"/>
-                    <sizehint height="50" type="MINIMUM" width="120"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <real name="z" value="0"/>
-                <sizehint height="150" type="PREFERRED" width="150"/>
-                <sizehint height="52" type="MINIMUM" width="120"/>
-                <layout type="stacked">
-                    <stackitem itemname="playButton"/>
-                    <stackitem itemname="pauseButton"/>
-                </layout>
-            </widget>
-            <widget name="ffButton" type="HbPushButton">
-                <icon iconName="qtg_mono_next.svg" name="icon"/>
-                <real name="z" value="7"/>
-                <sizehint height="50" type="PREFERRED" width="150"/>
-                <sizehint height="50" type="MINIMUM" width="120"/>
-                <string name="state" value="normal"/>
-            </widget>
-            <widget name="detailsButton" type="HbPushButton">
-                <icon iconName=":/hbvideoplaybackview/images/qtg_mono_info.png" name="icon"/>
-                <sizehint height="50" type="PREFERRED" width="150"/>
-                <sizehint height="50" type="MINIMUM" width="120"/>
-                <string name="state" value="normal"/>
-            </widget>
-            <real name="z" value="1"/>
-            <sizehint height="60" type="PREFERRED" width="640"/>
-            <sizehint height="50" type="MINIMUM" width="178"/>
-            <bool name="visible" value="FALSE"/>
-            <layout orientation="Horizontal" spacing="0px" type="linear">
-                <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
-                <linearitem itemname="aspectRatioButtons"/>
-                <linearitem itemname="rwButton"/>
-                <linearitem itemname="playPauseButtons"/>
-                <linearitem itemname="ffButton"/>
-                <linearitem itemname="detailsButton"/>
-            </layout>
-        </widget>
-        <widget name="progressBarLayout" type="HbWidget">
-            <widget name="positionLabel" type="HbLabel">
-                <enums name="alignment" value="AlignHCenter|AlignVCenter|AlignTrailing"/>
-                <real name="z" value="1"/>
-                <sizehint height="30" type="PREFERRED" width="30"/>
-            </widget>
-            <widget name="progressSlider" type="HbProgressBar">
-                <integer name="progressValue" value="0"/>
-                <real name="z" value="1"/>
-                <sizehint height="30" type="PREFERRED" width="200"/>
-            </widget>
-            <widget name="durationLabel" type="HbLabel">
-                <enums name="alignment" value="AlignHCenter|AlignVCenter|AlignTrailing"/>
-                <real name="z" value="1"/>
-                <sizehint height="30" type="PREFERRED" width="30"/>
-            </widget>
-            <real name="z" value="3"/>
-            <sizehint height="50" type="PREFERRED" width="640"/>
-            <contentsmargins bottom="6" left="30" right="30" top="6"/>
-            <bool name="visible" value="FALSE"/>
-            <layout orientation="Horizontal" type="linear">
-                <linearitem itemname="positionLabel"/>
-                <linearitem itemname="progressSlider"/>
-                <linearitem itemname="durationLabel"/>
-            </layout>
-        </widget>
         <widget name="bufferingIcon" type="HbLabel">
             <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <icon iconName=":/hbvideoplaybackview/images/connecting_loading.gif" name="icon"/>
+            <icon iconName="frame_anim_looping" name="icon"/>
             <real name="z" value="5"/>
-            <sizehint height="57" type="PREFERRED" width="63"/>
+            <sizehint height="70" type="PREFERRED" width="70"/>
             <bool name="visible" value="FALSE"/>
         </widget>
         <widget name="fileDetailsLayout" type="HbWidget">
@@ -146,22 +32,22 @@
         <widget name="bitmapLayout" type="HbWidget">
             <widget name="audioOnlyBitmap" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName=":/hbvideoplaybackview/images/qtg_large_just_audio.png" name="icon"/>
+                <icon iconName="qtg_large_just_audio" name="icon"/>
                 <bool name="visible" value="FALSE"/>
             </widget>
             <widget name="partialAudioOnlyBitmap" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName=":/hbvideoplaybackview/images/qtg_large_corrupted.png" name="icon"/>
+                <icon iconName="qtg_large_corrupted" name="icon"/>
                 <bool name="visible" value="FALSE"/>
             </widget>
             <widget name="realAudioOnlyBitmap" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName=":/hbvideoplaybackview/images/qtg_large_realplayer.png" name="icon"/>
+                <icon iconName="qtg_large_realplayer" name="icon"/>
                 <bool name="visible" value="FALSE"/>
             </widget>
             <widget name="tvOutBitmap" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName=":/hbvideoplaybackview/images/qtg_large_tv_out.png" name="icon"/>
+                <icon iconName="qtg_large_tv_out" name="icon"/>
                 <bool name="visible" value="FALSE"/>
             </widget>
             <real name="z" value="1"/>
@@ -180,7 +66,7 @@
         <widget name="detailsPlaybackWindow" type="HbWidget">
             <widget name="small_transparentWindow" type="HbTransparentWindow">
                 <widget name="detailsViewPlayButton" type="HbPushButton">
-                    <icon iconName="qtg_mono_play.svg" name="icon"/>
+                    <icon iconName="qtg_mono_play" name="icon"/>
                     <real name="z" value="2"/>
                     <sizehint height="60" type="PREFERRED" width="60"/>
                     <contentsmargins bottom="0" left="0" right="0" top="0"/>
@@ -218,17 +104,135 @@
             <bool name="visible" value="FALSE"/>
             <layout type="anchor"/>
         </widget>
+        <widget name="controlBarLayout" type="HbWidget">
+            <widget name="progressBarLayout" type="HbWidget">
+                <widget name="positionLabel" type="HbLabel">
+                    <enums name="alignment" value="AlignRight|AlignVCenter|AlignHCenter|AlignTrailing"/>
+                    <real name="z" value="1"/>
+                    <sizehint height="30" type="PREFERRED" width="30"/>
+                </widget>
+                <widget name="progressSlider" type="HbProgressBar">
+                    <integer name="progressValue" value="0"/>
+                    <real name="z" value="1"/>
+                    <sizehint height="30" type="PREFERRED" width="200"/>
+                </widget>
+                <widget name="durationLabel" type="HbLabel">
+                    <enums name="alignment" value="AlignRight|AlignVCenter|AlignHCenter|AlignTrailing"/>
+                    <real name="z" value="1"/>
+                    <sizehint height="30" type="PREFERRED" width="30"/>
+                </widget>
+                <real name="z" value="3"/>
+                <sizehint height="50" type="PREFERRED" width="640"/>
+                <contentsmargins bottom="6" left="30" right="30" top="6"/>
+                <bool name="visible" value="TRUE"/>
+                <layout orientation="Horizontal" type="linear">
+                    <linearitem itemname="positionLabel"/>
+                    <linearitem itemname="progressSlider"/>
+                    <linearitem itemname="durationLabel"/>
+                </layout>
+            </widget>
+            <widget name="buttonBarLayout" type="HbWidget">
+                <widget name="aspectRatioButtons" type="HbWidget">
+                    <widget name="naturalButton" type="HbPushButton">
+                        <icon iconName="qtg_mono_aspect_ratio_natural" name="icon"/>
+                        <sizehint height="50" type="PREFERRED" width="150"/>
+                        <sizehint height="50" type="MINIMUM" width="120"/>
+                        <bool name="visible" value="FALSE"/>
+                        <string name="state" value="normal"/>
+                    </widget>
+                    <widget name="stretchButton" type="HbPushButton">
+                        <icon iconName="qtg_mono_aspect_ratio_stretched" name="icon"/>
+                        <real name="z" value="1"/>
+                        <sizehint height="50" type="PREFERRED" width="150"/>
+                        <sizehint height="50" type="MINIMUM" width="120"/>
+                        <bool name="visible" value="FALSE"/>
+                        <string name="state" value="normal"/>
+                    </widget>
+                    <widget name="zoomButton" type="HbPushButton">
+                        <icon iconName="qtg_mono_aspect_ratio_zoom" name="icon"/>
+                        <real name="z" value="2"/>
+                        <sizehint height="50" type="PREFERRED" width="150"/>
+                        <sizehint height="50" type="MINIMUM" width="120"/>
+                        <string name="state" value="normal"/>
+                    </widget>
+                    <real name="z" value="0"/>
+                    <sizehint height="150" type="PREFERRED" width="150"/>
+                    <sizehint height="52" type="MINIMUM" width="120"/>
+                    <layout type="stacked">
+                        <stackitem itemname="naturalButton"/>
+                        <stackitem itemname="stretchButton"/>
+                        <stackitem itemname="zoomButton"/>
+                    </layout>
+                </widget>
+                <widget name="rwButton" type="HbPushButton">
+                    <icon iconName="qtg_mono_previous" name="icon"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <string name="state" value="normal"/>
+                </widget>
+                <widget name="playPauseButtons" type="HbWidget">
+                    <widget name="playButton" type="HbPushButton">
+                        <icon iconName="qtg_mono_play" name="icon"/>
+                        <real name="z" value="1"/>
+                        <sizehint height="50" type="PREFERRED" width="150"/>
+                        <sizehint height="50" type="MINIMUM" width="120"/>
+                        <bool name="visible" value="FALSE"/>
+                        <string name="state" value="normal"/>
+                    </widget>
+                    <widget name="pauseButton" type="HbPushButton">
+                        <icon iconName="qtg_mono_pause" name="icon"/>
+                        <sizehint height="50" type="PREFERRED" width="150"/>
+                        <sizehint height="50" type="MINIMUM" width="120"/>
+                        <string name="state" value="normal"/>
+                    </widget>
+                    <real name="z" value="0"/>
+                    <sizehint height="150" type="PREFERRED" width="150"/>
+                    <sizehint height="52" type="MINIMUM" width="120"/>
+                    <layout type="stacked">
+                        <stackitem itemname="playButton"/>
+                        <stackitem itemname="pauseButton"/>
+                    </layout>
+                </widget>
+                <widget name="ffButton" type="HbPushButton">
+                    <icon iconName="qtg_mono_next" name="icon"/>
+                    <real name="z" value="7"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <string name="state" value="normal"/>
+                </widget>
+                <widget name="detailsButton" type="HbPushButton">
+                    <icon iconName="qtg_mono_info" name="icon"/>
+                    <sizehint height="50" type="PREFERRED" width="150"/>
+                    <sizehint height="50" type="MINIMUM" width="120"/>
+                    <string name="state" value="normal"/>
+                </widget>
+                <real name="z" value="1"/>
+                <sizehint height="50" type="PREFERRED" width="640"/>
+                <sizehint height="50" type="MINIMUM" width="178"/>
+                <bool name="visible" value="TRUE"/>
+                <layout orientation="Horizontal" spacing="0px" type="linear">
+                    <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
+                    <linearitem itemname="aspectRatioButtons"/>
+                    <linearitem itemname="rwButton"/>
+                    <linearitem itemname="playPauseButtons"/>
+                    <linearitem itemname="ffButton"/>
+                    <linearitem itemname="detailsButton"/>
+                </layout>
+            </widget>
+            <real name="z" value="1"/>
+            <sizehint height="160" type="PREFERRED" width="80"/>
+            <bool name="visible" value="FALSE"/>
+            <layout orientation="Vertical" spacing="0px" type="linear">
+                <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
+                <linearitem itemname="progressBarLayout"/>
+                <linearitem itemname="buttonBarLayout"/>
+            </layout>
+        </widget>
         <size height="360" name="size" width="640"/>
         <real name="z" value="1"/>
         <rect height="360" name="geometry" width="640" x="0" y="0"/>
         <sizehint height="524287" type="MAXIMUM" width="524287"/>
         <layout type="anchor">
-            <anchoritem dst="buttonBarLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
-            <anchoritem dst="buttonBarLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
-            <anchoritem dst="buttonBarLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
-            <anchoritem dst="progressBarLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
-            <anchoritem dst="progressBarLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
-            <anchoritem dst="progressBarLayout" dstEdge="BOTTOM" spacing="0" src="buttonBarLayout" srcEdge="TOP"/>
             <anchoritem dst="bufferingIcon" dstEdge="CENTERH" spacing="0" src="" srcEdge="CENTERH"/>
             <anchoritem dst="bufferingIcon" dstEdge="CENTERV" spacing="0" src="" srcEdge="CENTERV"/>
             <anchoritem dst="title" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
@@ -236,6 +240,8 @@
             <anchoritem dst="title" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
+            <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-100" src="" srcEdge="BOTTOM"/>
             <anchoritem dst="bitmapLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
             <anchoritem dst="bitmapLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="CENTERH"/>
             <anchoritem dst="bitmapLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
@@ -247,24 +253,21 @@
             <anchoritem dst="transparentWindow" dstEdge="TOP" spacing="0" src="" srcEdge="TOP"/>
             <anchoritem dst="transparentWindow" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
             <anchoritem dst="transparentWindow" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
-            <anchoritem dst="buttonBarLayout" dstEdge="TOP" spacing="-50" src="" srcEdge="BOTTOM"/>
-            <anchoritem dst="progressBarLayout" dstEdge="TOP" spacing="-50" src="buttonBarLayout" srcEdge="TOP"/>
-            <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="progressBarLayout" srcEdge="TOP"/>
-            <anchoritem dst="bitmapLayout" dstEdge="BOTTOM" spacing="0" src="progressBarLayout" srcEdge="TOP"/>
             <anchoritem dst="title" dstEdge="BOTTOM" spacing="100" src="" srcEdge="TOP"/>
             <anchoritem dst="volumeSlider" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
             <anchoritem dst="volumeSlider" dstEdge="TOP" spacing="0" src="title" srcEdge="BOTTOM"/>
-            <anchoritem dst="volumeSlider" dstEdge="BOTTOM" spacing="0" src="progressBarLayout" srcEdge="TOP"/>
-            <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
+            <anchoritem dst="controlBarLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
+            <anchoritem dst="controlBarLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="controlBarLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="bitmapLayout" dstEdge="BOTTOM" spacing="-100" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="volumeSlider" dstEdge="BOTTOM" spacing="-100" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="controlBarLayout" dstEdge="TOP" spacing="-100" src="" srcEdge="BOTTOM"/>
         </layout>
     </widget>
     <section name="detailsView">
         <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
             <sizehint height="0" type="PREFERRED" width="200"/>
             <bool name="visible" value="FALSE"/>
-        </widget>
-        <widget name="fileDetailsLayout" type="HbWidget">
-            <sizehint height="264" type="PREFERRED" width="320"/>
         </widget>
         <widget name="content" type="HbWidget">
             <layout type="anchor">
@@ -274,22 +277,25 @@
                 <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="264" type="PREFERRED" width="320"/>
+        </widget>
     </section>
     <section name="audioOnlyViewWithLocalPlayback">
         <widget name="fileDetailsRatingSlider" type="HbRatingSlider">
             <sizehint height="30" type="PREFERRED" width="200"/>
             <bool name="visible" value="TRUE"/>
         </widget>
-        <widget name="fileDetailsLayout" type="HbWidget">
-            <sizehint height="198" type="PREFERRED" width="320"/>
-        </widget>
         <widget name="content" type="HbWidget">
             <layout type="anchor">
                 <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
                 <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
                 <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="progressBarLayout" srcEdge="TOP"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-100" src="" srcEdge="BOTTOM"/>
             </layout>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="198" type="PREFERRED" width="320"/>
         </widget>
     </section>
     <section name="audioOnlyViewWithNonLocalPlayback">
@@ -297,16 +303,16 @@
             <sizehint height="0" type="PREFERRED" width="200"/>
             <bool name="visible" value="FALSE"/>
         </widget>
-        <widget name="fileDetailsLayout" type="HbWidget">
-            <sizehint height="198" type="PREFERRED" width="320"/>
-        </widget>
         <widget name="content" type="HbWidget">
             <layout type="anchor">
                 <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
                 <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="CENTERH"/>
                 <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="progressBarLayout" srcEdge="TOP"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="-100" src="" srcEdge="BOTTOM"/>
             </layout>
+        </widget>
+        <widget name="fileDetailsLayout" type="HbWidget">
+            <sizehint height="198" type="PREFERRED" width="320"/>
         </widget>
     </section>
     <section name="nonLocalPlayback">

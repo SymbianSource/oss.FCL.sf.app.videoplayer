@@ -103,4 +103,17 @@ QList<HbAction*> HbMenu::actions()
     return mActions.values();
 }
 
+void HbMenu::setPreferredPos(const QPointF &position,
+    HbPopup::Placement placement)
+{
+    Q_UNUSED(placement);
+
+    HbMenuData::mExecPoint = position;
+}
+
+void HbMenu::setDismissPolicy(HbPopup::DismissPolicy dismissPolicy)
+{
+    Q_UNUSED(dismissPolicy);
+}
+
 // end of file

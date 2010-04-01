@@ -38,8 +38,6 @@
 
 const int MEDIA_COUNT = 10;
 
-
-
 // -----------------------------------------------------------------------------
 // main
 // -----------------------------------------------------------------------------
@@ -153,7 +151,7 @@ void TestVideoListDataModel::testInitialize()
     VideoDeleteWorker::mCreateCount = 0;
     
     QVERIFY(mTestObjectNotInitialized->initialize() == 0);
-    // secon call should succeed right away
+    // second call should succeed right away
     QVERIFY(mTestObjectNotInitialized->initialize() == 0);
     QVERIFY(mTestObjectNotInitialized->getCollectionClient() != 0);
     
@@ -229,6 +227,49 @@ void TestVideoListDataModel::testMediaIdAtIndex()
     mMediaFactory->removeArray();
     mTestObjectInitialized->d_ptr->newVideoListSlot(0);
     QVERIFY( mTestObjectInitialized->mediaIdAtIndex(MEDIA_COUNT / 2) == TMPXItemId::InvalidId());
+}
+
+// -----------------------------------------------------------------------------
+// testIndexOfId
+// -----------------------------------------------------------------------------
+//
+void TestVideoListDataModel::testIndexOfId()
+{
+    mMediaFactory->removeArray();
+        
+    mMediaFactory->createMediaItems(MEDIA_COUNT);
+      
+    // ownership of media-array transferred
+    mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
+    
+    QModelIndex index;
+    
+    // invalid id
+    TMPXItemId id = TMPXItemId::InvalidId();
+    index = mTestObjectInitialized->indexOfId(id);
+    QVERIFY(!index.isValid());
+    
+    //invalid index: does not exists
+    id = TMPXItemId(MEDIA_COUNT, 0);
+    index = mTestObjectInitialized->indexOfId(id);
+    QVERIFY(!index.isValid());
+    
+    // existing
+    id = TMPXItemId(0, 0);
+    index = mTestObjectInitialized->indexOfId(id);
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == 0);
+
+    id = TMPXItemId(MEDIA_COUNT / 2, 0);
+    index = mTestObjectInitialized->indexOfId(id);
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == MEDIA_COUNT / 2);
+    
+    id = TMPXItemId(MEDIA_COUNT - 1, 0);
+    index = mTestObjectInitialized->indexOfId(id);
+    QVERIFY(index.isValid());
+    QVERIFY(index.row() == MEDIA_COUNT - 1);
+ 
 }
 
 // -----------------------------------------------------------------------------
@@ -439,7 +480,7 @@ void TestVideoListDataModel::testColumnCount()
     // test with valid "parent index
     QVERIFY(mTestObjectInitialized->columnCount(index) == 0);
 }
-   
+
 // -----------------------------------------------------------------------------
 // testIndex
 // -----------------------------------------------------------------------------
@@ -542,12 +583,35 @@ void TestVideoListDataModel::testPrepareDetails()
     
     // album typed data
     mMediaFactory->removeArray();        
-    mMediaFactory->createMediaItems(5, 2, MediaDetailNone);
+    mMediaFactory->createMediaItems(5, 2, MediaDetailCategoryVideoCount);
     mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
     modelIndex = mTestObjectInitialized->index(3, 0);
     result = mTestObjectInitialized->data(modelIndex, Qt::DisplayRole);
     QVERIFY (result.toStringList().count() == 2 );
-  
+}
+
+// -----------------------------------------------------------------------------
+// testPrepareVideoCountString
+// -----------------------------------------------------------------------------
+//
+void TestVideoListDataModel::testPrepareVideoCountString()
+{
+    QString details("");
+    QModelIndex modelIndex;
+    QVariant result;
+    
+    // Cagegory typed data.
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(MEDIA_COUNT, 1, MediaDetailCategoryVideoCount);
+    mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
+
+    modelIndex = mTestObjectInitialized->index(MEDIA_COUNT / 2, 0);
+    result = mTestObjectInitialized->data(modelIndex, Qt::DisplayRole);
+    QVERIFY (result.toStringList().count() == 2 );
+    
+    modelIndex = mTestObjectInitialized->index(MEDIA_COUNT-1, 0);
+    result = mTestObjectInitialized->data(modelIndex, Qt::DisplayRole);
+    QVERIFY (result.toStringList().count() == 2 );
 }
 
 // -----------------------------------------------------------------------------
@@ -805,7 +869,32 @@ void TestVideoListDataModel::testSetAlbumInUse()
 {
     TMPXItemId dummyId(1,1);   
     mTestObjectInitialized->setAlbumInUse(dummyId);
-    QVERIFY(mTestObjectInitialized->d_ptr->mCurrentAlbum == dummyId);
+    QVERIFY(mTestObjectInitialized->albumInUse() == dummyId);
+}
+
+// -----------------------------------------------------------------------------
+// testRemoveItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+void TestVideoListDataModel::testRemoveItemsFromAlbum()
+{
+    VideoListDataModelPrivate::mRemoveFrAlbumReturn = 0;
+    VideoCollectionClient::mRemoveItemsReturn = 0;
+    TMPXItemId id(0,0);
+    QList<TMPXItemId> items;
+    items.append(id);
+    // remove count == 0
+    QVERIFY(mTestObjectInitialized->removeItemsFromAlbum(id, items) == 0);
+    
+    VideoListDataModelPrivate::mRemoveFrAlbumReturn = 1;
+    VideoCollectionClient::mRemoveItemsReturn = -1;
+    // collectionclient returns < 0
+    QVERIFY(mTestObjectInitialized->removeItemsFromAlbum(id, items) < 0);
+    
+    VideoListDataModelPrivate::mRemoveFrAlbumReturn = 1;
+    VideoCollectionClient::mRemoveItemsReturn = 0;
+    // succeeds
+    QVERIFY(mTestObjectInitialized->removeItemsFromAlbum(id, items) == 1);
 }
 
 // -----------------------------------------------------------------------------

@@ -141,6 +141,14 @@ public: // services
     const QIcon* getVideoThumbnailFromIndex( int index ) const;
    
     /**
+     * return video count of the item at given index
+     * 
+     * @param index
+     * @return quint32
+     */
+    quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) const;
+    
+    /**
      * return video size of the item at given index
      * 
      * @param index
@@ -223,6 +231,12 @@ public: // services
      * returns mBelongsToAlbum;
      */
     void setAlbumInUse(TMPXItemId albumId);
+    
+    /**
+     * returns mRemoveFrAlbumReturn
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &ids);
+    
     
 private: // private methods
     
@@ -350,6 +364,16 @@ public:
     static bool mFailInit;
 
     /**
+     * if true, size returned is mVideoCount
+     */
+    static bool mOverrideVideoCount;
+    
+    /**
+     * override video count value
+     */
+    static quint32 mVideoCount;
+    
+    /**
      * if true, size returned is mSize
      */
     static bool mOverrideSize;
@@ -378,6 +402,11 @@ public:
      * value from belongsToAlbum to be returned
      */
     static bool mBelongsToAlbum;
+    
+    /**
+     * value returned from removeItemsFromAlbum
+     */
+    static int mRemoveFrAlbumReturn;
     
 };
 

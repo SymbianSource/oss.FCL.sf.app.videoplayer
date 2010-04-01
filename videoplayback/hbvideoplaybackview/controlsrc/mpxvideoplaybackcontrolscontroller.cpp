@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#27 %
+// Version : %version: da1mmcf#29 %
 
 
 
@@ -23,7 +23,6 @@
 #include <coecntrl.h>
 #include <bautils.h>
 #include <barsread.h>
-#include <StringLoader.h>
 #include <f32file.h>
 
 #include <QTimer>
@@ -36,11 +35,11 @@
 #include <hbratingslider.h>
 #include <hbiconanimator.h>
 #include <hbtransparentwindow.h>
+#include <hbiconanimationmanager.h>
 
 #include "mpxvideoviewwrapper.h"
 #include "hbvideobaseplaybackview.h"
-#include "mpxvideoplaybackbuttonbar.h"
-#include "mpxvideoplaybackprogressbar.h"
+#include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackcontrolpolicy.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackviewfiledetails.h"
@@ -186,6 +185,8 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 void QMPXVideoPlaybackControlsController::addFileDetails(
     QMPXVideoPlaybackViewFileDetails* details )
 {
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::addFileDetails"));
+
     //
     // If it is not local, hide the star rating
     //
@@ -481,10 +482,11 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
             //
             // Buffering animation icon
             //
+            HbIconAnimationManager* manager = HbIconAnimationManager::global();
+            manager->addDefinitionFile(":/hbvideoplaybackview/animation.axml");
+			
             QGraphicsWidget *widget = mLoader->findWidget( QString( "bufferingIcon" ) );
             HbLabel *bufferingAnim = qobject_cast<HbLabel*>( widget );
-            HbIconItem *iconItem = new HbIconItem( bufferingAnim->icon() );
-            iconItem->animator().startAnimation();
 
             control = new QMPXVideoPlaybackFullScreenControl( this,
                                                               controlIndex,
@@ -507,39 +509,20 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
 
             break;
         }
-        case EMPXButtonBar:
+        case EMPXControlBar:
         {
             //
             // Button bar
             //
-            QGraphicsWidget *widget = mLoader->findWidget( QString( "buttonBarLayout" ) );
-            QMPXVideoPlaybackButtonBar *buttonBar = 
-                qobject_cast<QMPXVideoPlaybackButtonBar*>( widget );
-            buttonBar->initialize();
+            QGraphicsWidget *widget = mLoader->findWidget( QString( "controlBarLayout" ) );
+            QMPXVideoPlaybackControlBar *controlBar = 
+                qobject_cast<QMPXVideoPlaybackControlBar*>( widget );
+            controlBar->initialize();
 
             control = new QMPXVideoPlaybackFullScreenControl( this,
                                                               controlIndex,
-                                                              buttonBar,
+                                                              controlBar,
                                                               properties );
-            mControls.append( control );
-
-            break;
-        }
-        case EMPXProgressBar:
-        {
-            //
-            // Progress bar
-            //
-            QGraphicsWidget *widget = mLoader->findWidget( QString( "progressBarLayout" ) );
-            QMPXVideoPlaybackProgressBar *progressBar = 
-                qobject_cast<QMPXVideoPlaybackProgressBar*>( widget );
-            progressBar->initialize();
-
-            control = new QMPXVideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              progressBar,
-                                                              properties );
-
             mControls.append( control );
 
             break;
@@ -703,7 +686,7 @@ bool QMPXVideoPlaybackControlsController::isVisible()
 
     for ( int i = 0 ; i < mControls.count() ; i++ )
     {
-        if ( mControls[i]->controlIndex() == EMPXButtonBar )
+        if ( mControls[i]->controlIndex() == EMPXControlBar )
         {
             if ( mControls[i]->isVisible() )
             {

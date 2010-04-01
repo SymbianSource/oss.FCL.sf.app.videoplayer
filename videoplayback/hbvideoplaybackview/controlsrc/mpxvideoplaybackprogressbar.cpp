@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#13 %
+// Version : %version: da1mmcf#14 %
 
 
 
@@ -24,9 +24,7 @@
 #include <QGraphicsSceneMouseEvent>
 
 #include <hblabel.h>
-#include <hbframeitem.h>
 #include <hbprogressbar.h>
-#include <hbframedrawer.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackprogressbar.h"
@@ -44,7 +42,6 @@ QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar(
     , mNeedToResumeAfterSetPosition( false )
     , mInitialized( false )
     , mDragging( false )
-    , mFrameItem( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar()"));
 }
@@ -98,16 +95,6 @@ void QMPXVideoPlaybackProgressBar::initialize()
         // we need to set the duration manually 
         //
         durationChanged( (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier );
-
-        //
-        // Set framedrawer for semi transparent background
-        //
-        mFrameItem = new HbFrameItem ( this );
-        mFrameItem->setGeometry( boundingRect() );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
-        mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );
-        mFrameItem->setVisible( false );
     }
 }
 
@@ -295,8 +282,6 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
     {
         setEnabled( true );
     }
-
-    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
 }
 
 // -------------------------------------------------------------------------------------------------

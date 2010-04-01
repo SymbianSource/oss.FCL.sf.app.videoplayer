@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 18 %
+// Version : %version: e003sa33#19 %
 
 
 #include <AudioPreference.h>
@@ -94,7 +94,7 @@ void CMpxVideoPlayerUtility::Reset()
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::Reset()"));
 
     Close();
-    OpenControllerL();
+    MPX_TRAPD( err, OpenControllerL() );
 }
 
 void CMpxVideoPlayerUtility::OpenControllerL()

@@ -263,7 +263,8 @@ public:
      *
      * @param aId          Video identifier in MDS database.
      * @param aFullDetails If ETrue, then all details are fetched, othewise only subset.
-     * @return             Pointer to media object, ownership moves.
+     * @return             Pointer to media object, ownership moves. NULL if
+     *                     not found.
      */
     CMPXMedia* CreateVideoL( TUint32 aId, TBool aFullDetails = ETrue );
 
@@ -346,10 +347,12 @@ private:
     /**
      * Gets object from MDS.
      *
-     * @param aId   The ID of the object to get.
-     * @return      The object if found, NULL otherwise.
+     * @param aId      The ID of the object to get.
+     * @param aIsVideo Set to ETrue if the object to be fetched is video. If set to
+     *                 EFalse, then the object is assumed to be album.
+     * @return         The object if found, NULL otherwise.
      */
-    CMdEObject* ObjectL( const TItemId aId );
+    CMdEObject* ObjectL( const TItemId aId, TBool aIsVideo = ETrue );
 
     /**
      * Read the video details from the given object to the media class.
@@ -433,6 +436,13 @@ private:
      */
     void SetCreationAndModifiedDatesL( CMdEObject& aObject );
 
+    /**
+     * Sets creation date to aObject from aVideo.
+     * 
+     * @param aVideo  Creation date is copied from here.
+     * @param aObject Creation date is written here.
+     */
+    void SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject );
 public:
 
     /**
@@ -579,14 +589,6 @@ private: // data
      * The Last Play Point property definition. Not own.
      */
     CMdEPropertyDef* iLastPlayPositionPropertyDef;
-
-#if 0
-    /**
-     * 17.
-     * The Download ID property definition. Not own.
-     */
-    CMdEPropertyDef* iDownloadIdPropertyDef;
-#endif
     
     /**
     * 18.

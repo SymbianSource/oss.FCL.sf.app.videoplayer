@@ -85,7 +85,7 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
     mSortRole = role;
     mSortOrder = order;
     
-    return status;    
+    return status;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order)
     if (mSortRole == -1)
     {
         CRepository *cenRep = 0;
-        TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
+        TRAP(err, cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
         if(cenRep)
         {
             int sortRole(-1);
@@ -190,7 +190,7 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
         if(prototype)
         {
             //Use image layout in prototype
-            prototype->setGraphicsSize(HbListViewItem::Thumbnail);
+            prototype->setGraphicsSize(HbListViewItem::WideThumbnail);
         }
         view->setItemRecycling(true);
         view->setClampingStyle(HbScrollArea::BounceBackClamping);
@@ -243,27 +243,27 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
     switch(statusCode)
     {
         case VideoCollectionCommon::statusSingleDeleteFail:
-            format = tr("Unable to delete item %1. It is currently open."); //TODO: localisation
+            format = hbTrId("txt_videos_info_unable_to_delete_1_it_is_current");
             if(additional.isValid())
             {
                 msg = format.arg(additional.toString());
             }
         break;
         case VideoCollectionCommon::statusMultipleDeleteFail:
-            msg = tr("Unable to delete some items which are currently open.");
+            msg = hbTrId("txt_videos_info_unable_to_delete_some_items_which");
         break;
         case VideoCollectionCommon::statusSingleRemoveFail:
-            format = tr("Unable to remove collection %1."); //TODO: localisation
+            format = tr("Unable to remove collection %1."); //localisation
             if(additional.isValid())
             {
                 msg = format.arg(additional.toString());
             }
         break;
         case VideoCollectionCommon::statusMultiRemoveFail:
-            msg = tr("Unable to remove some collections.");
+            msg = tr("Unable to remove some collections.");  //localisation
         break;
         case VideoCollectionCommon::statusVideosAddedToCollection:
-            format = tr("Videos added to %1 collection."); //TODO: localisation
+            format = hbTrId("txt_videos_dpopinfo_videos_added_to_1");
             if(additional.isValid())
             {
                 msg = format.arg(additional.toString());
@@ -271,10 +271,10 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             error = false;
         break;
         case VideoCollectionCommon::statusAllVideosAlreadyInCollection:
-            msg = tr("All videos already added to this collection.");            
+            msg = tr("All videos already added to this collection.");   //localisation
         break;
         case VideoCollectionCommon::statusDeleteInProgress:
-            format = tr("%1 videos are being deleted."); //TODO: localisation
+            format = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted");
             if(additional.isValid())
             {
                 msg = format.arg(additional.toString());

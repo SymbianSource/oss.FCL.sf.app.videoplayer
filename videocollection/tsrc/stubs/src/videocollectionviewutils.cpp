@@ -25,6 +25,7 @@ int VideoCollectionViewUtilsData::mSortRole = 0;
 Qt::SortOrder VideoCollectionViewUtilsData::mSortOrder = Qt::AscendingOrder;
 QString VideoCollectionViewUtilsData::mIconString = "";
 QString VideoCollectionViewUtilsData::mPressedString = "";
+QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
 
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
@@ -100,6 +101,6 @@ void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,
 
 void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &additional)
 {
-    Q_UNUSED(additional);
+    VideoCollectionViewUtilsData::mLastStatusAdditional = additional;
     VideoCollectionViewUtilsData::mLastError = statusCode;
 }

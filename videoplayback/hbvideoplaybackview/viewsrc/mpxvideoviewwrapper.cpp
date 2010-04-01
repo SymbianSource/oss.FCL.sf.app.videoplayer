@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#22 %
+// Version : %version: da1mmcf#24 %
 
 
 
@@ -60,6 +60,8 @@
 CMPXVideoViewWrapper::CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView )
     : iView( aView )
     , iControlsController( NULL )
+    , iMediaRequested( false )
+    , iPlaylistView( false )
 {
 }
 
@@ -97,19 +99,7 @@ void CMPXVideoViewWrapper::ConstructL()
     //  Create Active Object for closing player
     //
     iCloseAO = CIdle::NewL( CActive::EPriorityStandard );   
-        
-    iPlaylistView = EFalse;
-    
-    // Get playlist information
-    MMPXSource* s = iPlaybackUtility->Source();
-
-    if ( s )
-    {
-        CMPXCollectionPlaylist* playlist = s->PlaylistL();
-        iPlaylistView = (playlist) ? ETrue : EFalse;
-        delete playlist;
-    }
-
+                
     //
     //  Create Video Playback Display Handler
     //
@@ -351,7 +341,7 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         }
         case EMPXPbvCmdNextListItem:
         {
-            if ( iPlaylistView && IsMultiItemPlaylist() )
+            if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
                 iPlaybackUtility->CommandL( EPbCmdNext );
             }
@@ -359,7 +349,7 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         }
         case EMPXPbvCmdPreviousListItem:  
         {
-            if ( iPlaylistView && IsMultiItemPlaylist() )
+            if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
 			    //
 			    // the command is being sent twice on purpose
@@ -1383,8 +1373,28 @@ void CMPXVideoViewWrapper::CreateControlsL()
     const QString qMimeType( (QChar*)mimeType.Ptr(), mimeType.Length() );
     iFileDetails->mMimeType = qMimeType;
 
-    iFileDetails->mMultiItemPlaylist = IsMultiItemPlaylist();
+    //
+    // get playlist information and set mMultiItemPlaylist flag
+    //
+    TInt numItems = 1;    
+    MMPXSource* s = iPlaybackUtility->Source();
 
+    if ( s )
+    {
+        CMPXCollectionPlaylist* playlist = NULL;
+
+        MPX_TRAPD( err, playlist = s->PlaylistL() );
+        
+        if ( err == KErrNone && playlist )
+        {
+            iPlaylistView = ETrue;
+            numItems = playlist->Count();
+            delete playlist;
+        }
+    }
+
+    iFileDetails->mMultiItemPlaylist = ( numItems > 1 );
+    
     CleanupStack::PopAndDestroy( cmd );
 
     if ( iControlsController )
@@ -1402,27 +1412,17 @@ void CMPXVideoViewWrapper::CreateControlsL()
 //
 TBool CMPXVideoViewWrapper::IsMultiItemPlaylist()
 {
-    TInt numItems = 1;
-    MMPXSource* s = iPlaybackUtility->Source();
-
-    if ( s )
+    
+    bool multiLinks( false );
+    
+    if ( iFileDetails )
     {
-        CMPXCollectionPlaylist* playlist = NULL;
-
-        MPX_TRAPD( err, playlist = s->PlaylistL() );
-
-        if ( err == KErrNone && playlist )
-        {
-            numItems = playlist->Count();
-            delete playlist;
-        }
+        MPX_DEBUG(_L("CMPXVideoViewWrapper::IsMultiItemPlaylist(%d)"), 
+            iFileDetails->mMultiItemPlaylist );
+        multiLinks = iFileDetails->mMultiItemPlaylist;
     }
-
-    TBool retVal = ( numItems > 1 );
-
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::IsMultiItemPlaylist(%d)"), retVal);
-
-    return retVal;
+    
+    return multiLinks;
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -72,7 +72,8 @@ public:
     enum GraphicsSize
     {
         InvalidSize,
-        Thumbnail
+        Thumbnail,
+        WideThumbnail,
     };
     
    

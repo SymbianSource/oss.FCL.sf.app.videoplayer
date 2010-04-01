@@ -26,7 +26,6 @@
 #include <QtTest/QtTest>
 
 class HbVideoBasePlaybackView;
-class CMPXVideoViewWrapper;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 class QMPXVideoPlaybackStatusPaneControl;
@@ -57,29 +56,23 @@ public:
     void setup();
          
 private slots:
+    void testSetVisible();
+    void testSetMenu();
+    void testUpdateControlsWithFileDetails();
+    void testSetVisibility();
+    void testControlListUpdated();
+    void testSlot_handleAboutToShow();
+    void testSlot_handleAboutToHide();
+    void testSlot_openFullScreenView();
 
-      void testSetVisible();
-	  void testSetMenu();
-	  void testUpdateControlsWithFileDetails();
-	  void testSetVisibility();
-	  void testControlListUpdated();
-	  void testSlot_handleAboutToShow();
-	  void testSlot_handleAboutToHide();
-	  void testSlot_openFullScreenView();
-	  	
-	  
-    
 signals:
-
     void commandSignal();
     
 private:
-	  HbVideoBasePlaybackView*                 mBaseVideoView;
-	  CMPXVideoViewWrapper*                    mVideoViewWrapper;
-	  QMPXVideoPlaybackViewFileDetails*        mFileDetails;
-	  QMPXVideoPlaybackControlsController*     mControlsController;
-	  QMPXVideoPlaybackStatusPaneControl*      mStatusPane;
- 
+    HbVideoBasePlaybackView*                 mBaseVideoView;
+    QMPXVideoPlaybackViewFileDetails*        mFileDetails;
+    QMPXVideoPlaybackControlsController*     mControlsController;
+    QMPXVideoPlaybackStatusPaneControl*      mStatusPane;
 };
 
 

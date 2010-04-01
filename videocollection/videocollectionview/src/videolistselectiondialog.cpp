@@ -73,7 +73,11 @@ mListWidget(0)
         mListWidget = new VideoListWidget(mUiLoader);
         if (mListWidget)
         {
-            mListWidget->initialize(*mModel);
+            if(mListWidget->initialize(*mModel) < 0)
+            {
+                delete mListWidget;
+                mListWidget = 0;
+            }
         }
     }
 }
@@ -121,7 +125,12 @@ void VideoListSelectionDialog::setupContent(int type, TMPXItemId activeItem)
         }
     }
     // set (or reset) generic id filter
-    mModel->setGenericIdFilter(activeItem, (mTypeOfSelection == EDeleteVideos));    
+    bool filterValue = true;
+    if(mTypeOfSelection == EAddToCollection || mTypeOfSelection == ESelectCollection)
+    {
+        filterValue = false;
+    }
+    mModel->setGenericIdFilter(activeItem, filterValue);    
     activateSelection();
 }
 
@@ -138,21 +147,29 @@ bool VideoListSelectionDialog::initDialog()
         {
            return false;
         }
-    }    
-    if(!mListWidget)
-    {
-        mListWidget = new VideoListWidget(mUiLoader);
-        mListWidget->initialize(*mModel);
-    }
+    }  
     if (!mListContainer)
     {
         mListContainer =
-                mUiLoader->findWidget<HbStackedWidget>(DOCML_NAME_LIST_CONTAINER);
-        if(mListContainer && mListWidget)
+                   mUiLoader->findWidget<HbStackedWidget>(DOCML_NAME_LIST_CONTAINER);
+    
+        if(!mListWidget)
+        {
+            mListWidget = new VideoListWidget(mUiLoader);
+            if(mListWidget->initialize(*mModel) < 0)
+            {
+                delete mListWidget;
+                mListWidget = 0;
+                mListContainer = 0;
+                return false;
+            }
+        }
+        if(mListContainer)
         {
             mListContainer->addWidget(mListWidget);
         }
     }
+
     if(!mHeading)
     {
         mHeading = mUiLoader->findWidget<HbLabel>(DOCML_NAME_DLG_HEADINGLBL);
@@ -173,11 +190,11 @@ bool VideoListSelectionDialog::initDialog()
     }
     if(!primaryAction())
     {
-        setPrimaryAction(new HbAction(tr("OK"), this)); //TODO: localisation
+        setPrimaryAction(new HbAction(hbTrId("txt_common_button_ok"), this));
     }
     if(!secondaryAction())
     {
-        setSecondaryAction(new HbAction(tr("Cancel"), this)); //TODO: localisation
+        setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"), this));
     }
     if(!mListWidget || !mListContainer || !mHeading || !mCheckBox || !primaryAction() || !secondaryAction())
     {
@@ -192,39 +209,63 @@ bool VideoListSelectionDialog::initDialog()
 //
 void VideoListSelectionDialog::activateSelection()
 {
-    // "add to collection" and "select collection" -selections needs 
+    // "add to collection" and "remove from collection -selections needs 
     // additional functionality for primary key
     if(mTypeOfSelection == EAddToCollection ||
-       mTypeOfSelection == ESelectCollection)
+       mTypeOfSelection == ERemoveFromCollection)
     {
         primaryAction()->disconnect(SIGNAL(triggered()));
         connect(primaryAction(), SIGNAL(triggered()), this, SLOT(primaryActionTriggeredSlot()));
     }
-    
-    if(mTypeOfSelection == EDeleteVideos || mTypeOfSelection == EAddToCollection) 
+    QString headingTxt("");
+    QString primaryTxt("");
+    // create texts
+    switch(mTypeOfSelection)
     {
-        mSelection.clear();
-        mListWidget->setSelectionMode(HbAbstractItemView::MultiSelection);   
-        mListWidget->activate(VideoCollectionCommon::ELevelVideos);
-        mCheckboxContainer->setVisible(true);
-        mItemCount->setPlainText(tr("0/%1").arg(mModel->rowCount())); 
-        mCheckBox->setChecked(false);        
-        QString txt("");
-        mTypeOfSelection == EDeleteVideos ? txt = tr("Delete items") : txt = tr("Add to collection"); // localisation missing
-        mHeading->setPlainText(txt);
-        mTypeOfSelection == EDeleteVideos ? txt = hbTrId("txt_common_menu_delete") : txt = tr("Add"); // localisation missing
-        primaryAction()->setText(txt);
-        primaryAction()->setDisabled(true);
+    case EDeleteVideos:
+        primaryTxt = hbTrId("txt_common_button_delete");
+    break;
+    case EAddToCollection:
+        primaryTxt = hbTrId("txt_common_button_add");
+    break;
+    case ERemoveFromCollection:
+        primaryTxt = hbTrId("txt_common_button_remove");
+    break;
+    case ESelectCollection:
+        primaryTxt = hbTrId("txt_videos_button_new");
+    break;
+    default:
+    break;
+    }
+
+    HbAction *primary = primaryAction();
+    primary->setText(primaryTxt);
+
+    if(mTypeOfSelection == ESelectCollection)
+    {
+        headingTxt = hbTrId("txt_videos_title_select_collection");
+        mCheckboxContainer->setVisible(false);
+        mListWidget->setSelectionMode(-1);   
+        mListWidget->activate(VideoCollectionCommon::ELevelCategory);
+        // need to set primaryaction disabled here in order for it 
+        // get correctly updated at modelReady(), where it will be enabled
+        // if state would be same, no update will happen
+        primary->setDisabled(true);
     }
     else
     {
-        mListWidget->setSelectionMode(-1);   
-        mListWidget->activate(VideoCollectionCommon::ELevelCategory);
-        mCheckboxContainer->setVisible(false);
-        mHeading->setPlainText(tr("Select collection")); // localisation missing
-        primaryAction()->setText(tr("New")); // localisation missing    
-        primaryAction()->setDisabled(false);
-    }    
+        headingTxt = hbTrId("txt_videos_title_select_videos");
+        mListWidget->setSelectionMode(HbAbstractItemView::MultiSelection);
+        mListWidget->activate(VideoCollectionCommon::ELevelVideos);
+        mCheckboxContainer->setVisible(true);
+        mItemCount->setPlainText(tr("0/%1").arg(mModel->rowCount())); 
+        mCheckBox->setChecked(false);
+        // need to set primaryaction enabled here in order for it 
+        // get correctly updated at modelReady(), where it will be disabled  
+        // if state would be same, no update will happen
+        primary->setDisabled(false);
+    }
+    mHeading->setPlainText(headingTxt);         
     // sort to make sure dialog has correctly filtered content
     // at the same order as in view
     VideoCollectionViewUtils::sortModel(mModel, false);        
@@ -234,7 +275,7 @@ void VideoListSelectionDialog::activateSelection()
 // exec
 // ---------------------------------------------------------------------------
 //
-HbAction* VideoListSelectionDialog::exec()
+void VideoListSelectionDialog::exec()
 {
     // clear checkbox
     mCheckBox->setChecked(false);
@@ -244,46 +285,87 @@ HbAction* VideoListSelectionDialog::exec()
     // scroll list back to top
     mListWidget->scrollTo(mModel->index(0, 0));
 
-    connectSignals();
-    
-    // Launch popup syncronously
-    bool accepted = false;
-    HbDialog::exec() == primaryAction() ? accepted = true : accepted = false;
-    
-    disconnectSignals();
-   
-    if(accepted)
+    if(mModel->rowCount())
     {
-        // user is adding videos into selected collection 
-        // or selecting collection where to add videos
-        if(mTypeOfSelection == EAddToCollection ||
-           mTypeOfSelection == ESelectCollection)
-        {            
-            if(mSelectedAlbumId != TMPXItemId::InvalidId() && mSelectedVideos.count())
+        connectSignals();
+    
+        // show dialog
+        HbDialog::open();
+    }
+    else
+    {
+        // no items, finish right away
+        finishedSlot(primaryAction());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// finishedSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListSelectionDialog::finishedSlot(HbAction *action)
+{
+    disconnectSignals();
+    if(action == secondaryAction())
+    {
+        return;
+    }
+    QString albumName("");
+    if( mTypeOfSelection == ESelectCollection )
+    {
+        if( mSelectedAlbumId == TMPXItemId::InvalidId())
+        {
+            albumName = queryNewAlbumSelected();
+            if(mSelectedAlbumId == TMPXItemId::InvalidId())
             {
-                if(mModel->addItemsInAlbum(mSelectedAlbumId, mSelectedVideos.toList()) == 0)
+                // user cancelled new album creation
+                return;
+            }           
+       }
+       mTypeOfSelection = EAddToCollection;
+
+    }
+
+    if(mTypeOfSelection == EAddToCollection)
+    {  
+        if(mSelectedAlbumId != TMPXItemId::InvalidId() && mSelectedVideos.count())
+        {
+            if(mModel->addItemsInAlbum(mSelectedAlbumId, mSelectedVideos.toList()) == 0)
+            {
+                if(!albumName.length())
                 {
-                    QVariant data = getSelectedName();
-                    VideoCollectionViewUtils::instance().showStatusMsgSlot(
-                            VideoCollectionCommon::statusVideosAddedToCollection,
-                            data);
+                    albumName = getSelectedName();
                 }
+                QVariant data = albumName;
+                VideoCollectionViewUtils::instance().showStatusMsgSlot(
+                        VideoCollectionCommon::statusVideosAddedToCollection,
+                        data);
             }
         }
-        // user is deleting videos
-        else if(mTypeOfSelection == EDeleteVideos)
+    }
+    else if(mTypeOfSelection == ERemoveFromCollection)
+    {
+        if(mSelectedAlbumId != TMPXItemId::InvalidId() && mSelectedVideos.count())
         {
-            QVariant data = mSelection.indexes().count();
-            VideoCollectionViewUtils::instance().showStatusMsgSlot(
-                                                   VideoCollectionCommon::statusDeleteInProgress,
-                                                   data);
-            // delete items            
-            mModel->deleteItems(mSelection.indexes());
-
+            if(mModel->removeItemsFromAlbum(mSelectedAlbumId, mSelectedVideos.toList()) == 0)
+            {
+                QVariant data = getSelectedName();
+                VideoCollectionViewUtils::instance().showStatusMsgSlot(
+                        VideoCollectionCommon::statusVideosRemovedFromCollection,
+                        data);
+            }
         }
-        return primaryAction();
+    }
+    // user is deleting videos
+    else if(mTypeOfSelection == EDeleteVideos)
+    {
+        QVariant data = mSelection.indexes().count();
+        VideoCollectionViewUtils::instance().showStatusMsgSlot(
+                VideoCollectionCommon::statusDeleteInProgress,
+                data);
+        // delete items            
+        mModel->deleteItems(mSelection.indexes());
     } 
-    return secondaryAction(); 
 }
 
 // ---------------------------------------------------------------------------
@@ -312,8 +394,7 @@ void VideoListSelectionDialog::markAllStateChangedSlot(int state)
 //
 void VideoListSelectionDialog::selectionChangedSlot(const QItemSelection &selected, const QItemSelection &deselected)
 {  
-    
-    if(!primaryAction())
+    if(!primaryAction() || mTypeOfSelection == ESelectCollection)
     {
         return;
     }
@@ -362,24 +443,21 @@ void VideoListSelectionDialog::singleItemSelectedSlot(const QModelIndex &index)
 //
 void VideoListSelectionDialog::modelReadySlot()
 {
-    if(!mModel)
+   
+    if(mTypeOfSelection == ESelectCollection)
     {
-        return;
-    }
-    
-    if(mTypeOfSelection == ESelectCollection && ! mModel->rowCount())
-    {
-        // in case there are no albums, start input dialog right away
-        mSelectedAlbumId = queryNewAlbum();
-        if(mSelectedAlbumId != TMPXItemId::InvalidId())
+        primaryAction()->setDisabled(false);
+        if(!mModel->rowCount())
         {
+            // in case there are no user defined albums, 
+            // start input dialog right away by accepting dialog
             primaryAction()->trigger();
+            return;
         }
-        else
-        {
-            secondaryAction()->trigger();
-        }
-        return;
+    }
+    if(mTypeOfSelection != ESelectCollection)
+    {
+        primaryAction()->setDisabled(true);
     }
     updateCounterSlot();
 }
@@ -390,17 +468,14 @@ void VideoListSelectionDialog::modelReadySlot()
 //
 void VideoListSelectionDialog::updateCounterSlot()
 {
-    if(!mItemCount || !mModel)
+    if(!mItemCount)
     {
         return;
     }
-    // orbit does not update HbLabel read from docml in case it isn't cleared first
-    int rowCount = mModel->rowCount();
-    
-   
+
+    int rowCount = mModel->rowCount();       
     int selectionCount = mSelection.indexes().count();
-    mItemCount->setPlainText(tr("%1/%2").arg(selectionCount).arg(rowCount));
-    
+    mItemCount->setPlainText(tr("%1/%2").arg(selectionCount).arg(rowCount));  
     mForcedCheck = true;
     if(selectionCount == rowCount && rowCount > 0)
     {     
@@ -423,13 +498,7 @@ void VideoListSelectionDialog::primaryActionTriggeredSlot()
     // reconnect primary action
     primaryAction()->disconnect(SIGNAL(triggered()));
     connect(primaryAction(), SIGNAL(triggered()), this, SLOT(close()));
-    
-    if(mTypeOfSelection == EDeleteVideos) 
-    {       
-        primaryAction()->trigger();
-		return;
-    }
-    
+        
     // update video items selection here before content changes.
     int count = mSelection.indexes().count();
     TMPXItemId id = TMPXItemId::InvalidId();
@@ -447,23 +516,6 @@ void VideoListSelectionDialog::primaryActionTriggeredSlot()
         primaryAction()->trigger();
         return;
     }
-    
-    
-    else if(mTypeOfSelection == ESelectCollection)
-    {
-        // there's no selected collection and primary action pressed
-        // -> user is willing to create a new collection
-        mSelectedAlbumId = queryNewAlbum();
-        if(mSelectedAlbumId != TMPXItemId::InvalidId())
-        {       
-            primaryAction()->trigger();
-        }
-        else
-        {
-            // cancelled
-            secondaryAction()->trigger();
-        }     
-    }
     else if(mTypeOfSelection == EAddToCollection)
     {
         // videos for collection selected, but collection 
@@ -478,7 +530,10 @@ void VideoListSelectionDialog::primaryActionTriggeredSlot()
 // ---------------------------------------------------------------------------
 //
 void VideoListSelectionDialog::connectSignals()
-{
+{   
+    // dialog finished
+    connect(this, SIGNAL(finished(HbAction*)), this, SLOT(finishedSlot(HbAction*)));
+    
     // selection changes
     connect(mListWidget, SIGNAL(activated(const QModelIndex&)),
             this, SLOT(singleItemSelectedSlot(const QModelIndex&)));
@@ -487,8 +542,8 @@ void VideoListSelectionDialog::connectSignals()
             this, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection &)));
         
     // model changes signals
-    connect(mModel, SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
-    connect(mModel, SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));    
+    connect(mModel->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
+    connect(mModel->sourceModel(), SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));    
     
     // mark all state changes
     connect(mCheckBox, SIGNAL(stateChanged(int)), this, SLOT(markAllStateChangedSlot(int)));
@@ -499,7 +554,9 @@ void VideoListSelectionDialog::connectSignals()
 // ---------------------------------------------------------------------------
 //
 void VideoListSelectionDialog::disconnectSignals()
-{    
+{   
+    disconnect(this, SIGNAL(finished(HbAction*)), this, SLOT(finishedSlot(HbAction*)));
+    
     disconnect(mListWidget, SIGNAL(activated(const QModelIndex&)),
                 this, SLOT(singleItemSelectedSlot(const QModelIndex&)));
     
@@ -507,8 +564,8 @@ void VideoListSelectionDialog::disconnectSignals()
                             this, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection &)));
             
     // model changes signals
-    disconnect(mModel, SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
-    disconnect(mModel, SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));   
+    disconnect(mModel->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
+    disconnect(mModel->sourceModel(), SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));   
     
     // mark all state changes
     disconnect(mCheckBox, SIGNAL(stateChanged(int)), this, SLOT(markAllStateChangedSlot(int)));   
@@ -541,21 +598,22 @@ QString VideoListSelectionDialog::getSelectedName()
 }
 
 // ---------------------------------------------------------------------------
-// queryNewAlbum
+// queryNewAlbumSelected
 // ---------------------------------------------------------------------------
 //
-TMPXItemId VideoListSelectionDialog::queryNewAlbum()
+QString VideoListSelectionDialog::queryNewAlbumSelected()
 {
-    TMPXItemId newId = TMPXItemId::InvalidId();
+    mSelectedAlbumId = TMPXItemId::InvalidId();
     bool ok = false;
-    QString label(tr("Enter name:"));   // localisation missing
-    QString text(tr("New collection")); // localisation missing
-    text = HbInputDialog::getText(label, text, &ok);
+    QString label(hbTrId("txt_videos_title_enter_name"));
+    QString text("");
+    text = HbInputDialog::getText(label, hbTrId("txt_videos_dialog_entry_new_collection"), &ok);
     if (ok && text.length())
     {
        // check for duplicate album name and add new album
-        newId = mModel->addNewAlbum(mModel->resolveAlbumName(text));
+        text = mModel->resolveAlbumName(text);
+        mSelectedAlbumId = mModel->addNewAlbum(text);
     }
-    return newId;
+    return text;
 }
 

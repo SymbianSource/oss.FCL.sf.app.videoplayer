@@ -159,12 +159,6 @@ protected slots:
 
 private slots:
 
-	/**
-     * Signaled for item share.
-     *
-     */
-    void shareItemSlot();
-
     /**
      * Signaled for one item deletion.
      *
@@ -188,6 +182,11 @@ private slots:
      *
      */
     void addToCollectionSlot();
+    
+    /**
+     * Signaled to remove a particular video from collection
+     */
+    void removeFromCollectionSlot();
 
     /**
      * Signaled to remove a user created collection.
@@ -210,6 +209,12 @@ private slots:
      */
     void playItemSlot();
 
+    /**
+     * slot is connected to view's doDelayeds -signal
+     *
+     */
+    void doDelayedsSlot();
+    
     /**
      * Signaled when stepping back from collection in collection view
      *
@@ -262,12 +267,11 @@ private:
 
     enum TContextActionIds
     {
-        EActionShare = 1,
-        EActionDelete,
+    	EActionDelete = 1,
         EActionDetails,
-        EACtionRemoveFromCollection,
-        EACtionAddToCollection,
-        EACtionRemoveCollection,
+        EActionRemove,
+        EActionAddToCollection,
+        EActionRemoveCollection,
         EActionRename,
     	EActionPlay
     };
@@ -326,11 +330,6 @@ private:
      */
 	bool                       mSignalsConnected;
 	
-	/**
-     * True if details plugin is ready
-     */
-	bool                       mDetailsReady;
-
     /**
      * Boolean for knowing when the app was started as a service.
      */

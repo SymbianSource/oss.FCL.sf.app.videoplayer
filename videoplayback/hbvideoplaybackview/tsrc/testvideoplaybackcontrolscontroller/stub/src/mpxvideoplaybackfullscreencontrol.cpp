@@ -15,15 +15,13 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
 #include <w32std.h>
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
-#include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackfullscreencontrol.h"
 #include "mpxvideoplaybackfiledetailswidget.h"
 #include "mpxvideoplaybackcontrolscontroller.h"

@@ -19,6 +19,7 @@
 #define VIDEOSORTFILTERPROXYMODEL_H
 
 #include <qsortfilterproxymodel.h>
+#include <mpxitemid.h>
 
 class QTimer;
 class VideoListDataModel;
@@ -27,6 +28,10 @@ class VideoCollectionClient;
 class VideoSortFilterProxyModel : public QObject 
 {
     Q_OBJECT
+    
+signals:
+    
+    void shortDetailsReady(TMPXItemId);
     
 public: 
     

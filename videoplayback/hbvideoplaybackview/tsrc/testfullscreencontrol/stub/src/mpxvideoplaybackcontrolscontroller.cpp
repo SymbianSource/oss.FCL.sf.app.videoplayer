@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -23,7 +23,6 @@
 #include <coecntrl.h>
 #include <bautils.h>
 #include <barsread.h>
-#include <stringloader.h>
 #include <f32file.h>
 
 #include <qtimer>

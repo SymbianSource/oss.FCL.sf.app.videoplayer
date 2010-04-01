@@ -148,7 +148,8 @@ namespace VideoCollectionCommon
         statusMultiRemoveFail,
         statusRemoveSucceed,
         statusVideosAddedToCollection,
-        statusAllVideosAlreadyInCollection
+        statusAllVideosAlreadyInCollection,
+        statusVideosRemovedFromCollection
     };
     
     /**

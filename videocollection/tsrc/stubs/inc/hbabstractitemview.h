@@ -15,16 +15,17 @@
 * 
 */
 
-
 #ifndef HBABSTRACTITEMVIEW_H
 #define HBABSTRACTITEMVIEW_H
 
+#include "hbwidget.h"
 #include <QGraphicsWidget>
 #include <QItemSelectionModel>
-#include "hbwidget.h"
 
 class HbAbstractItemView : public HbWidget
 {
+    Q_OBJECT
+    
 public:
     
     enum SelectionMode
@@ -41,7 +42,7 @@ public:
 signals:
 
     void activated(const QModelIndex &index);
-    
+
 };
 
 #endif

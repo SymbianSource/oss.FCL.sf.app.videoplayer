@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -85,8 +85,7 @@ QMPXVideoPlaybackControlPolicy::setControlProperties( TMPXVideoPlaybackControls 
             }
             break;
         }
-        case EMPXButtonBar:
-        case EMPXProgressBar:
+        case EMPXControlBar:
         {
             //
             // We don't delete ButtonBar and Progress Bar from the controlsList 

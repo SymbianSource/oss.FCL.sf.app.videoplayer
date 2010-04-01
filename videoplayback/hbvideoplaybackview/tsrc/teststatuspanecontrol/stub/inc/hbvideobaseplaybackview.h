@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   3 %
 
 
 
@@ -27,8 +27,6 @@
 //  Include Files
 #include <hbview.h>
 
-class CMPXVideoViewWrapper;
-class RWindow;
 
 //  Constants
 
@@ -48,25 +46,7 @@ class HbVideoBasePlaybackView : public HbView
         
         void handleDeactivateView();
         
-        void mousePressEvent( QGraphicsSceneMouseEvent *event );
-        
-        QVariant itemChange( GraphicsItemChange change, const QVariant &value );
-        
-        void paint( QPainter *painter, 
-                    const QStyleOptionGraphicsItem *option,
-                    QWidget *widget );
-        
-        bool event( QEvent *event );
-        
-        virtual void handleClosePlaybackView();
-        
-        virtual void handleBufferingState();
-
-        virtual void issuePlayCommand();                
-
-        virtual void handlePluginError( int aError );                
-        
-        virtual void retrievePdlInformation();
+        virtual void handleClosePlaybackView();   
         
         virtual void closePlaybackView();
         
@@ -77,13 +57,9 @@ class HbVideoBasePlaybackView : public HbView
         void setTitleBarFlags( HbTitleBarFlags flags );
 
     public:
-        int mCurrentError;   // default = KErrNone 
         bool mViewActive;
         HbTitleBarFlags mTitleFlag;
-        
-    public:
-        friend class CMPXVideoViewWrapper;
-                				
+        				
 };
 
 #endif  // __HBVIDEOBASEPLAYBACKVIEW_H__

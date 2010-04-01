@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #include <hbapplication.h>
@@ -32,7 +32,6 @@
 #include "mpxvideoplaybackviewfiledetails.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 #include "hbvideobaseplaybackview.h"
-#include "mpxvideoviewwrapper.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "hblabel.h"
 
@@ -84,12 +83,10 @@ void TestStatusPaneControl::setup()
     MPX_ENTER_EXIT(_L("TestStatusPaneControl::setup()"));
 
     mBaseVideoView    = new HbVideoBasePlaybackView();
-    TRAPD( err, mVideoViewWrapper = CMPXVideoViewWrapper::NewL( mBaseVideoView ) ); 
         
     mFileDetails = new QMPXVideoPlaybackViewFileDetails();  
     
     mControlsController = new QMPXVideoPlaybackControlsController( mBaseVideoView, 
-                                                                   mVideoViewWrapper, 
                                                                    mFileDetails );
                                                                             
     mStatusPane = new QMPXVideoPlaybackStatusPaneControl( mControlsController, 
@@ -111,12 +108,6 @@ void TestStatusPaneControl::cleanup()
     {
         delete mBaseVideoView;
         mBaseVideoView = NULL;    
-    }
-        
-    if ( mVideoViewWrapper )
-    {
-        delete mVideoViewWrapper;
-        mVideoViewWrapper = NULL;    
     }
     
     if ( mFileDetails )

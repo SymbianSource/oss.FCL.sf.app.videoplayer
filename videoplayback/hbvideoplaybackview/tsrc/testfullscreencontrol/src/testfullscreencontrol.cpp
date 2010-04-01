@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #include <hbapplication.h>
@@ -28,8 +28,7 @@
 
 #include "mpxvideoplaybackviewfiledetails.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
-#include "mpxvideoplaybackprogressbar.h"
-#include "mpxvideoplaybackbuttonbar.h"
+#include "mpxvideoplaybackcontrolbar.h"
 
 
 #define private public
@@ -104,26 +103,14 @@ void TestFullScreenControl::createControl(TMPXVideoPlaybackControls control)
                                                                          0 );         
             break;    
         }
-        case EMPXProgressBar:
-        {            
-            QMPXVideoPlaybackProgressBar *progressBar = 
-                    new QMPXVideoPlaybackProgressBar( mControlsController );            
-
-            mFullScreenControl = new QMPXVideoPlaybackFullScreenControl( mControlsController,
-                                                                         control,
-                                                                         progressBar,
-                                                                         0 );            
-        
-            break; 
-        }
-        case EMPXButtonBar:
+        case EMPXControlBar:
         {
-            QMPXVideoPlaybackButtonBar *buttonBar = 
-                    new QMPXVideoPlaybackButtonBar( mControlsController );            
+            QMPXVideoPlaybackControlBar *controlBar = 
+                    new QMPXVideoPlaybackControlBar( mControlsController );            
     
             mFullScreenControl = new QMPXVideoPlaybackFullScreenControl( mControlsController,
                                                                          control,
-                                                                         buttonBar,
+                                                                         controlBar,
                                                                          0 );            
              
             break;
@@ -198,9 +185,9 @@ void TestFullScreenControl::testDurationChanged()
     // test for progress bar
     delete mFullScreenControl;
     mFullScreenControl = NULL;    
-    setup( EMPXProgressBar );
+    setup( EMPXControlBar );
     QVERIFY( mFullScreenControl->durationChanged( 100 ) );      
-    QVERIFY( static_cast<QMPXVideoPlaybackProgressBar*>(mFullScreenControl->mControl)->mDuration == 100 );       
+    QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mDuration == 100 );       
     
     // test for something other than progress bar
     delete mFullScreenControl;
@@ -221,9 +208,9 @@ void TestFullScreenControl::testPositionChanged()
     // test for progress bar
     delete mFullScreenControl;
     mFullScreenControl = NULL;    
-    setup( EMPXProgressBar );
+    setup( EMPXControlBar );
     QVERIFY( mFullScreenControl->positionChanged( 100 ) );      
-    QVERIFY( static_cast<QMPXVideoPlaybackProgressBar*>(mFullScreenControl->mControl)->mPosition == 100 );      
+    QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mPosition == 100 );      
     
     // test for something other than progress bar
     delete mFullScreenControl;
@@ -243,9 +230,9 @@ void TestFullScreenControl::testAspectRatioChanged()
     // test for button bar
     delete mFullScreenControl;
     mFullScreenControl = NULL;    
-    setup( EMPXButtonBar );        
+    setup( EMPXControlBar );        
     QVERIFY( mFullScreenControl->aspectRatioChanged( 3 ) );  // EMMFNatural
-    QVERIFY( static_cast<QMPXVideoPlaybackButtonBar*>(mFullScreenControl->mControl)->mAspectRatio == 3 ); 
+    QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mAspectRatio == 3 ); 
     
     // test for something other than button bar
     delete mFullScreenControl;
@@ -264,9 +251,9 @@ void TestFullScreenControl::testUpdateState()
 
     delete mFullScreenControl;
     mFullScreenControl = NULL;    
-    setup( EMPXButtonBar );     
+    setup( EMPXControlBar );     
     mFullScreenControl->updateState( EPbStatePaused ); 
-    QVERIFY( static_cast<QMPXVideoPlaybackButtonBar*>(mFullScreenControl->mControl)->mState == EPbStatePaused );         
+    QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mState == EPbStatePaused );         
 }
 
 // ---------------------------------------------------------------------------
@@ -279,13 +266,13 @@ void TestFullScreenControl::testUpdateControlsWithFileDetails()
 
     delete mFullScreenControl;
     mFullScreenControl = NULL;     
-    setup( EMPXButtonBar );
+    setup( EMPXControlBar );
     
     mFileDetails->mPausableStream = true;
     
     mFullScreenControl->updateControlsWithFileDetails(mFileDetails);
     
-    QVERIFY( static_cast<QMPXVideoPlaybackButtonBar*>(mFullScreenControl->mControl)->mShowPauseButton );    
+    QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mFileDetails->mPausableStream );    
 }
 
 // ---------------------------------------------------------------------------
@@ -303,6 +290,6 @@ void TestFullScreenControl::testUpdateControlProperties()
     QVERIFY( mFullScreenControl != NULL );
     
     QVERIFY( mFullScreenControl->mProperties == 1 );
-}        
+}
         
 // End of file

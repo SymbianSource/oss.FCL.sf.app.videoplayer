@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -245,6 +245,13 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          *  @return KErrNone
          */
         static TInt ExitApplicationL( TAny* aPtr );
+        
+        /*
+         *  Late initializatoin of members that can be delayed 
+         *  to help improve startup time
+         *  @since 10.1
+         */        
+        void LateInitL();
 
     private:
         /**

@@ -34,6 +34,7 @@ class VideoSortFilterProxyModel;
 class QModelIndex;
 class QTimer;
 class VideoThumbnailFetcher;
+class HbIcon;
 
 class VideoThumbnailDataPrivate : public QObject
 {
@@ -243,7 +244,7 @@ private: // Data
     VideoThumbnailFetcher            *mThumbnailFetcher;
     
     /**
-     * Local data map for thumbnail data:
+     * Local cache for thumbnail data:
      * - key is the video's media id
      * - data is the actual thumbnail data.
      * If thumbnail data is not yet fetched, QIcon is default thumbnail.
@@ -251,10 +252,12 @@ private: // Data
     QCache<TMPXItemId, QIcon>        mThumbnailData;
 
     /**
-     * Default thumbnail for a video.
+     * Local hash for default thumbnails.
+     * - key is mpx item id defining default tn type 
+     *  - data is the actual thumbnail data.
      */
-    QIcon                           *mDefaultTnVideo;
-
+    QHash<TMPXItemId, HbIcon>       mDefaultThumbnails;
+    
     /**
      * Default thumbnail for a category.
      */

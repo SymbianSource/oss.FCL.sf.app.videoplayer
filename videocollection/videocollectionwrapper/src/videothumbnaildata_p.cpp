@@ -20,6 +20,8 @@
 #include <qpixmap.h>
 #include <qtimer.h>
 #include <mpxmediageneraldefs.h>
+#include <hbicon.h>
+
 #include <vcxmyvideosdefs.h>
 
 #include "videothumbnaildata_p.h"
@@ -58,8 +60,6 @@ inline uint qHash(TMPXItemId key)
 //
 VideoThumbnailDataPrivate::VideoThumbnailDataPrivate() :
     mThumbnailFetcher(0),
-    mDefaultTnVideo(0),
-    mDefaultTnCategory(0),
     mCurrentModel(0),
     mCurrentFetchIndex(0),
     mCurrentBackgroundFetchCount(0),
@@ -417,18 +417,62 @@ void VideoThumbnailDataPrivate::modelChangedSlot()
 //
 const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
 {
-    // Is thumbnail for a video or a category.
+    const TMPXItemId defaultIdVideo(KMaxTUint32-1, KVcxMvcMediaTypeVideo);
+    const TMPXItemId defaultIdAlbum(KMaxTUint32-1, KVcxMvcMediaTypeAlbum);
+    const TMPXItemId defaultIdDownloads(KVcxMvcCategoryIdDownloads, KVcxMvcMediaTypeCategory);
+    const TMPXItemId defaultIdCaptured(KVcxMvcCategoryIdCaptured, KVcxMvcMediaTypeCategory);
+
+    // Default thumbnail for video
     if(mediaId.iId2 == KVcxMvcMediaTypeVideo) 
     {
-        if(!mDefaultTnVideo)
-            mDefaultTnVideo = new QIcon(":/icons/default_thumbnail_video.svg");
-        return mDefaultTnVideo;
+        if(!mDefaultThumbnails.contains(defaultIdVideo))
+        {
+            mDefaultThumbnails[defaultIdVideo] = HbIcon(":/icons/default_thumbnail_video.svg");
+        }
+        return &mDefaultThumbnails[defaultIdVideo].qicon();
     }
     else
     {
-        if(!mDefaultTnCategory)
-            mDefaultTnCategory = new QIcon(":/icons/default_thumbnail_collection.svg");
-        return mDefaultTnCategory;
+        // Default thumbnail for user defined album.
+        if(mediaId.iId2 == KVcxMvcMediaTypeAlbum)
+        {
+            if(!mDefaultThumbnails.contains(defaultIdAlbum))
+            {
+                mDefaultThumbnails[defaultIdAlbum] = HbIcon(":/icons/default_thumbnail_collection.svg");
+            }
+            return &mDefaultThumbnails[defaultIdAlbum].qicon();
+        }
+
+        // Thumbnails for default collections.
+        switch(mediaId.iId1)
+        {
+            case KVcxMvcCategoryIdDownloads:
+            {
+                if(!mDefaultThumbnails.contains(defaultIdDownloads))
+                {
+                    mDefaultThumbnails[defaultIdDownloads] = HbIcon("qtg_large_video_download");
+                }
+                return &mDefaultThumbnails[defaultIdDownloads].qicon();
+            }
+            
+            case KVcxMvcCategoryIdCaptured:
+            {
+                if(!mDefaultThumbnails.contains(defaultIdCaptured))
+                {
+                    mDefaultThumbnails[defaultIdCaptured] = HbIcon("qtg_large_video_capture");
+                }
+                return &mDefaultThumbnails[defaultIdCaptured].qicon();
+            }
+
+            default:
+            {
+                if(!mDefaultThumbnails.contains(defaultIdAlbum))
+                {
+                    mDefaultThumbnails[defaultIdAlbum] = HbIcon(":/icons/default_thumbnail_collection.svg");
+                }
+                return &mDefaultThumbnails[defaultIdAlbum].qicon();
+            }
+        }
     }
 }
 
@@ -480,12 +524,7 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
     // Clear data.
     mReadyThumbnailMediaIds.clear();
     mThumbnailData.clear();
-    
-    delete mDefaultTnVideo;
-    mDefaultTnVideo = 0;
-    
-    delete mDefaultTnCategory;
-    mDefaultTnCategory = 0;
+    mDefaultThumbnails.clear();
 }
 
 // -----------------------------------------------------------------------------

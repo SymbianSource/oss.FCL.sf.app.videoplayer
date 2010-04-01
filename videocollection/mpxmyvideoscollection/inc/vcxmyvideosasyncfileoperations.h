@@ -29,6 +29,7 @@
 
 // FORWARD DECLARATIONS
 class CVcxMyVideosCollectionPlugin;
+class CVcxMyVideosAsyncFileCopy;
 
 // CONSTANTS
 
@@ -88,10 +89,9 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         * Moves or copies video to another drive.
         *
         * @param aMdsId        MDS id of the item to be moved.
-        * @param aTargetDrive  Target drive.
         * @param aMove         If ETrue, the source file is deleted.
         */
-        void MoveOrCopyVideoL( TUint32 aMdsId, TInt aTargetDrive, TBool aMove );
+        void MoveOrCopyVideoL( TUint32 aMdsId );
                        
         /**
         * Generates and sends resp message for Move,Copy and Delete operations.
@@ -141,6 +141,28 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         void GenerateTargetPathForMoveOrCopyL(
                 const TDesC& aSourcePath, TDes& aTargetPath, TInt aTargetDrive );
 
+        /**
+        * Initializes member variables for the Copy or Move operations.
+        *
+        * @param aCmd  Command received from collection client.
+        */                
+        void InitMoveOrCopyOperationsL( CMPXMedia& aCmd );
+        
+        /**
+        * Called when file copying completes in Move or Copy operations.
+        *
+        * @param aErr Result code of the file copy.
+        */
+        void HandleFileCopyCompletedL( TInt aErr );
+        
+        /**
+        * Initializes MDS and collection cache before the actual file copy.
+        * Does some sanity checks also.
+        *
+        * @param aMdsId        MDS ID of the video being moved/copied.
+        */
+        void InitSingleMoveOrCopyL( TUint32 aMdsId );
+
     public:
 
         /**
@@ -172,9 +194,51 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         TInt iTargetDrive;
 
         /**
+        * Set to ETrue if current operation is Move.
+        */
+        TBool IsMoveOperation;
+        
+        /**
         * Owner of this class.
         */
         CVcxMyVideosCollectionPlugin& iCollection;
+        
+        /**
+        * Performs single file copy in multiple steps.
+        * Used to avoid long blockings when copying large files.
+        * Own.
+        */
+        CVcxMyVideosAsyncFileCopy* iFileCopier;
+        
+        /**
+        * New media which is created to collection cache in copy operation.
+        * It is stored in memeber variable in case that file operations
+        * fail and we have to roll MDS and cache back. Own.
+        */
+        CMPXMedia* iMediaForCopyOp;
+        
+        /**
+        * Updated media which is changed in move operation.
+        * It is stored in memeber variable in case that file operations
+        * fail and we have to roll MDS and cache back. Own.
+        */        
+        CMPXMedia* iMediaForMoveOp;
+        
+        /**
+        * Source path for move or copy operation.
+        */
+        TFileName iSourcePath;
+        
+        /**
+        * Target path for move or copy operation.
+        */
+        TFileName iTargetPath;
+        
+        /**
+        * Flag for move operation is stored just to avoid accessing
+        * CMPXMedia object too much.
+        */
+        TBool iIsMoveOperation;
                                 
     };
 

@@ -26,6 +26,8 @@ bool VideoCollectionClient::mFailConnectSignals = false;
 
 int VideoCollectionClient::mInitializeCount = 0;
 
+int VideoCollectionClient::mRemoveItemsReturn = -1;
+
 
 
 // -----------------------------------------------------------------------------
@@ -58,6 +60,18 @@ int VideoCollectionClient::initialize( VideoDataSignalReceiver* /*signalReceiver
         return -1;
     }
     return 0;
+}
+
+
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
+{
+    Q_UNUSED(albumId);
+    Q_UNUSED(items);
+    return mRemoveItemsReturn;
 }
 
 

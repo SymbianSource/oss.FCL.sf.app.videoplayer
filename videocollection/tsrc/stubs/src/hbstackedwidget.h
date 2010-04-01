@@ -18,6 +18,7 @@
 #ifndef HBSTACKEDWIDGET
 #define HBSTACKEDWIDGET
 
+#include <qpointer.h>
 #include <QGraphicsWidget>
 #include "hbwidget.h"
 
@@ -55,8 +56,7 @@ public:
      */
     static int initializeCount;
     
-    QObject *mCurrentWidget;
-
+    QPointer<QObject> mCurrentWidget;
 };
 
 #endif

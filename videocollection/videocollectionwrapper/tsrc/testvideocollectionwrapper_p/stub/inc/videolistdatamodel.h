@@ -21,7 +21,7 @@
 
 #include <QObject>
 #include <qabstractitemmodel.h>
-
+#include <mpxitemid.h>
 
 // FORWARD DECLARATIONS
 class VideoCollectionClient;
@@ -70,9 +70,14 @@ public:
 signals:
 
     /**
+     * not used in stub, but needed to make sure testable object is linked correctly
+     */
+    void shortDetailsReady(TMPXItemId);
+    
+    /**
      * not used ion stub, but needed to make sure testable object is linked correctly
      */
-    void fullVideoDetailsReady(int index);
+    void fullVideoDetailsReady(TMPXItemId);
             
 public: // from QAbstractItemModel
     

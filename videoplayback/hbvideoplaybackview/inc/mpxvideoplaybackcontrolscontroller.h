@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#12 %
+// Version : %version: da1mmcf#13 %
 
 
 
@@ -42,7 +42,6 @@ class QActionGroup;
 class CMPXVideoViewWrapper;
 class HbVideoBasePlaybackView;
 class QMPXVideoPlaybackControlPolicy;
-class QMPXVideoPlaybackControlsLayout;
 class QMPXVideoPlaybackDocumentLoader;
 class QMPXVideoPlaybackFullScreenControl;
 class QMPXVideoPlaybackNonTouchVolumeBar;

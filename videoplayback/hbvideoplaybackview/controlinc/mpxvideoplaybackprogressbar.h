@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: da1mmcf#9 %
 
 
 
@@ -26,7 +26,6 @@
 #include <mpxplaybackframeworkdefs.h>
 
 class HbLabel;
-class HbFrameItem;
 class HbProgressBar;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
@@ -63,8 +62,6 @@ class QMPXVideoPlaybackProgressBar : public HbWidget
         bool                                 mNeedToResumeAfterSetPosition;
         bool                                 mInitialized;
         bool                                 mDragging;
-
-        HbFrameItem                         *mFrameItem;
 };
 
 #endif /*MPXVIDEOPLAYBACKPROGRESSBAR_H_*/

@@ -15,13 +15,11 @@
 *
 */
 
-// Version : %version: da1mmcf#20 %
+// Version : %version: da1mmcf#21 %
 
 
 
-#include <hbframeitem.h>
 #include <hbpushbutton.h>
-#include <hbframedrawer.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackbuttonbar.h"
@@ -39,7 +37,6 @@ QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
     , mInitialized( false )
-    , mFrameItem( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar"));
 }
@@ -142,16 +139,6 @@ void QMPXVideoPlaybackButtonBar::initialize()
         {
             mButtons[i]->setFlag( QGraphicsItem::ItemIsFocusable, false );
         }
-
-        //
-        // Set framedrawer for semi transparent background
-        //
-        mFrameItem = new HbFrameItem ( this );
-        mFrameItem->setGeometry( boundingRect() );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
-        mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );
-        mFrameItem->setVisible( false );
     }
 }
 
@@ -410,8 +397,6 @@ void QMPXVideoPlaybackButtonBar::updateWithFileDetails(
         QGraphicsItem* widget = mButtons[i]->primitive( HbStyle::P_PushButton_background );
         widget->setVisible( backgrondVisible );        
     }
-
-    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse ); 
 }
 
 // -------------------------------------------------------------------------------------------------

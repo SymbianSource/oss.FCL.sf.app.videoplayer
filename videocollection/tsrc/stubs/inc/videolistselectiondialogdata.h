@@ -18,6 +18,8 @@
 #ifndef VIDEOLISTSELECTIONDIALOGDATA_H
 #define VIDEOLISTSELECTIONDIALOGDATA_H
 
+#include <mpxitemid.h>
+
 class VideoListSelectionDialogData
 {
 public: // methods
@@ -27,6 +29,8 @@ public: // methods
         mSelectionCount = 0;
         mMultiSelectionLaunchCount = 0;
         mMultiSelectionItemSelectionCount = 0;
+        mSelectionType = -1;
+        mSettedMpxId = TMPXItemId::InvalidId();
     }
     
 public: // data
@@ -34,6 +38,8 @@ public: // data
     static int mSelectionCount;
     static int mMultiSelectionLaunchCount;
     static int mMultiSelectionItemSelectionCount;
+    static int mSelectionType;
+    static TMPXItemId mSettedMpxId;
 };
 
 #endif /* VIDEOLISTSELECTIONDIALOGDATA_H */

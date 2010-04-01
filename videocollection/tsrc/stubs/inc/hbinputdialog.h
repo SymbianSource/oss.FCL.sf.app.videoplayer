@@ -31,14 +31,9 @@ public:
     ~HbInputDialog() {}
 
     static QString getText(const QString &label,const QString &text = QString(),
-            bool *ok = 0, QGraphicsScene *scene = 0, QGraphicsItem *parent = 0)
-    {
-        Q_UNUSED(label);
-        Q_UNUSED(ok);
-        Q_UNUSED(scene);
-        Q_UNUSED(parent);
-        return text;
-    }
+            bool *ok = 0, QGraphicsScene *scene = 0, QGraphicsItem *parent = 0);
+    
+    static bool mGetTextFails;
 };
 
 #endif //HBINPUT_DIALOG_H

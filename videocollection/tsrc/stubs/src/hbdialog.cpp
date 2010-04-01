@@ -51,6 +51,26 @@ HbDialog::~HbDialog()
     currentInstance = 0;
     mActions.clear();
 }
+
+void HbDialog::open( QObject* receiver, const char* member)
+{
+    if(receiver && member)
+    {
+        connect(this, SIGNAL(finished(HbAction*)), receiver, SLOT(member));
+    }
+    if(execReturnPrimary)
+    {
+        emit finished(mPrimaryAction);
+    }
+    else
+    {
+        emit finished(mSecondaryAction);
+    }
+    if(receiver && member)
+    {
+        disconnect(this, SIGNAL(finished(HbAction*)), receiver, SLOT(member));
+    }  
+}
     
 void HbDialog::setDismissPolicy(HbDialog::DismissPolicy dismissPolicy)
 {

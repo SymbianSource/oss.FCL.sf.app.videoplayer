@@ -140,6 +140,17 @@ public:
      */
     TMPXItemId albumInUse();
     
+    /**
+     * removes provided items from provided album id and calls
+     * collectionclient to update mds as well.
+     * 
+     * @param albumId album from where to remove
+     * @param items items to remove
+     * 
+     * @return count of items removed or -1 if failed 
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);    
+    
 public: // from QAbstractItemModel
     
     /**
@@ -254,7 +265,20 @@ private:
      * 
      * @return QString detail string
      */
-    QString prepareDetailRow( int index ) const; 
+    QString prepareDetailRow(int index) const; 
+
+    /**
+     * Generates a video count string for category or album at given index.
+     * 
+     * In case item is not found in the provided index, empty
+     * string is returned.
+     * 
+     * @param index, index of the item data is requested
+     * @param index, item id of the item data is requested  
+     * 
+     * @return QString video count string
+     */
+    QString prepareVideoCountString(int index) const;
     
     /**
      * Generates a video size string from video item at given index
@@ -266,7 +290,7 @@ private:
      * 
      * @return QString size string
      */
-    QString prepareSizeString( int index ) const;
+    QString prepareSizeString(int index) const;
     
     /**
      * Called when there are status changes in some async operation
@@ -286,7 +310,7 @@ private:
      * 
      * @return Lengths as QStringList, first item tells the minutes, second tells seconds
      */
-    QStringList prepareLengthStrings( int index  ) const;
+    QStringList prepareLengthStrings(int index) const;
 
 private:
     

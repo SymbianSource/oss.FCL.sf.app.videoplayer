@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#16 %
+// Version : %version: da1mmcf#17 %
 
 
 
@@ -191,8 +191,7 @@ void QMPXVideoPlaybackControlConfiguration::updateControlsWithFileDetails()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlsWithFileDetails()"));
 
-    addControlToList( EMPXButtonBar );
-    addControlToList( EMPXProgressBar );
+    addControlToList( EMPXControlBar );
 
     if ( mControlsController->fileDetails()->mVideoEnabled )
     {

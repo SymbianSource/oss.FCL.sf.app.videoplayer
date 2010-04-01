@@ -51,16 +51,51 @@ VideoCollectionUiLoader::VideoCollectionUiLoader():
 //
 VideoCollectionUiLoader::~VideoCollectionUiLoader()
 {
-    // selection dialog needs to be deleted manually
+    if (mTimerId)
+    {
+        killTimer(mTimerId);
+        mTimerId = 0;
+    }
+
+	// selection dialog needs to be deleted manually
+    QGraphicsWidget *widget =
+        HbDocumentLoader::findWidget(DOCML_NAME_DIALOG);
+
     VideoListSelectionDialog *dialog =
-        findWidget<VideoListSelectionDialog>(
-            DOCML_NAME_DIALOG);
+        qobject_cast<VideoListSelectionDialog*>(widget);
     delete dialog;
     
     // clear queue and hash tables
     mQueue.clear();
+    mDocmls.clear();
     mWidgets.clear();
     mObjects.clear();
+}
+
+// ---------------------------------------------------------------------------
+// load
+// ---------------------------------------------------------------------------
+//
+QObjectList VideoCollectionUiLoader::load( const QString &fileName, bool *ok )
+{
+	QObjectList list;
+	if (!mDocmls.contains(fileName))
+	{
+		mDocmls.append(fileName);
+		list = HbDocumentLoader::load(fileName, ok);
+		//TODO: save returned and delete on destructor
+	}
+	return list;
+}
+
+// ---------------------------------------------------------------------------
+// load
+// ---------------------------------------------------------------------------
+//
+QObjectList VideoCollectionUiLoader::load( const QString &fileName, const QString &section , bool *ok )
+{
+	return HbDocumentLoader::load(fileName, section, ok);
+	//TODO: save returned and delete on destructor
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +114,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             widgetSlot);
         addToQueue(params);
     }
@@ -89,6 +125,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             widgetSlot);
         addToQueue(params);
     }
@@ -99,6 +136,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             widgetSlot);
         addToQueue(params);
     }
@@ -109,6 +147,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             objectSlot);
         addToQueue(params);
     }
@@ -119,6 +158,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             objectSlot);
         addToQueue(params);
     }
@@ -129,6 +169,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             objectSlot);
         addToQueue(params);
     }
@@ -139,6 +180,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
             widgetSlot);
         addToQueue(params);
     }
@@ -149,6 +191,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
             widgetSlot);
         addToQueue(params);
     }
@@ -159,6 +202,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
             widgetSlot);
         addToQueue(params);
     }
@@ -169,6 +213,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             objectSlot);
         addToQueue(params);
     }
@@ -179,6 +224,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+			0,
             objectSlot);
         addToQueue(params);
     }
@@ -189,16 +235,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_BY_TOTAL_LENGTH))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_BY_TOTAL_LENGTH,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
+			0,
             objectSlot);
         addToQueue(params);
     }
@@ -209,6 +246,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             false, // is object
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             objectSlot);
         addToQueue(params);
     }
@@ -219,6 +257,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            0,
             widgetSlot);
         addToQueue(params);
     }
@@ -229,6 +268,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
             widgetSlot);
         addToQueue(params);
     }
@@ -239,6 +279,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOCOLLECTIONVIEW_FILE,
+            DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
             widgetSlot);
         addToQueue(params);
     }
@@ -248,6 +289,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
             true, // is widget
             receiver,
             DOCML_VIDEOSELECTIONDIALOG_FILE,
+            0,
             widgetSlot);
         addToQueue(params);
     }
@@ -280,6 +322,38 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
     else
     {
         widget = HbDocumentLoader::findWidget(name);
+        if (!widget)
+        {
+            // check if the widget is being loaded and remove it from queue
+            int count = mQueue.count();
+            for (int i = 0; i < count; i++)
+            {
+                const Params& params = mQueue.at(i);
+                if (params.mName.compare(name) == 0)
+                {
+					bool ok(true);
+					
+					if(!mDocmls.contains(params.mDocml))
+					{
+						load(params.mDocml, &ok);
+
+						if (ok)
+						{
+							mDocmls.append(params.mDocml);
+						}
+					}
+					if ((params.mSection != 0) && ok)
+					{
+						load(params.mDocml, params.mSection, &ok);
+					}
+					if(ok)
+					{
+						widget = HbDocumentLoader::findWidget(params.mName);
+					}
+                    break;
+                }
+            }            
+        }
         if (widget)
         {
             // initialize widget
@@ -305,6 +379,7 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
                             params.mReceiver, params.mMember);
                     }
                     mQueue.removeAt(i);
+                    runNext(); //removes timer if queue is empty
                     break;
                 }
             }            
@@ -332,6 +407,38 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
     else
     {
         object = HbDocumentLoader::findObject(name);
+        if (!object)
+        {
+            // check if the object is being loaded and remove it from queue
+            int count = mQueue.count();
+            for (int i = 0; i < count; i++)
+            {
+                const Params& params = mQueue.at(i);
+                if (params.mName.compare(name) == 0)
+                {
+					bool ok(true);
+					
+					if(!mDocmls.contains(params.mDocml))
+					{
+						load(params.mDocml, &ok);
+
+						if (ok)
+						{
+							mDocmls.append(params.mDocml);
+						}
+					}
+					if ((params.mSection != 0) && ok)
+					{
+						load(params.mDocml, params.mSection, &ok);
+					}
+					if(ok)
+					{
+						object = HbDocumentLoader::findObject(params.mName);
+					}
+                    break;
+                }
+            }            
+        }
         if (object)
         {
             // initialize widget
@@ -357,6 +464,7 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
                             params.mReceiver, params.mMember);
                     }
                     mQueue.removeAt(i);
+                    runNext(); //removes timer if queue is empty
                     break;
                 }
             }            
@@ -453,6 +561,14 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
                         videoServices = VideoServices::instance();
                     }
                     videoList->initialize(*model, videoServices);
+
+                    HbEffect::add(videoList,
+                                   EFFECT_SLIDE_IN_TO_LEFT_FILENAME,
+                                   EFFECT_SLIDE_IN_TO_LEFT);
+
+                    HbEffect::add(videoList,
+                            EFFECT_SLIDE_OUT_TO_LEFT_FILENAME,
+                            EFFECT_SLIDE_OUT_TO_LEFT);
                 }
             }
         }
@@ -480,7 +596,6 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
                 findObject<HbAction>(DOCML_NAME_SORT_BY_DATE);
                 findObject<HbAction>(DOCML_NAME_SORT_BY_NAME);
                 findObject<HbAction>(DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS);
-                findObject<HbAction>(DOCML_NAME_SORT_BY_TOTAL_LENGTH);
                 findObject<HbAction>(DOCML_NAME_SORT_BY_SIZE);
 
                 // add sub menu actions
@@ -490,7 +605,6 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
                     mSortGroup->addAction(mMenuActions[EActionSortByDate]);
                     mSortGroup->addAction(mMenuActions[EActionSortByName]);
                     mSortGroup->addAction(mMenuActions[EACtionSortByItemCount]);
-                    mSortGroup->addAction(mMenuActions[EActionSortByLength]);
                     mSortGroup->addAction(mMenuActions[EActionSortBySize]);
                     
                     // set all sub menu items checkable
@@ -513,9 +627,14 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         {
             // ensure that all the actions related to options menu are loaded
             // when options menu is loaded
-            findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION);
-            findObject<HbAction>(DOCML_NAME_CREATE_COLLECTION);
-            findObject<HbAction>(DOCML_NAME_DELETE_MULTIPLE);
+        	// when applicaton has been launched as a service,
+        	// do not load components which are not required
+        	if(!mIsService)
+        	{
+				findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION);
+				findObject<HbAction>(DOCML_NAME_CREATE_COLLECTION);
+				findObject<HbAction>(DOCML_NAME_DELETE_MULTIPLE);
+        	}
         }
     }
 }
@@ -577,14 +696,6 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                 mMenuActions[EACtionSortByItemCount] = action;
             }
         }
-        else if (name.compare(DOCML_NAME_SORT_BY_TOTAL_LENGTH) == 0)
-        {
-            HbAction *action = qobject_cast<HbAction*>(object);
-            if (action)
-            {
-                mMenuActions[EActionSortByLength] = action;
-            }
-        }
         else if (name.compare(DOCML_NAME_SORT_BY_SIZE) == 0)
         {
             HbAction *action = qobject_cast<HbAction*>(object);
@@ -623,11 +734,23 @@ void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
                     if (!widget)
                     {
                         // widget not found, try to load the docml
-                        load(params.mDocml, &ok);
-                        if (ok)
-                        {
-                            widget = HbDocumentLoader::findWidget(params.mName);
-                        }
+                    	if(!mDocmls.contains(params.mDocml))
+						{
+							load(params.mDocml, &ok);
+
+							if (ok)
+							{
+								mDocmls.append(params.mDocml);
+							}
+						}
+						if ((params.mSection != 0) && ok)
+						{
+							load(params.mDocml, params.mSection, &ok);
+						}
+						if(ok)
+						{
+							widget = HbDocumentLoader::findWidget(params.mName);
+						}
                     }
                     if (widget)
                     {
@@ -662,11 +785,23 @@ void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
                     if (!object)
                     {
                         // widget not found, try to load the docml
-                        load(params.mDocml, &ok);
-                        if (ok)
-                        {
-                            object = HbDocumentLoader::findObject(params.mName);
-                        }
+						if(!mDocmls.contains(params.mDocml))
+						{
+							load(params.mDocml, &ok);
+
+							if (ok)
+							{
+								mDocmls.append(params.mDocml);
+							}
+						}
+						if ((params.mSection != 0) && ok)
+						{
+							load(params.mDocml, params.mSection, &ok);
+						}
+						if(ok)
+						{
+							object = HbDocumentLoader::findObject(params.mName);
+						}
                     }
                     if (object)
                     {

@@ -95,6 +95,11 @@ private slots:
      *
      */
     void testMediaIdAtIndex();
+    
+    /**
+     * verifies indexOfId
+     */
+    void testIndexOfId();
 	
     /**
      * tests if correct file path for media will be returned at certain positions
@@ -138,7 +143,13 @@ private slots:
      *
      */
     void testPrepareDetails(); 
-      
+
+    /**
+     * Tests video count string is created ok in all cases
+     *
+     */
+    void testPrepareVideoCountString();
+
     /**
      * Tests to make sure size strings are created ok in all cases
      *
@@ -171,6 +182,11 @@ private slots:
      * verifies setAlbumInUse
      */
     void testSetAlbumInUse();
+    
+    /**
+     * verifies removeItemsFromAlbum;
+     */
+    void testRemoveItemsFromAlbum();
     
     /**
      * tests reportAsyncStatus

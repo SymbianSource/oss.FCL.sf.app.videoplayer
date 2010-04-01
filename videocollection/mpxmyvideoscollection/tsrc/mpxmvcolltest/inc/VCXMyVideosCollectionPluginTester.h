@@ -281,12 +281,15 @@ class CVCXMyVideosCollectionPluginTester : public CBase,
          * @param aEndIndex 
          */
         void RemoveMediasFromAlbumL( const TDesC& aAlbumName, TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex );
-        
-        /**
-         * Checks the count of albums.
-         */
-        bool CheckAlbumCount( int aExpectedCount );
 
+        /**
+         * Renames an album.
+         *
+         * @param aAlbumName
+         * @param aNewAlbumName
+         */
+        void RenameAlbumL( const TDesC& aAlbumName, const TDesC& aNewAlbumName );
+        
         /**
          * Use to toggle automatic refresh of contents when open collection changes.
          */

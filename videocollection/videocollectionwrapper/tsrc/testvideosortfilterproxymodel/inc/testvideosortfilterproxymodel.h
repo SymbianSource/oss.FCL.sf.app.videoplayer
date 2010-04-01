@@ -32,6 +32,12 @@ class TestVideoSortFilterProxyModel : public QObject
     Q_OBJECT
 
     // test functions for the test framework
+    
+signals:
+    /**
+     * test signal
+     */
+    void testSignal();
 
 private slots:
 
@@ -194,6 +200,11 @@ private slots:
      * tests addItemsInAlbum
      */
     void testAddItemsInAlbum();
+    
+    /**
+     * tests removeItemsFromAlbum
+     */
+    void testRemoveItemsFromAlbum();
     
     /**
      * tests getOpenItem

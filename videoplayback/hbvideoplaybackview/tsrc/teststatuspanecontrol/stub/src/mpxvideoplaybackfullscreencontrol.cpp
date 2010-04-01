@@ -15,19 +15,16 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
 #include <w32std.h>
+#include <hbwidget.h>
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
-#include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackfullscreencontrol.h"
-#include "mpxvideoplaybackfiledetailswidget.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
-#include "mpxvideoplaybackdetailsplaybackwindow.h"
 
 
 // -------------------------------------------------------------------------------------------------
@@ -94,76 +91,6 @@ void QMPXVideoPlaybackFullScreenControl::setVisibility( TMPXPlaybackState /*stat
 TMPXVideoPlaybackControls QMPXVideoPlaybackFullScreenControl::controlIndex()
 {
     return mControlIndex;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFullScreenControl::volumeChanged()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackFullScreenControl::volumeChanged( int /*volume*/ )
-{
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFullScreenControl::durationChanged()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackFullScreenControl::durationChanged( int duration )
-{
-    bool changed = EFalse;
-
-    if ( mControlIndex == EMPXProgressBar )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackFullScreenControl::DurationChanged() [%d]"), duration);
-
-        static_cast<QMPXVideoPlaybackProgressBar*>(mControl)->durationChanged( duration );
-
-        changed = ETrue;
-    }
-
-    return changed;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFullScreenControl::positionChanged()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackFullScreenControl::positionChanged( int position )
-{
-    bool changed = EFalse;
-
-    if ( mControlIndex == EMPXProgressBar )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackFullScreenControl::positionChanged() [%d]"), position);
-
-        static_cast<QMPXVideoPlaybackProgressBar*>(mControl)->positionChanged( position );
-
-        changed = ETrue;
-    }
-
-    return changed;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFullScreenControl::aspectRatioChanged()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackFullScreenControl::aspectRatioChanged( int aspectRatio )
-{
-    bool changed = EFalse;
-
-    if ( mControlIndex == EMPXButtonBar )
-    {
-        MPX_DEBUG(
-            _L("QMPXVideoPlaybackFullScreenControl::aspectRatioChanged() [%d]"), aspectRatio);
-
-        static_cast<QMPXVideoPlaybackButtonBar*>(mControl)->aspectRatioChanged( aspectRatio );
-
-        changed = ETrue;
-    }
-
-    return changed;
 }
 
 // -------------------------------------------------------------------------------------------------

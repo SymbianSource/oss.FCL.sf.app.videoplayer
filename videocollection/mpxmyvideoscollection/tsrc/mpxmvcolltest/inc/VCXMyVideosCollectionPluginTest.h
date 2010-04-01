@@ -341,6 +341,21 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * @param expectedCount
          */
         virtual TInt CheckAlbumCountL( CStifItemParser& aItem );
+
+        /**
+         * Renames an album.
+         *
+         * @param albumName
+         * @param newAlbumName
+         */
+        virtual TInt RenameAlbumL( CStifItemParser& aItem );
+        
+        /**
+         * Checks that an album exists.
+         *
+         * @param albumName
+         */
+        virtual TInt CheckAlbumExistsL( CStifItemParser& aItem );                
         
         /**
          * Checks the video count and that the videos really exist.
@@ -580,13 +595,6 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * @param aEndIndex index of last media 
          */
         virtual TInt RemoveMediasFromAlbumL( CStifItemParser& aItem );
-
-        /**
-         * Checks the count of albums.
-         *
-         * @param aExpectedAlbumCount
-         */
-        virtual TInt CheckAlbumCount( CStifItemParser& aItem );
         
         /**
          * Creates a video file to the file system.

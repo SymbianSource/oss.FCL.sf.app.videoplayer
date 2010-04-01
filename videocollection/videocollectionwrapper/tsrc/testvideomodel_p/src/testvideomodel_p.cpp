@@ -241,8 +241,6 @@ void TestVideoModel_p::testGetVideoNameFromIndex()
 //
 void TestVideoModel_p::testGetVideoThumbnailFromIndex()
 {
-    // TODO:
-    // no thumbnail data
     QVERIFY(mTestObject->getVideoThumbnailFromIndex(0) == 0);
     
     mMediaFactory->removeArray();
@@ -262,6 +260,34 @@ void TestVideoModel_p::testGetVideoThumbnailFromIndex()
     QVERIFY(mTestObject->getVideoThumbnailFromIndex(MEDIA_COUNT/2) != 0);
     QVERIFY(mTestObject->getVideoThumbnailFromIndex(MEDIA_COUNT - 1) != 0);
       
+    disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))); 
+}
+
+// -----------------------------------------------------------------------------
+// testGetCategoryVideoCountFromIndex
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testGetCategoryVideoCountFromIndex()
+{
+    QVERIFY(mTestObject->getCategoryVideoCountFromIndex(0) == 0);
+    
+    mMediaFactory->removeArray();
+    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));          
+    mMediaFactory->createMediaItems(MEDIA_COUNT, MediaDataName | MediaDataId | MediaDetailCategoryVideoCount);
+    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
+
+    QVERIFY(mTestObject->initialize() == 0);
+    
+    // invalid indexes
+    QVERIFY(mTestObject->getCategoryVideoCountFromIndex(-1) == 0);
+    
+    QVERIFY(mTestObject->getCategoryVideoCountFromIndex(MEDIA_COUNT) == 0);
+    
+    // correct indexes
+    QCOMPARE((int)(mTestObject->getCategoryVideoCountFromIndex(0)), 1);
+    QCOMPARE((int)(mTestObject->getCategoryVideoCountFromIndex(MEDIA_COUNT/2)), 1);
+    QCOMPARE((int)(mTestObject->getCategoryVideoCountFromIndex(MEDIA_COUNT - 1)), 5);
+
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))); 
 }
 
@@ -641,6 +667,59 @@ void TestVideoModel_p::testGetFilePathForId()
 }
 
 // -----------------------------------------------------------------------------
+// testBelongsToAlbum
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testBelongsToAlbum()
+{
+    TMPXItemId id(1,0);
+    // invalid id, no album setted
+    QVERIFY(!mTestObject->belongsToAlbum(id));
+    
+    mTestObject->setAlbumInUse(TMPXItemId(1,2));
+    
+    // invalid id, album setted
+    QVERIFY(!mTestObject->belongsToAlbum(id));
+    
+    QSet<TMPXItemId> items;
+    items.insert(id);
+    mTestObject->mAlbumData[TMPXItemId(1,2)] = items;
+    
+    // invalid id, album setted, items exist 
+    QVERIFY(mTestObject->belongsToAlbum(id));
+    
+    // no invalid id, item does not exist
+    QVERIFY(!mTestObject->belongsToAlbum(id, TMPXItemId(2,2)));
+    
+    // no invalid id, items exist 
+    QVERIFY(mTestObject->belongsToAlbum(id, TMPXItemId(1,2)));
+}
+    
+    
+// -----------------------------------------------------------------------------
+// testRemoveItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testRemoveItemsFromAlbum()
+{    
+    TMPXItemId albumId(1,2);
+    QList<TMPXItemId> ids;
+    // album does not exists
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, ids) == 0);
+    
+    QSet<TMPXItemId> items;
+    items.insert(TMPXItemId(1,0));
+    items.insert(TMPXItemId(3,0));
+    mTestObject->mAlbumData[albumId] = items;
+    
+    ids.append(TMPXItemId(2,0));
+    ids.append(TMPXItemId(3,0));
+    // provided list contains and does not contain items in album
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, ids) == 1);
+    
+}
+
+// -----------------------------------------------------------------------------
 // testThumbnailsFetchedSlot
 // -----------------------------------------------------------------------------
 //
@@ -882,6 +961,57 @@ void TestVideoModel_p::testAppendVideoListSlot()
 }
 
 // -----------------------------------------------------------------------------
+// testAlbumListAvailableSlot
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testAlbumListAvailableSlot()
+{ 
+
+    QVERIFY(mTestObject->initialize() == 0);
+        
+    QVERIFY(connect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*)),
+            mTestObject, SLOT(albumListAvailableSlot(TMPXItemId, CMPXMediaArray*))));  
+    
+    TMPXItemId albumId(1,2);
+    
+    // null video array
+    emit signalAlbumListAvailable(albumId, 0);
+    QVERIFY(mTestObject->mAlbumData.count() == 0);
+    
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(10);
+    // invalid album id
+    albumId = TMPXItemId::InvalidId();
+    emit signalAlbumListAvailable(albumId, mMediaFactory->mediaArray());
+    QVERIFY(mTestObject->mAlbumData.count() == 0);
+    
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(0);
+    albumId = TMPXItemId(1,2);
+    
+    // empty videoarray
+    emit signalAlbumListAvailable(albumId, mMediaFactory->mediaArray());
+    QVERIFY(mTestObject->mAlbumData.count() == 1);
+    
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(0);
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(1, 0)));
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(-1, -1)));
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(2, 0)));
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(3, 1)));
+    
+    // "normal" video array containing invalid ids.
+    emit signalAlbumListAvailable(albumId, mMediaFactory->mediaArray());
+    QVERIFY(mTestObject->mAlbumData.count() == 1);
+    QVERIFY(mTestObject->mAlbumData.find(albumId)->count() == 2);
+    TMPXItemId itemToCheck(1,0);
+    QVERIFY(mTestObject->belongsToAlbum(itemToCheck, albumId));    
+    
+    disconnect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*)),
+                mTestObject, SLOT(albumListAvailableSlot(TMPXItemId, CMPXMediaArray*)));
+}
+
+// -----------------------------------------------------------------------------
 // testNewVideoAvailableSlot
 // -----------------------------------------------------------------------------
 //
@@ -967,10 +1097,10 @@ void TestVideoModel_p::testNewVideoAvailableSlot()
 }
 
 // -----------------------------------------------------------------------------
-// testVideoDeletedSlot
+// testItemDeletedSlot
 // -----------------------------------------------------------------------------
 //
-void TestVideoModel_p::testVideoDeletedSlot()
+void TestVideoModel_p::testItemDeletedSlot()
 {
     mTestObject->initialize();
     mMediaFactory->removeArray();
@@ -979,16 +1109,16 @@ void TestVideoModel_p::testVideoDeletedSlot()
     QSignalSpy spyModelChanged(mStubModel, SIGNAL(modelChanged()));
     
     QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
-    QVERIFY(connect(this, SIGNAL(signalDeleteVideo(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId))));  
+    QVERIFY(connect(this, SIGNAL(signalDeleteItem(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId))));  
     
     // no videos
-    emit signalDeleteVideo(TMPXItemId(0,0));
+    emit signalDeleteItem(TMPXItemId(0,0));
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(spyModelChanged.count() == 0);
     
     // invalid id
-    emit signalDeleteVideo(TMPXItemId::InvalidId());
+    emit signalDeleteItem(TMPXItemId::InvalidId());
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(spyModelChanged.count() == 0);
@@ -1001,7 +1131,7 @@ void TestVideoModel_p::testVideoDeletedSlot()
     spyModelChanged.clear();
     
     // not marked as removed
-    emit signalDeleteVideo(TMPXItemId(MEDIA_COUNT / 2,0));
+    emit signalDeleteItem(TMPXItemId(MEDIA_COUNT / 2,0));
     QVERIFY(VideoListDataModel::mFirstRemoved == MEDIA_COUNT / 2);
     QVERIFY(VideoListDataModel::mFirstRemoved == MEDIA_COUNT / 2);
     QVERIFY(spyModelChanged.count() == 1);
@@ -1014,7 +1144,7 @@ void TestVideoModel_p::testVideoDeletedSlot()
     TMPXItemId id = mTestObject->markVideoRemoved(index);
     
     // marked as removed
-    emit signalDeleteVideo(id);
+    emit signalDeleteItem(id);
     // item already removed from container, no notifications
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
@@ -1026,7 +1156,7 @@ void TestVideoModel_p::testVideoDeletedSlot()
     
     index = mStubModel->index(mTestObject->getVideoCount() - 1, 0, QModelIndex());
     id = mTestObject->markVideoRemoved(index);
-    emit signalDeleteVideo(id);
+    emit signalDeleteItem(id);
     // item already removed from container, no notifications
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
@@ -1034,7 +1164,52 @@ void TestVideoModel_p::testVideoDeletedSlot()
     
     mTestObject->mVideoThumbnailData = tmp;
     
-    disconnect(this, SIGNAL(signalDeleteVideo(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId)));
+    // test albums
+    mTestObject->mAlbumData.clear();
+    mTestObject->mMediaData.clear();
+       
+    TMPXItemId album1 = TMPXItemId(2,2);
+    TMPXItemId album2 = TMPXItemId(3,2);
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(5);
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(album1.iId1, album1.iId2)));
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(album2.iId1, album2.iId2)));
+    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
+    VideoListDataModel::mFirstRemoved = -1;
+    VideoListDataModel::mLastRemoved = -1;
+    spyModelChanged.clear();
+    
+    QSet<TMPXItemId> items;
+    mTestObject->mAlbumData[album1] = items;
+    items.insert(mTestObject->getMediaIdFromIndex(0));
+    items.insert(mTestObject->getMediaIdFromIndex(1));
+    mTestObject->mAlbumData[album2] = items;
+    
+    // not existing album
+    emit signalDeleteItem(TMPXItemId(1,2));
+    QVERIFY(VideoListDataModel::mFirstRemoved == -1);
+    QVERIFY(spyModelChanged.count() == 0);
+    QVERIFY( mTestObject->mAlbumData.count() == 2);
+    
+    // existing
+    emit signalDeleteItem(album2);
+    QVERIFY(VideoListDataModel::mFirstRemoved == 6);
+    QVERIFY(spyModelChanged.count() == 1);
+    QVERIFY( mTestObject->mAlbumData.count() == 1);
+    
+    VideoListDataModel::mFirstRemoved = -1;
+    spyModelChanged.clear();
+    
+    // no tn object
+    VideoThumbnailData *pTmp = mTestObject->mVideoThumbnailData;
+    mTestObject->mVideoThumbnailData = 0;
+    emit signalDeleteItem(album1);
+    QVERIFY(VideoListDataModel::mFirstRemoved == 5);
+    QVERIFY(spyModelChanged.count() == 1);
+    QVERIFY( mTestObject->mAlbumData.count() == 0);
+    mTestObject->mVideoThumbnailData  = pTmp;
+    
+    disconnect(this, SIGNAL(signalDeleteItem(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId)));
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));
     
 }
@@ -1099,6 +1274,50 @@ void TestVideoModel_p::testVideoDeleteCompletedSlot()
 }
 
 // -----------------------------------------------------------------------------
+// testAlbumRemoveFailureSlot
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testAlbumRemoveFailureSlot()
+{
+    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
+    QVERIFY(connect(this, SIGNAL(signalAlbumDeleteFailure(QList<TMPXItemId>*)), mTestObject, SLOT(albumRemoveFailureSlot(QList<TMPXItemId>*)))); 
+    
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(1, 2)));
+    TRAP_IGNORE(mMediaFactory->mediaArray()->AppendL(mMediaFactory->getMediaWithWantedIds(2, 2)));
+    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
+    
+    VideoListDataModel::mStatus = -1;
+    VideoListDataModel::mStatusData = QVariant();
+    // null list
+    emit signalAlbumDeleteFailure(0);
+    QVERIFY(VideoListDataModel::mStatus == -1);
+    QVERIFY(!(VideoListDataModel::mStatusData.isValid()));
+    
+    QList<TMPXItemId> ids;
+    
+    // empty list
+    emit signalAlbumDeleteFailure(&ids);
+    QVERIFY(VideoListDataModel::mStatus == VideoCollectionCommon::statusRemoveSucceed);
+    QVERIFY(!(VideoListDataModel::mStatusData.isValid()));
+    
+    ids.append(TMPXItemId(1,2));
+    
+    // list contains one item
+    emit signalAlbumDeleteFailure(&ids);
+    QVERIFY(VideoListDataModel::mStatus == VideoCollectionCommon::statusSingleRemoveFail);    
+    QVERIFY(VideoListDataModel::mStatusData.isValid());
+    
+    // list contains more than one
+    ids.append(TMPXItemId(2,2));
+    emit signalAlbumDeleteFailure(&ids);
+    QVERIFY(VideoListDataModel::mStatus == VideoCollectionCommon::statusMultiRemoveFail);    
+    QVERIFY(VideoListDataModel::mStatusData.isValid());
+    
+    disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));
+    disconnect(this, SIGNAL(signalAlbumDeleteFailure(QList<TMPXItemId>*)), mTestObject, SLOT(albumRemoveFailureSlot(QList<TMPXItemId>*)));
+}
+
+// -----------------------------------------------------------------------------
 // testVideoDetailsCompletedSlot
 // -----------------------------------------------------------------------------
 //
@@ -1111,17 +1330,16 @@ void TestVideoModel_p::testVideoDetailsCompletedSlot()
     
     QSignalSpy spysignal(mTestObject, SIGNAL(videoDetailsReady(TMPXItemId)));
 
-    // no videos
+    // no videos, id ok
     emit signalVideoDetailsCompleted(TMPXItemId(0,0));
-    QVERIFY(spysignal.count() == 0);        
+    QVERIFY(spysignal.count() == 1);        
+    spysignal.clear();
     
     mMediaFactory->createMediaItems(MEDIA_COUNT);
     emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
     
     // invalid id
     emit signalVideoDetailsCompleted(TMPXItemId::InvalidId());
-    QVERIFY(spysignal.count() == 0); 
-    emit signalVideoDetailsCompleted(TMPXItemId(MEDIA_COUNT,0));
     QVERIFY(spysignal.count() == 0); 
     
     // correct ids

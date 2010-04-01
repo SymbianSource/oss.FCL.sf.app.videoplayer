@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #include <qdebug>
@@ -142,13 +142,13 @@ void TestMPXVideoPlaybackControlPolicy::testControlBarPolicy()
 
     TUint properties = 0;
 
-    mPolicy->setControlProperties( EMPXButtonBar, properties, mDetails, EDetailsView );
+    mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EDetailsView );
     QVERIFY( properties == 0 );
 
-    mPolicy->setControlProperties( EMPXProgressBar, properties, mDetails, EAudioOnlyView );
+    mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EAudioOnlyView );
     QVERIFY( properties == EMPXAllProperties );
 
-    mPolicy->setControlProperties( EMPXButtonBar, properties, mDetails, EFullScreenView );
+    mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EFullScreenView );
     QVERIFY( properties == ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking ) );
 
     cleanup();

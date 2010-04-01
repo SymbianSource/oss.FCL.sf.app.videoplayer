@@ -249,21 +249,9 @@ void CVcxMyVideosMdsDb::AddVideoL(
     CMdEObject* object = iMdsSession->NewObjectLC(
             *iVideoObjectDef, aVideo.ValueText( KMPXMediaGeneralUri ) ); // 1->
 
-    // check if the file exists and use the creation time from the file
-
-    SetCreationAndModifiedDatesL( *object );
-
-#if 0    
-    TTime time;
-    time.UniversalTime();
-	TTimeIntervalSeconds timeOffset = User::UTCOffset();
-	TTime localTime = time + timeOffset;
+    // Value from aVideo is taken in use in Media2ObjectL if aVideo contains creation date
+    SetCreationAndModifiedDatesL( *object ); // use current time
     
-    const TInt secondsInMinute( 60 );    
-    object->AddTimePropertyL( *iCreationDatePropertyDef, localTime ); 
-	object->AddInt16PropertyL( *iTimeOffsetPropertyDef, timeOffset.Int() / secondsInMinute );
-    object->AddTimePropertyL( *iLastModifiedDatePropertyDef, localTime );
-#endif
     object->AddUint8PropertyL( *iOriginPropertyDef,
             aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ) );
     
@@ -655,7 +643,7 @@ CMPXMedia* CVcxMyVideosMdsDb::CreateVideoL( TUint32 aId, TBool aFullDetails )
     if ( !object )
         {
         MPX_DEBUG2("CVcxMyVideosMdsDb:: mds id %d not found from mds", aId);
-        User::Leave( KErrNotFound );
+        return NULL;
         }
         
     CleanupStack::PushL( object ); // 1->
@@ -740,7 +728,7 @@ void CVcxMyVideosMdsDb::HandleObjectNotification(
 // CVcxMyVideosMdsDb::ObjectL
 // ---------------------------------------------------------------------------
 //
-CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
+CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId, TBool aIsVideo )
     {
     if ( !iMdsSession )
         {
@@ -755,8 +743,16 @@ CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
         return NULL;
         }
 
-    CMdEObject* object = iMdsSession->GetObjectL( aId, *iVideoObjectDef );
-
+    CMdEObject* object;
+    if ( aIsVideo )
+        {
+        object = iMdsSession->GetObjectL( aId, *iVideoObjectDef );
+        }
+    else
+        {
+        object = iMdsSession->GetObjectL( aId, *iAlbums->iAlbumObjectDef );
+        }
+    
     if ( object )
         {
         MPX_DEBUG2( "CVcxMyVideosMdsDb::ObjectL found, id: %d", aId );
@@ -960,19 +956,6 @@ void CVcxMyVideosMdsDb::Object2MediaL(
         
         aVideo.SetTObjectValueL<TInt>( KMPXMediaGeneralLastPlaybackPosition, pos );
         }
-
-#if 0    
-    //18. DOWNLOAD ID (BRIEF)
-    if ( aObject.Property( *iDownloadIdPropertyDef, property, 0 ) != KErrNotFound )
-        {
-        aVideo.SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId,
-                static_cast<CMdEUint32Property*>(property)->Value() );
-        }
-    else
-        {
-        aVideo.SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, 0 );
-        }
-#endif
     
     //19. RATING (FULL)
     if ( aObject.Property( *iRatingPropertyDef, property, 0 ) != KErrNotFound
@@ -1106,23 +1089,8 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
         }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-#if 0    
     // 6. KMPXMediaGeneralDate ( creation date )
-    if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
-        {
-        TInt64 creationDateInt64 = 0;
-        creationDateInt64 = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-        TTime creationDate( creationDateInt64 );
-        if ( aObject.Property( *iCreationDatePropertyDef, property, 0 ) != KErrNotFound )
-            {
-            static_cast<CMdETimeProperty*>(property)->SetValueL( creationDate );
-            }
-        else
-            {
-            aObject.AddTimePropertyL( *iCreationDatePropertyDef, creationDate );
-            }
-        }
-#endif
+    SetCreationDateToObjectL( aVideo, aObject );
     
     // 7. KMPXMediaGeneralFlags (including DRM flag)
     if ( aVideo.IsSupported( KMPXMediaGeneralFlags ) )
@@ -1329,23 +1297,6 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             aObject.AddReal32PropertyL( *iLastPlayPositionPropertyDef, lastPlaybackPos );
             }
         }
-
-#if 0
-    // 18. DOWNLOAD ID
-    if ( aVideo.IsSupported( KVcxMediaMyVideosDownloadId ) )
-        {
-        TUint32 dlId = aVideo.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-        
-        if ( aObject.Property( *iDownloadIdPropertyDef, property, 0 ) != KErrNotFound )
-            {
-            static_cast<CMdEUint32Property*>(property)->SetValueL( dlId );
-            }
-        else
-            {
-            aObject.AddUint32PropertyL( *iDownloadIdPropertyDef, dlId );
-            }
-        }
-#endif
     
     // 19. RATING
     if ( aVideo.IsSupported( KVcxMediaMyVideosRating ) )
@@ -1434,6 +1385,37 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             aObject.AddTextPropertyL(
                     *iArtistPropertyDef, aVideo.ValueText( KMPXMediaVideoArtist ) );
             }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::SetCreationDateToObjectL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject )
+    {
+    CMdEProperty* property;
+    
+    if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
+        {
+        TInt64 creationDateInt64 = 0;
+        creationDateInt64 = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
+        TTime creationDate( creationDateInt64 );
+        if ( aObject.Property( *iCreationDatePropertyDef, property, 0 ) != KErrNotFound )
+            {
+            static_cast<CMdETimeProperty*>(property)->SetValueL( creationDate );
+            }
+        else
+            {
+            aObject.AddTimePropertyL( *iCreationDatePropertyDef, creationDate );
+            }
+#ifdef _DEBUG
+        TDateTime dT = creationDate.DateTime();
+        TBuf<200> buf;
+        buf.Format(_L("date from aVideo to aObject: %2d.%2d.%4d %2d:%2d:%2d"),
+                dT.Day()+1, dT.Month()+1, dT.Year(), dT.Hour(), dT.Minute(), dT.Second() ); 
+        MPX_DEBUG2("%S", &buf ); 
+#endif
         }
     }
 

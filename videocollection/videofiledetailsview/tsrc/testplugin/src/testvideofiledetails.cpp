@@ -63,7 +63,7 @@ void TestVideoFileDetails::initTestCase()
    mDummyModel = new VideoSortFilterProxyModel();
    
    connect(this, SIGNAL(shortDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(shortDetailsReady(TMPXItemId)));
-   connect(this, SIGNAL(fullDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(fullDetailsReady(TMPXItemId)));
+   connect(this, SIGNAL(fullDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(fullVideoDetailsReady(TMPXItemId)));
 
    connect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
            mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
@@ -81,7 +81,7 @@ void TestVideoFileDetails::initTestCase()
 void TestVideoFileDetails::cleanupTestCase()
 {
     disconnect(this, SIGNAL(shortDetailsReady(int)), mDummyModel, SIGNAL(shortDetailsReady(int)));
-    disconnect(this, SIGNAL(fullDetailsReady(int)),mDummyModel, SIGNAL(fullDetailsReady(int)));
+    disconnect(this, SIGNAL(fullDetailsReady(int)),mDummyModel, SIGNAL(fullVideoDetailsReady(int)));
     disconnect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
             mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
     disconnect(this, SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
@@ -99,7 +99,6 @@ void TestVideoFileDetails::init()
     mDummyModel->reset();
     
     mPlugin = new VideoFileDetailsViewPlugin();
-    mPlugin->createView();
     mPlugin->createView();
     mCommandReceived = false;
     mReceivedCommand = -1;
@@ -245,7 +244,7 @@ void TestVideoFileDetails::testDestroyView()
     QVERIFY( mPlugin->getView() == 0 );
     // plugin is still alive
     QVERIFY( mPlugin->viewPlugin() == mPlugin );
-    QVERIFY( mPlugin->mSecSkAction == 0 );
+    QVERIFY( mPlugin->mNavKeyBackAction == 0 );
     QVERIFY( mPlugin->mActivated == false );
     cleanup();
 }
@@ -341,7 +340,7 @@ void TestVideoFileDetails::testBack()
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
     
-    mPlugin->mSecSkAction->trigger();
+    mPlugin->mNavKeyBackAction->trigger();
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
     
@@ -354,7 +353,7 @@ void TestVideoFileDetails::testBack()
     mCommandReceived = false;
     mReceivedCommand = -1;
 
-    mPlugin->mSecSkAction->trigger();
+    mPlugin->mNavKeyBackAction->trigger();
     QCOMPARE( mCommandReceived, true );
     QCOMPARE( mReceivedCommand, static_cast<int>(MpxHbVideoCommon::ActivateCollectionView) );
     
@@ -367,7 +366,7 @@ void TestVideoFileDetails::testBack()
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
     
-    mPlugin->mSecSkAction->trigger();
+    mPlugin->mNavKeyBackAction->trigger();
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
 
@@ -739,7 +738,7 @@ void TestVideoFileDetails::testThumbnailReadySlot()
 template<class T> 
 T* TestVideoFileDetails::findWidget(QString name)
 {
-    return qobject_cast<T *>(mPlugin->mView.findWidget(name));
+    return qobject_cast<T *>(mPlugin->mLoader.findWidget(name));
 }
 
 // ---------------------------------------------------------------------------
@@ -749,7 +748,7 @@ T* TestVideoFileDetails::findWidget(QString name)
 template<class T> 
 T* TestVideoFileDetails::findObject(QString name)
 {
-    return qobject_cast<T *>(mPlugin->mView.findObject(name));
+    return qobject_cast<T *>(mPlugin->mLoader.findObject(name));
 }
 
 // ---------------------------------------------------------------------------

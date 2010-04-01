@@ -18,18 +18,39 @@
 #ifndef __TESTVIDEOLISTSELECTIONDIALOG_H__
 #define __TESTVIDEOLISTSELECTIONDIALOG_H__
 
-
 // INCLUDES
 #include <QtTest/QtTest>
+
+class VideoListSelectionDialog;
+class VideoCollectionUiLoader;
+class VideoListDataModel;
+class VideoSortFilterProxyModel;
+class VideoListWidget;
+class VideoListSelectionDialogTesterHelper;
 
 class TestVideoListSelectionDialog : public QObject
 {
     Q_OBJECT
 
+private:
+    
+    void setRowCount(int count, int type = 0, VideoListDataModel *model = 0);
+    
     // test functions for the test framework
-   
+
 private slots:
-   
+
+    /**
+     * called before anything else when test starts
+     */
+    void initTestCase();
+
+    /**
+     * will be called after testing ends
+     *
+     */
+    void cleanupTestCase();
+    
     /**
      * will be called before each testfunction is executed.
      *
@@ -40,8 +61,104 @@ private slots:
      * will be called after every testfunction.
      *
      */
-    void cleanup();    
+    void cleanup();
+    
+    /**
+     * Tests constructor and destructor.
+     */
+    void testConstructDestruct();
+    
+    /**
+     * tests VideoListSelectionDialog::setupContent
+     */
+    void testSetupContent();
+    
+    /**
+     * verifies failure cases in initDialog
+     */
+    void testSetupInitFailures();
+    
+    /**
+     * tests VideoListSelectionDialog::exec
+     */
+    void testExec();
+
+    /**
+     * tests finishedSlot
+     */
+    void testFinishedSlot();
+    
+    /**
+     * tests VideoListSelectionDialog::markAllStateChangedSlot
+     */
+    void testMarkAllStateChangedSlot();
+
+    /**
+     * tests VideoListSelectionDialog::selectionChangedSlot
+     */
+    void testSelectionChangedSlot();
+
+    /**
+     * tests VideoListSelectionDialog::singleItemSelectedSlot
+     */
+    void testSingleItemSelectedSlot();
+
+    /**
+     * tests VideoListSelectionDialog::initDialog
+     */
+    void testModelReadySlot();
+
+    /**
+     * tests VideoListSelectionDialog::updateCounterSlot
+     */
+    void testUpdateCounterSlot();
+
+    /**
+     * tests VideoListSelectionDialog::primaryActionTriggeredSlot
+     */
+    void testPrimaryActionTriggeredSlot();
+    
+    /**
+     * tests VideoListSelectionDialog::getSelectedName
+     */
+    void testGetSelectedName();
+    
 private:
+
+    /**
+     * test helper
+     */
+    VideoListSelectionDialogTesterHelper *mTestHelper;  
+    
+    /**
+     * object under test
+     */
+    VideoListSelectionDialog *mTestObject;
+    
+    /**
+     * dummy UI loader object
+     */
+    VideoCollectionUiLoader *mTestUiLoader;
+    
+    /**
+     * dummy source model
+     */
+    VideoListDataModel *mSourceModel;
+    
+    /**
+     * dummy model
+     */
+    VideoSortFilterProxyModel *mModel;
+    
+    /**
+     * dummy widget
+     */
+    VideoListWidget *mTestWidget;
+    
+	/**
+ 	 * flag indicating if last call to init succeeded.
+ 	 */
+    bool mInitOk;
 };
 
 

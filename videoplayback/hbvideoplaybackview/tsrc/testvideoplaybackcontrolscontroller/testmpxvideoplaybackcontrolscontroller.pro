@@ -14,7 +14,7 @@
 # Description: Project file for building testmpxvideoplaybackcontrolscontroller
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 
 TEMPLATE = app
@@ -27,8 +27,7 @@ DEPENDPATH += . \
 
 INCLUDEPATH += stub/inc \
                ../inc \
-               ../../inc \   
-               ../../controlinc \
+               ../../inc \
                ../../../inc \            
                ../../../../inc \                                          
 
@@ -36,7 +35,7 @@ DEPENDPATH += stub/inc stub/src inc src
         
 # Input
 HEADERS += hbvideobaseplaybackview.h  \
-           mpxvideoplaybackbuttonbar.h \
+           mpxvideoplaybackcontrolbar.h \
            mpxvideoplaybackcontrolpolicy.h \
            mpxvideoplaybackcontrolconfiguration.h \
            mpxvideoplaybackdetailsplaybackwindow.h \
@@ -44,7 +43,6 @@ HEADERS += hbvideobaseplaybackview.h  \
            mpxvideoplaybackfiledetailswidget.h \
            mpxvideoplaybackfullscreencontrol.h \
            mpxvideoplaybacknontouchvolumebar.h \
-           mpxvideoplaybackprogressbar.h \
            mpxvideoplaybackstatuspanecontrol.h \
            mpxvideoplaybackviewfiledetails.h \
            mpxvideoviewwrapper.h \
@@ -54,7 +52,7 @@ HEADERS += hbvideobaseplaybackview.h  \
 					 
                
 SOURCES += hbvideobaseplaybackview.cpp \ 
-           mpxvideoplaybackbuttonbar.cpp \
+           mpxvideoplaybackcontrolbar.cpp \
            mpxvideoplaybackcontrolpolicy.cpp \
            mpxvideoplaybackcontrolconfiguration.cpp \
            mpxvideoplaybackdetailsplaybackwindow.cpp \
@@ -62,7 +60,6 @@ SOURCES += hbvideobaseplaybackview.cpp \
            mpxvideoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackfullscreencontrol.cpp \
            mpxvideoplaybacknontouchvolumebar.cpp \
-           mpxvideoplaybackprogressbar.cpp \
            mpxvideoplaybackstatuspanecontrol.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
            mpxvideoviewwrapper.cpp \

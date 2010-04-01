@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 20 %
+// Version : %version: e003sa33#21 %
 
 
 
@@ -361,21 +361,23 @@ void CMPXStreamingPlaybackMode::HandleOpenComplete()
         HBufC8* tempBuf = NULL;
         TInt apMaxLen = 3;
 
-        HBufC8* accessPoint = HBufC8::NewLC( KMMFAccessPoint().Length() + apMaxLen );
-        accessPoint->Des().Format( KMMFAccessPoint, iVideoPlaybackCtlr->iAccessPointId );
+        MPX_TRAPD( err,
+                   HBufC8* accessPoint = HBufC8::NewLC( KMMFAccessPoint().Length() + apMaxLen );
+                   accessPoint->Des().Format( KMMFAccessPoint, iVideoPlaybackCtlr->iAccessPointId );
 
-        tempBuf = HBufC8::NewLC( accessPoint->Length() );
-        tempBuf->Des().Copy( accessPoint->Des() );
+                   tempBuf = HBufC8::NewLC( accessPoint->Length() );
+                   tempBuf->Des().Copy( accessPoint->Des() );
 
-        if ( tempBuf )
-        {
-            iVideoPlaybackCtlr->iPlayer->CustomCommandSync( destinationPckg,
+                   if ( tempBuf )
+                   {
+                       iVideoPlaybackCtlr->iPlayer->CustomCommandSync( destinationPckg,
                                                             EMMFROPControllerSetApplicationConfig,
                                                             tempBuf->Des(),
                                                             savePckg );
-        }
+                   }
 
-        CleanupStack::PopAndDestroy(2);   // accessPoint, tempBuf
+                   CleanupStack::PopAndDestroy(2);   // accessPoint, tempBuf 
+                );
     }
 }
 
@@ -400,7 +402,8 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
         }
         else
         {
-            playAllowed = !( iVideoPlaybackCtlr->IsVoiceCall() && IsNetworkMode2GL() );
+            MPX_TRAPD( err,
+            		   playAllowed = !( iVideoPlaybackCtlr->IsVoiceCall() && IsNetworkMode2GL() ) );
 
             if ( !playAllowed )
             {

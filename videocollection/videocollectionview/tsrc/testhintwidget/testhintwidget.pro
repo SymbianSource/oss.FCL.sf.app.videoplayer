@@ -20,49 +20,28 @@ TARGET =
  
 DEPENDPATH += . \
     inc \
-    src
+    src \
+    ../../../tsrc/stubs
     
 INCLUDEPATH += . \
     inc \
     ../../../tsrc/stubs/inc \
-    \ # keep these at bottom so that stubbed headers are searched first
+    \ # keep these at bottom so that stubbed headers are taken first
     ../../../inc \
     ../../../videocollectionview/inc \
     ../../../videocollectionwrapper/inc \
+    ../../../../inc \
+    ../../../../videoplayerapp/videoplayerengine/inc
     
-CONFIG += qtestlib \
-    Hb \
-    symbian_test
-
-LIBS += -lestor.dll \
-    -lfbscli.dll \
-    -lbitgdi.dll \
-    -lgdi.dll \
-    -lvideocollectionwrapper.dll
-
 HEADERS +=  inc/testhintwidget.h \
     \ # headers needed in test
     ../../../videocollectionview/inc/videohintwidget.h \
-    \ # headers needed in stubs
-    ../../../videocollectionview/inc/videolistview.h \
-    ../../../videocollectionview/inc/videolistwidget.h \
-    ../../../videocollectionview/inc/videocollectionuiloader.h \
-    ../../../videocollectionview/inc/videocollectionviewutils.h \
-    ../../../videocollectionview/inc/videolistselectiondialog.h
-               
+           
 SOURCES +=  src/testhintwidget.cpp \
     \ # sources needed in test
     ../../../videocollectionview/src/videohintwidget.cpp \
-    \ # sources needed in stubs
-    ../../../tsrc/stubs/src/hblistview.cpp \
-    ../../../tsrc/stubs/src/hbwidget.cpp \
-    ../../../tsrc/stubs/src/hbscrollbar.cpp \
-    ../../../tsrc/stubs/src/hbdialog.cpp \
-    ../../../tsrc/stubs/src/hbaction.cpp \
-    ../../../tsrc/stubs/src/videocollectionuiloader.cpp \
-    ../../../tsrc/stubs/src/videocollectionviewutils.cpp \
-    ../../../tsrc/stubs/src/videolistview.cpp \
-    ../../../tsrc/stubs/src/videolistwidget.cpp \
-    ../../../tsrc/stubs/src/videolistselectiondialog.cpp
+
+TESTEDCLASS = videohintwidget
+include(../../../tsrc/stubs/stubs.pro)
 
 RESOURCES += ../../data/videocollectionview.qrc

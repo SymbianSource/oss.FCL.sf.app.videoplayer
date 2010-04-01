@@ -188,6 +188,17 @@ bool MediaObjectFactory::fillMediaDatas(CMPXMedia* media, int index, int mediaTy
         }
     }
     
+    // set video count
+    if(detailSelectionFlag & MediaDetailCategoryVideoCount)
+    {  
+        int count = (index%5);
+        TRAPD(error, media->SetTObjectValueL<quint32>(KVcxMediaMyVideosCategoryItemCount, count));
+        if(error != KErrNone)
+        {
+            return false;
+        }
+    }    
+    
     return true;
     
 }

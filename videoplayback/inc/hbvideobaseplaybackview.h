@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#12 %
+// Version : %version:  da1mmcf#13 %
 
 
 
@@ -51,6 +51,7 @@ class HbVideoBasePlaybackView : public HbView
 
     protected slots:
         virtual void closePlaybackView();
+        void handleClosePopupDialog();
 
     public:
 
@@ -85,8 +86,8 @@ class HbVideoBasePlaybackView : public HbView
         virtual void issuePlayCommand();
 
         void initializeVideoPlaybackView();
-        void displayInfoMessage( const QString& qString );
-        void displayErrorMessage( const QString& qString );
+		
+        void showDialog( const QString& qString, bool closeView = true );
 
         virtual void handleClosePlaybackView();
         

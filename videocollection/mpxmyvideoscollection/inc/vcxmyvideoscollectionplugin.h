@@ -366,7 +366,7 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * Albums related functionality (except mds db operations). Own.
         */
         CVcxMyVideosAlbums* iAlbums;
-                                                                                                    
+
         /**
         * Target drive for Move operation.
         */

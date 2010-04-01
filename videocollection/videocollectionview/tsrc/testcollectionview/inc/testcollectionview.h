@@ -29,15 +29,17 @@ class TestCollectionView : public QObject
 {
     Q_OBJECT
 
+public:
+    
+    TestCollectionView();
+    
     /**
      * call to init a testcase
-     *
      */
     void init(); 
     
     /**
      * call to cleanup a testcase
-     *
      */
     void cleanup();
     

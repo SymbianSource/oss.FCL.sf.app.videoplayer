@@ -32,9 +32,11 @@ VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *pare
     mVideoServices(0),
     mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
     mSignalsConnected(false),
-    mDetailsReady(false),
     mIsService(false),
+    mNavKeyBackAction(0),
+    mNavKeyQuitAction(0),
     mContextMenu(0),
+    mSelectionMode(HbAbstractItemView::NoSelection),
     mScrollPositionTimer(0),
     mUiLoader(uiLoader)
 {
@@ -88,11 +90,6 @@ void VideoListWidget::disConnectSignals()
     // not stubbed
 }
 
-void VideoListWidget::shareItemSlot()
-{
-    // not stubbed
-}
-
 void VideoListWidget::deleteItemSlot()
 {
     // not stubbed
@@ -125,6 +122,12 @@ void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
     // not stubbed
 }
 
+void VideoListWidget::setSelectionMode(int mode)
+{
+    Q_UNUSED(mode);
+    // not stubbed
+}
+
 void VideoListWidget::longPressGesture (const QPointF &point)
 {
     Q_UNUSED(point);
@@ -134,6 +137,11 @@ void VideoListWidget::longPressGesture (const QPointF &point)
 void VideoListWidget::playItemSlot()
 {
     // not stubbed
+}
+
+void VideoListWidget::doDelayedsSlot()
+{
+    // not stubbed    
 }
 
 void VideoListWidget::openDetailsSlot()
@@ -152,6 +160,11 @@ void VideoListWidget::addToCollectionSlot()
 }
 
 void VideoListWidget::removeCollectionSlot()
+{
+    // not stubbed
+}
+
+void VideoListWidget::removeFromCollectionSlot()
 {
     // not stubbed
 }

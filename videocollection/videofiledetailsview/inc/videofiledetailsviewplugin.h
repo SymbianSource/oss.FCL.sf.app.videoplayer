@@ -127,7 +127,6 @@ private slots:
      */
 	void getFileUri();
 
-
     /**
      * Signaled when short details are ready.
      *
@@ -193,19 +192,6 @@ private slots:
 private:
 
     /**
-     * Pre-creates the view and thumbnailmanager.
-     *
-     */
-    void preCreateView();
-
-    /**
-     * Allocates view and rest of it's objects to be ready to
-     * be activated.
-     *
-     */
-    void finalizeCreateView();
-
-    /**
      * Signaled for one item deletion.
      *
      */
@@ -215,6 +201,11 @@ private:
      * Starts fetching the large thumbnail with tnwrapper.
      */
     void startFetchingThumbnail();
+    
+    /**
+     * Gets the play icon for thumbnail.
+     */
+    const QPixmap &playIcon();
 
     /**
      * Finds and return the widget from document loader with the given name. Casts
@@ -232,19 +223,9 @@ private:
 private:
 
     /**
-     * Details view create status
-     */
-    enum TViewStatus
-    {
-        ENotCreated,
-        EPreCreated,
-        EFinalized
-    };
-
-    /**
      * Document loader that holds the view object
      */
-    HbDocumentLoader mView;
+    HbDocumentLoader mLoader;
 
     /**
      * Pointer to the model that holds video details. Not owned.
@@ -268,14 +249,6 @@ private:
     bool mIsService;
 
     /**
-     * Details view create status,
-     * if ENotCreated, view has not been created,
-     * if EPreCreated, view has been pre created
-     * if EFinalized, view creation has been finalised
-     */
-    TViewStatus mCreated;
-
-    /**
      * Mpx id of the video clip.
      */
     TMPXItemId mVideoId;
@@ -284,11 +257,16 @@ private:
      * Index of the clip to be deleted in the proxy model.
      */
     int mDeletedIndex;
+    
+    /**
+     * Previously loaded orientation.
+     */
+    Qt::Orientation mPreviousOrietation;
 
 	/**
      * Navigation softkey action object for back.
      */
-	HbAction 				   *mNavKeyBackAction;
+	HbAction *mNavKeyBackAction;
 
     /**
      * Title animation widget
@@ -309,7 +287,11 @@ private:
      * Collection wrapper.
      */
     VideoCollectionWrapper &mCollectionWrapper;
-
+    
+    /**
+     * Play icon with transparent background.
+     */
+    QPixmap mPlayIcon;
     };
 
 #endif  // VIDEOFILEDETAILSPLUGIN_H

@@ -882,25 +882,35 @@ void CVCXMyVideosCollectionPluginTester::UpdateAlbumsListL()
                         
             if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
                 {
-                TBool albumFound( EFalse ); 
+                int albumIndex(-1);
                 for( TInt e = 0; e < iAlbumIds.Count(); e++ )
                     {
                     if( iAlbumIds[e] == itemId )
                         {
-                        albumFound = ETrue;
+                        albumIndex = e;
                         }
                     }
                 
-                if( !albumFound )
+                TBuf<256> title;
+                if( media->IsSupported( KMPXMediaGeneralTitle ) )
                     {
-                    TBuf<256> title;
-                    if( media->IsSupported( KMPXMediaGeneralTitle ) )
+                    title = media->ValueText( KMPXMediaGeneralTitle );
+                    
+                    if( albumIndex == -1 )
                         {
-                        title = media->ValueText( KMPXMediaGeneralTitle );
+                        HBufC* titleBuff = title.AllocL();
+                        iAlbumNames.Append( titleBuff );
+                        iAlbumIds.Append( itemId );
                         }
-                    HBufC* titleBuff = title.AllocL();
-                    iAlbumNames.Append( titleBuff );
-                    iAlbumIds.Append( itemId );
+                    else
+                        {
+                        if( iAlbumNames[albumIndex]->Compare( title )!= KErrNone )
+                            {
+                            iAlbumNames[albumIndex]->Des().SetLength( 0 );
+                            iAlbumNames[albumIndex]->ReAlloc( title.Length() );
+                            iAlbumNames[albumIndex]->Des().Copy( title );
+                            }
+                        }
                     }
                 }
             }
@@ -2893,22 +2903,22 @@ void CVCXMyVideosCollectionPluginTester::RemoveMediasFromAlbumL( const TDesC& aA
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosCollectionPluginTester::CheckAlbumCount
+// CVCXMyVideosCollectionPluginTester::RenameAlbumL
 // -----------------------------------------------------------------------------
 //
-bool CVCXMyVideosCollectionPluginTester::CheckAlbumCount( int aExpectedCount )
+void CVCXMyVideosCollectionPluginTester::RenameAlbumL( const TDesC& aAlbumName, const TDesC& aNewAlbumName )
     {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CheckAlbumCount");
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::RenameAlbumL");
     
-    TBool ret( ETrue );
-    if( iAlbumNames.Count() != aExpectedCount )
-        {
-        VCXLOGLO3("<<<CVCXMyVideosCollectionPluginTester::CheckAlbumCount: expected: %d, got: %d, error!", aExpectedCount, iAlbumNames.Count());
-        ret = EFalse;
-        }
+    TMPXItemId itemId = GetAlbumIdL( aAlbumName );
+    CMPXMedia *media = CMPXMedia::NewL();
+    CleanupStack::PushL( media );
+    media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
+    media->SetTextValueL( KMPXMediaGeneralTitle, aNewAlbumName );
+    SetMediaL( media, ETrue );
+    CleanupStack::PopAndDestroy( media );
     
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CheckAlbumCount");
-    return ret;
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::RenameAlbumL");
     }
 
 // -----------------------------------------------------------------------------

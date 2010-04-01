@@ -38,40 +38,41 @@ EXPORTS
 	_ZN25VideoSortFilterProxyModel11qt_metacastEPKc @ 37 NONAME
 	_ZN25VideoSortFilterProxyModel12modelChangedEv @ 38 NONAME
 	_ZN25VideoSortFilterProxyModel12removeAlbumsERK5QListI11QModelIndexE @ 39 NONAME
-	_ZN25VideoSortFilterProxyModel14connectSignalsEv @ 40 NONAME
-	_ZN25VideoSortFilterProxyModel14processSortingEv @ 41 NONAME
-	_ZN25VideoSortFilterProxyModel15addItemsInAlbumE10TMPXItemIdRK5QListIS0_E @ 42 NONAME
-	_ZN25VideoSortFilterProxyModel16albumChangedSlotEv @ 43 NONAME
-	_ZN25VideoSortFilterProxyModel16fetchItemDetailsERK11QModelIndex @ 44 NONAME
-	_ZN25VideoSortFilterProxyModel16fullDetailsReadyE10TMPXItemId @ 45 NONAME
+	_ZN25VideoSortFilterProxyModel13setAlbumInUseE10TMPXItemId @ 40 NONAME
+	_ZN25VideoSortFilterProxyModel14connectSignalsEv @ 41 NONAME
+	_ZN25VideoSortFilterProxyModel14processSortingEv @ 42 NONAME
+	_ZN25VideoSortFilterProxyModel15addItemsInAlbumER10TMPXItemIdRK5QListIS0_E @ 43 NONAME
+	_ZN25VideoSortFilterProxyModel16albumChangedSlotEv @ 44 NONAME
+	_ZN25VideoSortFilterProxyModel16fetchItemDetailsERK11QModelIndex @ 45 NONAME
 	_ZN25VideoSortFilterProxyModel16staticMetaObjectE @ 46 NONAME DATA 16
 	_ZN25VideoSortFilterProxyModel17disconnectSignalsEv @ 47 NONAME
 	_ZN25VideoSortFilterProxyModel17shortDetailsReadyE10TMPXItemId @ 48 NONAME
 	_ZN25VideoSortFilterProxyModel18setGenericIdFilterE10TMPXItemIdb @ 49 NONAME
 	_ZN25VideoSortFilterProxyModel19getStaticMetaObjectEv @ 50 NONAME
-	_ZN25VideoSortFilterProxyModel21getMediaFilePathForIdE10TMPXItemId @ 51 NONAME
-	_ZN25VideoSortFilterProxyModel4backEv @ 52 NONAME
-	_ZN25VideoSortFilterProxyModel4openEi @ 53 NONAME
-	_ZN25VideoSortFilterProxyModel8openItemE10TMPXItemId @ 54 NONAME
-	_ZN25VideoSortFilterProxyModel9doSortingEiN2Qt9SortOrderEb @ 55 NONAME
-	_ZN25VideoSortFilterProxyModel9indexOfIdE10TMPXItemId @ 56 NONAME
-	_ZN25VideoSortFilterProxyModelC1EiP7QObject @ 57 NONAME
-	_ZN25VideoSortFilterProxyModelC2EiP7QObject @ 58 NONAME
-	_ZN25VideoSortFilterProxyModelD0Ev @ 59 NONAME
-	_ZN25VideoSortFilterProxyModelD1Ev @ 60 NONAME
-	_ZN25VideoSortFilterProxyModelD2Ev @ 61 NONAME
-	_ZNK18VideoThumbnailData10metaObjectEv @ 62 NONAME
-	_ZNK22VideoCollectionWrapper10metaObjectEv @ 63 NONAME
-	_ZNK25VideoSortFilterProxyModel10metaObjectEv @ 64 NONAME
-	_ZNK25VideoSortFilterProxyModel11getOpenItemEv @ 65 NONAME
-	_ZNK25VideoSortFilterProxyModel16filterAcceptsRowEiRK11QModelIndex @ 66 NONAME
-	_ZNK25VideoSortFilterProxyModel16resolveAlbumNameERK7QString @ 67 NONAME
-	_ZNK25VideoSortFilterProxyModel17getMediaIdAtIndexERK11QModelIndex @ 68 NONAME
-	_ZNK25VideoSortFilterProxyModel8lessThanERK11QModelIndexS2_ @ 69 NONAME
-	_ZTI18VideoThumbnailData @ 70 NONAME
-	_ZTI22VideoCollectionWrapper @ 71 NONAME
-	_ZTI25VideoSortFilterProxyModel @ 72 NONAME
-	_ZTV18VideoThumbnailData @ 73 NONAME
-	_ZTV22VideoCollectionWrapper @ 74 NONAME
-	_ZTV25VideoSortFilterProxyModel @ 75 NONAME
+	_ZN25VideoSortFilterProxyModel20removeItemsFromAlbumER10TMPXItemIdRK5QListIS0_E @ 51 NONAME
+	_ZN25VideoSortFilterProxyModel21getMediaFilePathForIdE10TMPXItemId @ 52 NONAME
+	_ZN25VideoSortFilterProxyModel4backEv @ 53 NONAME
+	_ZN25VideoSortFilterProxyModel4openEi @ 54 NONAME
+	_ZN25VideoSortFilterProxyModel8openItemE10TMPXItemId @ 55 NONAME
+	_ZN25VideoSortFilterProxyModel9doSortingEiN2Qt9SortOrderEb @ 56 NONAME
+	_ZN25VideoSortFilterProxyModel9indexOfIdE10TMPXItemId @ 57 NONAME
+	_ZN25VideoSortFilterProxyModelC1EiP7QObject @ 58 NONAME
+	_ZN25VideoSortFilterProxyModelC2EiP7QObject @ 59 NONAME
+	_ZN25VideoSortFilterProxyModelD0Ev @ 60 NONAME
+	_ZN25VideoSortFilterProxyModelD1Ev @ 61 NONAME
+	_ZN25VideoSortFilterProxyModelD2Ev @ 62 NONAME
+	_ZNK18VideoThumbnailData10metaObjectEv @ 63 NONAME
+	_ZNK22VideoCollectionWrapper10metaObjectEv @ 64 NONAME
+	_ZNK25VideoSortFilterProxyModel10metaObjectEv @ 65 NONAME
+	_ZNK25VideoSortFilterProxyModel11getOpenItemEv @ 66 NONAME
+	_ZNK25VideoSortFilterProxyModel16filterAcceptsRowEiRK11QModelIndex @ 67 NONAME
+	_ZNK25VideoSortFilterProxyModel16resolveAlbumNameERK7QString @ 68 NONAME
+	_ZNK25VideoSortFilterProxyModel17getMediaIdAtIndexERK11QModelIndex @ 69 NONAME
+	_ZNK25VideoSortFilterProxyModel8lessThanERK11QModelIndexS2_ @ 70 NONAME
+	_ZTI18VideoThumbnailData @ 71 NONAME
+	_ZTI22VideoCollectionWrapper @ 72 NONAME
+	_ZTI25VideoSortFilterProxyModel @ 73 NONAME
+	_ZTV18VideoThumbnailData @ 74 NONAME
+	_ZTV22VideoCollectionWrapper @ 75 NONAME
+	_ZTV25VideoSortFilterProxyModel @ 76 NONAME
 

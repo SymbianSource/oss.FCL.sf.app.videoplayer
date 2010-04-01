@@ -43,8 +43,6 @@ mToolbarCollectionActionGroup(0)
 
 VideoListView::~VideoListView()
 {
-    VideoListViewData::reset();
-    
     // disconnect signals
     disconnect();
 }
@@ -204,6 +202,11 @@ void VideoListView::addVideosToCollectionSlot()
     // not stubbed
 }
 
+void VideoListView::removeVideosFromCollectionSlot()
+{
+    // not stubbed
+}
+
 void VideoListView::aboutToShowMainMenuSlot()
 {
     // not stubbed
@@ -226,11 +229,6 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
     // not stubbed
 }
 
-void VideoListView::openSortByMenuSlot()
-{
-    // not stubbed
-}
-
 void VideoListView::widgetReadySlot(QGraphicsWidget *widget, const QString &name)
 {
     Q_UNUSED(widget);
@@ -243,6 +241,27 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
     Q_UNUSED(object);
     Q_UNUSED(name);
     // not stubbed
+}
+
+
+void VideoListView::finishCollectionOpenedSlot(const HbEffect::EffectStatus &status)
+{
+    Q_UNUSED(status);
+}
+
+void VideoListView::finishCollectionClosedSlot(const HbEffect::EffectStatus &status)
+{
+    Q_UNUSED(status);
+}
+
+void VideoListView::doSorting(int value)
+{
+    Q_UNUSED(value);
+}
+
+void VideoListView::doDelayedsSlot()
+{
+    // not stubbed    
 }
 
 void VideoListView::debugNotImplementedYet()

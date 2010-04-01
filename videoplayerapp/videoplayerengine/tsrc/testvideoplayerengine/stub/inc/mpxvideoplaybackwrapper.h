@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#3 %
+// Version : %version: da1mmcf#4 %
 
 
 
@@ -40,6 +40,7 @@ class QMpxVideoPlaybackWrapper : public QObject
     public:
         void openPlaybackView() ;
         static int GetInstanceCount();
+        void lateInit();
 
     signals:
         void handlePlaybackView( int viewId );

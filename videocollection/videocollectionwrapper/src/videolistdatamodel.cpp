@@ -14,6 +14,7 @@
 * Description: VideoListDataModel class implementation
 * 
 */
+
 // INCLUDE FILES
 
 #include <hbglobal.h>
@@ -25,7 +26,6 @@
 #include "videocollectionutils.h"
 #include "videodeleteworker.h"
 #include "videocollectionwrapper.h"
-
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -236,7 +236,7 @@ QMap<int, QVariant> VideoListDataModel::itemData(const QModelIndex &index) const
 // prepareDetailRow()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::prepareDetailRow( int index ) const
+QString VideoListDataModel::prepareDetailRow(int index) const
 {
     // TODO: download -status?
 
@@ -246,26 +246,49 @@ QString VideoListDataModel::prepareDetailRow( int index ) const
     
     if(itemId.iId2 != KVcxMvcMediaTypeVideo) //category || album
     {
-        //TODO: get real items and total length
-        int items          = 99;
-        QString minutesStr = "10";
-        QString secondsStr = "01";
-        retString = hbTrId("txt_videos_dblist_val_ln_videos_l1l2", items).arg(minutesStr).arg(secondsStr);
+        retString = prepareVideoCountString(index);
     }
     else //video
     {
         const QString sizeStr = prepareSizeString(index);
         const QStringList list = prepareLengthStrings( index );
-        retString = hbTrId("txt_videos_dblist_captured_val_1_l1l2").arg(sizeStr).arg(list.at(0)).arg(list.at(1));
+        QString duration;
+        duration.append(list.at(0));
+        duration.append(":");
+        duration.append(list.at(1));
+        duration.append(":");
+        duration.append(list.at(2));
+        retString = hbTrId("txt_videos_dblist_captured_val_1_l1").arg(duration).arg(sizeStr);
     }
     return retString; 
+}
+
+// -----------------------------------------------------------------------------
+// prepareVideoCountString()
+// -----------------------------------------------------------------------------
+//
+QString VideoListDataModel::prepareVideoCountString(int index) const
+{
+    QString videoCountString("");
+
+    quint32 items = d_ptr->getCategoryVideoCountFromIndex(index);
+    if(items > 0)
+    {
+        videoCountString = hbTrId("txt_videos_dblist_val_ln_videos", items);
+    }
+    else
+    {
+        videoCountString = hbTrId("txt_videos_info_no_videos");
+    }
+
+    return videoCountString;
 }
 
 // -----------------------------------------------------------------------------
 // prepareSizeString()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::prepareSizeString( int index ) const
+QString VideoListDataModel::prepareSizeString(int index) const
 {
     QString sizeStr("");
 
@@ -279,7 +302,7 @@ QString VideoListDataModel::prepareSizeString( int index ) const
 // VideoListDataModel::prepareLengthStrings()
 // -----------------------------------------------------------------------------
 //
-QStringList VideoListDataModel::prepareLengthStrings( int index ) const
+QStringList VideoListDataModel::prepareLengthStrings(int index) const
 {
     quint32 total = d_ptr->getVideodurationFromIndex(index);
     return VideoCollectionUtils::instance().prepareLengthStrings(total);
@@ -450,11 +473,28 @@ void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
 // albumInUse()
 // -----------------------------------------------------------------------------
 //
-
 TMPXItemId VideoListDataModel::albumInUse()
 {
     return d_ptr->mCurrentAlbum;
 }
+
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbum()
+// -----------------------------------------------------------------------------
+//
+int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
+{
+    int removeCount = d_ptr->removeItemsFromAlbum(albumId, items);
+    if(removeCount)
+    {
+        if(mCollectionClient->removeItemsFromAlbum(albumId, items) < 0)
+        {
+            return -1;
+        }
+        emit albumChanged();
+    }
+    return removeCount;
+}   
 
 // -----------------------------------------------------------------------------
 // deleteStartingFailsSlot()

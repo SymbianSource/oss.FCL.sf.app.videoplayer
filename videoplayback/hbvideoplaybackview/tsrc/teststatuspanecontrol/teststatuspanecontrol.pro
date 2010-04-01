@@ -14,7 +14,7 @@
 # Description: Project file for building teststatuspanecontrol
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 
 TEMPLATE = app
@@ -39,7 +39,6 @@ HEADERS += ../../../controlinc/mpxvideoplaybackstatuspanecontrol.h \
            mpxvideoplaybackcontrolscontroller.h \
            mpxvideoplaybackviewfiledetails.h \
            hbvideobaseplaybackview.h \
-           mpxvideoviewwrapper.h \      
            mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackfullscreencontrol.h \
            hblabel.h
@@ -49,7 +48,6 @@ SOURCES += ../../../controlsrc/mpxvideoplaybackstatuspanecontrol.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
            hbvideobaseplaybackview.cpp \
-           mpxvideoviewwrapper.cpp \  
            mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackfullscreencontrol.cpp \
            hblabel.cpp

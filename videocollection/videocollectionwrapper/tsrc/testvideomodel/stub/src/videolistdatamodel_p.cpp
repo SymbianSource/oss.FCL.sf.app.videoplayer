@@ -64,6 +64,8 @@ bool VideoListDataModelPrivate::mReturnInvalidMarked = false;
  */
 bool VideoListDataModelPrivate::mFailInit = false;
 
+bool VideoListDataModelPrivate::mOverrideVideoCount = false;
+quint32 VideoListDataModelPrivate::mVideoCount = 0;
 
 bool VideoListDataModelPrivate::mOverrideSize = false;
 quint32 VideoListDataModelPrivate::mSize = 0;
@@ -74,6 +76,8 @@ quint32 VideoListDataModelPrivate::mDuration = 0;
 int VideoListDataModelPrivate::mGetVideoCountFail = -1;
 
 bool VideoListDataModelPrivate::mBelongsToAlbum = false;
+
+int VideoListDataModelPrivate::mRemoveFrAlbumReturn = -1;
 
 // -----------------------------------------------------------------------------
 // CVideoListData
@@ -173,15 +177,35 @@ const QIcon* VideoListDataModelPrivate::getVideoThumbnailFromIndex( int index ) 
 }
 
 // -----------------------------------------------------------------------------
+// getVideoThumbnailFromIndex
+// -----------------------------------------------------------------------------
+//
+quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) const
+{
+    if(mOverrideVideoCount)
+    {
+        return mVideoCount;
+    }
+    
+    quint32 count(0);
+    CMPXMedia *media = getMediaFromIndex(index);
+    if( media && media->IsSupported( KVcxMediaMyVideosCategoryItemCount ) )
+         {
+         count = *media->Value<TUint32>( KVcxMediaMyVideosCategoryItemCount );
+         }
+    return count;
+}
+
+// -----------------------------------------------------------------------------
 // getVideoSizeFromIndex
 // -----------------------------------------------------------------------------
 //
 quint32 VideoListDataModelPrivate::getVideoSizeFromIndex( int index ) const
 {
-     if(mOverrideSize)
-     {
-         return mSize;
-     }
+    if(mOverrideSize)
+    {
+        return mSize;
+    }
     quint32 size(0);
     CMPXMedia *media = getMediaFromIndex(index);
     if(media && media->IsSupported( KMPXMediaGeneralSize ))
@@ -285,6 +309,16 @@ void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
     mCurrentAlbum = albumId;
 }
   
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoListDataModelPrivate::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &ids)
+{
+    Q_UNUSED(albumId);
+    Q_UNUSED(ids);    
+    return mRemoveFrAlbumReturn;
+}
 
 // -----------------------------------------------------------------------------
 // getVideoStatusFromIndex

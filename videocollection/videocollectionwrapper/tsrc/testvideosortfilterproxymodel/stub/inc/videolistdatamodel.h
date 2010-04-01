@@ -109,6 +109,11 @@ public: // Constructors and destructor
     bool belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId = TMPXItemId::InvalidId());
     
     /**
+     * returns mRemoveFrAlbumReturn
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);
+    
+    /**
      * returns index of first occurence of provided id
      */
     QModelIndex indexOfId(TMPXItemId id);
@@ -262,6 +267,8 @@ public:
 	static bool mBelongsToAlbum;
 	
 	static bool mReturnInvalid;
+	
+	static int mRemoveFrAlbumReturn;
 	
 	static QString mMediaFilePathReturnValue;
 	

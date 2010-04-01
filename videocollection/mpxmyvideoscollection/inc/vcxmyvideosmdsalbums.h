@@ -49,7 +49,8 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
     public: // Constructors and destructor
         
         friend class CVcxMyVideosMdsCmdQueue;
-
+        friend class CVcxMyVideosMdsDb;
+        
         enum TVcxAsyncOperation
             {
             EVcxNone,
@@ -92,7 +93,16 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
         * @param aClient     Response call is done to this object.
         */
         void GetAlbumsL( CMPXMedia* aAlbumList, MVcxMyVideosMdsAlbumsObserver& aClient );
-        
+
+        /**
+         * Gets album from MDS synchronously.
+         * 
+         * @param aId  MDS ID of the album to be fetched.
+         * @returm     MPX media containing album data. Ownership
+         *             moves to caller. NULL if not found.
+         */
+        CMPXMedia* GetAlbumL( TUint32 aId );
+
         /**
          * Gets album content IDs asynchronously.
          * HandleGetAlbumContentIdsResp() callback function is called when ready.
@@ -168,6 +178,13 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
          * @param aClient    Response call is done to this object.
          */        
         void RemoveAlbumsL( CMPXMedia* aMpxCmd, MVcxMyVideosMdsAlbumsObserver& aClient );
+        
+        /**
+         * Sets album attributes.
+         * 
+         * @param aVideo  Values from aVideo are written to MDS.
+         */
+        void SetAlbumL( CMPXMedia& aVideo );
         
     protected:
         

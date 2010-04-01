@@ -33,6 +33,7 @@ enum MediaDetailSelection
     MediaDetailSizeFlag  = 0x04,
     MediaDetailDurationFlag = 0x08,
     MediaDetailFilePathFlag = 0x10,
+    MediaDetailCategoryVideoCount = 0x20,
     MediaDetailAll = 0xff
 };
 

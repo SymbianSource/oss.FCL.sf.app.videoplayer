@@ -226,7 +226,8 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
         ENTRY( "DeleteAllAlbums", CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL ),
         ENTRY( "AddMediasToAlbum", CVCXMyVideosCollectionPluginTest::AddMediasToAlbumL ),
         ENTRY( "RemoveMediasFromAlbum", CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL ),
-        ENTRY( "CheckAlbumCount", CVCXMyVideosCollectionPluginTest::CheckAlbumCount ),
+        ENTRY( "RenameAlbum", CVCXMyVideosCollectionPluginTest::RenameAlbumL ),
+        ENTRY( "CheckAlbumExists", CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL ),
         
         ENTRY( "CreateVideoFile", CVCXMyVideosCollectionPluginTest::CreateVideoFileL ),
         ENTRY( "CreateVideoFileNoWait", CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL ),
@@ -1403,14 +1404,12 @@ TInt CVCXMyVideosCollectionPluginTest::SetMediaDetailL( CStifItemParser& aItem )
     return err;
     }
 
-
 // -----------------------------------------------------------------------------
 // CVcxMyVideosApiTest::CheckAlbumCountL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CheckAlbumCountL( CStifItemParser& aItem )
     {
-
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckAlbumCountL ---------->");
     // Print to UI
     _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
@@ -2620,7 +2619,6 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL( CStifItemParser& aItem 
     return err;
     }
 
-
 // -----------------------------------------------------------------------------
 // CVcxMyVideosApiTest::AddMediasToAlbumL
 // -----------------------------------------------------------------------------
@@ -2704,35 +2702,80 @@ TInt CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL( CStifItemParser& 
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosApiTest::CheckAlbumCount
+// CVcxMyVideosApiTest::RenameAlbumL
 // -----------------------------------------------------------------------------
 //
-TInt CVCXMyVideosCollectionPluginTest::CheckAlbumCount( CStifItemParser& aItem )
+TInt CVCXMyVideosCollectionPluginTest::RenameAlbumL( CStifItemParser& aItem )
     {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CreateAlbumL ---------->");
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::RenameAlbumL ---------->");
     // Print to UI
     _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In CheckAlbumCount" );
+    _LIT( KWhere, "In RenameAlbumL" );
     TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
     // Print to log file
     iLog->Log( KWhere );
+
+    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
     
     aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
 
-    TInt err( KErrNotReady );
-    
-    int expectedCount;
-    User::LeaveIfError( aItem.GetNextInt( expectedCount ) );
+    int err( KErrNotReady );
     
     if( iTester )
         {
-        if( !iTester->CheckAlbumCount( expectedCount ) )
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+        
+        TPtrC newAlbumName;
+        User::LeaveIfError( aItem.GetNextString( newAlbumName ) );
+
+        if( newAlbumName.Compare( KStifScript2KString ) == KErrNone )
             {
-            err = KErrCorrupt;
+            TRAP( err, iTester->RenameAlbumL( albumName, KAbout2050CharsString ) );
+            }
+        else if( newAlbumName.Compare( KStifScriptEmptyString ) == KErrNone )
+            {
+            TRAP( err, iTester->RenameAlbumL( albumName, KVcxTestEmptyString ) );
+            }
+        else
+            {
+            TRAP( err, iTester->RenameAlbumL( albumName, newAlbumName ) );    
             }
         }
+  
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RenameAlbumL <----------");
+    return err;
+    }
 
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckAlbumCount <----------");
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::CheckAlbumExistsL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In CheckAlbumExistsL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+
+    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    int err( KErrNotReady );
+    
+    if( iTester )
+        {
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+        
+        TRAP( err, iTester->GetAlbumIdL(albumName) );
+        }
+  
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL <----------");
     return err;
     }
 

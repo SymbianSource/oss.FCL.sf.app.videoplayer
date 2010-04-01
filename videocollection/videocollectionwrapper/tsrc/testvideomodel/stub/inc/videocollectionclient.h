@@ -56,6 +56,11 @@ public: // Constructors and destructor
     int deleteVideos( QList<TMPXItemId> *ids );
     
     /**
+     * returns mRemoveItemsReturn
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);
+    
+    /**
      * if true, initializate fails
      */
     static bool mFailInitialize;
@@ -69,6 +74,11 @@ public: // Constructors and destructor
      * count of initialize -calls
      */
     static int mInitializeCount;
+    
+    /**
+     * returned from removeItemsFromAlbum
+     */
+    static int mRemoveItemsReturn;
     
   
 };

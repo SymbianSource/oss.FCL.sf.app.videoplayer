@@ -74,7 +74,7 @@ signals:
 	
     void shortDetailsReady(TMPXItemId index);
     
-    void fullDetailsReady(TMPXItemId index);
+    void fullVideoDetailsReady(TMPXItemId index);
 
 public: // from QAbstractItemModel
     

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -40,6 +40,7 @@ class QMpxVideoPlaybackWrapper : public QObject
 
         int playMedia( QString aFileName );
         void openPlaybackView() ;
+        void lateInit();
 
     private:
         void initializePlugins();

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -88,28 +88,23 @@ CMpxVideoPlayerAppUiEngine* CMpxVideoPlayerAppUiEngine::NewL( QMpxVideoPlaybackW
 // -------------------------------------------------------------------------------------------------
 //
 void CMpxVideoPlayerAppUiEngine::ConstructL()
-{
+{    
+    TUid collectionMode( KUidMpxVideoPlayerApplication );
+
+    iCollectionUtility = MMPXCollectionUtility::NewL( this, collectionMode ); 
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::PostInitL
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerAppUiEngine::LateInitL()
+{	       
+    CreatePlaybackUtilityMemberVariablesL();
+        
     iRecognizer = CMediaRecognizer::NewL();
-
-    //
-    //  Create the Collection Utility
-    //
-
-    //
-    // Workaround. Embedded is not supported yet.
-    //
-    //if ( ! iAppUi->IsEmbedded() )
-    if ( ETrue )
-    {
-        TUid collectionMode( KUidMpxVideoPlayerApplication );
-
-        iCollectionUtility = MMPXCollectionUtility::NewL( this, collectionMode );
-    }
-
-    //
-    //  Create Active Object for exiting the application
-    //
-    iExitAo = CIdle::NewL( CActive::EPriorityStandard );           
+               
+    iExitAo = CIdle::NewL( CActive::EPriorityStandard );     
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -161,14 +156,7 @@ void CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariables
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL()"));
 
-    if ( ! iPlaybackUtility )
-    {
-        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeNewPlayer );
-        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
-        manager.SelectPlayerL( KVideoHelixPlaybackPluginUid );
-        iPlaybackUtility->AddObserverL( *this );
-        iPlaybackUtility->CommandL( EPbCmdSetAutoResume, EFalse );
-    }
+	  CreatePlaybackUtilityMemberVariablesL();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -354,11 +342,6 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
 
     if ( KErrNone == err && ! iPdlHandler )
     {
-        //
-        //  Create member variables for embedded use cases that are not PDL
-        //
-        CreatePlaybackUtilityMemberVariablesL();
-
         TFileName filename;
         aFile.FullName(filename);
 
@@ -392,11 +375,6 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::OpenFileL()"),
                    _L("aFileName = %S"), &aFileName);
-
-    //
-    //  Create member variables for embedded use cases that are not PDL
-    //
-    CreatePlaybackUtilityMemberVariablesL();
 
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(aFileName);
 
@@ -457,8 +435,6 @@ void CMpxVideoPlayerAppUiEngine::OpenMediaL( const CMPXMedia& aMedia )
     playList->SetSingleItemPlaylist();
     playList->SetToFirst();
 
-    CreatePlaybackUtilityMemberVariablesL();
-
     iPlaybackUtility->InitL( *playList, ETrue );
 
     CleanupStack::PopAndDestroy( playList );
@@ -512,29 +488,7 @@ void CMpxVideoPlayerAppUiEngine::HandlePlaybackPlayerChangedL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandlePlaybackPlayerChangedL()"));
 
-    MMPXPlayer* player = iPlaybackUtility->PlayerManager().CurrentPlayer();
-
-    TUid pluginUid( KNullUid );
-    RArray<TUid> array;
-
-    CleanupClosePushL( array );
-
-    if ( iPdlHandler )
-    {
-        array.AppendL( KVideoPdlPlaybackViewUid );
-    }
-    else
-    {
-        if ( player )
-        {
-            pluginUid = player->UidL();
-            array.AppendL( pluginUid );
-        }
-    }
-
     ActivateVideoPlaybackView();
-
-    CleanupStack::PopAndDestroy( &array );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -712,9 +666,7 @@ void CMpxVideoPlayerAppUiEngine::DoHandelCollectionMediaL( const CMPXMedia& aMed
         
         if ( mediaType == CMediaRecognizer::ELocalRamFile ||
              mediaType == CMediaRecognizer::ELocalAsxFile )
-        {
-            CreatePlaybackUtilityMemberVariablesL();
-        
+        {        
             HandleMultiLinksFileL( mediaFile, mediaType );
         }    
         else
@@ -905,21 +857,7 @@ void CMpxVideoPlayerAppUiEngine::ProcessActivationMessageL( const TDesC8 &aMsg )
     TPckg<TVideoPlayerActivationMessage> paramsPckg( msgHandler );
     paramsPckg.Copy( aMsg );
 
-    /*if ( msgHandler.iMsgSender == TVideoPlayerActivationMessage::EMatrixMenu )
-    {
-        // Clear the view history, so app exits back to matrix.
-        iViewUtility->PushDefaultHistoryL();
-    }
-
-    if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::EOpenInternetVideos )
-    {
-        iViewUtility->ActivateViewL( TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId ) );
-    }
-    else if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::EOpenVideoStorage )
-    {
-        iViewUtility->ActivateViewL( TUid::Uid( KUidMyVideosViewTypeId ) );
-    }
-    else*/ if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::ELaunchVideoToPlayer )
+    if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::ELaunchVideoToPlayer )
     {
         // Launch video to player, it can be either local video or stream.
 
@@ -946,47 +884,6 @@ void CMpxVideoPlayerAppUiEngine::ProcessActivationMessageL( const TDesC8 &aMsg )
             }
         }
     }
-		/*else
-        {
-            TBool vodUiRunning = ( iViewUtility->ActiveViewType() ==
-                                   TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId ) );
-
-            if ( vodUiRunning )
-            {
-                // VOD is active, must use the utility to pass the message.
-                // Workaround for a test stopper, to be refactored.
-                CVcxViewMessageUtility::InstanceL()->SendCustomViewMessageL( TUid::Uid(0), aMsg );
-            }
-            else
-            {
-                // VOD is not running, activate with custom message.
-                HBufC* customMsg = HBufC::NewLC( paramsPckg.Length() );
-                customMsg->Des().Copy( paramsPckg );
-                iViewUtility->ActivateViewL( TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId ), customMsg );
-                CleanupStack::PopAndDestroy( customMsg );
-    
-                // Clear the view history, so playback returns where it was started
-                iViewUtility->PushDefaultHistoryL();
-            }
-        }
-    }
-    else if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::ELaunchServiceById )
-    {
-        if ( iViewUtility->ActiveViewType() == TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId ) )
-        {
-            // VOD is active, must use the utility to pass the message.
-            // Workaround for a test stopper, to be refactored.
-            CVcxViewMessageUtility::InstanceL()->SendCustomViewMessageL( TUid::Uid(0), aMsg );
-        }
-        else
-        {
-            // VOD is not running, activate with custom message.
-            HBufC* customMsg = HBufC::NewLC( paramsPckg.Length() );
-            customMsg->Des().Copy( paramsPckg );
-            iViewUtility->ActivateViewL( TUid::Uid( KMpxVideoPlayerVodViewPluginTypeId ), customMsg );
-            CleanupStack::PopAndDestroy( customMsg );
-        }
-    }*/
 }
 
 // -------------------------------------------------------------------------------------------------

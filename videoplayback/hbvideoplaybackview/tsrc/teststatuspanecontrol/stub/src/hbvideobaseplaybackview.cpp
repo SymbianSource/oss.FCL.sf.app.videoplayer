@@ -15,14 +15,12 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   3 %
 
 
 
 //  Include Files
-#include <qgraphicssceneevent>
 #include <hbinstance.h>
-#include <mmf/common/mmferrors.h>
 
 #include "../inc/hbvideobaseplaybackview.h"
 
@@ -35,7 +33,6 @@
 //
 HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 {
-    mCurrentError = KErrNone;
     mViewActive = false;
 }
 
@@ -66,46 +63,6 @@ void HbVideoBasePlaybackView::handleDeactivateView()
 }
 
 // -------------------------------------------------------------------------------------------------
-// HbVideoBasePlaybackView::mousePress
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::mousePressEvent( QGraphicsSceneMouseEvent *event ) 
-{
-}
-
-// -------------------------------------------------------------------------------------------------
-// HbVideoBasePlaybackView::itemChange
-// -------------------------------------------------------------------------------------------------
-//
-QVariant HbVideoBasePlaybackView::itemChange( GraphicsItemChange change, const QVariant &value )
-{
-    return QGraphicsWidget::itemChange( change, value );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::closePlaybackView()
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::paint( QPainter *painter, 
-                                     const QStyleOptionGraphicsItem *option, 
-                                     QWidget *widget )
-{
-    Q_UNUSED( widget );    
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::event()
-// -------------------------------------------------------------------------------------------------
-//
-bool HbVideoBasePlaybackView::event( QEvent *event )
-{
-    bool consumed = false;
-
-    return consumed;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   HbVideoBasePlaybackView::handleClosePlaybackView()
 // -------------------------------------------------------------------------------------------------
 //
@@ -115,47 +72,12 @@ void HbVideoBasePlaybackView::handleClosePlaybackView()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::issuePlayCommand
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::issuePlayCommand()
-{
-}
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::handleBufferingState
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::handleBufferingState()
-{
-}
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::handlePluginError()
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::handlePluginError( int aError )
-{
-    mCurrentError = aError;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   HbVideoBasePlaybackView::doClosePlayer
 // -------------------------------------------------------------------------------------------------
 //
 void HbVideoBasePlaybackView::doClosePlayer()
 {
     mViewActive = false;
-}
-
-
-
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::retrievePdlInformation
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::retrievePdlInformation()
-{
 }
 
 // -------------------------------------------------------------------------------------------------

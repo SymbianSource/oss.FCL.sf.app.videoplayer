@@ -217,8 +217,15 @@ void CVcxMyVideosCollectionPlugin::MediaL(
         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: fetching from MDS");
         video = iMyVideosMdsDb->CreateVideoL( ids[0].iId1, ETrue /* full details */ );    
         }
-        
-    iObs->HandleMedia( video, KErrNone );
+    
+    if ( video )
+        {
+        iObs->HandleMedia( video, KErrNone );
+        }
+    else
+        {
+        iObs->HandleMedia( NULL, KErrNotFound );    
+        }
     
     CleanupStack::PopAndDestroy( &ids );          // <-2
     CleanupStack::PopAndDestroy( &supportedIds ); // <-1
@@ -290,7 +297,20 @@ void CVcxMyVideosCollectionPlugin::CommandL(
                 MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: sync KMPXCommandIdCollectionSet arrived");
                 
                 CMPXMedia* video = aCmd.Value<CMPXMedia>( KMPXCommandColSetMedia );
-                SetVideoL( *video );
+                
+                TMPXItemId mpxId = TVcxMyVideosCollectionUtil::IdL( *video );
+                if ( mpxId.iId2 == KVcxMvcMediaTypeVideo )
+                    {
+                    SetVideoL( *video );
+                    }
+                else if ( mpxId.iId2 == KVcxMvcMediaTypeAlbum )
+                    {
+                    iMyVideosMdsDb->iAlbums->SetAlbumL( *video );
+                    }
+                else
+                    {
+                    User::Leave( KErrNotFound );
+                    }
                 }
                 break;
             
@@ -486,7 +506,9 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() Items modified in MDS, updating cache |");
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() --------------------------------------'");
             CMPXMedia* video;
-            for ( TInt i = 0; i < aId.Count(); i++ )
+            CMPXMedia* album;
+            TInt count = aId.Count();
+            for ( TInt i = count - 1; i >= 0; i-- )
                 {
                 video = iMyVideosMdsDb->CreateVideoL( aId[i], ETrue /* full details */ );
                 
@@ -498,12 +520,24 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                     }
                 else
                     {
-                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: couldn't find the modified item from MDS");
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: item was not found from videos, checking albums");
+                    album = iMyVideosMdsDb->iAlbums->GetAlbumL( aId[i] );
+                    
+                    if ( album )
+                        {
+                        CleanupStack::PushL( album ); // 1->
+                        iAlbums->UpdateAlbumL( *album ); // this will add event to iMessageList if necessarry
+                        CleanupStack::PopAndDestroy( album ); // <-1
+                        }
+                    else
+                        {
+                        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: couldn't find the modified item from MDS");
+                        }
+                    aId.Remove( i );
                     }
                 }
-            }
             
-            //TODO: handle album modify events
+            }
             break;
         }
 
@@ -525,16 +559,13 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                 }
             }
 
-        if ( aEvent == EMPXItemInserted )
-            {
-            //nonVideoIds are albums
-            TInt count = nonVideoIds.Count();
-            for ( TInt i = 0; i < count; i++ )
-                {
-                TRAP_IGNORE( iMessageList->AddEventL(
-                        TMPXItemId( nonVideoIds[i], KVcxMvcMediaTypeAlbum ), aEvent ) );
-                }
-            }
+    //nonVideoIds are albums
+    count = nonVideoIds.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        TRAP_IGNORE( iMessageList->AddEventL(
+                TMPXItemId( nonVideoIds[i], KVcxMvcMediaTypeAlbum ), aEvent ) );
+        }
 
     CleanupStack::PopAndDestroy( &nonVideoIds );
     
@@ -597,6 +628,11 @@ MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosCollectionPlugin::Handle
 
                     CMPXMedia* video = iMyVideosMdsDb->CreateVideoL(
                             mpxId.iId1, ETrue /* full details */ );
+                    
+                    if ( !video )
+                        {
+                        User::Leave( KErrNotFound );
+                        }
                     
                     CleanupStack::PushL( video ); // 1->
                                         
@@ -968,7 +1004,7 @@ void CVcxMyVideosCollectionPlugin::AddVideoToMdsAndCacheL( CMPXMedia& aVideo )
     ids.Reset();
     CleanupClosePushL( ids ); // 1->
     ids.AppendL( mpxId.iId1 );
-    HandleMyVideosDbEvent( EMPXItemInserted, ids ); //this will fetch from mds to cache and sync with downloads
+    HandleMyVideosDbEvent( EMPXItemInserted, ids ); //this will fetch from mds to cache
     CleanupStack::PopAndDestroy( &ids ); // <-1
     }
 

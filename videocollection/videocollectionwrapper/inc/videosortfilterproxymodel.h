@@ -175,7 +175,16 @@ public:
 	 * @param mediaIds, list of item ids
 	 * @return 0 if no errors.
 	 */
-    int addItemsInAlbum(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds);    
+    int addItemsInAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);    
+    
+    /**
+     * Removes items from existing album.
+     * 
+     * @param albumId, Album where to add items.
+     * @param mediaIds, list of item ids
+     * @return 0 if no errors.
+     */
+    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);    
 	
 	/**
 	 * Resolves duplicate album names and returns the resolved name.
@@ -195,9 +204,17 @@ public:
      * If false, filtering works other way around. 
      * 
      * 
-     * @param TMPXItemId item id used as filter
+     * @param filterValue item id used as filter
+     * @param filterValue
      */
     void setGenericIdFilter(TMPXItemId itemId, bool filterValue);
+    
+    /**
+     * Set album in use and invalidates filtering.
+     * 
+     * @param albumId album id
+     */
+    void setAlbumInUse(TMPXItemId albumId);
     
 	/**
 	 * Gets the currently opened item.
@@ -216,13 +233,6 @@ signals:
     * @param index, index of the item
     */ 
     void shortDetailsReady(TMPXItemId itemId);
-    
-    /**
-    * Signal to be emitted after all details are being fetched.
-    * 
-    * @param index, index of the item
-    */ 
-    void fullDetailsReady(TMPXItemId itemId);
     
     /**
      * Signals that the model is ready, ie. that all data has been

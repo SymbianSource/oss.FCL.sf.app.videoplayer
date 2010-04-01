@@ -148,6 +148,11 @@ private slots:
     void testGetVideoDetails();
     
     /**
+     * verifies removeAlbums
+     */
+    void testRemoveAlbums();
+    
+    /**
      * verifies addNewCollection -call.
      */
     void testAddNewCollection();
@@ -156,6 +161,11 @@ private slots:
      * verifies addItemsInAlbum
      */
     void testAddItemsInAlbum();
+    
+    /**
+     * verifies removeItemsFromAlbum
+     */
+    void testRemoveItemsFromAlbum();
     
     /**
      * verifies back -call

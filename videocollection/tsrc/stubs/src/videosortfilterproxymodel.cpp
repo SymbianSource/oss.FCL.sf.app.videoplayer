@@ -24,13 +24,19 @@ int VideoSortFilterProxyModelData::mSortRole = -1;
 Qt::SortOrder VideoSortFilterProxyModelData::mSortOrder = Qt::AscendingOrder;
 bool VideoSortFilterProxyModelData::mSortAsync = false;
 bool VideoSortFilterProxyModelData::mDeleteItemsFails = false;
+bool VideoSortFilterProxyModelData::mRemoveAlbumsFails = false;
 int VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
 bool VideoSortFilterProxyModelData::mOpenFails = false;
 QList<TMPXItemId> VideoSortFilterProxyModelData::mItemIds = QList<TMPXItemId>();
 QModelIndex VideoSortFilterProxyModelData::mLastIndex = QModelIndex();
 TMPXItemId VideoSortFilterProxyModelData::mLastItemId = TMPXItemId::InvalidId();
+TMPXItemId VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId::InvalidId();
 int VideoSortFilterProxyModelData::mDetailsReturnValue = 0;
-
+int VideoSortFilterProxyModelData::mAddItemsInAlbumReturnValue = 0;
+int VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue = 0;
+TMPXItemId VideoSortFilterProxyModelData::mGenericFilterId  = TMPXItemId::InvalidId();
+bool VideoSortFilterProxyModelData::mGenericFilterValue = false;
+TMPXItemId VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId::InvalidId();
 
 VideoSortFilterProxyModel::VideoSortFilterProxyModel(int type, QObject *parent):
     QSortFilterProxyModel(parent),
@@ -99,7 +105,6 @@ void VideoSortFilterProxyModel::getSorting(int &sortingRole,
 
 int VideoSortFilterProxyModel::deleteItems(const QModelIndexList &indexList)
 {
-    Q_UNUSED(indexList);
     
     int err = 0;
     if (VideoSortFilterProxyModelData::mDeleteItemsFails)
@@ -176,6 +181,21 @@ TMPXItemId VideoSortFilterProxyModel::getMediaIdAtIndex(
     return TMPXItemId::InvalidId();
 }
 
+QModelIndex VideoSortFilterProxyModel::indexOfId(TMPXItemId id)
+{
+    //VideoListDataModel *sourceModel = qobject_cast<VideoListDataModel*>(sourceModel());
+
+    for(int i = 0; i < VideoSortFilterProxyModelData::mItemIds.count(); i++)
+    {
+        if(VideoSortFilterProxyModelData::mItemIds.at(i) == id)
+        {
+            //return sourceModel->index(i, 0);
+            return index(i, 0);
+        }
+    }
+    return QModelIndex();
+}
+
 QString VideoSortFilterProxyModel::getMediaFilePathForId(TMPXItemId mediaId)
 {
     Q_UNUSED(mediaId);
@@ -186,30 +206,74 @@ QString VideoSortFilterProxyModel::getMediaFilePathForId(TMPXItemId mediaId)
 TMPXItemId VideoSortFilterProxyModel::addNewAlbum(const QString &title)
 {
     Q_UNUSED(title);
-    // not stubbed
-    return TMPXItemId::InvalidId();
+    return VideoSortFilterProxyModelData::mNewAlbumId;
 }
 
 QString VideoSortFilterProxyModel::resolveAlbumName(
     const QString& albumName) const
 {
-    Q_UNUSED(albumName);
-    // not stubbed
-    return QString();
+    QString name = albumName;
+    return name;
 }
 
-int VideoSortFilterProxyModel::addItemsInAlbum(TMPXItemId albumId, const QList<TMPXItemId> &mediaIds)
+int VideoSortFilterProxyModel::addItemsInAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds)
 {
-    Q_UNUSED(albumId);
-    Q_UNUSED(mediaIds);
+    if(VideoSortFilterProxyModelData::mAddItemsInAlbumReturnValue >= 0)
+    {
+        VideoSortFilterProxyModelData::mLastItemId = albumId;
+        VideoSortFilterProxyModelData::mItemIds.clear();
+        VideoSortFilterProxyModelData::mItemIds = mediaIds;
+    }
     // not stubbed
-    return 0;
+    return VideoSortFilterProxyModelData::mAddItemsInAlbumReturnValue;
 }
+
+int VideoSortFilterProxyModel::removeAlbums(const QModelIndexList &indexList)
+{
+    
+    int err = 0;
+    if (VideoSortFilterProxyModelData::mRemoveAlbumsFails)
+    {
+        err = -1;
+    }
+    else
+    {
+        if (indexList.count() > 0)
+        {
+            VideoSortFilterProxyModelData::mLastIndex = indexList.at(0);
+        }
+    }
+    
+    return err;
+}
+
+int VideoSortFilterProxyModel::removeItemsFromAlbum(class TMPXItemId &album, QList<class TMPXItemId> const &mediaIds)
+{
+    if(VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue >= 0)
+    {
+        VideoSortFilterProxyModelData::mLastItemId = album;
+        VideoSortFilterProxyModelData::mItemIds.clear();
+        VideoSortFilterProxyModelData::mItemIds = mediaIds;
+    }
+    return VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue;
+}
+
+void VideoSortFilterProxyModel::setAlbumInUse(TMPXItemId albumId)
+{
+    VideoSortFilterProxyModelData::mLastItemId = albumId;
+}
+
 
 TMPXItemId VideoSortFilterProxyModel::getOpenItem() const
 {
-    // not stubbed
-    return TMPXItemId();
+    return VideoSortFilterProxyModelData::mOpenedItemId;
+}
+
+void VideoSortFilterProxyModel::setGenericIdFilter(TMPXItemId itemId, bool filterValue)
+{
+    VideoSortFilterProxyModelData::mGenericFilterId  = itemId;
+    VideoSortFilterProxyModelData::mGenericFilterValue = filterValue;
+    return;
 }
 
 // end of file

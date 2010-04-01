@@ -15,9 +15,14 @@
 *
 */
 
-
 #ifndef HBLISTVIEW_H
 #define HBLISTVIEW_H
+
+#include "hbwidget.h"
+#include "hblistviewitem.h"
+#include "hbscrollbar.h"
+#include "hbabstractitemview.h"
+#include "videosortfilterproxymodel.h"
 
 #include <QGraphicsItem>
 #include <QModelIndex>
@@ -25,11 +30,6 @@
 #include <QList>
 #include <QPointF>
 #include <qitemselectionmodel.h>
-
-#include "videosortfilterproxymodel.h"
-#include "hblistviewitem.h"
-#include "hbscrollbar.h"
-#include "hbabstractitemview.h"
 
 class HbScrollArea
 {
@@ -49,7 +49,7 @@ public:
 class HbListView : public HbAbstractItemView
 {
     Q_OBJECT
-   
+    
 public:
 
 signals:
@@ -63,13 +63,18 @@ signals:
      * dummy signal
      */
     void scrollingEnded();
+    
+    /**
+     * dummy signal
+     */
+    void scrollingStarted();
         
 public:  
     /**
      * contructor
      */
     HbListView(QGraphicsItem *parent = 0) :
-            mItem(0)
+            mItem(0), mVerticalSB(0), mSelectionModel(0)
     {
         Q_UNUSED(parent);
         mItem = new HbListViewItem();
@@ -161,7 +166,7 @@ public:
     {
         mLatestUniformItemSizes = value;
     }
-
+    
     /**
      * dummy method
      */
@@ -220,7 +225,7 @@ public:
      */
     void clearSelection()
     {
-        // nop
+        mAllSelectedStatus = 0;
     }
     
     /**
@@ -238,7 +243,7 @@ public:
      */
     void selectAll()
     {
-        // nop
+        mAllSelectedStatus = 1;
     }
     
     /**
@@ -252,6 +257,15 @@ public:
         }
         return mSelectionModel;
     }
+
+    /**
+     * dummy method
+     */
+    HbAbstractViewItem* itemAtPosition(const QPointF &position)
+    {
+        return mItem;
+    }
+public:
     
     /**
      * items to be returned from visibleItems
@@ -263,14 +277,20 @@ public:
      */
     static HbAbstractItemView::SelectionMode mSelectionMode;
     
-    
     /**
      * provided model
      */
     static VideoSortFilterProxyModel *mLatestModel;
     
     /**
-     * item to returned from listItemPrototype
+     * -1 == initialized
+     *  0 == nothing selected
+     *  1 == all selected
+     */
+    static int mAllSelectedStatus;
+    
+    /**
+     * item to returned from listItemPrototype and from itemAtPosition
      */
     HbListViewItem *mItem;
     
@@ -283,7 +303,7 @@ public:
      * selection model
      */
     QItemSelectionModel *mSelectionModel;
-    
+
     /**
      * if true verticalScrollBar return null
      */

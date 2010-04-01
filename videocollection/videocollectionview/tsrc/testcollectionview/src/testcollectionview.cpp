@@ -19,6 +19,7 @@
 #include <hbapplication.h>
 #include <hbinstance.h>
 #include <hblabel.h>
+
 #include "videocollectionuiloader.h"
 #include "testcollectionview.h"
 #include "videocollectioncommon.h"
@@ -39,6 +40,7 @@ int main(int argc, char *argv[])
 {
     HbApplication app(argc, argv);
     HbMainWindow window;
+    hbInstance->mWindowses.append(&window);
 
     TestCollectionView tv;
 
@@ -57,6 +59,16 @@ int main(int argc, char *argv[])
     }
 
     return res;
+}
+
+
+// ---------------------------------------------------------------------------
+// TestCollectionView
+// ---------------------------------------------------------------------------
+//
+TestCollectionView::TestCollectionView()
+ : mTestView(0)
+{
 }
 
 // ---------------------------------------------------------------------------
@@ -83,6 +95,7 @@ void TestCollectionView::cleanupTestCase()
 //
 void TestCollectionView::init()
 {
+    cleanup();
     VideoCollectionUiLoaderData::reset();
     VideoListViewData::reset();
         
@@ -123,6 +136,7 @@ void TestCollectionView::cleanup()
 //
 void TestCollectionView::testCreateView()
 {
+    cleanup();
     VideoCollectionUiLoaderData::reset();
     VideoListViewData::reset();
     
@@ -130,11 +144,12 @@ void TestCollectionView::testCreateView()
 	
 	mTestView = new VideoCollectionViewPlugin();
 
-    QVERIFY( mTestView->mView == NULL );
+    QVERIFY( mTestView->mView == 0 );
 
     mTestView->createView();
 
-    QVERIFY( mTestView->mView == NULL );
+    QVERIFY( mTestView->mView == 0 );
+    QVERIFY( mTestView->mUiLoader != 0);
 
     delete mTestView;
 
@@ -142,11 +157,12 @@ void TestCollectionView::testCreateView()
 	
 	mTestView = new VideoCollectionViewPlugin();
 
-    QVERIFY( mTestView->mView == NULL );
+    QVERIFY( mTestView->mView == 0 );
 
     mTestView->createView();
 
-    QVERIFY( mTestView->mView != NULL );
+    QVERIFY( mTestView->mView != 0 );
+    QVERIFY( mTestView->mUiLoader != 0);
     QCOMPARE( VideoListViewData::mInitializeViewCount, 1 );
     QVERIFY( mTestView->mActivated == false );
 
@@ -186,14 +202,7 @@ void TestCollectionView::testActivateView()
     QCOMPARE( VideoListViewData::mActivateViewCount, 1 );
 
     mTestView->activateView();
-    HbAction *tmpAction = 0;
-    HbMainWindow *window = hbInstance->allMainWindows().value(0);
-    if (window)
-    {
-        tmpAction = window->softKeyAction(Hb::SecondarySoftKey);
-    }
     QCOMPARE( VideoListViewData::mActivateViewCount, 1 );
-    QVERIFY(tmpAction != 0);
 
     cleanup();
 }
@@ -214,7 +223,6 @@ void TestCollectionView::testDeactivateView()
 
     mTestView->deactivateView();
     QCOMPARE( VideoListViewData::mDeactivateViewCount, 1 );
-
     QVERIFY( mTestView->mActivated == false );
 
     mTestView->deactivateView();
@@ -232,20 +240,30 @@ void TestCollectionView::testDestroyView()
 {
     init();
 
+    // remove view from mainwindow so that we don't get hanging pointers there, as
+    // the test is creating and destroying view several times.
+    HbMainWindow *window = hbInstance->allMainWindows().value(0);
+    QVERIFY(window);
+    window->removeView(mTestView->mView);
+    
     mTestView->activateView();
-
+    
     mTestView->destroyView();
 
     QCOMPARE( VideoListViewData::mDeactivateViewCount, 1 );
     QVERIFY( mTestView->mActivated == false );
     QVERIFY( mTestView->mView == 0 );
+    QVERIFY( mTestView->mUiLoader == 0);
 
     mTestView->createView();
     QVERIFY( mTestView->mView != 0 );
+    QVERIFY( mTestView->mUiLoader != 0);
+    
     mTestView->destroyView();
     QCOMPARE( VideoListViewData::mDeactivateViewCount, 1 );
     QVERIFY( mTestView->mActivated == false );
     QVERIFY( mTestView->mView == 0 );
+    QVERIFY( mTestView->mUiLoader == 0);
 
     cleanup();
 }
@@ -256,6 +274,7 @@ void TestCollectionView::testDestroyView()
 //
 void TestCollectionView::testGetView()
 {
+    cleanup();
     mTestView = new VideoCollectionViewPlugin();
 
     QVERIFY( mTestView->getView() == 0 );
@@ -294,13 +313,11 @@ void TestCollectionView::testBack()
 //
 void TestCollectionView::testOrientationChange()
 {
-    // there's nothing to be tested yet for this.
-    // implementation is requires due inherited mpxviewplugin
+    // there's nothing to be tested for this.
+    // slot is probably going to be removed. This is here just to have the
+    // function decision coverage on correct level.
     init();
-    QVERIFY(mTestView);
     mTestView->orientationChange(Qt::Horizontal);
-    mTestView->orientationChange(Qt::Vertical);
-
     cleanup();
 }
 

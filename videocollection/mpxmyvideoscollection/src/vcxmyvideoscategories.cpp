@@ -283,8 +283,8 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             category = aCategoryArray.AtL( i );
 
             //codescanner warning: aVideosIncrements count is same as aCategoryArray count, so the range is checked
-            UpdateVideosCountL( *category, aVideosIncrements[i], KVcxMediaMyVideosCategoryItemCount,
-                    EVcxMyVideosListNoInfo );
+            UpdateVideosCountL( *category, aVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
@@ -294,8 +294,8 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             {
             category = aCategoryArray.AtL( i );
 
-            UpdateVideosCountL( *category, aNewVideosIncrements[i], KVcxMediaMyVideosCategoryNewItemCount,
-                    EVcxMyVideosListNoInfo );
+            UpdateVideosCountL( *category, aNewVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryNewItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
@@ -691,7 +691,8 @@ void CVcxMyVideosCategories::UpdateCategoryNewVideoNameAndDateL( TInt aOrigin, T
     prevNewVideoName.Set( iListArray->AtL( categoryIndex )->ValueText(
             KVcxMediaMyVideosCategoryNewItemName ) );
     CMPXMedia* newVideo;
-    currentNewVideoName.Set( CalculateNewVideoNameL( *videoList, aOrigin, aIgnoredIds, newVideo ) );
+    currentNewVideoName.Set( CalculateNewVideoNameL(
+            *videoList, aOrigin, aIgnoredIds, newVideo ) );
     if ( currentNewVideoName.CompareF( prevNewVideoName ) != 0 )
         {
         iListArray->AtL( categoryIndex )->SetTextValueL(

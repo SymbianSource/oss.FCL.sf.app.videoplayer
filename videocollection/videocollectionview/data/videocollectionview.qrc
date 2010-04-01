@@ -5,15 +5,10 @@
     </qresource>
     <qresource prefix="/" >
         <file>images/qtg_mono_video_all.svg</file>
-        <file>images/qtg_mono_video_collection.svg</file>
-        <file>images/qtg_mono_video_services.svg</file>
-        <file>images/mono_video_addvideos.svg</file>
-        <file>images/mono_video_removevideos.svg</file>
-        <file>images/mono_video_sortvideos.svg</file>
-        <file>images/services_icon.svg</file>
-        <file>images/services_icon_pressed.svg</file>
+        <file>images/qtg_mono_remove_from_video_collection.svg</file>
     </qresource>
-    <qresource prefix="/style" >
-        <file>hblistviewitem.css</file>
-    </qresource>
+    <qresource prefix="/" >
+        <file>effects/slide_in_to_left_and_fade_in.fxml</file>
+        <file>effects/slide_out_to_left_and_fade_out.fxml</file>
+    </qresource>    
 </RCC>

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 //
@@ -115,7 +115,14 @@ void CMPXVideoHelixPlayback::OpenFileHandleL( const TDesC& aUri, RFile& aFile )
 
     TInt err = aFile.Open( iFs, aUri, EFileRead | EFileShareReadersOrWriters );
 
-    if ( err != KErrNone )
+    //
+    //  Check if RFile64 is needed
+    //
+    if ( err == KErrTooBig )
+    {
+        User::Leave( KErrTooBig );
+    }
+    else if ( err != KErrNone )
     {
         CheckForStreamingUrlL( aUri );
     }
@@ -129,7 +136,7 @@ void CMPXVideoHelixPlayback::InitialiseL( const TDesC& aSong )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitialiseL()"),
                   _L("aSong %S"), &aSong );
-    
+
     InitialiseWithPositionL( aSong );
 }
 
@@ -151,8 +158,8 @@ void CMPXVideoHelixPlayback::InitialiseWithPositionL( const TDesC& aSong, TInt a
 
     if ( err == KErrNone )
     {
-        iVideoPlaybackCtlr->OpenFileL( aSong, fileHandle, aPosition ); 
-    }   
+        iVideoPlaybackCtlr->OpenFileL( aSong, fileHandle, aPosition );
+    }
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
     else if ( err == KErrTooBig )
     {
@@ -171,7 +178,7 @@ void CMPXVideoHelixPlayback::InitialiseWithPositionL( const TDesC& aSong, TInt a
         }
         else
         {
-                iVideoPlaybackCtlr->OpenFile64L( aSong, fileHandle64, aPosition ); 
+                iVideoPlaybackCtlr->OpenFile64L( aSong, fileHandle64, aPosition );
         }
 
         CleanupStack::PopAndDestroy(); // fileHandle64
@@ -193,7 +200,7 @@ void CMPXVideoHelixPlayback::InitialiseWithPositionL( const TDesC& aSong, TInt a
 void CMPXVideoHelixPlayback::InitialiseL( RFile& aSong )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitialiseL( RFile )"));
-        
+
     InitialiseWithPositionL( aSong );
 }
 
@@ -205,11 +212,11 @@ void CMPXVideoHelixPlayback::InitialiseWithPositionL( RFile& aSong, TInt aPositi
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitialiseWithPositionL( RFile )"),
                    _L("aPosition %d"), aPosition );
-    
+
     TFileName filename;
     aSong.FullName( filename );
 
-    iVideoPlaybackCtlr->OpenFileL( filename, aSong, aPosition ); 
+    iVideoPlaybackCtlr->OpenFileL( filename, aSong, aPosition );
 }
 
 
@@ -219,8 +226,8 @@ void CMPXVideoHelixPlayback::InitialiseWithPositionL( RFile& aSong, TInt aPositi
 //
 void CMPXVideoHelixPlayback::InitStreamingL( const TDesC& aUri,
                                              const TDesC8& /*aType*/,
-                                             TInt aAccessPoint, 
-                                             TInt aPosition ) 
+                                             TInt aAccessPoint,
+                                             TInt aPosition )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreamingL()"),
                    _L("aUri %S, aAccessPoint %d, aPosition %d"), &aUri, aAccessPoint, aPosition );
@@ -238,7 +245,7 @@ void CMPXVideoHelixPlayback::InitStreamingL( const TDesC& aUri,
     }
     else
     {
-        iVideoPlaybackCtlr->OpenFileL( aUri, fileHandle, aPosition, aAccessPoint );  
+        iVideoPlaybackCtlr->OpenFileL( aUri, fileHandle, aPosition, aAccessPoint );
     }
 
     CleanupStack::PopAndDestroy();
@@ -248,7 +255,7 @@ void CMPXVideoHelixPlayback::InitStreamingL( const TDesC& aUri,
 //    Initializes a clip for playback from a file handle
 //  ----------------------------------------------------------------------------
 //
-void CMPXVideoHelixPlayback::InitStreamingL( RFile& aFile, TInt aAccessPoint, TInt aPosition  ) 
+void CMPXVideoHelixPlayback::InitStreamingL( RFile& aFile, TInt aAccessPoint, TInt aPosition  )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreamingL( RFile )"),
                    _L("aAccessPoint = %d, aPosition = %d"), aAccessPoint, aPosition );
@@ -394,21 +401,21 @@ void CMPXVideoHelixPlayback::OpenFileHandle64L( const TDesC& aUri, RFile64& aFil
 //    Initializes a clip for playback from a 64-bit file handle
 //  ----------------------------------------------------------------------------
 //
-void CMPXVideoHelixPlayback::Initialise64L( RFile64& aSong, TInt aPosition ) 
+void CMPXVideoHelixPlayback::Initialise64L( RFile64& aSong, TInt aPosition )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::Initialise64L( RFile64 )"),
                    _L("aPosition %d"), aPosition );
     TFileName filename;
     aSong.FullName( filename );
 
-    iVideoPlaybackCtlr->OpenFile64L( filename, aSong, aPosition );   
+    iVideoPlaybackCtlr->OpenFile64L( filename, aSong, aPosition );
 }
 
 //  ----------------------------------------------------------------------------
 //    Initializes a clip for playback from a 64-bit file handle
 //  ----------------------------------------------------------------------------
 //
-void CMPXVideoHelixPlayback::InitStreaming64L( RFile64& aFile, TInt aAccessPoint, TInt aPosition ) 
+void CMPXVideoHelixPlayback::InitStreaming64L( RFile64& aFile, TInt aAccessPoint, TInt aPosition )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoHelixPlayback::InitStreaming64L( RFile64 )"),
                    _L("aAccessPoint = %d, aPosition %d"), aAccessPoint, aPosition );
@@ -416,7 +423,7 @@ void CMPXVideoHelixPlayback::InitStreaming64L( RFile64& aFile, TInt aAccessPoint
     TFileName filename;
     aFile.FullName( filename );
 
-    iVideoPlaybackCtlr->OpenFile64L( filename, aFile, aPosition, aAccessPoint ); 
+    iVideoPlaybackCtlr->OpenFile64L( filename, aFile, aPosition, aAccessPoint );
 }
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API

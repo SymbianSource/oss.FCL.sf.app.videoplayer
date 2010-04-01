@@ -52,7 +52,8 @@ public:
     enum TSelectionFunction
     {
         EDeleteVideos,
-        EAddToCollection,
+        EAddToCollection,        
+        ERemoveFromCollection,
         ESelectCollection
     };
     
@@ -85,9 +86,8 @@ public slots:
     /**
      * Shows modal dialog build from the provided Videolistwidget.
      *
-     * @return HbAction primary action if "OK" iis pressed
      */
-    HbAction* exec();
+    void exec();
     
 private slots:
     
@@ -141,6 +141,13 @@ private slots:
      * 
      */
     void primaryActionTriggeredSlot();
+    
+    /**
+     * called when dialog has been finished
+     * 
+     * @param action causing the finished
+     */
+    void finishedSlot(HbAction *action);
       
 private:
     
@@ -177,11 +184,12 @@ private:
     
     /**
      * opens an input dialog for a user to input new album name
-     * If everything goes well and user accepts, method returns new album id
+     * If everything goes well and user accepts, method returns new album name and
+     * saves album id into mSelectedAlbumId
      * 
-     * @return TMPXItemId new album id or TMPXItemID::Invalid() in case of cancel
+     * @return QString new name or empty string in case of error or cancel
      */
-    TMPXItemId queryNewAlbum();
+    QString queryNewAlbumSelected();
     
 private:
    

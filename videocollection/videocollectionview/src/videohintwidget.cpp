@@ -186,11 +186,12 @@ void VideoHintWidget::updateUiComponents()
             noVideosLabel->setVisible(true);
             if (mCurrentLevel == Collection)
             {
-                hintLabel->setVisible(false);                
+                hintLabel->setVisible(false);
                 serviceButton->setIcon(*mAddVideosIcon);
             }
             else
             {               
+                hintLabel->setVisible(true);
                 serviceButton->setIcon(*mServiceIcon);
             }
         }

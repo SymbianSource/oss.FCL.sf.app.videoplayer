@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#3 %
+// Version : %version:  da1mmcf#4 %
 
 
 #include "mpxvideoplaybackwrapper.h"
@@ -58,6 +58,10 @@ int QMpxVideoPlaybackWrapper::GetInstanceCount()
 int QMpxVideoPlaybackWrapper::playMedia( QString aFileName )
 {
     return 0;
+}
+
+void QMpxVideoPlaybackWrapper::lateInit()
+{
 }
 
 // End of File

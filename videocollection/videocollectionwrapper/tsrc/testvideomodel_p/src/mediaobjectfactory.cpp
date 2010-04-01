@@ -185,6 +185,16 @@ CMPXMedia* MediaObjectFactory::getMediaWithWantedIds(int id1, int id2)
         delete media;
         return 0;
     }
+    
+    TBuf<65> videoname;
+    videoname.Format(KMediaTestNamePrefix, id1);              
+    TRAP(error, media->SetTextValueL( KMPXMediaGeneralTitle, videoname));
+    if(error != KErrNone)
+    {
+       delete media;
+       return 0;
+    }
+
     return media;
 }
 
@@ -399,6 +409,18 @@ bool MediaObjectFactory::fillData(CMPXMedia *media, int index, int dataSelection
             return false;
         }
     }
+    
+    // set video count
+    if(dataSelectionFlags & MediaDetailCategoryVideoCount)
+    {  
+        int count = (index%5) + 1;
+        TRAPD(error, media->SetTObjectValueL<quint32>(KVcxMediaMyVideosCategoryItemCount, count));
+        if(error != KErrNone)
+        {
+            return false;
+        }
+    }    
+    
     return true;
 }
 

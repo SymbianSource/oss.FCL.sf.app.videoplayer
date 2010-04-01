@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -28,8 +28,7 @@
 #include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 
-#include "mpxvideoplaybackbuttonbar.h"
-#include "mpxvideoplaybackprogressbar.h"
+#include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackfiledetailswidget.h"
 #include "mpxvideoplaybacknontouchvolumebar.h"
 #include "mpxvideoplaybackcontrolconfiguration.h"
@@ -130,24 +129,14 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
         MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[HbLabel] to object list") );                
         mWidgets.append( object );
     }
-    else if ( name == "buttonBarLayout" )
+    else if ( name == "controlBarLayout" )
     {
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating buttonBarLayout") );
+        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating controlBarLayout") );
     
-        object = new QMPXVideoPlaybackButtonBar( mController );
+        object = new QMPXVideoPlaybackControlBar( mController );
         object->setObjectName( name );
         
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[buttonBarLayout] to object list") );                        
-        mWidgets.append( object );
-    }
-    else if ( name == "progressBarLayout" )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating progressBarLayout") );
-    
-        object = new QMPXVideoPlaybackProgressBar( mController );
-        object->setObjectName( name );
-        
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[progressBarLayout] to object list") );                        
+        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[controlBarLayout] to object list") );                        
         mWidgets.append( object );
     }
     else if ( name == "fileDetailsLayout" )
@@ -200,7 +189,7 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
         MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[HbRatingSlider] to object list") );                        
         mWidgets.append( object );
     }
-            
+
     return object;
 }
 

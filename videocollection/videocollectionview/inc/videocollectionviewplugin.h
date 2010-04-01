@@ -83,6 +83,12 @@ signals:
      */
     void command(int);
 
+    /**
+     * Signaled to do delayed loading of components not loaded initially at start up phase
+     *
+     */
+    void doDelayeds();
+    
 public slots: // from QViewPlugin
 
     /**
@@ -101,6 +107,17 @@ public slots: // from QViewPlugin
 
 private:
 
+    /** from QObject */
+    void timerEvent(QTimerEvent *event); 
+    
+private:
+
+    // async loading timeout
+    static const int DELAYED_LOAD_TIMEOUT = 4000; // ms
+
+    /** timer id */
+    int mTimerId;
+
     /**
      * docml ui loader, owned
      */
@@ -116,6 +133,12 @@ private:
      * If flag is false, no operations can be do to the view.
      */
     bool mActivated;
+    
+	/*
+	 * Service mode flag. True if started as a service, otherwise false.
+	 *
+	 */
+    bool mIsService;
 };
 
 #endif  // VIDEOVIEWPLUGIN_H

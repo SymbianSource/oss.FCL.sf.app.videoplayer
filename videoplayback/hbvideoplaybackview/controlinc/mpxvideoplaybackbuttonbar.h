@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: da1mmcf#9 %
 
 
 
@@ -27,7 +27,6 @@
 #include <mpxplaybackframeworkdefs.h>
 
 
-class HbFrameItem;
 class HbPushButton;
 class QActionGroup;
 class QMPXVideoPlaybackViewFileDetails;
@@ -75,8 +74,6 @@ class QMPXVideoPlaybackButtonBar : public HbWidget
 
         QList<HbPushButton*>                 mButtons;
         bool                                 mInitialized;
-
-        HbFrameItem                         *mFrameItem;
 };
 
 #endif /*MPXVIDEOPLAYBACKBUTTONBAR_H_*/

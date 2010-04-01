@@ -32,7 +32,4 @@ bool HbListView::mLatestUniformItemSizes = false;
 bool HbListView::mLatestVisibility = false;
 bool HbListView::mLatestEnableValue = false;
 QModelIndex HbListView::mCurrentIndex = QModelIndex();
-
-
-
-
+int HbListView::mAllSelectedStatus = -1;

@@ -29,6 +29,13 @@ class HbDialog :  public HbWidget
 {
    Q_OBJECT
    
+signals:
+
+    /**
+     * emitted from open -method 
+     */
+    void finished(HbAction*); 
+   
 public:
     
     enum DefaultTimeout
@@ -56,6 +63,15 @@ public:
      * destructor
      */
     ~HbDialog();
+    
+public slots:
+    
+    /**
+     * emits finished -signal with mPrimaryAction if execReturnPrimary is true. 
+     */
+    void open( QObject* receiver = 0, const char* member = 0 );
+    
+public:
     
     /**
      * sets mDismissPolicy
@@ -116,7 +132,7 @@ public:
      * returns mPrimaryAction if execReturnPrimary is true.
      */
     HbAction* exec();
-    
+        
     /**
      * stubbed member
      */

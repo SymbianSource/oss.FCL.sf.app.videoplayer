@@ -22,6 +22,7 @@
 #include <QGraphicsWidget>
 #include "hbinstance.h"
 #include "hbtoolbar.h"
+#include "hbeffect.h"
 
 class HbView : public QGraphicsWidget
 {
@@ -30,7 +31,7 @@ class HbView : public QGraphicsWidget
 
 public:
 
-    HbView(QGraphicsItem *parent = 0) : QGraphicsWidget(parent), mToolBar(0)
+    HbView(QGraphicsItem *parent = 0) : QGraphicsWidget(parent), mToolBar(0), mNavigationAction(0)
     {
         Q_UNUSED(parent);
     }
@@ -63,8 +64,11 @@ public:
     
     void setNavigationAction(HbAction *action)
     {
-        Q_UNUSED(action);
+        mNavigationAction = action;
     }
+    
+    
+    HbAction *mNavigationAction;
     
     mutable HbToolBar* mToolBar;
 };

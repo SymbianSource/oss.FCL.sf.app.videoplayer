@@ -229,7 +229,7 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         *                 attribute contains the media items. Ownership
         *                 moves to caller.
         */
-        CMPXMedia* GetVideosL( RArray<TUint32> aMdsIds );
+        CMPXMedia* GetVideosL( RArray<TUint32>& aMdsIds );
 
         /**
         * Removes video from iVideoList (or from iPartialVideoList).

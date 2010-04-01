@@ -15,6 +15,8 @@
 * 
 */
 
+// Version : %version: %
+
 #include <e32err.h>
 #include <w32std.h>
 
@@ -108,66 +110,81 @@ void TestVideoPlaybackView::testHandleActivateView()
 }
 
 void TestVideoPlaybackView::testHandlePluginError()
-{   /*
-    setup();
+{   
+    //
+    // playback view is closed after displaying these error notes
+    //
+    verifyHandlePluginError( KErrNotSupported );
+    verifyHandlePluginError( KErrUnknown );
+    verifyHandlePluginError( KErrMMDecoder );
+    verifyHandlePluginError( KErrCorrupt );
+    verifyHandlePluginError( KErrTooBig );
+    verifyHandlePluginError( KErrMMInvalidProtocol );
+    verifyHandlePluginError( KErrMMInvalidURL );
+    verifyHandlePluginError( KErrArgument );
+    verifyHandlePluginError( KErrSessionClosed ); 
+    verifyHandlePluginError( KErrTimedOut );
+    verifyHandlePluginError( KErrNotFound );
+    verifyHandlePluginError( KErrMMNotEnoughBandwidth );   
+    verifyHandlePluginError( KErrDisconnected );
+    verifyHandlePluginError( KErrMMProxyServer ); 
+    verifyHandlePluginError( KErrCouldNotConnect );
+    verifyHandlePluginError( KErrAbort );
+    verifyHandlePluginError( KErrCancel ); 
+    verifyHandlePluginError( KErrMMDRMNotAuthorized );
+    verifyHandlePluginError( KErrCANoRights );
+    verifyHandlePluginError( KErrCANoPermission );
+    verifyHandlePluginError( KMPXVideoTvOutPlaybackNotAllowedClose );
     
-    mVideoView->handlePluginError( KErrGeneral );	        
-    QVERIFY( mVideoView->isEnabled() );
-    QVERIFY( ! mVideoView->isObscured() );
-    
-    mVideoView->handlePluginError( KErrNotSupported );   
-    
-    mVideoView->handlePluginError( KErrArgument );
-    
-    mVideoView->handlePluginError( KErrSessionClosed );
-    
-    mVideoView->handlePluginError( KErrTimedOut );
-    
-    mVideoView->handlePluginError( KErrNotFound );
-    
-    mVideoView->handlePluginError( KErrMMNotEnoughBandwidth );
-    
-    mVideoView->handlePluginError( KErrDisconnected );
-    
-    mVideoView->handlePluginError( KMPXVideoPlayOver2GDuringVoiceCallError );
-    
-    mVideoView->handlePluginError( KErrTimedOut );
-    
-    mVideoView->handlePluginError( KErrCancel );
-    
-    mVideoView->handlePluginError( KErrCANoPermission );
-    
-    mVideoView->handlePluginError( KMPXVideoCallOngoingError );
-    
-    mVideoView->handlePluginError( KMPXVideoTvOutPlaybackNotAllowed );
-    
-    mVideoView->handlePluginError( KMPXVideoTvOutPlaybackNotAllowedClose );
-	          
-    cleanup();*/
+    //
+    // playback view remains open after displaying these error notes
+    //
+    verifyHandlePluginError( KMPXVideoCallOngoingError, false );
+    verifyHandlePluginError( KMPXVideoTvOutPlaybackNotAllowed, false );
+    verifyHandlePluginError( KMPXVideoPlayOver2GDuringVoiceCallError, false );
+            
+    //
+    // default error case, playback view is closed after displaying error note
+    //
+    verifyHandlePluginError( KErrGeneral );    
 }
 
-void TestVideoPlaybackView::testDisplayErrorMessage()
+void TestVideoPlaybackView::testShowDialog()
 {   
+    //
+    // construct and activate playback view
+    //
     setup();
     
-    mVideoView->displayErrorMessage( "test error msg" );
+    //
+    // ensure that playback view is currently activated
+    //
+    QVERIFY( ! mVideoView->mTimerForClosingView->isActive() );
     
-    QVERIFY( mVideoView->isEnabled() );
-    QVERIFY( ! mVideoView->isObscured() );
+    //
+    // test showDialog() method
+    //
+    mVideoView->showDialog( "test error msg" );
     
-    cleanup();    
-}
+    //
+    // connect and emit signal for handleClosePopupDialog() slot
+    //
+    connect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
+    emit commandSignal();     
 
+    //
+    // verify that playback view is properly closed
+    //
+    QVERIFY( mVideoView->mTimerForClosingView->isActive() );
 
-void TestVideoPlaybackView::testDisplayInfoMessage()
-{   
-    setup();
-
-    mVideoView->displayInfoMessage( "test info msg" );
+    //
+    // disconnect signal for handleClosePopupDialog() slot
+    //
+    disconnect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
     
-    QVERIFY( mVideoView->isEnabled() );
-    QVERIFY( ! mVideoView->isObscured() );  
-    
+    //
+    // destruct playback view
+    //
     cleanup();    
 }
 
@@ -425,6 +442,57 @@ void TestVideoPlaybackView::testHandleDeactivateView()
     cleanup();        
 }
 
+void TestVideoPlaybackView::verifyHandlePluginError( TInt error, bool closeView )
+{       
+    //
+    // construct and activate playback view
+    //
+    setup();
+    
+    //
+    // ensure that playback view is currently open
+    //
+    QVERIFY( ! mVideoView->mTimerForClosingView->isActive() );
+    
+    //
+    // test handlePluginError() method
+    //
+    mVideoView->handlePluginError( error );   
+    
+    //
+    // close playback view after error note has been launched
+    //
+    if ( closeView )
+    {
+        //
+        // connect and emit signal for handleClosePopupDialog() slot
+        //
+        connect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
+        emit commandSignal();  
+
+        //
+        // verify that playback view is properly closed
+        //
+        QVERIFY( mVideoView->mTimerForClosingView->isActive() );
+    
+        //
+        // disconnect signal for handleClosePopupDialog() slot
+        //
+        disconnect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
+    }
+    else
+    {    
+        //
+        // verify that playback view is still open after error note has been launched
+        //
+        QVERIFY( ! mVideoView->mTimerForClosingView->isActive() );
+    }        
+    
+    //
+    // destruct playback view
+    //
+    cleanup();
+}
 
 // End of file
     

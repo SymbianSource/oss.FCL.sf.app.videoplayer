@@ -19,6 +19,7 @@
 #define VIDEOCOLLECTIONVIEWUTILSDATA_H
 
 #include <qnamespace.h>
+#include <qvariant.h>
 
 class VideoCollectionViewUtilsData
 {
@@ -32,6 +33,7 @@ public: // methods
         mSortOrder = Qt::AscendingOrder;
         mIconString = "";
         mPressedString = "";
+        mLastStatusAdditional = QVariant();
     }   
     
 public: // data
@@ -42,6 +44,7 @@ public: // data
     static Qt::SortOrder mSortOrder;
     static QString mIconString;
     static QString mPressedString;
+    static QVariant mLastStatusAdditional;
 };
 
 #endif /* VIDEOCOLLECTIONVIEWUTILSDATA_H */

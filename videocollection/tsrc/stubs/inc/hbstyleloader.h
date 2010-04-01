@@ -43,7 +43,7 @@ public:
    static bool registerFilePath(const QString &filePath) 
    { 
        Q_UNUSED(filePath);
-       return true; 
+       return mRegisterFilePathReturnValue; 
    }
    
    static bool unregisterFilePath(const QString &filePath) 
@@ -56,6 +56,11 @@ public:
      * counter to make sure alloc dealloc match
      */
     static int initializeCount;
+    
+    /**
+     * returned from registerFilePath
+     */
+    static bool mRegisterFilePathReturnValue;
     
 signals:
             

@@ -20,13 +20,15 @@ TARGET =
 
 DEPENDPATH += . \
     inc \
-    src
-    
+    src \
+    ../../../tsrc/stubs
+
 INCLUDEPATH = . \
     inc \
     ../../../tsrc/stubs/inc \
     \ # keep these at bottom so that stubbed headers are taken first
     ../../../inc \
+    ../../../videocollectionview/inc \
     ../../../videocollectionwrapper/inc
     
 CONFIG += qtestlib \
@@ -39,27 +41,15 @@ LIBS += -lestor.dll \
     -lgdi.dll
 
 # Input
-HEADERS +=  inc/testvideocollectionviewutils.h \
+HEADERS += inc/testvideocollectionviewutils.h \
     \ # headers needed in test
-    ../../inc/videocollectionviewutils.h \
-    \ # headers needed in stubs
-    ../../../tsrc/stubs/inc/hbaction.h \
-    ../../../tsrc/stubs/inc/hblabel.h \
-    ../../../tsrc/stubs/inc/hbmessagebox.h \
-    ../../../tsrc/stubs/inc/hbdialog.h \
-    ../../../tsrc/stubs/inc/hbwidget.h \
-    ../../../tsrc/stubs/inc/centralrepository.h \
-    ../../../videocollectionwrapper/inc/videocollectionwrapper.h
+    ../../inc/videocollectionviewutils.h
     
 SOURCES += src/testvideocollectionviewutils.cpp \
     \ # sources needed in test
-    ../../src/videocollectionviewutils.cpp \
-    \ # sources needed in stubs
-    ../../../tsrc/stubs/src/hbaction.cpp \
-    ../../../tsrc/stubs/src/hblabel.cpp \
-    ../../../tsrc/stubs/src/hbmessagebox.cpp \
-    ../../../tsrc/stubs/src/hbdialog.cpp \
-    ../../../tsrc/stubs/src/hbwidget.cpp \
-    ../../../tsrc/stubs/src/centralrepository.cpp \
-    ../../../tsrc/stubs/src/videocollectionwrapper.cpp
+    ../../src/videocollectionviewutils.cpp
+   
+TESTEDCLASS = videocollectionviewutils.cpp
+include(../../../tsrc/stubs/stubs.pro)
+    
            

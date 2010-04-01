@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RCC>
     <qresource prefix="hbvideoplaybackview">
-        <file>images/qtg_mono_aspect_ratio_zoom.png</file>
-        <file>images/qtg_large_corrupted.png</file>
-        <file>images/connecting_loading.gif</file>
-        <file>images/qtg_large_just_audio.png</file>
-        <file>images/qtg_large_tv_out.png</file>
-        <file>images/qtg_large_realplayer.png</file>
-        <file>images/qtg_mono_info.png</file>
+        <file>animation.axml</file>
         <file>hbvideoplaybackview.docml</file>
+        <file>effects/controlbar_appear.fxml</file>
+        <file>effects/controlbar_disappear.fxml</file>
     </qresource>
 </RCC>

@@ -14,7 +14,7 @@
 # Description: Project file for building testfullscreencontrol
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 
 TEMPLATE = app
@@ -39,8 +39,7 @@ HEADERS += ../../../controlinc/mpxvideoplaybackfullscreencontrol.h \
            inc/testfullscreencontrol.h \            
            mpxvideoplaybackcontrolscontroller.h \
            mpxvideoplaybackviewfiledetails.h \
-           mpxvideoplaybackprogressbar.h \
-           mpxvideoplaybackbuttonbar.h \
+           mpxvideoplaybackcontrolbar.h \
            mpxvideoplaybackfiledetailswidget.h \
            mpxvideoplaybackdetailsplaybackwindow.h     
 					 
@@ -49,8 +48,7 @@ SOURCES += ../../../controlsrc/mpxvideoplaybackfullscreencontrol.cpp \
            src/testfullscreencontrol.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
-           mpxvideoplaybackprogressbar.cpp \
-           mpxvideoplaybackbuttonbar.cpp \
+           mpxvideoplaybackcontrolbar.cpp \
            mpxvideoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackdetailsplaybackwindow.cpp                    
            				 

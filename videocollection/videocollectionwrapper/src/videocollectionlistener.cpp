@@ -107,7 +107,7 @@ void VideoCollectionListener::HandleOpenL(
     TMPXItemId pathId = path->Id();
     
     TBool categoryOrAlbumVideoList = false;
-    if(path->Levels() == VideoCollectionCommon::PathLevelVideos && pathId.iId2 != 0)
+    if(path->Levels() == VideoCollectionCommon::PathLevelVideos && pathId.iId2 != KVcxMvcMediaTypeVideo)
 	{
         categoryOrAlbumVideoList = true;
 	}

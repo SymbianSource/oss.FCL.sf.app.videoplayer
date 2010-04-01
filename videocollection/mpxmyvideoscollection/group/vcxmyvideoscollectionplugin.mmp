@@ -46,6 +46,7 @@ SOURCE          vcxmyvideosmdsalbums.cpp
 SOURCE          vcxmyvideosmdscmdqueue.cpp
 SOURCE          vcxmyvideosalbums.cpp
 SOURCE          vcxmyvideosalbum.cpp
+SOURCE          vcxmyvideosasyncfilecopy.cpp
 
 SOURCEPATH      ../data
 

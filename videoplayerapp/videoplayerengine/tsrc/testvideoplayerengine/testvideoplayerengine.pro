@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 8 %
+# Version : %version: da1mmcf#9 %
 
 
 TEMPLATE = app
@@ -53,6 +53,7 @@ HEADERS += stub/inc/mpxvideoplaybackwrapper.h \
            stub/inc/videoservices.h \
            stub/inc/videoserviceurifetch.h \
            stub/inc/videoserviceplay.h \
+           stub/inc/hbview.h \
            ../../../../inc/videoplayerengine.h
 
 SOURCES += stub/src/mpxvideoplaybackwrapper.cpp \

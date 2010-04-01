@@ -21,6 +21,7 @@
 #include <mpxlog.h>
 #include <mpxmediacontainerdefs.h>
 #include <mpxcollectionpluginobserver.h>
+#include <mpxmediageneraldefs.h>
 #include "vcxmyvideosalbums.h"
 #include "vcxmyvideoscollectionutil.h"
 #include "vcxmyvideoscollectionplugin.h"
@@ -256,7 +257,7 @@ void CVcxMyVideosAlbums::RemoveAlbumsL( RArray<TUint32>& aAlbumIds )
     TInt count = aAlbumIds.Count();
     for ( TInt i = count -1; i >= 0; i-- )
         {
-        TBool removed = RemoveAlbum( aAlbumIds[i], EFalse /* dont compress */);
+        TBool removed = RemoveAlbumL( aAlbumIds[i], EFalse /* dont compress */);
         if ( removed )
             {
             aAlbumIds.Remove( i );
@@ -268,10 +269,10 @@ void CVcxMyVideosAlbums::RemoveAlbumsL( RArray<TUint32>& aAlbumIds )
     }
 
 // ----------------------------------------------------------------------------
-// CVcxMyVideosAlbums::RemoveAlbum
+// CVcxMyVideosAlbums::RemoveAlbumL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosAlbums::RemoveAlbum( TUint32 aMdsId, TBool aCompress )
+TBool CVcxMyVideosAlbums::RemoveAlbumL( TUint32 aMdsId, TBool aCompress )
     {
     TInt pos;
     CVcxMyVideosAlbum* album = Album( aMdsId, &pos );
@@ -281,6 +282,8 @@ TBool CVcxMyVideosAlbums::RemoveAlbum( TUint32 aMdsId, TBool aCompress )
         
         iAlbums.Remove( pos );
         albumArray->Remove( pos );
+        
+        MPX_DEBUG2("CVcxMyVideosAlbums:: removing album from pos %d", pos);
         
         if ( aCompress )
             {
@@ -311,7 +314,7 @@ void CVcxMyVideosAlbums::AddAlbumsFromMdsL( RArray<TUint32>& /*aAlbumIds*/ )
 //
 void CVcxMyVideosAlbums::HandleGetAlbumsRespL( CMPXMedia* aAlbumList )
     {
-    // aAlbumList = iAlbums->iAlbumList
+    // aAlbumList = iAlbumList
     CMPXMediaArray* array = aAlbumList->Value<CMPXMediaArray>( KMPXMediaArrayContents );
     TInt count = array->Count();
     TMPXItemId mpxId;
@@ -364,13 +367,16 @@ void CVcxMyVideosAlbums::HandleGetAlbumContentIdsRespL( TUint32 aAlbumId,
     
     
 #ifdef _DEBUG
-    TInt count = album->iVideoList.Count();
-
-    MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: content ids for album %d arrived", aAlbumId);
-
-    for ( TInt i = 0; i < album->iVideoList.Count(); i++ )
+    if ( album )
         {
-        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: mds id = %d", album->iVideoList[i].iMdsId );
+        TInt count = album->iVideoList.Count();
+
+        MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: content ids for album %d arrived", aAlbumId);
+
+        for ( TInt i = 0; i < album->iVideoList.Count(); i++ )
+            {
+            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: mds id = %d", album->iVideoList[i].iMdsId );
+            }
         }
 #endif
     }
@@ -436,7 +442,8 @@ void CVcxMyVideosAlbums::DoHandleAddVideosToAlbumRespL( CMPXMedia* aCmd,
         MPX_DEBUG3( "CVcxMyVideosAlbums:: item result[%d] = %d (id)", i, video.iRelationMdsId );
         if ( video.iRelationMdsId == KNoId )
             {
-            mediaArray->AtL( i )->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value, KErrGeneral );
+            mediaArray->AtL( i )->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    KErrGeneral );
             }
         else
             {
@@ -470,6 +477,8 @@ void CVcxMyVideosAlbums::HandleRemoveRelationsResp( RArray<TUint32>& /*aRelation
     
     // iRemoveFromAlbumVideos and mediaArray are in sync
     
+    TRAP_IGNORE(
+    
     CMPXMedia* cmd             = iCollection.iActiveTask->Command();
     CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( *cmd );
     TInt count                 = iRemoveFromAlbumVideos.Count();
@@ -489,6 +498,9 @@ void CVcxMyVideosAlbums::HandleRemoveRelationsResp( RArray<TUint32>& /*aRelation
             video->SetTObjectValueL( KVcxMediaMyVideosInt32Value, KErrGeneral );
             }
         }
+    
+    );
+    
     iRemoveFromAlbumVideos.Reset();
     
     iCollection.iActiveTask->Done();
@@ -502,7 +514,9 @@ void CVcxMyVideosAlbums::HandleRemoveRelationsResp( RArray<TUint32>& /*aRelation
 //
 void CVcxMyVideosAlbums::HandleRemoveAlbumsResp( CMPXMedia* aCmd,
         RArray<TUint32>& aResultIds )
-    {
+    {    
+    TRAP_IGNORE(
+    
     CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( *aCmd );
     TInt count = mediaArray->Count();
     TUint32 mdsId;
@@ -520,6 +534,8 @@ void CVcxMyVideosAlbums::HandleRemoveAlbumsResp( CMPXMedia* aCmd,
             album->SetTObjectValueL( KVcxMediaMyVideosInt32Value, KErrGeneral );
             }
         }
+    
+    );
     
     iCollection.iActiveTask->Done();
     }
@@ -547,9 +563,9 @@ void CVcxMyVideosAlbums::HandleRelationEvent( TObserverNotificationType /*aType*
             if ( album )
                 {
                 album->Remove( aRelationArray[i].RightObjectId(), ETrue /* compress */ );                
+                iCollection.iMessageList->AddEventL( TMPXItemId( albumId, KVcxMvcMediaTypeAlbum ),
+                        EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
                 }
-            iCollection.iMessageList->AddEventL( TMPXItemId( albumId, KVcxMvcMediaTypeAlbum ),
-                    EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
             }
         else
             {
@@ -563,4 +579,36 @@ void CVcxMyVideosAlbums::HandleRelationEvent( TObserverNotificationType /*aType*
     );
     }
 
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::UpdateAlbumL
+// Updates album attributes from aAlbum, if album is not found from memory,
+// nothing is done (no fetching from MDS).
+// ----------------------------------------------------------------------------
+//
+TBool CVcxMyVideosAlbums::UpdateAlbumL( const CMPXMedia& aAlbum )
+    {
+    TBool changed = EFalse;
+    
+    TMPXItemId mpxId = TVcxMyVideosCollectionUtil::IdL( aAlbum );
+    CVcxMyVideosAlbum* album = Album( mpxId.iId1 );
+
+    if ( album && album->iMedia )
+        {
+        CMPXMedia* media = album->iMedia;
+
+        if ( media->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            TPtrC newTitle( TVcxMyVideosCollectionUtil::Title( aAlbum ) );
+            TPtrC oldTitle( TVcxMyVideosCollectionUtil::Title( *media ) );
+
+            if ( newTitle != oldTitle )
+                {
+                media->SetTextValueL( KMPXMediaGeneralTitle, newTitle );
+                iCollection.iMessageList->AddEventL( mpxId, EMPXItemModified );
+                changed = ETrue;
+                }
+            }
+        }
+    return changed;
+    }
 // END OF FILE

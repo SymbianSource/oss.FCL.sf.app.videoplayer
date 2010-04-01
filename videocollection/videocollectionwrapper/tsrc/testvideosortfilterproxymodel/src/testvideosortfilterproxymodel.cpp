@@ -393,9 +393,9 @@ void TestVideoSortFilterProxyModel::testFetchItemDetailsGetVideoDetailsFails()
 {
 	VideoCollectionClient::mFailMediaDetails = true;
 	
-	mStubModel->appendData("Test");
-
 	QVERIFY(mTestObject->initialize(mStubModel) == 0);
+	mTestObject->open(3);
+	mStubModel->appendData("Test");
 	
 	QSignalSpy fetchSpy(mTestObject, SIGNAL(shortDetailsReady(TMPXItemId)));
 	QModelIndex index = mTestObject->index(0, 0);
@@ -1015,9 +1015,13 @@ void TestVideoSortFilterProxyModel::testResolveAlbumName()
     
    
     mCollectionModel->initialize(mStubModel);
+    mCollectionModel->open(2);
     VideoCollectionWrapper::instance().mProxyModel = mCollectionModel;
     
+    mStubModel->appendData(TMPXItemId(1,2)); 
     mStubModel->appendData(name);
+    
+    int count = mCollectionModel->rowCount();
     
     // invalid data from model, same name can be used
     VideoListDataModel::mReturnInvalid = true;
@@ -1025,13 +1029,21 @@ void TestVideoSortFilterProxyModel::testResolveAlbumName()
     QVERIFY(resolved.length());
     QVERIFY(resolved == name);  
     VideoListDataModel::mReturnInvalid = false;
-    
+            
     // same name, name to be different
     resolved = mTestObject->resolveAlbumName(name);
     QVERIFY(resolved.length());
     QVERIFY(resolved != name);
     QVERIFY(resolved.contains("1"));
     
+    mStubModel->appendData(TMPXItemId(2,2)); 
+    mStubModel->appendData(resolved);
+    
+    resolved = mTestObject->resolveAlbumName(name);
+    QVERIFY(resolved.length());
+    QVERIFY(resolved != name);
+    QVERIFY(resolved.contains("2"));
+
     // different name, no changes
     name = "Another";
     resolved = mTestObject->resolveAlbumName(name);
@@ -1054,6 +1066,30 @@ void TestVideoSortFilterProxyModel::testAddItemsInAlbum()
     mTestObject->initialize(mStubModel);
        
     QVERIFY(mTestObject->addItemsInAlbum(albumId, items) == 0);
+}
+
+// ---------------------------------------------------------------------------
+// testRemoveItemsFromAlbum
+// ---------------------------------------------------------------------------
+//
+void TestVideoSortFilterProxyModel::testRemoveItemsFromAlbum()
+{
+    VideoListDataModel::mRemoveFrAlbumReturn = 1;
+    TMPXItemId albumId(1,2);
+    QList<TMPXItemId> items;
+    items.append(TMPXItemId(1,0));
+    
+    // no model
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == -1);
+    mTestObject->initialize(mStubModel);
+    
+    // model returns < 0
+    VideoListDataModel::mRemoveFrAlbumReturn = -1;
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == -1);
+    
+    VideoListDataModel::mRemoveFrAlbumReturn = 11;
+    // "succeed"
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1145,16 +1181,19 @@ void TestVideoSortFilterProxyModel::testRemoveAlbums()
 //
 void TestVideoSortFilterProxyModel::testAlbumChangedSlot()
 {
+    connect(this, SIGNAL(testSignal()), mTestObject, SLOT(albumChangedSlot()));
     // cannot test anything here, just for the coverage
     // level incorrect
     mTestObject->initialize(mStubModel);
-    mStubModel->emitAlbumChanged();
+    emit testSignal();
     delete mTestObject;
     mTestObject = 0;
     mTestObject = new FilterProxyTester(VideoCollectionWrapper::ECollectionContent);
-    QVERIFY(mTestObject);
+    connect(this, SIGNAL(testSignal()), mTestObject, SLOT(albumChangedSlot()));
+    QVERIFY(mTestObject);    
     mTestObject->initialize(mStubModel);
-    mStubModel->emitAlbumChanged();        
+    emit testSignal();      
+    disconnect(this, SIGNAL(testSignal()), mTestObject, SLOT(albumChangedSlot()));
 }
 
 // ---------------------------------------------------------------------------

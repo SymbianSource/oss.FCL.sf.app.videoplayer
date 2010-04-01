@@ -51,7 +51,7 @@ signals:
     /**
      * test signal
      */
-    void testSignal();
+    void testSignal(Qt::Orientation);
 
 
 private:
@@ -67,8 +67,6 @@ private:
      */
     VideoCollectionUiLoader* mUiLoader;
     
-    /** docml object list */
-    QObjectList mObjectList;
 };
 
 

@@ -156,7 +156,34 @@ void CVcxMyVideosMdsAlbums::GetAlbumsL( CMPXMedia* aAlbumList,
     iMdsDb.iCmdQueue->ExecuteCmdL( cmd ); //owneship moves
     CleanupStack::Pop( cmd );
     }
-    
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsAlbums::GetAlbumL
+// ---------------------------------------------------------------------------
+//
+CMPXMedia* CVcxMyVideosMdsAlbums::GetAlbumL( TUint32 aId )
+    {
+    CMdEObject* object = iMdsDb.ObjectL( aId, EFalse /* is not video, is album */);
+
+    if ( !object )
+        {
+        MPX_DEBUG2("CVcxMyVideosMdsAlbums:: mds id %d not found from mds", aId);
+        return NULL;
+        }
+        
+    CleanupStack::PushL( object ); // 1->
+
+    CMPXMedia* album = CMPXMedia::NewL( );
+    CleanupStack::PushL( album ); // 2->
+
+    Object2MediaL( *object, *album );
+
+    CleanupStack::Pop( album );            // <-2
+    CleanupStack::PopAndDestroy( object ); // <-1
+
+    return album;
+    }
+
 // ---------------------------------------------------------------------------
 // CVcxMyVideosMdsAlbums::DoGetAlbumsL
 // ---------------------------------------------------------------------------
@@ -338,7 +365,7 @@ void CVcxMyVideosMdsAlbums::Object2MediaL(
     // ID
     TMPXItemId mpxId;
     mpxId.iId1 = aObject.Id();
-    mpxId.iId2 = 2;
+    mpxId.iId2 = KVcxMvcMediaTypeAlbum;
     aAlbum.SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, mpxId );
     
     // TITLE
@@ -774,6 +801,58 @@ void CVcxMyVideosMdsAlbums::AddAlbumL( CMPXMedia& aAlbum )
     CleanupStack::PopAndDestroy( object ); // <-1
     
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::AddAlbumL() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsAlbums::SetAlbumL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsAlbums::SetAlbumL( CMPXMedia& aVideo )
+    {
+    MPX_DEBUG1("CVcxMyVideosMdsDb::SetAlbumL() start");
+
+    if ( !iMdsDb.iMdsSession )
+        {
+        MPX_DEBUG2("CVcxMyVideosMdsAlbums:: no mds session(%d), leaving", iMdsDb.iMdsError);
+        User::Leave( iMdsDb.iMdsError );
+        }
+
+    TMPXItemId mpxId = TVcxMyVideosCollectionUtil::IdL( aVideo );
+
+    MPX_DEBUG2("CVcxMyVideosMdsAlbums::SetAlbumL updating object %d ", mpxId.iId1);
+    
+    CMdEObject* object =
+            iMdsDb.iMdsSession->OpenObjectL( mpxId.iId1, *iAlbumObjectDef );
+    if ( !object )
+        {
+        // No object with this ID was found!
+        MPX_DEBUG1("CVcxMyVideosMdsAlbums::SetAlbumL no object found");
+        User::Leave( KErrNotFound );
+        }
+    else
+        {
+        MPX_DEBUG1("CVcxMyVideosMdsAlbums::SetAlbumL object found");
+        
+        if ( object->OpenForModifications() )
+            {
+            CleanupStack::PushL( object ); // 1->
+            
+            Media2ObjectL( aVideo, *object );
+            
+            iMdsDb.iMdsSession->CommitObjectL( *object );
+
+            CleanupStack::PopAndDestroy( object );
+            }
+        else
+            {
+            // Object is already locked!
+            MPX_DEBUG1("CVcxMyVideosMdsAlbums::SetAlbumL object was locked!");
+            delete object;
+            User::Leave( KErrInUse );
+            }
+        }
+
+    MPX_DEBUG1("CVcxMyVideosMdsDb::SetAlbumL() exit");
     }
 
 // ---------------------------------------------------------------------------

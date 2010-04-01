@@ -139,6 +139,18 @@ const QIcon* VideoListDataModelPrivate::getVideoThumbnailFromIndex( int index ) 
 }
 
 // -----------------------------------------------------------------------------
+// getCategoryVideoCountFromIndex
+// -----------------------------------------------------------------------------
+//
+quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) const
+{
+    quint32 count(0);
+    CMPXMedia *media = mMediaData.fromIndex(index);
+    VideoCollectionUtils::instance().mediaValue<quint32>(media, KVcxMediaMyVideosCategoryItemCount, count );
+    return count;
+}
+
+// -----------------------------------------------------------------------------
 // getVideoSizeFromIndex
 // -----------------------------------------------------------------------------
 //
@@ -147,7 +159,7 @@ quint32 VideoListDataModelPrivate::getVideoSizeFromIndex( int index ) const
     quint32 size(0);
     CMPXMedia *media = mMediaData.fromIndex(index);
     VideoCollectionUtils::instance().mediaValue<quint32>(media, KMPXMediaGeneralSize, size );    
-    return size;    
+    return size;
 }
 
 // -----------------------------------------------------------------------------
@@ -366,12 +378,36 @@ bool VideoListDataModelPrivate::belongsToAlbum(const TMPXItemId &itemId, TMPXIte
 }
 
 // -----------------------------------------------------------------------------
-// belongsToAlbum
+// setAlbumInUse
 // -----------------------------------------------------------------------------
 //
 void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
 {
     mCurrentAlbum = albumId;
+}
+
+// -----------------------------------------------------------------------------
+// removeItemsFromAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoListDataModelPrivate::removeItemsFromAlbum(TMPXItemId &albumId, 
+                                        const QList<TMPXItemId> &items)
+{
+    QHash<TMPXItemId, QSet<TMPXItemId> >::iterator iter = mAlbumData.find(albumId);
+    if(iter == mAlbumData.end())
+    {
+        return 0;
+    }
+    int removeCount = 0;
+    int count = items.count();
+    for(int i = 0; i < count; ++i)
+    {
+        if(iter->remove(items.at(i)))
+        {
+            ++removeCount;
+        }
+    }   
+    return removeCount;
 }
 
 // -----------------------------------------------------------------------------
@@ -449,10 +485,10 @@ bool VideoListDataModelPrivate::isValid(const CMPXMedia &media,
 }
 
 // -----------------------------------------------------------------------------
-// appendDataToAlbumL
+// albumDataChangedL
 // -----------------------------------------------------------------------------
 //
-void VideoListDataModelPrivate::appendDataToAlbumL(TMPXItemId albumId,
+void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
     CMPXMediaArray *videoArray)
 {
     if (!videoArray || albumId == TMPXItemId::InvalidId())
@@ -460,14 +496,10 @@ void VideoListDataModelPrivate::appendDataToAlbumL(TMPXItemId albumId,
         return;
     }
     QSet<TMPXItemId> items;
-    QHash<TMPXItemId, QSet<TMPXItemId> >::iterator iter;
-    // if album exists fetch existing items
-    iter =  mAlbumData.find(albumId);
-    if(iter != mAlbumData.end())
-    {
-        items = iter.value();
-    }
-    bool albumUpdated = false;
+       
+    // remove existing
+    mAlbumData.remove(albumId);
+    
     int videoCount = videoArray->Count();
     CMPXMedia *media = 0;
     TMPXItemId id = TMPXItemId::InvalidId();
@@ -476,20 +508,16 @@ void VideoListDataModelPrivate::appendDataToAlbumL(TMPXItemId albumId,
     {
         media = videoArray->AtL(i);
         id = getMediaId(media);
-        if (id != TMPXItemId::InvalidId())
-        {
-            
+        if (id != TMPXItemId::InvalidId() && id.iId2 == KVcxMvcMediaTypeVideo)
+        {          
             items.insert(id);
-            albumUpdated = true;
         }
     }  
-    // overwrite existing or create new
+ 
     mAlbumData[albumId] = items;
+    
     // signal that album has been updated
-    if (albumUpdated)
-    {
-        emit q_ptr->albumChanged();
-    }
+    emit q_ptr->albumChanged();
 
     // signal that model is ready
     emit q_ptr->modelReady();
@@ -661,6 +689,7 @@ void VideoListDataModelPrivate::albumRemoved(TMPXItemId albumId)
     if(iter != mAlbumData.end())
     {
         iter->clear();
+        mAlbumData.remove(albumId);
         changed = true;
     }
 
@@ -745,6 +774,10 @@ void VideoListDataModelPrivate::videoDeleteCompletedSlot(int overallCount, QList
 //
 void VideoListDataModelPrivate::albumRemoveFailureSlot(QList<TMPXItemId> *failedMediaIds)
 {
+    if(!failedMediaIds)
+    {
+        return;
+    }
     int status(VideoCollectionCommon::statusRemoveSucceed);
     QVariant data;
     if(failedMediaIds->count() > 0)
@@ -786,7 +819,7 @@ void VideoListDataModelPrivate::albumListAvailableSlot(TMPXItemId albumId,
     CMPXMediaArray *albumItems)
 {
     // currently only one album is kept in memory
-    TRAP_IGNORE(appendDataToAlbumL(albumId, albumItems));
+    TRAP_IGNORE(albumDataChangedL(albumId, albumItems));
 }
 
 // End of file

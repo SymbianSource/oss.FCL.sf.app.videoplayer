@@ -148,7 +148,7 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         * @param aVideo  Media object to fetch parameter from.
         * @return        ID.
         */
-        static TMPXItemId IdL( CMPXMedia& aVideo );
+        static TMPXItemId IdL( const CMPXMedia& aVideo );
 
         /**
         * Gets KVcxMediaMyVideosDuration attribute of aVideo.
@@ -164,7 +164,7 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         * @return  KMPXMediaGeneralTitle value. If attribute is not supported,
         *          then KNullDesC is returned.
         */
-        static const TDesC& Title( CMPXMedia& aVideo );
+        static const TDesC& Title( const CMPXMedia& aVideo );
 
         /**
         * Gets KVcxMediaMyVideosRating attribute of the video.

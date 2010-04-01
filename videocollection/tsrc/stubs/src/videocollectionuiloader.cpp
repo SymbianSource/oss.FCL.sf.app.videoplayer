@@ -15,9 +15,11 @@
 *
 */
 
+#include <qdebug.h>
 #include <qset.h>
 #include <qstring.h>
 #include <hblistview.h>
+#include <hbmenu.h>
 
 #include "videocollectionuiloader.h"
 #include "videolistview.h"
@@ -64,14 +66,28 @@ void VideoCollectionUiLoader::setIsService(bool isService)
 QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
 {
     QGraphicsWidget *widget = 0;
-    widget = HbDocumentLoader::findWidget(name);
+    if(VideoCollectionUiLoaderData::mFindFailure)
+    {
+        return 0; 
+    }
+    if(!VideoCollectionUiLoaderData::mFindFailureNameList.contains(name))
+    {
+        widget = HbDocumentLoader::findWidget(name);
+    }
     return widget;
 }
 
 QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
 {
     QObject *object = 0;
-    object = HbDocumentLoader::findObject(name);
+    if(VideoCollectionUiLoaderData::mFindFailure)
+    {
+        return 0; 
+    }
+    if(!VideoCollectionUiLoaderData::mFindFailureNameList.contains(name))
+    {
+        object = HbDocumentLoader::findObject(name);
+    }
     return object;
 }
 
@@ -109,27 +125,28 @@ QObject* VideoCollectionUiLoader::createObject(const QString& type,
     QObject* object = doFindObject(name);
     if (!object)
     {
-        if (type == VideoListView::staticMetaObject.className())
+        if (name == DOCML_NAME_VIEW)
         {
             object = new VideoListView(this);
         }
-        else if (type == VideoListWidget::staticMetaObject.className())
+        else if (name == DOCML_NAME_VC_COLLECTIONWIDGET ||
+                 name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET ||
+                 name == DOCML_NAME_VC_VIDEOLISTWIDGET)
         {
             object = new VideoListWidget(this);
         }
-        else if ( type == VideoListSelectionDialog::staticMetaObject.className() )
+        else if (name == DOCML_NAME_DIALOG)
         {
             if(!VideoCollectionUiLoaderData::mFailDialogLoad)
             {
                 object = new VideoListSelectionDialog(this);
-                
             }
             else
             {
                 return 0;
             }
         }
-        else if (type == VideoHintWidget::staticMetaObject.className())
+        else if (name == DOCML_NAME_VC_VIDEOHINTWIDGET)
         {
             object = new VideoHintWidget(this);
         }
@@ -137,25 +154,9 @@ QObject* VideoCollectionUiLoader::createObject(const QString& type,
         {
             object->setObjectName(name);
 
-            if (VideoCollectionUiLoaderData::mFindFailure)
-            {
-                if (!VideoCollectionUiLoaderData::mFindFailureNameList.empty())
-                {
-                    if (VideoCollectionUiLoaderData::mFindFailureNameList.contains(name))
-                    {
-                        delete object;
-                        object = 0;
-                    }
-                }
-                else
-                {
-                    delete object;
-                    object = 0;
-                }
-            }
+
             return object;
         }
-
         object = HbDocumentLoader::createObject(type, name);
     }
     

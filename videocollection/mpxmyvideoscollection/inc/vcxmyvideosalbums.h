@@ -133,7 +133,7 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          *                   otherwise not.
          * @return           ETrue if album was found and removed.
          */
-        TBool RemoveAlbum( TUint32 aMdsId, TBool aCompress );
+        TBool RemoveAlbumL( TUint32 aMdsId, TBool aCompress );
         
         /**
          * Fetches albums from MDS. This is called from MDS insert event.
@@ -142,6 +142,24 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          */
         void AddAlbumsFromMdsL( RArray<TUint32>& aAlbumIds );
 
+        /**
+         * Updates albums from MDS. This is called from MDS modify event.
+         * 
+         * @param aAlbumIds  Album IDs to update.
+         */
+        void UpdateAlbumsFromMdsL( RArray<TUint32>& aAlbumIds );
+
+        /**
+         * Updates album attributes, does not write to MDS. Adds
+         * modify event to iCollection.iMessageList if necessarry.
+         * 
+         * @param aAlbum  New values are read from this.
+         * @return        ETrue if album was modified, EFalse otherwise.
+         */
+        TBool UpdateAlbumL( const CMPXMedia& aAlbum );
+
+protected:
+        
         /**
          * From MVcxMyVideosMdsAlbumsObserver.
          * Process albums arriving from MDS. Response to VcxMyVideosMdsAlbums::GetAlbumsL.
@@ -224,7 +242,8 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          * iCollection.ConstructL, CVcxMyVideosMdsDb::NewL(..,aAlbumsObserver,..).
          */
         void HandleRelationEvent( TObserverNotificationType aType,
-                const RArray<TMdERelation>& aRelationArray );    
+                const RArray<TMdERelation>& aRelationArray );
+        
     private:
 
         /**
@@ -283,7 +302,7 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
         RArray<TUint32> iMdsOpTargetIds;
         
         /**
-         * Store album video data during relation deletion. This is to
+         * Stores album video data during relation deletion. This is to
          * avoid second search when resp arrives.
          */
         RArray<TVcxMyVideosAlbumVideo> iRemoveFromAlbumVideos;

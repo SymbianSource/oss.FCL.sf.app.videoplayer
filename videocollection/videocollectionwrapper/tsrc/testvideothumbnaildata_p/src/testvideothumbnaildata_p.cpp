@@ -24,6 +24,7 @@
 #include <qlist.h>
 #include <qvariant.h>
 #include "qmetatype.h"
+#include <vcxmyvideosdefs.h>
 
 #include "testvideothumbnaildata_p.h"
 #include "videothumbnailfetcher.h"
@@ -222,7 +223,7 @@ void TestVideoThumbnailData_p::testGetThumbnail()
 
     mTestObject->mThumbnailData.insert(TMPXItemId(mediaid, 0), new QIcon(pixmap));
     QCOMPARE( *(mTestObject->getThumbnail(TMPXItemId(mediaid, 0))), *(mTestObject->mThumbnailData[TMPXItemId(mediaid, 0)]) );
-    QVERIFY( mTestObject->getThumbnail(TMPXItemId(mediaid+100, 0)) == mTestObject->mDefaultTnVideo );
+    QVERIFY( mTestObject->getThumbnail(TMPXItemId(mediaid+100, 0)) != 0);
 
     cleanup();
 }
@@ -699,26 +700,64 @@ void TestVideoThumbnailData_p::testDefaultThumbnail()
 {
     init();
 
-    QVERIFY( mTestObject->mDefaultTnVideo == 0 );
-    QVERIFY( mTestObject->mDefaultTnCategory == 0 );
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 0);
     
     // Tn for video
-    const QIcon* tn = mTestObject->defaultThumbnail(TMPXItemId(1, 0));
+    const QIcon* tn = mTestObject->defaultThumbnail(TMPXItemId(1, KVcxMvcMediaTypeVideo));
+    QVERIFY( tn != 0 );
+    QVERIFY( tn->isNull() == false );    
+    // Second call when tn has been loaded already.
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(1, KVcxMvcMediaTypeVideo)));
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 1);
+
+    // Default tn for album
+    tn = mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeAlbum));
     QVERIFY( tn != 0 );
     QVERIFY( tn->isNull() == false );
-    QCOMPARE( tn->cacheKey(), mTestObject->mDefaultTnVideo->cacheKey() );
     // Second call when tn has been loaded already.
-    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(1, 0)));
-
-    // Tn for category
-    const QIcon* tn2 = mTestObject->defaultThumbnail(TMPXItemId(0, 1));
-    QVERIFY( tn2 != 0 );
-    QVERIFY( tn2->isNull() == false );
-    QCOMPARE( tn2->cacheKey(), mTestObject->mDefaultTnCategory->cacheKey() );
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeAlbum)));
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 2);
+    
+    // Default tn for unknown category
+    tn = mTestObject->defaultThumbnail(TMPXItemId(555, KVcxMvcMediaTypeCategory));
+    QVERIFY( tn != 0 );
+    QVERIFY( tn->isNull() == false );
     // Second call when tn has been loaded already.
-    QVERIFY(tn2 == mTestObject->defaultThumbnail(TMPXItemId(0, 1))); 
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeCategory))); 
+    // Still two because icon is same as default album 
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 2);
 
-    QVERIFY(tn2->cacheKey() != tn->cacheKey());
+    // Default tn for downloads category
+    tn = mTestObject->defaultThumbnail(TMPXItemId(KVcxMvcCategoryIdDownloads, KVcxMvcMediaTypeCategory));
+    QVERIFY( tn != 0 );
+    QVERIFY( tn->isNull() == false );
+    // Second call when tn has been loaded already.
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(KVcxMvcCategoryIdDownloads, KVcxMvcMediaTypeCategory))); 
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 3);
+
+    // Default tn for captured category
+    tn = mTestObject->defaultThumbnail(TMPXItemId(KVcxMvcCategoryIdCaptured, KVcxMvcMediaTypeCategory));
+    QVERIFY( tn != 0 );
+    QVERIFY( tn->isNull() == false );
+    // Second call when tn has been loaded already.
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(KVcxMvcCategoryIdCaptured, KVcxMvcMediaTypeCategory))); 
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 4);    
+    
+    cleanup();
+    
+
+    init();
+
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 0);
+
+    // Default tn for unknown category, tn not loaded
+    tn = mTestObject->defaultThumbnail(TMPXItemId(555, KVcxMvcMediaTypeCategory));
+    QVERIFY( tn != 0 );
+    QVERIFY( tn->isNull() == false );
+    // Second call when tn has been loaded already.
+    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeCategory))); 
+    // Still two because icon is same as default album 
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 1);
     
     cleanup();
 }
@@ -854,8 +893,10 @@ void TestVideoThumbnailData_p::testFreeThumbnailData()
 {
     init();
 
-    QVERIFY( mTestObject->getThumbnail(TMPXItemId(1, 0)) == mTestObject->mDefaultTnVideo );
-    QVERIFY( mTestObject->getThumbnail(TMPXItemId(0, 1)) == mTestObject->mDefaultTnCategory );
+    mTestObject->getThumbnail(TMPXItemId(1, 0));
+    mTestObject->getThumbnail(TMPXItemId(0, 1));
+    QVERIFY(mTestObject->mDefaultThumbnails.count() > 0);
+    
     mTestObject->freeThumbnailData();
     
     QVERIFY(!mTestObject->mBgFetchTimer->isActive());
@@ -864,8 +905,7 @@ void TestVideoThumbnailData_p::testFreeThumbnailData()
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 0);
     QCOMPARE(mTestObject->mThumbnailData.count(), 0);
     
-    QVERIFY(mTestObject->mDefaultTnVideo == 0);
-    QVERIFY(mTestObject->mDefaultTnVideo == 0);
+    QVERIFY(mTestObject->mDefaultThumbnails.count() == 0);
 
     // Call again.
     mTestObject->freeThumbnailData();

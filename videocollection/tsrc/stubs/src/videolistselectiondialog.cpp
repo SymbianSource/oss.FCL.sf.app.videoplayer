@@ -26,6 +26,8 @@ bool VideoListSelectionDialogData::mExecReturnPrimary = false;
 int VideoListSelectionDialogData::mSelectionCount = 0;
 int VideoListSelectionDialogData::mMultiSelectionLaunchCount = 0;    
 int VideoListSelectionDialogData::mMultiSelectionItemSelectionCount = 0;
+int VideoListSelectionDialogData::mSelectionType = -1;
+TMPXItemId VideoListSelectionDialogData::mSettedMpxId = TMPXItemId::InvalidId();
 
 VideoListSelectionDialog::VideoListSelectionDialog(
     VideoCollectionUiLoader *uiLoader,
@@ -66,9 +68,8 @@ VideoListSelectionDialog::~VideoListSelectionDialog()
 
 void VideoListSelectionDialog::setupContent(int type, TMPXItemId activeItem)
 {
-    Q_UNUSED(type);
-    Q_UNUSED(activeItem);
-    // not stubbed
+    VideoListSelectionDialogData::mSelectionType = type;
+    VideoListSelectionDialogData::mSettedMpxId = activeItem;
 }
 
 bool VideoListSelectionDialog::initDialog()
@@ -77,7 +78,7 @@ bool VideoListSelectionDialog::initDialog()
     return false;
 }
 
-HbAction* VideoListSelectionDialog::exec()
+void VideoListSelectionDialog::exec()
 {
     // fill selection
     VideoListSelectionDialogData::mMultiSelectionLaunchCount++;
@@ -96,18 +97,11 @@ HbAction* VideoListSelectionDialog::exec()
     }
     VideoListSelectionDialogData::mMultiSelectionItemSelectionCount = mSelection.indexes().count();
     
-    // return wanted action
-    HbAction *action = 0;
-    if (VideoListSelectionDialogData::mExecReturnPrimary)
-    {
-        action = primaryAction();
-    }
-    else
-    {
-        action = secondaryAction();
-    }
-    
-    return action;
+}
+
+void VideoListSelectionDialog::finishedSlot(HbAction *action)
+{
+    Q_UNUSED(action);
 }
 
 void VideoListSelectionDialog::markAllStateChangedSlot(int state)

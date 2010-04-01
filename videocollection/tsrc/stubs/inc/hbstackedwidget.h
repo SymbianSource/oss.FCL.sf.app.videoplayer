@@ -19,6 +19,7 @@
 #define HBSTACKEDWIDGET
 
 #include <QGraphicsWidget>
+#include <qpointer.h>
 #include "hbwidget.h"
 
 class HbStackedWidget : public HbWidget
@@ -55,7 +56,7 @@ public:
      */
     static int initializeCount;
     
-    QObject *mCurrentWidget;
+    QPointer<QObject> mCurrentWidget;
 
 };
 

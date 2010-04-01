@@ -15,6 +15,8 @@
 * 
 */
 
+// Version : %version: %
+
 #ifndef __TESTVIDEOPLAYBACKVIEW_H__
 #define __TESTVIDEOPLAYBACKVIEW_H__
 
@@ -45,14 +47,17 @@ public:
         
     void setup();
     
+private:
+    
+    void verifyHandlePluginError( TInt error, bool closeView = true );
+    
     // test functions for the test framework         
 private slots:
 
     // the order in which these testXX methods are declared is important
     // changing this order will affect the test results
     void testHandleActivateView();
-    void testDisplayErrorMessage();
-    void testDisplayInfoMessage();
+    void testShowDialog();
     void testGetWindow();
     void testIssuePlayCommand();
     void testEvent();
@@ -70,7 +75,7 @@ private slots:
     void testDoClosePlayer();
 
 signals:
-    void commandSignal(int);
+    void commandSignal();
 
 private:
     HbVideoPlaybackView*  mVideoView;

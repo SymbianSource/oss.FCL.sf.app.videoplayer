@@ -312,7 +312,7 @@ TVcxMyVideosDownloadState TVcxMyVideosCollectionUtil::DownloadStateL( CMPXMedia&
 // TVcxMyVideosCollectionUtil::IdL
 // ----------------------------------------------------------------------------
 //
-TMPXItemId TVcxMyVideosCollectionUtil::IdL( CMPXMedia& aVideo )
+TMPXItemId TVcxMyVideosCollectionUtil::IdL( const CMPXMedia& aVideo )
     {
     TMPXItemId id( 0, 0 );
                             
@@ -345,7 +345,7 @@ TReal32 TVcxMyVideosCollectionUtil::DurationL( CMPXMedia& aVideo )
 // TVcxMyVideosCollectionUtil::Title
 // ----------------------------------------------------------------------------
 //
-const TDesC& TVcxMyVideosCollectionUtil::Title( CMPXMedia& aVideo )
+const TDesC& TVcxMyVideosCollectionUtil::Title( const CMPXMedia& aVideo )
     {                            
     if ( aVideo.IsSupported( KMPXMediaGeneralTitle ) )
         {

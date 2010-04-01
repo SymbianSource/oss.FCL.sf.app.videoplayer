@@ -143,14 +143,14 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
     
     QList<TMPXVideoPlaybackControls> controlsList = mControlConfig->controlList();
     
-    QVERIFY( controlsList.contains( EMPXButtonBar ) );
+    QVERIFY( controlsList.contains( EMPXControlBar ) );
     
     // 2. test with mVideoEnabled = true
     mControlsController->mFileDetails->mVideoEnabled = false;
     
     mControlConfig->updateControlsWithFileDetails(); 
     
-    QVERIFY( controlsList.contains( EMPXProgressBar ) );
+    QVERIFY( controlsList.contains( EMPXControlBar ) );
     
     QGraphicsWidget *widget = 
             mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );

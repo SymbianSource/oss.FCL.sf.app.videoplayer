@@ -43,4 +43,5 @@ EXPORTS
 	?connectView@QVideoPlayerEngine@@AAEXXZ @ 42 NONAME ; void QVideoPlayerEngine::connectView(void)
 	?instance@VideoServices@@SAPAV1@PAVQVideoPlayerEngine@@@Z @ 43 NONAME ; class VideoServices * VideoServices::instance(class QVideoPlayerEngine *)
 	??_EQVideoPlayerEngine@@UAE@I@Z @ 44 NONAME ; QVideoPlayerEngine::~QVideoPlayerEngine(unsigned int)
+	?doDelayedLoad@QVideoPlayerEngine@@AAEXXZ @ 45 NONAME ; void QVideoPlayerEngine::doDelayedLoad(void)
 

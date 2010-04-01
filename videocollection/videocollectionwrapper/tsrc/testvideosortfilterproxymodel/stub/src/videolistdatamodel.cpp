@@ -25,6 +25,7 @@ bool VideoListDataModel::mRemoveRowsFails = false;
 bool VideoListDataModel::mGetMediaIdAtIndexFails = false;
 bool VideoListDataModel::mBelongsToAlbum = false;
 bool VideoListDataModel::mReturnInvalid = false;
+int VideoListDataModel::mRemoveFrAlbumReturn = -1;
 int VideoListDataModel::mLastDeletedIndexRow = -1;
 QString VideoListDataModel::mMediaFilePathReturnValue = "";
 
@@ -437,6 +438,17 @@ bool VideoListDataModel::belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId )
     Q_UNUSED(itemId);
     Q_UNUSED(albumId);
     return mBelongsToAlbum;
+}
+
+// ---------------------------------------------------------------------------
+// removeItemsFromAlbum
+// ---------------------------------------------------------------------------
+//
+int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
+{
+    Q_UNUSED(albumId);
+    Q_UNUSED(items);
+    return mRemoveFrAlbumReturn;
 }
 
 // ---------------------------------------------------------------------------

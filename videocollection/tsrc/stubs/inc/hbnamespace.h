@@ -106,7 +106,8 @@ public:
         SeparatorItem,
         UserItem = 1000
     };
-    
+
+*/ 
     enum GraphicsItemType
     {
         ItemType_NotificationDialog = QGraphicsItem::UserType+10000,
@@ -205,6 +206,7 @@ public:
         ItemType_IndexFeedback,
         ItemType_Last = QGraphicsItem::UserType + 20000
     };
+    /*
 
     enum WidgetAttribute
     {

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -54,26 +54,6 @@ class QMPXVideoPlaybackFullScreenControl : public QObject
         * return control index
         */
         TMPXVideoPlaybackControls controlIndex();
-
-        /**
-        * set changed volume
-        */
-        bool volumeChanged( int aVolume );
-
-        /**
-        * set changed duration
-        */
-        bool durationChanged( int duration );
-
-        /**
-        * set changed volume
-        */
-        bool positionChanged( int position );
-
-        /**
-        * Set changed position
-        */
-        bool aspectRatioChanged( int aspectRatio );
 
         /**
         * set changed state

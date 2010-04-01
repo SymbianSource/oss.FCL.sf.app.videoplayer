@@ -25,6 +25,31 @@ class QGraphicsItem;
 class QPointF;
 class HbAction;
 
+class HbPopup
+{
+public:
+    enum Placement
+    {
+        TopLeftCorner,
+        TopRightCorner,
+        BottomLeftCorner,
+        BottomRightCorner,
+        TopEdgeCenter,
+        RightEdgeCenter,
+        BottomEdgeCenter,
+        LeftEdgeCenter,
+        Center
+    };
+
+    enum DismissPolicy
+    {
+        NoDismiss   = 0,
+        TapInside   = 1,
+        TapOutside  = 2,
+        TapAnywhere = TapInside | TapOutside
+    };
+};
+
 class HbMenu: public HbWidget
 {
     Q_OBJECT
@@ -56,6 +81,13 @@ public:
     
     /** stubbed from HbMenu */
     QList<HbAction*> actions();
+    
+    /** stubbed from HbMenu */
+    void setPreferredPos(const QPointF& position,
+        HbPopup::Placement placement = HbPopup::TopLeftCorner);
+    
+    /** stubbed from HbMenu */
+    void setDismissPolicy(HbPopup::DismissPolicy dismissPolicy);
     
 public:
     /** dummy actions */

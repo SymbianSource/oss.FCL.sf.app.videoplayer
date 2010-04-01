@@ -15,14 +15,13 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 // INCLUDE FILES
 #include <e32std.h>
 #include <w32std.h> // RWindowBase
 #include <e32base.h>
-#include <AknUtils.h>
 #include <eikclbd.h>
 #include <aknconsts.h>
 #include <remconcoreapi.h>

@@ -15,7 +15,6 @@
 *
 */
 
-
 #ifndef VIDEOLISTVIEW_H
 #define VIDEOLISTVIEW_H
 
@@ -107,6 +106,12 @@ signals:
      * @param int command id
      */
     void command(int);
+    
+    /**
+     * Signaled to do delayed loading of components not loaded initially at start up phase
+     *
+     */
+    void doDelayeds();
 
 private slots:
 
@@ -115,6 +120,12 @@ private slots:
      */
     void modelReadySlot();
 
+    /**
+     * slot is connected to plugin's doDelayeds -signal
+     *
+     */
+    void doDelayedsSlot();
+    
     /**
      * slot is connected to service's titleReady -signal
      */
@@ -134,7 +145,7 @@ private slots:
      * Activates all videos widget by calling changeWidget.
      *
      */
-    void openAllVideosViewSlot();
+    void openAllVideosViewSlot();  
 
     /**
      * Slot is connected into toolbar's video collection tab's
@@ -162,11 +173,17 @@ private slots:
 
      /**
      * Slot is connected into main menus sort -items
-     * Method checks sorting role based on active menu item and starts sorting
+     * Method checks sorting role based on active menu item and initiates sorting
      *
      */
     void startSorting();
 
+     /**
+     * Method checks the sorting role and starts sorting
+     *
+     */
+    void doSorting(int role);
+    
     /**
      * Slot is connected into main menus "delete items" (delete...) signal
      *
@@ -187,6 +204,11 @@ private slots:
      *
      */
     void addVideosToCollectionSlot();
+    
+    /**
+     * Slot is connected into toolbar's "remove videos" signal
+     */
+    void removeVideosFromCollectionSlot();
 
     /**
      * Slot is connected into main menus aboutToShow -signal
@@ -231,12 +253,14 @@ private slots:
         const QModelIndex &index);
 
     /**
-     * Slot is connected into toolbar's sort by tab's
-     * triggered signal.
-     *
-     * Activates sort by popup menu.
+     * Slot is called when effect for opening a collection finishes.
      */
-    void openSortByMenuSlot();
+    void finishCollectionOpenedSlot(const HbEffect::EffectStatus &status);
+    
+    /**
+     * Slot is called when effect for closing a collection finishes.
+     */
+    void finishCollectionClosedSlot(const HbEffect::EffectStatus &status);    
     
     /**
      * Slot which is called when a widget has been loaded.
@@ -256,6 +280,24 @@ private slots:
     void debugNotImplementedYet();
 
 private:
+
+    /**
+     * Delayed load of multiselection dialog component
+	 *
+     */
+    void loadMultiSelection();
+
+    /**
+     * Delayed load videolistwidgets
+	 *
+     */
+    void loadLists(bool doAsync);
+    
+    /**
+     * Delayed load of hint components
+	 *
+     */
+    void loadHint(bool doAsync);
 
     /**
      * Cleans all possibly created objects from this. In some cases there are no quarantees
@@ -327,8 +369,7 @@ private:
         ETBActionCollections   = 11,
         ETBActionServices      = 12,
         ETBActionAddVideos     = 13,
-        ETBActionRemoveVideos  = 14,
-        ETBActionSortVideos    = 15
+        ETBActionRemoveVideos  = 14
     };
 
     /**
@@ -350,11 +391,36 @@ private:
      * Boolean for knowing when the app was started as a service.
      */
     bool mIsService;
+    
+    /**
+     * Boolean for knowing wether the hint component has been loaded or not.
+     */
+    bool mHintLoaded;
 
+    /**
+     * Boolean for knowing wether the list widgets have been loaded or not.
+     */
+    bool mListsLoaded;
+    
+    /**
+     * Boolean for knowing wether the multiselection component has been loaded or not.
+     */
+    bool mMultiselectionLoaded;
+    
     /**
      * Boolean for knowing when the model is ready.
      */
     bool mModelReady;
+    
+    /**
+     * Collection being opened or closed.
+     */
+    bool mTransitionOngoing;
+
+    /**
+     * Hint level for the hint widget.
+     */
+    VideoHintWidget::HintLevel mHintLevel;
 
     /**
      * pointer to videoservices instance
@@ -365,7 +431,7 @@ private:
      * Currently used list
      */
     VideoListWidget* mCurrentList;
-    
+
     /**
      * Action group for the toolbar.
      */

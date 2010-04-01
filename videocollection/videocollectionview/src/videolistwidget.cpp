@@ -27,9 +27,7 @@
 #include <hbmainwindow.h>
 #include <hblistviewitem.h>
 #include <hbmessagebox.h>
-#include <hbstyleloader.h>
 #include <vcxmyvideosdefs.h>
-#include "videocollectionuiloader.h"
 
 #include "videocollectionviewutils.h"
 #include "videocollectionuiloader.h"
@@ -53,7 +51,6 @@ mModel(0),
 mVideoServices(0),
 mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
 mSignalsConnected(false),
-mDetailsReady(false),
 mIsService(false),
 mNavKeyBackAction(0),
 mNavKeyQuitAction(0),
@@ -71,7 +68,6 @@ mUiLoader(uiLoader)
 //
 VideoListWidget::~VideoListWidget()
 {
-    HbStyleLoader::unregisterFilePath( ":/style/hblistviewitem.css" );
     delete mScrollPositionTimer;
     mScrollPositionTimer = 0;
 	mContextMenuActions.clear();
@@ -107,9 +103,6 @@ int VideoListWidget::initialize(VideoSortFilterProxyModel &model, VideoServices*
 	
     mNavKeyQuitAction = new HbAction(Hb::QuitNaviAction);
 
-    // initial setup for widget is hidden
-	setVisible(false);
-
 	mScrollPositionTimer = new QTimer();
 	mScrollPositionTimer->setSingleShot(true);
 
@@ -118,15 +111,8 @@ int VideoListWidget::initialize(VideoSortFilterProxyModel &model, VideoServices*
 		connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
 	}
 
-    bool ret = HbStyleLoader::registerFilePath( ":/style/hblistviewitem.css" );
-
-    if(!ret)
-    {
-        return -1;
-    }
-	
 	setModel(mModel);
-
+	
     return 0;
 }
 
@@ -149,8 +135,9 @@ int VideoListWidget::activate(VideoCollectionCommon::TCollectionLevels level)
     {
         return -1;
     }
+    
 	mCurrentLevel = level;
-	setVisible(true);
+    setVisible(true);
 
     if ( connectSignals() < 0)
     {
@@ -200,7 +187,8 @@ void VideoListWidget::deactivate()
     {
         mContextMenu->hide();
     }
-    setVisible(false);  
+
+    setVisible(false);
     disConnectSignals();
     
     // Free allocated memory for list thumbnails and disable background fetching.
@@ -233,7 +221,6 @@ int VideoListWidget::connectSignals()
            !connect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollPositionTimerSlot())) || 
            !connect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back())) ||
            !connect(mNavKeyQuitAction, SIGNAL(triggered()), qApp, SLOT(quit()))) 
-           
         {
             return -1;
         }
@@ -260,15 +247,6 @@ void VideoListWidget::disConnectSignals()
 }
 
 // ---------------------------------------------------------------------------
-// shareItemSlot
-// ---------------------------------------------------------------------------
-//
-void VideoListWidget::shareItemSlot()
-{
-    debugNotImplementedYet();
-}
-
-// ---------------------------------------------------------------------------
 // deleteItemSlot
 // ---------------------------------------------------------------------------
 //
@@ -285,7 +263,7 @@ void VideoListWidget::deleteItemSlot()
 
     if (variant.isValid())
     {
-        QString text = tr("Do you want to delete \"%1\"?").arg( //TODO: localisation
+        QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
                 variant.toStringList().first());
         if(HbMessageBox::question(text))
         {
@@ -306,22 +284,33 @@ void VideoListWidget::createContextMenu()
     {
         return;
     }
+    
     mContextMenu = new HbMenu();
-
-    if (mIsService)
+    if (mContextMenu)
     {
-		mContextMenuActions[EActionPlay]    = mContextMenu->addAction(hbTrId("txt_videos_menu_play"),    this, SLOT(playItemSlot())); //TODO: localisation
-		mContextMenuActions[EActionDetails] = mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
-    }
-    else
-    {
-        mContextMenuActions[EACtionAddToCollection]      = mContextMenu->addAction(hbTrId("txt_videos_menu_add_to_collection"), this, SLOT(addToCollectionSlot()));
-        mContextMenuActions[EACtionRemoveFromCollection] = mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(debugNotImplementedYet()));
-        mContextMenuActions[EActionShare]                = mContextMenu->addAction(hbTrId("txt_videos_menu_share"), this, SLOT(shareItemSlot()));
-        mContextMenuActions[EActionRename]               = mContextMenu->addAction(hbTrId("txt_common_menu_rename_item"), this, SLOT(renameSlot()));
-        mContextMenuActions[EACtionRemoveCollection]     = mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(removeCollectionSlot()));   
-        mContextMenuActions[EActionDelete]               = mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
-        mContextMenuActions[EActionDetails]              = mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        mContextMenu->setDismissPolicy(HbPopup::TapAnywhere);
+        if (mIsService)
+        {
+            mContextMenuActions[EActionPlay]    = 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
+            mContextMenuActions[EActionDetails] = 
+                    mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        }
+        else
+        {
+            mContextMenuActions[EActionAddToCollection] = 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_add_to_collection"), this, SLOT(addToCollectionSlot()));
+            mContextMenuActions[EActionRemove]           = 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_remove_from_collection"), this, SLOT(removeFromCollectionSlot()));
+            mContextMenuActions[EActionRename]           = 
+                    mContextMenu->addAction(hbTrId("txt_common_menu_rename_item"), this, SLOT(renameSlot()));
+            mContextMenuActions[EActionRemoveCollection] = 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(removeCollectionSlot()));   
+            mContextMenuActions[EActionDelete]           = 
+                    mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
+            mContextMenuActions[EActionDetails]          = 
+                    mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        }
     }
 }
 
@@ -335,6 +324,13 @@ void VideoListWidget::setContextMenu()
     {
         createContextMenu();
     }
+    
+    if (!mContextMenu)
+    {
+        // failed to create context menu, return
+        return;
+    }
+    
 	int menuActionCount = 0;
     HbAction *action = 0;
     foreach(action, mContextMenuActions.values())
@@ -361,8 +357,7 @@ void VideoListWidget::setContextMenu()
     {
     	if (!mIsService)
     	{
-			mContextMenuActions[EACtionAddToCollection]->setVisible(true);
-    		mContextMenuActions[EActionShare]->setVisible(true);
+			mContextMenuActions[EActionAddToCollection]->setVisible(true);
     		mContextMenuActions[EActionDelete]->setVisible(true);
     	}
     	else
@@ -376,15 +371,14 @@ void VideoListWidget::setContextMenu()
 		if(!mIsService)
 		{
             mContextMenuActions[EActionRename]->setVisible(true);
-            mContextMenuActions[EACtionRemoveCollection]->setVisible(true);
+            mContextMenuActions[EActionRemoveCollection]->setVisible(true);
 		}
     }
     else if(mCurrentLevel == VideoCollectionCommon::ELevelAlbum)
     {
     	if (!mIsService)
     	{
-			mContextMenuActions[EACtionRemoveFromCollection]->setVisible(true);
-            mContextMenuActions[EActionShare]->setVisible(true);
+			mContextMenuActions[EActionRemove]->setVisible(true);
             mContextMenuActions[EActionDelete]->setVisible(true);
     	}
     	else
@@ -412,6 +406,17 @@ VideoSortFilterProxyModel& VideoListWidget::getModel()
 //
 void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
 {
+    // surprisingly interenting feature: after long press also single press
+    // is executed. as a workaround the following hack check is needed.
+    // otherwise after the context menu is shown also single press action
+    // is executed.
+    if (mContextMenu &&
+        mContextMenu->isVisible())
+    {
+        // do not activate context menu if it is already visible
+        return;
+    }
+    
     if(mSelectionMode != HbAbstractItemView::NoSelection)
     {
         // no custom functionality defined
@@ -432,10 +437,9 @@ void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
             // signal view that item has been activated
             emit(collectionOpened(true,
                 variant.toStringList().first(),
-                modelIndex));
-            
-            return;
+                modelIndex));                       
         }
+        return;
     }
     if(mIsService && (mCurrentLevel != VideoCollectionCommon::ELevelCategory))
     {
@@ -478,35 +482,47 @@ void VideoListWidget::setSelectionMode(int mode)
 //
 void VideoListWidget::longPressGesture (const QPointF &point)
 {
-    if (!mDetailsReady)
-    {
-        emit command(MpxHbVideoCommon::LoadVideoDetailsView);
-        mDetailsReady = true;
-    }
     if(mSelectionMode != HbAbstractItemView::NoSelection)
     {
         // do not activate context menu during selection mode
         return;
     }
 
-	QModelIndex index = currentIndex();
-    if(mModel && index.isValid())
-    {   
-    	TMPXItemId mpxId = mModel->getMediaIdAtIndex(index);
-    	// Only videos and user created albums have context menu.
-    	if((mpxId.iId2 == KVcxMvcMediaTypeVideo) ||
-    	   (!mIsService && mpxId.iId2 == KVcxMvcMediaTypeAlbum ))
-    	{
-            setContextMenu();
-            // if menu not yet exists, it has been created
-            // setup might fail causing menu to be removed
-            if(mContextMenu)
+    HbAbstractViewItem *viewItem = itemAtPosition(point);
+    if (viewItem)
+    {
+        QModelIndex index = viewItem->modelIndex();
+        if(mModel && index.isValid())
+        {   
+            TMPXItemId mpxId = mModel->getMediaIdAtIndex(index);
+            // Only videos and user created albums have context menu.
+            if((mpxId.iId2 == KVcxMvcMediaTypeVideo) ||
+               (!mIsService && mpxId.iId2 == KVcxMvcMediaTypeAlbum ))
             {
-                mContextMenu->exec(point);
+                setContextMenu();
+                // if menu not yet exists, it has been created
+                // setup might fail causing menu to be removed
+                if(mContextMenu)
+                {
+                    mContextMenu->setPreferredPos(point);
+                    mContextMenu->show();
+                }
             }
-    	}
+        }
     }
 	HbListView::longPressGesture(point);
+}
+
+// ---------------------------------------------------------------------------
+// doDelayedsSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::doDelayedsSlot()
+{
+	if (!mContextMenu)
+	{
+		createContextMenu();
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -561,6 +577,27 @@ void VideoListWidget::addToCollectionSlot()
 }
 
 // ---------------------------------------------------------------------------
+// removeFromCollectionSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::removeFromCollectionSlot()
+{
+    if(!mModel)
+    {
+        return;
+    }
+    TMPXItemId collectionId = mModel->getOpenItem();
+    TMPXItemId itemId = mModel->getMediaIdAtIndex(currentIndex());
+    if(collectionId != TMPXItemId::InvalidId() && 
+       itemId != TMPXItemId::InvalidId())
+    {
+        QList<TMPXItemId> ids;
+        ids.append(itemId);
+        mModel->removeItemsFromAlbum(collectionId, ids);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // removeCollectionSlot
 // ---------------------------------------------------------------------------
 //
@@ -603,9 +640,11 @@ void VideoListWidget::playAllSlot()
 //
 void VideoListWidget::back()
 {
+	// Empty the proxy model causing the items to be removed from list widget.
+    mModel->setAlbumInUse(TMPXItemId::InvalidId());
     if(mModel)
     {
-    	emit collectionOpened(false, QString(), QModelIndex());
+        emit collectionOpened(false, QString(), QModelIndex());
     }
 }
 

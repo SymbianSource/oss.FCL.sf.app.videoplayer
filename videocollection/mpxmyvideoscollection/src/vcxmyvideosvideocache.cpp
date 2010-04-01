@@ -266,7 +266,7 @@ CMPXMedia* CVcxMyVideosVideoCache::FindVideoByMdsIdL( TUint32 aMdsId, TInt& aPos
 // CVcxMyVideosVideoCache::GetVideosL
 // ----------------------------------------------------------------------------
 //
-CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32> aMdsIds )
+CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32>& aMdsIds )
     {
     CMPXMessage* videoList = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
     CleanupStack::PushL( videoList ); // 1->
@@ -593,7 +593,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
     TBool changed = EFalse;
         
     // 1 MPX ID cant be changed
-    // 2 
+    // 2
     if ( aVideo.IsSupported( KMPXMediaGeneralTitle ) )
         {
         if ( videoInCache->ValueText( KMPXMediaGeneralTitle ) !=
