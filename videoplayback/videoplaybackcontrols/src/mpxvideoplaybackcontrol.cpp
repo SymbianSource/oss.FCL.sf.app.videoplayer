@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 19 %
+// Version : %version: e003sa33#20 %
 
 
 // INCLUDE FILES
@@ -562,6 +562,9 @@ void CMPXVideoPlaybackControl::ResetControl()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::ResetControl()"));
 
+    iControl->SetPointerCapture( EFalse );
+    iControl->ClaimPointerGrab( EFalse );
+    
     switch( iControlIndex )
     {
         case EMPXButtonBar:

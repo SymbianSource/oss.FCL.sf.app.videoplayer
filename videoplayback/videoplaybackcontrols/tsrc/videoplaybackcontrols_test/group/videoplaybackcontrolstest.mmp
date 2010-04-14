@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: e003sa33#10 %
 
 
 
@@ -90,5 +90,6 @@ LIBRARY         playbackhelper.lib
 LIBRARY         RemConInterfaceBase.lib
 LIBRARY         RemConCoreApi.lib
 LIBRARY         ecom.lib
+LIBRARY         inetprotutil.lib
 
 // End of File

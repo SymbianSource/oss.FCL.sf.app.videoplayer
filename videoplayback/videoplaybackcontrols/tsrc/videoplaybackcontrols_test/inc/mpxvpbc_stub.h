@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#10 %
+// Version : %version: e003sa33#11 %
 
 
 
@@ -116,6 +116,12 @@ class CMPXVideoPlaybackContainer: public CCoeControl
         * and make sure aspect ratio equal to screen aspect ratio 
         */
         void AddSameARFileDetailsL( TBool aHasVideoTrack = ETrue );
+        
+        /**
+        * Add file details with empty title
+        * and make sure aspect ratio equal to screen aspect ratio 
+        */        
+        void AddEmptyTitleFileDetailsL( TBool aHasVideoTrack = ETrue );
         
     private:    
         // Data

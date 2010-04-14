@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#11 %
+// Version : %version: e003sa33#12 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -72,6 +72,7 @@ TInt CVideoPlaybackControlsTest::RunMethodL( CStifItemParser& aItem )
         ENTRY( "AddLongFileDetails", CVideoPlaybackControlsTest::AddLongFileDetails ),
         ENTRY( "AddAudioOnlyFileDetails", CVideoPlaybackControlsTest::AddAudioOnlyFileDetails ),
         ENTRY( "AddSameARFileDetails", CVideoPlaybackControlsTest::AddSameARFileDetails ),
+        ENTRY( "AddEmptyTitleFileDetails", CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL ),
         ENTRY( "SetDuration", CVideoPlaybackControlsTest::SetDuration ),
         ENTRY( "SoftkeyPressed", CVideoPlaybackControlsTest::SoftkeyPressed ),
         ENTRY( "ShowControls", CVideoPlaybackControlsTest::ShowControls ),
@@ -507,6 +508,19 @@ TInt CVideoPlaybackControlsTest::AddSameARFileDetails()
 	MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddSameARFileDetails()" ) );
 
     MPX_TRAPD( result, iContainer->AddSameARFileDetailsL() );
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CVideoPlaybackControlsTest::AddEmptyTitleFileDetails
+// -------------------------------------------------------------------------------------------------
+//
+TInt CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL()
+{
+	MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL()" ) );
+
+    MPX_TRAPD( result, iContainer->AddEmptyTitleFileDetailsL() );
 
     return result;
 }

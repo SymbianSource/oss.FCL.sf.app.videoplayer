@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#31 %
+// Version : %version: 32 %
 
 
 // INCLUDE FILES
@@ -1239,7 +1239,7 @@ TInt CMPXVideoPlaybackControlsController::HandleControlsTimeout( TAny* aPtr )
 //
 void CMPXVideoPlaybackControlsController::HideAllControls()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::HideAllControls()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::HideAllControls()"));
 
     ResetDisappearingTimers( EMPXTimerCancel );
 
@@ -1255,7 +1255,8 @@ void CMPXVideoPlaybackControlsController::HideAllControls()
 //
 void CMPXVideoPlaybackControlsController::ShowControls()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::ShowControls() iState = %d"), iState);
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowControls()"),
+                   _L("iState = %d"), iState );
 
     CloseMediaDetailsViewer();
 
@@ -1299,7 +1300,7 @@ TBool CMPXVideoPlaybackControlsController::IsVisible()
 //
 void CMPXVideoPlaybackControlsController::UpdateControlsVisibility()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::UpdateControlsVisibility()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::UpdateControlsVisibility()"));
 
     HideAllControls();
     ShowControls();
@@ -1914,6 +1915,8 @@ TBool CMPXVideoPlaybackControlsController::IsMediaDetailsViewerVisible()
 //
 void CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()"));
+
     if ( iMediaDetailsViewerControl )
     {
         iMediaDetailsViewerControl->MakeVisible(EFalse);

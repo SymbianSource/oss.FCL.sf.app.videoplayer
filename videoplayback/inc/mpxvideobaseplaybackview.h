@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 18 %
+
+// Version : %version: 19 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -34,6 +35,7 @@
 #include "mpxvideoplaybackcontrol.hrh"
 #include "mpxvideoplaybackdisplayhandler.h"
 #include <mpxvideoplaybackdefs.h>
+#include <AknWsEventObserver.h>
 
 //  Constants
 
@@ -47,14 +49,14 @@ class CMPFileDetails;
 
 class CMPXVideoPlaybackViewFileDetails;
 
-
 //  Class Definitions
 
 class CMPXVideoBasePlaybackView : public CAknView,
                                   public MMPXPlaybackObserver,
                                   public MMPXViewActivationObserver,
                                   public MMPXPlaybackCallback,
-                                  public MMPXCollectionObserver
+                                  public MMPXCollectionObserver,
+                                  public MAknWsEventObserver
 {
     public:
         ~CMPXVideoBasePlaybackView();
@@ -68,6 +70,8 @@ class CMPXVideoBasePlaybackView : public CAknView,
         virtual void HandleCommandL( TInt aCommand );
 
         void RetrieveFileNameAndModeL( CMPXCommand* aCmd );
+
+        void HandleWsEventL( const TWsEvent& aEvent, CCoeControl* aDestination );
 
     protected:
 
@@ -349,6 +353,8 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         void HandleRealOneBitmapTimeoutL();
 
+        void SendWindowCommandL( TMPXVideoPlaybackCommand aCmd );
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt OpenDrmFileHandle64L( RFile64& aFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
@@ -358,6 +364,7 @@ class CMPXVideoBasePlaybackView : public CAknView,
         MMPXViewUtility*                    iViewUtility;
         MMPXCollectionUtility*              iCollectionUtility;
         CMPXVideoPlaybackDisplayHandler*    iDisplayHandler;
+        CAknWsEventMonitor*                 iAknEventMonitor;
 
         TMPXPlaybackState                   iPlaybackState;
 
@@ -374,6 +381,7 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iCollectionMediaRequested;
         TBool                               iPdlReloading;
         TBool                               iRealOneDelayedPlay;
+        TBool                               iKeyboardInFocus;
 
         HBufC*                              iClipName;
 };

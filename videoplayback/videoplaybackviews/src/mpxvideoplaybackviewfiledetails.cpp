@@ -15,13 +15,14 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: e003sa33#11 %
 
 
 //
 //  INCLUDE FILES
 //
 #include <f32file.h>
+#include <uri16.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackviewfiledetails.h"
@@ -124,6 +125,67 @@ EXPORT_C HBufC* CMPXVideoPlaybackViewFileDetails::GenerateFileNameL()
     }
 
     return fileName;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackViewFileDetails::GenerateFileTitleL
+// -------------------------------------------------------------------------------------------------
+//
+EXPORT_C HBufC* CMPXVideoPlaybackViewFileDetails::GenerateFileTitleL()
+{
+    MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackViewFileDetails::GenerateFileTitleL()" ) );
+
+    HBufC* fileTitle = NULL;
+
+    if ( iTitle && iTitle->Length() )
+    {
+        //
+        // use file title in metadata as title cotent directly
+        //
+        fileTitle = iTitle->AllocL();
+    }
+    else if ( ( EMPXVideoStreaming == iPlaybackMode || EMPXVideoLiveStreaming == iPlaybackMode ) &&
+              iClipName && iClipName->Length() )
+    {
+        //
+        //  parse file name in URL
+        //
+        TUriParser parser;
+
+        if ( parser.Parse( iClipName->Des() ) == KErrNone )
+        {
+
+            MPX_DEBUG(
+                _L( "    streaming link: schema = %S, urihost = %S, uriPort = %S, uriPath = %S" ),
+                &( parser.Extract( EUriScheme ) ),
+                &( parser.Extract( EUriHost ) ),
+                &( parser.Extract( EUriPort ) ),
+                &( parser.Extract( EUriPath ) ) );
+
+            HBufC* nameAndTail = NULL;
+
+            MPX_TRAPD( err, nameAndTail = parser.GetFileNameL( EUriFileNameTail ) );
+
+            if ( KErrNone == err && nameAndTail )
+            {
+                CleanupStack::PushL( nameAndTail );
+                TInt extPos = nameAndTail->Des().LocateReverse( KExtDelimiter );
+
+                if ( extPos > 0 )
+                {
+                    fileTitle = ( nameAndTail->Des().Left( extPos ) ).AllocL();
+                }
+                else
+                {
+                    fileTitle = nameAndTail->Des().AllocL();
+                }
+
+                CleanupStack::PopAndDestroy( nameAndTail );
+            }
+        }
+    }
+
+    return fileTitle;
 }
 
 //  EOF

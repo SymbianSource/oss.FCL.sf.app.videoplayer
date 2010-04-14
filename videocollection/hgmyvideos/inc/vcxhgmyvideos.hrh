@@ -25,6 +25,7 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdPlay = 700,             // Play video
     EVcxHgMyVideosCmdOpen,                   // Open video view
     EVcxHgMyVideosCmdDelete,                 // Delete video (only for complete files)
+    EVcxHgMyVideosCmdDeleteMarked,           // Delete video (only for complete files)
     EVcxHgMyVideosCmdResumeDownload,         // Resume download (only for downloads)
     EVcxHgMyVideosCmdCancelDownload,         // Cancel download (only for downloads)
     EVcxHgMyVideosCmdVideoDetails,           // Video details
@@ -36,7 +37,9 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdSortByName,             // Sort submenu: Sort by name
     EVcxHgMyVideosCmdSortBySize,             // Sort submenu: Sort by size
     EVcxHgMyVideosCmdCopy,                   // Copy video(s)
+    EVcxHgMyVideosCmdCopyMarked,             // Copy video(s)
     EVcxHgMyVideosCmdMove,                   // Move video(s)
+    EVcxHgMyVideosCmdMoveMarked,             // Move video(s)
     EVcxHgMyVideosCmdMarkUnmarkSubMenu,      // Mark or unmark videos sub-menu
     EVcxHgMyVideosCmdMark,                   // Mark/Unmark submenu: Mark video
     EVcxHgMyVideosCmdUnmark,                 // Mark/Unmark submenu: Unmark video 
@@ -49,6 +52,7 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdExit,                   // Exit Video Storage
     EVcxHgMyVideosCmdToggleMultipleMarking,  // Toggle marking mode state
     EVcxHgMyVideosCmdSend,                   // Send video
+    EVcxHgMyVideosCmdSendMarked,             // Send video
     EVcxHgMyVideosCmdNothing,                // Non-functional command
     EVcxHgMyVideosCmdStartMarking,           // Sets marking mode on
     EVcxHgMyVideosCmdStopMarking,             // Sets marking mode off

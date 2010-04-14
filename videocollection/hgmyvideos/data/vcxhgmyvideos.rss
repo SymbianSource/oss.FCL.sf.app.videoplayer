@@ -103,6 +103,11 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
             },
         MENU_ITEM 
             {
+            command = EVcxHgMyVideosCmdDeleteMarked;
+            txt = qtn_iptv_delete_video_clip;
+            },
+        MENU_ITEM
+            {
             command = EVcxHgMyVideosCmdResumeDownload; 
             txt = qtn_iptv_resume_download;
             flags = EEikMenuItemSpecific;
@@ -127,10 +132,20 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
             },
         MENU_ITEM 
             { 
+            command = EVcxHgMyVideosCmdCopyMarked;
+            txt = qtn_iptv_copy_submenu;
+            },
+        MENU_ITEM
+            {
             command = EVcxHgMyVideosCmdMove; 
             txt = qtn_iptv_move_submenu;
             flags = EEikMenuItemSpecific;
             },    
+        MENU_ITEM
+            {
+            command = EVcxHgMyVideosCmdMoveMarked;
+            txt = qtn_iptv_move_submenu;
+            },
         MENU_ITEM 
             { 
             command = EVcxHgMyVideosCmdShowViaHomenet;

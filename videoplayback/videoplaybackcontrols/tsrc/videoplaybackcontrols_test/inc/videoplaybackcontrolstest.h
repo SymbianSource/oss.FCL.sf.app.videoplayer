@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#10 %
+// Version : %version: e003sa33#11 %
 
 
 
@@ -213,6 +213,12 @@ private:
      * @return symbian OS error code.
      */
     virtual TInt AddSameARFileDetails();
+        
+    /**
+     * Add empty title file details
+     * @return symbian OS error code.
+     */
+    virtual TInt AddEmptyTitleFileDetailsL();
     
     /**
     * Create controller

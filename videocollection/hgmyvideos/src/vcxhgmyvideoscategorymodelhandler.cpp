@@ -38,6 +38,7 @@
 #include <aknlayoutscalable_avkon.cdl.h>
 #include <coemain.h>
 #include <aknappui.h>
+#include <bautils.h>
 
 #include <vcxhgmyvideosicons.mbg>
 #include <myvideosindicator.h>
@@ -185,7 +186,24 @@ HBufC* CVcxHgMyVideosCategoryModelHandler::GetCategoryNameLC( TInt aCategoryId )
             name = StringLoader::LoadLC( R_VCXHGMYVIDEOS_STORAGE_OTHER_LIST );
             break;            
         case KCategoryIdLastWatched:
-            name = StringLoader::LoadLC( R_VCXHGMYVIDEOS_LAST_WATCHED );
+            if ( LastWatchedSetL() )
+                {
+                name = StringLoader::LoadLC( R_VCXHGMYVIDEOS_LAST_WATCHED );
+                }
+            else 
+                {
+                if ( PreloadedExistsL() )
+                    {
+                    TBuf<KMyVideosTitleStringMaxLength> string;
+                    TInt error = iModel.GetMyVideosCustomizationString( 
+					                 KCRVideoPlayerPreloadedVideoName, string );
+                    name = error ? KNullDesC().AllocLC() : string.AllocLC();                
+                    }
+                else
+                    {
+                    name = StringLoader::LoadLC( R_VCXHGMYVIDEOS_LAST_WATCHED );
+                    }
+                }
             break;            
         case KCategoryIdExtraItem1:
             // ExtraItem1 is always interpreted as Ovi Store
@@ -261,7 +279,10 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_captured_thumbnail_video_mask;
             break;
         case KCategoryIdLastWatched:
-            // Dont set default lw icon here, it'd just blink.
+			 if ( !LastWatchedSetL() )
+			    {
+				LoadLastWatchedIconL();
+				}
             break;
         case KCategoryIdExtraItem1:
             // ExtraItem1 is always interpreted as Ovi Store
@@ -411,7 +432,6 @@ HBufC* CVcxHgMyVideosCategoryModelHandler::FormatCategorySecondRowLC( TInt aCate
         case KVcxMvcCategoryIdTvRecordings:
         case KVcxMvcCategoryIdCaptured:
         case KVcxMvcCategoryIdOther:
-        case KCategoryIdLastWatched:
             {
             CMPXMedia* media = GetCategoryDataL( aCategoryId );
             if ( media )
@@ -424,6 +444,37 @@ HBufC* CVcxHgMyVideosCategoryModelHandler::FormatCategorySecondRowLC( TInt aCate
 				}
             }
             break;
+        case KCategoryIdLastWatched:
+            {
+            if ( LastWatchedSetL() )
+                {
+                CMPXMedia* media = GetCategoryDataL( aCategoryId );
+                if ( media )
+                    {
+                    secondRow = FormatCategorySecondRowLC( *media );
+                    }
+                else
+                    {
+                    secondRow = KNullDesC().AllocLC();
+                    }
+                }
+            else    
+                {
+                if ( PreloadedExistsL() )
+                    {
+                    TBuf<KMyVideosTitleStringMaxLength> string;
+                    TInt error = iModel.GetMyVideosCustomizationString( 
+					                        KCRVideoPlayerPreloadedVideoDescription, string );
+                    secondRow = error ? KNullDesC().AllocLC() : string.AllocLC();
+                    }
+                else
+                    {
+                    secondRow = KNullDesC().AllocLC();
+                    }
+                }
+            }
+            break;
+
         case KCategoryIdExtraItem1:
             // ExtraItem1 is always interpreted as Ovi Store
             secondRow = StringLoader::LoadLC( R_VCXHGMYVIDEOS_OVI_STORE_VIDEOS ); 
@@ -936,17 +987,31 @@ void CVcxHgMyVideosCategoryModelHandler::FetchLastWatchedL()
 // 
 void CVcxHgMyVideosCategoryModelHandler::PlayLastWatchedVidedoL()
     {
-    if (  iLastWatched && iLastWatched->IsSupported( KMPXMediaGeneralId ) )
+    if ( LastWatchedSetL() )
         {
-        iModel.CollectionClient().PlayVideoL(
-                    *iLastWatched->Value<TMPXItemId>( KMPXMediaGeneralId ) );
-
-        iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
+        if (  iLastWatched && iLastWatched->IsSupported( KMPXMediaGeneralId ) )
+            {
+            iModel.CollectionClient().PlayVideoL(
+                        *iLastWatched->Value<TMPXItemId>( KMPXMediaGeneralId ) );
+    
+            iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
+            }
         }
     else
         {
-        // Refresh the list to remove the highlight.
-        iScroller.DrawDeferred();
+        if ( PreloadedExistsL() )
+            {
+            CAknAppUi* appui = static_cast<CAknAppUi*>( CCoeEnv::Static()->AppUi() );
+            
+            if ( appui )
+                {
+                TBuf<KMaxPath> path;
+                TInt error = iModel.GetMyVideosCustomizationString( 
+				                         KCRVideoPlayerPreloadedVideoPath, path );
+                appui->OpenFileL( path );
+                iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
+                }
+            }
         }
     }
 
@@ -957,12 +1022,33 @@ void CVcxHgMyVideosCategoryModelHandler::PlayLastWatchedVidedoL()
 // 
 void CVcxHgMyVideosCategoryModelHandler::LoadLastWatchedIconL()
     {
-    CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
-                    iLastWatched->ValueText( KMPXMediaGeneralUri ),
-                    KNullDesC );
-    
-    iTnRequestId = iTnManager.GetL( *source );
-    CleanupStack::PopAndDestroy( source );
+    if ( LastWatchedSetL() )
+        {
+        if ( iLastWatched )
+            {
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
+                            iLastWatched->ValueText( KMPXMediaGeneralUri ),
+                            KNullDesC );
+            
+            iTnRequestId = iTnManager.GetL( *source );
+            CleanupStack::PopAndDestroy( source );
+            }
+        }
+    else 
+        {
+        if ( PreloadedExistsL() )
+            {
+            TBuf<KMaxPath> path;
+            TInt error = iModel.GetMyVideosCustomizationString( 
+			                        KCRVideoPlayerPreloadedVideoPath, path );
+            CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
+                            path,
+                            KNullDesC );
+            
+            iTnRequestId = iTnManager.GetL( *source );
+            CleanupStack::PopAndDestroy( source );
+            }
+        }
 	}
 
 // -----------------------------------------------------------------------------
@@ -1201,4 +1287,38 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::CreateEmptyHgListIconL()
     CleanupStack::Pop( bitmap );
 
     return icon;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::LastWatchedSetL()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosCategoryModelHandler::LastWatchedSetL()
+    {
+    TInt id;
+    if ( !iModel.GetLastWatchedIdL( id ) && id )
+        {
+        return ETrue;
+        }
+    else
+        {
+        return EFalse;
+        }
+    }
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::PreloadedExistsL()
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosCategoryModelHandler::PreloadedExistsL()
+    {
+    TBuf<KMaxPath> path;
+    TInt error = iModel.GetMyVideosCustomizationString( KCRVideoPlayerPreloadedVideoPath, path );
+    if ( !error && path.Length() && BaflUtils::FileExists( iModel.FileServerSessionL(), path ) )
+        {
+        return ETrue;
+        }
+    else
+        {
+        return EFalse;
+        }
     }

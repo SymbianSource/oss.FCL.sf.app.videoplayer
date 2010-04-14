@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#16 %
+// Version : %version: 17 %
 
 
 // INCLUDE FILES
@@ -72,7 +72,7 @@ CMPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler(
 CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
         CMPXVideoPlaybackContainer* aContainer )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::NewL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::NewL()"));
 
     CMPXVideoPlaybackUserInputHandler* self =
         new (ELeave) CMPXVideoPlaybackUserInputHandler( aContainer );
@@ -109,6 +109,8 @@ void CMPXVideoPlaybackUserInputHandler::ConstructL()
 //
 CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()"));
+
     if ( iVolumeRepeatTimer )
     {
         iVolumeRepeatTimer->Cancel();
@@ -122,7 +124,6 @@ CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
         iCoreTarget = NULL;
         iInterfaceSelector = NULL;
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -136,21 +137,19 @@ void CMPXVideoPlaybackUserInputHandler::MrccatoPlay( TRemConCoreApiPlaybackSpeed
         _L("CMPXVideoPlaybackUserInputHandler::MrccatoPlay"),
         _L("aButtonAct = %d"), aButtonAct );
 
-    ProcessMediaKey(ERemConCoreApiPlay, aButtonAct);
+    ProcessMediaKey( ERemConCoreApiPlay, aButtonAct );
 }
 
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackUserInputHandler::MrccatoCommand()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::MrccatoCommand(TRemConCoreApiOperationId aOperationId,
-                                                       TRemConCoreApiButtonAction aButtonAct )
+void CMPXVideoPlaybackUserInputHandler::MrccatoCommand( TRemConCoreApiOperationId aOperationId,
+                                                        TRemConCoreApiButtonAction aButtonAct )
 {
-    MPX_ENTER_EXIT(
-        _L("CMPXVideoPlaybackUserInputHandler::MrccatoCommand"),
-        _L("aButtonAct = %d"), aButtonAct );
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::MrccatoCommand"));
 
-    ProcessMediaKey(aOperationId, aButtonAct);
+    ProcessMediaKey( aOperationId, aButtonAct );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -160,7 +159,8 @@ void CMPXVideoPlaybackUserInputHandler::MrccatoCommand(TRemConCoreApiOperationId
 void CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperationId aOperationId,
                                                           TRemConCoreApiButtonAction aButtonAct )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey()"),
+                   _L("aOperationId = %d"), aOperationId );
 
     switch ( aOperationId )
     {
@@ -178,47 +178,45 @@ void CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperatio
         }
         case ERemConCoreApiRewind:
         {
-            HandleRewind(aButtonAct);
+            HandleRewind( aButtonAct );
             break;
         }
         case ERemConCoreApiFastForward:
         {
-            HandleFastForward(aButtonAct);
+            HandleFastForward( aButtonAct );
             break;
         }
         case ERemConCoreApiVolumeUp:
         {
-            HandleVolumeUp(aButtonAct);
+            HandleVolumeUp( aButtonAct );
             break;
         }
         case ERemConCoreApiVolumeDown:
         {
-            HandleVolumeDown(aButtonAct);
+            HandleVolumeDown( aButtonAct );
             break;
         }
         case ERemConCoreApiPausePlayFunction:
         {
             if ( aButtonAct == ERemConCoreApiButtonClick )
             {
-                TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdPlayPause));
+                TRAP_IGNORE(iContainer->HandleCommandL( EMPXPbvCmdPlayPause ));
             }
             break;
         }
         case ERemConCoreApiPause:
         {
-            TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdPause));
+            TRAP_IGNORE( iContainer->HandleCommandL(EMPXPbvCmdPause) );
             break;
         }
         case ERemConCoreApiPlay:
         {
             if ( aButtonAct == ERemConCoreApiButtonClick )
             {
-                TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdPlay));
+                TRAP_IGNORE( iContainer->HandleCommandL( EMPXPbvCmdPlay ) );
             }
             break;
         }
-        default:
-            break;
     }
 }
 
@@ -226,15 +224,17 @@ void CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperatio
 // CMPXVideoPlaybackUserInputHandler::HandleFastForward()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleFastForward(TRemConCoreApiButtonAction aButtonAct)
+void CMPXVideoPlaybackUserInputHandler::HandleFastForward( TRemConCoreApiButtonAction aButtonAct )
 {
-    if (aButtonAct == ERemConCoreApiButtonPress)
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleFastForward()"));
+
+    if ( aButtonAct == ERemConCoreApiButtonPress )
     {
-        TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdSeekForward));
+        TRAP_IGNORE( iContainer->HandleCommandL( EMPXPbvCmdSeekForward ) );
     }
-    else if (aButtonAct == ERemConCoreApiButtonRelease)
+    else if ( aButtonAct == ERemConCoreApiButtonRelease )
     {
-        TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdEndSeek));
+        TRAP_IGNORE( iContainer->HandleCommandL( EMPXPbvCmdEndSeek ) );
     }
 }
 
@@ -243,15 +243,17 @@ void CMPXVideoPlaybackUserInputHandler::HandleFastForward(TRemConCoreApiButtonAc
 // CMPXVideoPlaybackUserInputHandler::HandleRewind()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleRewind(TRemConCoreApiButtonAction aButtonAct)
+void CMPXVideoPlaybackUserInputHandler::HandleRewind( TRemConCoreApiButtonAction aButtonAct )
 {
-    if (aButtonAct == ERemConCoreApiButtonPress)
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleFastForward()"));
+
+    if ( aButtonAct == ERemConCoreApiButtonPress )
     {
-        TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdSeekBackward));
+        TRAP_IGNORE( iContainer->HandleCommandL( EMPXPbvCmdSeekBackward ) );
     }
-    else if (aButtonAct == ERemConCoreApiButtonRelease)
+    else if ( aButtonAct == ERemConCoreApiButtonRelease )
     {
-        TRAP_IGNORE(iContainer->HandleCommandL(EMPXPbvCmdEndSeek));
+        TRAP_IGNORE( iContainer->HandleCommandL( EMPXPbvCmdEndSeek ) );
     }
 }
 
@@ -259,8 +261,11 @@ void CMPXVideoPlaybackUserInputHandler::HandleRewind(TRemConCoreApiButtonAction 
 // CMPXVideoPlaybackUserInputHandler::HandleVolumeUp()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonAction aButtonAct)
+void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp( TRemConCoreApiButtonAction aButtonAct )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeUp()"),
+                   _L("aButtonAct = %d"), aButtonAct );
+
     switch ( aButtonAct )
     {
         case ERemConCoreApiButtonPress:
@@ -272,6 +277,7 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonActio
             }
 
             iVolumeRepeatUp = ETrue;
+
             iVolumeRepeatTimer->Start(
                 KAknStandardKeyboardRepeatRate,
                 KAknStandardKeyboardRepeatRate,
@@ -301,8 +307,10 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonActio
 // CMPXVideoPlaybackUserInputHandler::HandleVolumeDown()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown(TRemConCoreApiButtonAction aButtonAct)
+void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown( TRemConCoreApiButtonAction aButtonAct )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeDown()"));
+
     switch ( aButtonAct )
     {
         case ERemConCoreApiButtonPress:
@@ -314,6 +322,7 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown(TRemConCoreApiButtonAct
             }
 
             iVolumeRepeatUp = EFalse;
+
             iVolumeRepeatTimer->Start(
                 KAknStandardKeyboardRepeatRate,
                 KAknStandardKeyboardRepeatRate,
@@ -348,25 +357,25 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
                                                          const TPointerEvent& aPointerEvent,
                                                          TMPXVideoControlType aMPXControl )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent()"));
 
-    switch (iProcessingInputType)
+    switch ( iProcessingInputType )
     {
         case EMpxVideoNone:
         {
-            if (aPointerEvent.iType == TPointerEvent::EButton1Down && iForeground)
+            if ( aPointerEvent.iType == TPointerEvent::EButton1Down && iForeground )
             {
                 iProcessingInputType = EMpxVideoTouch;
 
-                ReRoutePointerEventL(aControl, aPointerEvent, aMPXControl);
+                ReRoutePointerEventL( aControl, aPointerEvent, aMPXControl );
             }
             break;
         }
         case EMpxVideoTouch:
         {
-            if (aPointerEvent.iType != TPointerEvent::EButton1Down)
+            if ( aPointerEvent.iType != TPointerEvent::EButton1Down )
             {
-                ReRoutePointerEventL(aControl, aPointerEvent, aMPXControl);
+                ReRoutePointerEventL( aControl, aPointerEvent, aMPXControl );
 
                 // reset the value only on pointer up event - but not on drag
                 if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
@@ -374,11 +383,6 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
                     iProcessingInputType = EMpxVideoNone;
                 }
             }
-            break;
-        }
-        default:
-        {
-            // user input is disallowed
             break;
         }
     } // switch
@@ -392,13 +396,13 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
 void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyEvent,
                                                           TEventCode aType )
 {
-    MPX_DEBUG(_L("MPXVideoPlaybackUserInputHandler::ProcessKeyEvent"));
+    MPX_ENTER_EXIT(_L("MPXVideoPlaybackUserInputHandler::ProcessKeyEvent()"));
 
-    switch (iProcessingInputType)
+    switch ( iProcessingInputType )
     {
         case EMpxVideoNone:
         {
-            if (aType == EEventKeyDown && iForeground)
+            if ( aType == EEventKeyDown && iForeground )
             {
                 iProcessingInputType = EMpxVideoKeyboard;
                 iLastPressedKeyCode = aKeyEvent.iCode;
@@ -410,12 +414,12 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
         }
         case EMpxVideoKeyboard:
         {
-            if (aType == EEventKeyUp)
+            if ( aType == EEventKeyUp )
             {
                 // only handle up event for the key being handled
                 // ignore spurious key presses
-                if (aKeyEvent.iCode == iLastPressedKeyCode  &&
-                    aKeyEvent.iScanCode == iLastPressedKeyScanCode)
+                if ( aKeyEvent.iCode == iLastPressedKeyCode  &&
+                     aKeyEvent.iScanCode == iLastPressedKeyScanCode )
                 {
                     iContainer->DoHandleKeyEventL(aKeyEvent, aType);
 
@@ -423,11 +427,6 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
                     iProcessingInputType = EMpxVideoNone;
                 }
             }
-            break;
-        }
-        default:
-        {
-            // user input is disallowed
             break;
         }
     } // switch
@@ -440,49 +439,50 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
 void CMPXVideoPlaybackUserInputHandler::ProcessMediaKey( TRemConCoreApiOperationId aOperationId,
                                                          TRemConCoreApiButtonAction aButtonAct )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ProcessMediaKey"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ProcessMediaKey()"),
+                   _L("iProcessingInputType = %d, aButtonAct = %d"),
+                       iProcessingInputType, aButtonAct );
 
     switch ( iProcessingInputType )
     {
         case EMpxVideoNone:
         {
-            if ( aButtonAct == ERemConCoreApiButtonPress && iForeground )
+            if ( iForeground )
             {
-                iProcessingInputType = EMpxVideoMediaKeys;
-                iLastMediaKeyPressed = aOperationId;
-                DoHandleMediaKey(aOperationId, aButtonAct);
-            }
-            else if (aButtonAct == ERemConCoreApiButtonClick && iForeground)
-            {
-                DoHandleMediaKey(aOperationId, aButtonAct);
-                // reset on click AND/OR release
-                iProcessingInputType = EMpxVideoNone;
-            }
-            break;
-        }
-        case EMpxVideoMediaKeys:
-        {
-            if (aButtonAct == ERemConCoreApiButtonRelease)
-            {
-                // handle only if this release is for media-key being currently handled
-                // ignore spurious media key presses
-                if (iLastMediaKeyPressed == aOperationId)
+                if ( aButtonAct == ERemConCoreApiButtonPress )
                 {
-                    DoHandleMediaKey(aOperationId, aButtonAct);
+                    iProcessingInputType = EMpxVideoMediaKeys;
+                    iLastMediaKeyPressed = aOperationId;
+                    DoHandleMediaKey( aOperationId, aButtonAct );
+                }
+                else if ( aButtonAct == ERemConCoreApiButtonClick )
+                {
+                    DoHandleMediaKey( aOperationId, aButtonAct );
                     // reset on click AND/OR release
                     iProcessingInputType = EMpxVideoNone;
                 }
             }
             break;
         }
-        default:
+        case EMpxVideoMediaKeys:
         {
-            // user input is disallowed
+            if ( aButtonAct == ERemConCoreApiButtonRelease )
+            {
+                //
+                //  Handle only if this release is for media-key being currently handled
+                //  Ignore spurious media key presses
+                //
+                if ( iLastMediaKeyPressed == aOperationId )
+                {
+                    DoHandleMediaKey( aOperationId, aButtonAct );
+
+                    iProcessingInputType = EMpxVideoNone;
+                }
+            }
             break;
         }
     } // switch
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL()
@@ -503,7 +503,7 @@ TInt CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL( TAny* aPtr )
 //
 void CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()"));
 
     TMPXVideoPlaybackViewCommandIds command = EMPXPbvCmdDecreaseVolume;
 
@@ -520,11 +520,11 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
 //   CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL(CCoeControl* aControl,
-                                                             const TPointerEvent& aPointerEvent,
-                                                             TMPXVideoControlType aMPXControl)
+void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL( CCoeControl* aControl,
+                                                              const TPointerEvent& aPointerEvent,
+                                                              TMPXVideoControlType aMPXControl )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()"));
 
     if ( aMPXControl == EMpxVideoPlaybackContainer )
     {
@@ -540,14 +540,25 @@ void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL(CCoeControl* aContr
 //   CMPXVideoPlaybackUserInputHandler::SetForeground()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::SetForeground(TBool aForeground)
+void CMPXVideoPlaybackUserInputHandler::SetForeground( TBool aForeground )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::SetForeground()"),
+                   _L("aForeground = %d"), aForeground );
+
     iForeground = aForeground;
 
-    if ( !iForeground )
+    if ( ! iForeground )
     {
-        // we are in background so reset iProcessingInputType value
+        //
+        //  Keyboard focus has been lost
+        //  Reset input type and clear volume timer if necessary
+        //
         iProcessingInputType = EMpxVideoNone;
+
+        if ( iVolumeRepeatTimer->IsActive() )
+        {
+            iVolumeRepeatTimer->Cancel();
+        }
     }
 }
 

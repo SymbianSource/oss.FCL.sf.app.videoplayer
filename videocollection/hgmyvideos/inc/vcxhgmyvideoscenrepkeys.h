@@ -48,6 +48,9 @@ const TInt KCRVideoPlayerItemLocation7            = 0x07;
 
 const TInt KCRVideoPlayerCapturedVideosIconPath   = 0x0A;
 const TInt KCRVideoPlayerOtherVideosIconPath      = 0x0B;
+const TInt KCRVideoPlayerPreloadedVideoPath       = 0x0C;
+const TInt KCRVideoPlayerPreloadedVideoName       = 0x0D;
+const TInt KCRVideoPlayerPreloadedVideoDescription= 0x0E;
 
 const TInt KCRVideoPlayerExtraItem1IconPath       = 0x10;
 const TInt KCRVideoPlayerExtraItem1Title          = 0x11;

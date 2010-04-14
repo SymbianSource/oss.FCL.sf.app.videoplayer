@@ -37,4 +37,5 @@ EXPORTS
 	_ZN32CMPXVideoPlaybackViewFileDetails17GenerateFileNameLEv @ 36 NONAME
 	_ZTI35CMPXVideoPlaybackMediaDetailsViewer @ 37 NONAME
 	_ZTV35CMPXVideoPlaybackMediaDetailsViewer @ 38 NONAME
+	_ZN32CMPXVideoPlaybackViewFileDetails18GenerateFileTitleLEv @ 39 NONAME
 

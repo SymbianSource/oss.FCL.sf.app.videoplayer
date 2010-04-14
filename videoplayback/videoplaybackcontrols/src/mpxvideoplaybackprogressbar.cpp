@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#19 %
+// Version : %version: e003sa33#20 %
 
 
 // INCLUDE FILES
@@ -860,6 +860,8 @@ void CMPXVideoPlaybackProgressBar::Reset()
     {
         TPointerEvent event;
         event.iType = TPointerEvent::EButton1Up;
+        event.iPosition.iX = iSliderRect.iTl.iX;
+
         MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }

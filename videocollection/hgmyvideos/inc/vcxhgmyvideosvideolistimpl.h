@@ -188,17 +188,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
         void HandleMarkCommandL( TInt aMarkCommand );
         
         /**
-         * Checks the UI and list status, and returns information to show correct
-         * move and copy -menu items.
-         * 
-         * @param aShowMoveAndCopySubmenu On return, ETrue if move/copy sub-menu cab be shown.
-         * @param aShowCopy On return, ETrue if copy menu item can be shown.
-         * @param aShowMove On return, ETrue if move menu item can be shown.
-         */
-        void ShowMoveAndCopyMenuItemsL( 
-                 TBool& aShowMoveAndCopySubmenu, TBool& aShowCopy, TBool& aShowMove );
-        
-        /**
          * Handles move and copy commands to list.
          * 
          * @param aCopy ETrue if copy command was given. EFalse if move.
@@ -223,7 +212,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          * @param aResourceId Resource ID of menu to be activated.
          * @param aMenuPane Pointer to menu pane.
          */
-        void DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );        
+        void DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );
         
         /**
          * Returns correct MSK resource Id based on current state of video list.
@@ -407,6 +396,26 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
          */
         void OperationTargetsToMpxIdsL( RArray<TInt>& operationTargetIndexes,  
                                         RArray<TInt>& operationTargetIds );
+
+        /**
+         * Add "Send" menu item to menus
+         *
+         * @param aMenuPane Add the menu item to this menu pane
+         * @param aAddToOptions If true, also add to Options menu. If false, only add to context menu.
+         */
+        void AddSendItemToMenuPaneL(
+                CEikMenuPane* aMenuPane,
+                TBool aAddToOptions );
+
+        /**
+         * Handles dynamic initialisation of Move, Copy and Delete menu items
+         *
+         * @param aMenuPane Pointer to menu pane.
+         * @param aItemsMarked If true, also add to Options menu. If false, only add to context menu.
+         */
+        void DynInitMenuPaneFileOperationsL(
+                CEikMenuPane* aMenuPane,
+                TBool aItemsMarked );
 
     protected:
     

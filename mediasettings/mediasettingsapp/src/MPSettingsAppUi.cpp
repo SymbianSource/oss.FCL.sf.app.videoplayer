@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 
@@ -301,7 +301,7 @@ TKeyResponse CMPSettingsAppUi::HandleKeyEventL(
     {
     MPX_DEBUG1(_L("#MS# CMPSettingsAppUi::HandleKeyEventL()"));
     // Check if the event should be handled by iTabGroup
-    if (aType != EEventKey ||  iNaviPane->Top() != iDecoratedTabGroup)
+    if ( !iTabGroup || aType != EEventKey ||  iNaviPane->Top() != iDecoratedTabGroup)
         {
         return EKeyWasNotConsumed;
         }

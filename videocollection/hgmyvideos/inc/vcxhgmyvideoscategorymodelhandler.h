@@ -340,6 +340,22 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
                 const TFileName& aFileName,
                 TInt aBitmapId,
                 TInt aMaskId );
+        
+        /**
+         * Check, if the last watched cenrep key is set
+         * 
+         * @return ETrue if the key has been set, otherwise EFalse
+         */
+        TBool LastWatchedSetL();
+        
+        /**
+         * Check, if the preloaded video exists
+         * If the key exists, but the file is missing, it is considered, 
+         * as it does not exist.
+         *  
+         * @return ETrue if the preloaded does exist, otherwise EFalse
+         */
+        TBool PreloadedExistsL();
 
     private:
     

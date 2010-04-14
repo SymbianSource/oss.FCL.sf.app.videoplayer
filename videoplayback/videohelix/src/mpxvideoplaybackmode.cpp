@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: e003sa33#21 %
+// Version : %version: 22 %
 
 
 
@@ -199,11 +199,12 @@ void CMPXVideoPlaybackMode::HandleBackground()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXVideoPlaybackMode::CanPlayNow
+//  CMPXVideoPlaybackMode::CanPlayNow()
 //  ------------------------------------------------------------------------------------------------
 TBool CMPXVideoPlaybackMode::CanPlayNow()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackMode::CanPlayNow"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackMode::CanPlayNow"));
+
     TBool playAllowed = EFalse;
 
     if ( iVideoPlaybackCtlr->iAppInForeground && iVideoPlaybackCtlr->iAllowAutoPlay )
@@ -362,31 +363,34 @@ void CMPXStreamingPlaybackMode::HandleOpenComplete()
         TInt apMaxLen = 3;
 
         MPX_TRAPD( err,
-                   HBufC8* accessPoint = HBufC8::NewLC( KMMFAccessPoint().Length() + apMaxLen );
-                   accessPoint->Des().Format( KMMFAccessPoint, iVideoPlaybackCtlr->iAccessPointId );
+        {
+            HBufC8* accessPoint = HBufC8::NewLC( KMMFAccessPoint().Length() + apMaxLen );
+            accessPoint->Des().Format( KMMFAccessPoint, iVideoPlaybackCtlr->iAccessPointId );
 
-                   tempBuf = HBufC8::NewLC( accessPoint->Length() );
-                   tempBuf->Des().Copy( accessPoint->Des() );
+            tempBuf = HBufC8::NewLC( accessPoint->Length() );
+            tempBuf->Des().Copy( accessPoint->Des() );
 
-                   if ( tempBuf )
-                   {
-                       iVideoPlaybackCtlr->iPlayer->CustomCommandSync( destinationPckg,
-                                                            EMMFROPControllerSetApplicationConfig,
-                                                            tempBuf->Des(),
-                                                            savePckg );
-                   }
+            if ( tempBuf )
+            {
+                iVideoPlaybackCtlr->iPlayer->CustomCommandSync(
+                                                 destinationPckg,
+                                                 EMMFROPControllerSetApplicationConfig,
+                                                 tempBuf->Des(),
+                                                 savePckg );
+            }
 
-                   CleanupStack::PopAndDestroy(2);   // accessPoint, tempBuf 
-                );
+            CleanupStack::PopAndDestroy(2);
+        } );
     }
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXStreamingPlaybackMode::CanPlayNow
+//    CMPXStreamingPlaybackMode::CanPlayNow
 //  ------------------------------------------------------------------------------------------------
 TBool CMPXStreamingPlaybackMode::CanPlayNow()
 {
-    MPX_DEBUG(_L("CMPXStreamingPlaybackMode::CanPlayNow"));
+    MPX_ENTER_EXIT(_L("CMPXStreamingPlaybackMode::CanPlayNow"));
+
     TBool playAllowed = EFalse;
 
     if ( iVideoPlaybackCtlr->iAppInForeground && iVideoPlaybackCtlr->iAllowAutoPlay )
@@ -425,6 +429,7 @@ TBool CMPXStreamingPlaybackMode::IsTvOutAllowedL()
     MPX_ENTER_EXIT(_L("CMPXStreamingPlaybackMode::IsTvOutAllowedL(1)"));
     return ETrue;
 }
+
 //  ------------------------------------------------------------------------------------------------
 //    CMPXStreamingPlaybackMode::HandlePause()
 //  ------------------------------------------------------------------------------------------------
@@ -440,9 +445,10 @@ void CMPXStreamingPlaybackMode::HandlePause()
         {
             iVideoPlaybackCtlr->ChangeState( EMPXVideoPaused );
 
-            iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
-                                                                  0,
-                                                                  err );
+            iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent(
+                                                   MMPXPlaybackPluginObserver::EPPaused,
+                                                   0,
+                                                   err );
         }
         else
         {

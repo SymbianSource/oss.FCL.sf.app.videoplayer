@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: ou1cpsw#21 %
+
+// Version : %version: 22 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -52,6 +53,7 @@ class CMediaRecognizer;
 class CMPXVideoSeeker;
 class CMpxVideoDrmHelper;
 class CHWRMLight;
+
 //
 //  CLASS DECLARATION
 //
@@ -94,7 +96,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         void HandleSettingChange( const TUid& aRepositoryUid,
                                   TUint32 aSettingId );
 
-        void OpenFileL( const TDesC& aMediaFile, RFile& aFile, TInt aPosition, TInt aAccessPointId = KUseDefaultIap );  
+        void OpenFileL( const TDesC& aMediaFile, RFile& aFile, TInt aPosition, TInt aAccessPointId = KUseDefaultIap );
 
         void HandleGeneralPlaybackCommandL( CMPXCommand& aCmd );
 
@@ -132,7 +134,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-        void OpenFile64L( const TDesC& aMediaFile, RFile64& aFile, TInt aPosition, TInt aAccessPointId = KUseDefaultIap ); 
+        void OpenFile64L( const TDesC& aMediaFile, RFile64& aFile, TInt aPosition, TInt aAccessPointId = KUseDefaultIap );
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
@@ -155,32 +157,34 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         void DetermineMediaTypeL();
 
         void ResetMemberVariables();
-        
+
         void StartLightsControl();
         void CancelLightsControl();
-        
+
         void EnableDisplayBacklight();
         void DisableDisplayBacklight();
-       
+
         static TInt HandleBackLightTimeout( TAny* aPtr );
         void DoHandleBackLightTimeout();
         void StartBackLightTimer();
         void CancelBackLightTimer();
-        
+
         void InitUserActivityTimerL();
         void RestartUserActivityTimer();
         void CancelUserActivityTimer();
         static TInt HandleUserActivityTimeout( TAny* aPtr );
         void DoHandleUserActivityTimeout();
-       
+
         TTimeIntervalMicroSeconds32 InitDisplayTimerL();
         void RestartDisplayTimer();
         void CancelDisplayTimer();
         static TInt HandleDisplayTimeout( TAny* aPtr );
         void DoHandleDisplayTimeout();
-        
+
         CHWRMLight* GetLightsL();
         void ReleaseLights();
+
+        TBool SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed );
 
     protected:
 
@@ -244,15 +248,14 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
 
         // Timer for calling User::ResetInactivityTime() periodicallly while playing.
         // This keeps backligth on and screensaver off.
-        CPeriodic*                              iBackLightTimer;        
-                                                                        
+        CPeriodic*                              iBackLightTimer;
+
         // Timer to turn display lights off when playing to TV-out
-        CPeriodic*                              iDisplayTimer;         
+        CPeriodic*                              iDisplayTimer;
         TTimeIntervalMicroSeconds32             iDisplayTimerTimeout;
         // Timer monitoring user activity when TV-out is connected
-        CPeriodic*                              iUserActivityTimer;     
+        CPeriodic*                              iUserActivityTimer;
 
-        
         TBool                                   iSeekable;
 
         CMpxVideoDrmHelper*                     iDrmHelper;

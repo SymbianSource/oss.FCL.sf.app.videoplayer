@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#14 %
+// Version : %version: e003sa33#15 %
 
 
 // INCLUDES
@@ -395,6 +395,36 @@ void CMPXVideoPlaybackContainer::AddSameARFileDetailsL( TBool aHasVideoTrack )
     {        
         iFileDetails->iVideoHeight = this->Rect().Height();
         iFileDetails->iVideoWidth = this->Rect().Width();
+        
+        iFileDetails->iBitRate = 8000;
+        iFileDetails->iMimeType = _L("video/3gp").Alloc();        
+    }
+
+    if ( iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
+    {
+        iFileDetails->iSeekable = EFalse;
+    }
+
+    iControlsController->AddFileDetailsL( iFileDetails );
+}
+
+//
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackContainer::AddEmptyTitleFileDetailsL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackContainer::AddEmptyTitleFileDetailsL( TBool aHasVideoTrack )
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::AddEmptyTitleFileDetailsL() "));
+
+    iFileDetails->iAudioEnabled = ETrue;
+    iFileDetails->iVideoEnabled = aHasVideoTrack;
+    iFileDetails->iSeekable = ETrue;
+    
+    if ( iFileDetails->iVideoEnabled )
+    {        
+        iFileDetails->iVideoHeight = 176;
+        iFileDetails->iVideoWidth = 144;
         
         iFileDetails->iBitRate = 8000;
         iFileDetails->iMimeType = _L("video/3gp").Alloc();        

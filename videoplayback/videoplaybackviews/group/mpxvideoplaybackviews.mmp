@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#15 %
+// Version : %version: e003sa33#16 %
 
 
 #include <data_caging_paths.hrh>
@@ -82,7 +82,7 @@ LIBRARY             apgrfx.lib
 LIBRARY             mpfiledetailsdialog.lib
 LIBRARY             sysutil.lib 
 LIBRARY             drmuihandling.lib
-
+LIBRARY             inetprotutil.lib
 
 #ifdef SYMBIAN_BUILD_GCE
 LIBRARY             mediaclientvideodisplay.lib

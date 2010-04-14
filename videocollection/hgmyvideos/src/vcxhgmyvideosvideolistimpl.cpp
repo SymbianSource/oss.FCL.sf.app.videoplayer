@@ -249,6 +249,9 @@ void CVcxHgMyVideosVideoListImpl::HandleSelectL( TInt /*aIndex*/ )
 //
 void CVcxHgMyVideosVideoListImpl::HandleOpenL( TInt /*aIndex*/ )
     {
+    // Reset the visible selection of the list.
+    iScroller->DrawDeferred();
+    
     if ( iModel.TouchSupport() )
         {    
         PlayCurrentVideoL();
@@ -622,37 +625,12 @@ void CVcxHgMyVideosVideoListImpl::HandleMarkCommandL( TInt aMarkCommand )
             EndMarkingMode();
             break;
             }
+        default:
+            break;
         }
     
     iView.DynInitMskL();
     iView.DynInitRskL();
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoListImpl::ShowMoveAndCopyMenuItemsL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoListImpl::ShowMoveAndCopyMenuItemsL( 
-        TBool& aShowMoveAndCopySubmenu, TBool& aShowCopy, TBool& aShowMove )
-    {
-    RArray<TInt> operationTargets;
-    CleanupClosePushL( operationTargets );
-    
-    TRAPD( error, GetOperationTargetIndexesL( operationTargets ) );
-
-    if ( error != KErrNone )
-        {
-        aShowMoveAndCopySubmenu = aShowCopy = aShowMove = EFalse;
-        }
-	else
-        {
-        iVideoCopier->ShowMenuItemsL( operationTargets, 
-                                      aShowMoveAndCopySubmenu,
-                                      aShowCopy,
-                                      aShowMove );
-        }
-    
-    CleanupStack::PopAndDestroy( &operationTargets );
     }
 
 // -----------------------------------------------------------------------------
@@ -713,150 +691,67 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
         }
 #endif
 
-    RArray<TInt> markedVideos;
-    CleanupClosePushL( markedVideos );
-    
-    iVideoModel->MarkedVideosL( markedVideos );
-    TInt highlight = Highlight();        
-    TInt count = iVideoModel->VideoCount();
-
-    TVcxMyVideosDownloadState dlState( EVcxMyVideosDlStateNone );
-    TBool progressivePlay( EFalse );
-    
-    if ( count > 0 && highlight >= 0 )
-        {
-        dlState = iVideoModel->VideoDownloadState( highlight );
-        progressivePlay = iVideoModel->IsProgressivePlayPossible( highlight );
-        }
-
-    // Check if there are marked items on the list that can be deleted
-    TBool itemsToDelete( EFalse );
-    
-    for ( TInt i = 0; i < markedVideos.Count(); i++ )
-        {
-        if ( iVideoModel->VideoDownloadState( markedVideos[i] ) == EVcxMyVideosDlStateNone )
-            {    
-            itemsToDelete = ETrue;
-            break;
-            }
-        }
-
-    TBool showDelete = ( ( highlight >= 0 ) && ( count > 0 ) 
-                         && ( ( dlState == EVcxMyVideosDlStateNone && markedVideos.Count() == 0 ) 
-                         || itemsToDelete ) );
-    
     if ( aResourceId == R_VCXHGMYVIDEOS_MAINVIEW_MENU )
-        {      
+        {
+        // Check if list has videos marked
+        RArray<TInt> markedVideos;
+        CleanupClosePushL( markedVideos );
+        iVideoModel->MarkedVideosL( markedVideos );
+        TBool videosMarked = ( markedVideos.Count() > 0 );
+        CleanupStack::PopAndDestroy( &markedVideos );
+
+        TInt highlight = Highlight();
+        TInt count = iVideoModel->VideoCount();
+
+        // Show play menuitem for non-touch
         if ( ! iModel.TouchSupport() )
             {
-            TBool showPlay = ( ( markedVideos.Count() == 0 ) && ( highlight >= 0 ) && ( count > 0 )
-                           && ( ( dlState == EVcxMyVideosDlStateNone ) || ( progressivePlay ) ) );
+            TBool showPlay = ( !videosMarked && ( highlight >= 0 ) && ( count > 0 ) );
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ! showPlay );
             }
 
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDelete, ! showDelete );
-
-        TBool showCancel = ( ( markedVideos.Count() == 0 ) && ( highlight >= 0 ) && ( count > 0 )
-                             && ( dlState != EVcxMyVideosDlStateNone ) );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCancelDownload, ! showCancel );
-
-        TBool showResume = showCancel && ( ( dlState == EVcxMyVideosDlStatePaused ) ||
-                                           ( dlState == EVcxMyVideosDlStateFailed ) );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdResumeDownload, ! showResume );
-
-        TBool showVideoDetails = ( ( markedVideos.Count() == 0 ) &&
-                                   ( highlight >= 0 ) && 
-                                   ( count > 0 ) && 
-                                   ( ( dlState == EVcxMyVideosDlStateNone ) ||
-                                     ( progressivePlay ) ) );        
-        
-        // Dont show file details if file isn't downloaded yet.
-        if( ( VideoModel().VideoDownloadState( Highlight() ) == EVcxMyVideosDlStateDownloading ) ||
-            ( VideoModel().VideoDownloadState( Highlight() ) == EVcxMyVideosDlStateFailed ) ||
-            ( VideoModel().VideoDownloadState( Highlight() ) == EVcxMyVideosDlStatePaused ) )
+        if ( count > 0 )
             {
-            showVideoDetails = EFalse;
-            }
-        
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdVideoDetails, ! showVideoDetails );        
+            // Video details.
+            TBool showVideoDetails = ( !videosMarked && highlight >= 0 );
+            aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdVideoDetails, !showVideoDetails );
 
-        // UPnP menu item. Item's behaviour follows video details item.     
-        if ( showVideoDetails && count > 0 && highlight >= 0 && iUPnP->IsApplicable() )
-            {
-            if ( iUPnP->IsStarted() )
+            // UPnP menu item. Item's behaviour follows video details item.
+            if ( showVideoDetails && iUPnP->IsApplicable() )
                 {
-                aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdStopShowViaHomenet, EFalse);
+                if ( iUPnP->IsStarted() )
+                    {
+                    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdStopShowViaHomenet, EFalse);
+                    }
+                else
+                    {
+                    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdShowViaHomenet, EFalse );
+                    }
+                }
+
+            // Move, copy, delete
+            DynInitMenuPaneFileOperationsL( aMenuPane, videosMarked );
+
+            // Send item
+            if ( highlight >= 0 || videosMarked )
+                {
+                AddSendItemToMenuPaneL( aMenuPane, videosMarked );
+                }
+
+#ifdef RD_VIDEO_AS_RINGING_TONE
+            // Assign (use as) menu item
+            if ( !videosMarked && highlight >= 0 )
+                {
+                aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, EFalse );
                 }
             else
                 {
-                aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdShowViaHomenet, EFalse );
+                // Hide Assign (use as) menu item
+                aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
                 }
-            }
-        
-        // Send menu item.
-        if ( ( highlight >= 0 ) && ( count > 0 ) &&
-                ( dlState == EVcxMyVideosDlStateNone ) )
-            {
-            // Get total size for marked videos
-            RArray<TInt> operationTargets;
-            CleanupClosePushL( operationTargets );
-            
-            GetOperationTargetIndexesL( operationTargets );
-            TInt64 attachmentsTotalSize( 0 );
-            for ( TInt i = 0; i < operationTargets.Count(); i++ )
-                {
-                attachmentsTotalSize += iVideoModel->GetVideoSize( operationTargets[i] );
-                }
-
-            IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL() %d files with total size %ld", operationTargets.Count(), attachmentsTotalSize );
-            
-            // SendUi uses TInt for size, hide Send menu item for over 2GB attachments
-            if ( attachmentsTotalSize > 0 && attachmentsTotalSize < KMaxTInt )
-                {
-                // Place Send menu item on top of "Use as" (Assign) submenu
-                TInt sendItemIndex = 0;
-#ifdef RD_VIDEO_AS_RINGING_TONE                
-                aMenuPane->ItemAndPos( EVcxHgMyVideosCmdAiwAssign, sendItemIndex );
-#else
-                aMenuPane->ItemAndPos( EVcxHgMyVideosCmdSortSubMenu, sendItemIndex );
-#endif
-                // Add Send item to menu
-                TSendingCapabilities capabilities(
-                    0,
-                    attachmentsTotalSize,
-                    TSendingCapabilities::ESupportsAttachments );
-                SendUiL()->AddSendMenuItemL(
-                        *aMenuPane,
-                        sendItemIndex,
-                        EVcxHgMyVideosCmdSend,
-                        capabilities );
-                aMenuPane->SetItemSpecific( EVcxHgMyVideosCmdSend, ETrue );
-
-                // The Send item also needs to be flagged as a list query.
-                CEikMenuPaneItem::SData& itemData = aMenuPane->ItemData( EVcxHgMyVideosCmdSend );
-                itemData.iFlags |= EEikMenuItemSpecificListQuery;
-                }
-            CleanupStack::PopAndDestroy( &operationTargets );
-            }
-
-#ifdef RD_VIDEO_AS_RINGING_TONE
-        // Assign (use as) menu item
-        if ( ( markedVideos.Count() == 0 ) &&
-                ( highlight >= 0 ) && ( count > 0 ) &&
-                ( ( dlState == EVcxMyVideosDlStateNone ) ) )
-            {
-            aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, EFalse );
-            }
-        else
-            {
-            // Hide Assign (use as) menu item
-            aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
-            }
 #endif
 
-        // Marking submenu
-        if( count > 0 )
-            {
+            // Marking submenu
             // Show "Mark/Unmark" only if there are videos in the list
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkUnmarkSubMenu, EFalse);
             }
@@ -867,10 +762,11 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             // Dont show "Sort by" if list is empty.
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdSortSubMenu, ETrue );
             }
-        
+
         // Hide "Settings" menu item
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdOpenSettings, ETrue );
         }
+
 #ifdef RD_VIDEO_AS_RINGING_TONE
     else if ( aResourceId == R_VCXHGMYVIDEOS_USE_AS_SUBMENU )
         {
@@ -895,7 +791,6 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
         CleanupStack::PopAndDestroy( &operationTargets );
         }
 #endif
-    CleanupStack::PopAndDestroy( &markedVideos );
     }
 
 // -----------------------------------------------------------------------------
@@ -1171,4 +1066,105 @@ void CVcxHgMyVideosVideoListImpl::OperationTargetsToMpxIdsL(
             aOperationTargetIds.Append( iVideoModel->GetVideoId( aOperationTargetIndexes[i] ) );
             }
         }
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL()
+// ---------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL(
+        CEikMenuPane* aMenuPane,
+        TBool aAddToOptions )
+    {
+    IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL() enter" );
+    // Get total size of the videos that we're about to send
+    RArray<TInt> operationTargets;
+    CleanupClosePushL( operationTargets );
+
+    GetOperationTargetIndexesL( operationTargets );
+    TInt64 attachmentsTotalSize( 0 );
+    for ( TInt i = 0; i < operationTargets.Count(); i++ )
+        {
+        attachmentsTotalSize += iVideoModel->GetVideoSize( operationTargets[i] );
+        }
+
+    IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL() %d files with total size %ld", operationTargets.Count(), attachmentsTotalSize );
+
+    // SendUi uses TInt for size, hide Send menu item for over 2GB attachments
+    if ( attachmentsTotalSize > 0 && attachmentsTotalSize < KMaxTInt )
+        {
+        // Find place for Send menu item on top of "Use as" (Assign) or Sort submenu
+        TInt sendItemIndex = 0;
+#ifdef RD_VIDEO_AS_RINGING_TONE
+        aMenuPane->ItemAndPos( EVcxHgMyVideosCmdAiwAssign, sendItemIndex );
+#else
+        aMenuPane->ItemAndPos( EVcxHgMyVideosCmdSortSubMenu, sendItemIndex );
+#endif
+        // Add Send item to context menu
+        TSendingCapabilities capabilities(
+            0,
+            attachmentsTotalSize,
+            TSendingCapabilities::ESupportsAttachments );
+        SendUiL()->AddSendMenuItemL(
+                *aMenuPane,
+                sendItemIndex,
+                EVcxHgMyVideosCmdSend,
+                capabilities );
+        aMenuPane->SetItemSpecific( EVcxHgMyVideosCmdSend, ETrue );
+        // The Send item also needs to be flagged as a list query.
+        CEikMenuPaneItem::SData& itemData = aMenuPane->ItemData( EVcxHgMyVideosCmdSend );
+        itemData.iFlags |= EEikMenuItemSpecificListQuery;
+
+        // Add Send to Options menu
+        if ( aAddToOptions )
+            {
+            SendUiL()->AddSendMenuItemL(
+                    *aMenuPane,
+                    sendItemIndex,
+                    EVcxHgMyVideosCmdSendMarked,
+                    capabilities );
+            aMenuPane->SetItemSpecific( EVcxHgMyVideosCmdSendMarked, EFalse );
+            }
+        }
+    CleanupStack::PopAndDestroy( &operationTargets );
+    IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL() return" );
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxHgMyVideosVideoListImpl::DynInitMenuPaneFileOperationsL()
+// ---------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneFileOperationsL(
+        CEikMenuPane* aMenuPane,
+        TBool aItemsMarked )
+    {
+    // Delete
+    TBool showDelete = ( ( Highlight() >= 0 ) || aItemsMarked );
+
+    // Move and copy
+    RArray<TInt> operationTargets;
+    CleanupClosePushL( operationTargets );
+
+    TRAPD( error, GetOperationTargetIndexesL( operationTargets ) );
+
+    TBool showMoveAndCopySubmenu( EFalse );
+    TBool showCopy( EFalse );
+    TBool showMove( EFalse );
+
+    if ( error == KErrNone )
+        {
+        iVideoCopier->ShowMenuItemsL( operationTargets,
+                                      showMoveAndCopySubmenu,
+                                      showCopy,
+                                      showMove );
+        }
+
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopy, !showCopy );
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMove, !showMove );
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDelete, !showDelete );
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopyMarked, !showCopy || !aItemsMarked );
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMoveMarked, !showMove || !aItemsMarked );
+    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDeleteMarked, !showDelete || !aItemsMarked );
+
+    CleanupStack::PopAndDestroy( &operationTargets );
     }

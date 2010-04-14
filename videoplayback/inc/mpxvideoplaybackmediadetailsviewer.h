@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  e003sa33#5 %
+// Version : %version:  e003sa33#6 %
 
 #ifndef MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
 #define MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
@@ -123,19 +123,19 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         void UpdateBackgroundBitmapL() const;
         
         /** 
-        * Timer callback for scroll filename timer
+        * Timer callback for scroll timer
         * @since 9.2 
         * @param aPtr Pointer to timers callback 
         * @return KErrNone 
         */ 
-        static TInt ScrollFilenameTimer( TAny* aPtr );
+        static TInt ScrollTimer( TAny* aPtr );
 
         /** 
-        * Handle Scroll Filename Timer
+        * Handle Scroll Timer
         * @since 9.2 
         * @return void 
         */ 
-        void HandleScrollFilenameTimerL();   
+        void HandleScrollTimerL();
         
         /** 
         * Determine the number of items to be shown in the viewer
@@ -150,9 +150,60 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         * @return the viewer rect
         */                   
         TRect CalculateViewerRectL();          
+
+        /**
+         * Update the text of filename label
+         */
+        void UpdateFilenameL();
+
+        /**
+         * Update the text of title label
+         */
+        void UpdateTitleL();
+
+    private:
+        
+        /**
+         * Scroll the too long text for some label
+         */
+        class TTextScroller
+        {
+            public:
+        
+                /**
+                 * Constructor
+                 */
+                TTextScroller();
+
+                /**
+                 * Check if the source text needs scrolling.
+                 */
+                TBool IsScrollNeeded();
+
+                /**
+                 * Check if the text of a label needs to be updated
+                 */
+                TBool IsUpdateNeeded();
+
+                /**
+                 * Scroll the source text, and append it to the destination text
+                 *
+                 * @param aSrcText the source text to be scrolled.
+                 * @param aDesText to which the scrolled text to be appended
+                 */
+                void ScrollText( const TDesC& aSrcText, TDes& aDesText );
+
+            private:
                 
+                TUint32		iDelayBeginningTick;
+                TInt		iTextScrollPos;
+                TBool		iDelay;
+                TBool		iScroll;
+                TInt		iSrcTextLen;
+        };
 
     private:    // Data
+        
         CMPXVideoPlaybackControlsController* iController;
         
         CEikLabel*                           iClipnameLabel;
@@ -168,11 +219,12 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
 
         CFbsBitmap*                          iBackgroundBitmap;   
         CPeriodic*                           iScrollingTextTimer;
-        TInt                                 iScrollPosition;
-        TBool                                iShouldPauseScrolling;
         TRect                                iViewerRect;
         HBufC*                               iAdditionalString;
-        TUint32                              iScrollTimerDelayBeginningTick;
+        TTextScroller                        iFilenameScroller;
+        TTextScroller                        iTitleScroller;
+        // after every scrolling label has updated, draw them
+        TBool                                iScrolledTextUpdated; 
 };
 
 

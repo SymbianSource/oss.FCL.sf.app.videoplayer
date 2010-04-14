@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#19 %
+// Version : %version: e003sa33#20 %
 
 
 // INCLUDE FILES
@@ -1004,7 +1004,11 @@ void CMPXVideoPlaybackVolumeBar::Reset()
 
     if ( iDragging != EVolumeNotDragging )
     {
-    	iDragging = EVolumeNotDragging;
+        TPointerEvent event;
+        event.iType = TPointerEvent::EButton1Up;
+        event.iPosition.iY = ( iSliderRect.iTl.iY + iSliderRect.iBr.iY ) / 2;
+        
+        MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }
 

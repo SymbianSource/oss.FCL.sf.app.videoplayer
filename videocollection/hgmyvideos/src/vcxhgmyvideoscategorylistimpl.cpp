@@ -156,6 +156,9 @@ void CVcxHgMyVideosCategoryListImpl::HandleSelectL( TInt /* aIndex */ )
 // 
 void CVcxHgMyVideosCategoryListImpl::HandleOpenL( TInt /*aIndex*/ )
     {
+    // Reset the visible selection of the list.
+    iScroller->DrawDeferred();
+
     TInt highlight = Highlight();
     TInt categoryId = iCategoryModel->ResolveCategoryId( highlight );
     

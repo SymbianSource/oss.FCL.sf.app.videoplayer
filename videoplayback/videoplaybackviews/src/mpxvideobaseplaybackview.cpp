@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 68 %
+// Version : %version: e003sa33#71 %
 
 
 //  Include Files
@@ -67,7 +67,10 @@
 #include "mpxvideo_debug.h"
 #include "mpxvideoplayercustomviewmsgconsts.h"
 
-//  Member Functions
+//
+//  Set a constant for the information timeout of 5 seconds
+//
+const TInt KInformationNoteTimeout = 5000000;
 
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoBasePlaybackView::CMPXVideoBasePlaybackView()
@@ -113,6 +116,8 @@ void CMPXVideoBasePlaybackView::InitializeVideoPlaybackViewL()
     iCloseAO = CIdle::NewL( CActive::EPriorityStandard );
 
     BaseConstructL( R_MPX_VIDEO_PLAYBACK_VIEW );
+
+    iAknEventMonitor = static_cast<CAknAppUiBase*>(CCoeEnv::Static()->AppUi())->EventMonitor();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -456,6 +461,15 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     }
 
     //
+    //  Register for window visibility changes
+    //
+    iContainer->GetWindow().EnableVisibilityChangeEvents();
+
+    iKeyboardInFocus = ETrue;
+    iAknEventMonitor->Enable( ETrue );
+    iAknEventMonitor->AddObserverL( this );
+
+    //
     //  Deactivate the CBA set the LSK & RSK to empty
     //
     Cba()->SetCommandSetL( R_AVKON_SOFTKEYS_EMPTY );
@@ -492,6 +506,10 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
     //  Close the playback plugin to release all references to previous clip
     //
     MPX_TRAPD( err, HandleCommandL( EMPXPbvCmdClose ) );
+
+    iAknEventMonitor->Enable( EFalse );
+    iAknEventMonitor->RemoveObserver( this );
+    iKeyboardInFocus = EFalse;
 
     //
     //  Delete the display handler when the view is deactivated
@@ -533,8 +551,7 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
 }
 
 // -------------------------------------------------------------------------------------------------
-// From CAknView
-// Foreground event handling function.
+//   CMPXVideoBasePlaybackView::HandleForegroundEventL()
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoBasePlaybackView::HandleForegroundEventL( TBool aForeground )
@@ -542,31 +559,20 @@ void CMPXVideoBasePlaybackView::HandleForegroundEventL( TBool aForeground )
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleForegroundEventL()"),
                    _L("aForeground = %d"), aForeground );
 
-    TMPXVideoPlaybackCommand videoCmd = EPbCmdHandleBackground;
-
     if ( aForeground )
     {
-        videoCmd = EPbCmdHandleForeground;
         iContainer->HandleEventL( EMPXControlCmdHandleForegroundEvent );
+        iKeyboardInFocus = ETrue;
+
+        SendWindowCommandL( EPbCmdHandleForeground );
     }
     else
     {
         iContainer->HandleEventL( EMPXControlCmdHandleBackgroundEvent );
+        iKeyboardInFocus = EFalse;
+
+        SendWindowCommandL( EPbCmdHandleBackground );
     }
-
-    //
-    //  create command to pass to playback plugin
-    //
-    CMPXCommand* cmd = CMPXCommand::NewL();
-    CleanupStack::PushL( cmd );
-
-    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
-    cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
-    cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, videoCmd );
-    cmd->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, IsAppInFrontL() );
-
-    iPlaybackUtility->CommandL( *cmd );
-    CleanupStack::PopAndDestroy( cmd );
 
     CAknView::HandleForegroundEventL( aForeground );
 }
@@ -873,6 +879,9 @@ void CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()"));
 
+    // Reset the playback state to stopped
+    iPlaybackState = EPbStateStopped;
+    
     if ( IsMultiItemPlaylist() )
     {
         RemoveBackgroundSurfaceL();
@@ -1056,7 +1065,6 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // Handle playback error message.
 // -------------------------------------------------------------------------------------------------
@@ -1079,7 +1087,6 @@ void CMPXVideoBasePlaybackView::HandlePlaybackCommandComplete( CMPXCommand* /*aC
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandlePlaybackCommandComplete()"));
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoBasePlaybackView::ParseMetaDataL()
@@ -1377,9 +1384,6 @@ void CMPXVideoBasePlaybackView::HandleMediaL( const CMPXMedia& aMedia, TInt aErr
 
             // Handle the plugin error
             HandlePluginErrorL( error );
-
-            // Reset the playback state to stopped
-            iPlaybackState = EPbStateStopped;
         }
         else
         {
@@ -1480,6 +1484,7 @@ void CMPXVideoBasePlaybackView::DisplayInfoMessageL( TInt aResourceId, TBool aWa
     HBufC* text = StringLoader::LoadLC( aResourceId );
 
     CAknInformationNote* dlg = new (ELeave) CAknInformationNote( aWaitingDialog );
+    dlg->SetTimeout( (CAknNoteDialog::TTimeout) KInformationNoteTimeout );
     dlg->ExecuteLD( *text );
     CleanupStack::PopAndDestroy( text );
 }
@@ -1516,7 +1521,6 @@ void CMPXVideoBasePlaybackView::RetrieveFileNameAndModeL( CMPXCommand* aCmd )
 
     iPlaybackUtility->CommandL( *aCmd );
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoBasePlaybackView::ActivateClosePlayerActiveObject
@@ -1624,10 +1628,9 @@ void CMPXVideoBasePlaybackView::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
     }
 }
 
-// ---------------------------------------------------------------------------
-// CMPXVideoBasePlaybackView::IsAppInFrontL()
-// Returns true if app is foreground. Uses windowgroup id
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::IsAppInFrontL()
+// -------------------------------------------------------------------------------------------------
 //
 TBool CMPXVideoBasePlaybackView::IsAppInFrontL()
 {
@@ -1642,14 +1645,13 @@ TBool CMPXVideoBasePlaybackView::IsAppInFrontL()
         CArrayFixFlat<TInt>* wgList =
             new (ELeave) CArrayFixFlat<TInt>( wsSession.NumWindowGroups() );
 
-        // check if our window is front or not
         if ( wsSession.WindowGroupList( 0, wgList ) == KErrNone )
         {
+            //
+            //  If this window group is at the start of the window group array,
+            //  this application is in the front
+            //
             ret = ( iCoeEnv->RootWin().Identifier() == wgList->At(0) );
-        }
-        else
-        {
-            ret = EFalse;
         }
 
         delete wgList;
@@ -2204,6 +2206,55 @@ void CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()
         CreateGeneralPlaybackCommandL( EPbCmdPlay );
         iRealOneDelayedPlay = EFalse;
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::HandleWsEventL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::HandleWsEventL( const TWsEvent& aEvent,
+                                                CCoeControl* /*aDestination*/ )
+{
+    //
+    //  Fg/Bg events aren't received when the view has lost keyboard focus
+    //  If we are sent to full background, sent a background command to the playback plugin
+    //
+    if ( ! iKeyboardInFocus && aEvent.Type() == EEventWindowVisibilityChanged )
+    {
+        MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleWsEventL() EEventWindowVisibilityChanged"));
+
+        TUint visible = aEvent.VisibilityChanged()->iFlags;
+
+        if ( visible & TWsVisibilityChangedEvent::ENotVisible )
+        {
+            MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleWsEventL() ENotVisible"));
+            SendWindowCommandL( EPbCmdHandleBackground );
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::SendWindowCommandL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCmd )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::SendWindowCommandL()"),
+                   _L("aCmd = %d"), aCmd );
+
+    //
+    //  create command to pass to playback plugin
+    //
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+
+    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
+    cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, aCmd );
+    cmd->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, IsAppInFrontL() );
+
+    iPlaybackUtility->CommandL( *cmd );
+    CleanupStack::PopAndDestroy( cmd );
 }
 
 // EOF
