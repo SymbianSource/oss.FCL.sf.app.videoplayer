@@ -182,6 +182,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
     CleanupClosePushL( newVideosIncrements ); // 2->
 
     TInt i;
+    videosIncrements.ReserveL( categoryCount );
+    newVideosIncrements.ReserveL( categoryCount );
     for ( i = 0; i < categoryCount; i++ )
         {
         videosIncrements.AppendL( 0 );
@@ -280,18 +282,20 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             {
             category = aCategoryArray.AtL( i );
 
-            UpdateVideosCountL( *category, aVideosIncrements[i], KVcxMediaMyVideosCategoryItemCount,
-                    EVcxMyVideosListNoInfo );
+            //codescanner warning: aVideosIncrements count is same as aCategoryArray count, so the range is checked
+            UpdateVideosCountL( *category, aVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
 
+        //codescanner warning: aNewVideosIncrements count is same as aCategoryArray count, so the range is checked
         if ( aNewVideosIncrements[i] != 0 )
             {
             category = aCategoryArray.AtL( i );
 
-            UpdateVideosCountL( *category, aNewVideosIncrements[i], KVcxMediaMyVideosCategoryNewItemCount,
-                    EVcxMyVideosListNoInfo );
+            UpdateVideosCountL( *category, aNewVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryNewItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
@@ -687,7 +691,8 @@ void CVcxMyVideosCategories::UpdateCategoryNewVideoNameAndDateL( TInt aOrigin, T
     prevNewVideoName.Set( iListArray->AtL( categoryIndex )->ValueText(
             KVcxMediaMyVideosCategoryNewItemName ) );
     CMPXMedia* newVideo;
-    currentNewVideoName.Set( CalculateNewVideoNameL( *videoList, aOrigin, aIgnoredIds, newVideo ) );
+    currentNewVideoName.Set( CalculateNewVideoNameL(
+            *videoList, aOrigin, aIgnoredIds, newVideo ) );
     if ( currentNewVideoName.CompareF( prevNewVideoName ) != 0 )
         {
         iListArray->AtL( categoryIndex )->SetTextValueL(

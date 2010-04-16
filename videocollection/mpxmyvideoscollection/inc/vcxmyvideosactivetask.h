@@ -28,11 +28,22 @@
 NONSHARABLE_CLASS( MVcxMyVideosActiveTaskObserver )
     {
 public:
+    
+    enum TStepResult
+        {
+        EMoreToCome,
+        EDone,
+        /**
+         * Observer is responsible for calling Done or ContinueStepping if returning this.
+         */
+        EStopStepping
+        };
+    
     /**
     * Handle the execution of a step
-    * @return ETrue if complete, EFalse if more to do
+    * @return TStepResult
     */
-    virtual TBool HandleStepL() = 0;
+    virtual TStepResult HandleStepL() = 0;
     /**
     * Handle the completion of the operation
     */
@@ -84,7 +95,26 @@ public:    // Accessor functions
     */
     CMPXCommand& GetCommand();
 
+    /**
+    * Get the command for the current task.
+    * @return the current command, ownership does not move.
+    */        
+    CMPXMedia* Command();
+    
+    /**
+     * If observer returns EStopStepping from HandleStepL, then observer must call
+     * this or ContinueStepping when sub operation is finished.
+     * Can be used to run async operations.
+     */
+    void Done();
 
+    /**
+     * If observer returns EStopStepping from HandleStepL, then observer must call
+     * this or Done when sub operation is finished.
+     * Can be used to run async operations.
+     */
+    void ContinueStepping();
+    
 protected: // From base class
 
     /**

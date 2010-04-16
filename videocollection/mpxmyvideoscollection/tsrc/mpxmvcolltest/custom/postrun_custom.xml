@@ -14,30 +14,6 @@
 	    <param path="c:\logs\Fusion\*"/>
        </params>
 </step>
-<step name="Fetch Livetv logs" harness="STIF" enabled="true" passrate="100" significant="false">
-       <command>fetch-log</command>
-       <params>
-	    <param type="text"/>
-	    <param delete="true"/>
-	    <param path="c:\logs\Livetv\*"/>
-       </params>
-</step>
-<step name="Fetch IPTV logs" harness="STIF" enabled="true" passrate="100" significant="false">
-       <command>fetch-log</command>
-       <params>
-	    <param type="text"/>
-	    <param delete="true"/>
-	    <param path="c:\logs\iptv\*"/>
-       </params>
-</step>
-<step name="Fetch verify files" harness="STIF" enabled="true" passrate="100" significant="false">
-       <command>fetch-log</command>
-       <params>
-	    <param type="text"/>
-	    <param delete="true"/>
-	    <param path="c:\testing\data\verifynew\*"/>
-       </params>
-</step>
 <step name="Fetch TestScripter logs" harness="STIF" enabled="true" passrate="100" significant="false">
        <command>fetch-log</command>
        <params>

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 
@@ -1157,6 +1157,11 @@ TUint32 CMPSettingsModelForROP::WapIdFromIapIdL( TUint32 aIapId )
     {
     MPX_DEBUG2(_L("#MS# CMPSettingsModelForROP::WapIdFromIapIdL(%d)"),aIapId);
     
+    TUint32 wap = 0;
+#ifdef __WINSCW__    
+    wap = aIapId;
+#else    
+    
     CMDBSession* db = CMDBSession::NewL( CMDBSession::LatestVersion() );
     CleanupStack::PushL( db );
     
@@ -1169,16 +1174,17 @@ TUint32 CMPSettingsModelForROP::WapIdFromIapIdL( TUint32 aIapId )
     wapBearerRecord->iWAPIAP = aIapId;
     
     TBool found = wapBearerRecord->FindL( *db );
-    
     if ( !found )
         {
         User::Leave(KErrNotFound);
         }
 
-    TUint32 wap = static_cast<TUint32>( wapBearerRecord->iWAPAccessPointId );
+    wap = static_cast<TUint32>( wapBearerRecord->iWAPAccessPointId );
     
     CleanupStack::PopAndDestroy( wapBearerRecord );
     CleanupStack::PopAndDestroy( db );
+
+#endif    
     
     MPX_DEBUG2(_L("#MS# CMPSettingsModelForROP::IapIdFromWapIdL() - return wap id: %d "), wap);
     return wap;
@@ -1192,6 +1198,10 @@ TUint32 CMPSettingsModelForROP::IapIdFromWapIdL( TUint32 aWapId )
     {
     MPX_DEBUG2(_L("#MS# CMPSettingsModelForROP::IapIdFromWapIdL(%d)"),aWapId);
     
+    TUint32 iap = 0;
+#ifdef __WINSCW__
+    iap = aWapId;
+#else    
     CMDBSession* db = CMDBSession::NewL( CMDBSession::LatestVersion() );
     CleanupStack::PushL( db );
     
@@ -1210,10 +1220,12 @@ TUint32 CMPSettingsModelForROP::IapIdFromWapIdL( TUint32 aWapId )
         User::Leave(KErrNotFound);
         }
 
-    TUint32 iap = static_cast<TUint32>( wapBearerRecord->iWAPIAP );
+    iap = static_cast<TUint32>( wapBearerRecord->iWAPIAP );
     
     CleanupStack::PopAndDestroy( wapBearerRecord );
     CleanupStack::PopAndDestroy( db );
+
+#endif
     
     MPX_DEBUG2(_L("#MS# CMPSettingsModelForROP::IapIdFromWapIdL() - return iap id: %d "), iap);
     return iap;

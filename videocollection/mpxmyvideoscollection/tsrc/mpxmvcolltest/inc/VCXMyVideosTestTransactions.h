@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
 
 #ifndef VCXMYVIDEOSTESTTRANSACTIONS_H
 #define VCXMYVIDEOSTESTTRANSACTIONS_H

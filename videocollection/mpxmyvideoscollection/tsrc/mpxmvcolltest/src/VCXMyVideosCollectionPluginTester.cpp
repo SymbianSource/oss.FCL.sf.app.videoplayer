@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
 
 // INCLUDE FILES
 #include <e32svr.h>
@@ -37,14 +36,12 @@
 #include <mpxcommandgeneraldefs.h>
 #include <mpxcollectioncommanddefs.h>
 
-#include "VCXTestCommon.h"
+#include "VCXMyVideosTestUtils.h"
 #include "VCXTestLog.h"
-#include "CIptvTestTimer.h"
-#include "CIptvTestActiveWait.h"
-#include "VCXTestStatsKeeper.h"
+#include "CVcxTestActiveWait.h"
 
 #include "VCXMyVideosCollectionPluginTester.h"
-#include "VCXMyVideosTestDlWatcher.h"
+#include "VCXMyVideosTestUtils.h"
 #include "VCXMyVideosTestCommon.h"
 
 #include "vcxmyvideoscollection.hrh"
@@ -61,11 +58,11 @@
 // -----------------------------------------------------------------------------
 //
 CVCXMyVideosCollectionPluginTester* CVCXMyVideosCollectionPluginTester::NewL(
-            MVCXMyVideosCollectionPluginTesterObserver* aObserver, CVCXTestCommon* aTestCommon, CVCXTestStatsKeeper* aStatsKeeper )
+            MVCXMyVideosCollectionPluginTesterObserver* aObserver, CVCXMyVideosTestUtils* aTestUtils )
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::NewL");
     CVCXMyVideosCollectionPluginTester* self = 
-        new (ELeave) CVCXMyVideosCollectionPluginTester( aObserver, aTestCommon, aStatsKeeper );
+        new (ELeave) CVCXMyVideosCollectionPluginTester( aObserver, aTestUtils );
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
@@ -79,8 +76,12 @@ CVCXMyVideosCollectionPluginTester* CVCXMyVideosCollectionPluginTester::NewL(
 //
 CVCXMyVideosCollectionPluginTester::CVCXMyVideosCollectionPluginTester( 
         MVCXMyVideosCollectionPluginTesterObserver* aObserver,
-        CVCXTestCommon* aTestCommon, CVCXTestStatsKeeper* aStatsKeeper )
- : iObserver( aObserver ), iTestCommon( aTestCommon ), iStats( aStatsKeeper )
+        CVCXMyVideosTestUtils* aTestUtils ) :
+iObserver( aObserver ), 
+iTestUtils( aTestUtils ),
+iCurrentLevelName( NULL ),
+iAutomaticContentRefresh( ETrue),
+iCurrentOpenedLevelIndex( -1 )
     {
 
     }
@@ -92,16 +93,6 @@ CVCXMyVideosCollectionPluginTester::CVCXMyVideosCollectionPluginTester(
 CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester( )
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester");
-
-    if( iProgressTimer )
-        {
-        iProgressTimer->CancelTimer();
-        delete iProgressTimer;
-        iProgressTimer = NULL;
-        }
-
-    delete iDlWatcher;
-    iDlWatcher = NULL;
 
     if( iCollectionUtility )
         {
@@ -121,9 +112,17 @@ CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester( )
 
     if( iMediaArray )
         {
+        PrintMediasL( iMediaArray, EFalse, _L("Items") );
         iMediaArray->Reset();
         delete iMediaArray;
         iMediaArray = NULL;
+        }
+
+    if( iMediaArrayCopy )
+        {
+        iMediaArrayCopy->Reset();
+        delete iMediaArrayCopy;
+        iMediaArrayCopy = NULL;
         }
 
     iFs.Close();
@@ -153,6 +152,9 @@ CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester( )
     delete iTransactions;
     iTransactions = NULL;
     
+    iAlbumNames.ResetAndDestroy();
+    iAlbumNames.Close();
+    
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester");
     }
 
@@ -163,18 +165,13 @@ CVCXMyVideosCollectionPluginTester::~CVCXMyVideosCollectionPluginTester( )
 void CVCXMyVideosCollectionPluginTester::ConstructL()
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::ConstructL");
-    iAutomaticContentRefresh = ETrue;
+    
 
-    iActiveWait = CIptvTestActiveWait::NewL();
+    iActiveWait = CVcxTestActiveWait::NewL();
     User::LeaveIfError( iFs.Connect() );
     
     iTransactions = CVCXMyVideosTestTransactions::NewL();
     iCollectionUtility = MMPXCollectionUtility::NewL( this, KMcModeIsolated );
-    iDlWatcher = CVCXMyVideosTestDlWatcher::NewL( iObserver, iStats );
-    iUpdateDownloads = ETrue;
-    iCurrentOpenedLevelIndex = -1;
-    iProgressTimer = CIptvTestTimer::NewL( *this, 0 );
-    iProgressTimer->After( 1000000 );
     
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::ConstructL");
     }
@@ -192,16 +189,70 @@ void CVCXMyVideosCollectionPluginTester::OpenCollectionL( TUint32 aCollectionUid
     iCollectionUid = TUid::Uid( aCollectionUid );
     path->AppendL( aCollectionUid );
     
-    TRAP_IGNORE( iStats->ActionStartL( KOpenCollectionActionId, _L("Open collection") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCurrentActionId = KOpenCollectionActionId;
     SetRefreshStatus( ETrue );
     
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTester::OpenCollectionL: collectionId: 0x%x", aCollectionUid);
+    
     iCollectionUtility->Collection().OpenL( *path );
+    iCurrentOpenedLevelIndex = -1;
     
     CleanupStack::PopAndDestroy( path );
     
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::OpenCollectionL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::OpenLevelL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::OpenLevelL( const TDesC& aLevelName )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::OpenLevelL (by name)");
+
+    if( GetCurrentLevel() != 2 )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Error. My videos collection must be open!");
+        User::Leave( KErrGeneral );
+        }
+
+    CMPXMedia* media;
+
+    int levelIndex(-1);
+    
+    // From last to first
+    for( TInt i = iMediaArray->Count()-1; i >= 0; i-- )
+        {
+        media = (*iMediaArray)[i];
+        
+        if( media->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            if( media->ValueText( KMPXMediaGeneralTitle ).Compare( aLevelName ) == KErrNone )
+                {
+                TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
+                VCXLOGLO3("CVCXMyVideosCollectionPluginTester::OpenLevelL: mpx id1: %d, id2: %d", itemId.iId1, itemId.iId2);
+                
+                levelIndex = i;
+                delete iCurrentLevelName;
+                iCurrentLevelName = NULL;
+                iCurrentLevelName = media->ValueText( KMPXMediaGeneralTitle ).AllocL();
+                break;
+                }
+            }
+        }
+    
+    if( levelIndex == -1 )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:::OpenLevelL: Couldn't find the level!");
+        User::Leave( KErrNotFound );
+        }
+    
+    // Open the level
+    iCollectionUtility->Collection().OpenL( levelIndex );
+    
+    iCurrentOpenedLevelIndex = levelIndex;
+    SetRefreshStatus( ETrue );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester:::OpenLevelL (by name)");
     }
 
 // -----------------------------------------------------------------------------
@@ -218,29 +269,24 @@ void CVCXMyVideosCollectionPluginTester::OpenLevelL( TInt aIndex )
         User::Leave( KErrGeneral );
         }
 
-    if( aIndex < 0 || aIndex > iMediaArray->Count() )
+    if( aIndex >= 0 || aIndex < iMediaArray->Count() )
         {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Error. Index (%d) out of bounds!", aIndex);
-        User::Leave( KErrGeneral );
+        CMPXMedia* media(NULL);
+        media = (*iMediaArray)[aIndex];
+
+        if( media->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            delete iCurrentLevelName;
+            iCurrentLevelName = NULL;
+            iCurrentLevelName = media->ValueText( KMPXMediaGeneralTitle ).AllocL();
+            }
         }
-
-    // Save the name of level
-
-    CMPXMedia* media(NULL);
-    media = (*iMediaArray)[aIndex];
-
-    if( media->IsSupported( KMPXMediaGeneralTitle ) )
+    else
         {
-        delete iCurrentLevelName;
-        iCurrentLevelName = NULL;
-        iCurrentLevelName = media->ValueText( KMPXMediaGeneralTitle ).AllocL();
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester::OpenLevelL: level index is invalid. Opening..");
         }
 
     // Open the level
-    TRAP_IGNORE( iStats->ActionStartL( KOpenCollectionLevelActionId, _L("Open level") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCurrentActionId = KOpenCollectionLevelActionId;
-    
     iCollectionUtility->Collection().OpenL( aIndex );
     
     iCurrentOpenedLevelIndex = aIndex;
@@ -257,12 +303,14 @@ void CVCXMyVideosCollectionPluginTester::RefreshContentsL()
     {
     //VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::RefreshContentsL");
 
+#if 0
     // No need to refresh if My Videos category is not open.
     if( GetCurrentLevel() != 3)
         {
         VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: No refresh because level.");
         return;
         }
+#endif 
 
     // Wait previous refresh to complete.
     if( IsRefreshing() )
@@ -275,9 +323,6 @@ void CVCXMyVideosCollectionPluginTester::RefreshContentsL()
     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Refreshing video list ----->");
     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: ----------------------------");
 
-    TRAP_IGNORE( iStats->ActionStartL( KRefreshCollectionActionId, _L("Refreshing collection") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCurrentActionId = KRefreshCollectionActionId;
     iCollectionUtility->Collection().OpenL();
     SetRefreshStatus( ETrue );
 
@@ -319,10 +364,7 @@ void CVCXMyVideosCollectionPluginTester::GetMediasByMpxIdL( TInt aStartIndex, TI
         cmd->SetTObjectValueL( KMPXMediaArrayCount, requestedMediaObjects->Count() );
         }
 
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Doing request.");
     iActionCount++;
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Get medias by MPX ID") ) );
-    iCurrentActionHasResponse = ETrue;
     iCollectionUtility->Collection().CommandL( *cmd );
 
     SetRefreshStatus( ETrue );
@@ -356,8 +398,7 @@ void CVCXMyVideosCollectionPluginTester::GetMediaFullDetailsL( TInt aDrive, TInt
     CleanupStack::PushL( path );
     VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selecting %d", realIndex);
     path->SelectL( realIndex );
-    TRAP_IGNORE( iStats->ActionStartL( KGetMediaFullDetailsActionId, _L("Get media full details") ) );
-    iCurrentActionHasResponse = EFalse;
+
     iCollectionUtility->Collection().MediaL( *path, attrs.Array() );
     CleanupStack::PopAndDestroy( path );
     CleanupStack::PopAndDestroy( &attrs );
@@ -387,10 +428,7 @@ void CVCXMyVideosCollectionPluginTester::GetMediaFullDetailsByMpxIdL( TInt aDriv
 
     cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosGetMediaFullDetailsByMpxId, aSync );    
     cmd->SetTObjectValueL( KMPXMediaGeneralId, itemId );    
-    TRAP_IGNORE( iStats->ActionStartL( KGetMediaFullDetailsActionId, _L("Get media full details by MPX ID") ) );
     iCollectionUtility->Collection().CommandL( *cmd );
-    
-    iCurrentActionHasResponse = EFalse;
     
     CleanupStack::PopAndDestroy( cmd );
 
@@ -443,12 +481,8 @@ void CVCXMyVideosCollectionPluginTester::ProcessCurrentEntriesL()
                     PrintMediasL( iMediaArray, ETrue, *iCurrentLevelName );
                     }
                 }
-
-            // Update download states and info
-            if( GetCurrentLevel() == 3 && iUpdateDownloads && iDownloadsStarted )
-                {
-                UpdateDownloadsL( iQuietMode );
-                }
+            
+            UpdateAlbumsListL();
             }
         else
             {
@@ -460,643 +494,7 @@ void CVCXMyVideosCollectionPluginTester::ProcessCurrentEntriesL()
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::UpdateDownloadsL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::UpdateDownloadsL( TBool aQuietMode )
-    {
-    if( !iMediaArray || !iDlWatcher )
-        {
-        return;
-        }
-
-    if( !aQuietMode )
-        VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::UpdateDownloadsL ---------->");
-
-    iDlWatcher->PrepareCheck();
-
-    // Print short info about downloads
-    CMPXMedia* media( NULL );
-
-    for( TInt i = 0; i < iMediaArray->Count(); i++ )
-        {
-        media = (*iMediaArray)[i];
-
-        // If it's download then get info about it and update download watcher.
-        if( media->IsSupported( KVcxMediaMyVideosDownloadState ) )
-            {
-            TInt state = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-
-            TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
-
-            HBufC* titleBuff = NULL;
-            HBufC* urlBuff = NULL;
-            HBufC* pathBuff = NULL;
-
-            if( media->IsSupported( KMPXMediaGeneralUri ) )
-                {
-                const TDesC& url = media->ValueText( KMPXMediaGeneralUri );
-                pathBuff = url.AllocL();
-                CleanupStack::PushL( pathBuff );
-                }
-
-            if( media->IsSupported( KMPXMediaGeneralTitle ) )
-                {
-                const TDesC& title = media->ValueText( KMPXMediaGeneralTitle );
-                titleBuff = title.AllocL();
-                CleanupStack::PushL( titleBuff );
-                }
-
-            if( media->IsSupported( KVcxMediaMyVideosRemoteUrl ) )
-                {
-                const TDesC& url = media->ValueText( KVcxMediaMyVideosRemoteUrl );
-                urlBuff = url.AllocL();
-                CleanupStack::PushL( urlBuff );
-                }
-
-            TInt progress = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadProgress ) )
-                {
-                progress = media->ValueTObjectL<TInt8>( KVcxMediaMyVideosDownloadProgress );
-                }
-
-            TUint32 downloadId = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadId ) )
-                {
-                downloadId = media->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-                }
-
-            TInt downloadError = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadError ) )
-                {
-                downloadError = media->ValueTObjectL<TInt32>( KVcxMediaMyVideosDownloadError );
-                }
-
-            TInt globalError = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadGlobalError ) )
-                {
-                globalError = media->ValueTObjectL<TInt32>( KVcxMediaMyVideosDownloadGlobalError );
-                }
-
-            CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownloadByMpxId( itemId.iId1 );
-
-            if( !dl )
-                {
-                // Tell dl watcher that dl has started. 
-                if( state != EVcxMyVideosDlStateNone )
-                    {
-                    iDlWatcher->StartDownloadL( *urlBuff, *pathBuff, downloadId, itemId.iId1, *titleBuff,
-                            static_cast<TVcxMyVideosDownloadState>( state ), progress );
-                    }
-                }
-            else
-                {
-                // Update download. 
-                    iDlWatcher->UpdateDownloadStateL( itemId.iId1, downloadId, 
-                            static_cast<TVcxMyVideosDownloadState>( state ), progress, 
-                            downloadError, globalError );
-                    
-                }
-            
-            if( state == EVcxMyVideosDlStatePaused && iAutoResume )
-                {
-                if( dl && !dl->iWaitingResume )
-                    {
-                    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: <---------- Autoresuming the paused download. ---------->");
-                    ResumeDownloadL( _L("resume"), dl->iIapId, dl->iServiceId, dl->iContentId, *dl->iUrl, dl->iSyncCall, *dl->iUserName, *dl->iPassword, NULL );
-                    iDlWatcher->SetDownloadResumedFlagL( itemId.iId1, downloadId );
-                    dl->iWaitingPause = EFalse;
-                    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: <---------- Resume ok ---------->");
-                    }
-                }
-
-            if( urlBuff )
-                {
-                CleanupStack::PopAndDestroy( urlBuff );
-                }
-            if( titleBuff )
-                {                
-                CleanupStack::PopAndDestroy( titleBuff );
-                }
-            if( pathBuff )
-                {                       
-                CleanupStack::PopAndDestroy( pathBuff );
-                }
-            }
-        }
-
-    if( !aQuietMode )
-        {
-        iDlWatcher->PrintDownloads();
-        }
-
-    iDlWatcher->FinishCheckL();
-    if( !aQuietMode )
-        VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::UpdateDownloadsL <----------");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CreateMpxCommandLC
-// -----------------------------------------------------------------------------
-//
-CMPXCommand* CVCXMyVideosCollectionPluginTester::CreateMpxCommandLC( TInt aCommandGeneralId, TInt aMyVideosCommandId, TBool aSync )
-    {
-    CMPXCommand* cmd = CMPXCommand::NewL();
-    CleanupStack::PushL( cmd );
-
-    cmd->SetTObjectValueL( KMPXCommandGeneralId, aCommandGeneralId );
-    if( aCommandGeneralId == KVcxCommandIdMyVideos )
-        {
-        cmd->SetTObjectValueL( KVcxMediaMyVideosCommandId, aMyVideosCommandId );
-        }
-
-    cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, aSync );
-
-    if( !aSync )
-        {
-        // Transaction id is used also tracking stats, so increment for every command.
-        iTransactions->NextTransactionId();
-
-        if( aCommandGeneralId == KVcxCommandIdMyVideos )
-            {
-            cmd->SetTObjectValueL( KVcxMediaMyVideosTransactionId, iTransactions->TransactionId() );
-            iTransactions->AddTransactionId( aMyVideosCommandId );
-            }
-        }
-
-    cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId, iCollectionUid.iUid );
-
-    return cmd;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::SelectMediasL
-// -----------------------------------------------------------------------------
-//
-CMPXMediaArray* CVCXMyVideosCollectionPluginTester::SelectMediasL( TInt aDriveFilter, TInt aStartIndex, TInt aEndIndex )
-    {
-    if( aStartIndex == -4 )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester::SelectMediasL - returning NULL");
-        return NULL;
-        }
-
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::SelectMediasL");
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL: aStartIndex: %d", aStartIndex);
-
-    if( !iMediaArray )
-        {
-        User::Leave( KErrNotReady );
-        }
-
-    iRequestedMediaIds.Reset();
-
-    CMPXMediaArray* medias = CMPXMediaArray::NewL();
-
-    // None
-    if( aStartIndex > aEndIndex )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Selected none of the videos.");
-        VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::SelectMediasL");
-        return medias;
-        }
-
-    CleanupStack::PushL( medias );
-
-    if( aStartIndex >= 0 )
-        {
-        if( aEndIndex > iMediaArray->Count() )
-            {
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
-            User::Leave( KErrArgument );
-            }
-
-        TInt countToSelect = aEndIndex - aStartIndex;
-        TInt indexOfVideoOnDrive = 0;
-        
-        for( TInt i = 0; i < iMediaArray->Count(); i++ )
-            {
-            CMPXMedia* media = (*iMediaArray)[i];
-
-            if( media )
-                {
-                TBool selectThis( EFalse );
-                
-                if( aDriveFilter != -1 )
-                    {
-                    // Drive specified, check path and index of video on the drive.
-                    const TDesC& localFilePath = media->ValueText( KMPXMediaGeneralUri );
-                    TInt drive( 0 );
-                    User::LeaveIfError( iFs.CharToDrive( localFilePath[0], drive ) );
-
-                    if( drive == aDriveFilter )
-                        {
-                        if( indexOfVideoOnDrive >= aStartIndex && indexOfVideoOnDrive < aEndIndex )
-                            {
-                            selectThis = ETrue;
-                            }
-                        indexOfVideoOnDrive++;                        
-                        }
-                    }
-                else
-                    {
-                    // No drive specified, just index check.
-                    if( i >= aStartIndex && i < aEndIndex )
-                        {
-                        selectThis = ETrue;
-                        }
-                    }
-
-                if( selectThis )
-                    {
-                    TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-                    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. MPX ID: %d", mpxId.iId1);
-                    iRequestedMediaIds.Append( mpxId.iId1 );
-                    CMPXMedia* newMedia = CMPXMedia::NewL();
-                    CleanupStack::PushL( newMedia );
-                    newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
-                    newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
-                    medias->AppendL( *newMedia );
-                    CleanupStack::PopAndDestroy( newMedia );
-    
-                    if( medias->Count() >= countToSelect )
-                        {
-                        break;
-                        }
-                    }
-                }
-            }
-        }
-
-    // Invalid IDs
-    if( aStartIndex == -1 )
-        {
-        for( TInt i = 0; i < aEndIndex; i++ )
-            {
-            TMPXItemId mpxId;
-            mpxId.iId1 = i+66666;
-            mpxId.iId2 = 0;
-
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. Invalid MPX ID: %d", mpxId.iId1);
-
-            CMPXMedia* newMedia = CMPXMedia::NewL();
-            CleanupStack::PushL( newMedia );
-            newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
-            newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
-            medias->AppendL( *newMedia );
-            CleanupStack::PopAndDestroy( newMedia );
-            }
-        }
-
-    // Duplicate IDs
-    if( aStartIndex == -2 )
-        {
-        if( aEndIndex > iMediaArray->Count() )
-            {
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
-            User::Leave( KErrArgument );
-            }
-
-        for( TInt i = 0; i < aEndIndex; i++ )
-            {
-            CMPXMedia* media = (*iMediaArray)[i];
-
-            if( media )
-                {
-                TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-
-                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. Add twice MPX ID: %d", mpxId.iId1);
-                iRequestedMediaIds.Append( mpxId.iId1 );
-                iRequestedMediaIds.Append( mpxId.iId1 );
-                CMPXMedia* newMedia = CMPXMedia::NewL();
-                CleanupStack::PushL( newMedia );
-                newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
-                newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
-                medias->AppendL( *newMedia );
-                medias->AppendL( *newMedia );
-                CleanupStack::PopAndDestroy( newMedia );
-                }
-            }
-        }
-
-    // Every second ID
-    if( aStartIndex == -3 )
-        {
-        if( aEndIndex > iMediaArray->Count() )
-            {
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
-            User::Leave( KErrArgument );
-            }
-
-        for( TInt i = 0; i < aEndIndex; i+=2 )
-            {
-            CMPXMedia* media = (*iMediaArray)[i];
-
-            if( media )
-                {
-                TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-
-                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. MPX ID: %d", mpxId.iId1);
-                iRequestedMediaIds.Append( mpxId.iId1 );
-                CMPXMedia* newMedia = CMPXMedia::NewL();
-                CleanupStack::PushL( newMedia );
-                newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
-                newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
-                medias->AppendL( *newMedia );
-                CleanupStack::PopAndDestroy( newMedia );
-                }
-            }
-        }
-
-    CleanupStack::Pop( medias );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::SelectMediasL");
-    return medias;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::UpdateOwnedMediaArray
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL()
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL");
-
-    if ( !iCollectionEntries )
-        {
-        return;
-        }
-
-    if( !iCollectionEntries->IsSupported( KMPXMediaArrayContents ) )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: No support for KMPXMediaArrayContents, cannot continue!");
-        User::Leave( KErrNotSupported );
-        }
-
-    // Get up to date list of all medias in collection.
-    CMPXMediaArray* medias = iCollectionEntries->Value<CMPXMediaArray>( KMPXMediaArrayContents );
-    
-    // Delete array of old medias
-    if( iOldMediaArray )
-        {
-        iOldMediaArray->Reset();
-        delete iOldMediaArray;
-        }
-
-    // Update the old array and create new
-    iOldMediaArray = iMediaArray;
-    iMediaArray = CMPXMediaArray::NewL();
-
-    TBool categories( EFalse );
-    
-    // Make copies of the medias.
-    for( TInt i=0; i<medias->Count(); i++ )
-        {
-        CMPXMedia* media = (*medias)[i];
-        
-        TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
-        if( itemId.iId2 != 0 )
-             {
-             categories = ETrue;
-             }
-        
-        // Ignore medias on ROM.
-        TBool isOnRom( EFalse );
-        
-        if( media->IsSupported( KMPXMediaGeneralUri ) )
-            {
-            const TDesC& url = media->ValueText( KMPXMediaGeneralUri );
-            if( url.FindC( _L("z:" ) ) != KErrNotFound )
-                {
-                isOnRom = ETrue;
-                }
-            }
-        
-        if( !isOnRom )
-            {
-            iMediaArray->AppendL( *media );
-            }
-        }
-    
-    iMediaCount = iMediaArray->Count();
-    
-    // Update count of videos on ROM.
-    if( !categories )
-        {
-        iVideosOnRomCount = 0;
-
-        for( TInt i=0; i<medias->Count(); i++ )
-            {
-            CMPXMedia* media = (*medias)[i];            
-            
-            if( media->IsSupported( KMPXMediaGeneralUri ) )
-                {
-                const TDesC& url = media->ValueText( KMPXMediaGeneralUri );
-                if( url.FindC( _L("z:" ) ) != KErrNotFound )
-                    {
-                    iVideosOnRomCount++;
-                    }
-                }
-            }
-
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: iVideosOnRom: %d", iVideosOnRomCount);
-        }
-    
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetChangedMedias
-// -----------------------------------------------------------------------------
-//
-CMPXMediaArray* CVCXMyVideosCollectionPluginTester::GetChangedMedias( const CMPXMediaArray* aNewMedias )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::GetChangedMedias");
-
-    CMPXMediaArray* changedMedias = CMPXMediaArray::NewL();
-
-    if( !aNewMedias )
-        {
-        VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::GetChangedMedias");
-        return changedMedias;
-        }
-
-    CleanupStack::PushL( changedMedias );
-
-    for( TInt i=0; i<aNewMedias->Count(); i++ )
-        {
-        CMPXMedia* media(NULL);
-        media = (*aNewMedias)[i];
-        
-        if( !media )
-            {
-            continue;
-            }
-        
-        TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-
-        CMPXMedia* oldMedia = GetMediaByMpxId( iOldMediaArray, mpxId );
-
-        TBool add( EFalse );
-
-        // It's a new.
-        if( !oldMedia )
-            {
-            add = ETrue;
-            }
-        // Check changes
-        else
-            {
-            const TArray<TMPXAttribute> newAttributes = media->Attributes();
-            const TArray<TMPXAttribute> oldAttributes = oldMedia->Attributes();
-            if( newAttributes.Count() != oldAttributes.Count() )
-                {
-                add = ETrue;
-                }
-            else
-                {
-                for( TInt e=0; e<newAttributes.Count(); e++ )
-                    {
-                    if( !oldMedia->Match( *media, newAttributes[e] ) )
-                        {
-                        add = ETrue;
-                        break;
-                        }
-                    }
-                }
-            }
-
-        // Add a copy of the media.
-        if( add )
-            {
-            changedMedias->AppendL( *media );
-            }
-        }
-
-    CleanupStack::Pop( changedMedias );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::GetChangedMedias");
-    return changedMedias;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetMediaByMpxId
-// -----------------------------------------------------------------------------
-//
-CMPXMedia* CVCXMyVideosCollectionPluginTester::GetMediaByMpxId( CMPXMediaArray* aMedias, TMPXItemId& aMpxId )
-    {
-    if( !aMedias )
-        {
-        return NULL;
-        }
-
-    for( TInt i=0; i<aMedias->Count(); i++ )
-        {
-        CMPXMedia* media = (*aMedias)[i];
-        TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-
-        if( mpxId == aMpxId )
-            {
-            return media;
-            }
-        }
-    return NULL;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::SetRefreshStatus
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::SetRefreshStatus( TBool aRefreshingCollection )
-    {
-    iRefreshingCollection = aRefreshingCollection;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CheckRequestMediaArrayL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL( CMPXMediaArray& aRequestResultMedias, RArray<TInt32>& aRequestedMediaIds )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL");
-
-    // Print requested ids
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Requested IDs:");
-    for( TInt i = 0; i < aRequestedMediaIds.Count(); i++ )
-        {
-        VCXLOGLO2("Requested: iId1: %d", aRequestedMediaIds[i] );
-        }
-
-    // Print actual result ids and check for errors
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Request result media IDs:");
-    for( TInt i = 0; i < aRequestResultMedias.Count(); i++ )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: at index: %d:", i);
-        CMPXMedia* media = aRequestResultMedias[i];
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: got media");
-        if( media )
-            {
-            TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
-            VCXLOGLO3("Result: iId1: %d, iId2: %d", mpxId.iId1, mpxId.iId2 );
-            if( media->IsSupported( KVcxMediaMyVideosInt32Value ) )
-                {
-                TInt32 result = (*media).ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
-                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: result: %d:", result);
-                if( result != KErrNone && !( result == KErrCancel && iCancelRequested ) )
-                    {
-                    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: ERROR in results: %d!", result);
-                    User::Leave( result );
-                    }
-                }
-            }
-        else
-            {
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Result is NULL at index: %d", i);
-            }
-        }
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: rest of the checks");
-    
-    // First check the counts match
-    if( aRequestResultMedias.Count() != aRequestedMediaIds.Count() )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Did not get all the requested entries!");
-        User::Leave( KErrCorrupt );
-        }
-    else
-    // Check that all requested ids are in the results
-    for( TInt i = 0; i < aRequestedMediaIds.Count(); i++ )
-        {
-        TMPXItemId mpxId;
-        mpxId.iId1 = aRequestedMediaIds[i];
-        mpxId.iId2 = 0;
-
-        TBool found( EFalse );
-        for( TInt e = 0; e < aRequestResultMedias.Count(); e++ )
-            {
-            CMPXMedia* media2 = aRequestResultMedias[e];
-            if( media2 )
-                {
-                TMPXItemId mpxId2 = *(*media2).Value<TMPXItemId>( KMPXMediaGeneralId );
-
-                if( mpxId == mpxId2 )
-                    {
-                    found = ETrue;
-                    }
-                }
-            }
-
-        if( !found )
-            {
-            VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Requested media not found from results!");
-            User::Leave( KErrCorrupt );
-            }
-        }
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::PrintMediasL
+// CVCXMyVideosCollectionPluginTester::PrintMediasL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::PrintMediasL( CMPXMediaArray* aMediaArray, TBool aCheckChanges, const TDesC& aTitle )
@@ -1137,7 +535,7 @@ void CVCXMyVideosCollectionPluginTester::PrintMediasL( CMPXMediaArray* aMediaArr
         VCXLOGLO4("CVCXMyVideosCollectionPluginTester:: <----------- %S - %d Entries, %d has changed ----------->", &aTitle, count, changedCount );
         }
 
-    CMPXMedia* media(NULL);
+    CMPXMedia* media;
     for( TInt i = 0; i < medias->Count(); i++ )
         {
         media = (*medias)[i];
@@ -1153,7 +551,7 @@ void CVCXMyVideosCollectionPluginTester::PrintMediasL( CMPXMediaArray* aMediaArr
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::PrintMPXMediaL
+// CVCXMyVideosCollectionPluginTester::PrintMPXMediaL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::PrintMPXMediaL( const CMPXMedia& aMedia, TBool aPrintAllDetails )
@@ -1169,7 +567,7 @@ void CVCXMyVideosCollectionPluginTester::PrintMPXMediaL( const CMPXMedia& aMedia
             }
 
         // Category
-        if( itemId.iId2 != 0 )
+        if( itemId.iId2 != KVcxMvcMediaTypeVideo )
             {
             TInt itemCount(0);
             TInt newItemCount(0);
@@ -1223,13 +621,21 @@ void CVCXMyVideosCollectionPluginTester::PrintMPXMediaL( const CMPXMedia& aMedia
 
     // Print all details
 
-    if( itemId.iId2 != 0 )
+    if( itemId.iId2 == KVcxMvcMediaTypeCategory )
         {
-        VCXLOGLO1("--------------------------- MEDIA CATEGORY -------------------------------");
+        VCXLOGLO1("--------------------------- CATEGORY -------------------------------");
         }
-    else
+    else if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
         {
-        VCXLOGLO1("--------------------------- MEDIA OBJECT -------------------------------");
+        VCXLOGLO1("--------------------------- Album ----------------------------------");
+        }
+    else if( itemId.iId2 == KVcxMvcMediaTypeVideo )
+        {
+        VCXLOGLO1("--------------------------- VIDEO -------------------------------");
+        }
+    else 
+        {
+        VCXLOGLO1("--------------------------- UNKNOWN! -------------------------------");
         }
 
     VCXLOGLO3("iId1: %d, iId2: %d", itemId.iId1, itemId.iId2 );
@@ -1459,7 +865,653 @@ void CVCXMyVideosCollectionPluginTester::PrintMPXMediaL( const CMPXMedia& aMedia
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleCollectionMessage
+// CVCXMyVideosCollectionPluginTester::UpdateAlbumsListL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::UpdateAlbumsListL()
+    {
+    CMPXMedia* media;
+    
+    for( TInt i = 0; i < iMediaArray->Count(); i++ )
+        {
+        media = (*iMediaArray)[i];
+        
+        if( media )
+            {
+            TMPXItemId itemId = *media->Value<TMPXItemId>( KMPXMediaGeneralId );
+                        
+            if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
+                {
+                int albumIndex(-1);
+                for( TInt e = 0; e < iAlbumIds.Count(); e++ )
+                    {
+                    if( iAlbumIds[e] == itemId )
+                        {
+                        albumIndex = e;
+                        }
+                    }
+                
+                TBuf<256> title;
+                if( media->IsSupported( KMPXMediaGeneralTitle ) )
+                    {
+                    title = media->ValueText( KMPXMediaGeneralTitle );
+                    
+                    if( albumIndex == -1 )
+                        {
+                        HBufC* titleBuff = title.AllocL();
+                        iAlbumNames.Append( titleBuff );
+                        iAlbumIds.Append( itemId );
+                        }
+                    else
+                        {
+                        if( iAlbumNames[albumIndex]->Compare( title )!= KErrNone )
+                            {
+                            iAlbumNames[albumIndex]->Des().SetLength( 0 );
+                            iAlbumNames[albumIndex]->ReAlloc( title.Length() );
+                            iAlbumNames[albumIndex]->Des().Copy( title );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::GetAlbumIdL
+// -----------------------------------------------------------------------------
+//
+TMPXItemId CVCXMyVideosCollectionPluginTester::GetAlbumIdL( const TDesC& aAlbumName )
+    {
+    // Get the last album with the name.
+    for( TInt i = iAlbumNames.Count()-1; i >= 0; i-- )
+        {
+        if( iAlbumNames[i]->Des() == aAlbumName && i < iAlbumIds.Count() )
+            {
+            VCXLOGLO3("CVCXMyVideosCollectionPluginTester::GetAlbumIdL: returning album id1: %d, id2: %d", iAlbumIds[i].iId1, iAlbumIds[i].iId2);
+            return iAlbumIds[i];
+            }
+        }
+    
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTester::GetAlbumIdL: could not find album '%S'", &aAlbumName);
+    User::Leave( KErrNotFound );
+    
+    return TMPXItemId::InvalidId();
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::CreateMpxCommandLC
+// -----------------------------------------------------------------------------
+//
+CMPXCommand* CVCXMyVideosCollectionPluginTester::CreateMpxCommandLC( TInt aCommandGeneralId, TInt aMyVideosCommandId, TBool aSync )
+    {
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+
+    cmd->SetTObjectValueL( KMPXCommandGeneralId, aCommandGeneralId );
+    if( aCommandGeneralId == KVcxCommandIdMyVideos )
+        {
+        cmd->SetTObjectValueL( KVcxMediaMyVideosCommandId, aMyVideosCommandId );
+        }
+
+    cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, aSync );
+
+    if( !aSync )
+        {
+        iTransactions->NextTransactionId();
+
+        if( aCommandGeneralId == KVcxCommandIdMyVideos )
+            {
+            cmd->SetTObjectValueL( KVcxMediaMyVideosTransactionId, iTransactions->TransactionId() );
+            iTransactions->AddTransactionId( aMyVideosCommandId );
+            }
+        }
+
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTester::CreateMpxCommandLC: collectionId: 0x%x", iCollectionUid.iUid);
+    cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId, iCollectionUid.iUid );
+
+    return cmd;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::SelectMediasL
+// -----------------------------------------------------------------------------
+//
+CMPXMediaArray* CVCXMyVideosCollectionPluginTester::SelectMediasL( TInt aDriveFilter, TInt aStartIndex, TInt aEndIndex )
+    {
+    if( aStartIndex == -4 )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester::SelectMediasL - returning NULL");
+        return NULL;
+        }
+
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::SelectMediasL");
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL: aStartIndex: %d", aStartIndex);
+
+    CMPXMediaArray* iSourceMedias;
+    
+    if( !iUseCopiedMedias )
+        {
+        if( !iMediaArray )
+            {
+            User::Leave( KErrNotReady );
+            }
+        iSourceMedias = iMediaArray;
+        }
+    else
+        {
+        if( !iMediaArrayCopy )
+            {
+            User::Leave( KErrNotReady );
+            }
+        iSourceMedias = iMediaArrayCopy;
+        }
+
+    iRequestedMediaIds.Reset();
+
+    CMPXMediaArray* medias = CMPXMediaArray::NewL();
+
+    // None
+    if( aStartIndex > aEndIndex )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Selected none of the videos.");
+        VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::SelectMediasL");
+        return medias;
+        }
+
+    CleanupStack::PushL( medias );
+
+    if( aStartIndex >= 0 )
+        {
+        if( aEndIndex > iSourceMedias->Count() )
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
+            User::Leave( KErrArgument );
+            }
+
+        TInt countToSelect = aEndIndex - aStartIndex;
+        TInt indexOfVideoOnDrive = 0;
+        
+        for( TInt i = 0; i < iSourceMedias->Count(); i++ )
+            {
+            CMPXMedia* media = (*iSourceMedias)[i];
+
+            if( media )
+                {
+                TBool selectThis( EFalse );
+                
+                if( aDriveFilter != -1 )
+                    {
+                    // Drive specified, check path and index of video on the drive.
+                    const TDesC& localFilePath = media->ValueText( KMPXMediaGeneralUri );
+                    TInt drive( 0 );
+                    User::LeaveIfError( iFs.CharToDrive( localFilePath[0], drive ) );
+
+                    if( drive == aDriveFilter )
+                        {
+                        if( indexOfVideoOnDrive >= aStartIndex && indexOfVideoOnDrive < aEndIndex )
+                            {
+                            selectThis = ETrue;
+                            }
+                        indexOfVideoOnDrive++;                        
+                        }
+                    }
+                else
+                    {
+                    // No drive specified, just index check.
+                    if( i >= aStartIndex && i < aEndIndex )
+                        {
+                        selectThis = ETrue;
+                        }
+                    }
+
+                if( selectThis )
+                    {
+                    TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+                    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. MPX ID: %d", mpxId.iId1);
+                    iRequestedMediaIds.Append( mpxId.iId1 );
+                    CMPXMedia* newMedia = CMPXMedia::NewL();
+                    CleanupStack::PushL( newMedia );
+                    newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
+                    newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
+                    medias->AppendL( *newMedia );
+                    CleanupStack::PopAndDestroy( newMedia );
+    
+                    if( medias->Count() >= countToSelect )
+                        {
+                        break;
+                        }
+                    }
+                }
+            }
+        }
+
+    // Invalid IDs
+    if( aStartIndex == -1 )
+        {
+        for( TInt i = 0; i < aEndIndex; i++ )
+            {
+            TMPXItemId mpxId;
+            mpxId.iId1 = i+66666;
+            mpxId.iId2 = 0;
+
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. Invalid MPX ID: %d", mpxId.iId1);
+
+            CMPXMedia* newMedia = CMPXMedia::NewL();
+            CleanupStack::PushL( newMedia );
+            newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
+            newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
+            medias->AppendL( *newMedia );
+            CleanupStack::PopAndDestroy( newMedia );
+            }
+        }
+
+    // Duplicate IDs
+    if( aStartIndex == -2 )
+        {
+        if( aEndIndex > iSourceMedias->Count() )
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
+            User::Leave( KErrArgument );
+            }
+
+        for( TInt i = 0; i < aEndIndex; i++ )
+            {
+            CMPXMedia* media = (*iSourceMedias)[i];
+
+            if( media )
+                {
+                TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. Add twice MPX ID: %d", mpxId.iId1);
+                iRequestedMediaIds.Append( mpxId.iId1 );
+                iRequestedMediaIds.Append( mpxId.iId1 );
+                CMPXMedia* newMedia = CMPXMedia::NewL();
+                CleanupStack::PushL( newMedia );
+                newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
+                newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
+                medias->AppendL( *newMedia );
+                medias->AppendL( *newMedia );
+                CleanupStack::PopAndDestroy( newMedia );
+                }
+            }
+        }
+
+    // Every second ID
+    if( aStartIndex == -3 )
+        {
+        if( aEndIndex > iSourceMedias->Count() )
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester::SelectMediasL end index: %d is out of bounds.", aEndIndex);
+            User::Leave( KErrArgument );
+            }
+
+        for( TInt i = 0; i < aEndIndex; i+=2 )
+            {
+            CMPXMedia* media = (*iSourceMedias)[i];
+
+            if( media )
+                {
+                TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Selected media. MPX ID: %d", mpxId.iId1);
+                iRequestedMediaIds.Append( mpxId.iId1 );
+                CMPXMedia* newMedia = CMPXMedia::NewL();
+                CleanupStack::PushL( newMedia );
+                newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
+                newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
+                medias->AppendL( *newMedia );
+                CleanupStack::PopAndDestroy( newMedia );
+                }
+            }
+        }
+
+    CleanupStack::Pop( medias );
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::SelectMediasL");
+    return medias;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::SetUseCopiedMediasL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::SetUseCopiedMediasL( TBool aUseCopiedMedias )
+    {
+    if( aUseCopiedMedias )
+        {
+        CreateCopyOfCurrentMediasL();
+        }
+    
+    iUseCopiedMedias = aUseCopiedMedias;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::CreateCopyOfCurrentMediasL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::CreateCopyOfCurrentMediasL()
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CreateCopyOfCurrentMediasL");
+    
+    if( !iMediaArray )
+        {
+        User::Leave( KErrNotReady );
+        }
+    
+    if( iMediaArrayCopy )
+        {
+        iMediaArrayCopy->Reset();
+        delete iMediaArrayCopy;
+        iMediaArrayCopy = NULL;
+        }
+    
+    iMediaArrayCopy = CMPXMediaArray::NewL();
+    
+    for( TInt i = 0; i < iMediaArray->Count(); i++ )
+        {
+        CMPXMedia* media = (*iMediaArray)[i];
+
+        if( media )
+            {
+            TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+            CMPXMedia* newMedia = CMPXMedia::NewL();
+            CleanupStack::PushL( newMedia );
+            newMedia->SetTObjectValueL( KMPXMessageMediaGeneralId, mpxId );
+            newMedia->SetTObjectValueL( KMPXMediaGeneralId, mpxId );
+            iMediaArrayCopy->AppendL( *newMedia );
+            CleanupStack::PopAndDestroy( newMedia );
+            }
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CreateCopyOfCurrentMediasL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArray
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL()
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL");
+
+    if ( !iCollectionEntries )
+        {
+        return;
+        }
+
+    if( !iCollectionEntries->IsSupported( KMPXMediaArrayContents ) )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: No support for KMPXMediaArrayContents, cannot continue!");
+        User::Leave( KErrNotSupported );
+        }
+
+    // Get up to date list of all medias in collection.
+    CMPXMediaArray* medias = iCollectionEntries->Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    
+    // Delete array of old medias
+    if( iOldMediaArray )
+        {
+        iOldMediaArray->Reset();
+        delete iOldMediaArray;
+        }
+
+    // Update the old array and create new
+    iOldMediaArray = iMediaArray;
+    iMediaArray = CMPXMediaArray::NewL();
+
+    TBool categories( EFalse );
+    
+    // Make copies of the medias.
+    for( TInt i=0; i<medias->Count(); i++ )
+        {
+        CMPXMedia* media = (*medias)[i];
+        
+        TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
+
+        if( itemId.iId2 != KVcxMvcMediaTypeVideo )
+             {
+             categories = ETrue;
+             }
+        
+        // Ignore medias on ROM.
+        TBool isOnRom( EFalse );
+        
+        if( media->IsSupported( KMPXMediaGeneralUri ) )
+            {
+            const TDesC& url = media->ValueText( KMPXMediaGeneralUri );
+            if( url.FindC( _L("z:" ) ) != KErrNotFound )
+                {
+                isOnRom = ETrue;
+                }
+            }
+        
+        if( !isOnRom )
+            {
+            iMediaArray->AppendL( *media );
+            }
+        }
+    
+    iMediaCount = iMediaArray->Count();
+    
+    // Update count of videos on ROM.
+    if( !categories )
+        {
+        iVideosOnRomCount = 0;
+
+        for( TInt i=0; i<medias->Count(); i++ )
+            {
+            CMPXMedia* media = (*medias)[i];            
+            
+            if( media->IsSupported( KMPXMediaGeneralUri ) )
+                {
+                const TDesC& url = media->ValueText( KMPXMediaGeneralUri );
+                if( url.FindC( _L("z:" ) ) != KErrNotFound )
+                    {
+                    iVideosOnRomCount++;
+                    }
+                }
+            }
+
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: iVideosOnRom: %d", iVideosOnRomCount);
+        }
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::UpdateOwnedMediaArrayL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::GetChangedMedias
+// -----------------------------------------------------------------------------
+//
+CMPXMediaArray* CVCXMyVideosCollectionPluginTester::GetChangedMedias( const CMPXMediaArray* aNewMedias )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::GetChangedMedias");
+
+    CMPXMediaArray* changedMedias = CMPXMediaArray::NewL();
+
+    if( !aNewMedias )
+        {
+        VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::GetChangedMedias");
+        return changedMedias;
+        }
+
+    CleanupStack::PushL( changedMedias );
+
+    for( TInt i=0; i<aNewMedias->Count(); i++ )
+        {
+        CMPXMedia* media(NULL);
+        media = (*aNewMedias)[i];
+        
+        if( !media )
+            {
+            continue;
+            }
+        
+        TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+        CMPXMedia* oldMedia = GetMediaByMpxId( iOldMediaArray, mpxId );
+
+        TBool add( EFalse );
+
+        // It's a new.
+        if( !oldMedia )
+            {
+            add = ETrue;
+            }
+        // Check changes
+        else
+            {
+            const TArray<TMPXAttribute> newAttributes = media->Attributes();
+            const TArray<TMPXAttribute> oldAttributes = oldMedia->Attributes();
+            if( newAttributes.Count() != oldAttributes.Count() )
+                {
+                add = ETrue;
+                }
+            else
+                {
+                for( TInt e=0; e<newAttributes.Count(); e++ )
+                    {
+                    if( !oldMedia->Match( *media, newAttributes[e] ) )
+                        {
+                        add = ETrue;
+                        break;
+                        }
+                    }
+                }
+            }
+
+        // Add a copy of the media.
+        if( add )
+            {
+            changedMedias->AppendL( *media );
+            }
+        }
+
+    CleanupStack::Pop( changedMedias );
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::GetChangedMedias");
+    return changedMedias;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::GetMediaByMpxId
+// -----------------------------------------------------------------------------
+//
+CMPXMedia* CVCXMyVideosCollectionPluginTester::GetMediaByMpxId( CMPXMediaArray* aMedias, TMPXItemId& aMpxId )
+    {
+    if( !aMedias )
+        {
+        return NULL;
+        }
+
+    for( TInt i=0; i<aMedias->Count(); i++ )
+        {
+        CMPXMedia* media = (*aMedias)[i];
+        TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+        if( mpxId == aMpxId )
+            {
+            return media;
+            }
+        }
+    return NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::SetRefreshStatus
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::SetRefreshStatus( TBool aRefreshingCollection )
+    {
+    iRefreshingCollection = aRefreshingCollection;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL( CMPXMediaArray& aRequestResultMedias, RArray<TInt32>& aRequestedMediaIds )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL");
+
+    // Print requested ids
+    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Requested IDs:");
+    for( TInt i = 0; i < aRequestedMediaIds.Count(); i++ )
+        {
+        VCXLOGLO2("Requested: iId1: %d", aRequestedMediaIds[i] );
+        }
+
+    // Print actual result ids and check for errors
+    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Request result media IDs:");
+    for( TInt i = 0; i < aRequestResultMedias.Count(); i++ )
+        {
+        VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: at index: %d:", i);
+        CMPXMedia* media = aRequestResultMedias[i];
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: got media");
+        if( media )
+            {
+            TMPXItemId mpxId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
+            VCXLOGLO3("Result: iId1: %d, iId2: %d", mpxId.iId1, mpxId.iId2 );
+            if( media->IsSupported( KVcxMediaMyVideosInt32Value ) )
+                {
+                TInt32 result = (*media).ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
+                VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: result: %d:", result);
+                if( result != KErrNone && !( result == KErrCancel && iCancelRequested ) )
+                    {
+                    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: ERROR in results: %d!", result);
+                    User::Leave( result );
+                    }
+                }
+            }
+        else
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: Result is NULL at index: %d", i);
+            }
+        }
+
+    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: rest of the checks");
+    
+    // First check the counts match
+    if( aRequestResultMedias.Count() != aRequestedMediaIds.Count() )
+        {
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Did not get all the requested entries!");
+        User::Leave( KErrCorrupt );
+        }
+    else
+    // Check that all requested ids are in the results
+    for( TInt i = 0; i < aRequestedMediaIds.Count(); i++ )
+        {
+        TMPXItemId mpxId;
+        mpxId.iId1 = aRequestedMediaIds[i];
+        mpxId.iId2 = 0;
+
+        TBool found( EFalse );
+        for( TInt e = 0; e < aRequestResultMedias.Count(); e++ )
+            {
+            CMPXMedia* media2 = aRequestResultMedias[e];
+            if( media2 )
+                {
+                TMPXItemId mpxId2 = *(*media2).Value<TMPXItemId>( KMPXMediaGeneralId );
+
+                if( mpxId == mpxId2 )
+                    {
+                    found = ETrue;
+                    }
+                }
+            }
+
+        if( !found )
+            {
+            VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Requested media not found from results!");
+            User::Leave( KErrCorrupt );
+            }
+        }
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CheckRequestMediaArrayL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::HandleCollectionMessage
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleCollectionMessage( CMPXMessage* aMessage, TInt aError )
@@ -1532,7 +1584,7 @@ void CVCXMyVideosCollectionPluginTester::HandleCollectionMessage( CMPXMessage* a
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleSingleCollectionMessage
+// CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessage
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMessage* aMessage )
@@ -1597,11 +1649,7 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
 
                         SetRefreshStatus( EFalse );
 
-                        // add downloads to the requested ID array always and update downloads too.
-                        TBool backup = iUpdateDownloads;
-                        iUpdateDownloads = EFalse;
                         ProcessCurrentEntriesL();
-                        iUpdateDownloads = backup;
 
                         // Check
                         TRAPD( err, CheckRequestMediaArrayL( *iMediaArray, iRequestedMediaIds ) );
@@ -1612,10 +1660,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
 
                         // Inform observer
                         iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageGotMediasByKMpxId, KErrNone );
-                        
-                        TRAPD( actionErr, iStats->ActionEndL( transactionId, err ) );
-                        if( actionErr == KErrAbort )
-                            iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
                         
                         }
                         break;
@@ -1653,7 +1697,7 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                     case KVcxMessageMyVideosListComplete:
                         {
                         VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: ----------------------------------------------------------------");
-                        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: KVcxMediaMyVideosCommandId: KVcxMessageMyVideosListComplete");
+                        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: KVcxMediaMyVideosCommandId: KVcxMessageMyVideosListComplete ------>");
                         VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: ----------------------------------------------------------------");
                         iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageListComplete, KErrNone );
                         }
@@ -1672,8 +1716,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                         iActionCount--;
 
                         iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCopyOrMoveStarted, KErrNone );
-                        
-                        TRAP_IGNORE( iStats->ActionProgressL( transactionId, _L("Move/Copy started.") ) );
                         }
                         break;
 
@@ -1709,10 +1751,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                             TRAP_IGNORE( iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCommandCanceled, KErrNone ) );
                             iCancelRequested = EFalse;
                             }                        
-
-                        TRAPD( actionErr, iStats->ActionEndL( transactionId, err ) );
-                        if( actionErr == KErrAbort )
-                            iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
                         
                         CleanupStack::PopAndDestroy( medias );
                         }
@@ -1750,10 +1788,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                             iCancelRequested = EFalse;
                             }                        
                         
-                        TRAPD( actionErr, iStats->ActionEndL( transactionId, err ) );
-                        if( actionErr == KErrAbort )
-                            iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
-                        
                         CleanupStack::PopAndDestroy( medias );
                         }
                         break;
@@ -1771,8 +1805,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                         iActionCount--;
 
                         iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageDeleteStarted, KErrNone );
-                        
-                        TRAP_IGNORE( iStats->ActionProgressL( transactionId, _L("Delete started.") ) );
                         }
                         break;
 
@@ -1808,10 +1840,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                             TRAP_IGNORE( iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCommandCanceled, KErrNone ) );
                             iCancelRequested = EFalse;
                             }
-                        
-                        TRAPD( actionErr, iStats->ActionEndL( transactionId, err ) );
-                        if( actionErr == KErrAbort )
-                            iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
                         
                         CleanupStack::PopAndDestroy( medias );
                         }
@@ -1880,28 +1908,8 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
 
             TMPXItemId itemId = *aMessage->Value<TMPXItemId>(KMPXMessageMediaGeneralId);
             VCXLOGLO3("CVCXMyVideosCollectionPluginTester:: Item Id1: %d, Id2: %d", itemId.iId1, itemId.iId2);
-
-#if 1
-            // Check the IDs for categories
-            if( itemId.iId2 != 0 && ( itemId.iId1 != KVcxMvcCategoryIdAll &&
-                    itemId.iId1 != KVcxMvcCategoryIdDownloads &&
-                    itemId.iId1 != KVcxMvcCategoryIdTvRecordings &&
-                    itemId.iId1 != KVcxMvcCategoryIdCaptured &&
-                    itemId.iId1 != KVcxMvcCategoryIdOther ) )
-                {
-                iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionCategoryChanged, KErrCorrupt );
-                VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Error. INVALID ITEM ID.");
-                break;
-                }
-#endif
-            // If event if for category, skip it if it's not for the open category.
-            if( iCurrentOpenedLevelIndex != -1 && itemId.iId2 > 0 && itemId.iId1 != iCurrentOpenedLevelIndex )
-                {
-                VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Not for open category. Skip.");
-                break;
-                }
-
-            if( iWaitingForItemChange && itemId.iId2 == 0 )
+       
+            if( iWaitingForItemChange && itemId.iId2 == KVcxMvcMediaTypeVideo )
                 {
                 VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Stop wait for item change");
                 iWaitingForItemChange = EFalse;
@@ -1917,14 +1925,20 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                     {
                     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: changeEvent EMPXItemInserted");
                     iInsertedItemIds.Append( itemId.iId1 );
-
                     refreshNeeded = ETrue;
-                    iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxItemInserted, KErrNone );
                     
-                    TRAPD( actionErr, iStats->ActionEndL( KSideloadVideoActionId, KErrNone ) );
-                    if( actionErr == KErrAbort )
-                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
-                    
+                    if( itemId.iId2 == KVcxMvcMediaTypeVideo)
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxVideoInserted, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeCategory )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxCategoryInserted, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxAlbumInserted, KErrNone );
+                        }
                     }
                     break;
 
@@ -1933,11 +1947,19 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: changeEvent EMPXItemDeleted");
                     iDeletedItemIds.Append( itemId.iId1 );
                     refreshNeeded = ETrue;
-                    iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxItemDeleted, KErrNone );
                     
-                    TRAPD( actionErr, iStats->ActionEndL( KRemoveMediaActionId, KErrNone ) );
-                    if( actionErr == KErrAbort )
-                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
+                    if( itemId.iId2 == KVcxMvcMediaTypeVideo)
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxVideoDeleted, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeCategory )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxCategoryDeleted, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxAlbumDeleted, KErrNone );
+                        }
                     }
                     break;
 
@@ -1945,17 +1967,29 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                     {
                     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: changeEvent EMPXItemModified");
                     refreshNeeded = EFalse;
+                    
                     if ( aMessage->IsSupported( KVcxMediaMyVideosInt32Value ) )
                         {
                         TInt32 extraInfo = aMessage->ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
                         if ( extraInfo == EVcxMyVideosVideoListOrderChanged )
                             {
-                            VCXLOGLO1("CVcxMyVideosCollectionTester:: Received EVcxMyVideosVideoListOrderChanged ------->");
+                            VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Received EVcxMyVideosVideoListOrderChanged ------->");
                             iObserver->HandleVcxMvTesterMessageL( KVCXMyVideosTestMessageVideoListOrderChanged, KErrNone );
                             refreshNeeded = ETrue;
                             }
                         }
-                    iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxItemModified, KErrNone );
+                    if( itemId.iId2 == KVcxMvcMediaTypeVideo)
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxVideoModified, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeCategory )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxCategoryModified, KErrNone );
+                        }
+                    else if( itemId.iId2 == KVcxMvcMediaTypeAlbum )
+                        {
+                        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageMpxAlbumModified, KErrNone );
+                        }
                     }
                     break;
 
@@ -1965,15 +1999,6 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                     iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionMessageError, KErrCorrupt );
                     }
                     break;
-                }
-
-            if( itemId.iId2 == 0 )
-                {
-                iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionItemChanged, KErrNone );
-                }
-            else
-                {
-                iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionCategoryChanged, KErrNone );
                 }
 
             // Refresh if there's need and it's possible.
@@ -1991,13 +2016,14 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                      VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Auto refresh disabled");
                      refreshNeeded = EFalse;
                      }
-
+#if 0
                 // No need to refresh if My Videos category is not open.
                 if( GetCurrentLevel() != 3 )
                     {
                     VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: No refresh because level");
                     refreshNeeded = EFalse;
                     }
+#endif
 
                 if( refreshNeeded )
                     {
@@ -2024,7 +2050,7 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleOpenL
+// CVCXMyVideosCollectionPluginTester::HandleOpenL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXMedia& aEntries,
@@ -2038,12 +2064,6 @@ void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXMedia& aEntries,
     VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: aError: %d", aError);
     
     SetRefreshStatus( EFalse );
-
-    TRAPD( actionErr, iStats->ActionEndL( iCurrentActionId, aError ) );
-    if( actionErr == KErrAbort )
-        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
-    
-    iCurrentActionId = -1;
     
     if( aError == KErrNone )
         {
@@ -2053,7 +2073,7 @@ void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXMedia& aEntries,
         iCollectionEntries = CMPXMedia::NewL( aEntries );
         
         iCollectionMediaArray = iCollectionEntries->Value<CMPXMediaArray>( KMPXMediaArrayContents );        
-
+        
         UpdateOwnedMediaArrayL();
 
         // There could have been changes to the content during update.
@@ -2063,7 +2083,7 @@ void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXMedia& aEntries,
 
         TInt foundInsertedItemCount(0);
 
-        for( TInt e=0; e<iMediaCount; e++ )
+        for( TInt e = 0; e < iMediaCount; e++ )
             {
             CMPXMedia* media = (*iMediaArray)[e];
             TMPXItemId itemId = *(*media).Value<TMPXItemId>( KMPXMediaGeneralId );
@@ -2121,7 +2141,7 @@ void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXMedia& aEntries,
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleOpenL
+// CVCXMyVideosCollectionPluginTester::HandleOpenL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXCollectionPlaylist& /*aPlaylist*/,
@@ -2134,7 +2154,7 @@ void CVCXMyVideosCollectionPluginTester::HandleOpenL( const CMPXCollectionPlayli
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleCollectionMediaL
+// CVCXMyVideosCollectionPluginTester::HandleCollectionMediaL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleCollectionMediaL(const CMPXMedia& aMedia,
@@ -2142,10 +2162,6 @@ void CVCXMyVideosCollectionPluginTester::HandleCollectionMediaL(const CMPXMedia&
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::HandleCollectionMediaL");
     VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: aError: %d", aError);
-
-    TRAPD( actionErr, iStats->ActionEndL( KGetMediaFullDetailsActionId, aError ) );
-    if( actionErr == KErrAbort )
-        iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
 
     if( iGettingFullDetailsForAllMedia )
         {
@@ -2162,7 +2178,7 @@ void CVCXMyVideosCollectionPluginTester::HandleCollectionMediaL(const CMPXMedia&
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::HandleCommandComplete
+// CVCXMyVideosCollectionPluginTester::HandleCommandComplete
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::HandleCommandComplete( CMPXCommand* aCommandResult,
@@ -2189,12 +2205,6 @@ void CVCXMyVideosCollectionPluginTester::HandleCommandComplete( CMPXCommand* aCo
             {
             transactionId = *aCommandResult->Value<TUint32>( KVcxMediaMyVideosTransactionId );
             iTransactions->TransactionResponse( transactionId );
-            if( !iCurrentActionHasResponse )
-                {
-                TRAPD( actionErr, iStats->ActionEndL( transactionId, aError ) );
-                if( actionErr == KErrAbort )
-                    iObserver->HandleVcxMvTesterMessageL( KVCXMYVideosTestMessageCollectionGeneral, actionErr );
-                }
             }
         
         if( aCommandResult->IsSupported( KMPXCommandGeneralId ) )
@@ -2261,7 +2271,7 @@ void CVCXMyVideosCollectionPluginTester::HandleCommandComplete( CMPXCommand* aCo
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetMediaCount
+// CVCXMyVideosCollectionPluginTester::GetMediaCount
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTester::GetMediaCount()
@@ -2296,8 +2306,7 @@ void CVCXMyVideosCollectionPluginTester::AddMediaL( CMPXMedia* aMedia, TBool aSy
 
     CMPXCommand* cmd = CreateMpxCommandLC( KMPXCommandIdCollectionAdd, 0, aSync );
     cmd->SetCObjectValueL(KMPXCommandColAddMedia, aMedia );
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Add media") ) );
-    iCurrentActionHasResponse = EFalse;
+
     iCollectionUtility->Collection().CommandL(*cmd);
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2324,14 +2333,13 @@ void CVCXMyVideosCollectionPluginTester::SetMediaL( CMPXMedia* aMedia, TBool aSy
     PrintMPXMediaL( *aMedia, ETrue );
 
     iCollectionUtility->Collection().CommandL( *cmd );
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Set media") ) );
-    iCurrentActionHasResponse = EFalse;
+    
     CleanupStack::PopAndDestroy( cmd );
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::SetMediaL");
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::RemoveMediaL
+// CVCXMyVideosCollectionPluginTester::RemoveMediaL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::RemoveMediaL( TInt aDrive, TInt aIndex, TBool aSync )
@@ -2345,15 +2353,13 @@ void CVCXMyVideosCollectionPluginTester::RemoveMediaL( TInt aDrive, TInt aIndex,
     media = (*iCollectionMediaArray)[realIndex];
     
     const TDesC& localFilePath = media->ValueText( KMPXMediaGeneralUri );
-    iTestCommon->EnsureFileIsNotInUse( localFilePath );
+    iTestUtils->EnsureFileIsNotInUse( localFilePath );
     
     TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
 
     CMPXCommand* cmd = CreateMpxCommandLC( KMPXCommandIdCollectionRemoveMedia, 0, aSync );
     cmd->SetTObjectValueL( KMPXMediaGeneralId, itemId );
 
-    TRAP_IGNORE( iStats->ActionStartL( KRemoveMediaActionId, _L("Remove media") ) );
-    iCurrentActionHasResponse = EFalse;
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2362,7 +2368,7 @@ void CVCXMyVideosCollectionPluginTester::RemoveMediaL( TInt aDrive, TInt aIndex,
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::RemoveMediaByMpxIdL
+// CVCXMyVideosCollectionPluginTester::RemoveMediaByMpxIdL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::RemoveMediaByMpxIdL( TInt aMpxId, TBool aSync )
@@ -2374,8 +2380,6 @@ void CVCXMyVideosCollectionPluginTester::RemoveMediaByMpxIdL( TInt aMpxId, TBool
     CMPXCommand* cmd = CreateMpxCommandLC( KMPXCommandIdCollectionRemoveMedia, 0, aSync );
     cmd->SetTObjectValueL( KMPXMediaGeneralId, aMpxId );
 
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Remove media") ) );
-    iCurrentActionHasResponse = EFalse;
     iCollectionUtility->Collection().CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
 
@@ -2383,7 +2387,7 @@ void CVCXMyVideosCollectionPluginTester::RemoveMediaByMpxIdL( TInt aMpxId, TBool
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetAllMediaFullDetailsL
+// CVCXMyVideosCollectionPluginTester::GetAllMediaFullDetailsL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::GetAllMediaFullDetailsL()
@@ -2437,7 +2441,7 @@ void CVCXMyVideosCollectionPluginTester::GetAllMediaFullDetailsL()
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::DeleteAllMediaFilesL
+// CVCXMyVideosCollectionPluginTester::DeleteAllMediaFilesL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::DeleteAllMediaFilesL( )
@@ -2477,7 +2481,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteAllMediaFilesL( )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::DeleteFileOfMediaL
+// CVCXMyVideosCollectionPluginTester::DeleteFileOfMediaL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::DeleteFileOfMediaL( TInt aDrive, TInt aIndex )
@@ -2494,7 +2498,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteFileOfMediaL( TInt aDrive, TInt a
         const TDesC& localFilePath = media->ValueText( KMPXMediaGeneralUri );
         VCXLOGLO2("Local file path: %S", &localFilePath);
 
-        iTestCommon->EnsureFileIsNotInUse( localFilePath );
+        iTestUtils->EnsureFileIsNotInUse( localFilePath );
         TInt err = iFs.Delete( localFilePath );
         if( err != KErrNone )
             {
@@ -2510,7 +2514,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteFileOfMediaL( TInt aDrive, TInt a
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetMediaL
+// CVCXMyVideosCollectionPluginTester::GetMediaL
 // -----------------------------------------------------------------------------
 //
 CMPXMedia* CVCXMyVideosCollectionPluginTester::GetMediaL( TInt aDrive, TInt aIndex )
@@ -2524,7 +2528,41 @@ CMPXMedia* CVCXMyVideosCollectionPluginTester::GetMediaL( TInt aDrive, TInt aInd
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::MoveMediasL
+// CVCXMyVideosCollectionPluginTester::GetIndexOfMediaWithNameL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTester::GetIndexOfMediaWithNameL( const TDesC& aName )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::GetIndexOfMediaWithNameL");
+    CMPXMedia* media = NULL;
+    
+    TInt index = -1;
+    
+    if( !iMediaArray )
+        {
+        User::Leave( KErrNotReady );
+        }
+    
+    // From last to first
+    for( TInt i = iMediaArray->Count()-1; i >= 0; i-- )
+        {
+        media = (*iMediaArray)[i];
+        
+        if( media->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            if( media->ValueText( KMPXMediaGeneralTitle ).Compare( aName ) == KErrNone )
+                {
+                index = i;
+                break;
+                }
+            }
+        }
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::GetIndexOfMediaWithNameL");
+    return index;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::MoveMediasL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::MoveMediasL( TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex, TInt aDestDrive, TBool aSync )
@@ -2541,8 +2579,6 @@ void CVCXMyVideosCollectionPluginTester::MoveMediasL( TInt aSourceDrive, TInt aS
         cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
         }
     
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Move medias") ) );
-    iCurrentActionHasResponse = ETrue;
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2554,7 +2590,7 @@ void CVCXMyVideosCollectionPluginTester::MoveMediasL( TInt aSourceDrive, TInt aS
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CancelMoveL
+// CVCXMyVideosCollectionPluginTester::CancelMoveL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::CancelMoveOrCopyL( TBool aSync )
@@ -2562,8 +2598,7 @@ void CVCXMyVideosCollectionPluginTester::CancelMoveOrCopyL( TBool aSync )
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CancelMoveOrCopyL");
 
     CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosCancelMoveOrCopy, aSync );
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Cancel move or copy") ) );
-    iCurrentActionHasResponse = EFalse;
+
     iCollectionUtility->Collection().CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
     
@@ -2573,7 +2608,7 @@ void CVCXMyVideosCollectionPluginTester::CancelMoveOrCopyL( TBool aSync )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CopyMediasL
+// CVCXMyVideosCollectionPluginTester::CopyMediasL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::CopyMediasL( TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex, TInt aDestDrive, TBool aSync )
@@ -2590,8 +2625,6 @@ void CVCXMyVideosCollectionPluginTester::CopyMediasL( TInt aSourceDrive, TInt aS
         cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
         }
     
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Copy medias") ) );
-    iCurrentActionHasResponse = ETrue;
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2603,7 +2636,7 @@ void CVCXMyVideosCollectionPluginTester::CopyMediasL( TInt aSourceDrive, TInt aS
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::DeleteMediasL
+// CVCXMyVideosCollectionPluginTester::DeleteMediasL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::DeleteMediasL( TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex, TBool aSync )
@@ -2618,8 +2651,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediasL( TInt aSourceDrive, TInt 
         {
         cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
         }
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Delete media") ) );
-    iCurrentActionHasResponse = ETrue;
+
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2632,7 +2664,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediasL( TInt aSourceDrive, TInt 
 
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::DeleteMediasByMpxIdsL
+// CVCXMyVideosCollectionPluginTester::DeleteMediasByMpxIdsL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::DeleteMediasByMpxIdsL( CMPXMediaArray* aMedias, TBool aSync )
@@ -2652,8 +2684,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediasByMpxIdsL( CMPXMediaArray* 
         {
         cmd->SetCObjectValueL( KMPXMediaArrayContents, aMedias );
         }
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Delete media") ) );
-    iCurrentActionHasResponse = ETrue;
+
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2664,7 +2695,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediasByMpxIdsL( CMPXMediaArray* 
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::DeleteMediaByMpxIdL
+// CVCXMyVideosCollectionPluginTester::DeleteMediaByMpxIdL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::DeleteMediaByMpxIdL( TMPXItemId& aMpxId, TBool aSync )
@@ -2689,8 +2720,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediaByMpxIdL( TMPXItemId& aMpxId
         {
         cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
         }
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Delete media") ) );
-    iCurrentActionHasResponse = ETrue;
+    
     iCollectionUtility->Collection().CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
@@ -2702,7 +2732,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteMediaByMpxIdL( TMPXItemId& aMpxId
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CancelDeleteL
+// CVCXMyVideosCollectionPluginTester::CancelDeleteL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::CancelDeleteL( TBool aSync )
@@ -2710,8 +2740,7 @@ void CVCXMyVideosCollectionPluginTester::CancelDeleteL( TBool aSync )
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CancelDeleteL");
 
     CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosCancelDelete, aSync );
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Cancel delete") ) );
-    iCurrentActionHasResponse = EFalse;
+
     iCollectionUtility->Collection().CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
 
@@ -2721,7 +2750,179 @@ void CVCXMyVideosCollectionPluginTester::CancelDeleteL( TBool aSync )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::SetAutomaticRefresh
+// CVCXMyVideosCollectionPluginTester::CreateAlbumL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::CreateAlbumL( const TDesC& aName, TBool aSync, TBool aInvalidCmd )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CreateAlbumL");
+
+    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosAddAlbum, aSync );
+
+    if( !aInvalidCmd )
+        {
+        cmd->SetTextValueL( KMPXMediaGeneralTitle, aName );
+        }
+
+    iCollectionUtility->Collection().CommandL( *cmd );
+    CleanupStack::PopAndDestroy( cmd );
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CreateAlbumL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::DeleteAlbumsL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::DeleteAlbumsL( RArray<TPtrC>& aAlbumNames )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::DeleteAlbumsL");
+
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL( array );
+    
+    for( int i = 0; i < aAlbumNames.Count(); i++ )
+        {
+        TMPXItemId albumId;
+        TRAPD(err, albumId = GetAlbumIdL( aAlbumNames[i] ));
+        if( err == KErrNone )
+            {
+            CMPXMedia* album = CMPXMedia::NewL();
+            CleanupStack::PushL( album );
+            album->SetTObjectValueL( KMPXMediaGeneralId, albumId );
+            array->AppendL( *album );
+            CleanupStack::PopAndDestroy( album );
+            }
+        }
+    
+    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosRemoveAlbums, EFalse );
+    
+    cmd->SetCObjectValueL( KMPXMediaArrayContents, array );
+
+    iCollectionUtility->Collection().CommandL( *cmd );
+    
+    CleanupStack::PopAndDestroy( cmd );
+    CleanupStack::PopAndDestroy( array );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::DeleteAlbumsL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::DeleteAllAlbumL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::DeleteAllAlbumsL()
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::DeleteAllAlbumsL");
+
+    CMPXMediaArray* array = CMPXMediaArray::NewL();
+    CleanupStack::PushL( array );
+    CMPXMedia* album;
+    
+    for( TInt i = 0; i < iAlbumIds.Count(); i++ )
+        {
+        // TODO: removing photos albums causes fails in opening albums.  
+        if( iAlbumIds[i].iId1 > 2 )
+            {
+            album = CMPXMedia::NewL();
+            CleanupStack::PushL( album );
+            album->SetTObjectValueL( KMPXMediaGeneralId, iAlbumIds[i] );
+            array->AppendL( *album );
+            CleanupStack::PopAndDestroy( album );
+            }
+        }
+    
+    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosRemoveAlbums, EFalse );
+    
+    cmd->SetCObjectValueL( KMPXMediaArrayContents, array );
+
+    iCollectionUtility->Collection().CommandL( *cmd );
+    
+    CleanupStack::PopAndDestroy( cmd );
+    CleanupStack::PopAndDestroy( array );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::DeleteAllAlbumsL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::AddMediasToAlbumL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::AddMediasToAlbumL( const TDesC& aAlbumName, TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::AddMediasToAlbumL");
+    
+    TMPXItemId albumId = GetAlbumIdL( aAlbumName );
+    
+    CMPXMediaArray* medias = SelectMediasL( aSourceDrive, aStartIndex, aEndIndex );
+    CleanupStack::PushL( medias );
+
+    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosAddToAlbum, EFalse );
+    if( medias )
+        {
+        cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
+        }
+
+    cmd->SetTObjectValueL( KVcxMediaMyVideosUint32Value, albumId );
+    
+    iCollectionUtility->Collection().CommandL( *cmd );
+
+    CleanupStack::PopAndDestroy( cmd );
+    CleanupStack::PopAndDestroy( medias );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::AddMediasToAlbumL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::RemoveMediasFromAlbumL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::RemoveMediasFromAlbumL( const TDesC& aAlbumName, TInt aSourceDrive, TInt aStartIndex, TInt aEndIndex )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::RemoveMediasFromAlbumL");
+    
+    TMPXItemId albumId = GetAlbumIdL( aAlbumName );
+    
+    CMPXMediaArray* medias = SelectMediasL( aSourceDrive, aStartIndex, aEndIndex );
+    CleanupStack::PushL( medias );
+
+    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosRemoveFromAlbum, EFalse );
+    if( medias )
+        {
+        cmd->SetCObjectValueL( KMPXMediaArrayContents, medias );
+        }
+
+    cmd->SetTObjectValueL( KVcxMediaMyVideosUint32Value, albumId );
+    
+    iCollectionUtility->Collection().CommandL( *cmd );
+
+    CleanupStack::PopAndDestroy( cmd );
+    CleanupStack::PopAndDestroy( medias );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::RemoveMediasFromAlbumL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::RenameAlbumL
+// -----------------------------------------------------------------------------
+//
+void CVCXMyVideosCollectionPluginTester::RenameAlbumL( const TDesC& aAlbumName, const TDesC& aNewAlbumName )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::RenameAlbumL");
+    
+    TMPXItemId itemId = GetAlbumIdL( aAlbumName );
+    CMPXMedia *media = CMPXMedia::NewL();
+    CleanupStack::PushL( media );
+    media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, itemId );
+    media->SetTextValueL( KMPXMediaGeneralTitle, aNewAlbumName );
+    SetMediaL( media, ETrue );
+    CleanupStack::PopAndDestroy( media );
+    
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::RenameAlbumL");
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTester::SetAutomaticRefresh
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::SetAutomaticRefresh( TBool aValue )
@@ -2730,15 +2931,16 @@ void CVCXMyVideosCollectionPluginTester::SetAutomaticRefresh( TBool aValue )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::IsRefreshing
+// CVCXMyVideosCollectionPluginTester::IsRefreshing
 // -----------------------------------------------------------------------------
 //
 TBool CVCXMyVideosCollectionPluginTester::IsRefreshing()
     {
     return iRefreshingCollection;
     }
+
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::SetQuietMode
+// CVCXMyVideosCollectionPluginTester::SetQuietMode
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::SetQuietMode( TBool aValue )
@@ -2747,376 +2949,7 @@ void CVCXMyVideosCollectionPluginTester::SetQuietMode( TBool aValue )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::StartDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::StartDownloadL( const TDesC& aTitle, TInt aIapId, TInt aServiceId,
-        TInt aContentId, const TDesC& aUrl, TBool aSync, const TDesC& aUserName, const TDesC& aPassword,
-        CMPXMedia* aMedia )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::StartDownloadL");
-
-    iUpdateDownloads = ETrue;
-    iDownloadsStarted = ETrue;
-
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosStartDownload, aSync );
-
-    CMPXMedia* startDownloadReq(NULL);
-    if( !aMedia )
-        {
-        startDownloadReq = CMPXMedia::NewL();
-        CleanupStack::PushL( startDownloadReq );
-        }
-    else
-        {
-        startDownloadReq = aMedia;
-        }
-
-    //startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
-    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, 0 );
-
-    // read only iap needed?
-    TUint flags = EVcxMyVideosServiceHasReadOnlyIap | EVcxMyVideosSilent;
-
-    startDownloadReq->SetTObjectValueL( KMPXMediaGeneralFlags, flags );
-
-    VCXLOGLO3("CVCXMyVideosCollectionPluginTester:: UserName: %S, Password: %S.", &aUserName, &aPassword);
-    
-    startDownloadReq->SetTextValueL( KMPXMediaGeneralTitle, aTitle );
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosRemoteUrl, aUrl );
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosUsername, aUserName);
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosPassword, aPassword);
-    
-    cmd->SetCObjectValueL<CMPXMedia>( KMPXCommandColAddMedia, startDownloadReq );
-
-    iDlWatcher->CreateDownloadL( aIapId, aServiceId, aContentId, aUrl, aSync, aUserName, aPassword );
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    if( !aMedia )
-        {
-        CleanupStack::PopAndDestroy( startDownloadReq );
-        }
-
-    CleanupStack::PopAndDestroy( cmd );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::StartDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::ResumeDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::ResumeDownloadL( const TDesC& aTitle, TInt aIapId, TInt aServiceId,
-        TInt aContentId, const TDesC& aUrl, TBool aSync, const TDesC& aUserName, const TDesC& aPassword,
-        CMPXMedia* aMedia
-        )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::ResumeDownloadL");
-
-    iUpdateDownloads = ETrue;
-    iDownloadsStarted = ETrue;
-
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosStartDownload, aSync );
-
-    CMPXMedia* startDownloadReq(NULL);
-    if( !aMedia )
-        {
-        startDownloadReq = CMPXMedia::NewL();
-        CleanupStack::PushL( startDownloadReq );
-        }
-    else
-        {
-        startDownloadReq = aMedia;
-        }
-
-    //startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
-    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, 0 );
-
-    // read only iap needed?
-    TUint flags = EVcxMyVideosServiceHasReadOnlyIap | EVcxMyVideosSilent;
-
-    startDownloadReq->SetTObjectValueL( KMPXMediaGeneralFlags, flags );
-
-    startDownloadReq->SetTextValueL( KMPXMediaGeneralTitle, aTitle );
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosRemoteUrl, aUrl );
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosUsername, aUserName);
-    startDownloadReq->SetTextValueL( KVcxMediaMyVideosPassword, aPassword);
-
-    cmd->SetCObjectValueL<CMPXMedia>( KMPXCommandColAddMedia, startDownloadReq );
-
-    CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownload( aServiceId, aContentId, aUrl );
-    if( dl )
-        {
-        startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosDownloadId, dl->iDownloadId );
-
-        TMPXItemId itemId;
-        itemId.iId1 = dl->iMpxId;
-        itemId.iId2 = 0;
-        startDownloadReq->SetTObjectValueL( KMPXMediaGeneralId, itemId );
-        
-        dl->iInformed = EFalse;
-        dl->iWaitingPause = EFalse;
-        }
-    else
-        {
-        startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosDownloadId, 6666 );
-        iDlWatcher->CreateDownloadL( aIapId, aServiceId, aContentId, aUrl, aSync, aUserName, aPassword );
-        }
-
-    EnsureMediaFilesAreNotInUseL();
-    
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Resume download") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    if( !aMedia )
-        {
-        CleanupStack::PopAndDestroy( startDownloadReq );
-        }
-
-    CleanupStack::PopAndDestroy( cmd );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::ResumeDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::ResumeAllDownloadsL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::ResumeAllDownloadsL()
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::ResumeAllDownloadsL");
-
-    iUpdateDownloads = ETrue;
-    iDownloadsStarted = ETrue;
-
-    for( TInt i = 0; i < iDlWatcher->GetDownloadCount(); i++ )
-        {
-        CVCXMyVideosTestDownload* dl;
-        dl = iDlWatcher->GetDownloadByIndex( i );
-        if( dl && dl->iState == EVcxMyVideosDlStatePaused )
-            {
-            ResumeDownloadL( _L("resume"), dl->iIapId, dl->iServiceId, dl->iContentId, *dl->iUrl, dl->iSyncCall, *dl->iUserName, *dl->iPassword, NULL );
-            }
-        }
-     
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::ResumeAllDownloadsL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CancelDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::CancelDownloadL( CVCXMyVideosTestDownload* aDownload, TBool aSync )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CancelDownloadL");
-
-    if( !aDownload )
-        {
-        User::Leave( KErrArgument );
-        }
-
-    iUpdateDownloads = ETrue;
-
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosCancelDownload, aSync );
-
-    CMPXMedia* cancelDownloadReq = CMPXMedia::NewL();
-    CleanupStack::PushL( cancelDownloadReq );
-
-    cancelDownloadReq->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, TMPXItemId ( aDownload->iMpxId, 0 ) );
-    cancelDownloadReq->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, aDownload->iDownloadId );
-    cancelDownloadReq->SetTextValueL( KMPXMediaGeneralUri, aDownload->iPath->Des() );
-
-    cmd->SetCObjectValueL<CMPXMedia>( KMPXCommandColAddMedia, cancelDownloadReq );
-    
-    iDlWatcher->CancelDownloadL( aDownload->iServiceId, aDownload->iContentId, *aDownload->iUrl );
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Cancel download") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    CleanupStack::PopAndDestroy( cancelDownloadReq );
-    CleanupStack::PopAndDestroy( cmd );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CancelDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::CancelDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::CancelDownloadL( TInt aMpxId, TInt aDownloadId, const TPtrC& aDownloadPath, TBool aSync )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::CancelDownloadL (by IDs)");
-
-    iUpdateDownloads = ETrue;
-
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosCancelDownload, aSync );
-
-    CMPXMedia* cancelDownloadReq = CMPXMedia::NewL();
-    CleanupStack::PushL( cancelDownloadReq );
-
-    CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownloadByIndex(0);
-
-    TPtrC downloadPath( aDownloadPath );
-
-    if( aMpxId == -1 && dl )
-        {
-        aMpxId = dl->iMpxId;
-        }
-
-    if( aDownloadId == -1 && dl )
-        {
-        aDownloadId = dl->iDownloadId;
-        }
-
-    if( aDownloadPath == _L("NULL") && dl )
-        {
-        downloadPath.Set( *dl->iPath );
-        }
-
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: mpxId: %d", aMpxId);
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: downloadId: %d", aDownloadId);
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTester:: downloadPath: %S", &aDownloadPath);
-
-    cancelDownloadReq->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, TMPXItemId ( aMpxId, 0 ) );
-    cancelDownloadReq->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, aDownloadId );
-    cancelDownloadReq->SetTextValueL( KMPXMediaGeneralUri, downloadPath );
-
-    cmd->SetCObjectValueL<CMPXMedia>( KMPXCommandColAddMedia, cancelDownloadReq );
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Cancel download") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    CleanupStack::PopAndDestroy( cancelDownloadReq );
-    CleanupStack::PopAndDestroy( cmd );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::CancelDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::PauseDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::PauseDownloadL( TInt aServiceId, TInt aContentId, const TDesC& aUrl, TBool aSync )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::PauseDownloadL");
-
-    iUpdateDownloads = ETrue;
-
-    CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownload( aServiceId, aContentId, aUrl );
-    if( dl )
-        {
-        dl->iWaitingPause = ETrue;
-        }
-    else
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Download not found!");
-        User::Leave( KErrNotFound );
-        }
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosPauseDownload, aSync );
-
-    cmd->SetTObjectValueL( KVcxMediaMyVideosDownloadId, dl->iDownloadId );
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Pause download") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    CleanupStack::PopAndDestroy( cmd );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::PauseDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::PauseDownloadL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::PauseDownloadL( const TDesC& aUrl, TBool aSync )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTester::PauseDownloadL");
-
-    iUpdateDownloads = ETrue;
-
-    CMPXCommand* cmd = CreateMpxCommandLC( KVcxCommandIdMyVideos, KVcxCommandMyVideosPauseDownload, aSync );
-
-    CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownload( aUrl );
-    if( !dl )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Download not found!");
-        User::Leave( KErrNotFound );
-        }
-    else
-        {
-        dl->iWaitingPause = ETrue;
-        }
-    
-
-    cmd->SetTObjectValueL( KVcxMediaMyVideosDownloadId, dl->iDownloadId );
-
-    VCXLOGLO1("CVCXMyVideosCollectionPluginTester:: Making command.");
-    TRAP_IGNORE( iStats->ActionStartL( iTransactions->TransactionId(), _L("Pause download") ) );
-    iCurrentActionHasResponse = EFalse;
-    iCollectionUtility->Collection().CommandL( *cmd );
-
-    CleanupStack::PopAndDestroy( cmd );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTester::PauseDownloadL");
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetDownloadWatcher
-// -----------------------------------------------------------------------------
-//
-CVCXMyVideosTestDlWatcher* CVCXMyVideosCollectionPluginTester::GetDownloadWatcher()
-    {
-    return iDlWatcher;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetActiveDownloadCountL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTester::GetActiveDownloadCountL()
-    {
-    TInt count = 0;
-
-    CMPXMedia* media ( NULL );
-    for( TInt i = 0; i < iMediaArray->Count(); i++ )
-        {
-        media = (*iMediaArray)[i];
-
-        if( media->IsSupported( KVcxMediaMyVideosDownloadState ) )
-            {
-            TInt state = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-
-            if( state == EVcxMyVideosDlStateDownloading || ( state == EVcxMyVideosDlStatePaused && iAutoResume ) )
-                {
-                count++;
-                }
-            }
-        }
-
-    VCXLOGLO2(">>>CVCXMyVideosCollectionPluginTester:: Active downloads: %d", count);
-
-    return count;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::SetAutoResume
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::SetAutoResume( TBool aValue )
-    {
-    iAutoResume = aValue;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetCurrentLevel
+// CVCXMyVideosCollectionPluginTester::GetCurrentLevel
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTester::GetCurrentLevel()
@@ -3133,7 +2966,7 @@ TInt CVCXMyVideosCollectionPluginTester::GetCurrentLevel()
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetCurrentOpenLevelIndex
+// CVCXMyVideosCollectionPluginTester::GetCurrentOpenLevelIndex
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTester::GetCurrentOpenLevelIndex()
@@ -3142,7 +2975,7 @@ TInt CVCXMyVideosCollectionPluginTester::GetCurrentOpenLevelIndex()
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetLastFullMedia
+// CVCXMyVideosCollectionPluginTester::GetLastFullMedia
 // -----------------------------------------------------------------------------
 //
 CMPXMedia* CVCXMyVideosCollectionPluginTester::GetLastFullMedia()
@@ -3151,7 +2984,7 @@ CMPXMedia* CVCXMyVideosCollectionPluginTester::GetLastFullMedia()
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetMediaIndexInCollectionL
+// CVCXMyVideosCollectionPluginTester::GetMediaIndexInCollectionL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTester::GetMediaIndexInCollectionL( TInt aDrive, TInt aIndex )
@@ -3231,7 +3064,7 @@ TInt CVCXMyVideosCollectionPluginTester::GetMediaIndexInCollectionL( TInt aDrive
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetVideoCountForDrive
+// CVCXMyVideosCollectionPluginTester::GetVideoCountForDrive
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTester::GetVideoCountForDrive( TInt aDrive )
@@ -3260,7 +3093,7 @@ TInt CVCXMyVideosCollectionPluginTester::GetVideoCountForDrive( TInt aDrive )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::GetAllCollectionMedia
+// CVCXMyVideosCollectionPluginTester::GetAllCollectionMedia
 // -----------------------------------------------------------------------------
 //
 const CMPXMediaArray* CVCXMyVideosCollectionPluginTester::GetAllCollectionMedia()
@@ -3269,7 +3102,7 @@ const CMPXMediaArray* CVCXMyVideosCollectionPluginTester::GetAllCollectionMedia(
     }
 
 // -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionTester::EnsureMediaFilesAreNotInUseL
+// CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
@@ -3281,8 +3114,6 @@ void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
     TInt error( KErrInUse );
     
     const TInt KEnsureMediasNotInUseID = 1234567;
-    
-    TRAP_IGNORE( iStats->ActionStartL( KEnsureMediasNotInUseID, _L("Ensure files.") ) );
     
     TBool filesLocked( ETrue );
     // Check all files that they are not in use, retry few times.
@@ -3312,72 +3143,11 @@ void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
 
     if( error != KErrNone && error != KErrNotFound && error != KErrBadName )
         {
-        TRAP_IGNORE( iStats->ActionEndL( KEnsureMediasNotInUseID, error ) );
         VCXLOGLO2("CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL: error: %d", error);
         User::Leave( error );
-        }
-    else
-        {
-        TRAP_IGNORE( iStats->ActionEndL( KEnsureMediasNotInUseID, KErrNone ) );
         }
     
     VCXLOGLO1("CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL: All ok.");
     }
-    
-// -----------------------------------------------------------------------------
-// CVCXMyVideosCollectionPluginTester::TimerComplete
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTester::TimerComplete( TInt /* aTimerId */, TInt /* aError */ )
-    {
-    if( iProgressTimer )
-        {
-        iProgressTimer->After( 1000000 );
-        }
 
-    if( !iMediaArray || !iDlWatcher )
-       {
-       return;
-       }
-
-    if( iDownloadsStarted && iUpdateDownloads && GetCurrentLevel() == 3 )
-        {
-       // Print short info about downloads
-       CMPXMedia* media( NULL );
-
-       VCXLOGLO2("CVCXMyVideosCollectionPluginTester::TimerComplete: medias: %d", iMediaArray->Count());
-       for( TInt i = 0; i < iMediaArray->Count(); i++ )
-           {
-           media = (*iMediaArray)[i];
-
-           if( media->IsSupported( KVcxMediaMyVideosDownloadState ) )
-               {
-               TInt state = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-
-               TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
-
-               TInt progress = -1;
-               if( media->IsSupported( KVcxMediaMyVideosDownloadProgress ) )
-                   {
-                   progress = media->ValueTObjectL<TInt8>( KVcxMediaMyVideosDownloadProgress );
-                   }
-
-               TUint32 downloadId = 0;
-               if( media->IsSupported( KVcxMediaMyVideosDownloadId ) )
-                   {
-                   downloadId = media->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-                   }
-
-               CVCXMyVideosTestDownload* dl = iDlWatcher->GetDownloadByMpxId( itemId.iId1 );
-
-               if( dl )
-                   {
-//                   VCXLOGLO5("CVCXMyVideosCollectionPluginTester:: DL ID: %d, MPX ID: %d, state: %d, progress: %d", downloadId, itemId.iId1, state, progress );
-//                   VCXLOGLO3("CVCXMyVideosCollectionPluginTester:: serviceId: %d, contentId: %d", dl->iServiceId, dl->iContentId );
-                   iDlWatcher->UpdateDownloadProgressL( itemId.iId1, downloadId, progress );
-                   }
-               }
-           }
-        }
-    }
 //  End of File

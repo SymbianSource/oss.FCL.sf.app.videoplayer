@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 21 %
+
+// Version : %version: 23 %
 
 
 #include <MMFROPCustomCommandConstants.h>
@@ -160,7 +161,6 @@ void CMPXVideoDlMgrIf::ConnectToDownloadL( CMPXCommand& aCmd )
 
         iCurrentDl->SetBoolAttribute( EDlAttrSilent, EFalse );
 
-        //a temp hack until dl manager has a fix for this
         TInt32 activeDownload( 0 );
         iCurrentDl->GetIntAttribute( EDlAttrActiveDownload, activeDownload );
         iCurrentDl->SetIntAttribute( EDlAttrActivePlayedDownload, activeDownload );
@@ -502,6 +502,7 @@ void CMPXVideoDlMgrIf::HandleDownloadComplete()
     //
     //  Notify the player and the UI view that the download is complete
     //
+    HandleCustomCommand( EMMFROPControllerSetDownloadSize, iDlTotalSize );
     HandleCustomCommand( EMMFROPControllerSetDownloadComplete, ETrue );
 }
 
@@ -737,7 +738,7 @@ void CMPXVideoDlMgrIf::UpdateDownloadSizeL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoDlMgrIf::UpdateDownloadSizeL()"));
 
-    if ( iController->iDrmHelper->IsProtected( iController->iFileHandle ) )
+    if ( iController->iDrmHelper->IsProtectedL( iController->iFileHandle ) )
     {
         MPX_DEBUG(_L("CMPXVideoDlMgrIf::UpdateDownloadSizeL() download is DRM protected"));
 

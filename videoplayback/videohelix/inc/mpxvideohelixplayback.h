@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 8 %
+// Version : %version: 10 %
 
 
 
@@ -162,8 +162,9 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         * @param aUri URI of the item
         * @param aType the mime type of the item
         * @param aAccessPoint the access point
+        * @param aPosition the starting position
         */
-        void InitStreamingL(const TDesC& aUri, const TDesC8& aType, TInt aAccessPoint);
+        void InitStreamingL(const TDesC& aUri, const TDesC8& aType, TInt aAccessPoint, TInt aPosition); 
 
         /**
         * Initializes a file handle for playback.
@@ -171,8 +172,9 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         * @since S60 9.2
         * @param aFile file handle of a file
         * @param aAccessPoint the access point
+        * @param aPosition the starting position
         */
-        void InitStreamingL(RFile& aFile, TInt aAccessPoint);
+        void InitStreamingL(RFile& aFile, TInt aAccessPoint, TInt aPosition);  
 
         /**
         * Initializes filename and handle
@@ -181,7 +183,7 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         * @param aUri URI of the item
         */
         RFile& OpenFileHandleL( const TDesC& aUri );
-        
+
         /**
         * Open file handle
         *
@@ -192,20 +194,21 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         void OpenFileHandleL( const TDesC& aUri, RFile& aFile );
 
         /**
-        * Handle open file handle
+        *  Checks if the Uri is a streaming link
         *
         * @since S60 9.2
-        * @param aError open file error
+        * @param aUri URL or file name
         */
-        void HandleOpenFileHandleL( TInt aError );
-        
+        void CheckForStreamingUrlL( const TDesC& aUri );
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
         /*
          *  Initializes a song for playback
          *  @param aFile RFile64 of a song
+         *  @param aPosition the starting position
          */
-        void Initialise64L( RFile64& aFile );
+        void Initialise64L( RFile64& aFile, TInt aPosition ); 
 
         /**
         * Initializes a file handle for playback.
@@ -213,8 +216,9 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         * @since S60 9.2
         * @param aFile RFile64 of a file
         * @param aAccessPoint the access point
+        * @param aPosition the starting position
         */
-        void InitStreaming64L(RFile64& aFile, TInt aAccessPoint);
+        void InitStreaming64L( RFile64& aFile, TInt aAccessPoint, TInt aPosition ); 
 
         /**
         * Initializes filename and handle
@@ -232,8 +236,27 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
         * @param aFile a 64-bit file handle
         */
         void OpenFileHandle64L( const TDesC& aUri, RFile64& aFile );
-        
-#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API        
+
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+
+
+        /*
+        *  Initializes a clip for playback
+        *  @since S60 9.2
+        *  
+        *  @param aSong the song path, 
+        *  @param aPosition the starting position 
+        */
+        void InitialiseWithPositionL( const TDesC& aSong, TInt aPosition = 0 );     
+                
+        /**
+        * Initializes a song for playback.
+        *
+        * @since S60 9.2
+        * @param aFile file handle of a song
+        * @param aPosition the starting position
+        */
+        void InitialiseWithPositionL(RFile& aSong, TInt aPosition = 0 );        
 
 
     private:
@@ -247,7 +270,7 @@ NONSHARABLE_CLASS( CMPXVideoHelixPlayback ) : public CMPXPlaybackPluginVersion2
          *  that can leave
          */
         void ConstructL();
-        
+
     private:
         //
         //  Data

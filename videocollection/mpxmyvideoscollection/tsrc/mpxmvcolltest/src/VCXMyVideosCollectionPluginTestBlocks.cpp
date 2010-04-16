@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
 
 // INCLUDE FILES
 #include <mmf/common/mmfcontrollerpluginresolver.h> // CleanupResetAndDestroyPushL
@@ -24,30 +23,35 @@
 #include <collate.h>
 
 #include "VCXTestLog.h"
-#include "VCXTestCommon.h"
-#include "CIptvTestActiveWait.h"
-#include "CIptvTestTimer.h"
-#include "VCXTestStatsKeeper.h"
+#include "VCXMyVideosTestUtils.h"
+#include "CVcxTestActiveWait.h"
+#include "CVcxTestTimer.h"
 
 #include "VCXMyVideosCollectionPluginTest.h"
 #include "VCXMyVideosCollectionPluginTester.h"
-#include "VCXMyVideosTestCommon.h"
-#include "VCXMyVideosTestDlWatcher.h"
-#include "VCXMyVideosTestServiceEmu.h"
+#include "VCXMyVideosTestUtils.h"
 #include "VCXTestMdsDbModifier.h"
+#include "VCXMyVideosTestCommon.h"
 
 #include <mpxmedia.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxmediageneralextdefs.h>
 
+#include "vcxmyvideosdefs.h"
 #include "vcxmyvideosuids.h"
 
 // CONSTANTS
 
 const TInt KVcxTestFileSize3GB = -999;
 
+_LIT(KAbout2050CharsString, "asdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjaiasdfiajsdfasdfiasdjfijasdifjisdfjisdjfiasdjfidjai");
+_LIT(KVcxTestEmptyString, "");
+
+_LIT(KStifScriptInvalidRequest, "InvalidRequest");
+_LIT(KStifScriptEmptyString, "EmptyString");
+_LIT(KStifScript2KString, "2KString");
+
 // MACROS
-#define VCXMVTEST_ERR(err) ( iStatsEnabled ) ? KErrNone : err 
 
 // MODULE DATA STRUCTURES
 
@@ -106,8 +110,8 @@ void CVCXMyVideosCollectionPluginTest::Delete()
 
     iSideloadFolders.ResetAndDestroy();
 
-    delete iTestCommon;
-    iTestCommon = NULL;
+    delete iTestUtils;
+    iTestUtils = NULL;
 
 #ifdef __WINSCW__
     iClient.Close();
@@ -144,9 +148,6 @@ void CVCXMyVideosCollectionPluginTest::Delete()
     delete iMpxMedia;
     iMpxMedia = NULL;
     
-    delete iServiceEmu;
-    iServiceEmu = NULL;
-    
     delete iMdsDbModifier;
     iMdsDbModifier = NULL;
 
@@ -154,9 +155,6 @@ void CVCXMyVideosCollectionPluginTest::Delete()
     iFileMan = NULL;
 
     iFs.Close();
-    
-    delete iStats;
-    iStats = NULL;    
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::Delete <----------");
     }
@@ -177,18 +175,16 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
         // Second is the actual implementation member function.
         ENTRY( "Create", CVCXMyVideosCollectionPluginTest::CreateL ),
         
-        ENTRY( "EnableStats", CVCXMyVideosCollectionPluginTest::EnableStatsL ),
-        ENTRY( "SetPreferredMemory", CVCXMyVideosCollectionPluginTest::SetPreferredMemoryL ),
         ENTRY( "SetSortingOrder", CVCXMyVideosCollectionPluginTest::SetSortingOrderL ),
         ENTRY( "SetAutomaticRefresh", CVCXMyVideosCollectionPluginTest::SetAutomaticRefresh ),
         ENTRY( "SetQuietMode", CVCXMyVideosCollectionPluginTest::SetQuietMode ),
         ENTRY( "CoolDown", CVCXMyVideosCollectionPluginTest::CoolDownL ),
-        ENTRY( "DisableDownloadCheck", CVCXMyVideosCollectionPluginTest::DisableDownloadCheckL ),
         ENTRY( "SetFileCheck", CVCXMyVideosCollectionPluginTest::SetFileCheckL ),
-        ENTRY( "SetAutoResume", CVCXMyVideosCollectionPluginTest::SetAutoResumeL ),
+        ENTRY( "SetUseCopiedMedias", CVCXMyVideosCollectionPluginTest::SetUseCopiedMediasL ),
 
         ENTRY( "OpenCollection", CVCXMyVideosCollectionPluginTest::OpenCollectionL ),
         ENTRY( "OpenLevel", CVCXMyVideosCollectionPluginTest::OpenLevelL ),
+        ENTRY( "OpenLevelByIndex", CVCXMyVideosCollectionPluginTest::OpenLevelByIndexL ),
         ENTRY( "RefreshContents", CVCXMyVideosCollectionPluginTest::RefreshContentsL ),
         ENTRY( "GetMediasByMpxId", CVCXMyVideosCollectionPluginTest::GetMediasByMpxIdL ),
         ENTRY( "CloseLevel", CVCXMyVideosCollectionPluginTest::CloseLevelL ),
@@ -198,10 +194,10 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
         ENTRY( "GetAllMediaFullDetails", CVCXMyVideosCollectionPluginTest::GetAllMediaFullDetailsL ),
         ENTRY( "SetMediaDetail", CVCXMyVideosCollectionPluginTest::SetMediaDetailL ),
         ENTRY( "CheckMediaDetail", CVCXMyVideosCollectionPluginTest::CheckMediaDetailL ),
+        ENTRY( "CheckAlbumCount", CVCXMyVideosCollectionPluginTest::CheckAlbumCountL ),
         ENTRY( "CheckMediaCount", CVCXMyVideosCollectionPluginTest::CheckMediaCountL ),
         ENTRY( "CheckMinimumMediaCount", CVCXMyVideosCollectionPluginTest::CheckMinimumMediaCountL ),
         ENTRY( "CheckMaximumMediaCount", CVCXMyVideosCollectionPluginTest::CheckMaximumMediaCountL ),
-        ENTRY( "CheckDownloadCount", CVCXMyVideosCollectionPluginTest::CheckDownloadCountL ),
         
         ENTRY( "CreateCopyOfMedia", CVCXMyVideosCollectionPluginTest::CreateCopyOfMediaL ),
         ENTRY( "CreateEmptyMedia", CVCXMyVideosCollectionPluginTest::CreateEmptyMediaL ),
@@ -212,6 +208,7 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
         
         ENTRY( "DeleteFileOfMedia", CVCXMyVideosCollectionPluginTest::DeleteFileOfMediaL ),
         ENTRY( "DeleteFilesOfAllMedias", CVCXMyVideosCollectionPluginTest::DeleteFilesOfAllMediasL ),
+        ENTRY( "CreateAlbum", CVCXMyVideosCollectionPluginTest::CreateAlbumL ),
         ENTRY( "RemoveMedia", CVCXMyVideosCollectionPluginTest::RemoveMediaL ),
         ENTRY( "RemoveAllMedia", CVCXMyVideosCollectionPluginTest::RemoveAllMediaL ),
         ENTRY( "MoveMedia", CVCXMyVideosCollectionPluginTest::MoveMediaL ),
@@ -224,25 +221,20 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
         ENTRY( "DeleteMedias", CVCXMyVideosCollectionPluginTest::DeleteMediasL ),
         ENTRY( "CancelDelete", CVCXMyVideosCollectionPluginTest::CancelDeleteL ),
         
+        ENTRY( "CreateAlbum", CVCXMyVideosCollectionPluginTest::CreateAlbumL ),
+        ENTRY( "DeleteAlbums", CVCXMyVideosCollectionPluginTest::DeleteAlbumsL ),
+        ENTRY( "DeleteAllAlbums", CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL ),
+        ENTRY( "AddMediasToAlbum", CVCXMyVideosCollectionPluginTest::AddMediasToAlbumL ),
+        ENTRY( "RemoveMediasFromAlbum", CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL ),
+        ENTRY( "RenameAlbum", CVCXMyVideosCollectionPluginTest::RenameAlbumL ),
+        ENTRY( "CheckAlbumExists", CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL ),
+        
         ENTRY( "CreateVideoFile", CVCXMyVideosCollectionPluginTest::CreateVideoFileL ),
         ENTRY( "CreateVideoFileNoWait", CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL ),
         ENTRY( "EnsureDriveForVideos", CVCXMyVideosCollectionPluginTest::EnsureDriveForVideosL ),
         ENTRY( "EmptySideloadFolders", CVCXMyVideosCollectionPluginTest::EmptySideloadFoldersL ),
         ENTRY( "SetDeleteSideloadedVideos", CVCXMyVideosCollectionPluginTest::SetDeleteSideloadedVideos ),
         
-        ENTRY( "Download", CVCXMyVideosCollectionPluginTest::DownloadL ),
-        ENTRY( "ResumeDownload", CVCXMyVideosCollectionPluginTest::ResumeDownloadL ),
-        ENTRY( "ResumeAllDownloads", CVCXMyVideosCollectionPluginTest::ResumeAllDownloadsL ),
-        ENTRY( "DownloadUsingMedia", CVCXMyVideosCollectionPluginTest::DownloadUsingMediaL ),
-        ENTRY( "ResumeDownloadUsingMedia", CVCXMyVideosCollectionPluginTest::ResumeDownloadUsingMediaL ),
-        ENTRY( "DownloadUrl", CVCXMyVideosCollectionPluginTest::DownloadUrlL ),
-        ENTRY( "CancelDownload", CVCXMyVideosCollectionPluginTest::CancelDownloadL ),
-        ENTRY( "CancelDownloadById", CVCXMyVideosCollectionPluginTest::CancelDownloadByIdL ),
-        ENTRY( "PauseDownload", CVCXMyVideosCollectionPluginTest::PauseDownloadL ),
-        ENTRY( "PauseDownloadByUrl", CVCXMyVideosCollectionPluginTest::PauseDownloadByUrlL ),
-        ENTRY( "CheckDownloadProgress", CVCXMyVideosCollectionPluginTest::CheckDownloadProgressL ),
-        
-        ENTRY( "WaitAllDownloads", CVCXMyVideosCollectionPluginTest::WaitAllDownloadsL ),
         ENTRY( "WaitForMessage", CVCXMyVideosCollectionPluginTest::WaitForMessageL ),
         ENTRY( "WaitForAnyMessage", CVCXMyVideosCollectionPluginTest::WaitForAnyMessageL ),
         ENTRY( "WaitForMessages", CVCXMyVideosCollectionPluginTest::WaitForMessagesL ),
@@ -254,34 +246,6 @@ TInt CVCXMyVideosCollectionPluginTest::RunMethodL(
 
     return RunInternalL( KFunctions, count, aItem );
 
-    }
-
-// -----------------------------------------------------------------------------
-// CVCXMyVideosCollectionPluginTest::EnableStatsL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::EnableStatsL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::EnableStatsL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In EnableStatsL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TPtrC statsName;
-    TPtrC fileName;
-    User::LeaveIfError( aItem.GetNextString( statsName) );
-    User::LeaveIfError( aItem.GetNextString( fileName) );
-
-    TRAP_IGNORE( iStats->StartStatsKeepingL( statsName, fileName ) );
-    iStatsEnabled = ETrue;
-    
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::EnableStatsL <----------");
-    return KErrNone;
     }
 
 // -----------------------------------------------------------------------------
@@ -303,13 +267,12 @@ TInt CVCXMyVideosCollectionPluginTest::CreateL( CStifItemParser& aItem )
 
     aItem.SetParsingType(CStifItemParser::EQuoteStyleParsing);
 
-    iTestCommon = CVCXTestCommon::NewL();
-    iStats = CVCXTestStatsKeeper::NewL();
-    iTester = CVCXMyVideosCollectionPluginTester::NewL( this, iTestCommon, iStats );
-    iActiveWait = CIptvTestActiveWait::NewL();
-    iActiveWaitBlocking = CIptvTestActiveWait::NewL();
-    iTimeoutTimer = CIptvTestTimer::NewL(*this, 0);
-    iCoolDownTimer = CIptvTestTimer::NewL(*this, 1);   
+    iTestUtils = CVCXMyVideosTestUtils::NewL();
+    iTester = CVCXMyVideosCollectionPluginTester::NewL( this, iTestUtils );
+    iActiveWait = CVcxTestActiveWait::NewL();
+    iActiveWaitBlocking = CVcxTestActiveWait::NewL();
+    iTimeoutTimer = CVcxTestTimer::NewL(*this, 0);
+    iCoolDownTimer = CVcxTestTimer::NewL(*this, 1);   
     
 #ifdef __WINSCW__
     TInt err = iClient.Connect();
@@ -319,51 +282,11 @@ TInt CVCXMyVideosCollectionPluginTest::CreateL( CStifItemParser& aItem )
         }
 #endif // __WINSCW__
 
-    iAutoResume = ETrue;
-
-    iTester->SetAutoResume( iAutoResume );
-
-    iServiceEmu = CVCXMyVideosTestServiceEmu::NewL();
-
     iMdsDbModifier = CVCXTestMdsDbModifier::NewL();
 
     iCurrentSortOrder = EVcxMyVideosSortingNone;
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateL <----------");
-    return KErrNone;
-    }
-
-// -----------------------------------------------------------------------------
-// CVCXMyVideosCollectionPluginTest::SetPreferredMemoryL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::SetPreferredMemoryL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::SetPreferredMemoryL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In SetPreferredMemoryL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TInt drive(0);
-    User::LeaveIfError( GetDriveParam( aItem, drive ) );
-
-    // These were defined in CVcxMyVideosDownloadUtil::PreferredMemoryDesL()
-    const TInt KVcxCenRepUid = 0x102750E2; // same as KIptvCenRepUid in CIptvUtil.h
-    const TInt KVcxCenRepPreferredMemoryKey = 0x01; // same as KIptvCenRepPreferredMemoryKey in CIptvUtil.h
-
-    TUid uid;
-    uid.iUid = KVcxCenRepUid;
-
-    CRepository* cenRep = CRepository::NewLC( uid );
-    User::LeaveIfError( cenRep->Set( KVcxCenRepPreferredMemoryKey, drive ) );
-    CleanupStack::PopAndDestroy( cenRep );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetPreferredMemoryL <----------");
     return KErrNone;
     }
 
@@ -397,7 +320,7 @@ TInt CVCXMyVideosCollectionPluginTest::SetSortingOrderL( CStifItemParser& aItem 
     iCurrentSortOrder = value;
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetSortingOrderL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -423,7 +346,7 @@ TInt CVCXMyVideosCollectionPluginTest::SetAutomaticRefresh( CStifItemParser& aIt
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetAutomaticRefresh <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -449,11 +372,11 @@ TInt CVCXMyVideosCollectionPluginTest::SetQuietMode( CStifItemParser& aItem )
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetQuietMode <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CoolDownL
+// CVcxMyVideosApiTest::CoolDownL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CoolDownL( CStifItemParser& /* aItem */ )
@@ -482,22 +405,7 @@ TInt CVCXMyVideosCollectionPluginTest::CoolDownL( CStifItemParser& /* aItem */ )
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DisableDownloadCheckL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::DisableDownloadCheckL( CStifItemParser& /* aItem */ )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DisableDownloadCheckL");
-    if( iTester )
-        {
-        iTester->GetDownloadWatcher()->DisableDownloadCheck();
-        }
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DisableDownloadCheckL");
-    return KErrNone;
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::SetFileCheckL
+// CVcxMyVideosApiTest::SetFileCheckL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::SetFileCheckL( CStifItemParser& aItem )
@@ -513,28 +421,19 @@ TInt CVCXMyVideosCollectionPluginTest::SetFileCheckL( CStifItemParser& aItem )
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::SetAutoResumeL
+// CVcxMyVideosApiTest::SetUseCopiedMediasL
 // -----------------------------------------------------------------------------
 //
-TInt CVCXMyVideosCollectionPluginTest::SetAutoResumeL( CStifItemParser& aItem )
+TInt CVCXMyVideosCollectionPluginTest::SetUseCopiedMediasL( CStifItemParser& aItem )
     {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::SetAutoResumeL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In SetAutoResumeL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::SetUseCopiedMediasL");
 
-    TInt autoResume(0);
-    User::LeaveIfError( aItem.GetNextInt( autoResume ) );
-    iAutoResume = autoResume;
-    if( iTester )
-        {
-        iTester->SetAutoResume( iAutoResume );
-        }
+    TInt value(0);
+    User::LeaveIfError( aItem.GetNextInt( value ) );
+    TBool set = static_cast<TBool>(value);
+    iTester->SetUseCopiedMediasL( set );
 
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetAutoResumeL <----------");
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetUseCopiedMediasL");
     return KErrNone;
     }
 
@@ -579,7 +478,7 @@ TInt CVCXMyVideosCollectionPluginTest::OpenCollectionL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::OpenCollectionL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -589,6 +488,41 @@ TInt CVCXMyVideosCollectionPluginTest::OpenCollectionL( CStifItemParser& aItem )
 TInt CVCXMyVideosCollectionPluginTest::OpenLevelL( CStifItemParser& aItem )
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::OpenLevelL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In OpenLevelL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+    
+    TPtrC name;
+    User::LeaveIfError( aItem.GetNextString( name ) );
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: levelName: %S", &name);
+
+    iLastReceivedMessage = -1;
+
+    TInt err( KErrNotReady );
+    if( iTester )
+        {
+        TRAP( err, iTester->OpenLevelL( name ) );
+        }
+
+    if( err != KErrNone )
+        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::OpenLevelL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXMyVideosCollectionPluginTest::OpenLevelByIndexL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::OpenLevelByIndexL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::OpenLevelByIndexL ---------->");
     // Print to UI
     _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
     _LIT( KWhere, "In OpenLevelL" );
@@ -612,8 +546,8 @@ TInt CVCXMyVideosCollectionPluginTest::OpenLevelL( CStifItemParser& aItem )
     if( err != KErrNone )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::OpenLevelL <----------");
-    return VCXMVTEST_ERR( err );
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::OpenLevelByIndexL <----------");
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -642,7 +576,7 @@ TInt CVCXMyVideosCollectionPluginTest::CloseLevelL( CStifItemParser& /* aItem */
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CloseLevelL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -673,7 +607,7 @@ TInt CVCXMyVideosCollectionPluginTest::RefreshContentsL( CStifItemParser& aItem 
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RefreshContentsL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -720,7 +654,7 @@ TInt CVCXMyVideosCollectionPluginTest::GetMediasByMpxIdL( CStifItemParser& aItem
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::GetMediasByMpxIdL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -776,7 +710,7 @@ TInt CVCXMyVideosCollectionPluginTest::GetMediaFullDetailsL( CStifItemParser& aI
     messages.Reset();
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::GetMediaFullDetailsL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -843,7 +777,7 @@ TInt CVCXMyVideosCollectionPluginTest::GetMediaFullDetailsByMpxIdL( CStifItemPar
     messages.Reset();
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::GetMediaFullDetailsByMpxIdL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -876,7 +810,7 @@ TInt CVCXMyVideosCollectionPluginTest::GetAllMediaFullDetailsL( CStifItemParser&
     iLastReceivedMessage = -1;
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::GetAllMediaFullDetailsL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -903,28 +837,49 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
 
     TInt drive(0);
     User::LeaveIfError( GetDriveParam( aItem, drive ) );
+    
+    // Get the media object to be checked.
+    
+    TPtrC itemIndexOrName;
+    User::LeaveIfError( aItem.GetNextString( itemIndexOrName ) );
+    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: item index or name: %S", &itemIndexOrName);
 
-    TInt itemIndex(0);
-    User::LeaveIfError( aItem.GetNextInt( itemIndex ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: item index: %d", itemIndex);
-
-    if( itemIndex < 0 || itemIndex >= iTester->GetMediaCount() )
+    TLex lex( itemIndexOrName );
+    TInt itemIndex( -1 );
+    if( lex.Val( itemIndex ) == KErrNone )
         {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: Error. Index (%d) out of bounds.", itemIndex);
+        if( itemIndex < 0 || itemIndex >= iTester->GetMediaCount() )
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: Error. Index (%d) out of bounds.", itemIndex);
+            User::Leave( KErrArgument );
+            }
+        }
+    else
+        {
+        itemIndex = iTester->GetIndexOfMediaWithNameL( itemIndexOrName );
+        }
+    
+    if( itemIndex == KErrNotFound ) 
+        {
         User::Leave( KErrArgument );
         }
 
+    // Attribute to be checked
+    
     TInt mpxAttributeMappingId(0);
     User::LeaveIfError( aItem.GetNextInt( mpxAttributeMappingId ) );
 
+    // It's type.
+    
     TVcxTestMediaAttributeType type;
     TMPXAttributeData mpxMediaAttribute;
     User::LeaveIfError( MapMpxMediaAttribute(
             static_cast<TVcxTestMediaAttributeIdMapping>(mpxAttributeMappingId),
             mpxMediaAttribute, type ) );
     
+    // Get the media to be checked.
     
-    CMPXMedia* media( NULL );        
+    CMPXMedia* media( NULL );
     TRAP( err, media = iTester->GetMediaL( drive, itemIndex ) );    
     
     // If attribute is not supported, fetch full media details.
@@ -945,7 +900,7 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
     if( err != KErrNone )
         {
         VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMediaDetailL <----------");
-        return VCXMVTEST_ERR( err );
+        return err;
         }
 
     if( !media->IsSupported( mpxMediaAttribute ) )
@@ -956,7 +911,7 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
         iTester->PrintMPXMediaL( *media, ETrue );
         
         VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMediaDetailL <---------");
-        return VCXMVTEST_ERR( KErrNotSupported );
+        return KErrNotSupported;
         }
 
     if( type == EVcxTestMediaAttributeTypeString )
@@ -1246,7 +1201,7 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMediaDetailL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1446,11 +1401,68 @@ TInt CVCXMyVideosCollectionPluginTest::SetMediaDetailL( CStifItemParser& aItem )
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetMediaDetailL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckMediaCountL
+// CVcxMyVideosApiTest::CheckAlbumCountL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::CheckAlbumCountL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckAlbumCountL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In CheckAlbumCountL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+
+    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    TInt expectedCount(0);
+    User::LeaveIfError(aItem.GetNextInt(expectedCount));
+
+    // File check
+    TInt videoCount = iTester->GetMediaCount();
+
+    // attribute check that they are in allowed values
+
+    int err(KErrNone);
+    int actualCount(0);
+    
+    for( TInt i = videoCount-1; i >= 0; i-- )
+        {
+        CMPXMedia* media = iTester->GetMediaL( -1, i );
+
+        // Skip categories with empty names, they are for photos.
+        if( !media->IsSupported( KMPXMediaGeneralTitle ) )
+            {
+            continue;
+            }
+        
+        TMPXItemId itemId  = *( media->Value<TMPXItemId>( KMPXMediaGeneralId ) );
+        
+        if(itemId.iId2 == KVcxMvcMediaTypeAlbum)
+            {
+            actualCount++;
+            }
+        }
+    
+    if ( actualCount != expectedCount )
+        {
+        VCXLOGLO2("CVCXMyVideosCollectionPluginTest: Error! Count of albums is wrong: %d", actualCount );
+        err = KErrCorrupt;
+        }
+  
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckAlbumCountL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::CheckMediaCountL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CheckMediaCountL( CStifItemParser& aItem )
@@ -1481,11 +1493,11 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaCountL( CStifItemParser& aItem 
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMediaCountL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckMinimumMediaCountL
+// CVcxMyVideosApiTest::CheckMinimumMediaCountL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CheckMinimumMediaCountL( CStifItemParser& aItem )
@@ -1513,11 +1525,11 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMinimumMediaCountL( CStifItemParser&
     TRAPD( err, CheckMediasL( expectedCount, drive, -1 ) );
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMinimumMediaCountL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckMaximumMediaCountL
+// CVcxMyVideosApiTest::CheckMaximumMediaCountL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CheckMaximumMediaCountL( CStifItemParser& aItem )
@@ -1545,43 +1557,7 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMaximumMediaCountL( CStifItemParser&
     TRAPD( err, CheckMediasL( expectedCount, drive, 1 ) );
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckMaximumMediaCountL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckDownloadCountL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::CheckDownloadCountL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckDownloadCountL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In CheckMediaCountL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-    
-    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
-
-    TInt expectedCount(0);
-    User::LeaveIfError(aItem.GetNextInt(expectedCount));
-
-    TInt err( KErrNotReady );
-    if( iTester )
-        {
-        err = KErrNone;
-        if( iTester->GetDownloadWatcher()->GetDownloadCount() != expectedCount )
-            {
-            err = KErrCorrupt;
-            VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: ERROR: Not expected count of downloads!");
-            }
-        }
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckDownloadCountL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1622,7 +1598,7 @@ TInt CVCXMyVideosCollectionPluginTest::CreateCopyOfMediaL( CStifItemParser& aIte
         {
         VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: ERROR: There's zero medias!");
         VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateCopyOfMediaL <----------");
-        return VCXMVTEST_ERR( KErrArgument );
+        return KErrArgument;
         }
 
     if( iMpxMedia )
@@ -1679,7 +1655,7 @@ TInt CVCXMyVideosCollectionPluginTest::CreateCopyOfMediaL( CStifItemParser& aIte
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateCopyOfMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1785,12 +1761,11 @@ TInt CVCXMyVideosCollectionPluginTest::AddMediaL( CStifItemParser& aItem )
         }
 #endif // __WINSCW__
 
-
     if( err != KErrNone )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::AddMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1832,7 +1807,7 @@ TInt CVCXMyVideosCollectionPluginTest::SetMediaL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::SetMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -1865,11 +1840,11 @@ TInt CVCXMyVideosCollectionPluginTest::OutsideMediaUpdateL( CStifItemParser& aIt
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::OutsideMediaUpdateL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::RemoveMediaL
+// CVcxMyVideosApiTest::RemoveMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::RemoveMediaL( CStifItemParser& aItem )
@@ -1907,11 +1882,11 @@ TInt CVCXMyVideosCollectionPluginTest::RemoveMediaL( CStifItemParser& aItem )
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RemoveMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::RemoveAllMediaL
+// CVcxMyVideosApiTest::RemoveAllMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::RemoveAllMediaL( CStifItemParser& aItem )
@@ -1931,102 +1906,6 @@ TInt CVCXMyVideosCollectionPluginTest::RemoveAllMediaL( CStifItemParser& aItem )
     TRAP_IGNORE( iTester->EnsureMediaFilesAreNotInUseL() );
     
     TInt error( KErrNone );
-    
-    TInt mediaCount = iTester->GetMediaCount();
-    
-    // Store info about the mpx items. 
-    RArray<TUint> mpxIds;
-    CleanupClosePushL( mpxIds ); 
-            
-    RArray<TUint> downloadIds;
-    CleanupClosePushL( downloadIds );
-    
-    RArray<TInt> downloadStates;
-    CleanupClosePushL( downloadStates );
-
-    RPointerArray<HBufC> filePaths;
-    CleanupResetAndDestroyPushL( filePaths );
-    
-    // Get ids and other needed details. 
-    
-    for( TInt i=0; i<mediaCount; i++ )
-        {
-        CMPXMedia* media( NULL );
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest::RemoveAllMediaL: GetMedia %d", i);
-        TRAP( error, media = iTester->GetMediaL( -1, i ) );
-
-        if( error != KErrNone )
-            {
-            CleanupStack::PopAndDestroy( &filePaths );
-            CleanupStack::PopAndDestroy( &downloadStates );
-            CleanupStack::PopAndDestroy( &downloadIds );
-            CleanupStack::PopAndDestroy( &mpxIds );
-            
-            VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RemoveAllMediaL <----------");
-            return VCXMVTEST_ERR( error );
-            }
-        
-        if( media && media->IsSupported( KMPXMediaGeneralUri ) )
-            {
-            TUint32 downloadId = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadId ) )
-                {
-                downloadId = media->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-                }
-
-            TInt state = -1;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadState ) )
-                {
-                state = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-                }                
-                
-            HBufC* path( NULL );
-            if( media->IsSupported( KMPXMediaGeneralUri ) )
-                {
-                path = media->ValueText( KMPXMediaGeneralUri ).AllocL();
-                }
-            else
-                {
-                path = HBufC::NewL( 32 );
-                }
-            
-            TMPXItemId itemId = *(media->Value<TMPXItemId>( KMPXMediaGeneralId ));
-            
-            filePaths.Append( path );
-            downloadIds.Append( downloadId );
-            downloadStates.Append( state );
-            mpxIds.Append( itemId.iId1 );
-            }
-        }
-    
-    // Cancel downloads.
-    
-    for( TInt i = mpxIds.Count()-1; i >= 0; i-- )
-        {
-        if( downloadIds[i] != 0 || downloadStates[i] != -1 )
-            {
-            // Cancel the download.
-            RArray<TInt> messages;
-            if( BaflUtils::FileExists( iFs, filePaths[i]->Des() ) )
-                {
-                messages.Append( KVCXMYVideosTestMessageMpxItemDeleted );
-                }
-            messages.Append( KVCXMYVideosTestMessageCommandComplete );
-            messages.Append( KVCXMYVideosTestMessageCollectionOpened );
-            TRAP( error, iTester->CancelDownloadL( mpxIds[i], downloadIds[i], filePaths[i]->Des(), EFalse ) );
-            if( error == KErrNone )
-                {
-                TRAP( error, WaitForMessagesL( ETrue, messages, 30, ETrue ) );
-                }
-            messages.Reset();
-            // Error occured, lets hope deleting works.
-            if( error != KErrNone )
-                {
-                downloadIds[i] = 0;
-                downloadStates[i] = -1;
-                }
-            }    
-        }
     
     // Get current list of medias.
     
@@ -2082,16 +1961,6 @@ TInt CVCXMyVideosCollectionPluginTest::RemoveAllMediaL( CStifItemParser& aItem )
 
     iLastReceivedMessage = -1;
 
-    CleanupStack::PopAndDestroy( &filePaths );
-    CleanupStack::PopAndDestroy( &downloadStates );
-    CleanupStack::PopAndDestroy( &downloadIds );
-    CleanupStack::PopAndDestroy( &mpxIds );
-
-    if( iTester && iTester->GetDownloadWatcher() )
-        {
-        iTester->GetDownloadWatcher()->Reset();
-        }
-
     if( iTester->GetMediaCount() > 0 )
         {
         VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: All medias could not be removed."); 
@@ -2099,11 +1968,11 @@ TInt CVCXMyVideosCollectionPluginTest::RemoveAllMediaL( CStifItemParser& aItem )
         }
     
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RemoveAllMediaL <----------");
-    return VCXMVTEST_ERR( error ); 
+    return error; 
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::MoveMediaL
+// CVcxMyVideosApiTest::MoveMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::MoveMediaL( CStifItemParser& aItem )
@@ -2141,7 +2010,7 @@ TInt CVCXMyVideosCollectionPluginTest::MoveMediaL( CStifItemParser& aItem )
     if( iTester )
         {
         TRAP( err, iTester->EnsureMediaFilesAreNotInUseL() );
-        err = VCXMVTEST_ERR( err );
+        err = err;
         if( err == KErrNone )
             {
             TRAP( err, iTester->MoveMediasL( sourceDrive, index, index+1, destDrive, syncCall ) );
@@ -2152,11 +2021,11 @@ TInt CVCXMyVideosCollectionPluginTest::MoveMediaL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::MoveMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::MoveMediasL
+// CVcxMyVideosApiTest::MoveMediasL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::MoveMediasL( CStifItemParser& aItem )
@@ -2197,7 +2066,7 @@ TInt CVCXMyVideosCollectionPluginTest::MoveMediasL( CStifItemParser& aItem )
     if( iTester )
         {
         TRAP( err, iTester->EnsureMediaFilesAreNotInUseL() );
-        err = VCXMVTEST_ERR( err );
+        err = err;
         if( err == KErrNone )
             {
             TRAP( err, iTester->MoveMediasL( sourceDrive, index, endIndex, destDrive, syncCall ) );
@@ -2208,11 +2077,11 @@ TInt CVCXMyVideosCollectionPluginTest::MoveMediasL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::MoveMediasL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelMoveL
+// CVcxMyVideosApiTest::CancelMoveL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CancelMoveL( CStifItemParser& aItem )
@@ -2247,11 +2116,11 @@ TInt CVCXMyVideosCollectionPluginTest::CancelMoveL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CancelMoveL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CopyMediaL
+// CVcxMyVideosApiTest::CopyMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CopyMediaL( CStifItemParser& aItem )
@@ -2295,11 +2164,11 @@ TInt CVCXMyVideosCollectionPluginTest::CopyMediaL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CopyMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CopyMediasL
+// CVcxMyVideosApiTest::CopyMediasL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CopyMediasL( CStifItemParser& aItem )
@@ -2346,11 +2215,11 @@ TInt CVCXMyVideosCollectionPluginTest::CopyMediasL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CopyMediasL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelCopyL
+// CVcxMyVideosApiTest::CancelCopyL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CancelCopyL( CStifItemParser& aItem )
@@ -2385,11 +2254,11 @@ TInt CVCXMyVideosCollectionPluginTest::CancelCopyL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CancelCopyL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DeleteMediaL
+// CVcxMyVideosApiTest::DeleteMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::DeleteMediaL( CStifItemParser& aItem )
@@ -2424,7 +2293,7 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteMediaL( CStifItemParser& aItem )
     if( iTester )
         {
         TRAP( err, iTester->EnsureMediaFilesAreNotInUseL() );
-        err = VCXMVTEST_ERR( err );
+        err = err;
         if( err == KErrNone )
             {
             TRAP( err, iTester->DeleteMediasL( sourceDrive, index, index+1, syncCall ) );
@@ -2435,11 +2304,11 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteMediaL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DeleteMediasL
+// CVcxMyVideosApiTest::DeleteMediasL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::DeleteMediasL( CStifItemParser& aItem )
@@ -2477,7 +2346,7 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteMediasL( CStifItemParser& aItem )
     if( iTester )
         {
         TRAP( err, iTester->EnsureMediaFilesAreNotInUseL() );
-        err = VCXMVTEST_ERR( err );
+        err = err;
         if( err == KErrNone )
             {
             TRAP( err, iTester->DeleteMediasL( sourceDrive, index, endIndex, syncCall ) );
@@ -2490,11 +2359,11 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteMediasL( CStifItemParser& aItem )
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteMediasL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelDeleteL
+// CVcxMyVideosApiTest::CancelDeleteL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CancelDeleteL( CStifItemParser& aItem )
@@ -2529,11 +2398,11 @@ TInt CVCXMyVideosCollectionPluginTest::CancelDeleteL( CStifItemParser& aItem )
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CancelDeleteL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 //----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelNextOperationL
+// CVcxMyVideosApiTest::CancelNextOperationL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CancelNextOperationL( CStifItemParser& /* aItem */ )
@@ -2553,7 +2422,7 @@ TInt CVCXMyVideosCollectionPluginTest::CancelNextOperationL( CStifItemParser& /*
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DeleteFileOfMediaL
+// CVcxMyVideosApiTest::DeleteFileOfMediaL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::DeleteFileOfMediaL( CStifItemParser& aItem )
@@ -2590,11 +2459,11 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteFileOfMediaL( CStifItemParser& aIte
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteFileOfMediaL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DeleteFilesOfAllMediasL
+// CVcxMyVideosApiTest::DeleteFilesOfAllMediasL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::DeleteFilesOfAllMediasL( CStifItemParser& /* aItem */ )
@@ -2613,7 +2482,7 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteFilesOfAllMediasL( CStifItemParser&
     if( iTester )
         {
         TRAP( err, iTester->EnsureMediaFilesAreNotInUseL() );
-        err = VCXMVTEST_ERR( err );
+        err = err;
         if( err == KErrNone )
             {        
             TRAP( err, iTester->DeleteAllMediaFilesL() );
@@ -2621,11 +2490,297 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteFilesOfAllMediasL( CStifItemParser&
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteFilesOfAllMediasL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CreateVideoFileL
+// CVcxMyVideosApiTest::CreateAlbumL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::CreateAlbumL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CreateAlbumL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In CreateAlbumL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    iLastReceivedMessage = -1;
+
+    TInt err( KErrNotReady );
+    if( iTester )
+        {
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+        
+        TInt sync;
+        if( aItem.GetNextInt( sync ) != KErrNone )
+            {
+            sync = EFalse;
+            }
+
+        if( albumName.Compare( KStifScript2KString ) == KErrNone )
+            {
+            TRAP( err, iTester->CreateAlbumL( KAbout2050CharsString, sync ) );
+            }
+        else if( albumName.Compare( KStifScriptEmptyString ) == KErrNone )
+            {
+            TRAP( err, iTester->CreateAlbumL( KVcxTestEmptyString, sync ) );
+            }
+        else if( albumName.Compare( KStifScriptInvalidRequest ) == KErrNone )
+            {
+            TRAP( err, iTester->CreateAlbumL( KVcxTestEmptyString, sync, ETrue ) );
+            }
+        else
+            {
+            TRAP( err, iTester->CreateAlbumL( albumName, sync ) );
+            }
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateAlbumL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::DeleteAlbumsL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::DeleteAlbumsL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DeleteAlbumsL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In DeleteAlbumsL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    iLastReceivedMessage = -1;
+    
+    TInt err( KErrNotReady );
+
+    if( iTester )
+        {
+        TPtrC albumName;
+        RArray<TPtrC> albumNames;
+        
+        while( aItem.GetNextString( albumName ) == KErrNone )
+            {
+            albumNames.Append( albumName );
+            }
+        
+        if( albumNames.Count() < 1 )
+            {
+            VCXLOGLO1("CVCXMyVideosCollectionPluginTest::DeleteAlbumsL: No albums specified!");
+            err = KErrArgument;
+            }
+        else
+            {
+            TRAP( err, iTester->DeleteAlbumsL( albumNames ) );
+            }
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteAlbumsL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::DeleteAllAlbumsL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In DeleteAllAlbumsL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    iLastReceivedMessage = -1;
+    
+    TInt err( KErrNotReady );
+
+    if( iTester )
+        {
+        TRAP( err, iTester->DeleteAllAlbumsL() );
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DeleteAllAlbumsL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::AddMediasToAlbumL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::AddMediasToAlbumL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::AddMediasToAlbumL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In AddMediasToAlbumL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    iLastReceivedMessage = -1;
+    
+    TInt err( KErrNotReady );
+    
+    if( iTester )
+        {
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+    
+        TInt sourceDrive(0);
+        User::LeaveIfError( GetDriveParam( aItem, sourceDrive ) );
+    
+        TInt index(0);
+        User::LeaveIfError( aItem.GetNextInt( index ) );
+    
+        TInt endIndex(0);
+        User::LeaveIfError( aItem.GetNextInt( endIndex ) );
+
+        TRAP( err, iTester->AddMediasToAlbumL( albumName, sourceDrive, index, endIndex ) );
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::AddMediasToAlbumL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::RemoveMediasFromAlbumL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In RemoveMediasFromAlbumL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    iLastReceivedMessage = -1;
+    
+    TInt err( KErrNotReady );
+
+    if( iTester )
+        {    
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+    
+        TInt sourceDrive(0);
+        User::LeaveIfError( GetDriveParam( aItem, sourceDrive ) );
+    
+        TInt index(0);
+        User::LeaveIfError( aItem.GetNextInt( index ) );
+    
+        TInt endIndex(0);
+        User::LeaveIfError( aItem.GetNextInt( endIndex ) );
+
+        TRAP( err, iTester->RemoveMediasFromAlbumL( albumName, sourceDrive, index, endIndex ) );
+        }
+
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RemoveMediasFromAlbumL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::RenameAlbumL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::RenameAlbumL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::RenameAlbumL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In RenameAlbumL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+
+    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    int err( KErrNotReady );
+    
+    if( iTester )
+        {
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+        
+        TPtrC newAlbumName;
+        User::LeaveIfError( aItem.GetNextString( newAlbumName ) );
+
+        if( newAlbumName.Compare( KStifScript2KString ) == KErrNone )
+            {
+            TRAP( err, iTester->RenameAlbumL( albumName, KAbout2050CharsString ) );
+            }
+        else if( newAlbumName.Compare( KStifScriptEmptyString ) == KErrNone )
+            {
+            TRAP( err, iTester->RenameAlbumL( albumName, KVcxTestEmptyString ) );
+            }
+        else
+            {
+            TRAP( err, iTester->RenameAlbumL( albumName, newAlbumName ) );    
+            }
+        }
+  
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::RenameAlbumL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::CheckAlbumExistsL
+// -----------------------------------------------------------------------------
+//
+TInt CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL( CStifItemParser& aItem )
+    {
+    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL ---------->");
+    // Print to UI
+    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
+    _LIT( KWhere, "In CheckAlbumExistsL" );
+    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
+    // Print to log file
+    iLog->Log( KWhere );
+
+    WaitForRefreshL( EFalse ); // Wait for possible refresh to finish.
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+
+    int err( KErrNotReady );
+    
+    if( iTester )
+        {
+        TPtrC albumName;
+        User::LeaveIfError( aItem.GetNextString( albumName ) );
+        
+        TRAP( err, iTester->GetAlbumIdL(albumName) );
+        }
+  
+    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckAlbumExistsL <----------");
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxMyVideosApiTest::CreateVideoFileL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CStifItemParser& aItem )
@@ -2643,17 +2798,14 @@ TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CStifItemParser& aItem 
     TInt temp(0);
 
     // Parameter video type
-    CIptvTestVideoCreator::TIptvTestVideoType videoType;
+    CVCXMyVideosTestUtils::TVcxTestVideoType videoType;
     User::LeaveIfError( aItem.GetNextInt(temp) );
-    videoType = static_cast<CIptvTestVideoCreator::TIptvTestVideoType>(temp);
+    videoType = static_cast<CVCXMyVideosTestUtils::TVcxTestVideoType>(temp);
     VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: videoType: %d", videoType);
 
     // Parameter drive letter
     TPtrC driveLetter;
     User::LeaveIfError(aItem.GetNextString(driveLetter));
-#ifdef __WINSCW__
-    driveLetter.Set(_L("C"));
-#endif
 
     // Parameter path and filename
     TPtrC filename;
@@ -2680,11 +2832,11 @@ TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CStifItemParser& aItem 
     TRAPD( err, CreateVideoFileL( videoType, driveLetter, filename, size, count, ETrue ) );
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateVideoFileL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CreateVideoFileNoWaitL
+// CVcxMyVideosApiTest::CreateVideoFileNoWaitL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL( CStifItemParser& aItem )
@@ -2702,17 +2854,14 @@ TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL( CStifItemParser& 
     TInt temp(0);
 
     // Parameter video type
-    CIptvTestVideoCreator::TIptvTestVideoType videoType;
+    CVCXMyVideosTestUtils::TVcxTestVideoType videoType;
     User::LeaveIfError( aItem.GetNextInt(temp) );
-    videoType = static_cast<CIptvTestVideoCreator::TIptvTestVideoType>(temp);
+    videoType = static_cast<CVCXMyVideosTestUtils::TVcxTestVideoType>(temp);
     VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: videoType: %d", videoType);
 
     // Parameter drive letter
     TPtrC driveLetter;
     User::LeaveIfError(aItem.GetNextString(driveLetter));
-#ifdef __WINSCW__
-    driveLetter.Set(_L("C"));
-#endif
     
     // Parameter path and filename
     TPtrC filename;
@@ -2741,14 +2890,14 @@ TInt CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL( CStifItemParser& 
     TRAPD( err, CreateVideoFileL( videoType, driveLetter, filename, size, count, EFalse ) );
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CreateVideoFileNoWaitL ---------->");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CreateVideoFileL
+// CVcxMyVideosApiTest::CreateVideoFileL
 // -----------------------------------------------------------------------------
 //
-void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CIptvTestVideoCreator::TIptvTestVideoType aType, const TDesC& aDriveLetter, const TDesC& aFileName, TInt aSize, TInt aVideoCount, TBool aDoSync )
+void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CVCXMyVideosTestUtils::TVcxTestVideoType aType, const TDesC& aDriveLetter, const TDesC& aFileName, TInt aSize, TInt aVideoCount, TBool aDoSync )
     {
     HBufC* path = HBufC::NewL( 2048 );
     CleanupStack::PushL(path);
@@ -2829,23 +2978,18 @@ void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CIptvTestVideoCreator::
         iSideloadedFiles.Append( path );
 
         // Create the video.
-        TRAP( err, iTestCommon->CreateVideoFileL( aType, *path, aSize ) );
+        TRAP( err, iTestUtils->CreateVideoFileL( aType, *path, aSize ) );
         if(err != KErrNone)
             {
             VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: CreateVideoFileL returned error: %d:", err);
             }
-        TRAP_IGNORE( iStats->ActionStartL( KSideloadVideoActionId, _L("Sideload video") ) );
         }
     else
         {
-        TRAP( err, iTestCommon->CreateVideoFilesL( aType, *path, aVideoCount, iSideloadedFiles ) );
+        TRAP( err, iTestUtils->CreateVideoFilesL( aType, *path, aVideoCount, iSideloadedFiles ) );
         if(err != KErrNone)
             {
             VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: CreateVideoFilesL returned error: %d:", err);
-            }
-        for( TInt i = 0; i < aVideoCount; i++ )
-            {
-            TRAP_IGNORE( iStats->ActionStartL( KSideloadVideoActionId, _L("Sideload video") ) );
             }
         CleanupStack::PopAndDestroy( path );
         }
@@ -2866,7 +3010,7 @@ void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CIptvTestVideoCreator::
             RArray<TInt> messages;
             for( TInt i=0; i<aVideoCount; i++ )
                 {
-                messages.Append( KVCXMYVideosTestMessageMpxItemInserted );
+                messages.Append( KVCXMYVideosTestMessageMpxVideoInserted );
                 }
             // Only one video added, refresh is automatic.
             if( aVideoCount <= 1 )
@@ -2947,7 +3091,7 @@ TInt CVCXMyVideosCollectionPluginTest::EnsureDriveForVideosL( CStifItemParser& a
         TInt createCount = amount - videoCount;
         
         TRAP( err, CreateVideoFileL( 
-                CIptvTestVideoCreator::IptvTestVideoMpeg4, driveLetter, filename, -1, createCount, ETrue ) );    
+                CVCXMyVideosTestUtils::VcxTestVideoMpeg4, driveLetter, filename, -1, createCount, ETrue ) );    
         }
     else
     if( videoCount > amount )
@@ -2980,7 +3124,7 @@ TInt CVCXMyVideosCollectionPluginTest::EnsureDriveForVideosL( CStifItemParser& a
         }
         
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::EnsureDriveForVideosL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
@@ -3043,7 +3187,7 @@ TInt CVCXMyVideosCollectionPluginTest::EmptySideloadFoldersL( CStifItemParser& /
         filesInUse.Remove( i );
 
         // Delete file
-        iTestCommon->EnsureFileIsNotInUse( *path );
+        iTestUtils->EnsureFileIsNotInUse( *path );
         TInt err = iFs.Delete( path->Des() );
         if( err != KErrNone )
             {
@@ -3060,7 +3204,7 @@ TInt CVCXMyVideosCollectionPluginTest::EmptySideloadFoldersL( CStifItemParser& /
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::SetDeleteSideloadedVideos
+// CVcxMyVideosApiTest::SetDeleteSideloadedVideos
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::SetDeleteSideloadedVideos( CStifItemParser& /* aItem */ )
@@ -3072,601 +3216,7 @@ TInt CVCXMyVideosCollectionPluginTest::SetDeleteSideloadedVideos( CStifItemParse
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DownloadL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::DownloadL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DownloadL ---------->");
-    iLastReceivedMessage = -1;
-    TRAPD( err, DownloadOrResumeL( aItem, EFalse, EFalse ) );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DownloadL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::ResumeDownloadL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::ResumeDownloadL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::ResumeDownloadL ---------->");
-    iLastReceivedMessage = -1;
-    TRAPD( err, DownloadOrResumeL( aItem, EFalse, ETrue ) );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::ResumeDownloadL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::ResumeAllDownloadsL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::ResumeAllDownloadsL( CStifItemParser& /* aItem */ )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::ResumeAllDownloadsL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In ResumeAllDownloadsL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    TRAPD( err, iTester->ResumeAllDownloadsL() );
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::ResumeAllDownloadsL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DownloadUsingMediaL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::DownloadUsingMediaL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DownloadUsingMediaL ---------->");
-
-    if( !iMpxMedia )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: Error. iMpxMedia not set!");
-        User::Leave( KErrArgument );
-        }
-
-    iLastReceivedMessage = -1;
-
-    TRAPD( err, DownloadOrResumeL( aItem, ETrue, EFalse ) );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DownloadUsingMediaL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::ResumeDownloadUsingMediaL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::ResumeDownloadUsingMediaL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::ResumeDownloadUsingMediaL ---------->");
-
-    if( !iMpxMedia )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: Error. iMpxMedia not set!");
-        User::Leave( KErrArgument );
-        }
-
-    iLastReceivedMessage = -1;
-
-    TRAPD( err, DownloadOrResumeL( aItem, ETrue, ETrue ) );
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::ResumeDownloadUsingMediaL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DownloadOrResumeL
-// -----------------------------------------------------------------------------
-//
-void CVCXMyVideosCollectionPluginTest::DownloadOrResumeL( CStifItemParser& aItem, TBool aUseCurrentMedia, TBool aResume )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DownloadOrResumeL");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In DownloadOrResumeL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    iLastReceivedMessage = -1;
-
-    TUint32 iapId(0);
-    TPtrC iapName;
-    User::LeaveIfError( aItem.GetNextString( iapName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: iapName: %S", &iapName);
-
-    if( iapName == KVCXTestZeroIap )
-        {
-        iapId = 0;
-        }
-    else
-    if( iapName == KVCXTestInvalidIap )
-        {
-        iapId = 10001;
-        }
-    else
-        {
-        User::LeaveIfError( iTestCommon->GetIapIdL(iapName, iapId) );
-        }
-
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: iapId: %d", iapId);
-
-    TPtrC serviceName;
-    User::LeaveIfError( aItem.GetNextString( serviceName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceName: %S", &serviceName);
-
-    TInt serviceId(0);
-    User::LeaveIfError( iServiceEmu->GetServiceIdL(serviceName, serviceId) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceId: %d", serviceId);
-
-    TInt contentId(0);
-    User::LeaveIfError( aItem.GetNextInt( contentId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: contentId: %d", contentId);
-
-    TInt syncCallInt(0);
-    User::LeaveIfError( aItem.GetNextInt( syncCallInt ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: callTypeInt: %d", syncCallInt);
-    TBool syncCall = static_cast<TBool>(syncCallInt);
-
-    TPtrC userName;
-    if( KErrNone == aItem.GetNextString( userName ) )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: userName: %S", &userName);
-        }
-    else
-        {
-        userName.Set( _L("") );
-        }
-
-    TPtrC password;
-    if( KErrNone == aItem.GetNextString( password ) )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: password: %S", &password);
-        }
-    else
-        {
-        password.Set( _L("") );
-        }
-
-    const TPtrC url = iServiceEmu->GetContentUrlL( serviceId, contentId );
-    const TPtrC title = iServiceEmu->GetContentTitleL( serviceId, contentId );
-
-    TInt err(0);
-    if( !aUseCurrentMedia )
-        {
-        if( !aResume )
-            {
-            TRAP( err, iTester->StartDownloadL( title, iapId, serviceId, contentId, url, syncCall, userName, password, NULL ) );
-            }
-        else
-            {
-            TRAP( err, iTester->ResumeDownloadL( title, iapId, serviceId, contentId, url, syncCall, userName, password, NULL ) );
-            }
-        }
-    else
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: passing current media to MPX plugin.");
-        if( !aResume )
-            {
-            TRAP( err, iTester->StartDownloadL( title, iapId, serviceId, contentId, url, syncCall, userName, password, iMpxMedia ) );
-            }
-        else
-            {
-            TRAP( err, iTester->ResumeDownloadL( title, iapId, serviceId, contentId, url, syncCall, userName, password, iMpxMedia ) );
-            }
-        }
-
-    // Set autoresume on if there's only one paused download.
-    CVCXMyVideosTestDlWatcher* dlWatcher = iTester->GetDownloadWatcher();
-    if( aResume && dlWatcher && !iAutoResume )
-        {
-        TInt pausedDlCount = 0;
-        for( TInt i=0; i<dlWatcher->GetDownloadCount(); i++ ) 
-            {
-            CVCXMyVideosTestDownload* dl = dlWatcher->GetDownloadByIndex( i );
-            if( dl->iState == EVcxMyVideosDlStatePaused )
-                {
-                pausedDlCount++;
-                }
-            }
-            if( pausedDlCount == 1 ) 
-                {
-                iAutoResume = ETrue;
-                iTester->SetAutoResume( ETrue );
-                }
-        }
-    
-    if( err != KErrNone )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-        User::Leave( err );
-        }
-    
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DownloadOrResumeL");
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DownloadUrlL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::DownloadUrlL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::DownloadUrlL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In DownloadUrlL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TUint32 iapId(0);
-    TPtrC iapName;
-    User::LeaveIfError( aItem.GetNextString( iapName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: iapName: %S", &iapName);
-    User::LeaveIfError( iTestCommon->GetIapIdL(iapName, iapId) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: iapId: %d", iapId);
-
-    TPtrC url;
-    User::LeaveIfError( aItem.GetNextString( url ) );
-    
-    TInt syncCallInt(0);
-    User::LeaveIfError( aItem.GetNextInt( syncCallInt ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: callTypeInt: %d", syncCallInt);
-    TBool syncCall = static_cast<TBool>(syncCallInt);
-
-    TPtrC userName;
-    if( KErrNone == aItem.GetNextString( userName ) )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: userName: %S", &userName);
-        }
-    else
-        {
-        userName.Set( _L("") );
-        }
-
-    TPtrC password;
-    if( KErrNone == aItem.GetNextString( password ) )
-        {
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: password: %S", &password);
-        }
-    else
-        {
-        password.Set( _L("") );
-        }
-
-    if( url == KVCXTestZeroUrl)
-        {
-        url.Set( _L("" ) );
-        }
-
-    TInt err( KErrNone );
-    
-    if( iTester )
-        {
-        if( url == KVCXMYVideosTest2kURLTag )
-            {
-            TRAP( err, iTester->StartDownloadL( _L("2kcharsurl"), iapId, 0, 0, KVCXMYVideosTest2kURL, syncCall, userName, password, NULL ) );
-            }
-        else
-        if( url == KVCXMYVideosTest1kURLTag )
-            {
-            TRAP( err, iTester->StartDownloadL( _L("1kcharsurl"), iapId, 0, 0, KVCXMYVideosTest1kURL, syncCall, userName, password, NULL ) );
-            }
-        else
-            {
-            TRAP( err, iTester->StartDownloadL( _L("urldl"), iapId, 0, 0, url, syncCall, userName, password, NULL ) );
-            }
-        }
-
-    if( err != KErrNone )
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::DownloadUrlL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelDownloadL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::CancelDownloadL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CancelDownloadL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In CancelDownloadL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TPtrC serviceName;
-    User::LeaveIfError( aItem.GetNextString( serviceName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceName: %S", &serviceName);
-
-    TInt serviceId(0);
-    User::LeaveIfError( iServiceEmu->GetServiceIdL(serviceName, serviceId) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceId: %d", serviceId);
-
-    TInt contentId(0);
-    User::LeaveIfError( aItem.GetNextInt( contentId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: contentId: %d", contentId);
-
-    TInt syncCallInt(0);
-    User::LeaveIfError( aItem.GetNextInt( syncCallInt ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: callTypeInt: %d", syncCallInt);
-    TBool syncCall = static_cast<TBool>(syncCallInt);
-
-    const TPtrC url = iServiceEmu->GetContentUrlL( serviceId, contentId );
-
-    CVCXMyVideosTestDownload* dl = iTester->GetDownloadWatcher()->GetDownload( serviceId, contentId, url );
-
-    TInt err( KErrNotReady );
-    if( !dl )
-        {
-        VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: Could not find download with specified params!");
-        }
-    else
-    if( iTester )
-        {
-        TRAP( err, iTester->CancelDownloadL( dl, syncCall ) );
-        }
-
-    if( err != KErrNone )
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CancelDownloadL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CancelDownloadByIdL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::CancelDownloadByIdL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CancelDownloadByIdL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In CancelDownloadByIdL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TInt mpxId(0);
-    User::LeaveIfError( aItem.GetNextInt( mpxId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: mpxId: %d", mpxId);
-
-    TInt downloadId(0);
-    User::LeaveIfError( aItem.GetNextInt( downloadId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: downloadId: %d", downloadId);
-
-    TInt syncCallInt(0);
-    User::LeaveIfError( aItem.GetNextInt( syncCallInt ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: callTypeInt: %d", syncCallInt);
-    TBool syncCall = static_cast<TBool>(syncCallInt);
-
-    _LIT(KVCxTestEmptyString, "NULL");
-    TPtrC downloadPath;
-    if( aItem.GetNextString( downloadPath ) != KErrNone )
-        {
-        downloadPath.Set( KVCxTestEmptyString );
-        }
-
-    TInt err( KErrNotReady );
-    if( iTester )
-        {
-        TRAP( err, iTester->CancelDownloadL( mpxId, downloadId, downloadPath, syncCall ) );
-        }
-
-    if( err != KErrNone )
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CancelDownloadByIdL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::PauseDownloadL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::PauseDownloadL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::PauseDownloadL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In PauseDownloadL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TPtrC serviceName;
-    User::LeaveIfError( aItem.GetNextString( serviceName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceName: %S", &serviceName);
-
-    TInt serviceId(0);
-    User::LeaveIfError( iServiceEmu->GetServiceIdL(serviceName, serviceId) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceId: %d", serviceId);
-
-    TInt contentId(0);
-    User::LeaveIfError( aItem.GetNextInt( contentId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: contentId: %d", contentId);
-
-    TInt syncCallInt(0);
-    User::LeaveIfError( aItem.GetNextInt( syncCallInt ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: callTypeInt: %d", syncCallInt);
-    TBool syncCall = static_cast<TBool>(syncCallInt);
-
-    const TPtrC url = iServiceEmu->GetContentUrlL( serviceId, contentId );
-
-    TInt err( KErrNotReady );
-    if( iTester )
-        {
-        // Disable autoresume
-        iAutoResume = EFalse;
-        iTester->SetAutoResume( iAutoResume );
-
-        TRAP( err, iTester->PauseDownloadL( serviceId, contentId, url, syncCall ) );
-        }
-
-    if( err != KErrNone )
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::PauseDownloadL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::PauseDownloadByUrlL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::PauseDownloadByUrlL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::PauseDownloadByUrlL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In PauseDownloadByUrlL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TPtrC url;
-    User::LeaveIfError( aItem.GetNextString( url ) );
-
-    TInt err( KErrNotReady );
-    if( iTester )
-        {
-        // Disable autoresume
-        iAutoResume = EFalse;
-        iTester->SetAutoResume( iAutoResume );
-
-        TRAP( err, iTester->PauseDownloadL( url, EFalse ) );
-        }
-
-    if( err != KErrNone )
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: err: %d", err);
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::PauseDownloadL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckDownloadProgressL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::CheckDownloadProgressL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckDownloadProgressL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In CheckDownloadProgressL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    iLastReceivedMessage = -1;
-
-    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
-
-    TPtrC serviceName;
-    User::LeaveIfError( aItem.GetNextString( serviceName ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceName: %S", &serviceName);
-
-    TInt serviceId(0);
-    User::LeaveIfError( iServiceEmu->GetServiceIdL(serviceName, serviceId) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: serviceId: %d", serviceId);
-
-    TInt contentId(0);
-    User::LeaveIfError( aItem.GetNextInt( contentId ) );
-    VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: contentId: %d", contentId);
-
-    TInt minimumProgress( 0 );
-    User::LeaveIfError( aItem.GetNextInt( minimumProgress ) );
-
-    const TPtrC url = iServiceEmu->GetContentUrlL( serviceId, contentId );
-
-    CVCXMyVideosTestDlWatcher* dlWatcher = iTester->GetDownloadWatcher();
-
-    TInt err( KErrNotReady );
-
-    if( dlWatcher )
-        {
-        CVCXMyVideosTestDownload* dl = dlWatcher->GetDownload( serviceId, contentId, url );
-
-        if( dl )
-            {
-            if( dl->iProgress < minimumProgress )
-                {
-                err = KErrCorrupt;
-                }
-            else
-                {
-                err = KErrNone;
-                }
-            }
-        }
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::CheckDownloadProgressL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitAllDownloadsL
-// -----------------------------------------------------------------------------
-//
-TInt CVCXMyVideosCollectionPluginTest::WaitAllDownloadsL( CStifItemParser& aItem )
-    {
-    VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::WaitAllDownloadsL ---------->");
-    // Print to UI
-    _LIT( KVCXMyVideosCollectionPluginTest, "VCXMyVideosCollectionPluginTest" );
-    _LIT( KWhere, "In WaitAllDownloadsL" );
-    TestModuleIf().Printf( 0, KVCXMyVideosCollectionPluginTest, KWhere );
-    // Print to log file
-    iLog->Log( KWhere );
-
-    TInt err( KErrNone );
-
-    TInt minutes(0);
-    if( aItem.GetNextInt( minutes ) != KErrNone )
-        {
-        minutes = 10;
-        }
-    iTimeoutTimer->After( KTimeoutMinute * minutes );
-
-    iWaitingForAllDownloads = ETrue;
-
-    VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::WaitAllDownloadsL <----------");
-    return VCXMVTEST_ERR( err );
-    }
-
-// -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitForMessageL
+// CVcxMyVideosApiTest::WaitForMessageL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::WaitForMessageL( CStifItemParser& aItem )
@@ -3707,11 +3257,11 @@ TInt CVCXMyVideosCollectionPluginTest::WaitForMessageL( CStifItemParser& aItem )
     messages.Reset();
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::WaitForMessageL <----------");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitForAnyMessageL
+// CVcxMyVideosApiTest::WaitForAnyMessageL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::WaitForAnyMessageL( CStifItemParser& aItem )
@@ -3754,11 +3304,11 @@ TInt CVCXMyVideosCollectionPluginTest::WaitForAnyMessageL( CStifItemParser& aIte
     messages.Reset();
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::WaitForAnyMessageL <----------");
-    return VCXMVTEST_ERR( error );
+    return error;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitForMessagesL
+// CVcxMyVideosApiTest::WaitForMessagesL
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::WaitForMessagesL( CStifItemParser& aItem )
@@ -3801,11 +3351,11 @@ TInt CVCXMyVideosCollectionPluginTest::WaitForMessagesL( CStifItemParser& aItem 
     messages.Reset();
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::WaitForMessagesL <----------");
-    return VCXMVTEST_ERR( error );
+    return error;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitForMessagesL
+// CVcxMyVideosApiTest::WaitForMessagesL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::WaitForMessagesL( TBool aBlock, RArray<TInt>& aMessages, TInt aTimeout,
@@ -3888,7 +3438,7 @@ TInt CVCXMyVideosCollectionPluginTest::DeleteDirectoryIfEmpty( RFs& aFs, CFileMa
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::MapMpxMediaAttribute
+// CVcxMyVideosApiTest::MapMpxMediaAttribute
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::MapMpxMediaAttribute(
@@ -4153,11 +3703,11 @@ TInt CVCXMyVideosCollectionPluginTest::MapMpxMediaAttribute(
         }
 
     VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::MapMpxMediaAttribute");
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::GetMessageDesc
+// CVcxMyVideosApiTest::GetMessageDesc
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::GetMessageDesc( TInt aMessage, TDes& aMsgBuff )
@@ -4270,29 +3820,49 @@ void CVCXMyVideosCollectionPluginTest::GetMessageDesc( TInt aMessage, TDes& aMsg
             aMsgBuff.Copy( _L("KVCXMYVideosTestMessageCollectionGeneral") );
             }
             break;
-        case KVCXMYVideosTestMessageCollectionItemChanged:
+        case KVCXMYVideosTestMessageMpxVideoInserted:
             {
-            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageCollectionItemChanged") );
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxVideoInserted") );
             }
             break;
-        case KVCXMYVideosTestMessageCollectionCategoryChanged:
+        case KVCXMYVideosTestMessageMpxCategoryInserted:
             {
-            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageCollectionCategoryChanged") );
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxCategoryInserted") );
             }
             break;
-        case KVCXMYVideosTestMessageMpxItemInserted:
+        case KVCXMYVideosTestMessageMpxAlbumInserted:
             {
-            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxItemInserted") );
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxAlbumInserted") );
             }
             break;
-        case KVCXMYVideosTestMessageMpxItemDeleted:
+        case KVCXMYVideosTestMessageMpxVideoDeleted:
             {
-            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxItemDeleted") );
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxVideoDeleted") );
             }
             break;
-        case KVCXMYVideosTestMessageMpxItemModified:
+        case KVCXMYVideosTestMessageMpxCategoryDeleted:
             {
-            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxItemModified") );
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxCategoryDeleted") );
+            }
+            break;
+        case KVCXMYVideosTestMessageMpxAlbumDeleted:
+            {
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxAlbumDeleted") );
+            }
+            break;
+        case KVCXMYVideosTestMessageMpxVideoModified:
+            {
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxVideoModified") );
+            }
+            break;
+        case KVCXMYVideosTestMessageMpxCategoryModified:
+            {
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxCategoryModified") );
+            }
+            break;
+        case KVCXMYVideosTestMessageMpxAlbumModified:
+            {
+            aMsgBuff.Copy( _L("KVCXMYVideosTestMessageMpxAlbumModified") );
             }
             break;
         case KVCXMyVideosTestMessageVideoListOrderChanged:
@@ -4321,13 +3891,15 @@ void CVCXMyVideosCollectionPluginTest::GetMessageDesc( TInt aMessage, TDes& aMsg
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::CheckMediasL
+// CVcxMyVideosApiTest::CheckMediasL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::CheckMediasL( TInt aExpectedVideoCount, TInt aDrive, TInt aCheckType )
     {
     VCXLOGLO1(">>>CVCXMyVideosCollectionPluginTest::CheckMediasL");
 
+    WaitForRefreshL( false );
+    
     TInt actualVideoCount(0);
 
     // File check
@@ -4359,20 +3931,7 @@ void CVCXMyVideosCollectionPluginTest::CheckMediasL( TInt aExpectedVideoCount, T
 
             actualVideoCount++;
 
-            TInt state = -1;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadState ) )
-                {
-                state = media->ValueTObjectL<TUint8>( KVcxMediaMyVideosDownloadState );
-                }
-
-            TUint32 downloadId = 0;
-            if( media->IsSupported( KVcxMediaMyVideosDownloadId ) )
-                {
-                downloadId = media->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-                }
-
-            // No file check for ongoing downloads
-            if( !iFileCheckDisabled && ( downloadId == 0 || state == EVcxMyVideosDlStateDownloaded ) )
+            if( !iFileCheckDisabled )
                 {
                 if( !iFs.IsValidName( localFilePath ) )
                     {
@@ -4449,7 +4008,7 @@ void CVCXMyVideosCollectionPluginTest::CheckMediasL( TInt aExpectedVideoCount, T
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::GetDriveParam
+// CVcxMyVideosApiTest::GetDriveParam
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosCollectionPluginTest::GetDriveParam( CStifItemParser& aItem, TInt& aDrive )
@@ -4471,11 +4030,11 @@ TInt CVCXMyVideosCollectionPluginTest::GetDriveParam( CStifItemParser& aItem, TI
             }
         }
 
-    return VCXMVTEST_ERR( err );
+    return err;
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::DoTotalRefreshL
+// CVcxMyVideosApiTest::DoTotalRefreshL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::DoTotalRefreshL()
@@ -4511,7 +4070,7 @@ void CVCXMyVideosCollectionPluginTest::DoTotalRefreshL()
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::WaitForRefreshL
+// CVcxMyVideosApiTest::WaitForRefreshL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::WaitForRefreshL( TBool aForcedWait )
@@ -4527,7 +4086,7 @@ void CVCXMyVideosCollectionPluginTest::WaitForRefreshL( TBool aForcedWait )
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::GetMediasForLevelL
+// CVcxMyVideosApiTest::GetMediasForLevelL
 // -----------------------------------------------------------------------------
 //
 CMPXMediaArray* CVCXMyVideosCollectionPluginTest::GetMediasForLevelL( TInt aLevel, TUint aFlagsFilter )
@@ -4634,7 +4193,7 @@ CMPXMediaArray* CVCXMyVideosCollectionPluginTest::GetMediasForLevelL( TInt aLeve
     }
 
 // -----------------------------------------------------------------------------
-// CIptvMyVideosApiTest::HandleVcxMvTesterMessageL
+// CVcxMyVideosApiTest::HandleVcxMvTesterMessageL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage, TInt aError )
@@ -4663,12 +4222,16 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
         aMessage == KVCXMYVideosTestMessageCollectionOpened ||
         aMessage == KVCXMYVideosTestMessageGotMediasByKMpxId )
         {
-        _LIT(KWhat, "VidCount");
-        _LIT(KDesc, "%d");
         TInt videoCount = iTester->GetMediaCount();
-        TestModuleIf().Printf( 0, KWhat, KDesc, videoCount );
+        if( iTester->GetCurrentOpenLevelIndex() == -1 )
+            {
+            TestModuleIf().Printf( 0, _L("Mv"), _L("CatCount %d"), videoCount );
+            }
+        else
+            {
+            TestModuleIf().Printf( 0, _L("Mv"), _L("VidCount %d"), videoCount );
+            }
         }
-
 
     // Waiting for messages from mpx plugin to stop.
     if( iCoolDownWait )
@@ -4678,78 +4241,6 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
         VCXLOGLO1("<<<CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL");
         return;
         }    
-    
-    if( aMessage == KVCXMYVideosTestMessageDlSucceeded ||
-        aMessage == KVCXMYVideosTestMessageDlFailed ||
-        aMessage == KVCXMYVideosTestMessageDlPaused ||
-        aMessage == KVCXMYVideosTestMessageDlGeneral ||
-        aMessage == KVCXMYVideosTestErrorDownloadNotFound )
-        {
-        TInt activeDownloads = iTester->GetActiveDownloadCountL();
-        TInt downloads = iTester->GetDownloadWatcher()->GetDownloadCount();
-        _LIT(KWhat, "Downloads");
-        _LIT(KDesc, "%d/%d");
-        TestModuleIf().Printf( 0, KWhat, KDesc, activeDownloads, downloads );
-
-        if( aError != KErrNone )
-            {
-            iLastDownloadError = aError;
-            }        
-        }
-    
-    // Inform script of paused download when auto resume is off.
-    if( !iWaitingForAllDownloads && aMessage == KVCXMYVideosTestMessageDlPaused && !iAutoResume )
-        {
-        // Add message to waited list and continue processing, check for signaling is done later.
-        iWaitedTestMessages.Reset();
-        iWaitedTestMessages.AppendL( aMessage );
-        }
-    
-    // Waiting for all downloads to complete. Check downloads and signal if needed.
-    if( iWaitingForAllDownloads )
-        {
-        TInt activeDownloads = iTester->GetActiveDownloadCountL();
-        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: Ongoing download count: %d", activeDownloads);
-        
-        if( activeDownloads <= 0 )
-            {
-            iTimeoutTimer->CancelTimer();
-            iWaitingForAllDownloads = EFalse;
-
-            TInt downloadCount = iTester->GetDownloadWatcher()->GetDownloadCount();
-            TInt maxFailsToSucceed = downloadCount / 3;
-            TInt fails = iTester->GetDownloadWatcher()->GetFailedDownloadCount();
-
-            if( maxFailsToSucceed <= 0 )
-                {
-                maxFailsToSucceed = 0;
-                }
-
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: download count: %d", downloadCount);
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: failed download count: %d", fails);
-            VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: max allowed fails: %d", maxFailsToSucceed);
-
-            if( fails > maxFailsToSucceed )
-                {
-                if( iLastDownloadError != KErrNone )
-                    {
-                    iEventError = iLastDownloadError;
-                    }
-                else
-                    {
-                    iEventError = KVCXMYVideosTestMessageDlFailed;
-                    }
-                }
-            else
-                {
-                iEventError = KErrNone;
-                }
-
-            // Add message to waited list and continue processing, check for signaling is done later.
-            iWaitedTestMessages.Reset();
-            iWaitedTestMessages.AppendL( aMessage );
-            }
-        }
 
     // See if there's cancel needed for move, copy or delete.
     if( aError == KErrNone && iCancelNextOperation )
@@ -4767,7 +4258,7 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
         }
 
     // Check for errors. 
-    if( aError != KErrNone && !iWaitingForAllDownloads )
+    if( aError != KErrNone )
         {
         VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: ----------> MsgQueue: Error: %d <----------", aError);
@@ -4777,7 +4268,7 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
         if( !iMessageWaitIsBlocking )
             {
             VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: ----------> MsgQueue: Signaling <----------");
-            Signal( VCXMVTEST_ERR( aError ) );
+            Signal( aError );
             TestModuleIf().Printf( 0, _L("Signal"), _L("%d"), aError );
             iEventError = KErrNone;
             }
@@ -4846,7 +4337,7 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
                 if( !iMessageWaitIsBlocking )
                     {
                     VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: ----------> MsgQueue: Signaling <----------");
-                    Signal( VCXMVTEST_ERR( iEventError ) );
+                    Signal( iEventError );
                     TestModuleIf().Printf( 0, _L("Signal"), _L("%d"), iEventError );
                     iEventError = KErrNone;
                     }
@@ -4867,7 +4358,7 @@ void CVCXMyVideosCollectionPluginTest::HandleVcxMvTesterMessageL( TInt aMessage,
     }
 
 // -----------------------------------------------------------------------------
-// CIptvEpgEngineTest::TimerComplete
+// CVcxEpgEngineTest::TimerComplete
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosCollectionPluginTest::TimerComplete(TInt aTimerId, TInt aError)
@@ -4888,11 +4379,8 @@ void CVCXMyVideosCollectionPluginTest::TimerComplete(TInt aTimerId, TInt aError)
             if( !iMessageWaitIsBlocking )
                 {
                 VCXLOGLO2( "CVCXMyVideosCollectionPluginTest:: Signaling: %d", iEventError);
-                Signal( VCXMVTEST_ERR( iEventError ) );
+                Signal( iEventError );
                 }
-            
-            TRAP_IGNORE( iStats->ActionEndL( 0, iEventError ) );
-
             TestModuleIf().Printf( 0, _L("Timedout"), _L("%d"), iEventError );
             }
         }
@@ -4903,7 +4391,6 @@ void CVCXMyVideosCollectionPluginTest::TimerComplete(TInt aTimerId, TInt aError)
         iActiveWait->Stop();
         iCoolDownWait = EFalse;
 
-        iWaitingForAllDownloads = EFalse;
         iWaitedTestMessages.Reset();
         iLastReceivedMessage = 0;
         }

@@ -112,27 +112,62 @@ CMPXMedia& CVcxMyVideosActiveTask::GetCommand()
     }
 
 // ---------------------------------------------------------------------------
+// Get the current media
+// ---------------------------------------------------------------------------
+//
+CMPXMedia* CVcxMyVideosActiveTask::Command()
+    {
+    return iCurCommand;
+    }
+
+// ---------------------------------------------------------------------------
 // From CActive
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosActiveTask::RunL()
     {
-    // ETrue is done, EFalse is more to do
-    //
-    if( iObserver.HandleStepL() )
+    switch ( iObserver.HandleStepL() )
         {
-        iObserver.HandleOperationCompleted( KErrNone );
-        delete iCurCommand;
-        iCurCommand = NULL;
+        case MVcxMyVideosActiveTaskObserver::EDone:
+            Done();
+            break;
+
+        case MVcxMyVideosActiveTaskObserver::EMoreToCome:
+            ContinueStepping();
+            break;
+
+        //observer is responsible for calling Done or ContinueStepping
+        case MVcxMyVideosActiveTaskObserver::EStopStepping:
+            break;
         }
-    else
-        {
-        ++iCurStep;
-        iStatus = KRequestPending;
-        SetActive();
-        TRequestStatus* status = &iStatus;
-        User::RequestComplete( status, KErrNone );
-        }
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosActiveTask::Done
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosActiveTask::Done()
+    {
+    MPX_DEBUG1("CVcxMyVideosActiveTask::Done() start");
+
+    iObserver.HandleOperationCompleted( KErrNone );
+    delete iCurCommand;
+    iCurCommand = NULL;
+
+    MPX_DEBUG1("CVcxMyVideosActiveTask::Done() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosActiveTask::ContinueStepping
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosActiveTask::ContinueStepping()
+    {
+    ++iCurStep;
+    iStatus = KRequestPending;
+    SetActive();
+    TRequestStatus* status = &iStatus;
+    User::RequestComplete( status, KErrNone );
     }
 
 // ---------------------------------------------------------------------------

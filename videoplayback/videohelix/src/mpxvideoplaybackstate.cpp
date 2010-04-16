@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 31 %
+// Version : %version: e003sa33#36 %
 
 
 //
@@ -526,6 +526,61 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoDrmProtected ),
             iVideoPlaybackCtlr->iFileDetails->iDrmProtected );
     }
+    
+    //
+    //  Description
+    //
+    if ( ( attrV & KMPXMediaVideoDescription.iAttributeId ) &&
+         ( iVideoPlaybackCtlr->iFileDetails->iDescription ) )
+    {
+        aMedia->SetTextValueL(
+            TMPXAttribute( KMPXMediaVideoDescription ),
+            *( iVideoPlaybackCtlr->iFileDetails->iDescription ) );
+    }
+    
+    //
+    //  Location
+    //
+    if ( ( attrV & KMPXMediaVideoLocation.iAttributeId ) &&
+         ( iVideoPlaybackCtlr->iFileDetails->iLocation ) )
+    {
+        aMedia->SetTextValueL(
+            TMPXAttribute( KMPXMediaVideoLocation ),
+            *( iVideoPlaybackCtlr->iFileDetails->iLocation ) );
+    }
+    
+    //
+    //  Copyright
+    //
+    if ( ( attrV & KMPXMediaVideoCopyright.iAttributeId ) &&
+         ( iVideoPlaybackCtlr->iFileDetails->iCopyright ) )
+    {
+        aMedia->SetTextValueL(
+            TMPXAttribute( KMPXMediaVideoCopyright ),
+            *( iVideoPlaybackCtlr->iFileDetails->iCopyright ) );
+    }
+ 
+    //
+    //  Language
+    //
+    if ( ( attrV & KMPXMediaVideoLanguage.iAttributeId ) &&
+         ( iVideoPlaybackCtlr->iFileDetails->iLanguage ) )
+    {
+        aMedia->SetTextValueL(
+            TMPXAttribute( KMPXMediaVideoLanguage ),
+            *( iVideoPlaybackCtlr->iFileDetails->iLanguage ) );
+    }
+     
+    //
+    //  Keywords
+    //
+    if ( ( attrV & KMPXMediaVideoKeywords.iAttributeId ) &&
+         ( iVideoPlaybackCtlr->iFileDetails->iKeywords ) )
+    {
+        aMedia->SetTextValueL(
+            TMPXAttribute( KMPXMediaVideoKeywords ),
+            *( iVideoPlaybackCtlr->iFileDetails->iKeywords ) );
+    }        
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -669,7 +724,7 @@ TInt CMPXVideoPlaybackState::RetrieveBufferingPercentage()
 //    CMPXVideoPlaybackState::IssuePlayCommand()
 //  ------------------------------------------------------------------------------------------------
 void CMPXVideoPlaybackState::IssuePlayCommand( TMPXVideoPlaybackState aState,
-                                               MMPXPlaybackPluginObserver::TEvent aEvent, 
+                                               MMPXPlaybackPluginObserver::TEvent aEvent,
                                                TBool aSendEvent )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::CMPXVideoPlaybackState::IssuePlayCommand()"),
@@ -680,7 +735,7 @@ void CMPXVideoPlaybackState::IssuePlayCommand( TMPXVideoPlaybackState aState,
     if ( err == KErrNone )
     {
         iVideoPlaybackCtlr->ChangeState( aState );
-    
+
         if ( aSendEvent )
         {
             iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( aEvent, 0, KErrNone );
@@ -924,7 +979,20 @@ void CMPXInitialisingState::HandleOpenComplete( TInt aError )
     if ( aError == KErrNone )
     {
         iVideoPlaybackCtlr->iPlaybackMode->HandleOpenComplete();
-
+		
+        //
+		//  call setposition with converted value saved in openfile
+        //
+		if ( iVideoPlaybackCtlr->iSavedPosition > 0 )
+        {    
+            MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  iSavedPosition %d"), iVideoPlaybackCtlr->iSavedPosition );
+                
+            TInt64 pos( iVideoPlaybackCtlr->iSavedPosition );
+            pos *= KPbMilliMultiplier;
+            
+            MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->SetPositionL( pos ) );
+        }
+               
         MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  Sending Prepare()"));
 
         iVideoPlaybackCtlr->iPlayer->Prepare();
@@ -1130,7 +1198,7 @@ void CMPXInitialisedState::HandleSetPositionL( TInt aPosition )
         //
         if ( pos != 0 )
         {
-        	iVideoPlaybackCtlr->iPlayer->SetPositionL( pos );
+            iVideoPlaybackCtlr->iPlayer->SetPositionL( pos );
         }
     }
     else
@@ -1506,6 +1574,10 @@ void CMPXPausedState::HandleForeground()
     {
         iVideoPlaybackCtlr->iState->HandlePlay();
     }
+    else
+    {
+        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
+    }
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1817,7 +1889,7 @@ void CMPXSeekingState::HandlePlay()
 void CMPXSeekingState::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXSeekingState::HandleBackground()"));
-    MPX_TRAPD( err, iVideoPlaybackCtlr->iState->HandleStopSeekL() );
+    MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandleBackground();
 }
 
@@ -1827,6 +1899,7 @@ void CMPXSeekingState::HandleBackground()
 void CMPXSeekingState::HandlePause()
 {
     MPX_DEBUG(_L("CMPXSeekingState::HandlePause()"));
+    MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
 }
 

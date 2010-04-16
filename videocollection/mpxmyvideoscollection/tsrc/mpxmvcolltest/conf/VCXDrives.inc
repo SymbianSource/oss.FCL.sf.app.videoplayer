@@ -1,24 +1,28 @@
-//
-// C is not used by Video Center when phone has F drive, change these accordingly.
-//
-// If phone has only C and E drives:
-//   C_DRIVE  e
-//   E_DRIVE  f
-//
-// If phone has F drive:
-//   C_DRIVE  e
-//   E_DRIVE  f
-//
-
-A_DRIVE  a
-C_DRIVE  e
-E_DRIVE  f
-O_DRIVE  o
-Z_DRIVE  z
+///*
+//* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+//* All rights reserved.
+//* This component and the accompanying materials are made available
+//* under the terms of the License "Eclipse Public License v1.0"
+//* which accompanies this distribution, and is available
+//* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//*
+//* Initial Contributors:
+//* Nokia Corporation - initial contribution.
+//*
+//* Contributors:
+//*
+//* Description: 
+//*
+//*/
 
 ANY_DRIVE "anydrive"
 
-// Don't change these drives
-C_DRIVE_FORCED  c
-E_DRIVE_FORCED  e
-F_DRIVE_FORCED  f
+// emulator use 1: x, 2: t or some other drives that do work.
+
+DRIVE_1  f
+DRIVE_2  e
+DRIVE_3  c
+
+C_DRIVE c
+E_DRIVE e
+F_DRIVE f

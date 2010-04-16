@@ -1,0 +1,100 @@
+/**
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   tester for methods in Video Playback View Plugin
+* 
+*/
+
+#ifndef __TESTMPXVIDEOVIEWWRAPPER_H__
+#define __TESTMPXVIDEOVIEWWRAPPER_H__
+
+
+// INCLUDES
+#include <QtTest/QtTest>
+
+class CMPXVideoViewWrapper;
+class HbVideoBasePlaybackView;
+
+class TestMPXVideoViewWrapper : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    /**
+     * will be called before each testfunction is executed.
+     *
+     */
+    void init(); 
+    
+    /**
+     * will be called after every testfunction.
+     *
+     */
+    void cleanup();
+    
+    // test functions for the test framework
+    
+         
+private slots:
+
+		// the order in which these testXX methods are declared is important
+		// changing this order will affect the test results
+
+		void testRequestMedia();
+		void testIsLive();
+		void testIsPlaylist();
+		void testHandleCommand();
+		void testHandlePluginError();
+		void testHandlePlaybackMessage();
+		void testSetProperty();
+		void testHandleProperty();
+		void testRetrieveFileNameAndMode();
+		void testActivateClosePlayerActiveObject();
+		void testDoClosePlayer();
+		void testIssuePlayCommand();
+		void testSetAspectRatio();
+		void testIsAppInFront();
+		void testClosePlaybackView();
+		void testHandleVolumeCmd();
+		void testHandleShortPressBackward();
+		void testIssueVideoAppForegroundCmd();
+		void testCreateControls();
+		void testIsMultiItemPlaylist();
+		void testUpdateVideoRect();
+		void testUpdateVideoRectDone();
+		void testHandleBufferingState();
+		void testHandleVideoPlaybackMessage();
+		void testCreateGeneralPlaybackCommand();
+		void testHandlePlaybackCommandComplete();
+		void testHandleMedia();
+		
+
+    
+signals:
+
+    void commandSignal(int);
+    
+private:
+    CMPXVideoViewWrapper*     mVideoViewWrapper;
+    HbVideoBasePlaybackView*  mBaseVideoView;
+ 
+};
+
+
+#endif  // __TESTMPXVIDEOVIEWWRAPPER_H__
+
+// End of file
+    
+
+

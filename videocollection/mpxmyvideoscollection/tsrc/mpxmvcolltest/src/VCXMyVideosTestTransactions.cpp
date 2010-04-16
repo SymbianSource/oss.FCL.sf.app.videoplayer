@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
 
 // INCLUDE FILES
 #include "VCXMyVideosTestTransactions.h"
@@ -24,7 +23,7 @@
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::NewL
+// CVCXMyVideosTestTransactions::NewL
 // -----------------------------------------------------------------------------
 //
 CVCXMyVideosTestTransactions* CVCXMyVideosTestTransactions::NewL()
@@ -56,7 +55,7 @@ CVCXMyVideosTestTransactions::~CVCXMyVideosTestTransactions( )
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::ConstructL
+// CVCXMyVideosTestTransactions::ConstructL
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosTestTransactions::ConstructL( )
@@ -67,7 +66,7 @@ void CVCXMyVideosTestTransactions::ConstructL( )
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::TransactionId
+// CVCXMyVideosTestTransactions::TransactionId
 // -----------------------------------------------------------------------------
 //
 TUint32 CVCXMyVideosTestTransactions::TransactionId( )
@@ -76,7 +75,7 @@ TUint32 CVCXMyVideosTestTransactions::TransactionId( )
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::NextTransactionId
+// CVCXMyVideosTestTransactions::NextTransactionId
 // -----------------------------------------------------------------------------
 //
 TUint32 CVCXMyVideosTestTransactions::NextTransactionId()
@@ -85,7 +84,7 @@ TUint32 CVCXMyVideosTestTransactions::NextTransactionId()
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::AddTransactionId
+// CVCXMyVideosTestTransactions::AddTransactionId
 // -----------------------------------------------------------------------------
 //
 void CVCXMyVideosTestTransactions::AddTransactionId( TUint32 aCommandId )
@@ -96,7 +95,7 @@ void CVCXMyVideosTestTransactions::AddTransactionId( TUint32 aCommandId )
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::TransactionResponse
+// CVCXMyVideosTestTransactions::TransactionResponse
 // -----------------------------------------------------------------------------
 //
 TBool CVCXMyVideosTestTransactions::TransactionResponse( TUint32 aTransactionId )
@@ -118,7 +117,7 @@ TBool CVCXMyVideosTestTransactions::TransactionResponse( TUint32 aTransactionId 
     }
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestDlWatcher::CheckTransactions
+// CVCXMyVideosTestTransactions::CheckTransactions
 // -----------------------------------------------------------------------------
 //
 TInt CVCXMyVideosTestTransactions::CheckTransactions( )

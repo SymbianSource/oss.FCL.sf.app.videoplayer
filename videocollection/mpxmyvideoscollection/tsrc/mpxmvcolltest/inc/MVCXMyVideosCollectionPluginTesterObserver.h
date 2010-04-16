@@ -11,10 +11,8 @@
 *
 * Contributors:
 *
-* Description:   ?Description*
+* Description:
 */
-
-
 
 #ifndef MVCXMYVIDEOSCOLLECTIONPLUGINTESTEROBSERVER_H
 #define MVCXMYVIDEOSCOLLECTIONPLUGINTESTEROBSERVER_H

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RCC>
+    <qresource prefix="hbvideoplaybackview">
+        <file>animation.axml</file>
+        <file>hbvideoplaybackview.docml</file>
+        <file>effects/controlbar_appear.fxml</file>
+        <file>effects/controlbar_disappear.fxml</file>
+    </qresource>
+</RCC>

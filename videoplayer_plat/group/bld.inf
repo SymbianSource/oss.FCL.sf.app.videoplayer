@@ -10,14 +10,13 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
-* 
+*
 * Description:  Main build file for platform APIs*
 */
 
 
 
 #include "../videoplayer_startup_api/group/bld.inf"
-#include "../video_player_file_details_dialog_api/group/bld.inf"
 #include "../videocollection_api/group/bld.inf"
 
 PRJ_PLATFORMS

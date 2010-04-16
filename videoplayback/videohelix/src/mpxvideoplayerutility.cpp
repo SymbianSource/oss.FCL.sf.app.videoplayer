@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:  This class is the interface between the playback plugin and RMMFController
- *
+*
 */
 
-// Version : %version: 13 %
+// Version : %version: e003sa33#19 %
 
 
 #include <AudioPreference.h>
@@ -66,8 +66,6 @@ CMpxVideoPlayerUtility::~CMpxVideoPlayerUtility()
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::~CMpxVideoPlayerUtility()"));
 
     Close();
-
-    delete iControllerEventMonitor;
 }
 
 void CMpxVideoPlayerUtility::Close()
@@ -81,6 +79,12 @@ void CMpxVideoPlayerUtility::Close()
         iControllerEventMonitor = NULL;
     }
 
+    if ( ! iSurfaceId.IsNull() )
+    {
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoRemoveDisplayWindow ) );
+        iSurfaceId = TSurfaceId::CreateNullId();
+    }
+
     iController.Close();
     iDirectScreenAccessAbort = EFalse;
 }
@@ -90,7 +94,7 @@ void CMpxVideoPlayerUtility::Reset()
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::Reset()"));
 
     Close();
-    OpenControllerL();
+    MPX_TRAPD( err, OpenControllerL() );
 }
 
 void CMpxVideoPlayerUtility::OpenControllerL()
@@ -226,9 +230,9 @@ TInt CMpxVideoPlayerUtility::VideoFormatMimeType( TDes8& aMimeType ) const
 
 TUint32 CMpxVideoPlayerUtility::FourCCCode() const
 {
-    TFourCC aFourCC( 0 ); 
+    TFourCC aFourCC( 0 );
     iVideoControllerCustomCommands.GetAudioCodec( aFourCC );
-    
+
     return aFourCC.FourCC();
 }
 
@@ -273,6 +277,21 @@ void CMpxVideoPlayerUtility::SetDisplayWindowL( const TRect& aScreenRect,
                 iVideoPlayControllerCustomCommands.DirectScreenAccessEvent( EResumeDSA ) );
 
         iDirectScreenAccessAbort = EFalse;
+    }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SurfaceRemovedFromView()"));
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
 }
 
@@ -513,13 +532,6 @@ TInt CMpxVideoPlayerUtility::VideoSurfaceCreated()
             error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( oldSurfaceId );
         }
     }
-    else
-    {
-        if ( replaceSurface )
-        {
-            iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( oldSurfaceId );
-        }
-    }
 
     return error;
 }
@@ -578,19 +590,17 @@ TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     TInt error = KErrNone;
 
-    if ( iSurfaceId.IsNull() )
+    if ( !iSurfaceId.IsNull() )
     {
-        error = KErrNotFound;
+        //
+        //  Send command to view to remove the surface
+        //
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
+
+        error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
+
+        iSurfaceId = TSurfaceId::CreateNullId();
     }
-
-    //
-    //  Send command to view to remove the surface
-    //
-    MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
-
-    error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
-
-    iSurfaceId = TSurfaceId::CreateNullId();
 
     return error;
 }
@@ -609,10 +619,10 @@ void CMpxVideoPlayerUtility::SendSurfaceCommandL( TInt aCmd )
         CMPXMessage* msg = CMPXMessage::NewL();
         CleanupStack::PushL( msg );
 
-        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplayMessage );
+        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplaySyncMessage );
         msg->SetTObjectValueL<TInt>( KMPXMediaVideoDisplayCommand, aCmd );
 
-        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackMessage( msg, KErrNone );
+        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackSyncMessage( *msg );
 
         CleanupStack::PopAndDestroy( msg );
     }
@@ -635,13 +645,13 @@ void CMpxVideoPlayerUtility::SendSurfaceCommandL( TInt aCmd,
         CMPXMessage* msg = CMPXMessage::NewL();
         CleanupStack::PushL( msg );
 
-        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplayMessage );
+        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplaySyncMessage );
         msg->SetTObjectValueL<TInt>( KMPXMediaVideoDisplayCommand, aCmd );
         msg->SetTObjectValueL<TSurfaceId>( KMPXMediaVideoDisplayTSurfaceId, aSurfaceId );
         msg->SetTObjectValueL<TRect>( KMPXMediaVideoDisplayCropRect, aCropRect );
         msg->SetTObjectValueL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio, aAspectRatio );
 
-        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackMessage( msg, KErrNone );
+        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackSyncMessage( *msg );
 
         CleanupStack::PopAndDestroy( msg );
     }

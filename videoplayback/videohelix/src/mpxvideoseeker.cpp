@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 // INCLUDE FILES
@@ -128,7 +128,7 @@ void CMPXVideoSeeker::StartSeekingL( TBool aForward,
 
     TInt trickplaySpeed = KDefaultTrickPlaySpeed;
 
-    if ( !iForward )
+    if ( ! iForward )
     {
         trickplaySpeed *= -1;
     }
@@ -152,16 +152,22 @@ void CMPXVideoSeeker::StartSeekingL( TBool aForward,
         iIncrements *= -1;
     }
 
-    iSeekTimer->Start( 0,
-                       interval,
-                       TCallBack( CMPXVideoSeeker::UpdatePosition, this ) );
+    if ( ! iSeekTimer->IsActive() )
+    {
+        iSeekTimer->Start( 0,
+                           interval,
+                           TCallBack( CMPXVideoSeeker::UpdatePosition, this ) );
+    }
 #endif
 
     if ( err == KErrNone )
     {
-        iTrickPlayTimer->Start( KTrickPlayTimeout,
-                                0,
-                                TCallBack( CMPXVideoSeeker::StopTrickPlay, this ) );
+        if ( ! iTrickPlayTimer->IsActive() )
+        {
+            iTrickPlayTimer->Start( KTrickPlayTimeout,
+                                    0,
+                                    TCallBack( CMPXVideoSeeker::StopTrickPlay, this ) );
+        }
     }
 }
 
