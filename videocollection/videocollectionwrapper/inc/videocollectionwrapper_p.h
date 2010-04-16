@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QPointer>
 #include <qabstractitemmodel.h>
-
+#include "videocollectioncommon.h"
 
 // FORWARD DECLARATIONS
 class CMPXMediaArray;
@@ -59,7 +59,7 @@ public: // Constructor
      * @param type type of model
      * @return address of model, NULL if creation did not succeed.
      */    
-	VideoSortFilterProxyModel* getModel(int &type);
+	VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType &type);
 
 private slots:
   

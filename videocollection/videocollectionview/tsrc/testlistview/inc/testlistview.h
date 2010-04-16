@@ -22,6 +22,7 @@
 // INCLUDES
 #include <QtTest/QtTest>
 #include "hbmessagebox.h"
+#include "hbeffect.h"
 
 class VideoListView;
 class VideoSortFilterProxyModel;
@@ -46,7 +47,12 @@ class TestListView : public QObject
     /**
      * Set row count in model.
      */
-    void setRowCount(int count);
+    void setRowCount(int count, VideoSortFilterProxyModel *model = 0);
+    
+    /**
+     * Check if action is visible.
+     */
+    bool isActionVisible(const char *name) const;
     
     // Test functions for the test framework.
     
@@ -68,11 +74,6 @@ private slots:
 	void testInitializeView();
 	
     /**
-	 * Tests creating menu of the view.
-	 */
-    void testCreateListMenu();
-    
-    /**
      * Tests menus.
      */
     void testMenus();
@@ -86,7 +87,7 @@ private slots:
      * Tests activatView.
      */
     void testActivateView();
-
+    
     /**
      * Tests deactivateView.
      */
@@ -111,11 +112,6 @@ private slots:
      * Tests aboutToShowMainMenuSlot.
      */
     void testAboutToShowMainMenuSlot();
-    
-    /**
-     * Tests openSortByMenuSlot
-     */
-    void testOpenSortByMenuSlot();
     
     /**
      * Tests handleStatusSlot.
@@ -161,19 +157,81 @@ private slots:
      * Tests showHint
      */
     void testShowHint();
+    
+    /**
+     * Tests titleReadySlot
+     */
+    void testTitleReadySlot();
 
+    /**
+     * Tests doDelayedsSlot
+     */
+    void testDoDelayedsSlot();
+
+    /**
+     * Tests openNewAlbumSlot
+     */
+    void testOpenNewAlbumSlot();
+
+    /**
+     * Tests aboutToChangeOrientationSlot
+     */
+    void testAboutToChangeOrientationSlot();
+
+    /**
+     * Tests orientationChangedSlot
+     */
+    void testOrientationChangedSlot();
+
+    /**
+     * Tests createCollectionSlot
+     */
+    void testCreateCollectionSlot();
+    
+    /**
+     * Tests addVideosToCollectionSlot
+     */
+    void testAddVideosToCollectionSlot();
+    
+    /**
+     * Tests removeVideosFromCollectionSlot
+     */
+    void testRemoveVideosFromCollectionSlot();
+    
+    /**
+     * Tests finishCollectionOpenedSlot
+     */
+    void testFinishCollectionOpenedSlot();
+
+    /**
+     * Tests finishCollectionClosedSlot
+     */
+    void testFinishCollectionClosedSlot();
+    
 signals:
 
     // Signals needed in tests.
     void testSignal();
+    
+    void testSignal2();
 
     void testSignal(int);
+    
+    void testSignal(const QString &);
 
     void testLayoutChangedSignal();
 
-    void testCollectionOpenedSignal(bool, const QString&);
+    void testCollectionOpenedSignal(bool, const QString&, const QModelIndex&);
 
     void testStatusSignal(int, QVariant&);
+    
+    void testObjectReadySignal(QObject*, const QString);
+    
+    void testSignal(const QModelIndex &parent, int start, int end);
+    
+    void testSignal(Qt::Orientation);
+    
+    void testSignal(const HbEffect::EffectStatus &status);
     
 private:
     

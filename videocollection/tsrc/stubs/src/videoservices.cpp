@@ -16,33 +16,38 @@
 */
 
 #include <qobject.h>
+#include "videoplayerappexport.h"
 #include "videoservices.h"
 #include "videoserviceurifetch.h"
+#include "videoservicebrowse.h"
+#include "xqserviceutilxtra.h"
 
-VideoServices *VideoServices::mInstance = 0;
+VideoServices* g_Instance = 0;
 
 VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
 {
-    if(!mInstance)
+    static VideoServices* g_Instance = 0;
+    
+    if(!g_Instance)
     {
-        mInstance = new VideoServices(engine);
+        g_Instance = new VideoServices(engine);
     }
-    else if(engine && !mInstance->engine())
+    else if(engine && !g_Instance->engine())
     {
-    	mInstance->setEngine(engine);
+    	g_Instance->setEngine(engine);
     }
-    mInstance->mReferenceCount++;
-    return mInstance;
+    g_Instance->mReferenceCount++;
+    return g_Instance;
 }
 
 void VideoServices::decreaseReferenceCount()
 {
-    if(mInstance)
+    if(g_Instance)
     {
-        if(--mInstance->mReferenceCount == 0)
+        if(--g_Instance->mReferenceCount == 0)
         {
-            delete mInstance;
-            mInstance = NULL;
+            delete g_Instance;
+            g_Instance = NULL;
         }
     }
 }
@@ -65,16 +70,30 @@ VideoServices::VideoServices(QVideoPlayerEngine* engine):
     mCurrentService(VideoServices::ENoService)
 {
     mServiceUriFetch = new VideoServiceUriFetch(this);
+    mServiceBrowse = new VideoServiceBrowse(this);
 }
 
 VideoServices::~VideoServices()
 {
     delete mServiceUriFetch;
+    delete mServiceBrowse;
 }
 
 VideoServices::TVideoService VideoServices::currentService()
 {
 	return mCurrentService;
+}
+
+int VideoServices::getBrowseCategory() const
+{
+    int category = 0;
+    
+    if (mServiceBrowse)
+    {
+        category = mServiceBrowse->getBrowseCategory();
+    }
+    
+    return category;
 }
 
 void VideoServices::setCurrentService(VideoServices::TVideoService service)
@@ -93,3 +112,9 @@ void VideoServices::itemSelected(const QString& item)
     // not stubbed
 }
 
+void VideoServices::browsingEnded()
+{
+    // not stubbed
+}
+
+// End of file

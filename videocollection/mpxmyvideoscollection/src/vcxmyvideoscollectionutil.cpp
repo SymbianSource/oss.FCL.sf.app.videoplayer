@@ -278,6 +278,21 @@ TUint32 TVcxMyVideosCollectionUtil::FlagsL( CMPXMedia& aVideo )
     }
 
 // ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::CreationDateL
+// ----------------------------------------------------------------------------
+//
+TInt64 TVcxMyVideosCollectionUtil::CreationDateL( CMPXMedia& aVideo )
+    {
+    TInt64 creationDate = 0;
+                            
+    if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
+        {
+        creationDate = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );                
+        }
+    return creationDate;
+    }
+
+// ----------------------------------------------------------------------------
 // TVcxMyVideosCollectionUtil::DownloadIdL
 // ----------------------------------------------------------------------------
 //
@@ -481,7 +496,7 @@ TInt TVcxMyVideosCollectionUtil::Origin( TInt aCategoryId )
 // TVcxMyVideosCollectionUtil::MediaArrayL
 // ----------------------------------------------------------------------------
 //
-CMPXMediaArray* TVcxMyVideosCollectionUtil::MediaArrayL( CMPXMedia& aMedia )
+CMPXMediaArray* TVcxMyVideosCollectionUtil::MediaArrayL( const CMPXMedia& aMedia )
     {
     if ( !aMedia.IsSupported( KMPXMediaArrayContents ) )
         {

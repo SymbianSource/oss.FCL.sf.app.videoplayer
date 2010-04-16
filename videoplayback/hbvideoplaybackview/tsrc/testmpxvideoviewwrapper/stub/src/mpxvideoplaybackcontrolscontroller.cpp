@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 7 %
 
 
 
@@ -118,15 +118,6 @@ void QMPXVideoPlaybackControlsController::handleEvent(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::hideAllControls()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::hideAllControls()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
 //   QMPXVideoPlaybackControlsController::handleTvOutEvent
 // -------------------------------------------------------------------------------------------------
 //
@@ -145,35 +136,15 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
 void QMPXVideoPlaybackControlsController::updateVideoRectDone()
 {
     mViewTransitionIsGoingOn = false;
-    
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::skipToPreviousVideoItem
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::skipToPreviousVideoItem()
-{
 }
 
 // -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::skipToNextVideoItem
+// QMPXVideoPlaybackControlsController::handleTappedOnScreen()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackControlsController::skipToNextVideoItem()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::handleTappedOnScreen()
-// -------------------------------------------------------------------------------------------------
-//
-
 void QMPXVideoPlaybackControlsController::handleTappedOnScreen()
+
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleTappedOnScreen"));
 }
-
-
 // End of File

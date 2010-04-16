@@ -21,6 +21,7 @@
 
 #include <QObject>
 
+#include "videocollectioncommon.h"
 #include "videosortfilterproxymodel.h"
 
 class VideoListDataModel;
@@ -36,7 +37,7 @@ public: // Constructors and destructor
      * Constructor
      *
      */
-    FilterProxyTester(int type, QObject *parent=0);
+    FilterProxyTester(VideoCollectionCommon::TModelType type, QObject *parent=0);
 
     /**
      * destructor

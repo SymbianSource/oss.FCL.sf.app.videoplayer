@@ -39,9 +39,6 @@
 "/epoc32/release/armv5/udeb/vcxmyvideoscollectionplugin.dll"      - "!:/sys/bin/vcxmyvideoscollectionplugin.dll"
 "/epoc32/data/z/resource/plugins/vcxmyvideoscollectionplugin.rsc" - "!:/resource/plugins/vcxmyvideoscollectionplugin.rsc"
 
-"/epoc32/release/armv5/udeb/vcxconnectionutility.dll"             - "!:/sys/bin/vcxconnectionutility.dll"
-"/epoc32/release/armv5/udeb/vcxconnutilpsworker.exe"              - "!:/sys/bin/vcxconnutilpsworker.exe"
-
 ;
 ; Playback Plugin
 ;

@@ -21,6 +21,7 @@
 
 // INCLUDES
 #include <QtTest/QtTest>
+#include <mpxitemid.h>
 
 class VideoListDataModel;
 class FilterProxyTester;
@@ -34,11 +35,17 @@ class TestVideoSortFilterProxyModel : public QObject
     // test functions for the test framework
     
 signals:
+    
     /**
      * test signal
      */
     void testSignal();
 
+    /**
+     * test signal
+     */
+    void testSignalMpxId(const TMPXItemId &id);
+    
 private slots:
 
     /**
@@ -112,11 +119,6 @@ private slots:
      * Test back with valid data.
      */
     void testBack();
-    
-    /**
-     * Test back when videocollectionclient is null.
-     */
-    void testBackClientNull();
 
     /**
      * Test fetchItemDetails with valid data.
@@ -157,6 +159,12 @@ private slots:
     void testLessThanDateTime();
     
     /**
+     * Calls less than with media objects of combined default / user created 
+     * collections
+     */
+    void testLessThanDefaults();
+    
+    /**
      * Calls sure lessThan with invalid role,
      * same indexes and for invalid data
      * tests that return values are correct for presetted items
@@ -170,11 +178,18 @@ private slots:
     void testDoSorting();
     
     /**
-     * Calls filterAcceptsRow.
-     * Tests that return values are correct with items with varying statuses. 
+     * Calls filterAcceptsRow. using type EAllVideos for model
+     * Tests that return values are correct with items with varying statuses.
      * 
      */
-    void testFilterAcceptsRow();
+    void testFilterAcceptsRowVideos();
+    
+    /**
+     * Calls filterAcceptsRow. using type differ than EAllVideos for model
+     * Tests that return values are correct with items with varying statuses.
+     * 
+     */
+    void testFilterAcceptsNoVideoTypes();
 
     /**
      * Test getMediaFilePathForId.
@@ -230,6 +245,21 @@ private slots:
      * tests setGenericIdFilter
      */
     void testSetGenericIdFilter();
+    
+    /**
+     * tests setAlbumInUse
+     */
+    void testSetAlbumInUse();
+    
+    /**
+     * tests renameAlbum
+     */
+    void testRenameAlbum();
+    
+    /**
+     * tests itemModifiedSlot
+     */
+    void testItemModifiedSlot();
     
 private:
     

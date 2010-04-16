@@ -168,6 +168,11 @@ private slots:
     void testRemoveItemsFromAlbum();
     
     /**
+     * verifies renameAlbum
+     */
+    void testRenameAlbum();
+
+    /**
      * verifies back -call
      *
      */

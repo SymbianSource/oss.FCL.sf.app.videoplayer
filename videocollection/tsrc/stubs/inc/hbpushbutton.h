@@ -54,7 +54,9 @@ public:
     }
 
 public slots:
-    void setText( const QString &text );
+    void setText( const QString &text ) {
+        Q_UNUSED(text);
+    }
 
 public:
     QString mText;

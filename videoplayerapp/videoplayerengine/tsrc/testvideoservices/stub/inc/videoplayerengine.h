@@ -15,12 +15,13 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: da1mmcf#2 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
 
 #include <qobject.h>
+#include <f32file.h>
 
 //FORWARD CLASS DECLARATION
 
@@ -46,6 +47,7 @@ class QVideoPlayerEngine: public QObject
     public:
         void initialize();
         void playMedia( QString filePath );
+        void playMedia( RFile file );
         void setEmbedded();
 
     public slots:

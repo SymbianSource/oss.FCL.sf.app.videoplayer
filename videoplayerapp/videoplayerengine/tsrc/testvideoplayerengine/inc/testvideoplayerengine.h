@@ -23,6 +23,8 @@
 //      - how to setup construction to fail for testing purposes
 
 
+// Version : %version: %
+
 #ifndef __TESTVIDEOPLAYERENGINE_H__
 #define __TESTVIDEOPLAYERENGINE_H__
 
@@ -84,7 +86,8 @@ private slots:
 
 signals:
 
-	void aboutToQuit();
+    void aboutToQuit();
+    void command( int );
 
 private:
 

@@ -96,7 +96,7 @@ signals:
      * Not emitted from here but had to be defined in order to 
      * get stub into use to testable object 
      */
-    void videoDetailsReady(TMPXItemId index);
+    void videoDetailsReady(QVariant&);
 
     
 public: // services
@@ -180,15 +180,6 @@ public: // services
      */
     QDateTime getVideoDateFromIndex( int index ) const;
    
-    /**
-     * Returns the metadata for the video.
-     * 
-     * @param index: item position where client wants the date from.
-     * @return QMap map of the QVariants that hold the data. Keys defined 
-     *      in VideoCollectionCommon
-     */
-    QMap<QString, QVariant> getMetaDataFromIndex(int index) const;
-      
     /**
      * Returns video status
      * 
@@ -303,12 +294,17 @@ public slots:
      * not used in stub
      * 
      */
-    void videoDetailsCompletedSlot(TMPXItemId videoId);
+    void videoDetailsCompletedSlot(CMPXMedia* media);
     
     /**
      * not used in stub
      */
     void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+    
+    /**
+     * not used in stub
+     */
+    void itemModifiedSlot(const TMPXItemId &itemId);    
     
     /**
      * not used in stub

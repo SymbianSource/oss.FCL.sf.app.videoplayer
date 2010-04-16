@@ -92,6 +92,9 @@ public:
 public:
     /** dummy actions */
     QMap<QString, HbAction*> mActions;
+    
+    /** active action */
+    HbAction* mActiveAction;
 };
 
 #endif // HBMENU_H

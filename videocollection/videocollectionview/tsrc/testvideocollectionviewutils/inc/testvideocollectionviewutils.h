@@ -46,9 +46,9 @@ private slots:
     void cleanup();
 
     /**
-     * verifies showErrorMsgSlot
+     * verifies showStatusMsgSlot
      */
-    void testShowErrorMsgSlot();
+    void testShowStatusMsgSlot();
     
     /**
      * verifies saveSortingValues
@@ -69,6 +69,16 @@ private slots:
      * verifies getServiceUriString
      */
     void testGetServiceUriString();
+    
+    /**
+     * Verifies initListView
+     */
+    void testInitListView();
+    
+    /**
+     * verifies sortModel
+     */
+    void testSortModel();
 
 };
 

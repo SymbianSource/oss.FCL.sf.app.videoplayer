@@ -20,7 +20,7 @@ EXPORTS
 	_ZN13VideoServicesD2Ev @ 19 NONAME
 	_ZN18QVideoPlayerEngine10handleQuitEv @ 20 NONAME
 	_ZN18QVideoPlayerEngine10initializeEv @ 21 NONAME
-	_ZN18QVideoPlayerEngine10loadPluginEN16MpxHbVideoCommon18MpxHbVideoViewTypeE @ 22 NONAME
+	_ZN18QVideoPlayerEngine23loadPluginAndCreateViewEN16MpxHbVideoCommon18MpxHbVideoViewTypeE @ 22 NONAME
 	_ZN18QVideoPlayerEngine11connectViewEv @ 23 NONAME
 	_ZN18QVideoPlayerEngine11qt_metacallEN11QMetaObject4CallEiPPv @ 24 NONAME
 	_ZN18QVideoPlayerEngine11qt_metacastEPKc @ 25 NONAME
@@ -44,4 +44,9 @@ EXPORTS
 	_ZTV13VideoServices @ 43 NONAME
 	_ZTV18QVideoPlayerEngine @ 44 NONAME
 	_ZN18QVideoPlayerEngine13doDelayedLoadEv @ 45 NONAME
+	_ZN18QVideoPlayerEngine9playMediaE5RFile @ 46 NONAME
+	_ZN13VideoServices13browsingEndedEv @ 47 NONAME
+	_ZNK13VideoServices17getBrowseCategoryEv @ 48 NONAME
+	_ZN18QVideoPlayerEngine25createPlayAndDetailsViewsEv @ 49 NONAME
+	_ZN18QVideoPlayerEngine14setCurrentViewEv @ 50 NONAME
 

@@ -18,6 +18,7 @@
 #ifndef HBLISTVIEW_H
 #define HBLISTVIEW_H
 
+#include <hbglobal.h>
 #include "hbwidget.h"
 #include "hblistviewitem.h"
 #include "hbscrollbar.h"
@@ -42,7 +43,7 @@ public:
     enum ScrollingStyle
     {
         InvalidScrolling,
-        PanOrFlick
+        PanWithFollowOn
     };
 };
 
@@ -221,6 +222,14 @@ public:
     }
     
     /**
+     * sets mLongPressedPoint
+     */
+    void panGesture (const QPointF &point)
+    {
+        mPanGesturePoint = point;
+    }
+    
+    /**
      * dummy method
      */
     void clearSelection()
@@ -263,6 +272,7 @@ public:
      */
     HbAbstractViewItem* itemAtPosition(const QPointF &position)
     {
+        Q_UNUSED(position);
         return mItem;
     }
 public:
@@ -323,6 +333,11 @@ public:
      * value setted in longPressGesture
      */
     static QPointF mLongPressedPoint;
+    
+    /**
+     * value setted in panGesture
+     */
+    static QPointF mPanGesturePoint;
     
     /**
      * latest value settes in setClampingStyle

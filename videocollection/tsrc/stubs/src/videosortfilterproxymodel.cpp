@@ -20,6 +20,8 @@
 #include "videocollectioncommon.h"
 #include "videolistdatamodel.h"
 
+using namespace VideoCollectionCommon;
+
 int VideoSortFilterProxyModelData::mSortRole = -1;
 Qt::SortOrder VideoSortFilterProxyModelData::mSortOrder = Qt::AscendingOrder;
 bool VideoSortFilterProxyModelData::mSortAsync = false;
@@ -37,13 +39,16 @@ int VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue = 0;
 TMPXItemId VideoSortFilterProxyModelData::mGenericFilterId  = TMPXItemId::InvalidId();
 bool VideoSortFilterProxyModelData::mGenericFilterValue = false;
 TMPXItemId VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId::InvalidId();
+QString VideoSortFilterProxyModelData::mLastAlbumNameInRename;
+int VideoSortFilterProxyModelData::mRenameAlbumReturnValue = 0;
+QString VideoSortFilterProxyModelData::mLastAddedAlbumName = "";
 
-VideoSortFilterProxyModel::VideoSortFilterProxyModel(int type, QObject *parent):
+VideoSortFilterProxyModel::VideoSortFilterProxyModel(VideoCollectionCommon::TModelType type, QObject *parent):
     QSortFilterProxyModel(parent),
     mModel(0),
     mCollectionClient(0),
     mType(type),
-    mLevel(-1),
+    mLevel(VideoCollectionCommon::ELevelInvalid),
     mIdleSortTimer(0),
     mWantedSortRole(VideoCollectionCommon::KeyDateTime)
 {
@@ -73,7 +78,7 @@ void VideoSortFilterProxyModel::disconnectSignals()
     // not stubbed
 }
 
-int VideoSortFilterProxyModel::open(int level)
+int VideoSortFilterProxyModel::open(VideoCollectionCommon::TCollectionLevels level)
 {
     int err = 0;
     
@@ -94,6 +99,8 @@ void VideoSortFilterProxyModel::doSorting(int sortingRole,
     VideoSortFilterProxyModelData::mSortRole = sortingRole;
     VideoSortFilterProxyModelData::mSortOrder = order;
     VideoSortFilterProxyModelData::mSortAsync = async;
+    setSortRole(sortingRole);
+    sort(0, order);
 }
 
 void VideoSortFilterProxyModel::getSorting(int &sortingRole,
@@ -152,6 +159,12 @@ void VideoSortFilterProxyModel::albumChangedSlot()
     // not stubbed
 }
 
+void VideoSortFilterProxyModel::itemModifiedSlot(const TMPXItemId &itemId)
+{
+    Q_UNUSED(itemId);
+    // not stubbed
+}
+
 bool VideoSortFilterProxyModel::lessThan(const QModelIndex &left,
     const QModelIndex &right) const
 {
@@ -203,9 +216,14 @@ QString VideoSortFilterProxyModel::getMediaFilePathForId(TMPXItemId mediaId)
     return QString();
 }
 
+TModelType VideoSortFilterProxyModel::getType()
+{
+    return mType;
+}
+
 TMPXItemId VideoSortFilterProxyModel::addNewAlbum(const QString &title)
 {
-    Q_UNUSED(title);
+    VideoSortFilterProxyModelData::mLastAddedAlbumName = title;
     return VideoSortFilterProxyModelData::mNewAlbumId;
 }
 
@@ -263,6 +281,16 @@ void VideoSortFilterProxyModel::setAlbumInUse(TMPXItemId albumId)
     VideoSortFilterProxyModelData::mLastItemId = albumId;
 }
 
+int VideoSortFilterProxyModel::renameAlbum(const TMPXItemId &albumId, const QString &newTitle)
+{
+    if(VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue >= 0)
+    {
+        VideoSortFilterProxyModelData::mLastItemId = albumId;
+        VideoSortFilterProxyModelData::mLastAlbumNameInRename = newTitle;
+
+    }
+    return VideoSortFilterProxyModelData::mRenameAlbumReturnValue;
+}
 
 TMPXItemId VideoSortFilterProxyModel::getOpenItem() const
 {

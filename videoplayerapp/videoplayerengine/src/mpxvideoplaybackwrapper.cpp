@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #include "mpxvideo_debug.h"
@@ -67,10 +67,25 @@ void QMpxVideoPlaybackWrapper::initializePlugins()
 //
 int QMpxVideoPlaybackWrapper::playMedia( QString aFileName )
 {
-    MPX_ENTER_EXIT(_L("QMpxVideoPlaybackWrapper::playMedia"));
-
+    MPX_ENTER_EXIT(_L("QMpxVideoPlaybackWrapper::playMedia"));   
+    
     TBuf<KMaxFileName> filename( aFileName.utf16() );
-    TRAPD( error, mUiEngine->OpenFileL( filename ) );
+    int error = openFileWithNativePath( filename );
+
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::playMedia err = %d"), error);
+
+    return error;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   QMpxVideoPlaybackWrapper::playMedia()
+// -------------------------------------------------------------------------------------------------
+//
+int QMpxVideoPlaybackWrapper::playMedia( RFile aFile )
+{
+    MPX_ENTER_EXIT(_L("QMpxVideoPlaybackWrapper::playMedia"));   
+    
+    TRAPD( error, mUiEngine->OpenFileL( aFile ) );
 
     MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::playMedia err = %d"), error);
 
@@ -98,5 +113,57 @@ void QMpxVideoPlaybackWrapper::lateInit()
     
     TRAP_IGNORE( mUiEngine->LateInitL() );
 }
+
+// -------------------------------------------------------------------------------------------------
+//   QMpxVideoPlaybackWrapper::openFileWithNativePath()
+// -------------------------------------------------------------------------------------------------
+//
+int QMpxVideoPlaybackWrapper::openFileWithNativePath(const TDesC& aFileName)
+{
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::openFileWithNativePath()"));    
+    
+    int err = KErrNone;
+
+    int fwdSlashPos = aFileName.LocateF('/');
+
+    if( fwdSlashPos == KErrNotFound )
+    {
+        // no fwd slashes found => filepath is already in 
+        // preferred format eg. c:\\data\\videos\\test.3gp
+        //
+        TRAP( err, mUiEngine->OpenFileL( aFileName ) );        
+    }
+    else
+    {        
+        HBufC* fileName = NULL;
+
+        TRAP( err,  fileName = aFileName.AllocL() );
+
+        if ( err == KErrNone )
+        {
+            int count( fileName->Des().Length() );
+
+            for ( int j = fwdSlashPos ; j < count; ++j )
+            {
+                if ( fileName->Des()[j]== '/' )
+                {
+                    fileName->Des()[j]='\\';
+                }
+            }
+            
+        }
+
+        TRAP( err, mUiEngine->OpenFileL( fileName->Des() ) );
+        
+        if ( fileName )
+        {
+            delete fileName;
+            fileName = NULL;
+        }        
+    }
+    
+    return err;
+}
+
 
 // End of File

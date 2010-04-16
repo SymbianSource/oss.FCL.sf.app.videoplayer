@@ -15,11 +15,14 @@
 *
 */
 
-#include <hbapplication.h>
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
+// Version : %version: %
 
+#include <hbapplication.h>
+
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
 #include "mpxhbvideocommondefs.h"
+#include "mpxvideo_debug.h"
 
 
 // ----------------------------------------------------------------------------
@@ -27,10 +30,11 @@
 // ----------------------------------------------------------------------------
 //
 VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent)
-: XQServiceProvider(QLatin1String("com.nokia.Videos.IVideoFetch"),parent),
-  mRequestIndex(0),
-  mServiceApp(parent)
+    : XQServiceProvider( QLatin1String("com.nokia.Videos.IVideoFetch"), parent )
+    , mRequestIndex( 0 )
+    , mServiceApp( parent )
 {
+    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::VideoServiceUriFetch()"));
 	publishAll();
 }
 
@@ -40,7 +44,7 @@ VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent)
 //
 VideoServiceUriFetch::~VideoServiceUriFetch()
 {
-
+    MPX_DEBUG(_L("VideoServiceUriFetch::~VideoServiceUriFetch()"));
 }
 
 // ----------------------------------------------------------------------------
@@ -49,9 +53,12 @@ VideoServiceUriFetch::~VideoServiceUriFetch()
 //
 void VideoServiceUriFetch::fetchFailed( int errorCode )
 {
+    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetchFailed()"),
+                   _L("errorCode = %d"), errorCode );
+    
     QStringList filesList;
-    filesList.insert(0, QString::number( errorCode ));//result
-    doComplete(filesList);
+    filesList.insert( 0, QString::number( errorCode ) ); //result
+    doComplete( filesList );
 }
 
 // ----------------------------------------------------------------------------
@@ -60,7 +67,9 @@ void VideoServiceUriFetch::fetchFailed( int errorCode )
 //
 void VideoServiceUriFetch::complete( QStringList filesList )
 {
-        doComplete(filesList);
+    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::complete()"));
+	
+    doComplete( filesList );
 }
 
 // ----------------------------------------------------------------------------
@@ -69,11 +78,24 @@ void VideoServiceUriFetch::complete( QStringList filesList )
 //
 void VideoServiceUriFetch::doComplete( QStringList filesList)
 {
+    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::doComplete()"));
+        
     if ( isActive() )
     {
         connect(this, SIGNAL(returnValueDelivered()), qApp, SLOT(quit()));
-        completeRequest(mRequestIndex, filesList);
+        bool ok = completeRequest(mRequestIndex, filesList);
         mRequestIndex = 0;
+        
+		//
+        // double check that request was completed succesfully, otherwise
+        // videos application cannot be exited at all
+		//
+        if ( ! ok )
+        {
+            MPX_DEBUG(_L("VideoServiceUriFetch::doComplete() : completeRequest FAILED !"));  
+			              
+            qApp->quit();
+        }
     }
 }
 
@@ -83,6 +105,8 @@ void VideoServiceUriFetch::doComplete( QStringList filesList)
 //
 bool VideoServiceUriFetch::isActive()
 {
+    MPX_DEBUG(_L("VideoServiceUriFetch::isActive() ret %d"), mRequestIndex );
+	
     return (mRequestIndex > 0);
 }
 
@@ -92,6 +116,8 @@ bool VideoServiceUriFetch::isActive()
 //
 QString VideoServiceUriFetch::contextTitle() const
 {
+    MPX_DEBUG(_L("VideoServiceUriFetch::contextTitle() ret %s"), mTitle.data() );
+	
     return mTitle;
 }
 
@@ -101,6 +127,9 @@ QString VideoServiceUriFetch::contextTitle() const
 //
 void VideoServiceUriFetch::fetch(const QString& title)
 {
+    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetch()"),
+                   _L("title = %s"), title.data() );
+    
     mTitle = title;
     emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
     emit mServiceApp->titleReady(title);
@@ -108,5 +137,6 @@ void VideoServiceUriFetch::fetch(const QString& title)
     mServiceApp->setCurrentService(VideoServices::EUriFetcher);
 
     mRequestIndex = setCurrentRequestAsync();
+    MPX_DEBUG(_L("VideoServiceUriFetch::fetch() : mRequestIndex(%d)"), mRequestIndex );
 }
 

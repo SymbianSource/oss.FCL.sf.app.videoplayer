@@ -93,9 +93,9 @@ public slots:
     /**
      * Signaled when all details for a video have been fetched.
      * 
-     * @param aMedia MPX Media that contains all details.
+     * @param media MPX Media that contains all details.
      */
-    virtual void videoDetailsCompletedSlot( TMPXItemId videoId ) = 0;
+    virtual void videoDetailsCompletedSlot( CMPXMedia* media ) = 0;
     
     /**
      * Signalled when album items are recieved.
@@ -105,6 +105,13 @@ public slots:
      */
     virtual void albumListAvailableSlot(TMPXItemId albumId,
         CMPXMediaArray *albumItems) = 0;
+    
+    /**
+     * Signalled when item has been mofidied.
+     * 
+     * @param itemId, item that has been modified.
+     */
+    virtual void itemModifiedSlot(const TMPXItemId &itemId) = 0;
 };
 
 #endif // __VIDEOMODELOBSERVER_H

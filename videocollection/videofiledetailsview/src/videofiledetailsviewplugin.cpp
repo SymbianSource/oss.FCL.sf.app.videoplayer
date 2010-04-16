@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: 69 %
+
 // INCLUDE FILES
 #include <qcoreapplication.h>
 #include <xqserviceutil.h>
@@ -26,13 +28,14 @@
 #include <hbpushbutton.h>
 #include <hbaction.h>
 #include <qabstractitemmodel.h>
-#include <qdebug.h>
 #include <hbmessagebox.h>
 #include <hblistwidget.h>
 #include <hblistwidgetitem.h>
 #include <hblistviewitem.h>
 #include <cmath>
 #include <thumbnailmanager_qt.h>
+#include <shareui.h>
+
 #include "videocollectionclient.h"
 #include "videofiledetailsviewplugin.h"
 #include "videocollectioncommon.h"
@@ -41,43 +44,38 @@
 #include "videosortfilterproxymodel.h"
 #include "videoservices.h"
 #include "videodetailslabel.h"
+#include "videocollectiontrace.h"
 
-const char* const VIDEO_DETAILS_DOCML = ":/xml/videofiledetails.docml";
-const char* const VIDEO_DETAILS_PORTRAIT = "portrait";
-const char* const VIDEO_DETAILS_LANDSCAPE = "landscape";
-const char* const VIDEO_DETAILS_GFX_DEFAULT = ":/gfx/pri_large_video.svg";
-const char* const VIDEO_DETAILS_VIEW = "videofiledetailsview";
-const char* const VIDEO_DETAILS_TITLE = "mLblTitle";
-const char* const VIDEO_DETAILS_THUMBNAIL = "mDetailsLabel";
-const char* const VIDEO_DETAILS_BUTTON = "mButton";
+const char* const VIDEO_DETAILS_DOCML             = ":/xml/videofiledetails.docml";
+const char* const VIDEO_DETAILS_PORTRAIT          = "portrait";
+const char* const VIDEO_DETAILS_LANDSCAPE         = "landscape";
+const char* const VIDEO_DETAILS_GFX_DEFAULT       = ":/gfx/pri_large_video.svg";
+const char* const VIDEO_DETAILS_VIEW              = "videofiledetailsview";
+const char* const VIDEO_DETAILS_TITLE             = "mLblTitle";
+const char* const VIDEO_DETAILS_THUMBNAIL         = "mDetailsLabel";
+const char* const VIDEO_DETAILS_BUTTON            = "mButton";
 const char* const VIDEO_DETAILS_MENUACTION_DELETE = "mOptionsDelete";
-const char* const VIDEO_DETAILS_LISTWIDGET ="mDetailsList";
-
-// Just for testing, remove this
-void _DebugNotImplementedYet()
-{
-    HbMessageBox::information(QObject::tr("Not implemented yet"));
-}
+const char* const VIDEO_DETAILS_LISTWIDGET        = "mDetailsList";
 
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
 //
 VideoFileDetailsViewPlugin::VideoFileDetailsViewPlugin()
-    : mModel(0),
-      mVideoServices(0),
-      mActivated(false),
-      mIsService(false),
-      mVideoId(TMPXItemId::InvalidId()),
-      mDeletedIndex(-1),
-      mPreviousOrietation(Qt::Vertical),
-      mNavKeyBackAction(0),
-      mTitleAnim(0),
-      mThumbLabel(0),
-      mThumbnailManager(0),
-      mCollectionWrapper(VideoCollectionWrapper::instance())
+    : mModel( 0 )
+    , mVideoServices( 0 )
+    , mActivated( false )
+    , mIsService( false )
+    , mVideoId( TMPXItemId::InvalidId() )
+    , mDeletedIndex( -1 )
+    , mPreviousOrietation( Qt::Vertical )
+    , mNavKeyBackAction( 0 )
+    , mTitleAnim( 0 )
+    , mThumbLabel( 0 )
+    , mThumbnailManager( 0 )
+    , mCollectionWrapper( VideoCollectionWrapper::instance() )
 {
-
+	FUNC_LOG;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +84,7 @@ VideoFileDetailsViewPlugin::VideoFileDetailsViewPlugin()
 //
 VideoFileDetailsViewPlugin::~VideoFileDetailsViewPlugin()
 {
+	FUNC_LOG;
 	destroyView();
 }
 
@@ -95,6 +94,7 @@ VideoFileDetailsViewPlugin::~VideoFileDetailsViewPlugin()
 //
 void VideoFileDetailsViewPlugin::createView()
 {
+	FUNC_LOG;
 	mLoader.reset();
 
 	mActivated = false;
@@ -106,6 +106,7 @@ void VideoFileDetailsViewPlugin::createView()
 	
 	if(!ok)
 	{
+	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load docml.");
 		return;
 	}
 
@@ -114,14 +115,15 @@ void VideoFileDetailsViewPlugin::createView()
 	
 	if(!ok)
 	{
+	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load portrait view.");
 		return;
 	}
 
-	mModel = mCollectionWrapper.getModel(VideoCollectionWrapper::EAllVideos);
+	mModel = mCollectionWrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
 	if (!mModel)
 		{
-		qDebug() << "VideoFileDetailsViewPlugin::createView(): Unable to open collection wrapper. Cannot connect slots, aborting...";
+	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() get model failed.");
 		// TODO need to throw exception instead?
 		return;
 		}
@@ -141,14 +143,20 @@ void VideoFileDetailsViewPlugin::createView()
 			this, SLOT(shortDetailsReadySlot(TMPXItemId)));
 
 	connect(mModel->sourceModel(),
-			SIGNAL(fullVideoDetailsReady(TMPXItemId)),
-			this, SLOT(fullDetailsReadySlot(TMPXItemId)));
+			SIGNAL(fullVideoDetailsReady(QVariant&)),
+			this, SLOT(fullDetailsReadySlot(QVariant&)));
 
 	connect(mModel,
 			SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
 			this, SLOT(rowsRemovedSlot(const QModelIndex&, int, int)));
 
+	// Setup thumbnail widget.
 	HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+	if(!thumbWidget)
+	{
+	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load thumbnail widget.");
+	    return;
+	}
 
 	// no deallocation needed for this since
 	// stackedwidget takes ownership
@@ -160,10 +168,22 @@ void VideoFileDetailsViewPlugin::createView()
 
 	thumbWidget->addWidget(mThumbLabel);
 
+	// Load details title.
 	HbStackedWidget* title = findObject<HbStackedWidget>(VIDEO_DETAILS_TITLE);
+	if(!title)
+	{
+	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load title.");
+	    return;
+	}
 	title->addWidget(mTitleAnim);
 
+	// Load delete action.
 	HbAction* deleteAction = findObject<HbAction>(VIDEO_DETAILS_MENUACTION_DELETE);
+    if(!deleteAction)
+    {
+        ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to delete action.");
+        return;
+    }
 
 	if (mIsService)
 	{
@@ -192,6 +212,7 @@ void VideoFileDetailsViewPlugin::createView()
 //
 void VideoFileDetailsViewPlugin::destroyView()
 {
+	FUNC_LOG;
     if (mActivated)
     {
         deactivateView();
@@ -203,8 +224,12 @@ void VideoFileDetailsViewPlugin::destroyView()
     	mVideoServices = 0;
     }
 
-    delete mNavKeyBackAction; mNavKeyBackAction = 0;
-    delete mThumbnailManager; mThumbnailManager = 0;
+    delete mNavKeyBackAction;
+    mNavKeyBackAction = 0;
+    
+    delete mThumbnailManager;
+    mThumbnailManager = 0;
+    
     disconnect();
     mLoader.reset();
 }
@@ -215,6 +240,7 @@ void VideoFileDetailsViewPlugin::destroyView()
 //
 void VideoFileDetailsViewPlugin::activateView()
 {
+	FUNC_LOG;
 	if (!mActivated)
     {
         HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
@@ -228,6 +254,7 @@ void VideoFileDetailsViewPlugin::activateView()
         	}
         	else
         	{
+        	    ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to connect navkey signal.");
         		return;
         	}
         }
@@ -254,25 +281,36 @@ void VideoFileDetailsViewPlugin::activateView()
 
 			if (!mVideoServices)
 			{
+			    ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to get video services instance.");
 				return;
 			}
     	}
 
-		HbPushButton* button = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
-
+		VideoServices::TVideoService service = VideoServices::ENoService;
 		if (mIsService && mVideoServices)
 		{
-			button->setText(tr("Attach")); //localisation
-
-			connect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
-			connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
-
+		    service = mVideoServices->currentService();
+		    
             HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-
             mainWnd->currentView()->setTitle(mVideoServices->contextTitle());
 		}
-    	else if(!mIsService)
-    	{
+
+        HbPushButton* button = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
+		if(!button)
+		{
+		    ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details button.");
+		    return;
+		}
+				
+		if (service == VideoServices::EUriFetcher)
+		{
+            button->setText(hbTrId("txt_videos_button_attach"));
+
+            connect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
+            connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
+		}
+		else
+		{
 			connect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()));
 			button->setText(hbTrId("txt_videos_opt_share"));
     	}
@@ -299,6 +337,7 @@ void VideoFileDetailsViewPlugin::activateView()
 //
 void VideoFileDetailsViewPlugin::deactivateView()
 {
+	FUNC_LOG;
     if ( mActivated )
     {
         mVideoId = TMPXItemId::InvalidId();
@@ -342,7 +381,6 @@ void VideoFileDetailsViewPlugin::deactivateView()
 		{
 			disconnect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()));
 		}
-
     }
 }
 
@@ -352,6 +390,7 @@ void VideoFileDetailsViewPlugin::deactivateView()
 //
 QGraphicsWidget* VideoFileDetailsViewPlugin::getView()
 {
+	FUNC_LOG;
     return mLoader.findWidget(VIDEO_DETAILS_VIEW);
 }
 
@@ -361,12 +400,13 @@ QGraphicsWidget* VideoFileDetailsViewPlugin::getView()
 //
 void VideoFileDetailsViewPlugin::orientationChange( Qt::Orientation orientation )
 {
-    if ( orientation == Qt::Vertical )
+	FUNC_LOG;
+    if (orientation == Qt::Vertical)
     {
     	mLoader.load(VIDEO_DETAILS_DOCML, VIDEO_DETAILS_PORTRAIT);
     }
 
-    else if ( orientation == Qt::Horizontal )
+    else if (orientation == Qt::Horizontal)
     {
        	mLoader.load(VIDEO_DETAILS_DOCML, VIDEO_DETAILS_LANDSCAPE);
     }
@@ -380,7 +420,8 @@ void VideoFileDetailsViewPlugin::orientationChange( Qt::Orientation orientation 
 //
 void VideoFileDetailsViewPlugin::back()
 {
-    if ( mActivated )
+	FUNC_LOG;
+    if (mActivated)
     {
         emit command( MpxHbVideoCommon::ActivateCollectionView );
     }
@@ -392,6 +433,7 @@ void VideoFileDetailsViewPlugin::back()
 //
 void VideoFileDetailsViewPlugin::shortDetailsReadySlot(TMPXItemId id)
 {
+	FUNC_LOG;
     // first clear all details, so that the view doesn't display the old data.
     findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET)->clear();
 
@@ -399,11 +441,11 @@ void VideoFileDetailsViewPlugin::shortDetailsReadySlot(TMPXItemId id)
 
     mVideoId = id;
 
-    QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
+    QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyTitle);
 
     if (variant.isValid() && mTitleAnim)
     {
-        mTitleAnim->setText(variant.toStringList().first());
+        mTitleAnim->setText(variant.toString());
     }
     startFetchingThumbnail();
 }
@@ -412,20 +454,22 @@ void VideoFileDetailsViewPlugin::shortDetailsReadySlot(TMPXItemId id)
 // Slot: fullDetailsReadySlot
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::fullDetailsReadySlot(TMPXItemId id)
+void VideoFileDetailsViewPlugin::fullDetailsReadySlot(QVariant& variant)
 {
+	FUNC_LOG;
     using namespace VideoCollectionCommon;
 
     int detailCount = sizeof(VideoDetailLabelKeys) / sizeof(int);
 
-    QModelIndex modelIndex = mModel->indexOfId(id);
-
-    QVariant variant = mModel->data(modelIndex, KeyMetaData);
-
     QMap<QString, QVariant> metadata = variant.toMap();
-
+    
     HbListWidget* list = findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET);
-
+    if(!list)
+    {
+        ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details list widget.");
+        return;
+    }
+    
     if(list->count())
     {
         list->clear();
@@ -457,11 +501,12 @@ void VideoFileDetailsViewPlugin::fullDetailsReadySlot(TMPXItemId id)
 //
 void VideoFileDetailsViewPlugin::getFileUri()
 {
+	FUNC_LOG;
 	if (mVideoId != TMPXItemId::InvalidId())
     {
         QModelIndex modelIndex = mModel->indexOfId(mVideoId);
 		QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
-		if ( variant.isValid()  )
+		if (variant.isValid())
 		{
 			QString itemPath = variant.value<QString>();
     		emit(fileUri(itemPath));
@@ -475,6 +520,7 @@ void VideoFileDetailsViewPlugin::getFileUri()
 //
 void VideoFileDetailsViewPlugin::startPlaybackSlot()
 {
+	FUNC_LOG;
 	if (mVideoId != TMPXItemId::InvalidId())
 	{
     	mModel->openItem(mVideoId);
@@ -487,7 +533,21 @@ void VideoFileDetailsViewPlugin::startPlaybackSlot()
 //
 void VideoFileDetailsViewPlugin::sendVideoSlot()
 {
-    _DebugNotImplementedYet();
+	FUNC_LOG;
+	HbMessageBox::information(tr("Not implemented yet"));
+	
+/*    if(mVideoId != TMPXItemId::InvalidId())
+    {
+        ShareUi dialog;
+        QModelIndex modelIndex = mModel->indexOfId(mVideoId);
+        QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
+        if(variant.isValid())
+        {
+            QStringList fileList;
+            fileList.append(variant.toString());
+            dialog.send(fileList, true);
+        }
+    }*/
 }
 
 // ---------------------------------------------------------------------------
@@ -496,15 +556,16 @@ void VideoFileDetailsViewPlugin::sendVideoSlot()
 //
 void VideoFileDetailsViewPlugin::deleteVideoSlot()
 {
+	FUNC_LOG;
 	if (mVideoId != TMPXItemId::InvalidId())
         {
 		QModelIndex modelIndex = mModel->indexOfId(mVideoId);
-		QVariant variant = mModel->data(modelIndex, Qt::DisplayRole);
+		QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyTitle);
 
         if (variant.isValid())
         {
             QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
-			   variant.toStringList().first());
+			   variant.toString());
 
             if (HbMessageBox::question(text))
             {
@@ -520,6 +581,7 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
 //
 void VideoFileDetailsViewPlugin::deleteItem(QModelIndex index)
 {
+	FUNC_LOG;
     mDeletedIndex = index.row();
 
     QModelIndexList list;
@@ -535,6 +597,7 @@ void VideoFileDetailsViewPlugin::deleteItem(QModelIndex index)
 void VideoFileDetailsViewPlugin::rowsRemovedSlot(const QModelIndex& parent,
                                                  int first, int last)
 {
+	FUNC_LOG;
 	Q_UNUSED(parent);
 
 	if(mActivated && mDeletedIndex > -1 &&
@@ -552,6 +615,7 @@ void VideoFileDetailsViewPlugin::rowsRemovedSlot(const QModelIndex& parent,
 //
 void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additional)
 {
+	FUNC_LOG;
     QString msg("");
     if(errorCode == VideoCollectionCommon::statusSingleDeleteFail)
     {
@@ -575,6 +639,7 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
 void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
         void * clientData, int id, int errorCode)
 {
+	FUNC_LOG;
     Q_UNUSED(clientData);
     Q_UNUSED(id);
 
@@ -631,6 +696,7 @@ void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
 	}
     else
     {
+        ERROR(errorCode, "VideoFileDetailsViewPlugin::thumbnailReadySlot() tbn fetch failed.");
 		mThumbLabel->setIcon(HbIcon(VIDEO_DETAILS_GFX_DEFAULT));
 	}
 }
@@ -641,6 +707,7 @@ void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
 //
 void VideoFileDetailsViewPlugin::startFetchingThumbnail()
 {
+	FUNC_LOG;
     int tnId = -1;
 
     if(mModel && mThumbnailManager)
@@ -653,13 +720,10 @@ void VideoFileDetailsViewPlugin::startFetchingThumbnail()
             tnId = mThumbnailManager->getThumbnail(variant.toString(), 0, 5000);
         }
     }
-    else
-    {
-        qWarning() << "Tried to start fetching thumbnail when either mModel or mThumbnailManager is NULL!";
-    }
 
     if(tnId == -1)
     {
+        ERROR(-1, "VideoFileDetailsViewPlugin::startFetchingThumbnail() starting the fetch failed.");
     	mThumbLabel->setIcon(HbIcon(VIDEO_DETAILS_GFX_DEFAULT));
     }
 }
@@ -670,6 +734,7 @@ void VideoFileDetailsViewPlugin::startFetchingThumbnail()
 //
 const QPixmap &VideoFileDetailsViewPlugin::playIcon()
 {
+	FUNC_LOG;
     // Check if we have already the icon.
     if(!mPlayIcon.isNull())
     {
@@ -748,6 +813,7 @@ const QPixmap &VideoFileDetailsViewPlugin::playIcon()
 template<class T>
 T* VideoFileDetailsViewPlugin::findWidget(QString name)
 {
+	FUNC_LOG;
     return qobject_cast<T *>(mLoader.findWidget(name));
 }
 
@@ -758,6 +824,7 @@ T* VideoFileDetailsViewPlugin::findWidget(QString name)
 template<class T>
 T* VideoFileDetailsViewPlugin::findObject(QString name)
 {
+	FUNC_LOG;
     return qobject_cast<T *>(mLoader.findObject(name));
 }
 

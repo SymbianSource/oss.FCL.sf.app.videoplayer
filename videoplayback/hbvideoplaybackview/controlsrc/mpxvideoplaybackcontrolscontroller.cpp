@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#29 %
+// Version : %version: da1mmcf#34 %
 
 
 
@@ -28,12 +28,13 @@
 #include <QTimer>
 #include <QFileInfo>
 #include <thumbnailmanager_qt.h>
+#include <xqserviceutil.h>
 
 #include <hblabel.h>
-#include <hbaction.h>
 #include <hbiconitem.h>
 #include <hbratingslider.h>
 #include <hbiconanimator.h>
+#include <hbvolumesliderpopup.h>
 #include <hbtransparentwindow.h>
 #include <hbiconanimationmanager.h>
 
@@ -45,11 +46,11 @@
 #include "mpxvideoplaybackviewfiledetails.h"
 #include "mpxvideoplaybackstatuspanecontrol.h"
 #include "mpxvideoplaybackfiledetailswidget.h"
-#include "mpxvideoplaybacknontouchvolumebar.h"
 #include "mpxvideoplaybackfullscreencontrol.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 #include "mpxvideoplaybackcontrolconfiguration.h"
 #include "mpxvideoplaybackdetailsplaybackwindow.h"
+#include "videoservices.h"
 
 
 // ================= MEMBER FUNCTIONS ==============================================================
@@ -71,7 +72,9 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController(
     , mLoader( NULL )
     , mVolumeControl( NULL )
     , mThumbnailManager( NULL )
+    , mVideoServices( 0 )
     , mViewTransitionIsGoingOn( false )
+    , mIsAttachOperation( false )
     , mThumbNailState( EThumbNailEmpty )
     , mState( EPbStateNotInitialised )
     , mViewMode( EFullScreenView )
@@ -102,13 +105,11 @@ void QMPXVideoPlaybackControlsController::initializeController()
     {
         QGraphicsWidget *widget = mLoader->findWidget( QString( "content" ) );
         mView->setWidget( widget );
-
-        widget = mLoader->findWidget( QString( "volumeSlider" ) );
-        mVolumeControl = qobject_cast<QMPXVideoPlaybackNonTouchVolumeBar*>( widget );
     }
     else
     {
-        MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::initializeController()- can't find xml"));
+        MPX_DEBUG(
+                _L("QMPXVideoPlaybackControlsController::initializeController()- can't find xml"));
 
         //
         // Can't find xml for layout. Delete mLoader
@@ -117,17 +118,56 @@ void QMPXVideoPlaybackControlsController::initializeController()
         mLoader = NULL;
     }
 
-    mControlsPolicy = new QMPXVideoPlaybackControlPolicy();
-    mControlsConfig = new QMPXVideoPlaybackControlConfiguration( this );
-
-    connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
-    
     mControlsTimer = new QTimer( this );
     mControlsTimer->setInterval( KMPXControlsTimeOut );
     mControlsTimer->setSingleShot( false );
     connect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
 
     connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
+	
+    mControlsPolicy = new QMPXVideoPlaybackControlPolicy();
+    
+    mControlsConfig = new QMPXVideoPlaybackControlConfiguration( this );
+    connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
+    mControlsConfig->createControlList();
+
+    mVolumeControl = new HbVolumeSliderPopup();
+    mVolumeControl->setVisible( false );
+    mVolumeControl->setTimeout( KMPXControlsTimeOut );
+    mVolumeControl->setTickPosition( Hb::NoSliderTicks );
+    mVolumeControl->setRange( KPbPlaybackVolumeLevelMin, KPbPlaybackVolumeLevelMax );
+
+    //
+    // if videoplayback is in service mode, create a videoservices instance
+    //
+    if ( XQServiceUtil::isService() && ! mVideoServices )
+    {
+        //
+        // obtain VideoServices instance 
+        //
+        mVideoServices = VideoServices::instance(); 
+
+        //
+        // allow 'attach' operation only for non-streaming media clips
+        //
+        if ( mVideoServices && mFileDetails->mPlaybackMode == EMPXVideoLocal )
+        {
+            //
+            // determine if this is 'attach' operation
+            //
+            mIsAttachOperation = ( mVideoServices->currentService() == VideoServices::EUriFetcher );
+            
+            if ( mIsAttachOperation )
+            {
+                //
+                // connect signal filePath() to videoservices slot itemSelected()
+                //
+                connect( this, SIGNAL( attachVideoPath( const QString& ) ), 
+                         mVideoServices, SLOT( itemSelected( const QString& ) ) );                        
+            }
+        }
+    }
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -136,7 +176,7 @@ void QMPXVideoPlaybackControlsController::initializeController()
 //
 QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()"));
 
     disconnect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
 
@@ -174,8 +214,33 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     if ( mThumbnailManager )
     {
         delete mThumbnailManager;
-        mThumbnailManager = 0;                    
+        mThumbnailManager = NULL;                    
     }
+
+    if ( mVolumeControl )
+    {
+        delete mVolumeControl;
+        mVolumeControl = NULL;
+    }
+    
+    if ( mIsAttachOperation )
+    {
+        //
+        // disable connection for 'attach' operation
+        //
+        disconnect( this, SIGNAL( attachVideoPath( const QString& ) ), 
+                    mVideoServices, SLOT( itemSelected( const QString& ) ) );    
+    }
+    
+    if ( mVideoServices )
+    {    
+        //
+        // decrease videoservices instance count
+        //
+    	mVideoServices->decreaseReferenceCount();
+    	mVideoServices = 0;
+    }
+    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -186,17 +251,6 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
     QMPXVideoPlaybackViewFileDetails* details )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::addFileDetails"));
-
-    //
-    // If it is not local, hide the star rating
-    //
-    if ( details->mPlaybackMode != EMPXVideoLocal )
-    {
-        QString sectionName = "nonLocalPlayback";
-
-        bool ok = false;
-        mLoader->load( KMPXPLAYBACKVIEW_XML, sectionName, &ok );
-    }
 
     mFileDetails = details;
 
@@ -363,33 +417,24 @@ void QMPXVideoPlaybackControlsController::handleStateChange( TMPXPlaybackState n
 
         switch ( newState )
         {
-            case EPbStateInitialised:
-            {
-                //
-                //  remove branding control when the state is transitioned to Initialized
-                //
-                if ( mFileDetails->mPlaybackMode == EMPXVideoStreaming ||
-                     mFileDetails->mPlaybackMode == EMPXVideoLiveStreaming )
-                {
-                    mControlsConfig->updateControlList( EMPXControlCmdPluginInitialized ); 
-                }
-                
-                break;                
-            }
             case EPbStatePlaying:
             case EPbStateInitialising:
             case EPbStateBuffering:
             case EPbStatePaused:
             case EPbStateNotInitialised:
             {
-                updateState();
-
                 //
                 //  Show all the controls
                 //
                 showControls();
 
+                updateState();
+
                 break;
+            }
+            default:
+            {
+                break;    
             }
         }
     }
@@ -1069,7 +1114,8 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
 void QMPXVideoPlaybackControlsController::changeViewMode( 
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::changeViewMode()"));
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::changeViewMode( %d, %d )"),
+            viewMode, transitionEffect );
 
     if ( viewMode != mViewMode )
     {
@@ -1159,7 +1205,8 @@ void QMPXVideoPlaybackControlsController::skipToNextVideoItem()
 //
 void QMPXVideoPlaybackControlsController::updateVideoRect( bool transitionEffect )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::updateVideoRect()"));
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::updateVideoRect( %d )"),
+            transitionEffect );
 
     if ( mFileDetails->mVideoEnabled && ! mFileDetails->mTvOutConnected )
     {
@@ -1167,6 +1214,9 @@ void QMPXVideoPlaybackControlsController::updateVideoRect( bool transitionEffect
 
         QRectF rect;
 
+        MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::updateVideoRect() : mViewMode = %d )"),
+                mViewMode );
+			
         if ( mViewMode == EDetailsView )
         {
             QGraphicsWidget *parent = mLoader->findWidget( QString( "detailsPlaybackWindow" ) );
@@ -1285,16 +1335,6 @@ void QMPXVideoPlaybackControlsController::handleThumbnailReady(
         hbIcon->setSize( tvOutBitmap->size() );
         tvOutLabel->setIcon( *hbIcon );
 
-        if ( qicon )
-        {
-            delete qicon;
-        }
-
-        if ( hbIcon )
-        {
-            delete hbIcon;
-        }
-
         mThumbNailState = EThumbNailSet;
     }
     else
@@ -1306,6 +1346,38 @@ void QMPXVideoPlaybackControlsController::handleThumbnailReady(
 
     disconnect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ), 
                 this, SLOT( handleThumbnailReady( QPixmap , void * , int , int ) ) );
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isAttachOperation
+// -------------------------------------------------------------------------------------------------
+//
+bool QMPXVideoPlaybackControlsController::isAttachOperation()
+{        
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
+	    mIsAttachOperation );
+    
+    return mIsAttachOperation;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::attachVideo()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::attachVideo()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"));
+    
+	//
+	// close and release resources
+	//
+    handleCommand( EMPXPbvCmdClose );
+	
+	//
+	// emit signal to launch videoservices itemSelected() slot
+	//
+    emit( attachVideoPath( mFileDetails->mClipName ) );
+    
 }
 
 // End of File

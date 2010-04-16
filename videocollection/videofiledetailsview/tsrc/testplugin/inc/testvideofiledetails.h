@@ -70,7 +70,7 @@ signals: // test signals to emit
     /**
      * full details test signal
      */
-    void fullDetailsReady(TMPXItemId index);
+    void fullDetailsReady(QVariant& variant);
     
     /**
      * data changed test signal

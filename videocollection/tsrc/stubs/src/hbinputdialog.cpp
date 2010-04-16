@@ -18,6 +18,8 @@
 #include "hbinputdialog.h"
 
 bool HbInputDialog::mGetTextFails = false;
+QString HbInputDialog::mGetTextReturnValue = QString();
+int HbInputDialog::mGetTextCallCount = 0;
 
 
 QString HbInputDialog::getText(const QString &label,const QString &text,
@@ -26,7 +28,16 @@ QString HbInputDialog::getText(const QString &label,const QString &text,
    Q_UNUSED(label);
    Q_UNUSED(scene);
    Q_UNUSED(parent);
-   QString textReturn = text;
+   mGetTextCallCount++;
+   QString textReturn;
+   if(HbInputDialog::mGetTextReturnValue.isNull())
+   {
+       textReturn = text;
+   }
+   else
+   {
+       textReturn = mGetTextReturnValue;
+   }
    if(mGetTextFails)
    {
        *ok = false;

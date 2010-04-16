@@ -11,14 +11,18 @@
 *
 * Contributors:
 *
-* Description:   ?Description
+* Description:   Implementation of VideoServices Stub
 *
 */
 
-#include <videoplayerengine.h>
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
-#include <videoserviceplay.h>
+// Version : %version: %
+
+#include "videoplayerengine.h"
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
+#include "videoserviceplay.h"
+#include "videoserviceview.h"
+#include "mpxvideo_debug.h"
 
 
 VideoServices *VideoServices::mInstance = 0;
@@ -30,9 +34,11 @@ int  VideoServices::mReferenceCount = 0;
 //
 VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
 {
-    if(!mInstance)
+    MPX_ENTER_EXIT(_L("VideoServices::instance()"));
+    
+    if ( ! mInstance )
     {
-        mInstance = new VideoServices(engine);
+        mInstance = new VideoServices( engine );
     }
     mInstance->mReferenceCount++;
     return mInstance;
@@ -44,9 +50,11 @@ VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
 //
 void VideoServices::decreaseReferenceCount()
 {
-    if(mInstance)
+    MPX_ENTER_EXIT(_L("VideoServices::decreaseReferenceCount()"));
+    
+    if ( mInstance )
     {
-        if(--mInstance->mReferenceCount == 0)
+        if( --mInstance->mReferenceCount == 0 )
         {
             delete mInstance;
             mInstance = NULL;
@@ -59,11 +67,14 @@ void VideoServices::decreaseReferenceCount()
 // VideoServices()
 // ----------------------------------------------------------------------------
 //
-VideoServices::VideoServices(QVideoPlayerEngine* engine) :
-mCurrentService(VideoServices::ENoService)
+VideoServices::VideoServices(QVideoPlayerEngine* engine) 
+    : mCurrentService(VideoServices::ENoService)
 {
+    MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
+    
     mServiceUriFetch = new VideoServiceUriFetch(this);
-	mServicePlay     = new VideoServicePlay(this, engine);
+    mServicePlay     = new VideoServicePlay(this, engine);
+    mServiceView     = new VideoServiceView(this, engine);
 }
 
 // ----------------------------------------------------------------------------
@@ -72,8 +83,11 @@ mCurrentService(VideoServices::ENoService)
 //
 VideoServices::~VideoServices()
 {
+    MPX_ENTER_EXIT(_L("VideoServices::~VideoServices()"));
+    
 	delete mServiceUriFetch;
 	delete mServicePlay;
+	delete mServiceView;
 }
 
 
@@ -83,6 +97,7 @@ VideoServices::~VideoServices()
 //
 VideoServices::TVideoService VideoServices::currentService()
 {
+    MPX_DEBUG(_L("VideoServices::currentService() ret %d"), mCurrentService);
 	return mCurrentService;
 }
 
@@ -91,8 +106,9 @@ VideoServices::TVideoService VideoServices::currentService()
 // setCurrentService()
 // ----------------------------------------------------------------------------
 //
-void VideoServices::setCurrentService(VideoServices::TVideoService service)
+void VideoServices::setCurrentService( VideoServices::TVideoService service )
 {
+    MPX_DEBUG(_L("VideoServices::setCurrentService(%d)"), service);
 	mCurrentService = service;
 }
 

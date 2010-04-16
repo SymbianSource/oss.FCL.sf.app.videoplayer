@@ -106,9 +106,9 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    void videoDetailsCompletedSlot(TMPXItemId id)
+    void videoDetailsCompletedSlot(CMPXMedia* media)
     {
-        Q_UNUSED(id);
+        Q_UNUSED(media);
     }
     
     /**
@@ -119,7 +119,14 @@ public slots:
         Q_UNUSED(albumId);
         Q_UNUSED(albumItems);
     }
- 
+
+    /**
+     * No implementation needed for these tests
+     */
+    virtual void itemModifiedSlot(const TMPXItemId &itemId)
+    {
+        Q_UNUSED(itemId);
+    }
 };
 
 

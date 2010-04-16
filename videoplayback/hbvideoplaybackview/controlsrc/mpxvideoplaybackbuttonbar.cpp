@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#21 %
+// Version : %version: da1mmcf#25 %
 
 
 
@@ -36,7 +36,10 @@
 QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar( 
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
+    , mSeekingState( EMPXNotSeeking )
     , mInitialized( false )
+    , mPosition( 0 )
+    , mDuration( 0 )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar"));
 }
@@ -72,8 +75,10 @@ void QMPXVideoPlaybackButtonBar::initialize()
         //
         QGraphicsWidget *widget = loader->findWidget( QString( "rwButton" ) );
         HbPushButton *rwButton = qobject_cast<HbPushButton*>( widget );
-        connect( rwButton, SIGNAL( pressed() ), this, SLOT( startRWSeeking() ) ); 
-        connect( rwButton, SIGNAL( released() ), this, SLOT( endSeeking() ) ); 
+        connect( rwButton, SIGNAL( pressed() ), this, SLOT( handleButtonPressed() ) );
+        connect( rwButton, SIGNAL( longPress( QPointF ) ), this, SLOT( rwPressing() ) );
+        connect( rwButton, SIGNAL( released() ), this, SLOT( rwReleased() ) ); 
+
         mButtons.append( rwButton );
 
         //
@@ -101,8 +106,9 @@ void QMPXVideoPlaybackButtonBar::initialize()
         //
         widget = loader->findWidget( QString( "ffButton" ) );
         HbPushButton *ffButton = qobject_cast<HbPushButton*>( widget );
-        connect( ffButton, SIGNAL( pressed() ), this, SLOT( startFFSeeking() ) ); 
-        connect( ffButton, SIGNAL( released() ), this, SLOT( endSeeking() ) );
+        connect( ffButton, SIGNAL( pressed() ), this, SLOT( handleButtonPressed() ) );
+        connect( ffButton, SIGNAL( longPress( QPointF ) ), this, SLOT( ffPressing() ) );
+        connect( ffButton, SIGNAL( released() ), this, SLOT( ffReleased() ) );
         mButtons.append( ffButton );
 
         //
@@ -135,9 +141,51 @@ void QMPXVideoPlaybackButtonBar::initialize()
         connect( detailsButton, SIGNAL( released() ), this, SLOT( openDetailsView() ) );
         mButtons.append( detailsButton );
 
+        //
+        // Attach button 
+        //
+        widget = loader->findWidget( QString( "attachButton" ) );        
+        HbPushButton *attachButton = qobject_cast<HbPushButton*>( widget );
+        connect( attachButton, SIGNAL( pressed() ), this, SLOT( handleButtonPressed() ) );
+        connect( attachButton, SIGNAL( released() ), mController, SLOT( attachVideo() ) ); 
+        mButtons.append( attachButton );
+            
         for ( int i = 0 ; i < EMPXButtonCount ; i++ )
         {
             mButtons[i]->setFlag( QGraphicsItem::ItemIsFocusable, false );
+        }
+
+        mDuration = (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier;
+
+        //
+		// obtain layout for aspect ratio which contains all 3 aspect ratio buttons:
+        //      natural, stretch, zoom
+		//
+        widget = loader->findWidget( QString( "aspectRatioButtons" ) );
+        
+        if ( mController->isAttachOperation() )
+        {
+            //
+            // disable 3 aspect ratio buttons
+            //
+            widget->setVisible( false );
+                
+            //
+            // enable "attach" button
+            //
+            mButtons[EMPXButtonAttach]->setVisible( true );        
+       }
+        else
+        {
+            //
+            // enable 3 aspect ratio buttons
+            //
+            widget->setVisible( true );
+        
+            //
+            // disable "attach" button
+            //
+            mButtons[EMPXButtonAttach]->setVisible( false );        
         }
     }
 }
@@ -155,46 +203,106 @@ void QMPXVideoPlaybackButtonBar::play()
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::startFFSeeking()
+// QMPXVideoPlaybackButtonBar::ffPressing()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::startFFSeeking()
+void QMPXVideoPlaybackButtonBar::ffPressing()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::startFFSeeking()"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::ffPressing()"),
+                   _L("mSeekingState = %d"), mSeekingState );
 
-    mButtons[EMPXButtonFF]->setSelected( true );
+    if ( mSeekingState == EMPXNotSeeking )
+    {
+        mSeekingState = EMPXFastForwarding;
+        mButtons[EMPXButtonFF]->setSelected( true );
 
-    mController->resetDisappearingTimers( EMPXTimerCancel );
-    mController->handleCommand( EMPXPbvCmdSeekForward );
+        mController->handleCommand( EMPXPbvCmdSeekForward );        
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::startRWSeeking()
+// QMPXVideoPlaybackButtonBar::rwPressing()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::startRWSeeking()
+void QMPXVideoPlaybackButtonBar::rwPressing()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::startRWSeeking()"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::rwPressing()"),
+                   _L("mSeekingState = %d"), mSeekingState );
 
-    mButtons[EMPXButtonRW]->setSelected( true );
 
-    mController->resetDisappearingTimers( EMPXTimerCancel );
-    mController->handleCommand( EMPXPbvCmdSeekBackward );
+    if ( mSeekingState == EMPXNotSeeking )
+    {
+        mSeekingState = EMPXRewinding;
+        mButtons[EMPXButtonRW]->setSelected( true );
+
+        mController->handleCommand( EMPXPbvCmdSeekBackward );
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::endSeeking()
+// QMPXVideoPlaybackButtonBar::ffReleased()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::endSeeking()
+void QMPXVideoPlaybackButtonBar::ffReleased()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::endSeeking()"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::ffReleased()"),
+                   _L("mSeekingState = %d"), mSeekingState );
 
-    mButtons[EMPXButtonFF]->setSelected( false );
-    mButtons[EMPXButtonRW]->setSelected( false );
+    if ( mSeekingState == EMPXFastForwarding )
+    {
+        mSeekingState = EMPXNotSeeking;
+        mController->handleCommand( EMPXPbvCmdEndSeek );        
+        mButtons[EMPXButtonFF]->setSelected( false );            
+    }
+    else
+    {
+        int temp = mPosition + KMPXFastForward;
+        MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::ffReleased() temp position = %d"), temp);
+
+        //
+        // If it has the playing time which is less than KMPXFastForward, ignore
+        //
+        if ( temp < mDuration )
+        {
+            mController->handleCommand( EMPXPbvCmdSetPosition, temp );
+        }
+    }
 
     mController->resetDisappearingTimers( EMPXTimerReset );
-    mController->handleCommand( EMPXPbvCmdEndSeek );
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackButtonBar::rwReleased()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackButtonBar::rwReleased()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::rwReleased()"),
+                   _L("mSeekingState = %d"), mSeekingState );
+
+    if ( mSeekingState == EMPXRewinding )
+    {
+        mSeekingState = EMPXNotSeeking;
+        mController->handleCommand( EMPXPbvCmdEndSeek );        
+        mButtons[EMPXButtonRW]->setSelected( false );        
+    }
+    else
+    {
+        int temp = mPosition + KMPXRewind;
+        MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::rwReleased() temp position = %d"), temp);
+
+        //
+        // If it played less than KMPXRewind, jump to 0
+        //
+        if ( temp < 0 )
+        {
+            temp = 0;
+        }
+
+        mController->handleCommand( EMPXPbvCmdSetPosition, temp );
+    }
+
+    mController->resetDisappearingTimers( EMPXTimerReset );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -217,20 +325,23 @@ void QMPXVideoPlaybackButtonBar::changeAspectRatio()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::changeAspectRatio()"));
 
-    mController->resetDisappearingTimers( EMPXTimerReset );
-
-    TMPXVideoPlaybackViewCommandIds cmd = EMPXPbvCmdNaturalAspectRatio;
-
-    if ( mButtons[EMPXButtonStretch]->isVisible() )
-    {
-        cmd = EMPXPbvCmdStretchAspectRatio;
+    if ( ! mController->isAttachOperation() )
+    {    
+        mController->resetDisappearingTimers( EMPXTimerReset );
+    
+        TMPXVideoPlaybackViewCommandIds cmd = EMPXPbvCmdNaturalAspectRatio;
+    
+        if ( mButtons[EMPXButtonStretch]->isVisible() )
+        {
+            cmd = EMPXPbvCmdStretchAspectRatio;
+        }
+        else if ( mButtons[EMPXButtonZoom]->isVisible() )
+        {
+            cmd = EMPXPbvCmdZoomAspectRatio;
+        }
+    
+        mController->handleCommand( cmd );
     }
-    else if ( mButtons[EMPXButtonZoom]->isVisible() )
-    {
-        cmd = EMPXPbvCmdZoomAspectRatio;
-    }
-
-    mController->handleCommand( cmd );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -245,7 +356,10 @@ void QMPXVideoPlaybackButtonBar::updateState( TMPXPlaybackState state )
     {
         case EPbStatePlaying:
         {
-            setEnabled( true );
+            if ( ! isEnabled() )
+            {
+                setEnabled( true );                
+            }
 
             mButtons[EMPXButtonPlay]->setVisible( false );
             mButtons[EMPXButtonPause]->setVisible( true );
@@ -253,7 +367,10 @@ void QMPXVideoPlaybackButtonBar::updateState( TMPXPlaybackState state )
         }
         case EPbStatePaused:
         {
-            setEnabled( true );
+            if ( ! isEnabled() )
+            {
+                setEnabled( true );
+            }
 
             mButtons[EMPXButtonPause]->setVisible( false );
             mButtons[EMPXButtonPlay]->setVisible( true );
@@ -263,7 +380,10 @@ void QMPXVideoPlaybackButtonBar::updateState( TMPXPlaybackState state )
         case EPbStateInitialising:
         case EPbStateBuffering:
         {
-            setEnabled( false );
+            if ( isEnabled() )
+            {
+                setEnabled( false );
+            }
 
             break;
         }
@@ -278,29 +398,32 @@ void QMPXVideoPlaybackButtonBar::aspectRatioChanged( int aspectRatio )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::aspectRatioChanged() aspectRatio = %d"), aspectRatio );
 
-    switch( aspectRatio )
+    if ( ! mController->isAttachOperation() )
     {
-        case EMMFNatural:
+        switch( aspectRatio )
         {
-            mButtons[EMPXButtonNatural]->setVisible( false );
-            mButtons[EMPXButtonStretch]->setVisible( true );
-            mButtons[EMPXButtonZoom]->setVisible( false );
-            break;
-        }
-        case EMMFStretch:
-        {
-            mButtons[EMPXButtonNatural]->setVisible( false );
-            mButtons[EMPXButtonStretch]->setVisible( false );
-            mButtons[EMPXButtonZoom]->setVisible( true );
-            break;
-        }
-        default:
-        {
-            mButtons[EMPXButtonNatural]->setVisible( true );
-            mButtons[EMPXButtonStretch]->setVisible( false );
-            mButtons[EMPXButtonZoom]->setVisible( false );
-            break;
-        }
+            case EMMFNatural:
+            {
+                mButtons[EMPXButtonNatural]->setVisible( false );
+                mButtons[EMPXButtonStretch]->setVisible( true );
+                mButtons[EMPXButtonZoom]->setVisible( false );
+                break;
+            }
+            case EMMFStretch:
+            {
+                mButtons[EMPXButtonNatural]->setVisible( false );
+                mButtons[EMPXButtonStretch]->setVisible( false );
+                mButtons[EMPXButtonZoom]->setVisible( true );
+                break;
+            }
+            default:
+            {
+                mButtons[EMPXButtonNatural]->setVisible( true );
+                mButtons[EMPXButtonStretch]->setVisible( false );
+                mButtons[EMPXButtonZoom]->setVisible( false );
+                break;
+            }
+        }    
     }
 }
 
@@ -324,20 +447,23 @@ void QMPXVideoPlaybackButtonBar::updateWithFileDetails(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::updateWithFileDetails()"));
 
-    if ( ! details->mVideoEnabled ||
-           details->mVideoHeight <= 0 ||
-           details->mVideoWidth <= 0 ||
-           details->mTvOutConnected )
-    {
-        mButtons[EMPXButtonNatural]->setEnabled( false );
-        mButtons[EMPXButtonStretch]->setEnabled( false );
-        mButtons[EMPXButtonZoom]->setEnabled( false );
-    }
-    else
-    {
-        mButtons[EMPXButtonNatural]->setEnabled( true );
-        mButtons[EMPXButtonStretch]->setEnabled( true );
-        mButtons[EMPXButtonZoom]->setEnabled( true );
+    if ( ! mController->isAttachOperation() )
+    {    
+        if ( ! details->mVideoEnabled ||
+               details->mVideoHeight <= 0 ||
+               details->mVideoWidth <= 0 ||
+               details->mTvOutConnected )
+        {
+            mButtons[EMPXButtonNatural]->setEnabled( false );
+            mButtons[EMPXButtonStretch]->setEnabled( false );
+            mButtons[EMPXButtonZoom]->setEnabled( false );
+        }
+        else
+        {
+            mButtons[EMPXButtonNatural]->setEnabled( true );
+            mButtons[EMPXButtonStretch]->setEnabled( true );
+            mButtons[EMPXButtonZoom]->setEnabled( true );
+        }
     }
 
     //
@@ -395,7 +521,7 @@ void QMPXVideoPlaybackButtonBar::updateWithFileDetails(
     for ( int i = 0 ; i < EMPXButtonCount ; i++ )
     {
         QGraphicsItem* widget = mButtons[i]->primitive( HbStyle::P_PushButton_background );
-        widget->setVisible( backgrondVisible );        
+        widget->setVisible( backgrondVisible );
     }
 }
 
@@ -413,6 +539,28 @@ void QMPXVideoPlaybackButtonBar::openDetailsView()
     {
         mController->changeViewMode( EDetailsView );
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackProgressBar::positionChanged
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackButtonBar::positionChanged( int position )
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::positionChanged position = %d"), position );
+
+    mPosition = position;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackButtonBar::durationChanged
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackButtonBar::durationChanged( int duration )
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::durationChanged duration = %d"), duration );
+
+    mDuration = duration;
 }
 
 //End of file

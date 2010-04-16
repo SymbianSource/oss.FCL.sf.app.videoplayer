@@ -152,6 +152,8 @@ void CVcxMyVideosOpenHandler::OpenL(
             {
             //we are at second level, return video list from some category or album
 
+            iCollection.AlbumsL().CreateAlbumListL(); //async
+
             TMPXItemId categoryId( aPath.Id() );
             
             if ( ( categoryId.iId2 == KVcxMvcMediaTypeCategory ) ||
@@ -170,7 +172,6 @@ void CVcxMyVideosOpenHandler::OpenL(
                 {
                 MPX_DEBUG2("CVcxMyVideosOpenHandler:: opening album %d", categoryId.iId1 );
                 
-                iCollection.AlbumsL().CreateAlbumListL(); //async
                 iPendingAlbumOpenId = categoryId.iId1;
                 if ( iCollection.AlbumsL().iAlbumListIsComplete ) 
                     {
@@ -209,7 +210,7 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
                                // If iCache.iVideoList is complete and can be used (correct sorting order),
                                // then nothing is done.
 
-    if ( !iCache.iVideoListIsPartial )
+    if ( iCache.IsComplete() )
         {
         MPX_DEBUG1("CVcxMyVideosOpenHandler:: videolist complete");
 
@@ -320,7 +321,7 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
         {
         // End event arrived
         
-        iCache.iVideoListIsPartial = EFalse;
+        iCache.SetComplete( ETrue );
         iCache.IsFetchingVideoList = EFalse;
         
 
@@ -359,8 +360,9 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
             // (KVcxMessageMyVideosItemsAppended events don't update collection frameworks cache) cache.
             MPX_DEBUG3("CVcxMyVideosOpenHandler:: adding modify event for album %d, extra info = %d",
                     iAlbumIdsBeingOpened[i], EVcxMyVideosVideoListOrderChanged );
-            iCollection.iMessageList->AddEventL( TMPXItemId( iAlbumIdsBeingOpened[i], 2 ), EMPXItemModified,
-                    EVcxMyVideosVideoListOrderChanged );
+            iCollection.iMessageList->AddEventL(
+                    TMPXItemId( iAlbumIdsBeingOpened[i], KVcxMvcMediaTypeAlbum ),
+                    EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
             // We dont send here, the send is at the end of this function.
             delete iAlbumVideoListsBeingOpened[i]; // we can delete our copy, client has its own copy
             iAlbumVideoListsBeingOpened[i] = NULL;
@@ -374,6 +376,8 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
 
         iCollection.CategoriesL().UpdateCategoriesNewVideoNamesL();
 
+        iCollection.AlbumsL().CalculateAttributesL();
+        
         iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
         }
     iCollection.iMessageList->SendL();
@@ -394,7 +398,7 @@ void CVcxMyVideosOpenHandler::HandleAlbumOpenL()
     CVcxMyVideosAlbum* album = iCollection.AlbumsL().Album( iPendingAlbumOpenId );
     if ( album )
         {
-        if ( !iCollection.iCache->iVideoListIsPartial )
+        if ( iCollection.iCache->IsComplete() )
             {
             //videolist complete
             CMPXMedia* videoList = album->CreateVideoListL();
@@ -512,8 +516,11 @@ void CVcxMyVideosOpenHandler::HandleGetAlbumContentVideosRespL(
     else
         {
         //TODO: should add album id
+        iCollection.AlbumsL().CalculateAttributesL();
+
         iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
 
+        
         delete iAlbumVideoList;
         iAlbumVideoList = NULL;
         }

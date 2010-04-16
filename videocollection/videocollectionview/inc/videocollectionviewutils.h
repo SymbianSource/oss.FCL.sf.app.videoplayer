@@ -19,6 +19,7 @@
 #define __VIDEOCOLLECTIONVIEWUTILS_H__
 
 #include <qobject.h>
+#include "videocollectioncommon.h"
 
 class HbListView;
 class VideoSortFilterProxyModel;
@@ -44,7 +45,7 @@ public:
      * @param order The sorting order (e.g. ascending or descending).
      * @return Zero if operation succeeded, less than zero in error cases.
      */
-    int saveSortingValues(int role, Qt::SortOrder order);
+    int saveSortingValues(int role, Qt::SortOrder order, VideoCollectionCommon::TCollectionLevels target);
     
     /**
      * Loads the sorting role and order from cenrep.
@@ -53,7 +54,7 @@ public:
      * @param order On return contains the sorting order
      * @return Zero if operation succeeded, less than zero in error cases.
      */
-    int loadSortingValues(int& role, Qt::SortOrder& order);
+    int loadSortingValues(int& role, Qt::SortOrder& order, VideoCollectionCommon::TCollectionLevels target);
     
     /**
      * Get service icon resource strings from cenrep.
@@ -81,7 +82,7 @@ public:
     /**
      * Initilizes model sort values.
      */
-    static void sortModel(VideoSortFilterProxyModel *model, bool async);
+    static void sortModel(VideoSortFilterProxyModel *model, bool async, VideoCollectionCommon::TCollectionLevels target);
 
 public slots:
     
@@ -112,10 +113,12 @@ private:
 
 private:
     /** current sorting role */
-    int mSortRole;
+    int mVideosSortRole;
+    int mCollectionsSortRole;
     
     /** current sorting order */
-    Qt::SortOrder mSortOrder;
+    Qt::SortOrder mVideosSortOrder;
+    Qt::SortOrder mCollectionsSortOrder;
 };
 
 #endif //__VIDEOCOLLECTIONUIUTILS_H__

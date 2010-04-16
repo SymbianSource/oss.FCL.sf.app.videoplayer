@@ -180,14 +180,15 @@ QVariant VideoListDataModel::data(const QModelIndex & index, int role) const
         return returnValue;
     }
     int row = index.row();
-    if(role == Qt::DisplayRole)
+    if(role == VideoCollectionCommon::KeyTitle)
     {       
         if(row >= 0 && row < mData.count())
         {
             returnValue = mData.at(row)->mName;
         }
     }
-    else if(role == VideoCollectionCommon::KeySizeValue)
+    else if(role == VideoCollectionCommon::KeySizeValue || 
+            role == VideoCollectionCommon::KeyNumberOfItems)
     {
         if(row >= 0 && row < mData.count())
         {

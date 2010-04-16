@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 #ifndef __TESTPROGRESSBAR_H__
 #define __TESTPROGRESSBAR_H__
@@ -49,17 +49,17 @@ public:
 
     // test functions for the test framework         
 private slots:
-        void testMousePressEvent();
-        void testMouseReleaseEvent();
-        void testMouseMoveEvent();
-        void testUpdateWithFileDetails();
-        void testUpdateState();
-        void testDurationChanged();
-        void testPositionChanged();	
-
+    void testHandleSliderPressed();
+    void testHandleSliderMoved();
+    void testHandleSliderReleased();
+    void testUpdateWithFileDetails();
+    void testUpdateState();
+    void testDurationChanged();
+    void testPositionChanged();	
+    void testHandleSeekingTimeout();
 
 signals:
-    void commandSignal(int);
+    void commandSignal();
 
 private:
     QMPXVideoPlaybackProgressBar*         mProgBar;
@@ -70,6 +70,3 @@ private:
 #endif  // __TESTPROGRESSBAR_H__
 
 // End of file
-    
-
-

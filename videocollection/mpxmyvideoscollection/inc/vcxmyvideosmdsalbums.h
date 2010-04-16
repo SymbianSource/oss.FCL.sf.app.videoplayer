@@ -41,7 +41,7 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
         public CActive,
         public MMdEQueryObserver,
         public MMdERelationItemObserver
-#if 0 // not used
+#if 0
         ,
         public MMdERelationObserver
 #endif
@@ -77,12 +77,20 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
     public: // new methods
 
         /**
+         * From CActive.
          * Cancels possible ongoing asynchronous request.
          * 
          * @param aType Defines what kind of request is cancelled.
          */
-        void Cancel( CVcxMyVideosMdsDb::TRequestType aType = CVcxMyVideosMdsDb::EAll );
+        void DoCancel( CVcxMyVideosMdsDb::TRequestType aType = CVcxMyVideosMdsDb::EAll );
 
+        /**
+         * Cancels queries.
+         *
+         * @param aType Defines what kind of request is cancelled.
+         */
+        void CancelQueries( CVcxMyVideosMdsDb::TRequestType aType = CVcxMyVideosMdsDb::EAll );
+        
         /**
         * Gets My Videos albums from MDS asynchronously.
         * HandleGetAlbumsResp() callback function is called when ready.
@@ -300,7 +308,7 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
          * @param aMpxCmd  Media containing command parameters: array with albums IDs.
          * @param aClient  Response call is done to this object.
          */
-        void CVcxMyVideosMdsAlbums::DoRemoveAlbumsL( CMPXMedia* aMpxCmd,
+        void DoRemoveAlbumsL( CMPXMedia* aMpxCmd,
                 MVcxMyVideosMdsAlbumsObserver& aClient );
 
         /**

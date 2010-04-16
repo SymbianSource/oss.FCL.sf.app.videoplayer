@@ -33,4 +33,8 @@ int VideoListDataModel::mFirstRemoved = -1;
    
 int VideoListDataModel::mLastRemoved = -1;
 
+TMPXItemId VideoListDataModel::mModifiedItemId = TMPXItemId::InvalidId();
+
+bool VideoListDataModel::mIndexReturnsInvalid = false;
+
 // End of file

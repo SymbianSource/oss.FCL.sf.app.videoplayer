@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -170,9 +170,6 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt SetDrmProtectedL( CStifItemParser& aItem );
         virtual TInt IssueSeekedToEndCommandL( CStifItemParser& aItem );
         virtual TInt HandleVolumeL( CStifItemParser& aItem );
-        virtual TInt ConnectHDMITvOutL();
-        virtual TInt DisconnectHDMITvOutL();
-        virtual TInt SetHDMITvOutConnectedL();
         virtual TInt InitializeWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeLinkWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeHandleWithPositionL( CStifItemParser& aItem );

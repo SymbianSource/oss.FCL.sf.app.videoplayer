@@ -15,43 +15,79 @@
 *
 */
 
+// Version : %version: %
 
-#include <videoservices.h>
+#include "videoservices.h"
 #include "videoserviceplay.h"
 #include "videoplayerengine.h"
+#include "mpxvideo_debug.h"
 
 
+// -------------------------------------------------------------------------------------------------
+// VideoServicePlay()
+// -------------------------------------------------------------------------------------------------
+// 
 VideoServicePlay::VideoServicePlay( VideoServices* parent, QVideoPlayerEngine* engine )
-: XQServiceProvider(QLatin1String("com.nokia.Videos.IVideoView"), parent),
-  mEngine(engine),
-  mServiceApp(parent)
+    : XQServiceProvider( QLatin1String("com.nokia.Videos.IVideoView"), parent )
+    , mEngine( engine )
+    , mServiceApp( parent )
 {
+    MPX_ENTER_EXIT(_L("VideoServicePlay::VideoServicePlay()"));
     publishAll();
 }
 
+// -------------------------------------------------------------------------------------------------
+// ~VideoServicePlay()
+// -------------------------------------------------------------------------------------------------
+// 
 VideoServicePlay::~VideoServicePlay()
 {
+    MPX_DEBUG(_L("VideoServicePlay::~VideoServicePlay()"));
 }
 
+// -------------------------------------------------------------------------------------------------
+// setEngine()
+// -------------------------------------------------------------------------------------------------
+// 
 void VideoServicePlay::setEngine( QVideoPlayerEngine* engine )
 {
-	mEngine = engine;
+    MPX_DEBUG(_L("VideoServicePlay::setEngine()"));
+    mEngine = engine;
 }
 
+// -------------------------------------------------------------------------------------------------
+// playMedia()
+// -------------------------------------------------------------------------------------------------
+// 
 void VideoServicePlay::playMedia( QString filePath )
 {
-    if(mEngine)
+    MPX_ENTER_EXIT(_L("VideoServicePlay::playMedia()"),
+                   _L("filePath = %s"), filePath.data() );  
+                     
+    if ( mEngine )
     {
-    	mServiceApp->setCurrentService(VideoServices::EPlayback);
+    	mServiceApp->setCurrentService( VideoServices::EPlayback );
     	mEngine->playMedia( filePath );
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+// playPDLMedia()
+// -------------------------------------------------------------------------------------------------
+// 
 void VideoServicePlay::playPDLMedia( QString filePath, int downloadID  )
 {
+    MPX_DEBUG(_L("VideoServicePlay::playPDLMedia()"));
+    Q_UNUSED( filePath );
+    Q_UNUSED( downloadID );
 }
 
+// -------------------------------------------------------------------------------------------------
+// closePlayer()
+// -------------------------------------------------------------------------------------------------
+// 
 void VideoServicePlay::closePlayer()
 {
+    MPX_DEBUG(_L("VideoServicePlay::closePlayer()"));
 }
 

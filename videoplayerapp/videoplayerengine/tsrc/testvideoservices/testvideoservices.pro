@@ -27,32 +27,29 @@ INCLUDEPATH += . \
               stub/inc \
               ../../../inc \
               ../../../../inc \
-              /epoc32/include \
-              /epoc32/include/stdapis \
-              /epoc32/include/stdapis/sys \
-
+              $$MW_LAYER_SYSTEMINCLUDE
 
 CONFIG += qtestlib hb qt
 
-LIBS += -lestor.dll \
-       -lfbscli.dll \
-       -lbitgdi.dll \
-       -lgdi.dll \
-       -lxqservice.dll
+LIBS += -lxqservice.dll \
+       -lxqserviceutil.dll 
 
 
 # Input
 HEADERS += stub/inc/videoplayerengine.h \
            inc/testvideoservices.h \
-           ../../inc/videoservices.h \
+           ../../../../inc/videoservices.h \
            ../../inc/videoserviceurifetch.h \
            ../../inc/videoserviceplay.h \
-           ../../../inc/videoplayerappexport.h
+           ../../inc/videoserviceview.h \
+           ../../inc/videoservicebrowse.h 
 
 SOURCES += stub/src/videoplayerengine.cpp \
            #stub/src/xqserviceprovider.cpp \
            src/testvideoservices.cpp \
            ../../src/videoservices.cpp \
            ../../src/videoserviceurifetch.cpp \
-           ../../src/videoserviceplay.cpp
+           ../../src/videoserviceplay.cpp \
+           ../../src/videoserviceview.cpp \
+           ../../src/videoservicebrowse.cpp 
 

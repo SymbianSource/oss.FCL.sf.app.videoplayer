@@ -593,8 +593,51 @@ void TestVideoCollectionClient::testRemoveItemsFromAlbum()
     mediaIds.append(TMPXItemId(2,2));
     mediaIds.append(TMPXItemId(2,1));
     
-    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);
+    QVERIFY(mTestObject->removeItemsFromAlbum(albumId, mediaIds) < 0);    
+}
+
+// -----------------------------------------------------------------------------
+// testRenameAlbum
+// -----------------------------------------------------------------------------
+//
+void TestVideoCollectionClient::testRenameAlbum()
+{
+    MMPXCollection::setCommandLLeave(false);
     
+    QString title = "test";
+    TMPXItemId albumId = TMPXItemId(1, 2);
+    
+    // no collectionutility
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    
+    mTestObject->initialize(mSignalReceiver);
+    
+    // invalid album id
+    albumId = TMPXItemId::InvalidId();
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    
+    // empty title
+    title = "";
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    
+    // video id
+    title = "test";
+    albumId = TMPXItemId(0, 0);
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+
+    // category id
+    albumId = TMPXItemId(0, 1);
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    
+    // good case
+    albumId = TMPXItemId(0, 2);
+    QVERIFY(mTestObject->renameAlbum(albumId, title) == 0);
+    
+    // command leaves
+    albumId = TMPXItemId(1, 2);
+    MMPXCollection::setCommandLLeave(true);
+    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    MMPXCollection::setCommandLLeave(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -603,7 +646,8 @@ void TestVideoCollectionClient::testRemoveItemsFromAlbum()
 //
 void TestVideoCollectionClient::testBack()
 {
-
+    MMPXCollection::setCommandLLeave(false);
+    
     CMPXCollectionPath::setLevel(3);
     // not initialized    
     QVERIFY(mTestObject->back() == -1);  

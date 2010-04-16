@@ -176,7 +176,7 @@ bool MediaObjectFactory::fillMediaDatas(CMPXMedia* media, int index, int mediaTy
             return false;
         }
     }
-    
+
     // set file path
     if(detailSelectionFlag & MediaDetailFilePathFlag)
     {
@@ -191,7 +191,7 @@ bool MediaObjectFactory::fillMediaDatas(CMPXMedia* media, int index, int mediaTy
     // set video count
     if(detailSelectionFlag & MediaDetailCategoryVideoCount)
     {  
-        int count = (index%5);
+        int count = 10 + index;
         TRAPD(error, media->SetTObjectValueL<quint32>(KVcxMediaMyVideosCategoryItemCount, count));
         if(error != KErrNone)
         {

@@ -14,11 +14,15 @@
 * Description:   tester for methods in VideoSortFilterProxyModel
 *
 */
+
+#include "xqserviceutilxtra.h"
+
 #include <hbaction.h>
 #include <qpointer.h>
 #include <hbapplication.h>
 #include <hbinstance.h>
 #include <hblabel.h>
+#include <vcxmyvideosdefs.h>
 
 #include "videocollectionuiloader.h"
 #include "testcollectionview.h"
@@ -27,9 +31,12 @@
 
 #include "videolistviewdata.h"
 #include "videocollectionuiloaderdata.h"
+#include "videoservicebrowsedata.h"
+#include "videolistviewdata.h"
 
 #define private public
 #include "videocollectionviewplugin.h"
+#include "videoservices.h"
 #undef private
 
 // ---------------------------------------------------------------------------
@@ -62,14 +69,6 @@ int main(int argc, char *argv[])
 }
 
 
-// ---------------------------------------------------------------------------
-// TestCollectionView
-// ---------------------------------------------------------------------------
-//
-TestCollectionView::TestCollectionView()
- : mTestView(0)
-{
-}
 
 // ---------------------------------------------------------------------------
 // initTestCase
@@ -95,10 +94,13 @@ void TestCollectionView::cleanupTestCase()
 //
 void TestCollectionView::init()
 {
-    cleanup();
+
     VideoCollectionUiLoaderData::reset();
     VideoListViewData::reset();
-        
+    VideoServiceBrowseData::reset();
+    VideoListViewData::reset();
+    
+    mTestView = 0;
     mTestView = new VideoCollectionViewPlugin();
     mTestView->createView();
     
@@ -131,7 +133,7 @@ void TestCollectionView::cleanup()
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test create view
+// testCreateView
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testCreateView()
@@ -140,12 +142,9 @@ void TestCollectionView::testCreateView()
     VideoCollectionUiLoaderData::reset();
     VideoListViewData::reset();
     
+    // finding view object from docml fails
     VideoCollectionUiLoaderData::mFindFailure = true;
-	
 	mTestView = new VideoCollectionViewPlugin();
-
-    QVERIFY( mTestView->mView == 0 );
-
     mTestView->createView();
 
     QVERIFY( mTestView->mView == 0 );
@@ -154,18 +153,23 @@ void TestCollectionView::testCreateView()
     delete mTestView;
 
     VideoCollectionUiLoaderData::mFindFailure = false;
-	
 	mTestView = new VideoCollectionViewPlugin();
-
-    QVERIFY( mTestView->mView == 0 );
-
     mTestView->createView();
-
     QVERIFY( mTestView->mView != 0 );
     QVERIFY( mTestView->mUiLoader != 0);
     QCOMPARE( VideoListViewData::mInitializeViewCount, 1 );
     QVERIFY( mTestView->mActivated == false );
-
+    
+    // second create without view object (for coverity)
+    delete mTestView->mView;
+    mTestView->mView = 0;
+    mTestView->createView();
+    QVERIFY( mTestView->mView != 0 );
+    QVERIFY( mTestView->mUiLoader != 0);
+    QCOMPARE( VideoListViewData::mInitializeViewCount, 2 );
+    QVERIFY( mTestView->mActivated == false );
+    
+    // make sure command signaling works
     connect( this, SIGNAL(commandSignal(int)), mTestView->mView, SIGNAL(command(int)));
     QSignalSpy commandSpy(mTestView, SIGNAL(command(int)));
     emit commandSignal(5);
@@ -174,47 +178,81 @@ void TestCollectionView::testCreateView()
     QCOMPARE( arguments.at(0).toInt(), 5 );
     disconnect();
 
+    // view exists
     VideoListView* current = mTestView->mView;
-
     mTestView->createView();
-
-    QCOMPARE( mTestView->mView, current );
-    
+    QCOMPARE( mTestView->mView, current );    
     HbMainWindow *window = hbInstance->allMainWindows().value(0);
     if (window)
     {
         window->addView(current);
     }
-
-    cleanup();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test activate view
+// testActivateView
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testActivateView()
 {
-    init();
-
+    XQServiceUtilXtra *serviceUtil = XQServiceUtilXtra::instance();
+    VideoServices *videoServices = VideoServices::instance();
+    
+    // activate view two times
     mTestView->activateView();
     QVERIFY( mTestView->mActivated == true );
     QCOMPARE( VideoListViewData::mActivateViewCount, 1 );
-
     mTestView->activateView();
     QCOMPARE( VideoListViewData::mActivateViewCount, 1 );
-
     cleanup();
+    
+    // activate view as service:
+    // -browse service
+    // -captured category
+    init();
+    serviceUtil->setCurrentService(true);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdCaptured;
+    mTestView->activateView();
+    QCOMPARE(VideoListViewData::mActivateViewCount, 1);
+    QVERIFY(VideoListViewData::mActivatedItemId.iId1 == KVcxMvcCategoryIdCaptured);
+    QVERIFY(VideoListViewData::mActivatedItemId.iId2 == KVcxMvcMediaTypeCategory);
+    cleanup();
+    
+    // activate view as browse service:
+    // -browse service
+    // -downloads category
+    init();
+    serviceUtil->setCurrentService(true);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdDownloads;
+    mTestView->activateView();
+    QCOMPARE(VideoListViewData::mActivateViewCount, 1);
+    QVERIFY(VideoListViewData::mActivatedItemId.iId1 == KVcxMvcCategoryIdDownloads);
+    QVERIFY(VideoListViewData::mActivatedItemId.iId2 == KVcxMvcMediaTypeCategory);
+    cleanup();
+
+    // activate view as browse service:
+    // -uri fetch service
+    init();
+    serviceUtil->setCurrentService(true);
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    mTestView->activateView();
+    QCOMPARE(VideoListViewData::mActivateViewCount, 1);
+    QVERIFY(VideoListViewData::mActivatedItemId == TMPXItemId::InvalidId());
+    cleanup();
+    
+    // final cleanup
+    serviceUtil->decreaseReferenceCount();
+    videoServices->decreaseReferenceCount();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test deactivate view
+// testDeactivateView
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testDeactivateView()
 {
-    init();
-
     mTestView->deactivateView();
     QCOMPARE( VideoListViewData::mDeactivateViewCount, 0 );
     QVERIFY( mTestView->mActivated == false );
@@ -228,18 +266,14 @@ void TestCollectionView::testDeactivateView()
     mTestView->deactivateView();
     QCOMPARE( VideoListViewData::mDeactivateViewCount, 1 );
     QVERIFY( mTestView->mActivated == false );
-
-    cleanup();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test destroy view
+// testDestroyView
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testDestroyView()
 {
-    init();
-
     // remove view from mainwindow so that we don't get hanging pointers there, as
     // the test is creating and destroying view several times.
     HbMainWindow *window = hbInstance->allMainWindows().value(0);
@@ -264,20 +298,15 @@ void TestCollectionView::testDestroyView()
     QVERIFY( mTestView->mActivated == false );
     QVERIFY( mTestView->mView == 0 );
     QVERIFY( mTestView->mUiLoader == 0);
-
-    cleanup();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test get view
+// testGetView
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testGetView()
 {
-    cleanup();
-    mTestView = new VideoCollectionViewPlugin();
-
-    QVERIFY( mTestView->getView() == 0 );
+    QVERIFY( mTestView->getView() == mTestView->mView );
     mTestView->createView();
     QVERIFY( mTestView->getView() == mTestView->mView );
     mTestView->activateView();
@@ -285,30 +314,26 @@ void TestCollectionView::testGetView()
     mTestView->deactivateView();
     QVERIFY( mTestView->getView() == mTestView->mView );
     mTestView->destroyView();
-    QVERIFY( mTestView->getView() == 0 );
-
-    cleanup();
+    QVERIFY( mTestView->getView() == 0 );    
+    // need to create view to handle cleaning up correctly
+    mTestView->createView();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test get view
+// testBack
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testBack()
 {
-    init();
-
     mTestView->back();
     QCOMPARE( VideoListViewData::mBackCount, 0 );
     mTestView->activateView();
     mTestView->back();
     QCOMPARE( VideoListViewData::mBackCount, 1 );
-
-    cleanup();
 }
 
 // ---------------------------------------------------------------------------
-// Slot: test orientation change
+// testOrientationChange
 // ---------------------------------------------------------------------------
 //
 void TestCollectionView::testOrientationChange()
@@ -316,9 +341,29 @@ void TestCollectionView::testOrientationChange()
     // there's nothing to be tested for this.
     // slot is probably going to be removed. This is here just to have the
     // function decision coverage on correct level.
-    init();
     mTestView->orientationChange(Qt::Horizontal);
-    cleanup();
+
+}
+
+// ---------------------------------------------------------------------------
+// testTimerEvent
+// ---------------------------------------------------------------------------
+//
+void TestCollectionView::testTimerEvent()
+{
+    QSignalSpy commandSpy(mTestView, SIGNAL(command(int)));
+    QSignalSpy delayedSpy(mTestView, SIGNAL(doDelayeds()));
+    
+    QEvent event(QEvent::Timer);
+    QApplication::sendEvent(mTestView, &event);
+    QVERIFY(commandSpy.count() == 0);
+    QVERIFY(delayedSpy.count() == 0);
+    
+    QTimerEvent timerEvent(mTestView->mTimerId);
+    QApplication::sendEvent(mTestView, &timerEvent);
+    QVERIFY(commandSpy.count() == 1);
+    QVERIFY(delayedSpy.count() == 1);
+    
 }
 
 

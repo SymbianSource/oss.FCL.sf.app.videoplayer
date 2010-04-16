@@ -137,9 +137,9 @@ private slots:
     /**
      * Signaled when full details are ready.
      *
-     * @param id Mpx id of the clip, needed when getting the data from model.
+     * @param metadata The metadata for the clip.
      */
-    void fullDetailsReadySlot(TMPXItemId id);
+    void fullDetailsReadySlot(QVariant& variant);
 
     /**
      * Slot that receives signal from play button to start playback.

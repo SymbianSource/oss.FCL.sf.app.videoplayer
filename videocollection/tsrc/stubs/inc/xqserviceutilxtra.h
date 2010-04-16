@@ -20,8 +20,6 @@
 
 #include <QObject>
 
-class XQServiceUtilXtra;
-
 class XQServiceUtilXtra : public QObject
 {
     Q_OBJECT
@@ -44,7 +42,6 @@ private:
 
     virtual ~XQServiceUtilXtra();
 
-
     Q_DISABLE_COPY(XQServiceUtilXtra)
 
 public:
@@ -55,6 +52,5 @@ public:
     static int mReferenceCount;
 
     static bool service;
-
 };
 #endif

@@ -41,7 +41,7 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
     VideoCollectionWrapperData::reset();
 }
 
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
+VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(VideoCollectionCommon::TModelType type)
 {
     VideoSortFilterProxyModel *model = 0;
     if (!VideoCollectionWrapperData::mGetModelFails)
@@ -59,7 +59,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
         
         switch (type)
         {
-            case EAllVideos:
+            case VideoCollectionCommon::EModelTypeAllVideos:
             {
                 model = VideoCollectionWrapperData::mAllVideosModel;
                 if (!model)
@@ -73,7 +73,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
                 }
                 break;
             }
-            case ECollections:
+            case VideoCollectionCommon::EModelTypeCollections:
             {
                 model = VideoCollectionWrapperData::mCollectionsModel;
                 if (!model)
@@ -87,7 +87,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
                 }
                 break;
             }
-            case ECollectionContent:
+            case VideoCollectionCommon::EModelTypeCollectionContent:
             {
                 model = VideoCollectionWrapperData::mCollectionContentModel;
                 if (!model)
@@ -101,7 +101,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
                 }
                 break;
             }
-            case EGeneric:
+            case VideoCollectionCommon::EModelTypeGeneric:
             {
                 model = VideoCollectionWrapperData::mGenericModel;
                 if (!model)

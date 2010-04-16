@@ -5,7 +5,6 @@
     </qresource>
     <qresource prefix="/" >
         <file>images/qtg_mono_video_all.svg</file>
-        <file>images/qtg_mono_remove_from_video_collection.svg</file>
     </qresource>
     <qresource prefix="/" >
         <file>effects/slide_in_to_left_and_fade_in.fxml</file>

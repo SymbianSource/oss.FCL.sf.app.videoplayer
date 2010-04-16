@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#13 %
+// Version : %version: 14 %
 
 
 #include <hbmenu.h>
@@ -55,10 +55,7 @@ QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
     // Press "back" key means going back to previous view if it's avaiable
     //
     connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
-    
-    HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-    HbView *currentView = mainWnd->currentView();
-    currentView->setNavigationAction(mActionBack);
+    mController->view()->setNavigationAction( mActionBack );
 
     connect( mController->view()->menu(), SIGNAL( aboutToShow() ), this, SLOT( handleAboutToShow() ) );
     connect( mController->view()->menu(), SIGNAL( aboutToHide() ), this, SLOT( handleAboutToHide() ) );
@@ -77,10 +74,7 @@ QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl()
 
     disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
     disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
-
-    HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
-    HbView *currentView = mainWnd->currentView();
-    currentView->setNavigationAction(0);
+    mController->view()->setNavigationAction( 0 );
 
     disconnect( mController->view()->menu(), SIGNAL( aboutToShow() ), this, SLOT( handleAboutToShow() ) );
     disconnect( mController->view()->menu(), SIGNAL( aboutToHide() ), this, SLOT( handleAboutToHide() ) );
@@ -104,19 +98,20 @@ void QMPXVideoPlaybackStatusPaneControl::setVisible( bool visible )
 
     if ( mVisible )
     {
-        mController->view()->showItems(
-                Hb::IndicatorItems | Hb::TitlePaneItem | Hb::SecondarySoftKeyItem | Hb::TitleBarItem );
+        mController->view()->setTitleBarVisible( true );
+        mController->view()->setStatusBarVisible( true );
 
         if ( mController->viewMode() == EFullScreenView ||
              mController->viewMode() == EDetailsView )
         {
-            mTitleLabel->setVisible( true );            
+            mTitleLabel->setVisible( true );
         }
     }
     else
     {
         mController->view()->menu()->close();
-        mController->view()->hideItems( Hb::AllItems );
+        mController->view()->setTitleBarVisible( false );
+        mController->view()->setStatusBarVisible( false );
 
         mTitleLabel->setVisible( false );
     }
@@ -179,7 +174,8 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 
-            mController->view()->setTitleBarFlags( HbView::TitleBarTransparent );
+            mController->view()->setViewFlags( 
+                    HbView::HbViewFlags( HbView::ViewTitleBarTransparent | HbView::ViewStatusBarTransparent ) );
             break;
         }
         case EDetailsView:
@@ -190,7 +186,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
             disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
             connect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
 
-            mController->view()->setTitleBarFlags( HbView::TitleBarFlagNone );
+            mController->view()->setViewFlags( HbView::ViewFlagNone );
 
             break;
         }
@@ -202,7 +198,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 
-            mController->view()->setTitleBarFlags( HbView::TitleBarFlagNone );
+            mController->view()->setViewFlags( HbView::ViewFlagNone );
             break;
         }
     }
@@ -215,9 +211,9 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
     if ( ! mFrameItem )
     {
         mFrameItem = new HbFrameItem ( mTitleLabel );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
         mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );    
     }
 
     mFrameItem->setGeometry( mTitleLabel->boundingRect() );

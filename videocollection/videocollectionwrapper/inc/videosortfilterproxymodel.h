@@ -22,6 +22,7 @@
 #include <e32const.h>
 #include <mpxitemid.h>
 #include "videocollectionexport.h"
+#include "videocollectioncommon.h"
 
 class QTimer;
 class VideoListDataModel;
@@ -39,7 +40,7 @@ public:
      * @param parent parent of this widget
      * @param client Collection client pointer to use.
      */
-    VideoSortFilterProxyModel(int type, QObject *parent=0);
+    VideoSortFilterProxyModel(VideoCollectionCommon::TModelType type, QObject *parent=0);
     
     /**
      * Destructor.
@@ -67,7 +68,7 @@ public:
      * @param level The level where the collection is opened.
      * @return 0 if opening was successful, negative if not.
      */
-    int open(int level);
+    int open(VideoCollectionCommon::TCollectionLevels level);
     
     /**
      * Starts sorting. If async parameter is defined as true uses idle timer: 
@@ -186,7 +187,16 @@ public:
      */
     int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);    
 	
-	/**
+    /**
+     * Renames an album.
+     * 
+     * @param itemId, Album to be renamed.
+     * @param newTitle, New title for the album.
+     * @return 0 if no errors.
+     */
+    int renameAlbum(const TMPXItemId &albumId, const QString &newTitle);
+
+    /**
 	 * Resolves duplicate album names and returns the resolved name.
 	 * 'New collection' -> 'New collection (1)' -> 'New collection (2)', etc.
 	 * 
@@ -224,6 +234,14 @@ public:
 	 */
     TMPXItemId getOpenItem() const;
 	
+	/**
+	 * Gets the type of model.
+	 * 
+	 * @param None.
+	 * @return TModelType.
+	 */
+    VideoCollectionCommon::TModelType getType();
+    
 signals:
 
 
@@ -279,6 +297,12 @@ private slots:
      * refiltering is required
      */
     void albumChangedSlot();
+
+    /**
+     * signaled when data for item has changed and 
+     * invalidate is required.
+     */
+    void itemModifiedSlot(const TMPXItemId &itemId);
     
 private:
     
@@ -316,12 +340,12 @@ private:
     /**
      * type of data excepted
      */
-    int mType;
+    VideoCollectionCommon::TModelType mType;
     
     /**
      * Currently open level.
      */
-    int mLevel;
+    VideoCollectionCommon::TCollectionLevels mLevel;
     
     /**
      * item id used as filter if model type is generic model

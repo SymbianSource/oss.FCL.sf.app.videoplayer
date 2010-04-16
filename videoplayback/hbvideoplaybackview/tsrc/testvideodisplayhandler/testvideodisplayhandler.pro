@@ -14,16 +14,14 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 TEMPLATE = app
 TARGET = testvideodisplayhandler
 CONFIG += qtestlib hb qt
 DEFINES += BUILD_VIDEOPLAYBACK_DLL
 
-DEPENDPATH += . \
-    inc \
-    src
+DEPENDPATH += inc src stub/inc stub/src
 
 INCLUDEPATH += ../../../inc \
                ../../../../inc \
@@ -33,23 +31,27 @@ INCLUDEPATH += ../../../inc \
 LIBS += -lmpxplaybackutility.dll \
         -lmpxcommon.dll \
         -lestor.dll \
-        -lsysutil.dll        
+        -lsysutil.dll \
+        -lcone.dll \
+        -lefsrv.dll \
+        -lws32.dll \
+        -lgdi.dll
                 
 # Input
-HEADERS += stub/inc/mpxvideoviewwrapper.h \
-           stub/inc/hbvideobaseplaybackview.h \
-           stub/inc/mpxvideoplaybackviewfiledetails.h \
-           stub/inc/mpxvideocontainer.h \
-           stub/inc/alfcompositionutility.h \
-           stub/inc/mediaclientvideodisplay.h \
-           inc/testvideodisplayhandler.h \
+HEADERS += mpxvideoviewwrapper.h \
+           hbvideobaseplaybackview.h \
+           mpxvideoplaybackviewfiledetails.h \
+           mpxvideocontainer.h \
+           alfcompositionutility.h \
+           mediaclientvideodisplay.h \
+           testvideodisplayhandler.h \
            ../../viewinc/mpxvideoplaybackdisplayhandler.h
                                                 
-SOURCES += stub/src/mpxvideoviewwrapper.cpp \					 				 
-           stub/src/hbvideobaseplaybackview.cpp \
-           stub/src/mpxvideoplaybackviewfiledetails.cpp \
-           stub/src/mpxvideocontainer.cpp \
-           stub/src/alfcompositionutility.cpp \
-           stub/src/mediaclientvideodisplay.cpp \
-		       src/testvideodisplayhandler.cpp \
-		       ../../viewsrc/mpxvideoplaybackdisplayhandler.cpp
+SOURCES += mpxvideoviewwrapper.cpp \					 				 
+           hbvideobaseplaybackview.cpp \
+           mpxvideoplaybackviewfiledetails.cpp \
+           mpxvideocontainer.cpp \
+           alfcompositionutility.cpp \
+           mediaclientvideodisplay.cpp \
+           testvideodisplayhandler.cpp \
+           ../../viewsrc/mpxvideoplaybackdisplayhandler.cpp

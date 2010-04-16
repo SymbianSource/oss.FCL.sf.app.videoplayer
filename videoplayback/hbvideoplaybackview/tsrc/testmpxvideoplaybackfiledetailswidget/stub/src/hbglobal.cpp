@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
@@ -77,7 +77,7 @@ QString hbTrId( QString string, int n )
     {
         loc = "Collection";
     }
-    else if ( string == "txt_videos_title_videos" )
+    else if ( string == "txt_videos_list_title" )
     {
         loc = "Title";
     }
@@ -89,6 +89,35 @@ QString hbTrId( QString string, int n )
     {
         loc = "Bitrate";
     }
+    else if ( string == "txt_videos_list_l1_l2_l3" )
+    {
+        loc = "%L1 hr %L2 min %L3 sec";
+    }
+    else if ( string == "txt_videos_list_l1_kb" )
+    {
+        loc = "%L1 kB";
+    }
+    else if ( string == "txt_videos_list_l1_mb" )
+    {
+        loc = "%L1 MB";
+    }
+    else if ( string == "txt_videos_list_l1_gb" )
+    {
+        loc = "%L1 GB";
+    }
+    else if ( string == "txt_videos_list_l1_kbps" )
+    {
+        loc = "%L1 kbps";
+    }
+    else if ( string == "txt_videos_list_l1_mbps" )
+    {
+        loc = "%L1 Mbps";
+    }
+    else if ( string == "txt_videos_list_l1l2" )
+    {
+        loc = "%L1x%L2";
+    }
+
     return loc;
 }
 

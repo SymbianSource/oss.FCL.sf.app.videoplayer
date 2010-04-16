@@ -19,6 +19,7 @@
 #define VIDEOCOLLECTIONUILOADERDATA_H
 
 #include <qstringlist.h>
+#include <qmap.h>
 
 class VideoCollectionUiLoaderData
 {
@@ -28,12 +29,16 @@ public: // methods
         mFindFailure = false;
         mFailDialogLoad = false;
         mFindFailureNameList.clear();
+        mMenuActions.clear();
+        mLastLoadPhasedData = -1;
     }
     
 public: // data
     static bool mFindFailure;
     static bool mFailDialogLoad;
     static QStringList mFindFailureNameList;
+    static QMap<VideoCollectionUiLoader::ActionIds, HbAction*> mMenuActions;
+    static int mLastLoadPhasedData;
 };
 
 #endif /* VIDEOCOLLECTIONUILOADERDATA_H */

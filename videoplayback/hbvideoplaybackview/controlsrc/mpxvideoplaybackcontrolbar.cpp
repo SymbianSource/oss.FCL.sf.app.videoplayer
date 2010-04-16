@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  5 %
 
 
 
@@ -102,9 +102,9 @@ void QMPXVideoPlaybackControlBar::initialize()
         //
         mFrameItem = new HbFrameItem ( this );
         mFrameItem->setGeometry( boundingRect() );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
         mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );
         mFrameItem->setVisible( false );
     }
 }
@@ -170,15 +170,51 @@ void QMPXVideoPlaybackControlBar::updateWithFileDetails(
 //
 void QMPXVideoPlaybackControlBar::setVisibleToControlBar( bool visible )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::setVisibleToControlBar() %d"), visible);
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlBar::setVisibleToControlBar()"),
+                   _L("visible = %d, current visibility = %d"), visible, isVisible() );
 
-    if ( visible && isVisible() == false )
+    //
+    // Change the visibility if the following condition meet:
+    // - visible is true
+    // - appear effect is not going on
+    // - disappear effect is going on (assume current visiblity is false)
+    //
+    if ( visible && 
+         ! HbEffect::effectRunning( this, "appear" ) &&
+         ( ! isVisible() || HbEffect::effectRunning( this, "disappear" ) ) )
     {
+        //
+        // If disappear effect is running on this, cancel
+        //
+        if ( HbEffect::effectRunning( this, "disappear" ) )
+        {
+            HbEffect::cancel( this );
+        }
+
+        if ( ! isEnabled() )
+        {
+            setEnabled( true );
+        }
+
         setVisible( true );
+
         HbEffect::start( this, "appear", this, "appeared" );
     }
-    else if ( ! visible && isVisible() == true )
+    else if ( ! visible && isVisible()&& ! HbEffect::effectRunning( this, "disappear" ) )
     {
+        //
+        // If appear effect is running on this, cancel
+        //
+        if( HbEffect::effectRunning( this, "appear" ) )
+        {
+            HbEffect::cancel( this );
+        }
+
+        if ( isEnabled() )
+		{
+            setEnabled( false );
+		}
+
         HbEffect::start( this, "disappear", this, "disappeared" );
     }
 }
@@ -209,10 +245,10 @@ void QMPXVideoPlaybackControlBar::disappeared( const HbEffect::EffectStatus &sta
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::disappeared()"));
 
-    setVisible( false );
-
     if ( status.reason == Hb::EffectFinished )
     {
+        setVisible( false );
+
         MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::disappeared() successful"));
     }
     else
@@ -233,6 +269,11 @@ void QMPXVideoPlaybackControlBar::durationChanged( int duration )
     {
         mProgressBar->durationChanged( duration );
     }
+
+    if ( mButtonBar )
+    {
+        mButtonBar->durationChanged( duration );
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -246,6 +287,11 @@ void QMPXVideoPlaybackControlBar::positionChanged( int position )
     if ( mProgressBar )
     {
         mProgressBar->positionChanged( position );
+    }
+    
+    if ( mButtonBar )
+    {
+        mButtonBar->positionChanged( position );
     }
 }
 

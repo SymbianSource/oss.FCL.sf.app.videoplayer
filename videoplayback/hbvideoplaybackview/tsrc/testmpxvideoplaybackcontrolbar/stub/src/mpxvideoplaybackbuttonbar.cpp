@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -88,6 +88,28 @@ void QMPXVideoPlaybackButtonBar::updateWithFileDetails(
     MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::updateWithFileDetails()"));
 
     mFileDetails = details;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackButtonBar::durationChanged
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackButtonBar::durationChanged( int duration )
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::durationChanged duration = %d"), duration );
+
+    mDuration = duration;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackButtonBar::positionChanged
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackButtonBar::positionChanged( int position )
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::positionChanged position = %d"), position );
+
+    mPosition = position;
 }
 
 //End of file

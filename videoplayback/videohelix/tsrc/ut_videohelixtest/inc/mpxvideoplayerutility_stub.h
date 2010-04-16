@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -170,6 +170,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         TInt     iAudioBitRate;
         TInt     iVideoBitRate;
         TInt     iVolume;
+        TInt     iCreationTime;
+        TInt     iModificationTime;
 
         TBool    iAudioEnabled;
         TBool    iSeekable;

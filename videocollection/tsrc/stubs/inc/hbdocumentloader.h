@@ -47,6 +47,8 @@ class HbDocumentLoader
 {
 
 public:
+    static void cleanup();
+    
     HbDocumentLoader();
     HbDocumentLoader(const HbMainWindow *window);
     virtual ~HbDocumentLoader();
@@ -74,6 +76,13 @@ public:
     static bool mFindWidgetFails;
     static bool mFindObjectFails;
     static bool mCreateObjectFails;
+
+    static bool mVideoListWidgetFailure;
+    static bool mCollectionWidgetFailure;
+    static bool mCollectionContentWidgetFailure;
+    static bool mLoadFails;
+    
+    static QObjectList mLoadReturns;
 };
 
 #endif // HBDOCUMENTLOADER_H

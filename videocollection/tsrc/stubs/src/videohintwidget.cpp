@@ -16,6 +16,10 @@
 */
 
 #include "videohintwidget.h"
+#include "videohintwidgetdata.h"
+
+int VideoHintWidgetData::mSettedHintLevel = -1;
+bool VideoHintWidgetData::mSettedButtonShowLevel = false;
 
 VideoHintWidget::VideoHintWidget(VideoCollectionUiLoader *uiLoader,
     QGraphicsItem *parent):
@@ -41,14 +45,12 @@ int VideoHintWidget::initialize()
 
 void VideoHintWidget::setLevel(HintLevel level)
 {
-    Q_UNUSED(level);
-    // not stubbed
+    VideoHintWidgetData::mSettedHintLevel = (int)level; 
 }
 
 void VideoHintWidget::setButtonShown(bool shown)
 {
-    Q_UNUSED(shown);
-    // not stubbed
+    VideoHintWidgetData::mSettedButtonShowLevel = shown;
 }
 
 void VideoHintWidget::orientationChangedSlot(Qt::Orientation targetOrientation)
@@ -59,12 +61,12 @@ void VideoHintWidget::orientationChangedSlot(Qt::Orientation targetOrientation)
 
 void VideoHintWidget::activate()
 {
-    // not stubbed
+    setVisible(true);
 }
 
 void VideoHintWidget::deactivate()
 {
-    // not stubbed
+    setVisible(false);
 }
 
 void VideoHintWidget::updateUiComponents()

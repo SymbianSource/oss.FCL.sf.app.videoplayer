@@ -25,7 +25,8 @@ LIBS += -lmpxcommon.dll -lflogger.dll -lestor.dll \
         -lfbscli.dll -lbitgdi.dll -lgdi.dll 
 
 # Input
-HEADERS += stub/inc/videolistdatamodel.h \
+HEADERS += stub/inc/metadatasignalspy.h \
+           stub/inc/videolistdatamodel.h \
            stub/inc/videocollectionwrapper.h \
            stub/inc/videocollectionutils.h \
            stub/inc/videodatacontainer.h \

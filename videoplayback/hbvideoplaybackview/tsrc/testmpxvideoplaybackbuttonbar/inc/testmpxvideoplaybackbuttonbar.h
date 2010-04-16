@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  3 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKBUTTONBAR_H__
 #define __TESTMPXVIDEOPLAYBACKBUTTONBAR_H__
@@ -37,7 +37,7 @@ public:
      * will be called before each testfunction is executed.
      *
      */
-    void init(); 
+    void init( bool attachOperation = false ); 
     
     /**
      * will be called after every testfunction.
@@ -51,9 +51,10 @@ private slots:
     // the order in which these testXX methods are declared is important
     // changing this order will affect the test results
     void testPlay();
-    void testStartFFSeeking();
-    void testStartRWSeeking();
-    void testEndSeeking();
+    void testLongTapOnFF();
+    void testLongTapOnRW();
+    void testShortTapOnFF();
+    void testShortTapOnRW();
     void testPause();
     void testChangeAspectRatio();
     void testUpdateState();
@@ -61,6 +62,7 @@ private slots:
     void testHandleButtonPressed();
     void testUpdateWithFileDetails();
     void testOpenDetailsView();
+    void testAttach();
 
 signals:
     void commandSignal(int);

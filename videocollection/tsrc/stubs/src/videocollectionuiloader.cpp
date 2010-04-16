@@ -21,21 +21,27 @@
 #include <hblistview.h>
 #include <hbmenu.h>
 
+#include "videocollectioncommon.h"
 #include "videocollectionuiloader.h"
+#include "videocollectionuiloaderdef.h"
 #include "videolistview.h"
 #include "videolistwidget.h"
 #include "videohintwidget.h"
 #include "videolistselectiondialog.h"
+#include "videocollectionwrapper.h"
 
 #include "videocollectionuiloaderdata.h"
 
 bool VideoCollectionUiLoaderData::mFindFailure = false;
 bool VideoCollectionUiLoaderData::mFailDialogLoad = false;
 QStringList VideoCollectionUiLoaderData::mFindFailureNameList;
+QMap<VideoCollectionUiLoader::ActionIds, HbAction*> VideoCollectionUiLoaderData::mMenuActions;
+int VideoCollectionUiLoaderData::mLastLoadPhasedData = -1;
 
 VideoCollectionUiLoader::VideoCollectionUiLoader():
     HbDocumentLoader(),
-    mTimerId(0)
+    mTimerId(0),
+    mIsService(0)
 {
     // not stubbed
 }
@@ -45,22 +51,50 @@ VideoCollectionUiLoader::~VideoCollectionUiLoader()
     VideoCollectionUiLoaderData::reset();
 }
 
-void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
-    QObject *receiver,
-    const char *widgetSlot,
-    const char *objectSlot)
+void VideoCollectionUiLoader::loadPhase(int loadPhase)
 {
-    Q_UNUSED(uiSections);
+    VideoCollectionUiLoaderData::mLastLoadPhasedData = loadPhase;
+}
+
+void VideoCollectionUiLoader::addData(QList<VideoCollectionUiLoaderParam> params,
+    QObject *receiver,
+    const char *slot)
+{
+    Q_UNUSED(params);
     Q_UNUSED(receiver);
-    Q_UNUSED(widgetSlot);
-    Q_UNUSED(objectSlot);
-    // not stubbed
+    Q_UNUSED(slot);
+}
+
+void VideoCollectionUiLoader::removeOrphanFromList(QObject *object)
+{
+    if (mOrphans.contains(object))
+    {
+        mOrphans.removeOne(object);
+    }
+
+    const QString &name = mObjects.key(object);
+    if (!name.isEmpty())
+    {
+        // found from list, remove
+        mObjects.remove(name);
+    }
 }
 
 void VideoCollectionUiLoader::setIsService(bool isService)
 {
-    Q_UNUSED(isService);
-    // not stubbed
+    mIsService = isService;
+}
+
+void VideoCollectionUiLoader::load(const QString &fileName, bool *ok)
+{
+    QObjectList list = HbDocumentLoader::load(fileName, ok);
+    storeOrphans(list);
+}
+
+void VideoCollectionUiLoader::load(const QString &fileName, const QString &section , bool *ok)
+{
+    QObjectList list = HbDocumentLoader::load(fileName, section, ok);
+    storeOrphans(list);
 }
 
 QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
@@ -91,26 +125,69 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
     return object;
 }
 
-void VideoCollectionUiLoader::addToQueue(Params &params)
-{
-    Q_UNUSED(params);
-    // not stubbed
-}
-
-void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
-    const QString &name)
-{
-    Q_UNUSED(widget);
-    Q_UNUSED(name);
-    // not stubbed
-}
-
 void VideoCollectionUiLoader::initObject(QObject *object,
     const QString &name)
 {
-    Q_UNUSED(object);
-    Q_UNUSED(name);
-    // not stubbed
+    VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
+    
+    if (name == DOCML_NAME_VC_VIDEOLISTWIDGET ||
+        name == DOCML_NAME_VC_COLLECTIONWIDGET ||
+        name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET)
+    {
+        VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos;
+        if(name == DOCML_NAME_VC_COLLECTIONWIDGET) {
+            type = VideoCollectionCommon::EModelTypeCollections;
+        } else if (name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET) {
+            type = VideoCollectionCommon::EModelTypeCollectionContent;
+        }
+        VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
+        VideoSortFilterProxyModel *model = wrapper.getModel(type);
+        videoList->initialize(*model, 0);
+    }
+    else if (name == DOCML_NAME_DIALOG)
+    {
+
+    }
+    else if (name == DOCML_NAME_VC_VIDEOHINTWIDGET)
+    {
+
+    }
+    else if (name == DOCML_NAME_OPTIONS_MENU)
+    {
+
+    }
+    else if (name == DOCML_NAME_SORT_MENU)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortBy] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_ADD_TO_COLLECTION)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionAddToCollection] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_CREATE_COLLECTION)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionNewCollection] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_DELETE_MULTIPLE)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionDelete] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_SORT_BY_DATE)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortByDate] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_SORT_BY_NAME)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortByName] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EACtionSortByItemCount] = qobject_cast<HbAction*>(object);
+    }
+    else if(name == DOCML_NAME_SORT_BY_SIZE)
+    {
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortBySize] = qobject_cast<HbAction*>(object);
+    }
 }
 
 void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
@@ -134,6 +211,7 @@ QObject* VideoCollectionUiLoader::createObject(const QString& type,
                  name == DOCML_NAME_VC_VIDEOLISTWIDGET)
         {
             object = new VideoListWidget(this);
+            initObject(qobject_cast<QGraphicsWidget*>(object), name);
         }
         else if (name == DOCML_NAME_DIALOG)
         {
@@ -153,11 +231,10 @@ QObject* VideoCollectionUiLoader::createObject(const QString& type,
         if (object)
         {
             object->setObjectName(name);
-
-
             return object;
         }
         object = HbDocumentLoader::createObject(type, name);
+        initObject(object, name);
     }
     
     return object;
@@ -168,9 +245,32 @@ void VideoCollectionUiLoader::runNext()
     // not stubbed
 }
 
-bool VideoCollectionUiLoader::isValid(const Params &params)
+bool VideoCollectionUiLoader::isValid(const VideoCollectionUiLoaderParam &param)
 {
-    Q_UNUSED(params);
+    Q_UNUSED(param);
     // not stubbed
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// storeOrphans
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::storeOrphans(const QObjectList &list)
+{
+    foreach (QObject *object, list)
+    {
+        if (!mOrphans.contains(object))
+        {
+            // add to list
+            mOrphans.append(object);
+            
+            // connect to "destroyed" signal
+            connect(
+                object, SIGNAL(destroyed(QObject*)),
+                this, SLOT(removeOrphanFromList(QObject*)));
+        }
+    }
+}
+
+// end of file

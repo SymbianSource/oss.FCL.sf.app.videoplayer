@@ -859,7 +859,7 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
         itemIndex = iTester->GetIndexOfMediaWithNameL( itemIndexOrName );
         }
     
-    if( itemIndex == KErrNotFound ) 
+    if( itemIndex == KErrNotFound )
         {
         User::Leave( KErrArgument );
         }

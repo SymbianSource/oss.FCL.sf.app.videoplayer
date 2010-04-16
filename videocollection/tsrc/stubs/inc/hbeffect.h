@@ -46,58 +46,55 @@ public:
         QVariant userData;
     };
     
-    static bool start(QGraphicsItem */*item*/, 
-                            const QString &/*itemType*/, 
-                            const QString &/*effectEvent*/,
-                            QObject */*receiver = 0*/,
-                            const char */*member = 0*/,
-                            const QVariant &/*userData = QVariant()*/,
-                            const QRectF &/*extRect = QRectF()*/)
+    static bool start(QGraphicsItem *item, 
+                            const QString &itemType, 
+                            const QString &effectEvent,
+                            QObject *receiver = 0,
+                            const char *member = 0,
+                            const QVariant &userData = QVariant(),
+                            const QRectF &extRect = QRectF())
     {
-      /*  HbEffect::EffectStatus status;
-        status.item = item;
-        status.effectEvent = effectEvent;
-        status.userData = userData;
-        status.reason = EffectNotStarted;
+        Q_UNUSED(item);
+        Q_UNUSED(itemType);
+        Q_UNUSED(effectEvent);
+        Q_UNUSED(receiver);
+        Q_UNUSED(member);
+        Q_UNUSED(userData);
+        Q_UNUSED(extRect);
         
-        QMetaObject::invokeMethod(
-            receiver,
-            member,
-            Qt::AutoConnection,
-            QGenericReturnArgument(),
-            Q_ARG(HbEffect::EffectStatus, status));*/
         return false;
     }
 
-    static bool start(QGraphicsItem */*item*/, 
-                            const QString &/*effectEvent*/,
-                            QObject */*receiver = 0*/,
-                            const char */*member = 0*/,
-                            const QVariant &/*userData = QVariant()*/,
-                            const QRectF &/*extRect = QRectF()*/)
+    static bool start(QGraphicsItem *item, 
+                            const QString &effectEvent,
+                            QObject *receiver = 0,
+                            const char *member = 0,
+                            const QVariant &userData = QVariant(),
+                            const QRectF &extRect = QRectF())
     {
-       /* HbEffect::EffectStatus status;
-        status.item = item;
-        status.effectEvent = effectEvent;
-        status.userData = userData;
-        status.reason = EffectNotStarted;
+        mLastStartedEffectContainer = item;
+        Q_UNUSED(effectEvent);
+        Q_UNUSED(receiver);
+        Q_UNUSED(member);
+        Q_UNUSED(userData);
+        Q_UNUSED(extRect);
         
-        QMetaObject::invokeMethod(
-            receiver,
-            member,
-            Qt::AutoConnection,
-            QGenericReturnArgument(),
-            Q_ARG(HbEffect::EffectStatus, status));*/
         return false;
     }
     
-    static bool start(const QList<QGraphicsItem *> &/*items*/, 
-                            const QString &/*itemType*/, 
-                            const QString &/*effectEvent*/,
-                            QObject */*receiver = 0*/,
-                            const char */*member = 0*/,
-                            const QVariant &/*userData = QVariant()*/)
+    static bool start(const QList<QGraphicsItem *> &items, 
+                            const QString &itemType, 
+                            const QString &effectEvent,
+                            QObject *receiver = 0,
+                            const char *member = 0,
+                            const QVariant &userData = QVariant())
     {
+        Q_UNUSED(items);
+        Q_UNUSED(itemType);
+        Q_UNUSED(effectEvent);
+        Q_UNUSED(receiver);
+        Q_UNUSED(member);
+        Q_UNUSED(userData);
 
         return false;
     }
@@ -123,6 +120,9 @@ public:
 
     static void enable(QGraphicsItem */*item*/) {}
     static void disable(QGraphicsItem */*item*/) {}
+    
+    
+    static QGraphicsItem* mLastStartedEffectContainer;
     
 private:
     

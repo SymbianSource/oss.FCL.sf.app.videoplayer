@@ -15,36 +15,43 @@
 *
 */
 
-// Version : %version:  da1mmcf#4 %
+// Version : %version:  da1mmcf#6 %
 
 
 #include "mpxvideoplaybackwrapper.h"
+#include "mpxvideo_debug.h"
 
 int mCount = 0;
 
 QMpxVideoPlaybackWrapper::QMpxVideoPlaybackWrapper()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::QMpxVideoPlaybackWrapper()"));    
     QMpxVideoPlaybackWrapper::Increment();
 }
 
 QMpxVideoPlaybackWrapper::~QMpxVideoPlaybackWrapper()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::~QMpxVideoPlaybackWrapper()"));
     QMpxVideoPlaybackWrapper::Decrement();
 }
 
 void QMpxVideoPlaybackWrapper::openPlaybackView()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::openPlaybackView()"));    
     emit handlePlaybackView( MpxHbVideoCommon::ActivatePlaybackView );
 }
 
 void QMpxVideoPlaybackWrapper::Increment()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::Increment()"));    
     ++mCount;
 }
 
 void QMpxVideoPlaybackWrapper::Decrement()
 {
-    if(mCount > 0)
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::Decrement()"));
+    
+    if ( mCount > 0 )
     {   
         --mCount;
     }
@@ -52,16 +59,29 @@ void QMpxVideoPlaybackWrapper::Decrement()
 
 int QMpxVideoPlaybackWrapper::GetInstanceCount()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::GetInstanceCount()"));    
     return mCount;
 }
 
 int QMpxVideoPlaybackWrapper::playMedia( QString aFileName )
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::playMedia( aFileName )"));
+    
+    Q_UNUSED( aFileName );    
+    return 0;
+}
+
+int QMpxVideoPlaybackWrapper::playMedia( RFile aFile )
+{
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::playMedia( aFile )"));
+    
+    Q_UNUSED( aFile );    
     return 0;
 }
 
 void QMpxVideoPlaybackWrapper::lateInit()
 {
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::lateInit()"));    
 }
 
 // End of File

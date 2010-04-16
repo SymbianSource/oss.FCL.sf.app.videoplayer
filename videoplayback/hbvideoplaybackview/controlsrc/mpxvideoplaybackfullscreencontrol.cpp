@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: da1mmcf#9 %
 
 
 
@@ -152,26 +152,6 @@ void QMPXVideoPlaybackFullScreenControl::setVisibility( TMPXPlaybackState state 
 TMPXVideoPlaybackControls QMPXVideoPlaybackFullScreenControl::controlIndex()
 {
     return mControlIndex;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFullScreenControl::volumeChanged()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackFullScreenControl::volumeChanged( int volume )
-{
-    bool changed = EFalse;
-
-    if ( mControlIndex == EMPXControlBar )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackFullScreenControl::volumeChanged() [%d]"), volume);
-
-        //static_cast<QMPXVideoPlaybackButtonBar*>(mControl)->volumeChanged( volume );
-
-        changed = ETrue;
-    }
-
-    return changed;
 }
 
 // -------------------------------------------------------------------------------------------------

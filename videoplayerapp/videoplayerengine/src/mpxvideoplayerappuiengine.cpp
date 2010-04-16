@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  5 %
+// Version : %version:  7 %
 
 
 
@@ -30,21 +30,18 @@
 #include <vcxmyvideosdefs.h>
 #include <mpxcollectionpath.h>
 #include <videoplayeractivationmessage.h>
-#include <AiwGenericParam.h>
 #include <mpxcollectionuihelper.h>
 #include <mpxcollectionhelperfactory.h>
 #include <mpxcollectionplugin.hrh>
 #include <mpxmediageneralextdefs.h>
 #include <mmf/common/mmfcontrollerframeworkbase.h>
 
-#include <streaminglinkmodel.h>
 #include <coeutils.h>
 #include <videoplaylistutility.h>
 #include <mpxvideoplaybackdefs.h>
 
 #include "mpxvideoplayerappuiengine.h"
 #include "mpxvideoplayerconstants.h"
-#include "mpxvideoembeddedpdlhandler.h"
 #include "mpxvideoplaybackwrapper.h"
 #include "mpxhbvideocommondefs.h"
 
@@ -57,7 +54,6 @@
 CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine( QMpxVideoPlaybackWrapper* aWrapper )
     : iPlaybackUtility( NULL ),
       iCollectionUtility( NULL ),
-      iExitAo( NULL ),
       iRecognizer( NULL ),
       iAccessPointId( KUseDefaultIap ),
       iMultilinkPlaylist( EFalse ),
@@ -100,11 +96,9 @@ void CMpxVideoPlayerAppUiEngine::ConstructL()
 //
 void CMpxVideoPlayerAppUiEngine::LateInitL()
 {	       
-    CreatePlaybackUtilityMemberVariablesL();
+    CreatePlaybackUtilityL();
         
-    iRecognizer = CMediaRecognizer::NewL();
-               
-    iExitAo = CIdle::NewL( CActive::EPriorityStandard );     
+    iRecognizer = CMediaRecognizer::NewL();               
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -128,12 +122,12 @@ void CMpxVideoPlayerAppUiEngine::CreateCollectionUtilityMemberVariablesL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL
+//   CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityL
 // -------------------------------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL()
+void CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL()"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityL()"));
 
     if ( ! iPlaybackUtility )
     {
@@ -149,17 +143,6 @@ void CMpxVideoPlayerAppUiEngine::CreatePlaybackUtilityMemberVariablesL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::CreateEmbeddedPdlPlaybackUtilityMemberVariablesL()"));
-
-	  CreatePlaybackUtilityMemberVariablesL();
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine
 // -------------------------------------------------------------------------------------------------
 //
@@ -167,22 +150,10 @@ CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()"));
 
-    if ( iExitAo )
-    {
-        delete iExitAo;
-        iExitAo = NULL;
-    }
-
     if ( iRecognizer )
     {
         delete iRecognizer;
         iRecognizer = NULL;
-    }
-
-    if ( iPdlHandler )
-    {
-        delete iPdlHandler;
-        iPdlHandler = NULL;
     }
 
     if ( iCollectionUtility )
@@ -228,144 +199,38 @@ void CMpxVideoPlayerAppUiEngine::HandleViewActivation( const TUid& /*aCurrentVie
 {
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::HandleAiwGenericParamListL()
-// ---------------------------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayerAppUiEngine::HandleAiwGenericParamListL( const CAiwGenericParamList* aParams )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandleAiwGenericParamListL()"));
-
-    TInt retVal = KErrNone;
-
-    TInt index = 0;
-
-    //
-    //  Check if there is a terminate message.  If it exists, exit the application.
-    //
-    TInt32 terminateID = 0;
-
-    const TAiwGenericParam* paramTerminate =
-        aParams->FindFirst( index, EGenericParamTerminate, EVariantTypeTInt32 );
-
-    if ( paramTerminate )
-    {
-        paramTerminate->Value().Get( terminateID );
-    }
-
-    if ( terminateID )
-    {
-        MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::HandleAiwGenericParamListL()  Terminate message received"));
-
-        //
-        //  Embedded app is being closed
-        //
-
-        //
-        // Workaround. Will handle it once AIW gets supported
-        //
-        //iAppUi->HandleCommandL( EEikCmdExit );
-
-        retVal = KErrCancel;
-    }
-    else
-    {
-        //
-        //  Determine if these parameters are for PDL
-        //
-        index = 0;
-        TInt32 dlId = KErrNotFound;
-
-        const TAiwGenericParam* genParamDlId =
-            aParams->FindFirst( index, EGenericParamDownloadId, EVariantTypeTInt32 );
-
-        if ( genParamDlId )
-        {
-            genParamDlId->Value().Get( dlId );
-
-            index = 0;
-
-            const TAiwGenericParam* paramFileName =
-                aParams->FindFirst( index, EGenericParamFile, EVariantTypeDesC );
-
-            TPtrC fileName;
-
-            //
-            //  Set the filename.  The LWPlayerAppUi checks for the
-            //  filename and exits if it doesn't exist
-            //
-            fileName.Set( paramFileName->Value().AsDes() );
-
-            if ( ! iPdlHandler )
-            {
-                iPdlHandler = CMpxVideoEmbeddedPdlHandler::NewL( this );
-            }
-
-            iPdlHandler->ConnectToEmbeddedDownloadL( dlId, fileName );
-        }
-        else
-        {
-            //
-            //  Check Access Point
-            //
-            index = 0;
-
-            const TAiwGenericParam* genParamAccessPoint =
-                aParams->FindFirst( index, EGenericParamAccessPoint, EVariantTypeTInt32 );
-
-            if ( index >= 0 && genParamAccessPoint )
-            {
-                TInt32 apId = KErrUnknown;
-                genParamAccessPoint->Value().Get( apId );
-                iAccessPointId = apId;
-            }
-        }
-    }
-
-    return retVal;
-}
-
 // -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayerAppUiEngine::OpenFileL
 // -------------------------------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParamList* aParams )
+void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::OpenFileL(RFile)"));
 
-    TInt err = KErrNone;
+    TFileName filename;
+    aFile.FullName(filename);
 
-    if ( aParams )
+    CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL( filename, aFile );
+
+    if ( mediaType == CMediaRecognizer::ELocalRamFile ||
+         mediaType == CMediaRecognizer::ELocalAsxFile )
     {
-        err = HandleAiwGenericParamListL( aParams );
+        HandleMultiLinksFileL( aFile, mediaType );
     }
-
-    if ( KErrNone == err && ! iPdlHandler )
+    else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
     {
-        TFileName filename;
-        aFile.FullName(filename);
-
-        CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL( filename, aFile );
-
-        if ( mediaType == CMediaRecognizer::ELocalRamFile ||
-             mediaType == CMediaRecognizer::ELocalAsxFile )
-        {
-            HandleMultiLinksFileL( aFile, mediaType );
-        }
-        else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
-        {
-            iPlaybackUtility->InitStreamingL( aFile, iAccessPointId );
-        }
-        else
-        {
-            iPlaybackUtility->InitL( aFile );
-        }
+        iPlaybackUtility->InitStreamingL( aFile, iAccessPointId );
     }
+    else
+    {
+        iPlaybackUtility->InitL( aFile );
+    }    
 
     iRecognizer->FreeFilehandle();
 
     aFile.Close();
 }
+
 
 // -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayerAppUiEngine::OpenFileL
@@ -374,8 +239,8 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
 void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::OpenFileL()"),
-                   _L("aFileName = %S"), &aFileName);
-
+                   _L("aFileName = %S"), &aFileName);    
+    
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(aFileName);
 
     if ( mediaType == CMediaRecognizer::ELocalVideoFile )
@@ -519,35 +384,6 @@ void CMpxVideoPlayerAppUiEngine::PrepareCloseMpxL()
 }
 
 // -------------------------------------------------------------------------------------------------
-// Sets AppUiEngine in stand alone "mode"
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::StartStandAloneL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::StartStandAloneL()"));
-
-    //
-    //  Create the utilities for the stand alone player
-    //
-    CreatePlaybackUtilityMemberVariablesL();
-
-    // Fetch the video collection UID
-    RArray<TUid> uid;
-    CleanupClosePushL( uid );
-
-    uid.AppendL( TUid::Uid( KVcxMediaIdMyVideos ) );
-
-    iVideoCollectionId = iCollectionUtility->CollectionIDL( uid.Array() );
-
-    CleanupStack::PopAndDestroy( &uid );
-
-    //
-    // Workaround. Don't use mpx view utility yet
-    //
-    // iViewUtility->SetAsDefaultViewL( KUidMyVideosViewType );
-}
-
-// -------------------------------------------------------------------------------------------------
 // Handle collection message
 // -------------------------------------------------------------------------------------------------
 //
@@ -589,10 +425,6 @@ void CMpxVideoPlayerAppUiEngine::DoHandleCollectionMessageL( CMPXMessage* aMessa
                     attribs.Append( KMPXMediaGeneralUri );
                     attribs.Append( KVcxMediaMyVideosDownloadId );
                     iCollectionUtility->Collection().MediaL( *cPath, attribs.Array() );
-
-                    // Create the playlist
-                    // Create proper playlist
-                    // InitPlaybackEngineL( *cPath );
 
                     CleanupStack::PopAndDestroy( &attribs );
                 }
@@ -645,81 +477,20 @@ void CMpxVideoPlayerAppUiEngine::DoHandelCollectionMediaL( const CMPXMedia& aMed
 
     MPX_DEBUG(_L("Video URI: %S"), &fileUri );
 
-    if ( aMedia.IsSupported( KVcxMediaMyVideosDownloadId ) &&
-         aMedia.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId ) != 0 )
-    {
-        TUint32 dlId = aMedia.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
+    //OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
 
-        if ( ! iPdlHandler )
-        {
-            iPdlHandler = CMpxVideoEmbeddedPdlHandler::NewL( this );
-        }
-
-        iPdlHandler->ConnectToCollectionDownloadL( dlId, const_cast<TDesC&>( fileUri ) );
-    }
+    TPtrC mediaFile( aMedia.ValueText( KMPXMediaGeneralUri ) );
+    CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(mediaFile);
+        
+    if ( mediaType == CMediaRecognizer::ELocalRamFile ||
+         mediaType == CMediaRecognizer::ELocalAsxFile )
+    {        
+        HandleMultiLinksFileL( mediaFile, mediaType );
+    }    
     else
     {
-        //OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
-
-        TPtrC mediaFile( aMedia.ValueText( KMPXMediaGeneralUri ) );
-        CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(mediaFile);
-        
-        if ( mediaType == CMediaRecognizer::ELocalRamFile ||
-             mediaType == CMediaRecognizer::ELocalAsxFile )
-        {        
-            HandleMultiLinksFileL( mediaFile, mediaType );
-        }    
-        else
-        {
-            OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// Steps back one level back in collection path. Will activate previous view if level exists
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::StepBackCollectionPathL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::StepBackCollectionPathL()"));
-
-    // Back the collection path one level...
-
-    CMPXCollectionPath* cPath = iCollectionUtility->Collection().PathL();
-    CleanupStack::PushL( cPath );
-
-    // Don't back up if there are no more levels or will panic
-    if ( cPath->Levels() > 1 )
-    {
-        cPath->Back();
-        iCollectionUtility->Collection().OpenL( *cPath );
-
-        //
-        // Workaround. Don't use mpx view utility yet
-        //
-        // iViewUtility->ActivatePreviousViewL();
-    }
-
-    CleanupStack::PopAndDestroy( cPath );
-}
-
-// -------------------------------------------------------------------------------------------------
-// Initialize the playback engine with a collection path
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::InitPlaybackEngineL( CMPXCollectionPath& aPath )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitPlaybackEngineL()"));
-
-    // Create a playlist with the current collection path
-    CMPXCollectionPlaylist* playlist = CMPXCollectionPlaylist::NewL( aPath );
-    CleanupStack::PushL( playlist );
-
-    playlist->SetSingleItemPlaylist();
-    iPlaybackUtility->InitL( *playlist, ETrue );
-
-    CleanupStack::PopAndDestroy( playlist );
+        OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
+    }    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -841,94 +612,15 @@ void CMpxVideoPlayerAppUiEngine::HandleUrlDesL( const TDesC& aUrl )
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::ProcessActivationMessageL
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::ProcessActivationMessageL( const TDesC8 &aMsg )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ProcessActivationMessageL()"));
-
-    if ( aMsg.Length() < KVideoPlayerActivationMessageMinLength )
-    {
-        User::Leave( KErrNotSupported );
-    }
-
-    TVideoPlayerActivationMessage msgHandler;
-    TPckg<TVideoPlayerActivationMessage> paramsPckg( msgHandler );
-    paramsPckg.Copy( aMsg );
-
-    if ( msgHandler.iMsgType == TVideoPlayerActivationMessage::ELaunchVideoToPlayer )
-    {
-        // Launch video to player, it can be either local video or stream.
-
-        // If there's path and mpx id,
-        // clip can be played directly.
-        if ( msgHandler.iServiceId && 
-             msgHandler.iFullPath.Length() > 0 )
-        {
-            if ( iRecognizer->IdentifyMediaTypeL( msgHandler.iFullPath )
-                  ==  CMediaRecognizer::ELocalVideoFile )
-            {
-                TMPXItemId id;
-                id.iId1 = msgHandler.iServiceId;
-				CMPXMedia* media = CMPXMedia::NewL();
-                CleanupStack::PushL( media );
-				media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, id );
-				OpenMediaL( *media );
-				CleanupStack::PopAndDestroy( media );
-            }
-            else
-            {
-                // Most likely the clip has been deleted
-                User::Leave( KErrNotFound );
-            }
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayerAppUiEngine::HandleMessageL()
 // -------------------------------------------------------------------------------------------------
 //
-TBool CMpxVideoPlayerAppUiEngine::HandleMessageL( TUid aMessageUid,
-                                                  const TDesC8& aMessageParameters )
+TBool CMpxVideoPlayerAppUiEngine::HandleMessageL( TUid /* aMessageUid */,
+                                                  const TDesC8& /* aMessageParameters */ )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandleMessageL()"));
 
     TBool msgHandled = EFalse;
-
-    switch ( aMessageUid.iUid )
-    {
-        // TVideoPlayerActivationMessage received.
-        case KVideoPlayerVodStartPlayer:
-        {
-            ProcessActivationMessageL( aMessageParameters );
-            msgHandled = ETrue;
-            break;
-        }
-        case KVideoPlayerStartPDlPlayer:
-        {
-            // Start the PDl
-            if ( iPdlHandler )
-            {
-                CBufFlat* paramBuf = CBufFlat::NewL( 1 );
-                CleanupStack::PushL( paramBuf );
-                paramBuf->InsertL( 0, aMessageParameters );
-                RBufReadStream readStream( *paramBuf );
-
-                CAiwGenericParamList* genParamList = CAiwGenericParamList::NewLC( readStream );
-
-                HandleAiwGenericParamListL( genParamList );
-
-                CleanupStack::PopAndDestroy( genParamList );
-                CleanupStack::PopAndDestroy( paramBuf );
-
-                msgHandled = ETrue;
-            }
-
-            break;
-        }
-    }
 
     return msgHandled;
 }
@@ -1010,131 +702,14 @@ void CMpxVideoPlayerAppUiEngine::HandleOpenL( const CMPXCollectionPlaylist& aPla
     }
 }
 
-
-
 // -------------------------------------------------------------------------------------------------
 // From MMPXCHelperEmbeddedOpenObserver
 // Handles OpenL from that occured in embedded mode
 // -------------------------------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCategory /*aCategory*/ )
+void CMpxVideoPlayerAppUiEngine::HandleEmbeddedOpenL( TInt /*aErr*/, TMPXGeneralCategory /*aCategory*/ )
 {
     MPX_DEBUG(_L("CMPXVideoAppUi::HandleEmbeddedOpenL()"));
-
-    if ( aErr != KErrNone )
-    {
-
-        // Kill MPX
-        //RunAppShutter();
-    }
-    else // No error, set the launch mode
-    {
-        iPlaybackUtility->CommandL( EPbCmdDisableEffect );
-    }
-}
-
-
-void CMpxVideoPlayerAppUiEngine::HandleSoftKeyBackL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandleSoftKeyBackL()"));
-
-    //
-    //  if we're in top level of our local view stack,
-    //  back command exits the app.  otherwise activate
-    //  the previous view in our local view stack
-    //
-
-    //
-    // Workaround. Don't use mpx view utility yet
-    //
-    // if ( iViewUtility->ViewHistoryDepth() <= 1 )
-    if ( ETrue )
-    {
-        ActivateExitActiveObject();
-    }
-    else
-    {
-        StepBackCollectionPathL();
-    }
-}
-
-TBool CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL( TApaCommand aCommand,
-                                                             TFileName& aDocumentName,
-                                                             const TDesC8& aTail )
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL()"));
-
-    TBool retVal = EFalse;
-
-    //
-    //  If command line has tail, this is probably a message from Matrix, Live TV
-    //  reminder, Video Center soft notification, or other VC component.
-    //
-    if ( aTail.Length() > 0 )
-    {
-        ProcessActivationMessageL( aTail );
-    }
-    else
-    {
-        //
-        //  If we are embedded or the command is to open a document
-        //
-
-        //
-        // Workaround. Embedded doesn't work yet
-        //
-        // if ( iAppUi->IsEmbedded() || aCommand != EApaCommandRun )
-        if ( aCommand != EApaCommandRun )
-        {
-            if ( iRecognizer->IsValidStreamingPrefix( aDocumentName ) )
-            {
-                retVal = ETrue;
-            }
-            else
-            {
-                retVal = ConeUtils::FileExists( aDocumentName );
-            }
-        }
-        else
-        {
-            StartStandAloneL();
-        }
-    }
-
-    return retVal;
-}
-
-void CMpxVideoPlayerAppUiEngine::ActivateExitActiveObject()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ActivateExitActiveObject()"));
-
-    if ( ! iExitAo->IsActive() )
-    {
-        iExitAo->Start( TCallBack( CMpxVideoPlayerAppUiEngine::ExitApplicationL, this ) );
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::ExitApplicationL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMpxVideoPlayerAppUiEngine::ExitApplicationL( TAny* aPtr )
-{
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ExitApplicationL()"));
-
-    static_cast<CMpxVideoPlayerAppUiEngine*>(aPtr)->DoExitApplicationL();
-    return KErrNone;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::DoExitApplicationL
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerAppUiEngine::DoExitApplicationL()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::DoExitApplicationL()"));
-
-    /*iAppUi->HandleCommandL( EEikCmdExit );*/
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -34,10 +34,8 @@
 #include <mpxcollectionobserver.h>
 #include <mpxcollectionuihelperobserver.h>
 
-class CMpxVideoEmbeddedPdlHandler;
 class CMPXCommonUiHelper;
 class MMPXCollectionUiHelper;
-class CAiwGenericParamList;
 class CVideoPlaylistUtility;
 class QMpxVideoPlaybackWrapper;
 
@@ -71,16 +69,15 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          * Opens the specified file in response to a corresponding message.
          *
          * @param aFile File to be opened.
-         * @param aParams aiw generic parameters for the file
          */
-        void OpenFileL( RFile& aFile, const CAiwGenericParamList* aParams );
-
+        void OpenFileL( const TDesC& aFileName );
+        
         /**
          * Opens the specified file in response to a corresponding message.
          *
          * @param aFile File to be opened.
-         */
-        void OpenFileL( const TDesC& aFileName );
+         */        
+        void OpenFileL( RFile& aFile );
 
         /**
          * Opens the specified mpx media object.
@@ -107,31 +104,9 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         void PrepareCloseMpxL();
 
         /**
-         * Sets AppUiEngine in stand alone "mode"
-         */
-        void StartStandAloneL();
-
-        /**
          * Handle media properties.
          */
         void DoHandelCollectionMediaL( const CMPXMedia& aMedia );
-
-        /**
-         * Steps one level up in collection path
-         */
-        void StepBackCollectionPathL();
-
-        /**
-         * Initialize the playback engine with a collection path
-         * @param aPath The collection path to create the playlist from
-         */
-        void InitPlaybackEngineL( CMPXCollectionPath& aPath );
-
-        /**
-         * Process activation message.
-         * @param aMsg reference to activation message
-         */
-        void ProcessActivationMessageL( const TDesC8 &aMsg );
 
         /*
          * Handle embedded playback message
@@ -218,34 +193,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
             * @param aCategory Type of item to be opened.
             */
         void HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCategory aCategory  );
-
-        void CreateEmbeddedPdlPlaybackUtilityMemberVariablesL();
-
-        /*
-         * Handles the "back" button.
-         */
-        void HandleSoftKeyBackL();
-
-        /*
-         *  Processes shell commands.
-         *  @param aCommand
-         *  @param aDocumentName
-         *  @param aTail
-         *  @return  ETrue if document name exists
-         */
-        TBool ProcessCommandParametersL( TApaCommand aCommand,
-                                         TFileName& aDocumentName,
-                                         const TDesC8& aTail );
-
-        /*
-         *  Provides the static function for the callback to exit the application
-         *  Called by CIdle iIdle
-         *  @since 9.2
-         *  @param aPtr Pointer to callback class
-         *  @return KErrNone
-         */
-        static TInt ExitApplicationL( TAny* aPtr );
-        
+       
         /*
          *  Late initializatoin of members that can be delayed 
          *  to help improve startup time
@@ -282,38 +230,17 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          */
         void HandleUrlDesL(const TDesC& aUrl);
 
-        TPtrC GetLinkLC( const TDesC& aFileName,
-                         CMediaRecognizer::TMediaType aMediaType,
-                         TBool aUseFileHandle = EFalse );
-
-        TInt HandleAiwGenericParamListL( const CAiwGenericParamList* aParams );
-
-        /**
-        * Handle collection message
-        *
-        * @param aMessage collection message
-        */
+       /**
+       * Handle collection message
+       *
+       * @param aMessage collection message
+       */
        void DoHandleCollectionMessageL( CMPXMessage* aMessage );
 
-       void CreatePlaybackUtilityMemberVariablesL();
+       void CreatePlaybackUtilityL();
 
        void CreateCollectionUtilityMemberVariablesL();
-
-       void CreateRemoteControlListenerL();
-
-       /*
-        *  Activates an active object to exit the application
-        *  @since 5.0
-        */
-       void ActivateExitActiveObject();
-
-       /*
-        *  Called to stop and exit the application
-        *  @since 9.2
-        *  @return void
-        */
-       virtual void DoExitApplicationL();
-       
+      
 	   /*
 	   * used to send media info to plugin
 	   */
@@ -327,15 +254,12 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         //  Owned Utilities
         //
         MMPXPlaybackUtility*     iPlaybackUtility;
-        //Do we need this?  MMPXViewUtility*         iViewUtility;
         MMPXCollectionUtility*   iCollectionUtility;
         MMPXCollectionUiHelper*  iCollectionUiHelper;  // own
 
         TUid iVideoCollectionId;
 
-        CIdle*                        iExitAo;
         CMediaRecognizer*             iRecognizer;       // own
-        CMpxVideoEmbeddedPdlHandler*  iPdlHandler;       // own
 
         TInt                     iAccessPointId;
         TBool                    iMultilinkPlaylist;

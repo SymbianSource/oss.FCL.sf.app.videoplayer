@@ -251,7 +251,7 @@ void CVcxMyVideosCollectionPlugin::CancelRequest()
 void CVcxMyVideosCollectionPlugin::CommandL(
     CMPXCommand& aCmd)
     {
-    MPX_FUNC("CVcxMyVideosCollectionPlugin::CommandL 2");
+    MPX_DEBUG1("CVcxMyVideosCollectionPlugin::CommandL() start");
 
     if ( !aCmd.IsSupported( KMPXCommandGeneralId ) )
         {
@@ -349,7 +349,7 @@ void CVcxMyVideosCollectionPlugin::CommandL(
                 }
             }
         }
-            
+    MPX_DEBUG1("CVcxMyVideosCollectionPlugin::CommandL() exit");            
     }
 
 // ----------------------------------------------------------------------------
@@ -391,33 +391,6 @@ TCollectionCapability CVcxMyVideosCollectionPlugin::GetCapabilities()
 //
 void CVcxMyVideosCollectionPlugin::SendMessages( CMPXMessage& aMessages )
     {
-#if _DEBUG
-    TRAP_IGNORE(
-
-    if ( aMessages.IsSupported( KMPXMessageArrayContents ) )
-        {
-        const CMPXMessageArray* messageArray =
-            aMessages.Value<CMPXMessageArray>(KMPXMessageArrayContents);
-            
-        for( TInt i = 0; i < messageArray->Count(); i++ )
-            {            
-            MPX_DEBUG2("CVcxMyVideosCollectionPlugin:: sending message ID: %d in array", ++iTotalMessagesSent);
-            messageArray->AtL( i )->SetTObjectValueL<TUint32>( KVcxMediaMyVideosMessageId, iTotalMessagesSent );
-            iMessagesInArraySent++;
-            }    
-
-        MPX_DEBUG3("CVcxMyVideosCollectionPlugin:: total messages sent (MSG ID): %d, messages in array sent: %d",
-            iTotalMessagesSent, iMessagesInArraySent);
-        }
-    else
-        {
-        MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: NO ARRAY IN MESSAGE!!!");
-        return;
-        }
-
-    );
-#endif
-
     iObs->HandleMessage( aMessages );
     }
 
@@ -429,7 +402,6 @@ void CVcxMyVideosCollectionPlugin::HandleMyVideosDbEvent(
         TMPXChangeEventType aEvent,
         RArray<TUint32>& aId )
     {
-    //MPX_FUNC("CVcxMyVideosCollectionPlugin::HandleMyVideosDbEvent");
     TRAPD( err, DoHandleMyVideosDbEventL( aEvent, aId ));
     if ( err != KErrNone )
         {
@@ -688,13 +660,13 @@ MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosCollectionPlugin::Handle
                     if ( !iCache->iVideoList )
                         {
                         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: iVideoListCache = NULL -> creating new empty iCache->iVideoList");
-                        iCache->iVideoListIsPartial = ETrue;
+                        iCache->SetComplete( EFalse );
                         iCache->iVideoList = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
                         }
 
                     TBool videoListFetchingWasCancelled = EFalse;
                         
-                    if ( iCache->iVideoListIsPartial )
+                    if ( !iCache->IsComplete() )
                         {                            
                         // Load items to cache
                         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: loading requested items to iCache->iVideoList");
@@ -1120,55 +1092,3 @@ void CVcxMyVideosCollectionPlugin::DoHandleObjectPresentNotificationL()
     iMessageList->SendL();    
     }
 
-#if 0
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::SetDownloadIdToZeroL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::SetDownloadIdToZeroL( TUint aDownloadId )
-    {
-    CMPXMedia* video = iCache->FindVideoByDownloadIdL( aDownloadId );
-    if ( video )
-        {
-        video->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, 0 );
-        video->SetTObjectValueL<TUint8>( KVcxMediaMyVideosDownloadState,
-                static_cast<TUint8>( EVcxMyVideosDlStateNone ) );
-        iMyVideosMdsDb->UpdateVideoL( *video );
-        iMessageList->AddEventL( TVcxMyVideosCollectionUtil::IdL(
-                *video ), EMPXItemModified );
-        iMessageList->SendL();
-        }
-    }
-    
-#ifdef _DEBUG
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::DownloadState
-// ----------------------------------------------------------------------------
-//
-const TDesC& CVcxMyVideosCollectionPlugin::DownloadState( TUint8 aDlState )
-    {
-    _LIT(KDlStateNoneDes, "None");
-    _LIT(KDlStateDownloadingDes, "Downloading");
-    _LIT(KDlStateFailedDes, "Failed");
-    _LIT(KDlStatePausedDes, "Paused");
-    _LIT(KDlStateDownloadedDes, "Downloaded");
-
-    switch ( aDlState )
-        {
-        case EVcxMyVideosDlStateNone:
-            return KDlStateNoneDes;
-        case EVcxMyVideosDlStateDownloading:
-            return KDlStateDownloadingDes;
-        case EVcxMyVideosDlStateFailed:
-            return KDlStateFailedDes;
-        case EVcxMyVideosDlStatePaused:
-            return KDlStatePausedDes;
-        case EVcxMyVideosDlStateDownloaded:
-            return KDlStateDownloadedDes;
-        default:
-            return KNullDesC;
-        }
-    }
-#endif
-
-#endif

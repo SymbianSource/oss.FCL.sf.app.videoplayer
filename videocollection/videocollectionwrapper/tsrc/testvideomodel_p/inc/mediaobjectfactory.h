@@ -43,7 +43,9 @@ enum MediaDataSelection
     MediaDataLanguage = 0x1000,
     MediaDataFormat = 0x2000,
     MediaDetailCategoryVideoCount = 0x4000,
-    MediaDataAll = 0xffff
+    MediaDataResolution = 0x8000,
+    MediaDataBitrate = 0x10000,
+    MediaDataAll = 0xffffffff
 };
 
 // const used for media creation

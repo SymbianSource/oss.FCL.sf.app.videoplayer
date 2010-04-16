@@ -20,12 +20,12 @@
 #include <vcxmyvideosdefs.h>
 #include <QList>
 #include "videocollectioncommon.h"
+
 // FORWARD DECLARATIONS
 
 class MMPXCollectionUtility;
 class VideoDataSignalReceiver;
 class VideoCollectionListener;
-
 
 // CLASS DECLARATION
 
@@ -36,7 +36,7 @@ class VideoCollectionListener;
  */
 class VideoCollectionClient 
 {
-        
+
 public: 
     
     /**
@@ -59,7 +59,6 @@ public:
     int initialize(VideoDataSignalReceiver *signalReceiver);
 
 public:
-   
         
     /**
      * Collection opening status
@@ -70,8 +69,6 @@ public:
         ECollectionOpening,
         ECollectionOpened            
     };  
-        
-
 
     /**
      * Connects videodata signals to provided object
@@ -112,7 +109,7 @@ public:
      * startOpenCurrentState to start collection into current state. 
      * 
      */
-    void setOpenStatus(int status);
+    void setOpenStatus(int status,  bool startOpening = true);
         
     /**
      * Starts opening of collection to the all videos category
@@ -205,6 +202,15 @@ public:
      * @return 0 if no errors.
      */
     int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    
+    /**
+     * Renames an album.
+     * 
+     * @param albumId, Album to be renamed.
+     * @param newTitle, New title for the album.
+     * @return 0 if no errors.
+     */
+    int renameAlbum(const TMPXItemId &albumId, const QString &newTitle);
 
 private:
     
@@ -290,8 +296,16 @@ private:
      */
     void removeItemsFromAlbumL(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
-private:
+    /**
+     * Renames an album.
+     * 
+     * @param albumId, Album to be renamed.
+     * @param newTitle, New title for the album.
+     * @return None.
+     */
+    void renameAlbumL(const TMPXItemId &albumId, const QString newTitle);
     
+private:
 
     /**
      * Pointer to MPX Collection utility.

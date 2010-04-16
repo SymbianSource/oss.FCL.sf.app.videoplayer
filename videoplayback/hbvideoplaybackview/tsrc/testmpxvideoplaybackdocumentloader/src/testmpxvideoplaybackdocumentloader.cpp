@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 #include <qdebug>
@@ -110,9 +110,6 @@ void TestMPXVideoPlaybackDocumentLoader::testCreateObject()
 
     object = mLoader->createObject( "", "fileDetailsLayout" );
     QVERIFY( object->objectName() == "fileDetailsLayout" );
-
-    object = mLoader->createObject( "", "volumeSlider" );
-    QVERIFY( object->objectName() == "volumeSlider" );
 
     object = mLoader->createObject( "", "detailsPlaybackWindow" );
     QVERIFY( object->objectName() == "detailsPlaybackWindow" );

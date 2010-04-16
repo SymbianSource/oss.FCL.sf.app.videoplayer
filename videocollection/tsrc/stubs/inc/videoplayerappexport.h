@@ -20,6 +20,7 @@
 
 #define VIDEOPLAYERAPP_DLL_EXPORT
 
+
 #endif // _VIDEOPLAYERAPPEXPORT_H
 
 // End of file.

@@ -15,8 +15,12 @@
 *
 */
 
-#include "stub/inc/hbinstance.h"
+// Version : %version:  %
+
 #include <hbmainwindow.h>
+
+#include "stub/inc/hbinstance.h"
+#include "mpxvideo_debug.h"
 
 bool initialised = false;
 HbInstance* mInstance = 0;
@@ -24,14 +28,18 @@ QList<HbInstance *> mInstances;
 
 HbInstance::HbInstance()
 {
+    MPX_DEBUG(_L("HbInstance::HbInstance()"));
 }
 
 HbInstance::~HbInstance()
 {
+    MPX_DEBUG(_L("HbInstance::~HbInstance()"));
 }
 
 HbInstance* HbInstance::instance()
 {
+    MPX_ENTER_EXIT(_L("TestVideoServices::instance()"));
+    
     if (!initialised)
     {
     	mInstance = new HbInstance();  
@@ -43,23 +51,28 @@ HbInstance* HbInstance::instance()
 
 HbInstance* HbInstance::primaryWindow() const
 {
+    MPX_DEBUG(_L("HbInstance::primaryWindow()"));
 	return mInstance;
 }
 
 QList<HbInstance *> HbInstance::allMainWindows() const
 {
+    MPX_DEBUG(_L("HbInstance::allMainWindows()"));
 	return mInstances;
 }
 
 void HbInstance::removeView( QGraphicsWidget* )
 {
+    MPX_DEBUG(_L("HbInstance::removeView()"));
 }
 
 void HbInstance::addView( QGraphicsWidget* )
 {
+    MPX_DEBUG(_L("HbInstance::addView()"));
 }
 
 void HbInstance::setCurrentView( HbView*, bool animation )
 {
+    MPX_DEBUG(_L("HbInstance::setCurrentView()"));
 }
 		

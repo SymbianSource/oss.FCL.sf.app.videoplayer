@@ -15,12 +15,14 @@
 *
 */
 
-// INCLUDE FILES
+// Version : %version: %
 
+// INCLUDE FILES
 #include <qpixmap.h>
 #include <thumbnailmanager_qt.h>
 
 #include "videothumbnailfetcher.h"
+#include "videocollectiontrace.h"
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -29,11 +31,12 @@
 // VideoThumbnailFetcher::VideoThumbnailFetcher()
 // -----------------------------------------------------------------------------
 //
-VideoThumbnailFetcher::VideoThumbnailFetcher() :
-    mThumbnailManager(0),
-    mPaused(false),
-    mTbnCreationEnabled(true)
+VideoThumbnailFetcher::VideoThumbnailFetcher() 
+    : mThumbnailManager( 0 )
+    , mPaused( false )
+    , mTbnCreationEnabled( true )
 {
+	FUNC_LOG;
     mThumbnailManager = new ThumbnailManager();
     mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailMedium);
     mThumbnailManager->setQualityPreference(ThumbnailManager::OptimizeForPerformance);
@@ -49,6 +52,7 @@ VideoThumbnailFetcher::VideoThumbnailFetcher() :
 //
 VideoThumbnailFetcher::~VideoThumbnailFetcher()
 {
+	FUNC_LOG;
     cancelFetches();
 
     disconnect(mThumbnailManager, SIGNAL(thumbnailReady( QPixmap , void * , int , int )),
@@ -77,6 +81,7 @@ void VideoThumbnailFetcher::addFetch(const QString fileName, void *internal, int
 //
 void VideoThumbnailFetcher::continueFetching()
 {
+	FUNC_LOG;
     mPaused = false;
     
     // First fetch all thumbnails that have been created already, next
@@ -103,8 +108,11 @@ void VideoThumbnailFetcher::continueFetching()
 //
 void VideoThumbnailFetcher::startThumbnailFetches()
 {
+	FUNC_LOG;
     if(!mThumbnailManager)
+    {
         return;
+    }
     
     // Only fetch those thumbnails that are already been created.
     mThumbnailManager->setMode(ThumbnailManager::DoNotCreate);
@@ -137,14 +145,19 @@ void VideoThumbnailFetcher::startThumbnailFetches()
 //
 void VideoThumbnailFetcher::startThumbnailCreation()
 {
+	FUNC_LOG;
     if(!mThumbnailManager || !mTbnCreationEnabled)
+    {
         return;
+    }
     
     mThumbnailManager->setMode(ThumbnailManager::CropToAspectRatio);
     
     // Do nothing if list is empty. 
     if(mCreationList.isEmpty())
+    {
         return;
+    }
     
     // Find fetch with highest priority. 
     int highestPriority = 0;
@@ -185,6 +198,7 @@ void VideoThumbnailFetcher::startThumbnailCreation()
 //
 void VideoThumbnailFetcher::pauseFetching()
 {
+	FUNC_LOG;
     mPaused = true;
 }
 
@@ -194,6 +208,7 @@ void VideoThumbnailFetcher::pauseFetching()
 //
 void VideoThumbnailFetcher::cancelFetches()
 {
+	FUNC_LOG;
     // Clear list of started fetches, thumbnail manager has the internal 
     // pointer.
     QList<int> keys = mStartedFetchList.keys();
@@ -228,6 +243,7 @@ int VideoThumbnailFetcher::fetchCount()
 //
 void VideoThumbnailFetcher::enableThumbnailCreation(bool enable)
 {
+	FUNC_LOG;
     mTbnCreationEnabled = enable;
 }
 
@@ -257,12 +273,16 @@ void VideoThumbnailFetcher::thumbnailReadySlot(QPixmap tnData, void *internal, i
         emit thumbnailReady(tnData, internal, error);
         
         if(mStartedFetchList.contains(requestId))
+        {
             delete mStartedFetchList.take(requestId);
+        }
     }
     
     // Continue the fetching process.
     if(!mPaused && mStartedFetchList.isEmpty())
+    {
         continueFetching();
+    }
 }
 
 // End of file.

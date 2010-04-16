@@ -35,9 +35,10 @@ namespace VideoCollectionCommon
         KeyDateTime,
 		KeySizeValue,
 		KeyStatus,
-		KeyMetaData,
 		KeyFilePath,
-        KeyLast
+        KeyLast,
+        KeyNumberOfItems,
+        KeyTitle
     };
     
     /**
@@ -74,7 +75,7 @@ namespace VideoCollectionCommon
      */
     const char * const VideoDetailLabels[] = {
     		QT_TR_NOOP("txt_videos_list_drm"),
-            QT_TR_NOOP("Service:"), //TODO: localisation
+            QT_TR_NOOP("txt_videos_list_service"),
             QT_TR_NOOP("txt_videos_list_description"),
             QT_TR_NOOP("txt_videos_list_duration"),
             QT_TR_NOOP("txt_videos_list_date"),
@@ -82,7 +83,7 @@ namespace VideoCollectionCommon
             QT_TR_NOOP("txt_videos_list_location"),
             QT_TR_NOOP("txt_videos_list_author"),
             QT_TR_NOOP("txt_videos_list_copyright"),
-            QT_TR_NOOP("Audio Type:"), //TODO: localisation
+            QT_TR_NOOP("txt_videos_list_audio_type"),
             QT_TR_NOOP("txt_videos_list_language"),
             QT_TR_NOOP("txt_videos_list_keywords"),
             QT_TR_NOOP("txt_videos_list_file_size"),
@@ -151,7 +152,16 @@ namespace VideoCollectionCommon
         statusAllVideosAlreadyInCollection,
         statusVideosRemovedFromCollection
     };
-    
+
+    enum TModelType
+    {
+    	EModelTypeInvalid,
+    	EModelTypeAllVideos,
+    	EModelTypeCollections,
+    	EModelTypeCollectionContent,
+    	EModelTypeGeneric
+    };
+
     /**
      * Utility macro to trace heap consumption.
      */

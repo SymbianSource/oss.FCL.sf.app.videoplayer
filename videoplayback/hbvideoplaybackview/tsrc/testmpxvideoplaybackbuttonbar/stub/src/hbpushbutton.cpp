@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  3 %
 
 #include <qgraphicswidget>
 
@@ -27,6 +27,9 @@
 // -------------------------------------------------------------------------------------------------
 //
 HbPushButton::HbPushButton()
+    : mVisible( false )
+    , mEnabled( false )
+    , mSelected( false )
 {
     MPX_ENTER_EXIT(_L("HbPushButton::HbPushButton()"));
 
@@ -54,7 +57,7 @@ HbPushButton::~HbPushButton()
 //
 void HbPushButton::setEnabled( bool enabled )
 {
-    MPX_DEBUG(_L("HbPushButton::setEnabled %d"), enabled );
+    MPX_DEBUG(_L("HbPushButton::setEnabled(%d)"), enabled );
 
     mEnabled = enabled;
 }
@@ -65,7 +68,7 @@ void HbPushButton::setEnabled( bool enabled )
 //
 bool HbPushButton::isEnabled()
 {
-    MPX_DEBUG(_L("HbPushButton::isEnabled %d"), mEnabled );
+    MPX_DEBUG(_L("HbPushButton::isEnabled() ret %d"), mEnabled );
 
     return mEnabled;
 }
@@ -76,7 +79,7 @@ bool HbPushButton::isEnabled()
 //
 void HbPushButton::setVisible( bool visible )
 {
-    MPX_DEBUG(_L("HbPushButton::setVisible %d"), visible );
+    MPX_DEBUG(_L("HbPushButton::setVisible(%d)"), visible );
 
     mVisible = visible;
 }
@@ -87,7 +90,7 @@ void HbPushButton::setVisible( bool visible )
 //
 bool HbPushButton::isVisible()
 {
-    MPX_DEBUG(_L("HbPushButton::isVisible %d"), mVisible );
+    MPX_DEBUG(_L("HbPushButton::isVisible() ret %d"), mVisible );
 
     return mVisible;
 }
@@ -98,7 +101,7 @@ bool HbPushButton::isVisible()
 //
 void HbPushButton::setSelected( bool selected )
 {
-    MPX_DEBUG(_L("HbPushButton::setSelected %d"), selected );
+    MPX_DEBUG(_L("HbPushButton::setSelected(%d)"), selected );
 
     mSelected = selected;
 }
@@ -109,7 +112,7 @@ void HbPushButton::setSelected( bool selected )
 //
 bool HbPushButton::isSelected()
 {
-    MPX_DEBUG(_L("HbPushButton::isSelected %d"), mSelected );
+    MPX_DEBUG(_L("HbPushButton::isSelected() ret %d"), mSelected );
 
     return mSelected;
 }
@@ -122,6 +125,8 @@ QGraphicsItem* HbPushButton::primitive( HbStyle::Primitive primitive ) const
 {
     MPX_DEBUG(_L("HbPushButton::primitive") );
 
+    Q_UNUSED( primitive );
+    
     return mBackground;
 }
 
@@ -145,6 +150,18 @@ void HbPushButton::release()
     MPX_DEBUG(_L("HbPushButton::release") );
 
     emit released();
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbPushButton::pressing
+// -------------------------------------------------------------------------------------------------
+//
+void HbPushButton::pressing()
+{
+    MPX_DEBUG(_L("HbPushButton::pressing") );
+
+    QPointF point( 0, 0 );
+    emit longPress( point );
 }
 
 // End of file

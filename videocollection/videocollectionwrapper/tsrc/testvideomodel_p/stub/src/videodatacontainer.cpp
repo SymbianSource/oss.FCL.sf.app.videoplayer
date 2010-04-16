@@ -71,8 +71,8 @@ void VideoDataContainer::clear()
 //
 void VideoDataContainer::remove(const TMPXItemId &id)
 {   
-    QMultiHash<TMPXItemId, QPair<int, CMPXMedia*> >::iterator removeIter = mMediaData.constFind(id);
-    if(removeIter == mMediaData.constEnd())
+    QMultiHash<TMPXItemId, QPair<int, CMPXMedia*> >::iterator removeIter = mMediaData.find(id);
+    if(removeIter == mMediaData.end())
     {
         return;
     }
@@ -146,11 +146,10 @@ CMPXMedia* VideoDataContainer::fromIndex(int index) const
 int VideoDataContainer::indexOfId(const TMPXItemId &id) const
 {
     QMultiHash<TMPXItemId, QPair<int, CMPXMedia*> >::const_iterator iter = mMediaData.find(id);
-    if( iter != mMediaData.constEnd())
+    if(iter != mMediaData.constEnd())
     {
         return iter->first;
     }
-    
     return -1;
 }
 
@@ -263,12 +262,12 @@ int VideoDataContainer::restoreRemovedItems(QList<TMPXItemId> *itemIds)
         ids = *itemIds;
     }
     
-    QList<TMPXItemId>::const_iterator idIter = ids.constBegin();
+    QList<TMPXItemId>::const_iterator idIter = ids.begin();
     QHash<TMPXItemId, CMPXMedia*>::iterator iter;
-    while(idIter != ids.constEnd())
+    while(idIter != ids.end())
     {
         iter = mRemovedMedia.find((*idIter));        
-        if(iter != mRemovedMedia.constEnd() && !mMediaData.contains(iter.key()))
+        if(iter != mRemovedMedia.end() && !mMediaData.contains(iter.key()))
         {
             mMediaIds.append(iter.key());
             mMediaData.insert(iter.key(), qMakePair(mMediaIds.count() - 1, iter.value()));              

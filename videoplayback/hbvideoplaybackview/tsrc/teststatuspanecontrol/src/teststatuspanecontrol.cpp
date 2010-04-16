@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 #include <hbapplication.h>
@@ -186,7 +186,8 @@ void TestStatusPaneControl::testUpdateControlsWithFileDetails()
     
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
     
-    QVERIFY( mControlsController->view()->mTitleFlag == HbView::TitleBarTransparent );
+    QVERIFY( mControlsController->view()->viewFlags() == 
+            HbView::HbViewFlags( HbView::ViewTitleBarTransparent | HbView::ViewStatusBarTransparent ));
     
     // 2. test for detial view mode    
     mControlsController->mViewMode = EDetailsView;
@@ -195,7 +196,7 @@ void TestStatusPaneControl::testUpdateControlsWithFileDetails()
     
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
 
-    QVERIFY( mControlsController->view()->mTitleFlag == HbView::TitleBarFlagNone );
+    QVERIFY( mControlsController->view()->viewFlags() == HbView::ViewFlagNone );
 
     // 3. test for audio only mode    
     mControlsController->mViewMode = EAudioOnlyView;
@@ -204,7 +205,7 @@ void TestStatusPaneControl::testUpdateControlsWithFileDetails()
     
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
 
-    QVERIFY( mControlsController->view()->mTitleFlag == HbView::TitleBarFlagNone );
+    QVERIFY( mControlsController->view()->viewFlags() == HbView::ViewFlagNone );
 }
 
 // ---------------------------------------------------------------------------

@@ -22,6 +22,7 @@
 // INCLUDES
 #include <QObject>
 #include <qabstractitemmodel.h>
+#include "videocollectioncommon.h"
 #include "videocollectionexport.h"
 
 // FORWARD DECLARATIONS
@@ -32,12 +33,11 @@ class VideoSortFilterProxyModel;
 /**
  * Class is used as an interface of the video collection QT wrapper.
  * 
- * Singleton instance is deleted when it's not used anymore by clients. At instantion time  
- * reference count is incremented. Client must call decreaseReferenceCount when it doesn't 
- * need the instance anymore. When reference count is 0 the instance is destroyed.
+ * Singleton instance is deleted when application ends
  * 
  * * Usage:
  *  @code
+ *  #include "videocollectioncommon.h"
  *  #include "videocollectionwrapper.h"
  *  #include "videosortfilterproxymodel.h"
  *  
@@ -45,25 +45,18 @@ class VideoSortFilterProxyModel;
  *  ////
  *  // Getting the instances
  *  ////
- *  VideoCollectionWrapper *wrapper = VideoCollectionWrapper::instance();
- * 
- *  VideoSortFilterProxyModel *model = wrapper->getModel();
+ *  VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
+ *  // getting all videos model
+ *  VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
  *  ...
  *  ////
  *  // Opening collection and start fetching video item data
  *  ////
  *  if(model)
  *  {
- *      mModel->open(VideoListWidget::ELevelVideos);
+ *      mModel.open(VideoCollectionCommon::ELevelVideos);
  *  }
  *  // see model documentation for the open funtionality
- *
- *  /////
- *  // Instance is not used anymore. 
- *  // Wrapper owns the model, so client should not deallocate it
- *  /////
- *  wrapper->decreaseReferenceCount();
- *  wrapper = 0; // Don't use before new instantion.
  * 
  *  @endcode
  * 
@@ -76,14 +69,6 @@ class VIDEOCOLLECTION_DLL_EXPORT VideoCollectionWrapper : public QObject
     Q_OBJECT
     
 public: // Constructor
-    
-    enum TModelType
-    {
-        EAllVideos,
-        ECollections,
-        ECollectionContent,
-        EGeneric
-    };
     
     /**
      * Returns singleton instance for this class.
@@ -101,7 +86,7 @@ public: // Constructor
      * 
      * @return address to model or NULL if fails.
      */    
-    VideoSortFilterProxyModel* getModel(int type);
+    VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType type);
 
     /**
      * Method can be used by client to emit status signal

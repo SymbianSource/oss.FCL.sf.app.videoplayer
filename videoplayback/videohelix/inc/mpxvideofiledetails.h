@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 
@@ -69,7 +69,9 @@ NONSHARABLE_CLASS( CMPXVideoFileDetails ) : public CBase
         TInt     iResolutionHeight;
         TInt     iMaxVolume;
         TInt     iBitRate;
-
+        TInt     iCreationTime;
+        TInt     iModificationTime;
+        
         TBool    iSeekable;
         TBool    iPausableStream;
         TBool    iLiveStream;

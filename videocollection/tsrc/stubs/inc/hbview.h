@@ -20,6 +20,7 @@
 #define HBVIEW_H
 
 #include <QGraphicsWidget>
+#include "qstring.h"
 #include "hbinstance.h"
 #include "hbtoolbar.h"
 #include "hbeffect.h"
@@ -27,7 +28,6 @@
 class HbView : public QGraphicsWidget
 {
     Q_OBJECT
-
 
 public:
 
@@ -45,7 +45,7 @@ public:
     
     void setTitle(const QString &title)
     {
-        Q_UNUSED(title);
+        mTitle = title;
     }
     
     HbToolBar *toolBar() const
@@ -59,7 +59,7 @@ public:
     void setItemVisible(Hb::SceneItem item, bool visible)
     {
         Q_UNUSED(item);
-        Q_UNUSED(visible);
+        mSetItemVisibleLast = visible;
     }
     
     void setNavigationAction(HbAction *action)
@@ -71,6 +71,12 @@ public:
     HbAction *mNavigationAction;
     
     mutable HbToolBar* mToolBar;
+    
+    QString mTitle;
+    
+public:
+    
+    static bool mSetItemVisibleLast;
 };
 
 #endif // HBVIEW_H

@@ -15,10 +15,12 @@
 * 
 */
 
-// INCLUDE FILES
+// Version : %version: 51 %
 
+// INCLUDE FILES
 #include <hbglobal.h>
 #include <vcxmyvideosdefs.h>
+
 #include "videolistdatamodel.h"
 #include "videolistdatamodel_p.h"
 #include "videocollectionclient.h"
@@ -26,6 +28,7 @@
 #include "videocollectionutils.h"
 #include "videodeleteworker.h"
 #include "videocollectionwrapper.h"
+#include "videocollectiontrace.h"
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -34,13 +37,14 @@
 // VideoListDataModel()
 // -----------------------------------------------------------------------------
 //
-VideoListDataModel::VideoListDataModel(QObject *parent) :
-QAbstractItemModel(parent),
-d_ptr( new VideoListDataModelPrivate(this)), 
-mCollectionClient(0),
-mDeleteWorker(0),
-mInitialized(false)
+VideoListDataModel::VideoListDataModel( QObject *parent ) 
+    : QAbstractItemModel( parent )
+    , d_ptr( new VideoListDataModelPrivate( this ) )
+    , mCollectionClient( 0 )
+    , mDeleteWorker( 0 )
+    , mInitialized( false )
 {
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,6 +53,7 @@ mInitialized(false)
 //
 VideoListDataModel::~VideoListDataModel()
 {
+	FUNC_LOG;
     delete mDeleteWorker;
     delete d_ptr;
     delete mCollectionClient;
@@ -60,6 +65,7 @@ VideoListDataModel::~VideoListDataModel()
 //
 int VideoListDataModel::initialize()
 {
+	FUNC_LOG;
     if(mInitialized)
     {
         return 0;
@@ -69,6 +75,7 @@ int VideoListDataModel::initialize()
         mCollectionClient = new VideoCollectionClient();
         if(!mCollectionClient || mCollectionClient->initialize(d_ptr) < 0)
         {
+            ERROR(-1, "VideoListDataModel::initialize() collection client setup failed.");
             delete mCollectionClient;
             mCollectionClient = 0;
             return -1;
@@ -88,11 +95,13 @@ int VideoListDataModel::initialize()
     
     if( d_ptr->initialize() == -1)            
     {
+        ERROR(-1, "VideoListDataModel::initialize() private model init failed.");
         return -1;
     }
 
     if(connectSignals() == -1)
     {
+        ERROR(-1, "VideoListDataModel::initialize() failed to connect signals.");
         disconnectSignals();
         return -1;
     }
@@ -107,6 +116,7 @@ int VideoListDataModel::initialize()
 //
 VideoCollectionClient* VideoListDataModel::getCollectionClient()
 {
+	FUNC_LOG;
     return mCollectionClient;
 }
  
@@ -116,13 +126,14 @@ VideoCollectionClient* VideoListDataModel::getCollectionClient()
 //
 int VideoListDataModel::connectSignals()
 {
+	FUNC_LOG;
     if(!connect(d_ptr, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
                            this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&))))
     {
         return -1;
     }
-    if(!connect(d_ptr, SIGNAL(videoDetailsReady(TMPXItemId)),
-                       this, SIGNAL(fullVideoDetailsReady(TMPXItemId))))
+    if(!connect(d_ptr, SIGNAL(videoDetailsReady(QVariant&)),
+                       this, SIGNAL(fullVideoDetailsReady(QVariant&))))
     {
         return -1;
     }
@@ -149,10 +160,11 @@ int VideoListDataModel::connectSignals()
 //
 void VideoListDataModel::disconnectSignals()
 {
+	FUNC_LOG;
     disconnect(d_ptr, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
                                this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
-    disconnect(d_ptr, SIGNAL(videoDetailsReady(TMPXItemId)),
-                           this, SIGNAL(fullVideoDetailsReady(TMPXItemId)));
+    disconnect(d_ptr, SIGNAL(videoDetailsReady(QVariant&)),
+                           this, SIGNAL(fullVideoDetailsReady(QVariant&)));
     disconnect(this, SIGNAL(modelChanged()), mDeleteWorker, SLOT(continueSlot()));
     disconnect(this, SIGNAL(modelReady()), mDeleteWorker, SLOT(continueSlot()));
     disconnect(mDeleteWorker, SIGNAL(deleteStartupFailed(QList<TMPXItemId>)), 
@@ -250,15 +262,9 @@ QString VideoListDataModel::prepareDetailRow(int index) const
     }
     else //video
     {
-        const QString sizeStr = prepareSizeString(index);
-        const QStringList list = prepareLengthStrings( index );
-        QString duration;
-        duration.append(list.at(0));
-        duration.append(":");
-        duration.append(list.at(1));
-        duration.append(":");
-        duration.append(list.at(2));
-        retString = hbTrId("txt_videos_dblist_captured_val_1_l1").arg(duration).arg(sizeStr);
+        const QString duration = prepareShortLengthString( index );
+
+        retString = doDetailRow(index, duration);
     }
     return retString; 
 }
@@ -299,13 +305,53 @@ QString VideoListDataModel::prepareSizeString(int index) const
 }
 
 // -----------------------------------------------------------------------------
-// VideoListDataModel::prepareLengthStrings()
+// VideoListDataModel::prepareShortLengthString()
 // -----------------------------------------------------------------------------
 //
-QStringList VideoListDataModel::prepareLengthStrings(int index) const
+QString VideoListDataModel::prepareShortLengthString(int index) const
 {
     quint32 total = d_ptr->getVideodurationFromIndex(index);
-    return VideoCollectionUtils::instance().prepareLengthStrings(total);
+    return VideoCollectionUtils::instance().prepareShortLengthString(total);
+}
+
+// -----------------------------------------------------------------------------
+// VideoListDataModel::doDetailRow()
+// -----------------------------------------------------------------------------
+//
+QString VideoListDataModel::doDetailRow(int index, const QString duration) const
+{
+    QString detailStr("");
+	
+    quint32 size = d_ptr->getVideoSizeFromIndex(index);
+	
+	const int videoSizeGB( 0x40000000 );
+	const int videoSizeHalfGB( 0x20000000 );
+	const int videoSizeMB( 0x100000 );
+	const int videoSizeHalfMB( 0x80000 );
+	const int videoSizeKB( 0x400 );
+
+	quint32 dispSize = 0;
+	
+	if ( size >= videoSizeGB )
+	{
+		dispSize  = size + videoSizeHalfGB;
+		dispSize /= videoSizeGB;
+		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_gb").arg(duration).arg(QString::number(dispSize));
+	}
+	else if ( size >= videoSizeMB )
+	{
+		dispSize  = size + videoSizeHalfMB;
+		dispSize /= videoSizeMB;
+		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_mb").arg(duration).arg(QString::number(dispSize));
+	}
+	else
+	{
+		dispSize  = size + videoSizeKB;
+		dispSize /= videoSizeKB;
+		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_kb").arg(duration).arg(QString::number(dispSize));
+	}
+	
+	return detailStr;
 }
 
 // -----------------------------------------------------------------------------
@@ -316,7 +362,6 @@ QVariant VideoListDataModel::data(const QModelIndex & index, int role) const
 {
     QVariant returnValue = QVariant();
 
-   
     if (index.isValid()) 
     {
         int rowIndex = index.row();
@@ -345,18 +390,23 @@ QVariant VideoListDataModel::data(const QModelIndex & index, int role) const
         {
             quint32 size = d_ptr->getVideoSizeFromIndex(rowIndex);
             returnValue = size;
-            
         }
-        else if(role == VideoCollectionCommon::KeyMetaData)
-        {
-            returnValue = d_ptr->getMetaDataFromIndex(rowIndex);
-        }
-        else if(role == VideoCollectionCommon::KeyFilePath)
+        else if (role == VideoCollectionCommon::KeyFilePath)
         {
             QString path = d_ptr->getFilePathFromIndex(rowIndex);
             if(!(path.isNull()) && !(path.isEmpty())) { 
                 returnValue = path;
             }
+        }
+        else if (role == VideoCollectionCommon::KeyNumberOfItems)
+        {
+            quint32 numberOfItems = d_ptr->getCategoryVideoCountFromIndex(rowIndex);
+            returnValue = numberOfItems;
+        }
+        else if (role == VideoCollectionCommon::KeyTitle)
+        {
+            QString title = d_ptr->getVideoNameFromIndex(rowIndex);
+            returnValue = title;
         }
     }
     
@@ -387,7 +437,6 @@ int VideoListDataModel::columnCount(const QModelIndex & parent) const
 //
 QModelIndex VideoListDataModel::index(int row, int column, const QModelIndex & /*parent*/) const
 {
-
     if(row >= 0 && row < d_ptr->getVideoCount())
     {
         return createIndex(row, column);
@@ -411,6 +460,7 @@ QModelIndex VideoListDataModel::parent(const QModelIndex & /*index*/) const
 //
 bool VideoListDataModel::removeRows(const QModelIndexList &indexList)
 {
+	FUNC_LOG;
     if(!mCollectionClient || !mDeleteWorker)
     {
         return false;
@@ -466,6 +516,7 @@ bool VideoListDataModel::belongsToAlbum(const TMPXItemId &itemId,
 //
 void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
 {
+	FUNC_LOG;
     d_ptr->setAlbumInUse(albumId);
 }
 
@@ -475,6 +526,7 @@ void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
 //
 TMPXItemId VideoListDataModel::albumInUse()
 {
+	FUNC_LOG;
     return d_ptr->mCurrentAlbum;
 }
 
@@ -484,11 +536,13 @@ TMPXItemId VideoListDataModel::albumInUse()
 //
 int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
 {
+	FUNC_LOG;
     int removeCount = d_ptr->removeItemsFromAlbum(albumId, items);
     if(removeCount)
     {
         if(mCollectionClient->removeItemsFromAlbum(albumId, items) < 0)
         {
+            ERROR(-1, "VideoListDataModel::removeItemsFromAlbum() remove failed.");
             return -1;
         }
         emit albumChanged();
@@ -502,6 +556,7 @@ int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TM
 //
 void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId> ids)
 {
+	FUNC_LOG;
     if(ids.count())
     {        
         d_ptr->restoreRemoved(&ids);
@@ -518,6 +573,7 @@ void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId> ids)
 //
 void VideoListDataModel::reportAsyncStatus(int statusCode, QVariant &additional)
 {
+	FUNC_LOG;
     bool report = true;
     if(statusCode == VideoCollectionCommon::statusSingleDeleteFail ||
        statusCode ==  VideoCollectionCommon::statusMultipleDeleteFail ||

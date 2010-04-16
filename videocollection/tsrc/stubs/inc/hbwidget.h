@@ -17,8 +17,10 @@
 
 #ifndef HBWIDGET_H
 #define HBWIDGET_H
+
 #include <QGraphicsWidget>
 #include <hbnamespace.h>
+#include <hbglobal.h>
 
  /**
  * counter to make sure alloc dealloc match
@@ -33,7 +35,15 @@ public:
     
     virtual ~HbWidget(){initializeCount--;}
     
-    void clearActions() {}
+    void clearActions() 
+    {
+        // Note actions().clear() does not work as actions() returns a copy of the actions list.
+        QList<QAction*> act = actions();
+        QAction* temp;
+        foreach(temp, act) {
+            this->removeAction(temp);
+        }
+    }
     
     static int initializeCount;
 };

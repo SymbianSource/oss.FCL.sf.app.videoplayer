@@ -60,6 +60,11 @@ public:
     TMPXItemId getLatestItemId();
     
     /**
+     * return mLatestModifiedItemId
+     */
+    TMPXItemId getLatestModifiedItemId();
+
+    /**
      * return mLatesListData
      */
     QList<TMPXItemId>& getLatestListData();
@@ -102,9 +107,9 @@ public slots:
     void videoDeleteCompletedSlot(int count, QList<TMPXItemId> *failedMediaIds);
     
     /**
-     * Saves provided integer to mLatestItemId
+     * Saves provided media to mLatestPtr
      */
-    void videoDetailsCompletedSlot(TMPXItemId videoId);
+    void videoDetailsCompletedSlot(CMPXMedia* media);
     
     /**
      * Saves provided integer to mLatestItemId and provided pointer to
@@ -123,6 +128,11 @@ public slots:
      */
     void itemDeletedSlot(TMPXItemId id);
     
+    /**
+     * saves provided item id into mLatestModifiedItemId
+     */
+    virtual void itemModifiedSlot(const TMPXItemId &itemId);
+    
 private:
     /**
      * Contains address of latest pointer passed to object
@@ -139,6 +149,11 @@ private:
      */
     TMPXItemId mLatestItemId;
     
+    /**
+     * contains value if the latest integer passed to object at EMPXItemModified event 
+     */
+    TMPXItemId mLatestModifiedItemId;
+
     /**
      * contains contents of list received from signal
      */

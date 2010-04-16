@@ -49,8 +49,6 @@ INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE \
 		/epoc32/include/mw
 
 INCLUDEPATH += ../videocollectionwrapper/inc \
-               ../../videoplayerapp/videoplayerengine/inc \
-               ../../videoplayerapp/inc \
                ../inc \
                ../../inc \
 
@@ -77,8 +75,9 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lvideocollectionwrapper.dll \
         -lcentralrepository.dll \
         -lxqserviceutil.dll \
-        -lvideoplayerengine.dll
-    
+        -lvideoplayerengine.dll \
+        -lflogger.dll
+            
 # Seems to be no way to get these on top of file
 mmpBlock = "$${LITERAL_HASH}include <platform_paths.hrh>" \
     "$${LITERAL_HASH}include <data_caging_paths.hrh>" \

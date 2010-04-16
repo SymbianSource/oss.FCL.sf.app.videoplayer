@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -54,7 +54,7 @@ QMPXVideoPlaybackDocumentLoader::~QMPXVideoPlaybackDocumentLoader()
 //
 QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::findWidget( const QString &name )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::findWidget") );
+    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::findWidget( %s )"), name.data() );
 
     QGraphicsWidget *object = NULL;
 
@@ -78,13 +78,13 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::findWidget( const QString &nam
 //
 QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &name )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::createWidget") );
+    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::createWidget( %s )"), name.data() );
 
     QGraphicsWidget *object = NULL;
         
     if ( name == "rwButton" ||  name == "pauseButton" || name == "playButton" || 
         name == "ffButton" || name == "naturalButton" || name == "stretchButton" ||
-        name == "zoomButton" || name == "detailsButton" )
+        name == "zoomButton" || name == "detailsButton" || "attachButton" || "aspectRatioButtons" )
     {
         object = new HbPushButton();
         object->setObjectName( name );
@@ -115,7 +115,7 @@ int QMPXVideoPlaybackDocumentLoader::exist( const QString &name )
         i = -1;
     }
 
-    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::exist %d"), i );
+    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::exist( %s ) ret %d"), name.data(), i );
 
     return i;
 }

@@ -26,8 +26,7 @@ class HbMenuData
 public: // methods
     static void reset()
     {
-        delete mMenuAction;
-        delete mActiveAction;
+        mMenuAction = 0;
         mEnabledSetted = false;
         mReturnEmptyActionList = false;
         mExecPoint = QPointF();
@@ -35,7 +34,6 @@ public: // methods
     
 public: // data
     static HbAction *mMenuAction;
-    static HbAction *mActiveAction;
     static bool mEnabledSetted;
     static bool mReturnEmptyActionList;
     static QPointF mExecPoint;

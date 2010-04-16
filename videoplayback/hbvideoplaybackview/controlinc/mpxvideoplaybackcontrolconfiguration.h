@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#6 %
+// Version : %version: da1mmcf#7 %
 
 
 
@@ -63,11 +63,12 @@ class QMPXVideoPlaybackControlConfiguration : public QObject
 
         void updateControlsWithFileDetails();
 
-    private:
         /**
         * Create control list
         */
         void createControlList();
+		
+    private:
 
         /**
         * Delete controls from list

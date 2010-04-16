@@ -56,3 +56,15 @@ HbView* HbMainWindow::currentView() const
     }
     return 0;
 }
+
+void HbMainWindow::setCurrentView(HbView *view)
+{
+    for(int i = 0; i < mViews.count(); i++)
+    {
+        if(mViews[i] == view)
+        {
+            mViews.takeAt(i);
+        }
+    }
+    mViews.prepend(view);
+}

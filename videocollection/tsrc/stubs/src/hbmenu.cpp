@@ -19,7 +19,6 @@
 #include "hbmenudata.h"
 
 HbAction *HbMenuData::mMenuAction = 0;
-HbAction *HbMenuData::mActiveAction = 0;
 bool HbMenuData::mEnabledSetted = false;
 bool HbMenuData::mReturnEmptyActionList = false;
 QPointF HbMenuData::mExecPoint = QPointF();
@@ -59,17 +58,12 @@ HbAction* HbMenu::menuAction()
 
 HbAction* HbMenu::activeAction()
 {
-    return HbMenuData::mActiveAction;
+    return mActiveAction;
 }
 
 void HbMenu::setActiveAction(HbAction *action)
 {
-    if (HbMenuData::mActiveAction)
-    {
-        delete HbMenuData::mActiveAction;
-        HbMenuData::mActiveAction = 0;
-    }
-    HbMenuData::mActiveAction = action;
+    mActiveAction = action;
 }
 
 void HbMenu::setEnabled(bool enabled)

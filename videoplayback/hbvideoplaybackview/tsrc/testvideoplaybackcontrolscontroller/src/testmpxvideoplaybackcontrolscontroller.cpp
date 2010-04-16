@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  4 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -35,9 +35,11 @@
 #include "mpxvideoviewwrapper.h"
 #include "mpxvideoplaybackfullscreencontrol.h"
 #include "mpxvideoplaybackcontrolconfiguration.h"
-#include "mpxvideoplaybacknontouchvolumebar.h"
 #include "thumbnailmanager_qt.h"
 #include "mpxvideoplaybackdocumentloader.h"
+#include "hbvolumesliderpopup.h"
+#include "videoservices.h"
+#include "xqserviceutilxtra.h"
 
 #define private public
 #include "mpxvideoplaybackcontrolscontroller.h"
@@ -250,33 +252,9 @@ void TestMPXVideoPlaybackControlsController::testHandleEventStateChanged()
     TMPXVideoPlaybackControlCommandIds event = EMPXControlCmdStateChanged;
     
     //
-    // state change (EPbStateInitialised, streaming)
-    //
-    int value = EPbStateInitialised;  
-    mFileDetails->mPlaybackMode = EMPXVideoStreaming;
-    mController->handleEvent( event, value );    
-    verifyHandleEventStateChangedResult( value );
-    
-    //
-    // state change (EPbStateInitialised, live-streaming)
-    //
-    value = EPbStateInitialised;  
-    mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming;
-    mController->handleEvent( event, value );    
-    verifyHandleEventStateChangedResult( value );
-    
-    //
-    // state change (EPbStateInitialised, non-streaming)
-    //
-    value = EPbStateInitialised;    
-    mFileDetails->mPlaybackMode = EMPXVideoLocal;
-    mController->handleEvent( event, value );    
-    verifyHandleEventStateChangedResult( value );
-    
-    //
     // state change (EPbStateInitialising)
     //
-    value = EPbStateInitialising;    
+    int value = EPbStateInitialising;    
     mController->handleEvent( event, value );    
     verifyHandleEventStateChangedResult( value );
         
@@ -866,6 +844,66 @@ void TestMPXVideoPlaybackControlsController::testUpdateVideoRectDone()
 }
 
 // -------------------------------------------------------------------------------------------------
+// TestMPXVideoPlaybackControlsController::testIsAttachOperation
+// -------------------------------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackControlsController::testIsAttachOperation()
+{
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testIsAttachOperation()") );
+    
+    //
+    // get access to XQServiceUtilXtra stub 
+    //
+    XQServiceUtilXtra* extraUtil = XQServiceUtilXtra::instance();
+
+    //
+    // set service enable
+    //
+    extraUtil->setCurrentService( true );
+        
+    //
+    // initialize controlscontroller
+    //
+    init();    
+             
+    //
+    // verify 'mIsAttachOperation' flag is enabled
+    //
+    QVERIFY( mController->mIsAttachOperation == true ); 
+        
+    //
+    // clean up
+    //
+    cleanup();    
+    
+    //
+    // set service disable
+    //
+    extraUtil->setCurrentService( false );
+        
+    //
+    // initialize controlscontroller
+    //
+    init();    
+             
+    //
+    // verify 'mIsAttachOperation' flag is disabled
+    //
+    QVERIFY( mController->mIsAttachOperation == false ); 
+            
+    //
+    // clean up
+    //
+    cleanup();    
+    
+    //
+    // dereference extraUtil count
+    //
+    extraUtil->decreaseReferenceCount();
+    
+}
+
+// -------------------------------------------------------------------------------------------------
 // TestMPXVideoPlaybackControlsController::testslot_skipToNextVideoItem
 // -------------------------------------------------------------------------------------------------
 //
@@ -906,6 +944,67 @@ void TestMPXVideoPlaybackControlsController::testslot_skipToPreviousVideoItem()
     
     cleanup();    
 }
+
+// -------------------------------------------------------------------------------------------------
+// TestMPXVideoPlaybackControlsController::testslot_attachVideo
+// -------------------------------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
+{
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_attachVideo()") );
+
+    //
+    // get access to XQServiceUtilXtra stub to enable XQServiceUtil::isService() method 
+    //
+    XQServiceUtilXtra* extraUtil = XQServiceUtilXtra::instance();
+
+    //
+    // set service enable
+    //
+    extraUtil->setCurrentService( true );
+        
+    //
+    // initialize controlscontroller
+    //
+    init();    
+        
+    //
+    // connect signal with controller attachVideo() slot
+    //
+    bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( attachVideo() ) );
+    
+    //
+    // emit signal, this will in turns invoke videoservices itemSelected() slot
+    //
+    emit commandSignal();     
+    
+    //
+    // verify command EMPXPbvCmdClose has been issued
+    //
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdClose ); 
+    
+    //
+    // verify videoservices itemSelected() slot is called
+    //
+    QVERIFY( mController->mVideoServices->mItemSelected == true ); 
+    
+    //
+    // disconnect signal
+    //
+    disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( attachVideo() ) );
+    
+    //
+    // clean up
+    //
+    cleanup();  
+    
+    //
+    // dereference extraUtil count
+    //
+    extraUtil->decreaseReferenceCount();
+    
+}
+
 
 // End of file
     

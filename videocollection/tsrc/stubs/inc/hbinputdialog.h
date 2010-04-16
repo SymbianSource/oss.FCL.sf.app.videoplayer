@@ -30,10 +30,17 @@ public:
     HbInputDialog(QGraphicsItem *parent= 0) : HbWidget(parent) {}
     ~HbInputDialog() {}
 
+    /**
+     * Returns string in parameter text if mGetTextReturnValue is null QString.
+     */
     static QString getText(const QString &label,const QString &text = QString(),
             bool *ok = 0, QGraphicsScene *scene = 0, QGraphicsItem *parent = 0);
     
     static bool mGetTextFails;
+    
+    static QString mGetTextReturnValue;
+    
+    static int mGetTextCallCount;
 };
 
 #endif //HBINPUT_DIALOG_H

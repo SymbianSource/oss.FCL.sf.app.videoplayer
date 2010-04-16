@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 6 %
 
 
 
@@ -87,9 +87,7 @@ class QMPXVideoPlaybackControlsController : public QObject
 		                           int value );
 
     private slots:
-        void hideAllControls();
-        void skipToNextVideoItem();
-        void skipToPreviousVideoItem();
+
         void handleTappedOnScreen();
 
     public:

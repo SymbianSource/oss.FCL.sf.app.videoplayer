@@ -2524,6 +2524,7 @@ CMPXMedia* CVCXMyVideosCollectionPluginTester::GetMediaL( TInt aDrive, TInt aInd
     TInt realIndex = GetMediaIndexInCollectionL( aDrive, aIndex );
 
     media = (*iCollectionMediaArray)[realIndex];
+
     return media;
     }
 
@@ -3107,13 +3108,30 @@ const CMPXMediaArray* CVCXMyVideosCollectionPluginTester::GetAllCollectionMedia(
 //
 void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
     {
-    if( iMediaArray->Count() <= 0 ) return; 
+    CMPXMediaArray* iSourceMedias;
+    
+    if( !iUseCopiedMedias )
+        {
+        if( !iMediaArray )
+            {
+            User::Leave( KErrNotReady );
+            }
+        iSourceMedias = iMediaArray;
+        }
+    else
+        {
+        if( !iMediaArrayCopy )
+            {
+            User::Leave( KErrNotReady );
+            }
+        iSourceMedias = iMediaArrayCopy;
+        }
+    
+    if( iSourceMedias->Count() <= 0 ) return; 
     
     TInt retries = 200;
     RFile64 file;
-    TInt error( KErrInUse );
-    
-    const TInt KEnsureMediasNotInUseID = 1234567;
+    TInt error( KErrNone );
     
     TBool filesLocked( ETrue );
     // Check all files that they are not in use, retry few times.
@@ -3121,17 +3139,18 @@ void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
         {
         filesLocked = EFalse;
         
-        for( TInt i=0; i<iMediaArray->Count(); i++ )
+        for( TInt i=0; i<iSourceMedias->Count(); i++ )
             {
-            CMPXMedia* media = (*iMediaArray)[i];
+            CMPXMedia* media = (*iSourceMedias)[i];
             
             if( media->IsSupported( KMPXMediaGeneralUri ) )
                 {
                 const TDesC& localFilePath = media->ValueText( KMPXMediaGeneralUri );
 
-                error = file.Open( iFs, localFilePath, EFileShareExclusive );
-                if( error == KErrInUse || error == KErrLocked )
+                TInt err = file.Open( iFs, localFilePath, EFileShareExclusive );
+                if( err == KErrInUse || err == KErrLocked )
                     {
+                    error = err;
                     filesLocked = ETrue;
                     User::After( 1000000 * 5 ); // Wait
                     break;
@@ -3139,6 +3158,11 @@ void CVCXMyVideosCollectionPluginTester::EnsureMediaFilesAreNotInUseL()
                 file.Close();
                 }
             }
+        
+            if(!filesLocked)
+                {
+                error = KErrNone;
+                }
         }
 
     if( error != KErrNone && error != KErrNotFound && error != KErrBadName )

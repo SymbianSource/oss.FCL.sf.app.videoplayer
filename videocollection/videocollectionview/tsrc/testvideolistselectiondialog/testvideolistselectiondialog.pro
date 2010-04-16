@@ -28,12 +28,12 @@ INCLUDEPATH = . \
     ../../../tsrc/stubs/inc \
     \ # keep these at bottom so that stub headers are taken first
     ../../../inc \
+    ../../../../inc \    
     ../../../videocollectionview/inc \
     ../../../videocollectionwrapper/inc
     
 CONFIG += qtestlib \
-    hb \
-    symbian_test
+    hb
 
 LIBS += -lestor.dll \
     -lfbscli.dll \

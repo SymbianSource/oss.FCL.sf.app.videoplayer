@@ -389,7 +389,6 @@ void TestVideoListDataModel::testData()
     mMediaFactory->removeArray();
     
     const int TEST_INDEX = 3;
-
     
     mMediaFactory->createMediaItems(TEST_INDEX + 1);
     mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
@@ -431,14 +430,12 @@ void TestVideoListDataModel::testData()
     QVERIFY(data.toInt() == VideoCollectionCommon::StatusNone);
     
     data.clear();
-    data = mTestObjectInitialized->data(index, VideoCollectionCommon::KeyMetaData);
-    QMap<QString, QVariant> map = data.toMap();
-    QVERIFY(map.contains("metadata"));
-    QCOMPARE(map["metadata"].toString(), QString("metadata"));
-    
-    data.clear();
     data = mTestObjectInitialized->data(index, VideoCollectionCommon::KeyFilePath); 
     QCOMPARE(data.toString(), gQTMediaFilePathPrefix + QString::number(TEST_INDEX));
+
+    data.clear();
+    data = mTestObjectInitialized->data(index, VideoCollectionCommon::KeyNumberOfItems); 
+    QCOMPARE(data.toUInt(), (uint)(10+TEST_INDEX));
     
     // invalid role
     data.clear();
@@ -570,7 +567,6 @@ void TestVideoListDataModel::testPrepareDetails()
     modelIndex = mTestObjectInitialized->index(MEDIA_COUNT / 2, 0);
     result = mTestObjectInitialized->data(modelIndex, Qt::DisplayRole);
     QVERIFY (result.toStringList().count() == 2 );
-
     
     // missing both
     mMediaFactory->removeArray();        
@@ -702,7 +698,7 @@ void TestVideoListDataModel::testPrepareLengthString()
     //
     // cannot check the actual strin due localisation
     //
-    // cannot call prepareLengthStrings directly, need to call indirectly using 
+    // cannot call prepareShortLengthString directly, need to call indirectly using 
     // public data -method. That means: 
     // - we cannot test without videolistdata -object -case because tested throught data -call and
     //   existence is tested there already

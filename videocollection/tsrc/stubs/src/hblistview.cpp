@@ -25,6 +25,7 @@ bool HbListView::mReturnNullPrototype = false;
 bool HbListView::mVScrollBarIsNull = false;
 bool HbListView::mLatestrecycling = false;
 QPointF HbListView::mLongPressedPoint = QPointF();
+QPointF HbListView::mPanGesturePoint = QPointF();
 HbScrollArea::ClampingStyle HbListView::mLatestClamping = HbScrollArea::InvalidClamping;
 HbScrollArea::ScrollingStyle HbListView::mLatestScrolling = HbScrollArea::InvalidScrolling;
 bool HbListView::mLatestFrictionEnabled = false;

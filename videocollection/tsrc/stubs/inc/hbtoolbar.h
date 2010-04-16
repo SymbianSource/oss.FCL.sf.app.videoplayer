@@ -26,7 +26,7 @@ class HbToolBar : public HbWidget
 
 public:
     HbToolBar( QGraphicsItem *parent = 0 ) : HbWidget(parent) {};
-    virtual ~HbToolBar();
+    virtual ~HbToolBar() {};
 
     using HbWidget::addAction;
 /*    HbAction *addAction( const QString &text );

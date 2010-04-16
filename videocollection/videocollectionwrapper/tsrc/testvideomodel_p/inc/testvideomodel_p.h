@@ -59,6 +59,11 @@ signals:
     void signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*);
     
     /**
+     * emitted to verify itemModifiedSlot
+     */
+    void signalItemModified(const TMPXItemId &);
+
+    /**
      * emitted to test newVideoAvailableSlot
      */
     void signalNewVideoAvailable(CMPXMedia*);
@@ -81,7 +86,7 @@ signals:
    /**
     * emitted to get videoDetailsCompletedSlot to be called.
     */
-   void signalVideoDetailsCompleted(TMPXItemId);
+   void signalVideoDetailsCompleted(CMPXMedia*);
    
     // test functions for the test framework
 private slots:
@@ -150,20 +155,15 @@ private slots:
     void testGetVideoAgeProfileFromIndex();
         
     /**
-     * verifies getVideodurationFromIndex
+     * verifies getVideodurationFromIndex and getVideoDuration
      */
     void testGetVideodurationFromIndex();
 
     /**
-     * verifies getVideoDateFromIndex
+     * verifies getVideoDateFromIndex and getVideoDate
      */
     void testGetVideoDateFromIndex();
         
-    /**
-     * verifies getMetaDataFromIndex
-     */
-    void testGetMetaDataFromIndex();
-    
     /**
      * verifies markVideoRemoved and restoreRemoved
      */
@@ -208,6 +208,11 @@ private slots:
      * verifies albumListAvailableSlot
      */
     void testAlbumListAvailableSlot();
+        
+    /**
+     * verifies testItemModifiedSlot
+     */
+    void testItemModifiedSlot();
         
     /**
      * verifies newVideoAvailableSlot

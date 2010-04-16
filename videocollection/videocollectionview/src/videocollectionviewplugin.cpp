@@ -15,28 +15,35 @@
 *
 */
 
+// Version : %version: %
+
 // INCLUDE FILES
 #include <xqplugin.h>
 #include <xqserviceutil.h>
 #include <hbaction.h>
 #include <hbapplication.h>
 #include <hbinstance.h>
+#include <mpxitemid.h>
 
+#include "videoservices.h"
+#include "vcxmyvideosdefs.h"
 #include "videocollectionviewplugin.h"
 #include "videolistview.h"
 #include "videocollectionuiloader.h"
 #include "mpxhbvideocommondefs.h"
+#include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
 //
 VideoCollectionViewPlugin::VideoCollectionViewPlugin()
-    : mUiLoader(0),
-      mView(0),
-      mActivated(false),
-      mIsService(false)
+    : mUiLoader( 0 )
+    , mView( 0 )
+    , mActivated( false )
+    , mIsService( false )
 {
+	FUNC_LOG;
 }
 
 // ---------------------------------------------------------------------------
@@ -45,6 +52,7 @@ VideoCollectionViewPlugin::VideoCollectionViewPlugin()
 //
 VideoCollectionViewPlugin::~VideoCollectionViewPlugin()
 {
+	FUNC_LOG;
     destroyView();
 }
 
@@ -54,6 +62,7 @@ VideoCollectionViewPlugin::~VideoCollectionViewPlugin()
 //
 void VideoCollectionViewPlugin::createView()
 {
+	FUNC_LOG;
 	mActivated = false;
     if ( !mView ) {
 
@@ -66,16 +75,17 @@ void VideoCollectionViewPlugin::createView()
 
         if (XQServiceUtil::isService())
         {
-        	mIsService = true;
+        	INFO("VideoCollectionViewPlugin::createView() service flag set to true.");
+            mIsService = true;
         }
         
         mUiLoader->setIsService(mIsService);
 
 		bool ok(false);
 
-		QList<QObject *> objects = mUiLoader->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
-
-	    if (!ok)
+		mUiLoader->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
+	    
+		if (!ok)
 	    {
 	    	return;
 	    }
@@ -84,13 +94,13 @@ void VideoCollectionViewPlugin::createView()
 
         if(!mView)
         {
-            // TODO: handle error: creating view
+            ERROR(-1, "VideoCollectionViewPlugin::createView() failed to create view.");
             return;
         }
 
         if(!connect( mView, SIGNAL(command(int)), this, SIGNAL(command(int)) ) ||
            !connect( this, SIGNAL(doDelayeds()), mView, SLOT(doDelayedsSlot()) )) {
-            // TODO: handle error: connecting signal
+            ERROR(-1, "VideoCollectionViewPlugin::createView() failed to connect signals.");
             delete mView;
             mView = 0;
             return;
@@ -107,6 +117,7 @@ void VideoCollectionViewPlugin::createView()
 //
 void VideoCollectionViewPlugin::timerEvent(QTimerEvent *event)
 {
+	FUNC_LOG;
     if (event)
     {
         if (event->timerId() == mTimerId)
@@ -126,6 +137,7 @@ void VideoCollectionViewPlugin::timerEvent(QTimerEvent *event)
 //
 void VideoCollectionViewPlugin::destroyView()
 {
+	FUNC_LOG;
     deactivateView();
     disconnect();
 
@@ -141,11 +153,35 @@ void VideoCollectionViewPlugin::destroyView()
 //
 void VideoCollectionViewPlugin::activateView()
 {
-    if ( !mActivated ) {
+	FUNC_LOG;
+    if (!mActivated)
+    {
         HbMainWindow *wnd = mView->mainWindow();
         if(wnd)
         {
-            mView->activateView();
+            TMPXItemId itemId = TMPXItemId::InvalidId();
+            bool isService = XQServiceUtil::isService();
+            if (isService)
+            {
+                VideoServices *videoServices = VideoServices::instance();
+                if (videoServices)
+                {
+                    VideoServices::TVideoService serviceType =
+                        videoServices->currentService();
+                    if (serviceType == VideoServices::EBrowse)
+                    {
+                        // activate browsing service
+                        itemId.iId1 = videoServices->getBrowseCategory();
+                        itemId.iId2 = KVcxMvcMediaTypeCategory;
+                    }
+                }
+            }
+            int err = mView->activateView(itemId);
+            if (err != 0)
+            {
+                // TODO: what to do if error?
+                return;
+            }
             mActivated = true;
         }
     }
@@ -157,6 +193,7 @@ void VideoCollectionViewPlugin::activateView()
 //
 void VideoCollectionViewPlugin::deactivateView()
 {
+	FUNC_LOG;
     if ( mActivated ) {
         mView->deactivateView();
         mActivated = false;
@@ -169,17 +206,19 @@ void VideoCollectionViewPlugin::deactivateView()
 //
 QGraphicsWidget* VideoCollectionViewPlugin::getView()
 {
+	FUNC_LOG;
     return mView;
 }
 
 // ---------------------------------------------------------------------------
 // Slot: Orientation change
-// // TODO: can be removed
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionViewPlugin::orientationChange( Qt::Orientation /* orientation */ )
+void VideoCollectionViewPlugin::orientationChange( Qt::Orientation  orientation)
 {
+	FUNC_LOG;
     // view handles orientation individually
+    Q_UNUSED(orientation);
 }
 
 // ---------------------------------------------------------------------------
@@ -188,6 +227,7 @@ void VideoCollectionViewPlugin::orientationChange( Qt::Orientation /* orientatio
 //
 void VideoCollectionViewPlugin::back()
 {
+	FUNC_LOG;
     if ( mActivated ) {
         mView->back();
     }

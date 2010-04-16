@@ -24,6 +24,7 @@
 StubSignalReceiver::StubSignalReceiver() :
 mLatestPtr(0),
 mLatestItemId(TMPXItemId::InvalidId()),
+mLatestModifiedItemId(TMPXItemId::InvalidId()),
 mLatestInteger(-1)
 {
     
@@ -46,6 +47,7 @@ void StubSignalReceiver::resetLatestItems()
 {
     mLatestPtr = 0;
     mLatestItemId = TMPXItemId::InvalidId();
+    mLatestModifiedItemId = TMPXItemId::InvalidId();
     mLatesListData.clear();
     mLatestInteger = -1;
 }
@@ -60,12 +62,22 @@ void* StubSignalReceiver::getLatestPointerAddr()
 }
  
 // -----------------------------------------------------------------------------
-// getLatestInt
+// getLatestItemId
 // -----------------------------------------------------------------------------
 //
 TMPXItemId StubSignalReceiver::getLatestItemId()
 {
     return mLatestItemId;
+}
+
+
+// -----------------------------------------------------------------------------
+// getLatestModifiedItemId
+// -----------------------------------------------------------------------------
+//
+TMPXItemId StubSignalReceiver::getLatestModifiedItemId()
+{
+    return mLatestModifiedItemId;
 }
 
 // -----------------------------------------------------------------------------
@@ -157,9 +169,9 @@ void StubSignalReceiver::videoDeleteCompletedSlot(int count, QList<TMPXItemId> *
 // videoDetailsCompletedSlot
 // -----------------------------------------------------------------------------
 //
-void StubSignalReceiver::videoDetailsCompletedSlot(TMPXItemId videoId)
+void StubSignalReceiver::videoDetailsCompletedSlot(CMPXMedia* media)
 {
-    mLatestItemId = videoId;
+    mLatestPtr = media;
 }
 
 // -----------------------------------------------------------------------------
@@ -180,6 +192,15 @@ void StubSignalReceiver::albumListAvailableSlot(TMPXItemId albumId,
 void StubSignalReceiver::itemDeletedSlot(TMPXItemId id)
 {
     mLatestItemId = id;
+}
+
+// -----------------------------------------------------------------------------
+// itemDeletedSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::itemModifiedSlot(const TMPXItemId &itemId)
+{
+    mLatestModifiedItemId = itemId;
 }
 
 // -----------------------------------------------------------------------------

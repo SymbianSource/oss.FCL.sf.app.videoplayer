@@ -69,7 +69,7 @@ public:
     /**
      * sets mOpenStatus
      */
-    void setOpenStatus(int status);
+    void setOpenStatus(int status, bool startOpening = true);
     
     /**
      * sets mLatestItemId
@@ -116,6 +116,8 @@ private:
     
 public:
 	static int mStartOpenCurrentStateCallCount;
+	
+	static bool mSetOpenStatusStartOpening;
     
 };
 

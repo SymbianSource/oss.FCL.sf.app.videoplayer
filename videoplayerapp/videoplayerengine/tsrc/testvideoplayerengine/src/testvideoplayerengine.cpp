@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: %
+
 // INCLUDES
 #include <QtTest/QtTest>
 #include <qdebug.h>
@@ -25,6 +27,9 @@
 #include <hbaction.h>
 #include <hbapplication.h>
 #include <qabstractitemmodel.h>
+#include <xqsharablefile.h>
+#include <f32file.h>
+#include <qfile.h>
 
 #include "mpxhbvideocommondefs.h"
 #include "testvideoplayerengine.h"
@@ -32,6 +37,8 @@
 #include "stub/inc/videoservices.h"
 #include "stub/inc/xqpluginloader.h"
 #include "../stub/inc/mpxvideoplaybackwrapper.h"
+#include "mpxvideo_debug.h"
+
 #define private public
 #include "videoplayerengine.h"
 #undef private
@@ -63,10 +70,13 @@ TestVideoPlayerEngine::TestVideoPlayerEngine()
     , mCollectionViewPlugin(0)
     , mFileDetailsViewPlugin(0)
 {
+    MPX_DEBUG(_L("TestVideoPlayerEngine::TestVideoPlayerEngine()"));
 }
 
 TestVideoPlayerEngine::~TestVideoPlayerEngine()
 {
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::~TestVideoPlayerEngine()"));
+    
     XQPluginLoader::cleanup();
     
     delete mTestObject;
@@ -74,8 +84,10 @@ TestVideoPlayerEngine::~TestVideoPlayerEngine()
 }
 
 
-void TestVideoPlayerEngine::init(bool isService)
+void TestVideoPlayerEngine::init( bool isService )
 {
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::init()"));
+    
     XQPluginLoader::mFailToLoadPluginUid  = -1; 
     
     mCurrentViewPlugin     = 0;
@@ -89,6 +101,8 @@ void TestVideoPlayerEngine::init(bool isService)
 
 void TestVideoPlayerEngine::cleanup()
 {
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::cleanup()"));
+    
     mCurrentViewPlugin     = 0;
     mPlaybackViewPlugin    = 0;
     mCollectionViewPlugin  = 0;
@@ -102,6 +116,8 @@ void TestVideoPlayerEngine::cleanup()
 
 void TestVideoPlayerEngine::testCreateDelete()
 {
+    MPX_DEBUG(_L("TestVideoServices::testCreateDelete()"));
+    
     //Test object creation and deletion
 	init();
 
@@ -124,6 +140,8 @@ void TestVideoPlayerEngine::testCreateDelete()
 
 void TestVideoPlayerEngine::testCreateDeleteService()
 {
+    MPX_DEBUG(_L("TestVideoServices::testCreateDeleteService()"));
+    
     //Test object creation and deletion
 	init(true);
 
@@ -145,6 +163,8 @@ void TestVideoPlayerEngine::testCreateDeleteService()
 
 void TestVideoPlayerEngine::testInitialize()
 {
+    MPX_DEBUG(_L("TestVideoServices::testInitialize()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -178,6 +198,8 @@ void TestVideoPlayerEngine::testInitialize()
 
 void TestVideoPlayerEngine::testInitializeService()
 {
+    MPX_DEBUG(_L("TestVideoServices::testInitializeService()"));
+    
     init(true);
 
     QVERIFY(mTestObject);
@@ -193,9 +215,9 @@ void TestVideoPlayerEngine::testInitializeService()
     mTestObject->initialize();
 
     QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
+    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
     QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
+    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
     QVERIFY(mTestObject->mPlaybackWrapper != 0);
     QVERIFY(mTestObject->mVideoServices != 0);
     QVERIFY(mTestObject->mIsService == true);
@@ -211,6 +233,8 @@ void TestVideoPlayerEngine::testInitializeService()
 
 void TestVideoPlayerEngine::testMultipleInitialize()
 {
+    MPX_DEBUG(_L("TestVideoServices::testMultipleInitialize()"));
+    
 	init();
 
     QVERIFY(mTestObject);
@@ -252,6 +276,8 @@ void TestVideoPlayerEngine::testMultipleInitialize()
 
 void TestVideoPlayerEngine::testMultipleInitializeService()
 {
+    MPX_DEBUG(_L("TestVideoServices::testMultipleInitializeService()"));
+    
 	init(true);
 
     QVERIFY(mTestObject);
@@ -266,9 +292,9 @@ void TestVideoPlayerEngine::testMultipleInitializeService()
     mTestObject->initialize();
 
     QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
+    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
     QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
+    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
     QVERIFY(mTestObject->mVideoServices != 0);
     QVERIFY(mTestObject->mIsService == true);
     QVERIFY(VideoServices::mReferenceCount == 1);
@@ -296,6 +322,8 @@ void TestVideoPlayerEngine::testMultipleInitializeService()
 
 void TestVideoPlayerEngine::testHandleCommandPreInit()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPreInit()"));
+    
 	init();
 
     QVERIFY(mTestObject);
@@ -325,6 +353,8 @@ void TestVideoPlayerEngine::testHandleCommandPreInit()
 
 void TestVideoPlayerEngine::testHandleCommandPostInit()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPostInit()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -405,6 +435,8 @@ void TestVideoPlayerEngine::testHandleCommandPostInit()
 
 void TestVideoPlayerEngine::testHandleCommandPreAndPostInit()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPreAndPostInit()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -495,6 +527,8 @@ void TestVideoPlayerEngine::testHandleCommandPreAndPostInit()
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -584,6 +618,8 @@ void TestVideoPlayerEngine::testHandleCommandPluginFail()
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail1()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail1()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -680,6 +716,8 @@ void TestVideoPlayerEngine::testHandleCommandPluginFail1()
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail2()
 {
+    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail2()"));
+    
     init();
 
     QVERIFY(mTestObject);
@@ -771,14 +809,45 @@ void TestVideoPlayerEngine::testHandleCommandPluginFail2()
 
 void TestVideoPlayerEngine::testPlayMedia()
 {
+    MPX_DEBUG(_L("TestVideoServices::testPlayMedia()"));
+    
+	  // 1. test with a string
     init();    
     mTestObject->playMedia( QString("c:\\data\\videos\\test.3gp"));
     QVERIFY(mTestObject);
     cleanup();
+    
+    // 2. test with a file handle
+    init();
+    XQSharableFile sf;
+    if ( sf.open("C:\\data\\videos\\test.3gp") )
+    {
+        RFile rFile;
+        bool handleOK = sf.getHandle( rFile );  
+        if ( handleOK )
+        {
+            mTestObject->playMedia( rFile );
+        }    
+         
+        QVERIFY(mTestObject);
+        
+        sf.close();
+    }
+    cleanup();
+
+    // 3. test with a filename
+    init();
+    QFile qfile("C:\\data\\videos\\test.3gp");
+    mTestObject->playMedia( qfile.fileName() );
+    QVERIFY(mTestObject);
+    cleanup();
+    
 }
 
 void TestVideoPlayerEngine::testSetEmbedded()
 {
+    MPX_DEBUG(_L("TestVideoServices::testSetEmbedded()"));
+    
     init();
     QVERIFY(mTestObject);
     mTestObject->setEmbedded();
@@ -788,6 +857,7 @@ void TestVideoPlayerEngine::testSetEmbedded()
 
 void TestVideoPlayerEngine::cleanupTestCase()
 {
+    MPX_DEBUG(_L("TestVideoServices::cleanupTestCase()"));    
     // all common cleanup here
 }
 

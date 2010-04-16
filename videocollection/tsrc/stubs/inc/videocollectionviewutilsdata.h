@@ -29,8 +29,10 @@ public: // methods
         mLastError = 0;
         mLoadSortingValuesFails = false;
         mGetServiceIconStringsFails = false;
-        mSortRole = 0;
-        mSortOrder = Qt::AscendingOrder;
+        mVideoSortRole = -1;
+        mCollectionSortRole = -1;
+        mVideoSortOrder = Qt::AscendingOrder;
+        mCollectionSortOrder = Qt::AscendingOrder;
         mIconString = "";
         mPressedString = "";
         mLastStatusAdditional = QVariant();
@@ -40,8 +42,10 @@ public: // data
     static int mLastError;
     static bool mLoadSortingValuesFails;
     static bool mGetServiceIconStringsFails;
-    static int mSortRole;
-    static Qt::SortOrder mSortOrder;
+    static int mVideoSortRole;
+    static int mCollectionSortRole;
+    static Qt::SortOrder mVideoSortOrder;
+    static Qt::SortOrder mCollectionSortOrder;
     static QString mIconString;
     static QString mPressedString;
     static QVariant mLastStatusAdditional;

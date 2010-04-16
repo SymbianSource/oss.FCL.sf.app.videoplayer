@@ -34,7 +34,7 @@ EXPORTS
 	?contextTitle@VideoServices@@QBE?AVQString@@XZ @ 33 NONAME ; class QString VideoServices::contextTitle(void) const
 	?initialize@QVideoPlayerEngine@@QAEXXZ @ 34 NONAME ; void QVideoPlayerEngine::initialize(void)
 	?trUtf8@QVideoPlayerEngine@@SA?AVQString@@PBD0@Z @ 35 NONAME ; class QString QVideoPlayerEngine::trUtf8(char const *, char const *)
-	?loadPlugin@QVideoPlayerEngine@@AAEXW4MpxHbVideoViewType@MpxHbVideoCommon@@@Z @ 36 NONAME ; void QVideoPlayerEngine::loadPlugin(enum MpxHbVideoCommon::MpxHbVideoViewType)
+	?loadPluginAndCreateView@QVideoPlayerEngine@@AAEXW4MpxHbVideoViewType@MpxHbVideoCommon@@@Z @ 36 NONAME ; void QVideoPlayerEngine::loadPluginAndCreateView(enum MpxHbVideoCommon::MpxHbVideoViewType)
 	?currentService@VideoServices@@QAE?AW4TVideoService@1@XZ @ 37 NONAME ; enum VideoServices::TVideoService VideoServices::currentService(void)
 	?qt_metacall@VideoServices@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 38 NONAME ; int VideoServices::qt_metacall(enum QMetaObject::Call, int, void * *)
 	?mInstance@VideoServices@@0PAV1@A @ 39 NONAME ; class VideoServices * VideoServices::mInstance
@@ -44,4 +44,9 @@ EXPORTS
 	?instance@VideoServices@@SAPAV1@PAVQVideoPlayerEngine@@@Z @ 43 NONAME ; class VideoServices * VideoServices::instance(class QVideoPlayerEngine *)
 	??_EQVideoPlayerEngine@@UAE@I@Z @ 44 NONAME ; QVideoPlayerEngine::~QVideoPlayerEngine(unsigned int)
 	?doDelayedLoad@QVideoPlayerEngine@@AAEXXZ @ 45 NONAME ; void QVideoPlayerEngine::doDelayedLoad(void)
+	?playMedia@QVideoPlayerEngine@@QAEXVRFile@@@Z @ 46 NONAME ; void QVideoPlayerEngine::playMedia(class RFile)
+	?getBrowseCategory@VideoServices@@QBEHXZ @ 47 NONAME ; int VideoServices::getBrowseCategory(void) const
+	?browsingEnded@VideoServices@@QAEXXZ @ 48 NONAME ; void VideoServices::browsingEnded(void)
+	?createPlayAndDetailsViews@QVideoPlayerEngine@@AAEXXZ @ 49 NONAME ; void QVideoPlayerEngine::createPlayAndDetailsViews(void)
+	?setCurrentView@QVideoPlayerEngine@@AAEXXZ @ 50 NONAME ; void QVideoPlayerEngine::setCurrentView(void)
 

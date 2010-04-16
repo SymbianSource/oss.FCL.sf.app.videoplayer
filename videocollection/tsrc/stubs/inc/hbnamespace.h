@@ -206,6 +206,13 @@ public:
         ItemType_IndexFeedback,
         ItemType_Last = QGraphicsItem::UserType + 20000
     };
+    
+    enum ApplicationFlag {
+        DefaultApplicationFlags = 0x00,
+        NoSplash                = 0x01
+    };
+    Q_DECLARE_FLAGS(ApplicationFlags, ApplicationFlag)
+    
     /*
 
     enum WidgetAttribute
@@ -324,13 +331,13 @@ public:
     /*!
         A type definition for text wrapping
     */
-/*    enum TextWrapping
+    enum TextWrapping
     {
         TextNoWrap = 0,
         TextWordWrap = 1,
         TextWrapAnywhere = 3
     };
-        
+/*        
     enum InstantInteraction {
         InstantPressed = 0,
         InstantReleased,

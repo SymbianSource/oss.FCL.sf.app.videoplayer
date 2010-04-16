@@ -15,12 +15,12 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #include <hbwidget.h>
 #include <hbtransparentwindow.h>
-#include <hbprogressbar.h>
+#include <hbprogressslider.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -84,29 +84,12 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
 
     QGraphicsWidget *object = NULL;
         
-    if ( name == "transparentWindow" )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating transparentWindow") );
-        
-        object = new HbTransparentWindow();
-		    object->setObjectName( name );
-        
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending to object list") );
-        mWidgets.append( object );                
-    }
-    else if ( name == "title"  || name == "positionLabel" || name == "durationLabel" )
+    if ( name == "progressSlider" )
     {        
-        object = new HbLabel();
-		    object->setObjectName( name );
-        mWidgets.append( object );
-    }
-    else if ( name == "progressSlider" )
-    {        
-        object = new HbProgressBar();
-		    object->setObjectName( name );
+        object = new HbProgressSlider();
+		object->setObjectName( name );
         mWidgets.append( object );        
     }
-    
 
     return object;
 }

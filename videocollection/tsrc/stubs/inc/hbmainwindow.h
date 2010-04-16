@@ -35,7 +35,9 @@ public:
      */
     HbMainWindow(QWidget *parent = 0, Hb::WindowFlags windowFlags = Hb::WindowFlagNone) :
     mSoftKeyAction(0),
-    mOrientation(Qt::Vertical)
+    mOrientation(Qt::Vertical),
+    mOrientationSet(false),
+    mCurrentView(0)
     {
         Q_UNUSED(parent);
         Q_UNUSED(windowFlags);
@@ -44,7 +46,7 @@ public:
     /**
      * destructor
      */
-    ~HbMainWindow(){};
+    ~HbMainWindow() {};
     
     /**
      * dummy
@@ -82,6 +84,8 @@ public:
     
     HbView *currentView() const;
     
+    void setCurrentView(HbView *view);
+    
     Qt::Orientation orientation() const
     {
         return mOrientation;
@@ -91,16 +95,19 @@ public:
     {
         Q_UNUSED(animate);
         mOrientation = orientation;
+        mOrientationSet = true;
     }
     
     void unsetOrientation(bool animate = true)
     {
         Q_UNUSED(animate);
         mOrientation = Qt::Vertical;
+        mOrientationSet = false;
     }
-
+    
 signals:
 
+    void aboutToChangeOrientation();
     void orientationChanged(Qt::Orientation orientation);
     
 public:
@@ -119,5 +126,13 @@ public:
      * orientation
      */
     Qt::Orientation mOrientation;
+    
+    /**
+     * orientation set
+     */
+    bool mOrientationSet;
+    
+    HbView *mCurrentView;
+    
 };
 #endif

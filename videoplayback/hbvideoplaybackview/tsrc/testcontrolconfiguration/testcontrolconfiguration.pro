@@ -14,7 +14,7 @@
 # Description: Project file for building testcontrolconfiguration
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 
 TEMPLATE = app
@@ -29,8 +29,7 @@ INCLUDEPATH += stub/inc \
                ../inc \
                ../../inc \   
                ../../../inc \            
-               ../../../../inc \                                          
-               $$MW_LAYER_SYSTEMINCLUDE                                            
+               ../../../../inc \
 
 DEPENDPATH += stub/inc stub/src inc src  
         

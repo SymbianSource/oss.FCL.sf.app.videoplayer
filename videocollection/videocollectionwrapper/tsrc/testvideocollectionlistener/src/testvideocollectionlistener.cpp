@@ -1,4 +1,3 @@
-
 /**
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
@@ -178,21 +177,32 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     CMPXMediaArray *array = mMediaFactory->newMediaArray();  
     
     CMPXMediaArray *arrayToTest = 0;
-  
-    QWARN("test for other paths than all videos are missing");
+
+    // empty array, no path   
+    mMediaFactory->putValuePtr<CMPXMediaArray>(media, KMPXMediaArrayContents, array);
+    mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 ); 
+    arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
+    QVERIFY(arrayToTest == 0);
+
     CMPXCollectionPath* collectionPath = 0;
     TRAP_IGNORE(
-            collectionPath =  CMPXCollectionPath::NewL();
-            collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
-            collectionPath->AppendL( KVcxMvcCategoryIdAll););
-  
-    // empty array
-    mMediaFactory->putValuePtr<CMPXMediaArray>(media, KMPXMediaArrayContents, array);   
+           collectionPath =  CMPXCollectionPath::NewL();
+           collectionPath->AppendL( KVcxUidMyVideosMpxCollection ););
+    
+    // empty array, path exists level incorrect (new video list, not category neither album level)     
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
     mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 ); 
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
+    
+    delete collectionPath;
+    // empty array, path exists level correct      
+    collectionPath = 0;
+    TRAP_IGNORE(
+          collectionPath =  CMPXCollectionPath::NewL();
+          collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
+          collectionPath->AppendL( KVcxMvcCategoryIdAll););
 
     // array of items from different levels, everything is reported 
     mStubCollectionClient->setCollectionLevel(VideoCollectionCommon::ELevelCategory);
@@ -219,6 +229,14 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
+    
+    delete collectionPath;
+    collectionPath = 0;
+    TRAP_IGNORE(
+         collectionPath =  CMPXCollectionPath::NewL();
+         collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
+         collectionPath->AppendL( KVcxMvcMediaTypeCategory););
+    mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
     
     mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
        
@@ -302,10 +320,10 @@ void TestVideoCollectionListener::testHandleOpenLPlaylistFunc()
 }
 
 // -----------------------------------------------------------------------------
-// testHandleCommandComplete
+// testHandleCommandCompleteInvalid
 // -----------------------------------------------------------------------------
 //
-void TestVideoCollectionListener::testHandleCommandComplete()
+void TestVideoCollectionListener::testHandleCommandCompleteInvalid()
 {
     
     User::Heap().__DbgMarkStart(); 
@@ -315,52 +333,179 @@ void TestVideoCollectionListener::testHandleCommandComplete()
     // error != KErrNone
     mStubCollection->callHandleCommandComplete(pCommand, -2);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // command == NULL
     mStubCollection->callHandleCommandComplete(0, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // null command + error != KErrNone
     mStubCollection->callHandleCommandComplete(0, -2);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
      
     // command without id
     delete pCommand;
     pCommand = mMediaFactory->newMedia();
     mStubCollection->callHandleCommandComplete(pCommand, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // no command attribute
     delete pCommand;
     pCommand = mMediaFactory->newMedia(0);
     mStubCollection->callHandleCommandComplete(pCommand, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // invalid KVcxMediaMyVideosCommandId
     int value = (KVcxCommandMyVideosGetMediaFullDetailsByMpxId + 10);
     mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
     mStubCollection->callHandleCommandComplete(pCommand, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
+    delete pCommand;
+
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    
+    int remHeap = User::Heap().__DbgMarkEnd(0);
+    QVERIFY(remHeap == 0);   
+}
+
+// -----------------------------------------------------------------------------
+// testHandleCommandCompleteGetDetails
+// -----------------------------------------------------------------------------
+//
+void TestVideoCollectionListener::testHandleCommandCompleteGetDetails()
+{
+    mSignalReceiver->resetLatestItems();
+    User::Heap().__DbgMarkStart(); 
+    CMPXCommand *pCommand = mMediaFactory->newMedia(0);
+    // cmd KVcxCommandMyVideosGetMediaFullDetailsByMpxId
     // no media object in command
+    int value;
     value = KVcxCommandMyVideosGetMediaFullDetailsByMpxId;
     mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
     mStubCollection->callHandleCommandComplete(pCommand, 0);
-    QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
-    // NOTE! we cannot test with item without KMPXMediaGeneralId, because after creation CMPXMedia 
-    //       always contain default value
-    
-    // correct item    
+    // correct item 
+    delete pCommand;
+    pCommand = mMediaFactory->newMedia();
     CMPXMedia *subMedia = mMediaFactory->newMedia(10);
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
     mMediaFactory->putValuePtr<CMPXMedia>(pCommand, KMPXCommandColAddMedia, subMedia);
     mStubCollection->callHandleCommandComplete(pCommand, 0);
-    QVERIFY(mSignalReceiver->getLatestItemId().iId1  == 10);
-
+    TMPXItemId itemId = TMPXItemId::InvalidId();
+    TMPXItemId expectedId = TMPXItemId::InvalidId();
+    TRAP_IGNORE(itemId = static_cast<CMPXMedia*>(mSignalReceiver->getLatestPointerAddr())->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId));
+    TRAP_IGNORE(expectedId = subMedia->ValueTObjectL<TMPXItemId>(KMPXMediaGeneralId));
+    QVERIFY(itemId == expectedId);
+    
     delete subMedia;
     delete pCommand;
     
+    int remHeap = User::Heap().__DbgMarkEnd(0);
+    QVERIFY(remHeap == 0);   
+}
+
+// -----------------------------------------------------------------------------
+// testHandleCommandCompleteRemoveAlbums
+// -----------------------------------------------------------------------------
+//
+void TestVideoCollectionListener::testHandleCommandCompleteRemoveAlbums()
+{
+    mSignalReceiver->resetLatestItems();
+    
+    User::Heap().__DbgMarkStart(); 
+    CMPXCommand *pCommand = mMediaFactory->newMedia(0);
+    
+    int value = KVcxCommandMyVideosRemoveAlbums;
+
+    // no messageArray object in command
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
+    mStubCollection->callHandleCommandComplete(pCommand, 0);
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    
+    delete pCommand;
+    pCommand = mMediaFactory->newMedia();
+    
+    // empty message array    
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
+    CMPXMediaArray *array = mMediaFactory->newMediaArray();
+    mMediaFactory->putValuePtr<CMPXMediaArray>(pCommand, KMPXMediaArrayContents, array);
+    mStubCollection->callHandleCommandComplete(pCommand, 0);
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    
+    delete array;
+    delete pCommand;
+    pCommand = mMediaFactory->newMedia();
+    
+    // some items, no failed
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
+    CMPXMedia *media1 = mMediaFactory->newMedia(1,0);
+    CMPXMedia *media2 = mMediaFactory->newMedia(2,0);
+    CMPXMedia *media3 = mMediaFactory->newMedia(3,0);
+    array = mMediaFactory->newMediaArray();
+    TRAP_IGNORE(
+        array->AppendL(media1);
+        array->AppendL(media2);
+        array->AppendL(media3););
+    
+    mMediaFactory->putValuePtr<CMPXMediaArray>(pCommand, KMPXMediaArrayContents, array);
+    mStubCollection->callHandleCommandComplete(pCommand, 0);
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    delete array;
+    delete pCommand;
+
+    // some items, one invalid item, no failed   
+    array = mMediaFactory->newMediaArray();
+    pCommand = mMediaFactory->newMedia();
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
+    media1 = mMediaFactory->newMedia(1,0);
+    media2 = mMediaFactory->newMedia(2,0);
+    media3 = mMediaFactory->newMedia(3,0);
+    CMPXMedia *media4;
+    TRAP_IGNORE(media4 = CMPXMedia::NewL());
+    TRAP_IGNORE(
+        array->AppendL(media1);
+        array->AppendL(media2);
+        array->AppendL(media3);
+        array->AppendL(media4););
+    
+    mMediaFactory->putValuePtr<CMPXMediaArray>(pCommand, KMPXMediaArrayContents, array);
+    mStubCollection->callHandleCommandComplete(pCommand, 0);
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    
+    delete array;
+    delete pCommand;
+    
+    // some items, one failed    
+    array = mMediaFactory->newMediaArray();
+    pCommand = mMediaFactory->newMedia();
+    mMediaFactory->putTValue<int>(pCommand, KVcxMediaMyVideosCommandId, value );
+    media1 = mMediaFactory->newMedia(1,0);
+    value = 0;
+    mMediaFactory->putTValue<int>(media1, KVcxMediaMyVideosInt32Value, value);
+    media2 = mMediaFactory->newMedia(2,0);
+    value = 1;
+    mMediaFactory->putTValue<int>(media2, KVcxMediaMyVideosInt32Value, value);
+    media3 = mMediaFactory->newMedia(3,0);
+    TRAP_IGNORE(
+            array->AppendL(media1);
+            array->AppendL(media2);
+            array->AppendL(media3););
+    
+    mMediaFactory->putValuePtr<CMPXMediaArray>(pCommand, KMPXMediaArrayContents, array);
+    mStubCollection->callHandleCommandComplete(pCommand, 0);
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() != 0);
+    QVERIFY(mSignalReceiver->getLatestListData().count() == 1);
+    QVERIFY(mSignalReceiver->getLatestListData().at(0) == TMPXItemId(2,0));
+    mSignalReceiver->resetLatestItems();
+    delete array;
+    delete pCommand;
     
     int remHeap = User::Heap().__DbgMarkEnd(0);
     QVERIFY(remHeap == 0);   
@@ -805,9 +950,30 @@ void TestVideoCollectionListener::testMyVideosDeleteMsgArray()
     delete array;
     array = mMediaFactory->newMediaArray();
     mMediaFactory->putValuePtr<CMPXMediaArray>( message, KMPXMediaArrayContents, array);
+    
+    // item(s) does contain KVcxMediaMyVideosInt32Value + one invalid item (== no id) before of that
+    mSignalReceiver->resetLatestItems();
+    CMPXMedia *media = 0;
+    TRAP_IGNORE(media = CMPXMedia::NewL());
+    mMediaFactory->putArrayContent( array, mMediaFactory->newMedia(1));
+    mMediaFactory->putArrayContent( array, media);
+    media = mMediaFactory->newMedia(3); 
+    value = 1;
+    mMediaFactory->putTValue<int>( media, KVcxMediaMyVideosInt32Value, value);
+    mMediaFactory->putArrayContent( array, media);  
+    mMediaFactory->putValuePtr<CMPXMediaArray>( message, KMPXMessageArrayContents, array);
+    mStubCollection->callHandleCollectionMessage(message, 0);
+    QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId()); 
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    QVERIFY(mSignalReceiver->getLatestIntegerData() == -1);
+    QVERIFY(mSignalReceiver->getLatestListData().count() == 0);
+    
+    delete array;
+    array = mMediaFactory->newMediaArray();
+    mMediaFactory->putValuePtr<CMPXMediaArray>( message, KMPXMediaArrayContents, array);
    
     // item(s) containing KVcxMediaMyVideosInt32Value -values, both incorrect (1) and correct (3)
-    CMPXMedia *media = 0;
+    
     mMediaFactory->putArrayContent( array, mMediaFactory->newMedia(1));
     
     media = mMediaFactory->newMedia(2);
@@ -869,12 +1035,14 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     // - we're testing only for KMPXMessageGeneral only once, because handleGeneralMPXMessage is already verified
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // invalid
     msgId = KMPXMessageIdItemChanged + 1;
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // KMPXMessageIdItemChanged with no content 
@@ -883,12 +1051,14 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXMessageId>(message, KMPXMessageGeneralId, msgId);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // KMPXMessageIdItemChanged with level != CVideoCollectionClient::ELevelVideos
     mStubCollectionClient->setCollectionLevel(VideoCollectionCommon::ELevelVideos - 1);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
              
     // KMPXMessageIdItemChanged with EMPXItemModified event type, no id
@@ -897,6 +1067,7 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXChangeEventType>(message, KMPXMessageChangeEventType, eventType);   
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // KMPXMessageIdItemChanged with existing with EMPXItemModified event type, iId2 != album
@@ -906,24 +1077,36 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == eventId);
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
-    
+
     // KMPXMessageIdItemChanged with existing with EMPXItemModified event type iId2 == album, not same as opened
     eventId.iId1 = 1;
     eventId.iId2 = 2;
     mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == eventId);
+    QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
+    
+    // KMPXMessageIdItemChanged with existing with EMPXItemModified event type iId2 == category, not same as opened
+    eventId.iId1 = 1;
+    eventId.iId2 = 1;
+    mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
+    mStubCollection->callHandleCollectionMessage(message, 0);
+    QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == eventId);
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     // KMPXMessageIdItemChanged with existing with EMPXItemModified event type iId2 == album, same as opened
-    eventId.iId1 = 1;
+    eventId.iId1 = 2;
     eventId.iId2 = 2;
     int callCount = mStubCollectionClient->mOpenItemCallCount;    
     mStubCollectionClient->openItem(eventId);
     QVERIFY(mStubCollectionClient->mOpenItemCallCount == callCount + 1);
     mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
     mStubCollection->callHandleCollectionMessage(message, 0);
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == eventId);
     QVERIFY(mStubCollectionClient->mOpenItemCallCount == callCount + 2);
     mSignalReceiver->resetLatestItems();
     
@@ -935,6 +1118,7 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId().iId1 == 10);
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     
     mSignalReceiver->resetLatestItems();
@@ -946,6 +1130,7 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXChangeEventType>(message, KMPXMessageChangeEventType, eventType);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     // mpx id should have not changed into 10
     QVERIFY(mStubCollectionClient->getLatestMPXId() == eventId);
@@ -955,6 +1140,7 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putTValue<TMPXItemId>(message, KMPXMessageMediaGeneralId, eventId);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() == 0);
     QVERIFY(mStubCollectionClient->getLatestMPXId() == eventId);
     
@@ -964,6 +1150,7 @@ void TestVideoCollectionListener::testHandleMPXMessage()
     mMediaFactory->putValuePtr<CMPXMedia>(message, KMPXCommandColAddMedia, media);
     mStubCollection->callHandleCollectionMessage(message, 0);
     QVERIFY(mSignalReceiver->getLatestItemId() == TMPXItemId::InvalidId());
+    QVERIFY(mSignalReceiver->getLatestModifiedItemId() == TMPXItemId::InvalidId());
     QVERIFY(mSignalReceiver->getLatestPointerAddr() != 0);
     CMPXMedia *gotten = static_cast<CMPXMedia*>(mSignalReceiver->getLatestPointerAddr());
     int fetchedId = -1;

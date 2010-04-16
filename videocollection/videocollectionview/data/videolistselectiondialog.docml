@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="0.8">
+<hbdocument version="0.9">
     <widget name="mMultiSelectionDialog" type="VideoListSelectionDialog">
         <widget name="mHeadingWidget" role="HbDialog:headingWidget" type="HbWidget">
             <widget name="mHeadingLabel" type="HbLabel">
                 <sizehint height="3.9un" type="PREFERRED"/>
                 <string name="plainText" value="Label"/>
-                <fontspec name="fontSpec" role="Primary" textpaneheight="26.8"/>
+                <fontspec name="fontSpec" role="Primary" textheight="26.8"/>
             </widget>
             <widget name="mCheckBoxContainer" type="HbWidget">
                 <widget name="mCheckMarkAll" type="HbCheckBox">
                     <sizehint type="PREFERRED" width="30.20844un"/>
-                    <string name="text" value="Mark All"/>
-                    <fontspec name="fontSpec" role="Secondary" textpaneheight="23.45"/>
+                    <string locid="txt_videos_setlabel_mark_all" name="text" value="Mark All"/>
+                    <fontspec name="fontSpec" role="Primary" textheight="26.8"/>
                 </widget>
                 <widget name="mSelectionCount" type="HbLabel">
                     <enums name="alignment" value="AlignRight"/>
                     <sizehint height="4.5un" type="PREFERRED" width="20.22703un"/>
                     <string name="plainText" value="Label"/>
                 </widget>
+                <bool name="focusLooping" value="FALSE"/>
                 <real name="z" value="2"/>
                 <sizehint height="6un" type="PREFERRED" width="23.8806un"/>
-                <bool name="focusLooping" value="FALSE"/>
                 <layout type="anchor">
                     <anchoritem dst="mSelectionCount" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
                     <anchoritem dst="mSelectionCount" dstEdge="TOP" spacing="0.5un" src="" srcEdge="TOP"/>
@@ -39,7 +39,7 @@
         <widget name="mListContainer" role="HbDialog:contentWidget" type="HbStackedWidget"/>
         <sizehint height="95.22388un" type="PREFERRED" width="53.58209un"/>
     </widget>
-    <metadata activeUIState="Common ui state" display="QHD portrait" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
     </metadata>
 </hbdocument>

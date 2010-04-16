@@ -29,6 +29,7 @@ public: // methods
         mLastIndex = QModelIndex();
         mDataAccessCount = 0;
         mRowCount = 0;
+        mRowCountDecrement = 0;
     }
     
     static QModelIndex lastIndex()
@@ -60,6 +61,7 @@ public: // data
     static QModelIndex mLastIndex;
     static int mDataAccessCount;
     static int mRowCount;
+    static int mRowCountDecrement;
 };
 
 #endif /* VIDEOLISTDATAMODELDATA_H */

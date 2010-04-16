@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 13 %
+// Version : %version: 15 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -695,6 +695,16 @@ void CMpxVideoPlayerUtility::FindFileDetail( TPtrC8& aItem, TPtrC8& value )
 
         iKeywords = value.AllocL();
     }
+    else if ( ! aItem.Compare(_L8("CreationTime")) )
+    {
+        TLex8 lex(value);
+        lex.Val( iCreationTime );
+    }
+    else if ( ! aItem.Compare(_L8("ModificationTime")) )
+    {
+        TLex8 lex(value);
+        lex.Val( iModificationTime );
+    }
 
     HBufC* name = HBufC::NewL( aItem.Length() );
     TPtr namePtr( name->Des() );
@@ -741,10 +751,6 @@ TInt CMpxVideoPlayerUtility::SurfaceParametersChanged()
 TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     return KErrNone;
-}
-
-void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
-{
 }
 
 #endif

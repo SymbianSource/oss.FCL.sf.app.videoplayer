@@ -38,9 +38,9 @@ NONSHARABLE_CLASS(TVcxMyVideosAlbumVideo)
 
         /**
          * Constructor.
-         */        
-        TVcxMyVideosAlbumVideo::TVcxMyVideosAlbumVideo();
-        
+         */
+        TVcxMyVideosAlbumVideo();
+
         /**
         * = operator.
         */        
@@ -141,11 +141,6 @@ public:
      *                  ETrue as default.
      */
     void Remove( TUint32 aMdsId, TBool aCompress = ETrue );
-
-    /**
-     * Updates album attributes from scratch.
-     */
-    void UpdateAttributesL();
     
     /**
      * Used for keeping RArray<TVcxMyVideosAlbumVideo> in integer order by
@@ -178,6 +173,16 @@ public:
     void AppendToVideoListL( CMPXMedia& aFromVideoList,
             CMPXMedia& aToVideoList, TInt aNewItemStartIndex );
 
+    /**
+     * Calculates KVcxMediaMyVideosCategoryItemCount, KVcxMediaMyVideosCategoryNewItemCount,
+     * KVcxMediaMyVideosCategoryNewItemName and KMPXMediaGeneralDate attributes to iMedia.
+     * 
+     * @param aStartIndex  Start position of the calculations in iVideoList.
+     *                     Can be used to update values when items are appended
+     *                     to old list, without calculating everything from scratch.
+     */
+    void CalculateAttributesL( TInt aStartIndex = 0 );
+    
 private:
 
     /**

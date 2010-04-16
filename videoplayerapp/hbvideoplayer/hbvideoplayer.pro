@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 15 %
+# Version : %version: da1mmcf#16 %
 
 
 TARGET = videoplayer
@@ -50,4 +50,29 @@ LIBS += -lvideoplayerengine.dll \
 VPATH += src
 
 SOURCES += main.cpp
-           
+
+RSS_RULES += \
+"    datatype_list =                                                                              " \
+"        {                                                                                        " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/avi\"; }, 											" \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/msvideo\"; },                  " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/x-msvideo\"; },          " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/x-pn-realvideo\"; },           " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-pn-realaudio\"; },           " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/vnd.rn-realvideo\"; },         " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/vnd.rn-realmedia\"; },   " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/x-pn-realmedia\"; },     " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-pn-realaudio-plugin\"; },    " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/x-matroska\"; },               " \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-matroska\"; },               " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-wmv\"; },                   " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-asf\"; },                   " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gp\"; },                        " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gpp2\"; },                      " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gpp\"; },                       " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/mp4\"; },                        " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-m4v\"; },                      " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/mpeg4\"; },                      " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"application/ram\"; },                  " \
+"        DATATYPE { priority=EDataTypePriorityHigh; type=\"application/sdp\"; }                   " \
+"        };                                                                                       " \          

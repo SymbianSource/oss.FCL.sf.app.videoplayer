@@ -31,8 +31,6 @@
 ;
 "" - "z:\sys\bin\vcxmyvideoscollectionplugin.dll" 
 "" - "z:\resource\plugins\vcxmyvideoscollectionplugin.r*" 
-"" - "z:\sys\bin\vcxconnectionutility.dll" 
-"" - "z:\sys\bin\vcxconnutilpsworker.exe" 
 
 ;
 ; Playback Plugin

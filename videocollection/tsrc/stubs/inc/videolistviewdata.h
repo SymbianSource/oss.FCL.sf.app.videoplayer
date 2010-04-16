@@ -18,6 +18,9 @@
 #ifndef VIDEOLISTVIEWDATA_H
 #define VIDEOLISTVIEWDATA_H
 
+#include <e32std.h>
+#include <mpxitemid.h>
+
 class VideoListViewData
 {
 public: // methods
@@ -27,6 +30,7 @@ public: // methods
         mActivateViewCount = 0;
         mDeactivateViewCount = 0;
         mBackCount = 0;
+        mActivatedItemId = TMPXItemId::InvalidId();
     }
     
 public: // data
@@ -34,6 +38,7 @@ public: // data
     static int mActivateViewCount;
     static int mDeactivateViewCount;
     static int mBackCount;
+    static TMPXItemId mActivatedItemId;
 };
 
 #endif /* VIDEOLISTVIEWDATA_H */

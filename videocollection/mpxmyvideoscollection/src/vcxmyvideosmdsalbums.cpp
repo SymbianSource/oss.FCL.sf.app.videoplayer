@@ -58,7 +58,7 @@ void CVcxMyVideosMdsAlbums::ConstructL()
         iMdsDb.iMdsSession->AddRelationItemObserverL( *this, NULL,
                 ENotifyRemove, iMdsDb.iNamespaceDef );
 
-#if 0   
+#if 0
         // We receive only IDs from here. We need to make query to get
         // relation objects-> slow to use. We use the response from
         // the add operation instead. This way we don't receive
@@ -93,20 +93,22 @@ CVcxMyVideosMdsAlbums* CVcxMyVideosMdsAlbums::NewL( CVcxMyVideosMdsDb& aMdsDb,
 //
 CVcxMyVideosMdsAlbums::~CVcxMyVideosMdsAlbums()
     {
+    CancelQueries();
     delete iAlbumQuery;
     delete iVideoQuery;
     delete iRelationQuery;
-    delete iAlbumList;
     iItemArray.Close();
     iResultBuffer.Close();
     }
 
 // ---------------------------------------------------------------------------
-// CVcxMyVideosMdsAlbums::Cancel
+// CVcxMyVideosMdsAlbums::CancelQueries
 // ---------------------------------------------------------------------------
 //
-void CVcxMyVideosMdsAlbums::Cancel( CVcxMyVideosMdsDb::TRequestType aType )
+void CVcxMyVideosMdsAlbums::CancelQueries( CVcxMyVideosMdsDb::TRequestType aType )
     {
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums::CancelQueries() start");
+
     if ( aType == CVcxMyVideosMdsDb::EAll || aType == CVcxMyVideosMdsDb::EGetAlbums )
         {
         if ( iAlbumQuery )
@@ -130,15 +132,42 @@ void CVcxMyVideosMdsAlbums::Cancel( CVcxMyVideosMdsDb::TRequestType aType )
             iVideoQuery->Cancel();
             }
         }
-    
-    
-    //TODO: cancel for "add to album"
-    
-    //TODO: cancel for "remove from album"
-    
-    //TODO: cancel for "remove albums"
-    
+
+    if ( aType == CVcxMyVideosMdsDb::EAll || aType == CVcxMyVideosMdsDb::EAddVideosToAlbum
+            || aType == CVcxMyVideosMdsDb::ERemoveRelations
+            || aType == CVcxMyVideosMdsDb::ERemoveAlbums )
+        {
+        
+        // MDS does not offer cancel for these
+        //Cancel();
+        }
+
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums::CancelQueries() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// From CActive
+// CVcxMyVideosMdsAlbums::DoCancel
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsAlbums::DoCancel()
+    {
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() start");
+
+#if 0
     // Seems like the only way to cancel these is to close session to MDS and reopen it...
+    // Update: even this does not cancel the operation
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums:: closing mds session");
+
+    delete iMdsDb.iMdsSession;
+    iMdsDb.iMdsSession = NULL;
+    
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums:: opening mds session");
+    TRAP_IGNORE( iMdsDb.OpenMdsSessionL() );
+    MPX_DEBUG2("CVcxMyVideosMdsAlbums:: opened mds session (%d)", iMdsDb.iMdsError);
+#endif
+    
+    MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() exit");
     }
 
 // ---------------------------------------------------------------------------
@@ -314,7 +343,6 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentVideosL( TUint32 aAlbumId, CMPXMedi
             rootCondition.AddRelationConditionL( *iContainsRelationDef );
 
     CMdELogicCondition& leftCondition = relationCondition.LeftL();
-    CMdELogicCondition& rightCondition = relationCondition.RightL();
 
     //...left side is an album...
     leftCondition.AddObjectConditionL( *iAlbumObjectDef );
@@ -551,7 +579,7 @@ void CVcxMyVideosMdsAlbums::HandleAlbumQueryCompletedL( CMdEQuery& /*aQuery*/, T
         Object2MediaL( object, *media );
         
 #ifdef _DEBUG
-        TBuf<200> title;
+        TBuf<KVcxMvcMaxTitleLength> title;
         title = TVcxMyVideosCollectionUtil::Title( *media );
         MPX_DEBUG2("CVcxMyVideosMdsAlbums:: object title: %S", &title);
 #endif        
@@ -668,7 +696,7 @@ void CVcxMyVideosMdsAlbums::AddVideosToAlbumL( CMPXMedia* aCmd,
     cmd->iCmdType  = CVcxMyVideosMdsDb::EAddVideosToAlbum;
     cmd->iClient   = &aClient;
     cmd->iMpxCmd   = aCmd;
-    iMdsDb.iCmdQueue->ExecuteCmdL( cmd ); //owneship moves
+    iMdsDb.iCmdQueue->ExecuteCmdL( cmd ); //ownership moves
     CleanupStack::Pop( cmd ); // <-1
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::AddVideosToAlbumL() exit");
     }
@@ -692,12 +720,17 @@ void CVcxMyVideosMdsAlbums::DoAddVideosToAlbumL( CMPXMedia* aCmd,
     iItemArray.Reserve( count );
     for ( TInt i = 0; i < count; i++ )
         {
-        relation = iMdsDb.iMdsSession->NewRelationL(
-                *iContainsRelationDef, albumId,
-                TVcxMyVideosCollectionUtil::IdL( *videoArray->AtL( i ) ) );
-        CleanupStack::PushL( relation );
-        iItemArray.AppendL( relation );
-        CleanupStack::Pop( relation );
+        // Filter already failed items out from the request (KErrAlreadyExists)
+        if ( TVcxMyVideosCollectionUtil::Int32ValueL( *videoArray->AtL( i ) ) 
+                != KErrAlreadyExists )
+            {
+            relation = iMdsDb.iMdsSession->NewRelationL(
+                    *iContainsRelationDef, albumId,
+                    TVcxMyVideosCollectionUtil::IdL( *videoArray->AtL( i ) ) );
+            CleanupStack::PushL( relation );
+            iItemArray.AppendL( relation );
+            CleanupStack::Pop( relation );        
+            }
         }
     
     iClient = &aClient;
@@ -942,16 +975,6 @@ void CVcxMyVideosMdsAlbums::RunL()
 //TODO: implement RunError
 
 // ---------------------------------------------------------------------------
-// CVcxMyVideosMdsAlbums::RunL
-// From CActive.
-// ---------------------------------------------------------------------------
-//
-void CVcxMyVideosMdsAlbums::DoCancel()
-    {
-    //TODO:
-    }
-
-// ---------------------------------------------------------------------------
 // CVcxMyVideosMdsAlbums::HandleAddVideosToAlbumCompletedL
 // ---------------------------------------------------------------------------
 //
@@ -1039,7 +1062,7 @@ void CVcxMyVideosMdsAlbums::HandleRelationItemNotification(CMdESession& /*aSessi
     iObserver->HandleRelationEvent( aType, aRelationArray );
     }
 
-#if 0 //not used
+#if 0
 // ----------------------------------------------------------------------------
 // CVcxMyVideosMdsAlbums::HandleRelationNotification
 // From MMdERelationObserver
@@ -1048,19 +1071,18 @@ void CVcxMyVideosMdsAlbums::HandleRelationItemNotification(CMdESession& /*aSessi
 void CVcxMyVideosMdsAlbums::HandleRelationNotification(CMdESession& /*aSession*/, 
         TObserverNotificationType aType,
         const RArray<TItemId>& aRelationIdArray)
-    {
-    iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
-    
+    {    
     switch ( aType )
         {
         case ENotifyAdd:
-            MPX_DEBUG1("CVcxMyVideosMdsAlbums:: ENotifyAdd");
+            MPX_DEBUG1("CVcxMyVideosMdsAlbums:: relation ENotifyAdd");
+            iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
             break;
         case ENotifyModify:
             MPX_DEBUG1("CVcxMyVideosMdsAlbums:: ENotifyModify");
             break;
         case ENotifyRemove:
-            MPX_DEBUG1("CVcxMyVideosMdsAlbums:: ENotifyRemove");
+            //remove is handled at HandleRelationItemNotification
             break;
         }
     }

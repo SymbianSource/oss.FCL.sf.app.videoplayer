@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -30,7 +30,6 @@
 
 #include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackfiledetailswidget.h"
-#include "mpxvideoplaybacknontouchvolumebar.h"
 #include "mpxvideoplaybackcontrolconfiguration.h"
 #include "mpxvideoplaybackdetailsplaybackwindow.h"
 
@@ -147,16 +146,6 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
         object->setObjectName( name );
         
         MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[fileDetailsLayout] to object list") );                        
-        mWidgets.append( object );
-    }
-    else if ( name == "volumeSlider" )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating volumeSlider") );
-    
-        object = new QMPXVideoPlaybackNonTouchVolumeBar();
-        object->setObjectName( name );
-        
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[volumeSlider] to object list") );                        
         mWidgets.append( object );
     }
     else if ( name == "detailsPlaybackWindow" )

@@ -19,6 +19,7 @@
 #include <mpxmedia.h>
 #include <mpxmediaarray.h>
 #include <mpxmediacontainerdefs.h>
+#include <mpxmediageneraldefs.h>
 #include "vcxmyvideosalbum.h"
 #include "vcxmyvideoscollectionplugin.h"
 #include "vcxmyvideosvideocache.h"
@@ -111,7 +112,7 @@ void CVcxMyVideosAlbum::ConstructL()
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosAlbum::Sort()
-    {    
+    {
     const TLinearOrder<TVcxMyVideosAlbumVideo> KOrderByMdsId(
             CVcxMyVideosAlbum::CompareVideosByMdsId );
 
@@ -220,16 +221,6 @@ void CVcxMyVideosAlbum::Remove( TUint32 aMdsId, TBool aCompress )
     }
 
 // ---------------------------------------------------------------------------
-// CVcxMyVideosAlbum::UpdateAttributesL
-// ---------------------------------------------------------------------------
-//
-void CVcxMyVideosAlbum::UpdateAttributesL()
-    {
-    //CalcNewVideoCountAndLatestNonWatchedL();
-    //CalcPlaytimeL();
-    }
-
-// ---------------------------------------------------------------------------
 // CVcxMyVideosAlbum::CompareVideosByMdsId
 // ---------------------------------------------------------------------------
 //
@@ -267,7 +258,7 @@ CMPXMedia* CVcxMyVideosAlbum::CreateVideoListL()
 
 // ---------------------------------------------------------------------------
 // CVcxMyVideosAlbum::CreateVideoListL
-// Appends to video list items which belong to this album.
+// Appends to video list the items which belong to this album.
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosAlbum::AppendToVideoListL( CMPXMedia& aFromVideoList,
@@ -296,3 +287,47 @@ void CVcxMyVideosAlbum::AppendToVideoListL( CMPXMedia& aFromVideoList,
             }
         }
     }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosAlbum::CalculateAttributesL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
+    {
+    TUint32 count = iVideoList.Count();
+    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
+    TInt newCount = 0;
+    CMPXMedia* video;
+    CMPXMedia* latestNewVideo = NULL;
+    TInt pos;
+    TUint32 flags;
+    TInt64 currentItemsCreationDate = 0;
+    TInt64 latestCreationDate = TVcxMyVideosCollectionUtil::CreationDateL( *iMedia );
+    for ( TInt i = aStartIndex; i < count; i++ )
+        {
+        video = iCollection.iCache->FindVideoByMdsIdL( iVideoList[i].iMdsId, pos );
+        if ( video )
+            {
+            flags = TVcxMyVideosCollectionUtil::FlagsL( *video );
+            if ( flags & EVcxMyVideosVideoNew )
+                {
+                newCount++;
+                currentItemsCreationDate = TVcxMyVideosCollectionUtil::CreationDateL( *video );
+                if ( latestCreationDate < currentItemsCreationDate )
+                    {
+                    latestCreationDate = currentItemsCreationDate;
+                    latestNewVideo     = video;
+                    }
+                }
+            }
+        }
+    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
+    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryNewItemCount, newCount );
+    if ( latestNewVideo )
+        {
+        iMedia->SetTextValueL( KVcxMediaMyVideosCategoryNewItemName,
+                TVcxMyVideosCollectionUtil::Title( *latestNewVideo ) );
+        }
+    iMedia->SetTObjectValueL<TInt64>( KMPXMediaGeneralDate, latestCreationDate );
+    }
+

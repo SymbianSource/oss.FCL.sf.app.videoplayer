@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  11 %
+// Version : %version:  13 %
 
 
 
@@ -81,7 +81,7 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         mPlayButton->setFlag( QGraphicsItem::ItemIsFocusable, false );
 
         connect( mPlayButton, SIGNAL( released() ), this, SLOT( playPause() ) );
-        
+
         QGraphicsItem *widget1 = mPlayButton->primitive( HbStyle::P_PushButton_background );
         widget1->setVisible( false );
 
@@ -90,9 +90,34 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         //
         HbFrameItem *frameItem = new HbFrameItem ( mPlayButton );
         frameItem->setGeometry( mPlayButton->boundingRect() );
-        frameItem->frameDrawer().setFrameType( HbFrameDrawer::OnePiece );
+        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        frameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
         frameItem->frameDrawer().setFillWholeRect( true );
-        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_status_trans_normal_c" );
+        
+        //
+        // create 'attach' button and connect corresponding signal/slot
+        //
+        QGraphicsWidget *detailsAttachWidget = loader->findWidget( QString( "detailsAttachButton" ) );
+        HbPushButton *attachButton = qobject_cast<HbPushButton*>( detailsAttachWidget );
+        connect( attachButton, SIGNAL( released() ), mController, SLOT( attachVideo() ) );
+
+        //
+        // create 'share' button
+        //     signal and slot to be created when requirement for 'share' operation is confirmed
+		//
+        QGraphicsWidget *detailsShareWidget = loader->findWidget( QString( "detailsShareButton" ) );
+        HbPushButton *shareButton = qobject_cast<HbPushButton*>( detailsShareWidget );
+        
+        //
+        // by default in xml layout, attachButton is not visible while shareButton is visible.
+        // if it's an 'attach' operation, reverse the visibility order
+        //
+        if ( mController->isAttachOperation() )
+        {
+            attachButton->setVisible( true );
+            shareButton->setVisible( false );
+        }    
+        
     }
 
     updateState( mController->state() );

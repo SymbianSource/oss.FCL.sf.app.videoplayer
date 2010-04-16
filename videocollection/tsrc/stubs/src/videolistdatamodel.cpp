@@ -24,6 +24,7 @@ QMap<int, QVariant> VideoListDataModelData::mData;
 QModelIndex VideoListDataModelData::mLastIndex;
 int VideoListDataModelData::mDataAccessCount = 0;
 int VideoListDataModelData::mRowCount = 0;
+int VideoListDataModelData::mRowCountDecrement = 0;
 
 VideoListDataModel::VideoListDataModel(QObject *parent) :
     QAbstractItemModel(parent),
@@ -103,7 +104,12 @@ int VideoListDataModel::rowCount(const QModelIndex &parent ) const
 {
     Q_UNUSED(parent);
 
-    return VideoListDataModelData::mRowCount;
+    uint count = VideoListDataModelData::mRowCount - VideoListDataModelData::mRowCountDecrement;
+    if(VideoListDataModelData::mRowCountDecrement > 0)
+    {
+        VideoListDataModelData::mRowCountDecrement--;
+    }
+    return count;
 }
 
 QMap<int, QVariant> VideoListDataModel::itemData(const QModelIndex &index) const
@@ -135,12 +141,12 @@ QString VideoListDataModel::prepareSizeString(int index) const
     return QString();
 }
 
-QStringList VideoListDataModel::prepareLengthStrings(int index) const
+QString VideoListDataModel::prepareShortLengthString(int index) const
 {
     Q_UNUSED(index);
     
     // not stubbed
-    return QStringList();
+    return QString();
 }
 
 QVariant VideoListDataModel::data(const QModelIndex &index, int role) const

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#24 %
+// Version : %version: da1mmcf#27 %
 
 
 
@@ -129,7 +129,6 @@ CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
     //
     if ( iDisplayHandler )
     {
-        iDisplayHandler->RemoveDisplayWindow();
         delete iDisplayHandler;
         iDisplayHandler = NULL;
     }
@@ -237,17 +236,6 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         {
             MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdClose"));
             
-            //
-            // The display window must be removed before closing the playback plugin
-            //
-            if ( iDisplayHandler )
-            {
-                //
-                // Remove the display window so the surface can be released
-                //
-                iDisplayHandler->RemoveDisplayWindow();
-            }
-
             CreateGeneralPlaybackCommandL( EPbCmdClose );
             break;
         }
@@ -473,17 +461,12 @@ void CMPXVideoViewWrapper::DoHandlePlaybackMessageL( CMPXMessage* aMessage )
     {
         HandleVideoPlaybackMessage( aMessage );
     }
-    else if ( KMPXMediaIdVideoDisplaySyncMessage == id )
+    else if ( KMPXMediaIdVideoDisplayMessage == id )
     {
         if ( iDisplayHandler )
         {
             iDisplayHandler->HandleVideoDisplayMessageL( aMessage );
         }
-
-        //
-        //  Signal Sync Message handling is complete
-        //
-        iPlaybackUtility->CommandL( EPbCmdSyncMsgComplete );
     }
 }
 
@@ -656,11 +639,6 @@ void CMPXVideoViewWrapper::DoHandleStateChangeL( TInt aNewState )
             }
             case EPbStateStopped:
             {
-                if ( iPlaylistView && iDisplayHandler )
-                {
-                    iDisplayHandler->RemoveDisplayWindow();
-                }
-
                 if ( iFileDetails->mMultiItemPlaylist )
                 {
                     iView->handleStoppedState();
@@ -929,6 +907,23 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qKeywords( (QChar*)keywords.Ptr(), keywords.Length() );
         iFileDetails->mKeywords = qKeywords;
     }
+    
+    //
+    //  Creation date/time
+    //
+    if ( aMedia.IsSupported( KMPXMediaVideoCreated ) )
+    {
+        iFileDetails->mCreationTime = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoCreated );
+    }
+ 
+    //
+    //  Last Modified date/time
+    //
+    if ( aMedia.IsSupported( KMPXMediaVideoLastModified ) )
+    {
+        iFileDetails->mModificationTime = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoLastModified );
+    }
+    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1283,7 +1278,24 @@ void CMPXVideoViewWrapper::HandleVolumeCmdL( TMPXPlaybackCommand aCmd )
     //
     iControlsController->handleEvent( EMPXControlCmdShowVolumeControls );
 
-    iPlaybackUtility->CommandL( aCmd );
+    switch( aCmd )
+    {
+        case EPbCmdDecreaseVolume:
+        {
+            CreateVideoSpecificCmdL( EPbCmdHandleDecreaseVolume );
+            break;
+        }
+        case EPbCmdIncreaseVolume:
+        {
+            CreateVideoSpecificCmdL( EPbCmdHandleIncreaseVolume );
+            break;
+        }
+        default:
+        {
+            iPlaybackUtility->CommandL( aCmd );
+            break;
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1417,11 +1429,11 @@ TBool CMPXVideoViewWrapper::IsMultiItemPlaylist()
     
     if ( iFileDetails )
     {
-        MPX_DEBUG(_L("CMPXVideoViewWrapper::IsMultiItemPlaylist(%d)"), 
-            iFileDetails->mMultiItemPlaylist );
         multiLinks = iFileDetails->mMultiItemPlaylist;
     }
     
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::IsMultiItemPlaylist() ret %d"), multiLinks );
+	
     return multiLinks;
 }
 

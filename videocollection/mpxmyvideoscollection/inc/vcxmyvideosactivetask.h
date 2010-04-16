@@ -114,14 +114,19 @@ public:    // Accessor functions
      * Can be used to run async operations.
      */
     void ContinueStepping();
-    
+
+    /**
+     * Add some functionality to CActive::Cancel
+     */
+    void Cancel();
+
 protected: // From base class
 
     /**
     * From CActive
     */
     void RunL();
-
+    
     /**
     * From CActive
     */
@@ -143,6 +148,13 @@ private:
     * 2nd-phase Constructor
     */
     void ConstructL();
+
+public:
+    /**
+     * Set to ETrue when stepping is stopped.
+     * Cancel or Done has to be called.
+     */
+    TBool iStopped;
 
 private: // data
 

@@ -14,14 +14,16 @@
 * Description: VideoDeleteWorker class implementation
 * 
 */
-// INCLUDE FILES
 
+// Version : %version: %
+
+// INCLUDE FILES
 #include <qtimer.h>
+
 #include "videocollectioncommon.h"
 #include "videocollectionclient.h"
 #include "videodeleteworker.h"
-
-
+#include "videocollectiontrace.h"
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -47,6 +49,7 @@ mRequestWaitTimer(0),
 mLastStatus(0),
 mLastStatusData(QVariant())
 {
+	FUNC_LOG;
     
 }
 
@@ -56,6 +59,7 @@ mLastStatusData(QVariant())
 //
 VideoDeleteWorker::~VideoDeleteWorker()
 {
+	FUNC_LOG;
     if(mRequestWaitTimer && mRequestWaitTimer->isActive())
     {
         mRequestWaitTimer->stop();
@@ -71,6 +75,7 @@ VideoDeleteWorker::~VideoDeleteWorker()
 //
 void VideoDeleteWorker::requestDelete(const QList<TMPXItemId> &indexList)
 {
+	FUNC_LOG;
     if(!mRequestWaitTimer)
     {
         mRequestWaitTimer = new QTimer();
@@ -95,6 +100,7 @@ void VideoDeleteWorker::requestDelete(const QList<TMPXItemId> &indexList)
 //
 int VideoDeleteWorker::removeFromRequest(TMPXItemId &itemId)
 {
+	FUNC_LOG;
     mRemoveBuffer.remove(itemId);
     return mRemoveBuffer.count();
 }
@@ -105,6 +111,7 @@ int VideoDeleteWorker::removeFromRequest(TMPXItemId &itemId)
 //
 bool VideoDeleteWorker::isDeleting()
 {
+	FUNC_LOG;
     return mRemoveBuffer.count() ? true : false;
 }
 
@@ -114,6 +121,9 @@ bool VideoDeleteWorker::isDeleting()
 //
 void VideoDeleteWorker::updateStatus(int status, QVariant data)
 {
+	FUNC_LOG;
+	INFO_1("VideoDeleteWorker::updateStatus() status: %d", status);
+	
     // do not update invalid status
     if(status != VideoCollectionCommon::statusDeleteSucceed && 
        status != VideoCollectionCommon::statusSingleDeleteFail &&
@@ -159,6 +169,7 @@ void VideoDeleteWorker::updateStatus(int status, QVariant data)
 //
 int VideoDeleteWorker::getLastStatus(QVariant &data)
 {
+	FUNC_LOG;
     data = mLastStatusData;
     return mLastStatus;
 }
@@ -169,6 +180,7 @@ int VideoDeleteWorker::getLastStatus(QVariant &data)
 //
 void VideoDeleteWorker::clearStatus()
 {
+	FUNC_LOG;
     mLastStatus = 0;
     mLastStatusData = QVariant();
 }
@@ -179,15 +191,16 @@ void VideoDeleteWorker::clearStatus()
 //
 void VideoDeleteWorker::continueSlot()
 {
-   if(!mRequestWaitTimer || !mRemoveBuffer.count())
-   {
-       return;
-   }
-   if(!mRequestWaitTimer->isActive())
-   {
-       mRequestWaitTimer->setSingleShot(true);
-       mRequestWaitTimer->start(0);
-   }
+    FUNC_LOG;
+    if(!mRequestWaitTimer || !mRemoveBuffer.count())
+    {
+        return;
+    }
+    if(!mRequestWaitTimer->isActive())
+    {
+        mRequestWaitTimer->setSingleShot(true);
+        mRequestWaitTimer->start(0);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -196,6 +209,7 @@ void VideoDeleteWorker::continueSlot()
 //
 void VideoDeleteWorker::execDeleteBlockSlot()
 {
+	FUNC_LOG;
     if(!mRemoveBuffer.count())
     {
         return;
@@ -226,6 +240,7 @@ void VideoDeleteWorker::execDeleteBlockSlot()
 //
 void VideoDeleteWorker::flushAll()
 {
+	FUNC_LOG;
     if(!mRemoveBuffer.count())
     {
         return;
@@ -234,7 +249,5 @@ void VideoDeleteWorker::flushAll()
     mCollectionClient.deleteVideos(&ids);
     mRemoveBuffer.clear();
 }
-            
-
 
 // End of file

@@ -158,6 +158,29 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          */
         TBool UpdateAlbumL( const CMPXMedia& aAlbum );
 
+        /**
+         * Calculates and updates album media attributes.
+         */
+        void CalculateAttributesL();
+        
+        /**
+         * Called when video's New Video flag changes. Calculates
+         * album attributes for the affected albums. Adds events
+         * to iCollection.iMessageList but does not send them.
+         * 
+         * @param aMdsId  MDS ID of the changed video.
+         */
+        void NewVideoFlagChangedL( TUint32 aMdsId );
+
+        /**
+         * Called when video's title changes. Calculates
+         * album attributes for the affected albums. Adds events
+         * to iCollection.iMessageList but does not send them.
+         * 
+         * @param aMdsId  MDS ID of the changed video.
+         */
+        void VideoTitleChangedL( TUint32 aMdsId );
+
 protected:
         
         /**

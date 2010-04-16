@@ -133,6 +133,8 @@ const QIcon* VideoThumbnailData::getThumbnail( TMPXItemId mediaId )
 //
 int VideoThumbnailData::startFetchingThumbnail( int mediaId, int priority )
 {
+    Q_UNUSED(mediaId);
+    Q_UNUSED(priority);
     gStartFetchingCounter++;
     if(gFailFetchTn)
     {
@@ -158,6 +160,7 @@ const QIcon* VideoThumbnailData::defaultThumbnail()
 //
 int VideoThumbnailData::removeThumbnail( TMPXItemId mediaId )
 {
+    Q_UNUSED(mediaId);
     gRemoveCounter++;
     if(gFailRemoveTn)
     {

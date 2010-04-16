@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#4 %
+// Version : %version: da1mmcf#5 %
 
 
 
@@ -25,6 +25,7 @@
 #include <qobject>
 #include <qstring>
 #include <qfile>
+#include <f32file.h>
 
 #include <mpxhbvideocommondefs.h>
 
@@ -36,6 +37,7 @@ class QMpxVideoPlaybackWrapper : public QObject
         QMpxVideoPlaybackWrapper();
         virtual ~QMpxVideoPlaybackWrapper();
         int playMedia( QString aFileName );
+        int playMedia( RFile aFile );
 
     public:
         void openPlaybackView() ;

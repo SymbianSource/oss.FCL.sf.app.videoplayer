@@ -11,12 +11,14 @@
 *
 * Contributors:
 *
-* Description:   ?Description
+* Description:   Implementation of VideoServiceUriFetch Stub
 *
 */
 
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
+// Version : %version: %
+
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
 
 
 // ----------------------------------------------------------------------------

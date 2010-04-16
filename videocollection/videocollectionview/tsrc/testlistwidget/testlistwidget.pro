@@ -17,7 +17,7 @@
 TEMPLATE = app
 
 TARGET =
- 
+
 DEPENDPATH += . \
     inc \
     src \
@@ -34,8 +34,7 @@ INCLUDEPATH += . \
     ../../../../videoplayerapp/videoplayerengine/inc
     
 CONFIG += qtestlib \
-    Hb \
-    symbian_test
+    Hb
 
 LIBS += -lestor.dll \
     -lfbscli.dll \

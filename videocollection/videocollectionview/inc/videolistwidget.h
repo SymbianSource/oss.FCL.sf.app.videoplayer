@@ -150,13 +150,20 @@ signals:
     void fileUri(const QString&);
 
 protected slots:
+    
     /**
-     * Signaled by the fw during long press and indicating that popupmenu
-     * concerning particular item is to be opened.
+     * Signaled by the fw when item is long pressed.
+     * Popup menu for the particular item is opened.
      * Saves current selected item's index to mCurrentIndex
      */
-    void longPressGesture (const QPointF &point);
+    void longPressedSlot(HbAbstractViewItem *item, const QPointF &point);
 
+    /**
+     * Re-implemented in case context menu is visible, the below list shoud not
+     * be panned.
+     */
+    void panGesture(const QPointF &point);
+    
 private slots:
 
     /**
@@ -170,12 +177,6 @@ private slots:
      *
      */
     void renameSlot();
-
-    /**
-     * Signaled to play all items.
-     *
-     */
-    void playAllSlot();
 
     /**
      * Signaled to add an item into a collection.
@@ -203,11 +204,10 @@ private slots:
     void openDetailsSlot();
 
     /**
-     * Signaled when the application has been lauched as a service and
-     * playback is initialized from context menu.
-     *
+     * Signaled when item's default functionality is initialized from context menu.
+     * Calls emitActivated for actually axecuting the functionality
      */
-    void playItemSlot();
+    void openItemSlot();
 
     /**
      * slot is connected to view's doDelayeds -signal
@@ -255,13 +255,6 @@ private slots:
      *
      */
     void fetchThumbnailsForVisibleItems();
-	
-    // TODO: following can be removed after all implementation ready
-    /**
-     * Slot is connected into item signals that are not yet implemented.
-     * Slot shows "Not yet implemented" note
-     */
-    void debugNotImplementedYet();
     
 private:
 
@@ -273,7 +266,8 @@ private:
         EActionAddToCollection,
         EActionRemoveCollection,
         EActionRename,
-    	EActionPlay
+    	EActionPlay,
+    	EActionOpen
     };
 
     /**
@@ -287,6 +281,11 @@ private:
      *
      */
     void setContextMenu();
+    
+    /**
+     * Method sets correct popup menu during browsing service.
+     */
+    void setBrowsingServiceContextMenu();
 
     /**
      * Method connects signals needed by the widget
@@ -300,6 +299,24 @@ private:
      *
      */
     void disConnectSignals();
+    
+    /**
+     * Return if this is a browsing service.
+     */
+    bool isBrowsingService() const;
+    
+    /**
+     * Set navigation action.
+     */
+    void setNavigationAction();
+    
+    /**
+     * handles single item activation. Either from 
+     * user's single tap or from default action at context menu.
+     * 
+     * @param index of item
+     */
+    void doActivateItem(const QModelIndex &index);
 
 private:
 
@@ -336,14 +353,9 @@ private:
 	bool                       mIsService;
 
 	/**
-     * Navigation softkey action object for back.
+     * Navigation softkey action.
      */
-	HbAction 				   *mNavKeyBackAction;
-
-    /**
-     * Navigation softkey action object for quit.
-     */
-    HbAction                   *mNavKeyQuitAction;
+	HbAction 				   *mNavKeyAction;
 
     /**
      * Item sensitive context menu

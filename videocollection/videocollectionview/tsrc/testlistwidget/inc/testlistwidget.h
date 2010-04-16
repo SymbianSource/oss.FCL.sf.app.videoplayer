@@ -15,12 +15,14 @@
 *
 */
 
+// Version : %version: 24 %
+
 #ifndef __TESTLISTWIDGET_H__
 #define __TESTLISTWIDGET_H__
 
-
 // INCLUDES
 #include <QtTest/QtTest>
+#include "videocollectioncommon.h"
 
 class VideoListWidget;
 class DummyDataModel;
@@ -34,13 +36,17 @@ class VideoServices;
 class VideoListDataModel;
 class VideoCollectionUiLoader;
 
+using namespace VideoCollectionCommon;
+
 class TestListWidget : public QObject
 {
     Q_OBJECT
 
 public:
 
-    void setRowCount(int count, int type = 0, VideoListDataModel *model = 0);
+    void setRowCount(int count,
+        TModelType type = EModelTypeAllVideos,
+        VideoListDataModel *model = 0);
     
     // test functions for the test framework
 private slots:
@@ -95,9 +101,14 @@ private slots:
     void testEmitActivated();
     
     /**
-     * verifies longPressGesture
+     * verifies longPressedSlot
      */
-    void testLongPressGesture();
+    void testLongPressedSlot();
+    
+    /**
+     * verifies panGesture
+     */
+    void testPanGesture();
     
     /**
      * verifies setContextMenu
@@ -120,14 +131,9 @@ private slots:
     void testRenameSlot();
     
     /**
-     * verifies playItemSlot
+     * verifies openItemSlot
      */
-    void testPlayItemSlot();
-    
-    /**
-     * verifies playAllSlot
-     */
-    void testPlayAllSlot();
+    void testOpenItemSlot();
     
     /**
      * verifies addToCollectionSlot

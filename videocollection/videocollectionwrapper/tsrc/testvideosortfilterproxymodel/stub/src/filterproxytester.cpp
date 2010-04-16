@@ -18,8 +18,6 @@
 
 // INCLUDES
 
-
-
 #define private public
 #include "videosortfilterproxymodel.h"
 #undef private
@@ -31,8 +29,8 @@
 // FilterProxyTester
 // ---------------------------------------------------------------------------
 //
-FilterProxyTester::FilterProxyTester(int type, QObject *parent) :
-VideoSortFilterProxyModel(type, parent)    
+FilterProxyTester::FilterProxyTester(VideoCollectionCommon::TModelType type, QObject *parent) :
+VideoSortFilterProxyModel(type, parent)
 {
     // NOP
 }

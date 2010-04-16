@@ -127,7 +127,7 @@ public:
     /**
      * prepares length string
      */
-    const QStringList prepareLengthStrings(quint32 total);
+    const QString prepareShortLengthString(quint32 total);
     
     /**
      * Prepares size string from the given value.

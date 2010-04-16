@@ -108,6 +108,11 @@ class  VideoCollectionClient
      * 
      */
     int back();
+    
+    /**
+     * returns mRenameAlbumReturnValue
+     */
+    int renameAlbum(const TMPXItemId &albumId, const QString &newTitle);    
 
 public:
     static bool mFailInit;
@@ -122,6 +127,8 @@ public:
     static QString mAddNewCollectionName;
     static QString mAddNewCollectionThumb;
     static QList<TMPXItemId> mAddNewCollectionIds;
+    static int mRenameAlbumReturnValue;
+    static int mBackReturnValue;
     
 private:
 

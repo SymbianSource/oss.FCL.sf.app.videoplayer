@@ -41,24 +41,18 @@ VideoListSelectionDialog::VideoListSelectionDialog(
     mListContainer(0),
     mForcedCheck(false),
     mModel(0),
-    mListWidget(0)
+    mListWidget(0),
+    mPrimaryAction(0),
+    mSecondaryAction(0)
 {
     setDismissPolicy(HbDialog::NoDismiss);
     setTimeout(HbDialog::NoTimeout);
     
     // create primary action
-    HbAction *action = new HbAction();
-    if (action)
-    {
-        setPrimaryAction(action);
-    }
+    mPrimaryAction = new HbAction();
     
     // create secondary action
-    action = new HbAction();
-    if (action)
-    {
-        setSecondaryAction(action);
-    }
+    mSecondaryAction = new HbAction();
 }
 
 VideoListSelectionDialog::~VideoListSelectionDialog() 
@@ -83,7 +77,7 @@ void VideoListSelectionDialog::exec()
     // fill selection
     VideoListSelectionDialogData::mMultiSelectionLaunchCount++;
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
-    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionWrapper::EGeneric);
+    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeGeneric);
     if (model)
     {
         for (int i = 0; i < VideoListSelectionDialogData::mSelectionCount; i++)

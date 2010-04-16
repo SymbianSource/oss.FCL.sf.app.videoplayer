@@ -202,11 +202,10 @@ signals:
 
     /**
     * This signal is connected to video list's details ready
-    * -signal indicating that video details data is fetched ok
-    * 
-    * @param id of the video item
+    * -signal indicating that video details data is fetched
+    * and provides a QMap of the details'.
     */
-    void fullVideoDetailsReady(TMPXItemId id);
+    void fullVideoDetailsReady(QVariant &);
     
     /**
     * This signal is connected to proxy models short details ready
@@ -232,6 +231,11 @@ signals:
      * Signals that album content has been updated.
      */
     void albumChanged();
+
+    /**
+     * Signals that item data has changed.
+     */
+    void itemModified(const TMPXItemId &itemId);
     
 private slots:
     
@@ -267,6 +271,20 @@ private:
      */
     QString prepareDetailRow(int index) const; 
 
+      /**
+     * Formats a detail row string for the video item
+     * at the given index. 
+     * 
+     * In case item is not found in the provided index, empty
+     * string is returned.
+     * 
+     * @param index, index of the item data is requested
+     * @param duration, duration of the video
+     *
+     * @return QString detail string
+     */
+    QString doDetailRow(int index, const QString duration) const;
+
     /**
      * Generates a video count string for category or album at given index.
      * 
@@ -301,16 +319,16 @@ private:
     void reportAsyncStatus(int statusCode, QVariant &additional);
             
     /**
-     * Generates a video length strings from video item at given index
+     * Generates a short video length string from video item at given index
      * 
      * In case item is not found in the provided index, empty
-     * strings are returned.
+     * string is returned.
      * 
      * @param index, index of the item data is requested
      * 
-     * @return Lengths as QStringList, first item tells the minutes, second tells seconds
+     * @return Lengths as QString,  (for example "00:25:10").
      */
-    QStringList prepareLengthStrings(int index) const;
+    QString prepareShortLengthString(int index) const;
 
 private:
     
