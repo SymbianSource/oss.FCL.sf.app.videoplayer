@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 22 %
+// Version : %version: 24 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -132,6 +132,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         void SetVolumeSteps( TInt aVolumeSteps );
         void HandleVolumeL( TBool aIncrease );
 
+        void SendHideControlsEventL();
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
         void OpenFile64L( const TDesC& aMediaFile, RFile64& aFile, TInt aPosition, TInt aAccessPointId = KUseDefaultIap );
@@ -184,7 +186,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         CHWRMLight* GetLightsL();
         void ReleaseLights();
 
-        TBool SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed );
+        void SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed );
 
     protected:
 

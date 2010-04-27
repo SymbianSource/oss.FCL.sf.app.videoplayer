@@ -22,7 +22,7 @@
 
 #include <data_caging_paths_for_iby.hrh>
 
-data=DATAZ_\APP_RESOURCE_DIR\MPSettingsROPModel.rsc      	   APP_RESOURCE_DIR\MPSettingsROPModel.rsc
+data=DATAZ_\RESOURCE_FILES_DIR\mpsettingsropmodel.rsc      	   RESOURCE_FILES_DIR\mpsettingsropmodel.rsc
 
 
 #endif // MPSETTROPMODELRSC_IBY

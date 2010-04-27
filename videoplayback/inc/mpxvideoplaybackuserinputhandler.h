@@ -15,8 +15,8 @@
 *
 */
 
-// Version : %version:  ou1cpsw#7 %
 
+// Version : %version:  8 %
 
 
 #ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
@@ -103,9 +103,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         * @return void
         */
         void SetForeground(TBool aForeground);
- 
-  
-                
+
 	private:
         /**
         * Handles volume repeat timer timout
@@ -130,8 +128,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         void ReRoutePointerEventL(CCoeControl* aControl,
                                   const TPointerEvent& aPointerEvent,
                                   TMPXVideoControlType aMPXControl);
-        
-       
+
     private:
 
         TMPXVideoUserInputType                  iProcessingInputType; 	// the type of input being processed
@@ -145,10 +142,10 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         CPeriodic*                              iVolumeRepeatTimer;     // owned
         TBool                                   iVolumeRepeatUp;
         TBool                                   iForeground;
-        
-        CMPXVideoPlaybackContainer*             iContainer;	  // not owned
 
-
+        CMPXVideoPlaybackContainer*             iContainer;	        // not owned
+        CCoeControl*                            iActiveControlPtr;  // not owned
+        TMPXVideoControlType                    iActiveControlType;
 };
 
 

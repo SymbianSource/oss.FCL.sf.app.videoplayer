@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 39 %
+// Version : %version: 42 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -459,7 +459,8 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
         case EVcxHgMyVideosCmdUnmark:
         case EVcxHgMyVideosCmdMarkAll:
         case EVcxHgMyVideosCmdUnmarkAll:
-        case EVcxHgMyVideosCmdToggleMultipleMarking:        
+        case EVcxHgMyVideosCmdToggleMultipleMarking:
+        case EVcxHgMyVideosCmdMarkContext:
             {
             VideoListL()->HandleMarkCommandL( aCommand );
             }
@@ -624,6 +625,8 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdShowViaHomenet, ETrue );
 #ifdef RD_VIDEO_AS_RINGING_TONE
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
+#else
+        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkContext, ETrue );
 #endif
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdOpen, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ETrue );

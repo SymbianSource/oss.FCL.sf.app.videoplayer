@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 //
 //  INCLUDE FILES
@@ -133,7 +133,6 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL()"));
 
     TBool statusChanged = EFalse;
-    TBool tvOutHDMI = EFalse;
 
     //
     //  Initialize TV-Out value to EFalse before checking if
@@ -168,23 +167,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
         {
             MPX_DEBUG(_L("    TV-Out Capabilities Exist"));
 
-            tvOutConnected = ETrue;
-
-            TAccPolNameRecord nameRecord;
-            nameRecord.SetNameL( KAccVideoOut );                       
-            TAccValueTypeTInt value;            
-            iConnection.GetValueL( genId, nameRecord, value );  
-            
-            if ( value.iValue == EAccVideoOutEHDMI )
-            {
-                tvOutHDMI = ETrue;
-                //
-                // HDMI has precedence over Comp TV-Out, If the accessory is
-                // HDMI then stop the search for Video Out accessory, else continue 
-                // looping through all the accessories.
-                //
-                break;
-            }
+            tvOutConnected = ETrue;                         
         }
     }
 
@@ -198,7 +181,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     {
         iTvOutConnected = tvOutConnected;
 
-        if ( iTvOutConnected && !tvOutHDMI)
+        if ( iTvOutConnected ) 
         {
             //
             //  Check the playablility of the clip
@@ -213,7 +196,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
         statusChanged   = ETrue;
     }
 
-    MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL  iTvOutConnected = %d, tvOutHDMI = %d"), iTvOutConnected, tvOutHDMI);
+    MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL  iTvOutConnected = %d"), iTvOutConnected);
 
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL() ret = %d"), statusChanged);
 

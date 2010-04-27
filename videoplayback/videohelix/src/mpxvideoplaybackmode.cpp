@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 22 %
+// Version : %version: 23 %
 
 
 
@@ -179,11 +179,16 @@ void CMPXVideoPlaybackMode::HandleBackground()
 
     if ( iVideoPlaybackCtlr->iAppInForeground )
     {
-        if ( iVideoPlaybackCtlr->IsAlarm() ||
-             ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ) )
+        if ( iVideoPlaybackCtlr->IsAlarm() )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
             iVideoPlaybackCtlr->iState->HandlePause();
+        }
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        {
+            iVideoPlaybackCtlr->iForegroundPause = ETrue;
+            iVideoPlaybackCtlr->iState->HandlePause();
+            iVideoPlaybackCtlr->SendHideControlsEventL();
         }
         else if ( iVideoPlaybackCtlr->IsPhoneCall() || iVideoPlaybackCtlr->IsVideoCall() )
         {

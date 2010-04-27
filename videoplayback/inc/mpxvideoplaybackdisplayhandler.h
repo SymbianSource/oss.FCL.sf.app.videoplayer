@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -65,9 +65,9 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
         void CreateDisplayWindowL( CWsScreenDevice& aScreenDevice, RWindow& aWin );
 
-        void RemoveDisplayWindow( TBool aSignalPlaybackPlugin = ETrue );
+        void RemoveDisplayWindow();
 
-        void HandleVideoDisplaySyncMessageL( CMPXMessage* aMessage );
+        void HandleVideoDisplayMessageL( CMPXMessage* aMessage );
 
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 

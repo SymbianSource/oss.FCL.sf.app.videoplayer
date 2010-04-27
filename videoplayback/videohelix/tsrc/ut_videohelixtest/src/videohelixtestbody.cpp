@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 18 %
+// Version : %version: 19 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -116,9 +116,6 @@ TInt CVHPPTestClass::RunMethodL( CStifItemParser& aItem )
         ENTRY( "SetDrmProtected", CVHPPTestClass::SetDrmProtectedL ),
         ENTRY( "IssueSeekedToEndCommand", CVHPPTestClass::IssueSeekedToEndCommandL),
         ENTRY( "HandleVolume", CVHPPTestClass::HandleVolumeL ),
-        ENTRY( "ConnectHDMITvOut", CVHPPTestClass::ConnectHDMITvOutL ),
-        ENTRY( "DisconnectHDMITvOut", CVHPPTestClass::DisconnectHDMITvOutL ),
-        ENTRY( "SetHDMITvOutConnected", CVHPPTestClass::SetHDMITvOutConnectedL ),
 
         ENTRY ("InitializeWithPositionL", CVHPPTestClass::InitializeWithPositionL),
         ENTRY ("InitializeLinkWithPositionL", CVHPPTestClass::InitializeLinkWithPositionL),
@@ -2171,66 +2168,6 @@ CVHPPTestClass::HandleVolumeL( CStifItemParser& aItem )
     return err; 
 } 
 
-TInt
-CVHPPTestClass::ConnectHDMITvOutL( )
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::ConnectHDMITvOutL()"));
-    iLog->Log(_L("CVHPPTestClass::ConnectHDMITvOutL()"));
-
-    // Connect HDMI TV Out
-    iAccObserver->SetTvOutHDMI( ETrue );
-
-    //
-    //  Add event for callback
-    //
-    TCallbackEvent* event = new TCallbackEvent;
-
-    event->iEvent = EPbCmdTvOutEvent;
-    event->iData  = ETrue;
-    event->iError = ETrue;
-
-    AddExpectedEvent( event );
-
-    iAccObserver->UpdateTvOutStatusL( ETrue );
-
-    return KErrNone;
-}
-
-TInt
-CVHPPTestClass::DisconnectHDMITvOutL()
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::DisconnectHDMITvOutL()"));
-    iLog->Log(_L("CVHPPTestClass::DisconnectHDMITvOutL()"));
-
-    // Connect HDMI TV Out
-    iAccObserver->SetTvOutHDMI( EFalse );
-
-    //
-    //  Add event for callback
-    //
-    TCallbackEvent* event = new TCallbackEvent;
-
-    event->iEvent = EPbCmdTvOutEvent;
-    event->iData  = EFalse;
-    event->iError = ETrue;
-
-    AddExpectedEvent( event );
-
-    iAccObserver->UpdateTvOutStatusL( EFalse );
-
-    return KErrNone;
-}
-
-TInt
-CVHPPTestClass::SetHDMITvOutConnectedL()
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::SetHDMITvOutConnectedL()"));
-    iLog->Log(_L("CVHPPTestClass::SetHDMITvOutConnectedL()"));
-
-    iAccObserver->SetTvOutHDMI( ETrue );
-
-    return KErrNone;
-}
 
 TInt
 CVHPPTestClass::InitializeWithPositionL( CStifItemParser& aItem )

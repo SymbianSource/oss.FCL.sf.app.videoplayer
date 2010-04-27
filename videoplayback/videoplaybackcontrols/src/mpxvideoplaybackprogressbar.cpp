@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#20 %
+// Version : %version: 21 %
 
 
 // INCLUDE FILES
@@ -85,7 +85,6 @@ void CMPXVideoPlaybackProgressBar::ConstructL( TRect aRect )
     //
     iMinSecFormatString = iEikonEnv->AllocReadResourceL(R_QTN_TIME_DURAT_MIN_SEC);
     iHourMinSecFormatString = iEikonEnv->AllocReadResourceL(R_QTN_TIME_DURAT_LONG);
-
 
 #ifdef RD_TACTILE_FEEDBACK
     iFeedback = MTouchFeedback::Instance();
@@ -182,9 +181,9 @@ CMPXVideoPlaybackProgressBar::~CMPXVideoPlaybackProgressBar()
     }
 
 #ifdef RD_TACTILE_FEEDBACK
-    if (iFeedback)
+    if ( iFeedback )
     {
-        iFeedback->RemoveFeedbackForControl(this);
+        iFeedback->RemoveFeedbackForControl( this );
     }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -217,7 +216,6 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     //
     // Calculate icon rects
     //
-
     TRect progressRect = Rect();
     TInt topMarginHeight = ( progressRect.iBr.iY - KMPXProgressBarHeight ) / 2 - 10;
     progressRect.iTl.iY += topMarginHeight;
@@ -284,6 +282,7 @@ void CMPXVideoPlaybackProgressBar::SkinChangeL()
 
     delete iFrameIcon;
     iFrameIcon = NULL;
+
     iFrameIcon = AknsUtils::CreateGulIconL(
         skin,
         KAknsIIDQgnGrafMup2BarFrame,
@@ -300,6 +299,7 @@ void CMPXVideoPlaybackProgressBar::SkinChangeL()
 
     delete iPlaybackIcon;
     iPlaybackIcon = NULL;
+
     iPlaybackIcon = AknsUtils::CreateGulIconL(
         skin,
         KAknsIIDQgnGrafMup2BarProgress2,
@@ -374,7 +374,7 @@ void CMPXVideoPlaybackProgressBar::HandleButtonDownEventL( TReal aRatio )
                    _L("ratio = %f"), aRatio );
 
     iPointerEventStarted = ETrue;
-    iWasPlaying = iController->State() == EPbStatePlaying? ETrue:EFalse;
+    iWasPlaying = iController->State() == EPbStatePlaying ? ETrue : EFalse;
 
     if ( iWasPlaying )
     {
@@ -388,7 +388,7 @@ void CMPXVideoPlaybackProgressBar::HandleButtonDownEventL( TReal aRatio )
         iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
         iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE        
+#endif //SYMBIAN_BUILD_GCE
     }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -421,7 +421,7 @@ void CMPXVideoPlaybackProgressBar::HandleDraggingEventL( TReal aRatio )
         iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
         iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE        
+#endif //SYMBIAN_BUILD_GCE
     }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -502,9 +502,11 @@ void CMPXVideoPlaybackProgressBar::Draw( const TRect& aRect ) const
     }
     else
     {
-        // draw a solid background so that the entire progress
-        // bar is shown not just the area representing the
-        // portion that has been played.
+        //
+        //  draw a solid background so that the entire progress
+        //  bar is shown not just the area representing the
+        //  portion that has been played.
+        //
         gc.SetBrushColor( KRgbBlack );
         gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
         gc.DrawRect( aRect );
@@ -630,7 +632,8 @@ void CMPXVideoPlaybackProgressBar::DurationChangedL( TInt aDuration )
 //
 void CMPXVideoPlaybackProgressBar::PositionChangedL( TInt aPosition, TBool aUserChanged )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackProgressBar::PositionChangedL() [%d]"), aPosition );
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackProgressBar::PositionChangedL()"),
+                   _L("aPosition = %d, aUserChanged = %d"), aPosition, aUserChanged );
 
     //
     //  We will ignore position information which engine sent
@@ -722,7 +725,8 @@ void CMPXVideoPlaybackProgressBar::UpdateDownloadPosition( TInt aSize )
 //
 void CMPXVideoPlaybackProgressBar::SetTextLWithReadableTimeL( TInt aTime, CEikLabel* aLabel )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackProgressBar::SetTextLWithReadableTimeL() [%d]"), aTime);
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackProgressBar::SetTextLWithReadableTimeL()"),
+                   _L("aTime = %d"), aTime );
 
     TBuf<16> text;
 
@@ -768,6 +772,7 @@ void CMPXVideoPlaybackProgressBar::UpdateProgressBarStateL( CMPXVideoPlaybackVie
     {
         delete iDownloadIcon;
         iDownloadIcon = NULL;
+
         iDownloadIcon = AknsUtils::CreateGulIconL(
             skin,
             KAknsIIDQgnGrafMup2BarProgress,
@@ -796,6 +801,7 @@ void CMPXVideoPlaybackProgressBar::UpdateProgressBarStateL( CMPXVideoPlaybackVie
     {
         delete iSliderIcon;
         iSliderIcon = NULL;
+
         iSliderIcon = AknsUtils::CreateGulIconL(
             skin,
             KAknsIIDQgnGrafNsliderMarker,
@@ -805,6 +811,7 @@ void CMPXVideoPlaybackProgressBar::UpdateProgressBarStateL( CMPXVideoPlaybackVie
 
         delete iSelectedSliderIcon;
         iSelectedSliderIcon = NULL;
+
         iSelectedSliderIcon = AknsUtils::CreateGulIconL(
             skin,
             KAknsIIDQgnGrafNsliderMarkerSelected,
@@ -856,6 +863,8 @@ void CMPXVideoPlaybackProgressBar::UpdateProgressBarStateL( CMPXVideoPlaybackVie
 //
 void CMPXVideoPlaybackProgressBar::Reset()
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackProgressBar::Reset()"));
+
     if ( iPointerEventStarted || iDragging )
     {
         TPointerEvent event;

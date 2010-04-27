@@ -141,6 +141,7 @@ void CVcxHgMyVideosVideoModelHandler::ConstructL()
 CVcxHgMyVideosVideoModelHandler::~CVcxHgMyVideosVideoModelHandler()
     {
     iResumeArray.Close();
+    iMarkedMediaList.Close();
     
     delete iVideoDetails;
     delete iVideoIndicator;
@@ -186,9 +187,9 @@ void CVcxHgMyVideosVideoModelHandler::DoModelDeactivate()
     TRAP_IGNORE( iDownloadUpdater->SetPausedL( ETrue ) );
     iModel.CollectionClient().SetVideoModelObserver( NULL );
     iScroller.DisableScrollBuffer();
-    
+
     TRAP_IGNORE( SaveHighlightedItemIdL() );
-    
+
     IPTVLOGSTRING_LOW_LEVEL( 
         "MPX My Videos UI # CVcxHgMyVideosVideoModelHandler::DoModelDeactivate() - Exit" );    
     }
@@ -198,7 +199,7 @@ void CVcxHgMyVideosVideoModelHandler::DoModelDeactivate()
 // -----------------------------------------------------------------------------
 //
 void CVcxHgMyVideosVideoModelHandler::SaveHighlightedItemIdL()
-    {    
+    {
     iHighlightedItemId = iVideoArray->ArrayIndexToMpxItemIdL( Highlight() );
     }
 
@@ -248,8 +249,14 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
         iDownloadUpdater->SetPausedL( ETrue );
     	
         TVcxMyVideosSortingOrder sortOrder = iModel.VideolistSortOrderL();
+
+        if ( iVideoListImpl.IsMarking() )
+            {
+            SaveMarkingsL();
+            }
+
         iVideoArray->ResortVideoListL( sortOrder );
-        
+
         TInt highlight = iScroller.SelectedIndex();
         
         ResetScrollerBufferAndItemsL();
@@ -258,6 +265,11 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
         
         iView.DynInitMskL();
     	
+        if ( iVideoListImpl.IsMarking() )
+            {
+            RestoreMarkingsL();
+            }
+
         iDownloadUpdater->VideoArrayChangedL();
         iDownloadUpdater->SetPausedL( EFalse );
 
@@ -1053,8 +1065,15 @@ void CVcxHgMyVideosVideoModelHandler::DeleteItemL( TMPXItemId aMpxItemId )
             // Last item has deleted, set empty text and reset list.
             iVideoListImpl.SetEmptyListTextByResourceL( R_VCXHGMYVIDEOS_NO_VIDEOS );
             iScroller.Reset();
+
+            // End marking mode for empty list
+            if ( iVideoListImpl.IsMarking() )
+                {
+                iVideoListImpl.EndMarkingMode();
+                iView.DynInitRskL();
+                }
             }
-        
+
         // fix for error where highlight was sometimes lost after delete. Problem is 
         // that someone is 'stealing' keyboard focus from the scroller (probably the
         // confirmation note, as user needs to clicks them to start the delete).
@@ -1194,16 +1213,16 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
     if (  videoCount > 0 )
         {
         ResizeScrollerL( videoCount );
-            		
+
         TInt highlight( KErrNotFound );
-		
+
         if ( iRestoreHighlightPosition )
             {
             highlight = iVideoArray->IndexByMPXItemId( iHighlightedItemId );
             }
         
         highlight != KErrNotFound ? iScroller.SetSelectedIndex( highlight ) :
-		                            iScroller.SetSelectedIndex( 0 );
+                                    iScroller.SetSelectedIndex( 0 );
         }
     else
         {
@@ -1481,4 +1500,56 @@ void CVcxHgMyVideosVideoModelHandler::ResizeScrollerL( TInt aNewItemCount )
         // CHgScroller::Reset() was already called, no need to reset tricks
         iScroller.ResizeL( aNewItemCount );
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::SaveMarkingsL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoModelHandler::SaveMarkingsL()
+    {
+    // Get marked list item indexes
+    RArray<TInt> markedVideos;
+    CleanupClosePushL( markedVideos );
+    MarkedVideosL( markedVideos );
+    TInt markedCount( markedVideos.Count() );
+
+    iMarkedMediaList.Reset();
+    iMarkedMediaList.ReserveL( markedCount );
+
+    TInt markedIndex;
+
+    for ( TInt i = 0; i <markedCount; i++ )
+        {
+        markedIndex = markedVideos[ i ];
+        CMPXMedia* media = iVideoArray->MPXMedia( markedIndex );
+        iMarkedMediaList.Append( media );
+        iScroller.ItemL( markedIndex ).ClearFlags( CHgItem::EHgItemFlagMarked );
+        IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::SaveMarkingsL() marked index = %d CMPXMedia = 0x%08x", markedIndex, media );
+        }
+
+    CleanupStack::PopAndDestroy( &markedVideos );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::RestoreMarkingsL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoModelHandler::RestoreMarkingsL()
+    {
+    TInt videoCount = iVideoArray->VideoCount();
+    TInt found( KErrNotFound );
+
+    for ( TInt i = 0; i < videoCount; i++ )
+        {
+        CMPXMedia* media = iVideoArray->MPXMedia( i );
+        found = iMarkedMediaList.Find( media );
+        if ( KErrNotFound != found )
+            {
+            iScroller.ItemL( i ).SetFlags( CHgItem::EHgItemFlagMarked );
+            }
+        IPTVLOGSTRING4_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::RestoreMarkingsL() list index = %d CMPXMedia = 0x%08x found = %d", i, media, found );
+        }
+
+    iMarkedMediaList.Reset();
     }

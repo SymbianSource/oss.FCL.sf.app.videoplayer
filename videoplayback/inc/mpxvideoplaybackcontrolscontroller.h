@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#11 %
+// Version : %version: e003sa33#14 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -139,9 +139,12 @@ class CMPXVideoPlaybackControlsController : public CBase
         inline TBool IsRealMediaFormat();
 
         /**
-         *  Check if video clip's aspect ratio is equal to screen display aspect ratio
+         *  Check aspect ratio icon
+         *  In case that Clip's AR is equals to Screen Display AR, also hide AR icon.  
+         *  
+         *  @return ETrue in case that clip's AspectRatioIcon can be shown
          */
-        TBool IsSameAspectRatio();
+        TBool ShowAspectRatioIcon();
 
     private:
         /**
@@ -337,6 +340,18 @@ class CMPXVideoPlaybackControlsController : public CBase
          *  Closes Media Details Viewer
          */
         void CloseMediaDetailsViewer();
+
+        /*
+         *   Handles the Loading Started command that was received after Buffering state was
+         *   blocked by the playback view
+         */
+        void HandleLoadingStarted();
+
+        /*
+         *   This will cause the controls to be updated when the surface changes and the
+         *   controls are visible.
+         */
+        void RedrawControlsForSurfaceChanges();
 
     private:
 

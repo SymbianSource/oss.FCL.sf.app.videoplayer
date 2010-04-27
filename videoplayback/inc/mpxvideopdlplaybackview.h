@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 // This file defines the API for VideoPlaybackView.dll
@@ -72,6 +72,8 @@ class CMPXVideoPdlPlaybackView : public CMPXVideoBasePlaybackView
         void HandleStoppedStateL();
 
         void HandleBufferingStateL();
+
+        void HandleInitializingStateL( TMPXPlaybackState aLastState );
 
     private:
 

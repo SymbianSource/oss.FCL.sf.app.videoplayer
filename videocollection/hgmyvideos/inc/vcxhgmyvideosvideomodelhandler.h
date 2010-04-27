@@ -475,13 +475,13 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @return ETrue if media belongs to category, otherwise EFalse.
          */
         TBool ValidOrigin( CMPXMedia& aMedia );
-                
+
         /** 
-         * Saves MPX id of highlighted item. 
+         * Saves MPX id of highlighted item.
          */
         void SaveHighlightedItemIdL();
-        
-        /** 
+
+        /**
          * Update scrollbar strip type depending on sort order
          */
         void UpdateScrollbarTypeL( const TVcxMyVideosSortingOrder& aSortingOrder );
@@ -501,9 +501,24 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * Resizes scroller with refetch
          * This is faster way to reset scroller than CHgScroller::Reset() and 
          * CHgScroller::ResizeL() calls combined
-		 * @param aNewItemCount New item count
+         * @param aNewItemCount New item count
          */
         void ResizeScrollerL( TInt aNewItemCount );
+
+        /**
+         * Saves the marked MPXMedia items to iMarkedMediaList. This is called before
+         * re-sorting the videos list if marking mode is enabled to preserve the
+         * marking status of marked items.
+         */
+        void SaveMarkingsL();
+
+        /**
+         * Restores the marking status of the MPXMedia items from iMarkedMediaList.
+         * This is called after re-sorting the list if marking mode is enabled to
+         * restore the marking status of the marked items.
+         * This method resets iMarkedMediaList before returning.
+         */
+        void RestoreMarkingsL();
 
     private:
         
@@ -570,7 +585,7 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * MPX id of highlighted item in a video list.
          */
         TMPXItemId iHighlightedItemId;
-        
+
         /**
          * Downloading has been resumed for these MPX IDs. Needed for showing
 		 * note "Resuming download not possible, download starts from beginning".
@@ -581,6 +596,14 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * Video indicator gives an overlay icon for video thumbnails.
          */
         CMyVideosIndicator* iVideoIndicator;
+
+        /**
+         * Array of marked MPXMedia items to temporarily hold a list of marked items in video list.
+         * The array is temporarily filled with pointers to marked media items prior to re-sorting
+         * the video list and is cleared after sorting.
+         */
+        RPointerArray<CMPXMedia> iMarkedMediaList;
+
     };
 
 #endif // VCXHGMYVIDEOSVIDEOMODELHANDLER_H

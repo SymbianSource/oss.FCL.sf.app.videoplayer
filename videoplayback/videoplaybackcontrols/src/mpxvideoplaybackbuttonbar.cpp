@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#17 %
+// Version : %version: 18 %
 
 
 
@@ -395,7 +395,7 @@ void CMPXVideoPlaybackButtonBar::HandleTopButtonUpEventL( const TPointerEvent& a
                 iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
 #else
                 iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE                
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -434,7 +434,7 @@ void CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()
                     iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
 #else
                     iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE                    
+#endif //SYMBIAN_BUILD_GCE
                 }
 #endif //RD_TACTILE_FEEDBACK
                 iController->HandleCommandL( EMPXPbvCmdPause );
@@ -453,7 +453,7 @@ void CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()
                     iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
 #else
                     iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE                    
+#endif //SYMBIAN_BUILD_GCE
                 }
 #endif //RD_TACTILE_FEEDBACK
                 iController->HandleCommandL( EMPXPbvCmdPlay );
@@ -485,7 +485,7 @@ void CMPXVideoPlaybackButtonBar::HandleBottomButtonUpEventL( const TPointerEvent
             iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
 #else
             iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE           
+#endif //SYMBIAN_BUILD_GCE
         }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -534,7 +534,7 @@ void CMPXVideoPlaybackButtonBar::DoStartSeekingL()
         iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
 #else
         iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE        
+#endif //SYMBIAN_BUILD_GCE
     }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -686,6 +686,8 @@ void CMPXVideoPlaybackButtonBar::UpdateButtonBarState( CMPXVideoPlaybackViewFile
 //
 void CMPXVideoPlaybackButtonBar::Reset()
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::Reset()"));
+
     if ( iSeeking )
     {
         // Abandon the ongoing seek operation

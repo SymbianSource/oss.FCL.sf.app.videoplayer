@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#26 %
+// Version : %version: 27 %
 
 
 // INCLUDE FILES
@@ -385,13 +385,26 @@ void CMPXVideoPlaybackContainer::HandlePointerEventL( const TPointerEvent& aPoin
 // only if if OK to handle pointer events
 // -------------------------------------------------------------------------------------------------
 //
-EXPORT_C void CMPXVideoPlaybackContainer::DoHandlePointerEventL( const TPointerEvent& aPointerEvent )
+EXPORT_C
+void CMPXVideoPlaybackContainer::DoHandlePointerEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::DoHandlePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::DoHandlePointerEventL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType );
 
-    if ( AknLayoutUtils::PenEnabled() && aPointerEvent.iType == TPointerEvent::EButton1Up )
+    if ( AknLayoutUtils::PenEnabled() )
     {
-        iControlsController->HandleEventL( EMPXControlCmdToggleVisibility );
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+            iControlsController->HandleEventL( EMPXControlCmdToggleVisibility );
+
+            SetPointerCapture( EFalse );
+            ClaimPointerGrab( EFalse );
+        }
+        else if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+        {
+            SetPointerCapture( ETrue );
+            ClaimPointerGrab( ETrue );
+        }
     }
 }
 

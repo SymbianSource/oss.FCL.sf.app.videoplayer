@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -74,7 +74,6 @@ NONSHARABLE_CLASS( CMPXVideoAccessoryObserver )
         void UpdateTvOutStatusL( TBool aTvOutConnected );
         void SetTvOutConnected( TBool aConnected );
         void SetTvOutPlaybackAllowed( TBool aAllowed );
-        void SetTvOutHDMI( TBool aTvOutHDMI );
 
     private:
 
@@ -95,7 +94,6 @@ NONSHARABLE_CLASS( CMPXVideoAccessoryObserver )
         CMPXVideoPlaybackController*        iController;
         TBool                               iTvOutConnected;
         TBool                               iTvOutPlaybackAllowed;
-        TBool                               iTvOutHDMI;
 };
 
 #endif  //  MPXVIDEOACCESSORYOBSERVER_H

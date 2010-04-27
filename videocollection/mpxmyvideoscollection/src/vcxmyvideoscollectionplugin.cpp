@@ -45,11 +45,6 @@
 const TInt KMaxFileDeleteAttempts = 4;
 const TInt KFileDeleteLoopDelay = 100000;
 
-//       Add 2000 new videos to memory card. Reboot phone, mds starts harvesting,
-//       open my videos -> mds server crashes and lots of events is sent to client.
-//       If one waits until all are harvested before opening my videos, it works.
-
-
 // ============================ MEMBER FUNCTIONS ==============================
 
 // ----------------------------------------------------------------------------

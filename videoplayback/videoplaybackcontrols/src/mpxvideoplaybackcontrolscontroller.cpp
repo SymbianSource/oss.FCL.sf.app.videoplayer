@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 32 %
+// Version : %version: e003sa33#36 %
 
 
 // INCLUDE FILES
@@ -160,7 +160,7 @@ EXPORT_C CMPXVideoPlaybackControlsController* CMPXVideoPlaybackControlsControlle
 //
 EXPORT_C CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsController()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsController"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsController"));
 
     iFs.Close();
 
@@ -374,11 +374,18 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         {
             iSurfaceCreated = ETrue;
             SetRealOneBitmapVisibility( EFalse );
+            RedrawControlsForSurfaceChanges();
             break;
         }
         case EMPXControlCmdSurfaceRemoved:
         {
             iSurfaceCreated = EFalse;
+            RedrawControlsForSurfaceChanges();
+            break;
+        }
+        case EMPXControlCmdLoadingStarted:
+        {
+            HandleLoadingStarted();
             break;
         }
     }
@@ -1938,33 +1945,70 @@ TBool CMPXVideoPlaybackControlsController::SetBackgroundBlack()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackControlsController::IsSameAspectRatio
+//   CMPXVideoPlaybackControlsController::ShowAspectRatioIcon
 // -------------------------------------------------------------------------------------------------
 //
-TBool CMPXVideoPlaybackControlsController::IsSameAspectRatio()
+TBool CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()
 {
-	MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackControlsController::IsSameAspectRatio()" ) );
-	
+	MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()"));
+
     TBool retVal = EFalse;
 
     if ( iFileDetails->iVideoEnabled &&
     	 iFileDetails->iVideoHeight > 0 &&
-  	     iFileDetails->iVideoWidth > 0 )
+  	     iFileDetails->iVideoWidth > 0 &&
+  	     AknLayoutUtils::PenEnabled() )
     {
         TRect displayRect = iContainer->Rect();
         TReal displayAspectRatio = ( TReal32 )displayRect.Width() / ( TReal32 )displayRect.Height();
-        TReal videoAspectRatio = ( TReal32 )iFileDetails->iVideoWidth / 
+        TReal videoAspectRatio = ( TReal32 )iFileDetails->iVideoWidth /
         		                 ( TReal32 )iFileDetails->iVideoHeight;
 
-        if ( displayAspectRatio == videoAspectRatio )
+        // If clip's AR is as same as screen display AR, AspectRatioIcon does not display.
+        if ( displayAspectRatio != videoAspectRatio )
         {
             retVal = ETrue;
         }
     }
 
-    MPX_DEBUG( _L( "CMPXVideoPlaybackControlsController::IsSameAspectRatio(%d)" ), retVal );
-    
+    MPX_DEBUG( _L( "CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()[%d]" ), retVal );
+
     return retVal;
 }
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackControlsController::HandleLoadingStarted
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackControlsController::HandleLoadingStarted()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::HandleLoadingStarted()"));
+
+    if ( iState != EPbStateBuffering )
+    {
+        iState = EPbStateBuffering;
+        UpdateStateOnButtonBar();
+        UpdateControlsVisibility();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges()"));
+
+    //
+    //  A surface has been added or removed.
+    //  If the controls are visible, redraw them with the new transparency value.
+    //
+    if ( IsVisible() )
+    {
+        UpdateControlsVisibility();
+    }
+}
+
 
 // End of File

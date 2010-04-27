@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 
 // INCLUDE FILES
@@ -357,7 +357,9 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
                                                          const TPointerEvent& aPointerEvent,
                                                          TMPXVideoControlType aMPXControl )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent()"),
+                   _L("iProcessingInputType = %d, aPointerEvent.iType = %d"),
+                   iProcessingInputType, aPointerEvent.iType );
 
     switch ( iProcessingInputType )
     {
@@ -367,27 +369,82 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
             {
                 iProcessingInputType = EMpxVideoTouch;
 
+                //
+                //  Save the active controls pointer to reroute invalid pointer events
+                //
+                iActiveControlPtr = aControl;
+                iActiveControlType = aMPXControl;
+
                 ReRoutePointerEventL( aControl, aPointerEvent, aMPXControl );
             }
+
             break;
         }
         case EMpxVideoTouch:
         {
-            if ( aPointerEvent.iType != TPointerEvent::EButton1Down )
+            if ( aControl == iActiveControlPtr )
             {
-                ReRoutePointerEventL( aControl, aPointerEvent, aMPXControl );
-
-                // reset the value only on pointer up event - but not on drag
-                if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+                //
+                //  Event is from the active control, process pointer event normally
+                //
+                if ( aPointerEvent.iType != TPointerEvent::EButton1Down )
                 {
-                    iProcessingInputType = EMpxVideoNone;
+                    ReRoutePointerEventL( aControl, aPointerEvent, aMPXControl );
+
+                    //
+                    //  reset the value only on pointer up event - but not on drag
+                    //
+                    if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+                    {
+                        iProcessingInputType = EMpxVideoNone;
+                        iActiveControlPtr = NULL;
+                    }
                 }
             }
+            else
+            {
+                //
+                //  Event is from non active control
+                //  This should not happen, but if event is a button up event,
+                //  end the current active control pointer processing
+                //
+                if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+                {
+                    //
+                    //  Reroute button up event to active control and end current 
+                    //  control processing
+                    //
+                    ReRoutePointerEventL( iActiveControlPtr, aPointerEvent, iActiveControlType );
+                    iProcessingInputType = EMpxVideoNone;
+                    iActiveControlPtr = NULL;
+                }
+            }
+
             break;
         }
     } // switch
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL( CCoeControl* aControl,
+                                                              const TPointerEvent& aPointerEvent,
+                                                              TMPXVideoControlType aMPXControl )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()"),
+                   _L("aMPXControl = %d"), aMPXControl );
+
+    if ( aMPXControl == EMpxVideoPlaybackContainer )
+    {
+        iContainer->DoHandlePointerEventL( aPointerEvent );
+    }
+    else if ( aMPXControl == EMpxVideoPlaybackControl )
+    {
+        static_cast<CMPXVideoPlaybackControl*>(aControl)->DoHandlePointerEventL( aPointerEvent );
+    }
+}
 
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackUserInputHandler::ProcessKeyEvent()
@@ -513,27 +570,6 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
     }
 
     iContainer->HandleCommandL( command );
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL( CCoeControl* aControl,
-                                                              const TPointerEvent& aPointerEvent,
-                                                              TMPXVideoControlType aMPXControl )
-{
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL()"));
-
-    if ( aMPXControl == EMpxVideoPlaybackContainer )
-    {
-        iContainer->DoHandlePointerEventL(aPointerEvent);
-    }
-    else if ( aMPXControl == EMpxVideoPlaybackControl )
-    {
-        static_cast<CMPXVideoPlaybackControl*>(aControl)->DoHandlePointerEventL(aPointerEvent);
-    }
 }
 
 // -------------------------------------------------------------------------------------------------

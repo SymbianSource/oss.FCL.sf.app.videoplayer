@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#20 %
+// Version : %version: 21 %
 
 
 // INCLUDE FILES
@@ -481,30 +481,30 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
 
     switch ( aPointerEvent.iType )
     {
-        case TPointerEvent::EButtonRepeat: 
-        {    
-#ifdef RD_TACTILE_FEEDBACK 
-            if ( iFeedback ) 
-            { 
+        case TPointerEvent::EButtonRepeat:
+        {
+#ifdef RD_TACTILE_FEEDBACK
+            if ( iFeedback )
+            {
 #ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
                 iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE 
-            } 
-#endif //RD_TACTILE_FEEDBACK                 
+#endif //SYMBIAN_BUILD_GCE
+            }
+#endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdIncreaseVolume );
             iDragging = EVolumeIncreaseDragging;
-            
-        }    
-        case TPointerEvent::EButton1Down: 
-        { 
-            Window().RequestPointerRepeatEvent( 
-                         TTimeIntervalMicroSeconds32(KMPXPtrEventRepeatRequestTime) 
-                         ,iVolumeUpControlRect); 
+
+        }
+        case TPointerEvent::EButton1Down:
+        {
+            Window().RequestPointerRepeatEvent(
+                         TTimeIntervalMicroSeconds32(KMPXPtrEventRepeatRequestTime)
+                         ,iVolumeUpControlRect);
 
             break;
-        } 
+        }
         case TPointerEvent::EDrag:
         {
             iDragging = EVolumeIncreaseDragging;
@@ -520,7 +520,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
                 iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE       
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -543,30 +543,30 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
 
     switch ( aPointerEvent.iType )
     {
-        case TPointerEvent::EButtonRepeat: 
-        {    
-#ifdef RD_TACTILE_FEEDBACK 
-            if ( iFeedback ) 
-            { 
+        case TPointerEvent::EButtonRepeat:
+        {
+#ifdef RD_TACTILE_FEEDBACK
+            if ( iFeedback )
+            {
 #ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
-                iFeedback->InstantFeedback( ETouchFeedbackSensitive ); 
-#endif //SYMBIAN_BUILD_GCE 
-            } 
-#endif //RD_TACTILE_FEEDBACK                 
+                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
+#endif //SYMBIAN_BUILD_GCE
+            }
+#endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdDecreaseVolume );
             iDragging = EVolumeDecreaseDragging;
-            
-        }    
-        case TPointerEvent::EButton1Down: 
-        { 
-            Window().RequestPointerRepeatEvent( 
-                         TTimeIntervalMicroSeconds32(KMPXPtrEventRepeatRequestTime) 
-                         ,iVolumeDownControlRect); 
+
+        }
+        case TPointerEvent::EButton1Down:
+        {
+            Window().RequestPointerRepeatEvent(
+                         TTimeIntervalMicroSeconds32(KMPXPtrEventRepeatRequestTime)
+                         ,iVolumeDownControlRect);
 
             break;
-        } 
+        }
         case TPointerEvent::EDrag:
         {
             iDragging = EVolumeDecreaseDragging;
@@ -577,7 +577,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
 #ifdef RD_TACTILE_FEEDBACK
             if ( iFeedback )
             {
-#ifdef SYMBIAN_BUILD_GCE           	
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
                 iFeedback->InstantFeedback( ETouchFeedbackBasic );
@@ -701,7 +701,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
 #ifdef RD_TACTILE_FEEDBACK
             if ( iFeedback )
             {
-#ifdef SYMBIAN_BUILD_GCE           	
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
 #else
                 iFeedback->InstantFeedback( ETouchFeedbackSensitive );
@@ -727,7 +727,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
             {
                 //
                 // volume & mute levels are kept track in playbackplugin.
-                // 
+                //
                 iController->HandleCommandL( EMPXPbvCmdMute );
             }
 
@@ -1000,14 +1000,14 @@ void CMPXVideoPlaybackVolumeBar::VolumeChanged( TInt aVolume )
 //
 void CMPXVideoPlaybackVolumeBar::Reset()
 {
-	MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::Reset()"));
+	MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::Reset()"));
 
     if ( iDragging != EVolumeNotDragging )
     {
         TPointerEvent event;
         event.iType = TPointerEvent::EButton1Up;
         event.iPosition.iY = ( iSliderRect.iTl.iY + iSliderRect.iBr.iY ) / 2;
-        
+
         MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }
@@ -1018,8 +1018,9 @@ void CMPXVideoPlaybackVolumeBar::Reset()
 //
 void CMPXVideoPlaybackVolumeBar::SetVolumeL( TInt aVolume )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::SetVolumeL(%d)"), aVolume);
-       
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::SetVolumeL()"),
+                   _L("aVolume = %d"), aVolume );
+
     iController->HandleCommandL( EMPXPbvCmdSetVolume, aVolume );
 }
 

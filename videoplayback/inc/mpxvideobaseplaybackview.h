@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 21 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -208,11 +208,6 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         inline void HandleOpenL( const CMPXCollectionPlaylist& /*aPlaylist*/, TInt /*aError*/ ) {}
 
-        /*
-         *  Handle actions when the surface is being removed
-         */
-        void RemoveBackgroundSurfaceL();
-
     public:
         /**
         * Set property
@@ -235,6 +230,8 @@ class CMPXVideoBasePlaybackView : public CAknView,
          */
         virtual void HandleStoppedStateL() = 0;
 
+        virtual void HandleInitializingStateL( TMPXPlaybackState aLastState ) = 0;
+
         virtual void HandlePluginErrorL( TInt aError );
 
         virtual void ClosePlaybackViewL();
@@ -246,7 +243,6 @@ class CMPXVideoBasePlaybackView : public CAknView,
         void InitializeVideoPlaybackViewL();
         void DisplayInfoMessageL( TInt aResourceId, TBool aWaitingDialog = EFalse );
         void DisplayErrorMessageL( TInt aResourceId );
-
 
         CMPXVideoBasePlaybackView();
 
@@ -287,6 +283,10 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         TInt RetrieveBufferingPercentageL();
 
+        void DoHandleInitializingStateL( TMPXPlaybackState aLastState );
+
+        TBool IsMultiItemPlaylist();
+
     private:
 
         /**
@@ -308,7 +308,6 @@ class CMPXVideoBasePlaybackView : public CAknView,
         void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd );
 
         void SetVideoRectL();
-
 
         void DisplayFileDetailsDialogL();
 
@@ -347,13 +346,15 @@ class CMPXVideoBasePlaybackView : public CAknView,
         void ShowFileDetailsDialogL();
 
         void HandleDrmErrorsL( TInt aError );
-        TBool IsMultiItemPlaylist();
+
         TInt OpenDrmFileHandleL( RFile& aFile );
         void LaunchDRMDetailsL();
 
         void HandleRealOneBitmapTimeoutL();
 
         void SendWindowCommandL( TMPXVideoPlaybackCommand aCmd );
+
+        TBool IsInMemoryPlugin();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt OpenDrmFileHandle64L( RFile64& aFile );
@@ -382,8 +383,6 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iPdlReloading;
         TBool                               iRealOneDelayedPlay;
         TBool                               iKeyboardInFocus;
-
-        HBufC*                              iClipName;
 };
 
 #endif  // __VIDEOBASEPLAYBACKVIEW_H__

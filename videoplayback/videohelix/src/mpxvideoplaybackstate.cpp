@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 37 %
+
+// Version : %version: 39 %
 
 
 //
@@ -577,6 +578,27 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoKeywords ),
             *( iVideoPlaybackCtlr->iFileDetails->iKeywords ) );
     }
+    
+    //
+    //  Creation date/time 
+    //
+    if ( attrV & KMPXMediaVideoCreated.iAttributeId )
+    {
+        aMedia->SetTObjectValueL<TInt>(
+            TMPXAttribute( KMPXMediaVideoCreated ),
+            iVideoPlaybackCtlr->iFileDetails->iCreationTime );
+    }
+
+    //
+    //  Last Modified date/time 
+    //
+    if ( attrV & KMPXMediaVideoLastModified.iAttributeId )
+    {
+        aMedia->SetTObjectValueL<TInt>(
+            TMPXAttribute( KMPXMediaVideoLastModified ),
+            iVideoPlaybackCtlr->iFileDetails->iModificationTime );
+    }
+
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1716,17 +1738,32 @@ CMPXBufferingState::~CMPXBufferingState()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXBufferingState::HandleLoadingStarted()
-//
-//  We transition to Buffering state after Play command is issued initially
-//
-//  No state transitions necessary here as we are already in Buffering state
+//    CMPXBufferingState::HandleLoadingStarted()
 //  ------------------------------------------------------------------------------------------------
 void CMPXBufferingState::HandleLoadingStarted()
 {
     MPX_DEBUG(_L("CMPXBufferingState::HandleLoadingStarted()"));
 
-    // no need to send any events - we are already in buffering state
+    TInt loadingPercentage = RetrieveBufferingPercentage();
+    
+    if ( loadingPercentage < 100 )
+    {
+        MPX_TRAPD( err,
+        {
+            CMPXMessage* message = CMPXMessage::NewL();
+            CleanupStack::PushL( message );
+    
+            message->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId, 
+                                                      KMPXMediaIdVideoPlayback );
+            
+            message->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, 
+                                                                 EPbCmdLoadingStarted );
+    
+            iVideoPlaybackCtlr->iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
+    
+            CleanupStack::PopAndDestroy( message );
+        } );
+    }
 }
 
 //  ------------------------------------------------------------------------------------------------

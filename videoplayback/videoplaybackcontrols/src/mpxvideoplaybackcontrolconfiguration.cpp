@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#13 %
+// Version : %version: e003sa33#14 %
 
 
 // INCLUDE FILES
@@ -200,9 +200,7 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
                     iTitleArtistIndicatorsAdded = EFalse;
                 }
 
-                if ( ! iAspectRatioIconAdded &&
-                     iControlsController->FileDetails()->iVideoHeight > 0 &&
-                     iControlsController->FileDetails()->iVideoWidth > 0 )
+                if ( ! iAspectRatioIconAdded && iControlsController->ShowAspectRatioIcon() )
                 {
                     iControlsList.AppendL( EMPXAspectRatioIcon );
                     iAspectRatioIconAdded = ETrue;
@@ -291,16 +289,7 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
                 iTitleArtistIndicatorsAdded = EFalse;
             }
 
-            //
-            //  If video is enabled, 
-            //  if video has not same aspect ratio with phone screenadd then
-            //  add aspect ratio icon
-            //
-            if ( ! iAspectRatioIconAdded &&
-                   fileDetails->iVideoHeight > 0 &&
-                   fileDetails->iVideoWidth > 0 &&
-                   ! ( iControlsController->IsSameAspectRatio() ) &&
-                   AknLayoutUtils::PenEnabled() )
+            if ( ! iAspectRatioIconAdded && iControlsController->ShowAspectRatioIcon() )
             {
                 iControlsList.AppendL( EMPXAspectRatioIcon );
                 iAspectRatioIconAdded = ETrue;

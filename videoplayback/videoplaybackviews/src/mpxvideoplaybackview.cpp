@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 18 %
+// Version : %version: 20 %
 
 
 //  Include Files
@@ -224,14 +224,25 @@ void CMPXVideoPlaybackView::HandleStoppedStateL()
     {
         HandleCommandL( EAknSoftkeyBack );
     }
-    else if ( iPlaylistView )
-    {
-        //
-        //  New item from the playlist clean up the view
-        //
-        RemoveBackgroundSurfaceL();
-    }
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackView::HandleInitializingStateL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackView::HandleInitializingStateL( TMPXPlaybackState aLastState )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackView::HandleInitializingStateL()"),
+                   _L("aLastState = %d"), aLastState );
+
+    //
+    //  For multi item playlists, reset the container and controls for next
+    //  item in playlist
+    //
+    if ( IsMultiItemPlaylist() )
+    {
+        DoHandleInitializingStateL( aLastState );
+    }
+}
 
 // EOF

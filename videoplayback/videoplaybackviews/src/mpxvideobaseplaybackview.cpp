@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#71 %
+// Version : %version: 75 %
 
 
 //  Include Files
@@ -51,6 +51,7 @@
 #include <mpxcollectionplaylist.h>
 #include <mpxcollectionpath.h>
 #include <mpxmediageneralextdefs.h>
+#include <vcxmyvideosuids.h>
 
 #include <drmuihandling.h>
 #include <drmerrorhandling.h>
@@ -107,6 +108,7 @@ void CMPXVideoBasePlaybackView::InitializeVideoPlaybackViewL()
 
     //
     //  Get an instance of collection utility
+    //  Used for the Collection Observer to get the MediaL callbacks
     //
     iCollectionUtility = MMPXCollectionUtility::NewL( this );
 
@@ -127,12 +129,6 @@ void CMPXVideoBasePlaybackView::InitializeVideoPlaybackViewL()
 CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
 {
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()"));
-
-    if ( iClipName )
-    {
-        delete iClipName;
-        iClipName = NULL;
-    }
 
     if ( iCloseAO )
     {
@@ -232,12 +228,6 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdClose:
         {
             MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleCommandL() EMPXPbvCmdClose"));
-
-            //
-            //  The display window must be removed before closing the playback plugin
-            //
-            RemoveBackgroundSurfaceL();
-
             CreateGeneralPlaybackCommandL( EPbCmdClose );
             break;
         }
@@ -542,12 +532,6 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
 
     iMediaRequested = EFalse;
     iPlaybackState = EPbStateNotInitialised;
-
-    if ( iClipName )
-    {
-        delete iClipName;
-        iClipName = NULL;
-    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -615,12 +599,13 @@ void CMPXVideoBasePlaybackView::HandleViewActivation( const TUid& aCurrentViewTy
 
     //
     //  This view is active since we are receiving the callback.
-    //  Some new view is being activated so stop playback and return to automatic orientation
+    //  Some new view is being activated so remove surface, stop playback and
+    //  return to automatic orientation
     //
-    TRAP_IGNORE(
-        HandleCommandL( EMPXPbvCmdStop );
-        AppUi()->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic );
-        );
+    iDisplayHandler->RemoveDisplayWindow();
+
+    TRAP_IGNORE( HandleCommandL( EMPXPbvCmdStop );
+                 AppUi()->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic ) );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -644,6 +629,37 @@ void CMPXVideoBasePlaybackView::HandlePlaybackMessage( CMPXMessage* aMessage, TI
 }
 
 // -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::IsInMemoryPlugin
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoBasePlaybackView::IsInMemoryPlugin()
+{
+    TBool retVal( EFalse );
+
+    MMPXCollection& collectionPlugin = iCollectionUtility->Collection();
+
+    TUid collectionUid;
+    TUid inMemoryPluginUid = TUid::Uid( KMpxInMemoryPluginUid );
+
+    MPX_TRAPD( error, collectionUid = collectionPlugin.UidL() );
+
+    if ( ! error )
+    {
+        MPX_DEBUG(_L("CMPXVideoBasePlaybackView::IsInMemoryPlugin() collectionUid = 0x%08x"),
+            collectionUid.iUid );
+
+        if ( collectionUid == inMemoryPluginUid )
+        {
+            retVal = ETrue;
+        }
+    }
+
+    MPX_DEBUG(_L("CMPXVideoBasePlaybackView::IsInMemoryPlugin(%d)"), retVal );
+
+    return retVal;
+}
+
+// -------------------------------------------------------------------------------------------------
 // Request for the media object
 // -------------------------------------------------------------------------------------------------
 //
@@ -655,7 +671,7 @@ void CMPXVideoBasePlaybackView::RequestMediaL()
     {
         iMediaRequested = ETrue;
 
-        if ( iPlaylistView )
+        if ( iPlaylistView && IsInMemoryPlugin() )
         {
             // Get the media attributes from the collection plugin
             RequestCollectionMediaL();
@@ -734,11 +750,9 @@ void CMPXVideoBasePlaybackView::RequestCollectionMediaL()
         CleanupClosePushL(attrs);
 
         //  General Media Attributes
-        attrs.Append( KMPXMediaGeneralUri );
-        attrs.Append( KMPXMediaGeneralExtAccessPoint );
         attrs.Append( KMPXMediaGeneralExtVideoSeekable );
 
-        s->MediaL( attrs.Array(), *this);
+        s->MediaL( attrs.Array(), *this );
 
         // Set the falg to indicate that media was reuqested from collection FW
         iCollectionMediaRequested = ETrue;
@@ -767,11 +781,11 @@ void CMPXVideoBasePlaybackView::DoHandlePlaybackMessageL( CMPXMessage* aMessage 
     {
         HandleVideoPlaybackMessage( aMessage );
     }
-    else if ( KMPXMediaIdVideoDisplaySyncMessage == id )
+    else if ( KMPXMediaIdVideoDisplayMessage == id )
     {
         if ( iDisplayHandler )
         {
-            iDisplayHandler->HandleVideoDisplaySyncMessageL( aMessage );
+            iDisplayHandler->HandleVideoDisplayMessageL( aMessage );
         }
     }
 }
@@ -868,6 +882,23 @@ void CMPXVideoBasePlaybackView::HandleVideoPlaybackMessage( CMPXMessage* aMessag
             }
             break;
         }
+        case EPbCmdLoadingStarted:
+        {
+            if ( iContainer )
+            {
+                MPX_TRAPD( err, iContainer->HandleEventL( EMPXControlCmdLoadingStarted ) );
+            }
+
+            break;
+        }
+        case EPbCmdHideControls:
+        {
+            if ( iContainer )
+            {
+                MPX_TRAPD( err, iContainer->HandleEventL( EMPXControlCmdHideControls ) );
+            }
+            break;
+        }
     }
 }
 
@@ -879,13 +910,10 @@ void CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()"));
 
-    // Reset the playback state to stopped
     iPlaybackState = EPbStateStopped;
-    
+
     if ( IsMultiItemPlaylist() )
     {
-        RemoveBackgroundSurfaceL();
-
         iPlaybackUtility->CommandL( EPbCmdNext );
     }
     else
@@ -986,34 +1014,7 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
         {
             case EPbStateInitialising:
             {
-                //
-                //  For multi item playlists, reset the container and controls for next
-                //  item in playlist
-                //
-                if ( IsMultiItemPlaylist() && iContainer )
-                {
-                    //
-                    //  If transitioning from Not Initialized to Initialising there is
-                    //  no need to update the playback information that was gathered
-                    //  when the container was created
-                    //
-                    if ( oldState != EPbStateNotInitialised )
-                    {
-                        iMediaRequested = EFalse;
-
-                        iContainer->HandleCommandL( EMPXPbvCmdResetControls );
-
-                        if ( iFileDetails )
-                        {
-                            if ( iFileDetailsDialog )
-                            {
-                                iFileDetailsDialog->Close();
-                            }
-
-                            iFileDetails->ClearFileDetails();
-                        }
-                    }
-                }
+                HandleInitializingStateL( oldState );
                 break;
             }
             case EPbStateBuffering:
@@ -1293,6 +1294,13 @@ void CMPXVideoBasePlaybackView::DoHandleMediaL( const CMPXMessage& aMedia, TInt 
 
             iContainer->HandleEventL( EMPXControlCmdSetAspectRatio, newAspectRatio );
         }
+        else
+        {
+            //
+            //  Remove the display window so the surface can be released
+            //
+            iDisplayHandler->RemoveDisplayWindow();
+        }
 
         //
         //  Delay the play command while the Real One Bitmap is being shown
@@ -1314,7 +1322,8 @@ void CMPXVideoBasePlaybackView::DoHandleMediaL( const CMPXMessage& aMedia, TInt 
 //
 void CMPXVideoBasePlaybackView::UpdatePbPluginMediaL( TBool aSeek)
 {
-    MPX_DEBUG(_L("CMPXVideoBasePlaybackView::UpdatePbPluginMediaL() iSeekable %d"), aSeek);
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::UpdatePbPluginMediaL()"),
+                   _L("aSeek = %d"), aSeek );
 
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
@@ -1323,7 +1332,8 @@ void CMPXVideoBasePlaybackView::UpdatePbPluginMediaL( TBool aSeek)
 
     cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
 
-    cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, EPbCmdUpdateSeekable );
+    cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
+                                                     EPbCmdUpdateSeekable );
 
     cmd->SetTObjectValueL<TBool>( KMPXMediaGeneralExtVideoSeekable, aSeek );
 
@@ -1351,20 +1361,6 @@ void CMPXVideoBasePlaybackView::HandleMediaL( const CMPXMedia& aMedia, TInt aErr
         {
             seek = aMedia.ValueTObjectL<TBool>( KMPXMediaGeneralExtVideoSeekable );
             UpdatePbPluginMediaL( seek );
-            MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleMediaL() called UpdatePbPluginMediaL iSeekable %d"), seek);
-        }
-
-        if ( aMedia.IsSupported( KMPXMediaGeneralUri ) )
-        {
-            TPtrC uri( aMedia.ValueText( KMPXMediaGeneralUri ) );
-
-            if ( iClipName )
-            {
-                delete iClipName;
-                iClipName = NULL;
-            }
-
-            iClipName = uri.AllocL();
         }
 
         // request for media from playbackplugin
@@ -1978,12 +1974,11 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandleL( RFile& aFile )
     TInt openError = KErrNotFound;
     RFs& fs = iCoeEnv->FsSession();
 
-    if ( iPlaylistView )
+    if ( iPlaylistView && iFileDetails->iClipName )
     {
-        //
-        //  Use iClipName from the MediaL() call
-        //
-        openError = aFile.Open( fs, iClipName->Des(), EFileRead | EFileShareReadersOrWriters );
+        openError = aFile.Open( fs,
+                                iFileDetails->iClipName->Des(),
+                                EFileRead | EFileShareReadersOrWriters );
     }
     else
     {
@@ -2115,12 +2110,11 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
     TInt openError = KErrNotFound;
     RFs& fs = iCoeEnv->FsSession();
 
-    if ( iPlaylistView )
+    if ( iPlaylistView && iFileDetails->iClipName )
     {
-        //
-        //  Use iClipName from the MediaL() call
-        //
-        openError = aFile.Open( fs, iClipName->Des(), EFileRead | EFileShareReadersOrWriters );
+        openError = aFile.Open( fs,
+                                iFileDetails->iClipName->Des(),
+                                EFileRead | EFileShareReadersOrWriters );
     }
     else
     {
@@ -2158,23 +2152,6 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
 }
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()
-{
-    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RemoveBackgroundSurfaceL()"));
-
-    if ( iDisplayHandler )
-    {
-        //
-        //  Remove the display window so the surface can be released
-        //
-        iDisplayHandler->RemoveDisplayWindow();
-    }
-}
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoBasePlaybackView::HandleRealOneBitmapTimeoutL()
@@ -2221,7 +2198,7 @@ void CMPXVideoBasePlaybackView::HandleWsEventL( const TWsEvent& aEvent,
     //
     if ( ! iKeyboardInFocus && aEvent.Type() == EEventWindowVisibilityChanged )
     {
-        MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleWsEventL() EEventWindowVisibilityChanged"));
+        MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleWsEventL() EEventWindowVisibilityChanged"));
 
         TUint visible = aEvent.VisibilityChanged()->iFlags;
 
@@ -2239,7 +2216,7 @@ void CMPXVideoBasePlaybackView::HandleWsEventL( const TWsEvent& aEvent,
 //
 void CMPXVideoBasePlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCmd )
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::SendWindowCommandL()"),
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::SendWindowCommandL()"),
                    _L("aCmd = %d"), aCmd );
 
     //
@@ -2255,6 +2232,41 @@ void CMPXVideoBasePlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCm
 
     iPlaybackUtility->CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::DoHandleInitializingStateL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::DoHandleInitializingStateL( TMPXPlaybackState aLastState )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::DoHandleInitializingStateL()"),
+                   _L("aLastState = %d"), aLastState );
+
+    if ( iContainer )
+    {
+        //
+        //  If transitioning from Not Initialized to Initialising there is
+        //  no need to update the playback information that was gathered
+        //  when the container was created
+        //
+        if ( aLastState != EPbStateNotInitialised )
+        {
+            iMediaRequested = EFalse;
+
+            iContainer->HandleCommandL( EMPXPbvCmdResetControls );
+
+            if ( iFileDetails )
+            {
+                if ( iFileDetailsDialog )
+                {
+                    iFileDetailsDialog->Close();
+                }
+
+                iFileDetails->ClearFileDetails();
+            }
+        }
+    }
 }
 
 // EOF

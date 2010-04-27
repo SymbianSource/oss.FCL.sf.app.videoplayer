@@ -625,6 +625,12 @@ void CVcxHgMyVideosVideoListImpl::HandleMarkCommandL( TInt aMarkCommand )
             EndMarkingMode();
             break;
             }
+        case EVcxHgMyVideosCmdMarkContext:
+            {
+            iVideoModel->HandleMarkCommandL( EVcxHgMyVideosCmdMark );
+            StartMarkingMode();
+            break;
+            }
         default:
             break;
         }
@@ -749,6 +755,9 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
                 // Hide Assign (use as) menu item
                 aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
                 }
+#else
+            // Context sensitive Mark
+            aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkContext, IsMarking() );
 #endif
 
             // Marking submenu

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 52 %
+// Version : %version: 56 %
 
 
 //
@@ -86,6 +86,8 @@ _LIT( KLocation, "Location" );
 _LIT( KRightCopy, "Copyright" );
 _LIT( KLanguage, "Language" );
 _LIT( KKeywords, "Keywords" );
+_LIT( KCreated, "CreationTime" );
+_LIT( KLastModified, "ModificationTime" );
 
 
 // ============================ MEMBER FUNCTIONS ===================================================
@@ -544,15 +546,6 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
                 aCmd.SetTObjectValueL<TInt>( KMPXMediaVideoBufferingPercentage,
                                              bufferingPercentage );
 
-                break;
-            }
-            case EPbCmdSurfaceRemoved:
-            {
-                iPlayer->SurfaceRemovedFromView();
-                break;
-            }
-            default:
-            {
                 break;
             }
         }
@@ -1451,6 +1444,16 @@ void CMPXVideoPlaybackController::ReadFileDetailsL()
             {
                 iFileDetails->iKeywords = metaData->Value().AllocL();
             }
+            else if ( !metaData->Name().CompareF( KCreated ) )
+            {
+                TLex lex( metaData->Value() );
+                lex.Val( iFileDetails->iCreationTime );
+            }
+            else if ( !metaData->Name().CompareF( KLastModified ) )
+            {
+                TLex lex( metaData->Value() );
+                lex.Val( iFileDetails->iModificationTime );
+            }
 
             CleanupStack::PopAndDestroy( metaData );
         }
@@ -1770,7 +1773,7 @@ TBool CMPXVideoPlaybackController::IsKeyLocked()
 //   CMPXVideoPlaybackController::SendTvOutEventL
 // -------------------------------------------------------------------------------------------------
 //
-TBool CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed )
+void CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::SendTvOutEventL()"));
 
@@ -1786,6 +1789,31 @@ TBool CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected, TBool aPla
         ( KMPXMediaVideoPlaybackCommand, EPbCmdTvOutEvent );
     message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutConnected, aConnected );
     message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutPlayAllowed, aPlaybackAllowed );
+
+    iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
+
+    CleanupStack::PopAndDestroy( message );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackController::SendHideControlsEventL
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::SendHideControlsEventL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::SendHideControlsEventL()"));
+
+    //
+    //  Send notice to the playback view to hide the controls
+    //  when key lock
+    //
+    CMPXMessage* message = CMPXMessage::NewL();
+    CleanupStack::PushL( message );
+
+    message->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId, KMPXMediaIdVideoPlayback );
+
+    message->SetTObjectValueL<TMPXVideoPlaybackCommand>
+        ( KMPXMediaVideoPlaybackCommand, EPbCmdHideControls );
 
     iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
 

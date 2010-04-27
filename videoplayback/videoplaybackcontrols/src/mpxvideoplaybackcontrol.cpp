@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#20 %
+// Version : %version: 21 %
 
 
 // INCLUDE FILES
@@ -202,7 +202,8 @@ void CMPXVideoPlaybackControl::Draw( const TRect& aRect ) const
 //
 void CMPXVideoPlaybackControl::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControl::HandlePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControl::HandlePointerEventL()"),
+                   _L("iControlIndex = %d"), iControlIndex );
 
     iController->iContainer->UserInputHandler()->ProcessPointerEventL( this,
                                                                        aPointerEvent,
@@ -215,10 +216,31 @@ void CMPXVideoPlaybackControl::HandlePointerEventL( const TPointerEvent& aPointe
 //
 EXPORT_C void CMPXVideoPlaybackControl::DoHandlePointerEventL( const TPointerEvent& aPointerEvent)
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControl::DoHandlePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControl::DoHandlePointerEventL()"),
+                   _L(" iControlIndex = %d, aPointerEvent.iType = %d"),
+                   iControlIndex, aPointerEvent.iType );
 
     if ( AknLayoutUtils::PenEnabled() )
     {
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+        {
+            iController->ResetDisappearingTimers( EMPXTimerCancel );
+
+            //
+            //  Grab the pointer event for all controls so the events will not transfer to a
+            //  different control as a dragging event occurs
+            //
+            SetPointerCapture( ETrue );
+            ClaimPointerGrab( ETrue );
+        }
+        else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+            iController->ResetDisappearingTimers( EMPXTimerReset );
+
+            SetPointerCapture( EFalse );
+            ClaimPointerGrab( EFalse );
+        }
+
         switch( iControlIndex )
         {
             case EMPXProgressBar:
@@ -227,21 +249,6 @@ EXPORT_C void CMPXVideoPlaybackControl::DoHandlePointerEventL( const TPointerEve
             case EMPXAspectRatioIcon:
             case EMPXMediaDetailsViewer:
             {
-                if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
-                {
-                    iController->ResetDisappearingTimers( EMPXTimerCancel );
-
-                    iControl->SetPointerCapture( ETrue );
-                    iControl->ClaimPointerGrab( ETrue );
-                }
-                else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
-                {
-                    iController->ResetDisappearingTimers( EMPXTimerReset );
-
-                    iControl->SetPointerCapture( EFalse );
-                    iControl->ClaimPointerGrab( EFalse );
-                }
-
                 //
                 // Pass an event to controller
                 //
@@ -562,9 +569,9 @@ void CMPXVideoPlaybackControl::ResetControl()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::ResetControl()"));
 
-    iControl->SetPointerCapture( EFalse );
-    iControl->ClaimPointerGrab( EFalse );
-    
+    SetPointerCapture( EFalse );
+    ClaimPointerGrab( EFalse );
+
     switch( iControlIndex )
     {
         case EMPXButtonBar:
@@ -582,9 +589,6 @@ void CMPXVideoPlaybackControl::ResetControl()
              static_cast<CMPXVideoPlaybackVolumeBar*>(iControl)->Reset();
              break;
         }
-        case EMPXAspectRatioIcon:
-        default:
-            break;
     }
 }
 

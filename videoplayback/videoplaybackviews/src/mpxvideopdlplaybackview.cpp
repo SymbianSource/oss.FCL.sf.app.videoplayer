@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: 24 %
 
 
 //  Include Files
@@ -434,6 +434,21 @@ void CMPXVideoPdlPlaybackView::ClosePlaybackViewWithErrorL()
     iPlaybackState = EPbStateStopped;
 
     ClosePlaybackViewL();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::HandleInitializingStateL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::HandleInitializingStateL( TMPXPlaybackState aLastState )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::HandleInitializingStateL()"),
+                   _L("aLastState = %d"), aLastState );
+
+    //
+    //  For PDL view, reset the container and controls for new download
+    //
+    DoHandleInitializingStateL( aLastState );
 }
 
 // EOF

@@ -45,6 +45,7 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     EVcxHgMyVideosCmdUnmark,                 // Mark/Unmark submenu: Unmark video 
     EVcxHgMyVideosCmdMarkAll,                // Mark/Unmark submenu: Mark all videos
     EVcxHgMyVideosCmdUnmarkAll,              // Mark/Unmark submenu: Unmark all videos
+    EVcxHgMyVideosCmdMarkContext,            // Mark video (context menu)
 #ifdef RD_VIDEO_AS_RINGING_TONE    
     EVcxHgMyVideosCmdAiwAssign,              // Submenu: Placeholder for "Use video as"
 #endif
