@@ -14,7 +14,7 @@
 * Description:   Video list cache. Contains cached data from MDS.*
 */
 
-// Version : %version: %
+// Version : %version: TB101_57 %
 
 
 // INCLUDE FILES
@@ -573,11 +573,11 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
             else
                 {
                 MPX_DEBUG2("CVcxMyVideosVideoCache:: video with %d ID not found from MDS -> prob non video object, skipping add to cache", aMdsIds[j] );
-                aMdsIds.Remove( j );
                 if ( aNonVideoIds )
                     {
-                    aNonVideoIds->AppendL( j );
+                    aNonVideoIds->AppendL( aMdsIds[j] );
                     }
+                aMdsIds.Remove( j );
                 }
             }
         else

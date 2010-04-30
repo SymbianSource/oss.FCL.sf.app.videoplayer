@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  22 %
+// Version : %version:  23 %
 
 
 #include <QDir>
@@ -217,14 +217,7 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         }
         else if ( mController->viewMode() == EAudioOnlyView )
         {
-            if ( details->mPlaybackMode == EMPXVideoLocal )
-            {
-                sectionName = "audioOnlyViewWithLocalPlayback";
-            }
-            else
-            {
-                sectionName = "audioOnlyViewWithNonLocalPlayback";
-            }
+            sectionName = "audioOnlyView";
         }
 
         bool ok = false;

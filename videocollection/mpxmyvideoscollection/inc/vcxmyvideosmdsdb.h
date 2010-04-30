@@ -25,11 +25,18 @@
 #include <harvesterclient.h>
 #include <mpxcollectionmessagedefs.h>
 #include <vcxmyvideosdefs.h>
+#include <e32property.h>
 #include "vcxmyvideosalbum.h"
 
 class CVcxMyVideosMdsAlbums;
 class CMPXMedia;
 class CVcxMyVideosMdsCmdQueue;
+
+const TUid KHarvesterPSShutdown = { 0x200009F5 } ;
+const TInt KMdSShutdown = 0x00000002; // values 1 = shutdown, 0 = restart, normal state
+
+static _LIT_SECURITY_POLICY_PASS(KAllowAllPolicy);
+static _LIT_SECURITY_POLICY_C1(KPowerMgmtPolicy,ECapabilityPowerMgmt);
 
 /**
  *  MPX My Videos collection MDS database observer class.
@@ -171,6 +178,75 @@ NONSHARABLE_CLASS(MVcxMyVideosMdsAlbumsObserver)
     };
 
 /**
+ * PSCW Listener Observer interface for signaling that MDS has Shutdown/restarted
+ */
+class MVcxMdsShutdownMonitorObserver
+    {
+public:
+
+    virtual void ShutdownNotification( TInt aShutdownState ) = 0;
+    };
+
+/**
+ *  Active object for observing P&S keys
+ */
+class CVcxMdsShutdownMonitor: public CActive
+    {
+public:
+
+    /**
+     * Two-phased constructor.
+     *
+     * @return Instance of CVcxMdsShutdownMonitor.
+     */
+    static CVcxMdsShutdownMonitor* NewL( MVcxMdsShutdownMonitorObserver& aObserver,
+            const TUid& aKeyCategory, const TInt aPropertyKey, TBool aDefineKey);
+
+    /**
+     * Destructor
+     */
+    virtual ~CVcxMdsShutdownMonitor();
+    
+protected:
+
+    /**
+     * Handles an active object's request completion event.
+     */
+    void RunL();
+
+    /**
+     * Implements cancellation of an outstanding request.
+     */
+    void DoCancel();
+
+private:
+
+    /**
+     * C++ default constructor
+     *
+     * @return Instance of CVcxMdsShutdownMonitor.
+     */
+    CVcxMdsShutdownMonitor( MVcxMdsShutdownMonitorObserver& aObserver,
+            const TUid& aKeyCategory, const TInt iPropertyKey, TBool aDefineKey );
+
+    /**
+     * Symbian 2nd phase constructor can leave.
+     */
+    void ConstructL();
+
+private:
+    
+    // not own
+    MVcxMdsShutdownMonitorObserver& iObserver;
+    
+    const TUid& iKeyCategory;
+    RProperty iProperty;
+    TInt iPropertyKey;
+    
+    TBool iDefineKey;
+};
+
+/**
  *  MPX My Videos collection ECOM plugin's MDS database class.
  */
 NONSHARABLE_CLASS(CVcxMyVideosMdsDb) :
@@ -178,7 +254,8 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDb) :
                                 public MMdESessionObserver,
                                 public MMdEQueryObserver,
                                 public MMdEObjectObserver,
-                                public MMdEObjectPresentObserver
+                                public MMdEObjectPresentObserver,
+                                public MVcxMdsShutdownMonitorObserver
     {
         
 public:
@@ -279,6 +356,8 @@ public:
      */
     CMPXMedia* CreateVideoL( TUint32 aId, TBool aFullDetails = ETrue );
 
+protected:
+    
 // from MMdESessionObserver
 
 	/**
@@ -343,6 +422,10 @@ public:
 // from MMdEObjectPresentObserver
     void HandleObjectPresentNotification(CMdESession& aSession, 
 			TBool aPresent, const RArray<TItemId>& aObjectIdArray);
+			
+// from MVcxMdsShutdownMonitorObserver
+    void ShutdownNotification( TInt aShutdownState );
+
 private:
 
     /**
@@ -459,6 +542,11 @@ private:
      * Opens MDS session.
      */
     void OpenMdsSessionL();
+
+    /**
+    * @return MDS session.
+    */
+    CMdESession& MdsSessionL();
     
 public:
 
@@ -486,9 +574,9 @@ private: // data
     CMdESession* iMdsSession;
 
     /**
-     * The error code saved from the callbacks.
+     * The sessions error state.
      */
-    TInt iMdsError;
+    TInt iMdsSessionError;
 
     /**
     * Asynchronous video list fetching query is stored here.
@@ -673,6 +761,12 @@ private: // data
      * handler or starting new query from the handler.
      */
     CAsyncCallBack* iAsyncHandleQueryCompleteCaller;
+
+    /**
+    * Monitors Mds server shutdown states.
+    */
+    CVcxMdsShutdownMonitor* iMdsShutdownMonitor;
+
     };
 
 #endif // VCXMYVIDEOSMDSDB_H

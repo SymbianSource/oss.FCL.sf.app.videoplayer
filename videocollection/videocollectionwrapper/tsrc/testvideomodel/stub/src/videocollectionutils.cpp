@@ -62,80 +62,31 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 {
     const int secondsInMinute( 60 );
     const int secondsInHour( 3600 );
-    QString lengthStr("");
-    
-    if ( length > 0 )
+
+	quint32 hours = length / secondsInHour;
+	quint32 minutes = length / secondsInMinute % secondsInMinute;
+	quint32 seconds = length % secondsInMinute;
+
+    QString hrs(QString::number(hours));
+    if(hours < 10)
     {
-        quint32 hours = length / secondsInHour;
-        quint32 minutes = length / secondsInMinute % secondsInMinute;
-        quint32 seconds = length % secondsInMinute;
-        
-        if ( hours > 0 )
-        {
-            if(hours == 1)
-            {
-                lengthStr = QObject::tr("%1 hour ").arg(QString::number(hours));
-            }
-            else
-            {
-                lengthStr += QObject::tr("%1 hours ").arg(QString::number(hours));
-            }
-        }
-
-        if ( minutes > 0 )
-        {
-            if(minutes == 1)
-            {
-                lengthStr += QObject::tr("%1 minute ").arg(QString::number(minutes));
-            }
-            else
-            {
-                lengthStr += QObject::tr("%1 minutes ").arg(QString::number(minutes));
-            }
-        }
-        if (seconds > 0 && hours == 0)
-        {
-            if(seconds == 1)
-            {
-                lengthStr += QObject::tr("%1 second").arg(QString::number(seconds));
-            }
-            else
-            {
-                lengthStr += QObject::tr("%1 seconds").arg(QString::number(seconds));
-            }
-        }
-    } else {
-        lengthStr += QObject::tr("0 seconds");
+    	hrs.prepend(QString::number(0));
     }
-    
-    return lengthStr;
+    QString mins(QString::number(minutes));
+    if(minutes < 10)
+    {
+    	mins.prepend(QString::number(0));
+    }
+    QString secs(QString::number(seconds));
+    if(seconds < 10)
+    {
+    	secs.prepend(QString::number(0));
+    }
+
+    QString lengthStr(hbTrId( "txt_videos_list_l1l2l3" ).arg( hrs ).arg( mins ).arg( secs ));
+
+    return lengthStr.trimmed();
 }
-
-// -----------------------------------------------------------------------------
-// VideoCollectionUtils::prepareShortLengthString()
-// -----------------------------------------------------------------------------
-//
-const QString VideoCollectionUtils::prepareShortLengthString(quint32 total)
-{
-	const int secondsInMinute( 60 );
-    const int secondsInHour( 3600 );
-
-    int hour = total / secondsInHour;
-    total = total % secondsInHour;
-    int minutes = total / secondsInMinute;
-    total = total % secondsInMinute;
-    int second = total;
-
-    QTime time( hour ,minutes ,second );
-    QString str;
-
-    HbExtendedLocale locale = HbExtendedLocale::system();
-
-    str = locale.format( time, r_qtn_time_durat_long_with_zero );
-
-    return str;
-}
-
 
 // -----------------------------------------------------------------------------
 // prepareSizeString

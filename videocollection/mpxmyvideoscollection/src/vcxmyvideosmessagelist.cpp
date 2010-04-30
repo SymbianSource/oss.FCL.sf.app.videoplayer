@@ -189,6 +189,24 @@ TBool CVcxMyVideosMessageList::AlreadyInMessageListL( const TMPXItemId& aId,
                     {
                     extraInfo = media->ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
                     }
+                    
+                if ( extraInfo == EVcxMyVideosVideoListOrderChanged &&
+                        aExtraInfo == 0 )
+                    {
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: found similar message with EVcxMyVideosVideoListOrderChanged flag set, discarding this msg");
+                    return ETrue;
+                    }
+                
+                if ( aExtraInfo == EVcxMyVideosVideoListOrderChanged &&
+                       extraInfo == 0 )
+                    {
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: Turning the EVcxMyVideosVideoListOrderChanged flag on to the previous message");
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: and discarding this.");
+                    media->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value,
+                            EVcxMyVideosVideoListOrderChanged );
+                    return ETrue;
+                    }
+                     
                 if ( aExtraInfo == extraInfo )
                     {
                     return ETrue;

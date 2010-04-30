@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 23 %
 
 // INCLUDE FILES
 #include <xqplugin.h>
@@ -99,13 +99,13 @@ void VideoCollectionViewPlugin::createView()
         }
 
         if(!connect( mView, SIGNAL(command(int)), this, SIGNAL(command(int)) ) ||
-           !connect( this, SIGNAL(doDelayeds()), mView, SLOT(doDelayedsSlot()) )) {
+           !connect( this, SIGNAL(doDelayeds()), mView, SLOT(doDelayedsSlot()) ) ||
+           !connect( mView, SIGNAL(viewReady()), this, SLOT(viewReadySlot()) ) ) {
             ERROR(-1, "VideoCollectionViewPlugin::createView() failed to connect signals.");
             delete mView;
             mView = 0;
             return;
         }
-        mTimerId = startTimer(DELAYED_LOAD_TIMEOUT);
         mView->initializeView();
     }
 }
@@ -179,7 +179,6 @@ void VideoCollectionViewPlugin::activateView()
             int err = mView->activateView(itemId);
             if (err != 0)
             {
-                // TODO: what to do if error?
                 return;
             }
             mActivated = true;
@@ -231,6 +230,16 @@ void VideoCollectionViewPlugin::back()
     if ( mActivated ) {
         mView->back();
     }
+}
+
+// ---------------------------------------------------------------------------
+// Slot: viewReadySlot
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewPlugin::viewReadySlot()
+{
+    FUNC_LOG;
+    mTimerId = startTimer(DELAYED_LOAD_TIMEOUT);
 }
 
 XQ_EXPORT_PLUGIN2( videocollectionview, VideoCollectionViewPlugin );

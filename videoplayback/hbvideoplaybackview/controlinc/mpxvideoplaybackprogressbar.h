@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#10 %
+// Version : %version: da1mmcf#11 %
 
 
 
@@ -26,6 +26,7 @@
 #include <mpxplaybackframeworkdefs.h>
 
 class QTimer;
+class HbFrameItem;
 class HbProgressSlider;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
@@ -58,6 +59,7 @@ class QMPXVideoPlaybackProgressBar : public HbWidget
     private:
         QMPXVideoPlaybackControlsController *mController;
         HbProgressSlider                    *mProgressSlider;
+        HbFrameItem                         *mFrameItem;
 
         int     mDuration;
         int     mDraggingPosition;

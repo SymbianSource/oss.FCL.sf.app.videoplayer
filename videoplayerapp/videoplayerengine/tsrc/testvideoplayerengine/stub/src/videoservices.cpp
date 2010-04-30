@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: da1mmcf#4 %
 
 #include "videoplayerengine.h"
 #include "videoservices.h"
@@ -69,6 +69,7 @@ void VideoServices::decreaseReferenceCount()
 //
 VideoServices::VideoServices(QVideoPlayerEngine* engine) 
     : mCurrentService(VideoServices::ENoService)
+    , mFetchSelected( false )
 {
     MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
     

@@ -113,7 +113,19 @@ signals:
      *
      */
     void doDelayeds();
+    
+    /**
+     * Signaled when view is ready.
+     */
+    void viewReady();
 
+public slots:
+
+    /**
+     * Signaled by HbInputDialog when it's closed. 
+     */
+    void createCollectionDialogFinished(HbAction *action);
+    
 private slots:
 
     /**
@@ -257,17 +269,7 @@ private slots:
     void collectionOpenedSlot(bool collectionOpened,
         const QString& collection,
         const QModelIndex &index);
-
-    /**
-     * Slot is called when effect for opening a collection finishes.
-     */
-    void finishCollectionOpenedSlot(const HbEffect::EffectStatus &status);
-    
-    /**
-     * Slot is called when effect for closing a collection finishes.
-     */
-    void finishCollectionClosedSlot(const HbEffect::EffectStatus &status);    
-    
+        
     /**
      * Slot which is called when an object has been loaded.
      */
@@ -378,11 +380,6 @@ private:
      * Boolean for knowing when the model is ready.
      */
     bool mModelReady;
-    
-    /**
-     * Collection being opened or closed.
-     */
-    bool mTransitionOngoing;
 
     /**
      * Hint level for the hint widget.

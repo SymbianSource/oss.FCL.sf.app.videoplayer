@@ -89,6 +89,11 @@ public slots:
      */
     void exec();
     
+    /**
+     * Signaled by HbInputDialog when it's closed.
+     */
+    void newAlbumNameDialogFinished(HbAction *action);    
+    
 private slots:
     
     /**
@@ -183,13 +188,9 @@ private:
     QString getSelectedName();
     
     /**
-     * opens an input dialog for a user to input new album name
-     * If everything goes well and user accepts, method returns new album name and
-     * saves album id into mSelectedAlbumId
-     * 
-     * @return QString new name or empty string in case of error or cancel
+     * Finalizes the operation.
      */
-    QString queryNewAlbumSelected();
+    void finalize(QString albumName = "");
     
 private:
    
@@ -232,6 +233,11 @@ private:
      * counter label from docml
      */
     HbLabel *mItemCount;
+    
+    /**
+     * checkbox label from docml
+     */
+    HbLabel *mCheckBoxText;
     
     /**
      * mark all checkbox

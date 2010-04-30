@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#20 %
+# Version : %version: da1mmcf#23 %
 
 
 TEMPLATE = lib
@@ -54,7 +54,8 @@ LIBS += -lmpxplaybackutility.dll \
         -lefsrv.dll \
         -lws32.dll \
         -lhal.dll \
-        -lgdi.dll
+        -lgdi.dll \
+        -lshareui.dll 
 
 DEPENDPATH += ../inc inc viewinc controlinc
 VPATH += viewsrc controlsrc
@@ -68,7 +69,7 @@ HEADERS += hbvideobaseplaybackview.h \
            mpxvideoplaybackfullscreencontrol.h \
            mpxvideoplaybackstatuspanecontrol.h \
            mpxvideoplaybackprogressbar.h \
-           mpxvideoplaybackbuttonbar.h \
+           mpxvideoplaybacktoolbar.h \
            mpxvideoplaybackcontrolbar.h \
            mpxvideoplaybackcontrolpolicy.h \
            mpxvideoplaybackcontrolconfiguration.h \
@@ -87,7 +88,7 @@ SOURCES += hbvideobaseplaybackview.cpp \
            mpxvideoplaybackfullscreencontrol.cpp \
            mpxvideoplaybackstatuspanecontrol.cpp \
            mpxvideoplaybackprogressbar.cpp \
-           mpxvideoplaybackbuttonbar.cpp \
+           mpxvideoplaybacktoolbar.cpp \
            mpxvideoplaybackcontrolbar.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
            mpxvideoplaybackcontrolpolicy.cpp \

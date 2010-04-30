@@ -383,6 +383,7 @@ public: // Test data.
 
     static bool mGetThumbFails;
     static int mThumbnailReadyError;
+    static int mCancelRequestCount;
 };
 
 #endif // STUB_THUMBNAILMANAGER_QT

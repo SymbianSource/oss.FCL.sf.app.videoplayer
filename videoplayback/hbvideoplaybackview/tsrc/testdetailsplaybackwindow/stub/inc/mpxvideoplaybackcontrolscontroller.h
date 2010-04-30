@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -100,6 +100,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         
     private slots:
         void attachVideo();
+        void sendVideo();
                 
     public:
         QMPXVideoPlaybackViewFileDetails          *mFileDetails;
@@ -112,6 +113,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         int                                        mCommandValue;
         bool                                       mIsAttachOperation;
         bool                                       mAttachVideoDone;
+        bool                                       mSendVideoDone;
 };
 
 // INLINE METHODS

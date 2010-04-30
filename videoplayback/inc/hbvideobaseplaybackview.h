@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#13 %
+// Version : %version:  da1mmcf#14 %
 
 
 
@@ -49,8 +49,10 @@ class HbVideoBasePlaybackView : public HbView
         void activatePreviousView();
         void tappedOnScreen();
 
-    protected slots:
+    public slots:
         virtual void closePlaybackView();
+
+    protected slots:
         void handleClosePopupDialog();
 
     public:

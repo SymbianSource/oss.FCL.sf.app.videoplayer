@@ -47,6 +47,7 @@
 #include "videofiledetailsviewplugin.h"
 #undef private
 
+const char *TEST_VIDEO_DETAILS_GFX_DEFAULT = ":/gfx/pri_large_video.svg";
 const char *TEST_VIDEO_DETAILS_VIEW = "videofiledetailsview";
 const char *TEST_VIDEO_DETAILS_WIDGET = "mContent";
 const char *TEST_VIDEO_DETAILS_TITLE = "mLblTitle";
@@ -226,8 +227,6 @@ void TestVideoFileDetails::testCreateView()
     QVERIFY( mPlugin->mModel == 0 );
     QVERIFY( mPlugin->mIsService == false);
     QVERIFY( mPlugin->mVideoServices == 0);
-    // TODO if the plugin is changed to throw exception in case of null model,
-    //      then it needs to be added here.
     
     // restoring the proper model.
     VideoCollectionWrapper::instance().setModel(mDummyModel);
@@ -387,8 +386,6 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     QString title("title");
     QString filepath("filepath");
     
-    // TODO need to add the default thumbnail checking.
-    
     init();
     activateView();
     
@@ -409,7 +406,15 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     QCOMPARE( mPlugin->mVideoId, testIndex );
     QCOMPARE( mPlugin->mTitleAnim->text(), title );
     mPlugin->mThumbnailManager = tmpTnManager;
-
+    
+    // thumbnail fetching fails
+    tmpTnManager->mGetThumbFails = true;
+    emit shortDetailsReady(testIndex);
+    QCOMPARE( mPlugin->mVideoId, testIndex );
+    QCOMPARE( mPlugin->mTitleAnim->text(), title );
+    QCOMPARE( mPlugin->mThumbLabel->icon().iconName(), QString(TEST_VIDEO_DETAILS_GFX_DEFAULT) );
+    tmpTnManager->mGetThumbFails = false;
+    
     // data exists
     emit shortDetailsReady(testIndex);
     
@@ -543,7 +548,7 @@ void TestVideoFileDetails::testStartPlaybackSlot()
 //
 void TestVideoFileDetails::testSendVideoSlot()
 {
-    QFAIL("Feature not yet implemented!");
+//    QFAIL("Feature not yet implemented!");
     
     mDummyModel->reset();
     init();

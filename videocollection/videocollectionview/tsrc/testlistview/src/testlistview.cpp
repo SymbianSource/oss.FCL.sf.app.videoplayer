@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 36 %
+// Version : %version: 38 %
 
 #define private public
 #include "videoservices.h"
@@ -544,6 +544,114 @@ void TestListView::testActivateView()
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelVideos);
     QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, TMPXItemId::InvalidId());
     cleanup();
+
+    // activate view:
+    // -browse service
+    // -captured category
+    // -sort role 0 (default, date & time)
+    init(false);
+    XQServiceUtilXtra *serviceUtilXtra = XQServiceUtilXtra::instance();
+    serviceUtilXtra->setCurrentService(true);
+    VideoServices *videoServices = VideoServices::instance(0);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->mSortRole = 0;
+    VideoListWidgetData::reset();
+    VideoSortFilterProxyModelData::reset();
+    itemId.iId1 = KVcxMvcCategoryIdCaptured;
+    itemId.iId2 = KVcxMvcMediaTypeCategory;
+    QCOMPARE(mTestView->initializeView(), 0);
+    QCOMPARE(mTestView->activateView(itemId), 0);
+    QVERIFY(VideoListWidgetData::mActive);
+    QCOMPARE(VideoListWidgetData::mActivateCount, 1);
+    QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
+    QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
+    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    serviceUtilXtra->decreaseReferenceCount();
+    videoServices->decreaseReferenceCount();
+    cleanup();
+
+    // activate view:
+    // -browse service
+    // -captured category
+    // -sort role 1 (date & time)
+    init(false);
+    serviceUtilXtra = XQServiceUtilXtra::instance();
+    serviceUtilXtra->setCurrentService(true);
+    videoServices = VideoServices::instance(0);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->mSortRole = 1;
+    VideoListWidgetData::reset();
+    VideoSortFilterProxyModelData::reset();
+    itemId.iId1 = KVcxMvcCategoryIdCaptured;
+    itemId.iId2 = KVcxMvcMediaTypeCategory;
+    QCOMPARE(mTestView->initializeView(), 0);
+    QCOMPARE(mTestView->activateView(itemId), 0);
+    QVERIFY(VideoListWidgetData::mActive);
+    QCOMPARE(VideoListWidgetData::mActivateCount, 1);
+    QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
+    QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
+    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    cleanup();
+    serviceUtilXtra->decreaseReferenceCount();
+    videoServices->decreaseReferenceCount();
+
+    // activate view:
+    // -browse service
+    // -captured category
+    // -sort role 2 (title)
+    init(false);
+    serviceUtilXtra = XQServiceUtilXtra::instance();
+    serviceUtilXtra->setCurrentService(true);
+    videoServices = VideoServices::instance(0);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->mSortRole = 2;
+    VideoListWidgetData::reset();
+    VideoSortFilterProxyModelData::reset();
+    itemId.iId1 = KVcxMvcCategoryIdCaptured;
+    itemId.iId2 = KVcxMvcMediaTypeCategory;
+    QCOMPARE(mTestView->initializeView(), 0);
+    QCOMPARE(mTestView->activateView(itemId), 0);
+    QVERIFY(VideoListWidgetData::mActive);
+    QCOMPARE(VideoListWidgetData::mActivateCount, 1);
+    QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
+    QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
+    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    cleanup();
+    serviceUtilXtra->decreaseReferenceCount();
+    videoServices->decreaseReferenceCount();
+
+    // activate view:
+    // -browse service
+    // -captured category
+    // -sort role 3 (size) 
+    init(false);
+    serviceUtilXtra = XQServiceUtilXtra::instance();
+    serviceUtilXtra->setCurrentService(true);
+    videoServices = VideoServices::instance(0);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->mSortRole = 3;
+    VideoListWidgetData::reset();
+    VideoSortFilterProxyModelData::reset();
+    itemId.iId1 = KVcxMvcCategoryIdCaptured;
+    itemId.iId2 = KVcxMvcMediaTypeCategory;
+    QCOMPARE(mTestView->initializeView(), 0);
+    QCOMPARE(mTestView->activateView(itemId), 0);
+    QVERIFY(VideoListWidgetData::mActive);
+    QCOMPARE(VideoListWidgetData::mActivateCount, 1);
+    QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
+    QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
+    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeySizeValue);
+    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    cleanup();
+    serviceUtilXtra->decreaseReferenceCount();
+    videoServices->decreaseReferenceCount();
 }
 
 // ---------------------------------------------------------------------------
@@ -784,7 +892,27 @@ void TestListView::testStartSortingSlot()
     QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
     QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
     QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
-
+	cleanup();
+	
+	// start sorting slot:
+	// -is service
+	init(false);
+	connect(this, SIGNAL(testSignal(int)), mTestView, SLOT(startSorting()));
+    sortMenu = mUiLoader->findWidget<HbMenu>(DOCML_NAME_SORT_MENU);
+    sortMenuAction->setMenu(sortMenu);
+    HbMenuData::mMenuAction = sortMenuAction;
+    mUiLoader->findWidget<HbMenu>(DOCML_NAME_OPTIONS_MENU)->setActiveAction(sortMenuAction);
+    sortAction = mUiLoader->findObject<HbAction>(DOCML_NAME_SORT_BY_NAME);
+    QVERIFY(sortAction != 0);
+    sortMenu->setActiveAction(sortAction);
+	XQServiceUtilXtra *serviceUtilXtra = XQServiceUtilXtra::instance();
+	serviceUtilXtra->setCurrentService(true);
+	QCOMPARE(mTestView->initializeView(), 0);
+	QCOMPARE(mTestView->activateView(TMPXItemId::InvalidId()), 0);
+	int sortRole = VideoCollectionViewUtilsData::mVideoSortRole;
+	emit testSignal(0);
+	QCOMPARE(sortRole, VideoCollectionViewUtilsData::mVideoSortRole);
+	serviceUtilXtra->decreaseReferenceCount();
 	cleanup();
 }
 
@@ -1067,10 +1195,14 @@ void TestListView::testCollectionOpenedSlot()
 
 	// index is invalid
 	init();
+	emit testCollectionOpenedSignal(true, testString, QModelIndex());
 	cleanup();
 	
 	// current list is null
 	init();
+	VideoListWidget *tmpList = mTestView->mCurrentList;
+	emit testCollectionOpenedSignal(true, testString, index);
+	mTestView->mCurrentList = tmpList;
 	cleanup();
 	
 	// current list is collectioncontentwidget
@@ -1202,13 +1334,12 @@ void TestListView::testShowHint()
     ////////
     // toolbar setup
     mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->setVisible(true);
-    mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->setVisible(true);
+
     // mToolbarViewsActionGroup is null
     QActionGroup *tmp = mTestView->mToolbarViewsActionGroup;
     mTestView->mToolbarViewsActionGroup = 0;
     emit testLayoutChangedSignal();    
     QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
     mTestView->mToolbarViewsActionGroup = tmp;
     
     //  mToolbarCollectionActionGroup is null
@@ -1216,34 +1347,29 @@ void TestListView::testShowHint()
     mTestView->mToolbarCollectionActionGroup = 0;
     emit testLayoutChangedSignal();    
     QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
     mTestView->mToolbarCollectionActionGroup = tmp;
     
     // mIsService is true
     mTestView->mIsService = true;
     emit testLayoutChangedSignal();    
     QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
     mTestView->mIsService = false;
     
     // show -flag is true, currentlist level != VideoCollectionCommon::ELevelDefaultColl
     mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelAlbum);
     emit testLayoutChangedSignal();    
     QVERIFY(!mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
     
     mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->setVisible(true);
     // show -flag is true, currentlist level == VideoCollectionCommon::ELevelDefaultColl
     mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelDefaultColl);
     emit testLayoutChangedSignal();    
     QVERIFY(!mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(!mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
        
     // show -flag is false
     setRowCount(1);
     emit testLayoutChangedSignal();   
     QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionRemoveVideos]->isVisible());
-    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionAddVideos]->isVisible());
     
     ///////
     // sub label
@@ -1578,92 +1704,6 @@ void TestListView::testRemoveVideosFromCollectionSlot()
     emit testSignal();
     
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(removeVideosFromCollectionSlot()));
-    
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
-// testFinishCollectionOpenedSlot
-// ---------------------------------------------------------------------------
-//
-void TestListView::testFinishCollectionOpenedSlot()
-{
-    XQServiceUtilXtra *serviceUtil = XQServiceUtilXtra::instance();
-    serviceUtil->setCurrentService(false);
-    
-    init(false);
-    
-    QVERIFY(connect(this, SIGNAL(testSignal(const HbEffect::EffectStatus &)), mTestView, 
-            SLOT(finishCollectionOpenedSlot(const HbEffect::EffectStatus &))));
-    
-    QVERIFY(mTestView->initializeView() == 0);
-    mTestView->activateView(TMPXItemId::InvalidId());
-
-    HbEffect::EffectStatus status;
-    
-    // Invalid status.userData
-    mTestView->mTransitionOngoing = true;
-    emit testSignal(status);
-    QVERIFY(!mTestView->mTransitionOngoing);
-    // TODO: verify
-    
-    // Category is not album
-    QVERIFY(mTestView->toolBar());
-    mTestView->toolBar()->clearActions();
-    mTestView->mTransitionOngoing = true;
-    status.userData = QVariant(static_cast<int>(VideoCollectionCommon::ELevelCategory));
-    emit testSignal(status);
-    QVERIFY(!mTestView->mTransitionOngoing);
-    QVERIFY(mTestView->toolBar()->actions().count() == 0);
-    
-    // Category is album
-    QVERIFY(mTestView->toolBar());
-    mTestView->toolBar()->clearActions();
-    mTestView->mTransitionOngoing = true;
-    status.userData = QVariant(static_cast<int>(VideoCollectionCommon::ELevelAlbum));
-    emit testSignal(status);
-    QVERIFY(!mTestView->mTransitionOngoing);
-    QVERIFY(mTestView->toolBar()->actions().count() > 0);
-    
-    disconnect(this, SIGNAL(testSignal(const HbEffect::EffectStatus &)), mTestView, 
-            SLOT(finishCollectionOpenedSlot(const HbEffect::EffectStatus &)));
-    
-    cleanup();
-    
-    // final cleanup
-    serviceUtil->decreaseReferenceCount();
-}
-
-// ---------------------------------------------------------------------------
-// testFinishCollectionOpenedSlot
-// ---------------------------------------------------------------------------
-//
-void TestListView::testFinishCollectionClosedSlot()
-{
-    init(false);
-    
-    QVERIFY(connect(this, SIGNAL(testSignal(const HbEffect::EffectStatus &)), mTestView, 
-            SLOT(finishCollectionClosedSlot(const HbEffect::EffectStatus &))));
-    
-    QVERIFY(mTestView->initializeView() == 0);
-    mTestView->activateView(TMPXItemId::InvalidId());
-
-    HbEffect::EffectStatus status;
-    
-    mTestView->mTransitionOngoing = true;
-    emit testSignal(status);
-    QVERIFY(!mTestView->mTransitionOngoing);
-
-    mTestView->mTransitionOngoing = true;
-    QActionGroup *tmp = mTestView->mToolbarViewsActionGroup;
-    mTestView->mToolbarViewsActionGroup = 0;
-    emit testSignal(status);
-    QVERIFY(!mTestView->mTransitionOngoing);
-    mTestView->mToolbarViewsActionGroup = tmp;
-
-    
-    disconnect(this, SIGNAL(testSignal(const HbEffect::EffectStatus &)), mTestView, 
-            SLOT(finishCollectionClosedSlot(const HbEffect::EffectStatus &)));
     
     cleanup();
 }

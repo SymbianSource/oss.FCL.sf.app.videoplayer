@@ -62,6 +62,14 @@ public:
      */
     QString contextTitle() const;
 
+    /**
+     * Returns sort type defined by the service client.
+     * 
+     * @param None.
+     * @return int.
+     */
+    int sortRole() const;
+
 	/*
 	 * Enum reflecting the services provided 
 	 */
@@ -177,6 +185,11 @@ private:
 	 * Current service
 	 */
     VideoServices::TVideoService mCurrentService;
+    
+    /**
+     * Sort role.
+     */
+    int mSortRole;
 
     friend class VideoServiceUriFetch;
 

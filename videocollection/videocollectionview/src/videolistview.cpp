@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 97 %
+// Version : %version: 101 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -58,7 +58,6 @@ VideoListView::VideoListView( VideoCollectionUiLoader *uiLoader, QGraphicsItem *
     , mUiLoader( uiLoader )
     , mIsService( false )
     , mModelReady( false )
-    , mTransitionOngoing( false )
     , mHintLevel( VideoHintWidget::AllVideos )
     , mVideoServices( 0 )
     , mCurrentList( 0 )
@@ -300,6 +299,14 @@ void VideoListView::doDelayedsSlot()
 void VideoListView::modelReadySlot()
 {
 	FUNC_LOG;
+	
+	// if mModelReady is false, then it means that this is the first time modelReady
+	// signal fires. Signaling that view is ready.
+	if(!mModelReady)
+	{
+	    emit viewReady();
+	}
+	
     mModelReady = true;
     
     // since the reset signal arrives after
@@ -539,24 +546,12 @@ void VideoListView::showHint(bool show)
     {
         if (show)
         {
-            mToolbarActions[ETBActionRemoveVideos]->setVisible(false);
-
-            if(mCurrentList->getLevel() == VideoCollectionCommon::ELevelDefaultColl) 
-            {
-                mToolbarActions[ETBActionAddVideos]->setVisible(false);
-            } 
+        	mToolbarActions[ETBActionRemoveVideos]->setVisible(false);
         }
-        else
-        {
-            if(mToolbarActions[ETBActionRemoveVideos]->isVisible() == false)
-            {
-                mToolbarActions[ETBActionRemoveVideos]->setVisible(true);
-            }
-            if(mToolbarActions[ETBActionAddVideos]->isVisible() == false) 
-            {
-                mToolbarActions[ETBActionAddVideos]->setVisible(true);
-            }
-        }
+        else if(mToolbarActions[ETBActionRemoveVideos]->isVisible() == false)
+		{
+        	mToolbarActions[ETBActionRemoveVideos]->setVisible(true);
+		}
     }
 
     // prepare sublabel
@@ -728,13 +723,6 @@ int VideoListView::activateCollectionContentView(const TMPXItemId &itemId)
                     // no need to deactivate since there cannot be previous widget
                     mCurrentList = collectionContentWidget;
                     
-                    // hide toolbar
-                    HbToolBar *toolBar = this->toolBar();
-                    if (toolBar)
-                    {
-                        toolBar->hide();
-                    }
-                    
                     // resolve collection name
                     if (itemId.iId1 == KVcxMvcCategoryIdDownloads)
                     {
@@ -753,7 +741,37 @@ int VideoListView::activateCollectionContentView(const TMPXItemId &itemId)
                     model.openItem(itemId);
                     
                     // sort model
-                    model.doSorting(VideoCollectionCommon::KeyDateTime, Qt::AscendingOrder);
+                    int sortRole = VideoCollectionCommon::KeyDateTime;
+                    if (mIsService &&
+                        mVideoServices)
+                    {
+                        // TODO: sorting roles needs to be defined somewhere
+                        sortRole = mVideoServices->sortRole();
+                        switch (sortRole)
+                        {
+                            // sort by name
+                            case 2:
+                            {
+                                sortRole = VideoCollectionCommon::KeyTitle;
+                                break;
+                            }
+                            // sort by size
+                            case 3:
+                            {
+                                sortRole = VideoCollectionCommon::KeySizeValue;
+                                break;
+                            }
+                            // date & time
+                            case 1:
+                                // fall through
+                            default:
+                            {
+                                sortRole = VideoCollectionCommon::KeyDateTime;
+                                break;
+                            }
+                        }
+                    }
+                    model.doSorting(sortRole, Qt::AscendingOrder);
                     
                     // set hint level to collections
                     setHintLevel(VideoHintWidget::Collection);
@@ -930,8 +948,12 @@ void VideoListView::doSorting(int role)
 		mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_VIDEOLISTWIDGET)->getModel().doSorting(role, order);	
 	}
 
-	// save sorting values
-	mUiUtils.saveSortingValues(role, order, mCurrentList->getLevel());
+    // save sorting values only if the application is not started as a service
+	if (!mIsService)
+	{
+	    // save sorting values
+	    mUiUtils.saveSortingValues(role, order, mCurrentList->getLevel());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -995,27 +1017,47 @@ void VideoListView::createCollectionSlot()
         return;
     }
     
-    VideoSortFilterProxyModel &model = mCurrentList->getModel();
-    
-    bool ok = false;
     // query a name for the collection
     QString label(hbTrId("txt_videos_title_enter_name"));
     QString text(hbTrId("txt_videos_dialog_entry_new_collection"));
-    text = HbInputDialog::getText(label, text, &ok);
-    if (ok && text.length())
+    
+    HbInputDialog *dialog = new HbInputDialog();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->getText(label, this, SLOT(createCollectionDialogFinished(HbAction *)), text);
+}
+
+// -------------------------------------------------------------------------------------------------
+// createCollectionDialogFinished
+// -------------------------------------------------------------------------------------------------
+//
+void VideoListView::createCollectionDialogFinished(HbAction *action)
+{
+    FUNC_LOG;
+    Q_UNUSED(action);
+    
+    HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
+    
+    QVariant variant = dialog->value();
+    
+    if(dialog->actions().first() == action && variant.isValid())
     {
+        VideoSortFilterProxyModel &model = mCurrentList->getModel();
+
         // resolve collection true name and add new album
-        text = model.resolveAlbumName(text);
+        QString text = model.resolveAlbumName(variant.toString());
         
-        // when collection reports about new collection, we open it right away,
-        // for that, connect to rowsInserted so that the new album can be opened
-        if(!connect(&model, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
-                    this, SLOT(openNewAlbumSlot(const QModelIndex&, int, int))))
+        if(text.length())
         {
-            return;
+            // when collection reports about new collection, we open it right away,
+            // for that, connect to rowsInserted so that the new album can be opened
+            if(!connect(&model, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
+                        this, SLOT(openNewAlbumSlot(const QModelIndex&, int, int))))
+            {
+                return;
+            }
+            
+            model.addNewAlbum(text);
         }
-        
-        model.addNewAlbum(text);
     }
 }
 
@@ -1270,152 +1312,99 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
     const QModelIndex &index)
 {
 	FUNC_LOG;
-	if(mTransitionOngoing)
-	{
-		return;
-	}
-	else
-	{
-	    // clear toolbar actions.
-	    toolBar()->clearActions();
-	}
 
-	if(collectionOpened)
-    {
-        if(!index.isValid())
-        {   
-            return;
-        }
-        
-        // open album view
-        VideoListWidget *collectionContentWidget =
-            mUiLoader->findWidget<VideoListWidget>(
-                DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
-        
-        if (!mCurrentList || mCurrentList == collectionContentWidget)
-        {
-            // no currentlist or currentlist is already list 
-            // we're about to transit
-            return;
-        }
+    // clear toolbar actions.
+    toolBar()->clearActions();
 
-        // get item id before deactivating
-        TMPXItemId itemId = TMPXItemId::InvalidId();
-        itemId = mCurrentList->getModel().getMediaIdAtIndex(index);
-        
-        // only category or album can be activated here
-        if(itemId == TMPXItemId::InvalidId() ||
-           (itemId.iId2 != KVcxMvcMediaTypeCategory && 
-            itemId.iId2 != KVcxMvcMediaTypeAlbum))
-        {
-            return;
-        }
-        
-        // Send level that is opened with the effect.
-        QVariant nextLevel;
-        if(itemId.iId2 ==  KVcxMvcMediaTypeCategory)
-        {
-            nextLevel = QVariant(VideoCollectionCommon::ELevelDefaultColl);
-        }
-        else if(itemId.iId2 == KVcxMvcMediaTypeAlbum)
-        {
-            nextLevel = QVariant(VideoCollectionCommon::ELevelAlbum);
-        }            
-        
-        // Start fetching content.
-        collectionContentWidget->getModel().openItem(itemId);
-        
-        HbEffect::start(collectionContentWidget,
-                        EFFECT_SLIDE_IN_TO_LEFT,
-                        this,
-                        "finishCollectionOpenedSlot",
-                        nextLevel);
-        
-        mTransitionOngoing = true;
-    }
-    else
-    {
-        // open categories view.
-        VideoListWidget *collectionContentWidget =
-            mUiLoader->findWidget<VideoListWidget>(
-                DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
-        
-        HbEffect::start(collectionContentWidget,
-                        EFFECT_SLIDE_OUT_TO_LEFT,
-                        this,
-                        "finishCollectionClosedSlot");
-        
-        mTransitionOngoing = true;
-    }
-	// update collection specific information
-	mCollectionName = collection;
-}
-
-// -------------------------------------------------------------------------------------------------
-// finishCollectionOpenedSlot
-// -------------------------------------------------------------------------------------------------
-//
-void VideoListView::finishCollectionOpenedSlot(const HbEffect::EffectStatus &status)
-{
-	FUNC_LOG;
-    Q_UNUSED(status);
-    
-    mTransitionOngoing = false;
-    
-    // deactivat current widget.
-    mCurrentList->deactivate();
-    
-    // activate video collection content widget.
-    mCurrentList = mUiLoader->findWidget<VideoListWidget>(
+    VideoListWidget *collectionContentWidget =
+                mUiLoader->findWidget<VideoListWidget>(
                     DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
-
-    if(!mCurrentList || !status.userData.isValid())
+    
+    if(!collectionContentWidget)
     {
         return;
     }
-    
-    updateSubLabel();
-
-    VideoCollectionCommon::TCollectionLevels level =
-            static_cast<VideoCollectionCommon::TCollectionLevels>(status.userData.toInt());
-	mCurrentList->activate(level);
-
-    VideoCollectionViewUtils::sortModel(&mCurrentList->getModel(), false, VideoCollectionCommon::ELevelVideos);
-    mCurrentList->getModel().invalidate();
-
-    // update hint widget
-    setHintLevel(VideoHintWidget::Collection);
-    showHint();
-
-    // update toolbar for albums, default categories don't have one.
-    if(level == VideoCollectionCommon::ELevelAlbum && 
-       mToolbarCollectionActionGroup && mToolbarActions.contains(ETBActionCollections))
+    // update collection specific information
+	mCollectionName = collection;
+	
+	// disable collection content animations during widget change        
+	HbAbstractItemView::ItemAnimations animationState = collectionContentWidget->enabledAnimations();
+	collectionContentWidget->setEnabledAnimations(HbAbstractItemView::None);
+	
+	if(collectionOpened)
     {
-        mToolbarActions[ETBActionCollections]->setChecked(false);
-        toolBar()->addActions(mToolbarCollectionActionGroup->actions());
-    }
-}
+        // open album view        
+        if (!index.isValid() || !mCurrentList || mCurrentList == collectionContentWidget)
+        {
+            // no currentlist or currentlist is already collection content -list 
+            collectionContentWidget->setEnabledAnimations(animationState);
+            return;
+        }
+        
+        // get item id before deactivating
+        TMPXItemId itemId = mCurrentList->getModel().getMediaIdAtIndex(index);
+        
+        // get level from the item to be opened only default 
+        // or user defined collections can be activated here
+        VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid;
+        if(itemId.iId2 == KVcxMvcMediaTypeCategory)
+        {
+            level = VideoCollectionCommon::ELevelDefaultColl; 
+        }
+        else if(itemId.iId2 == KVcxMvcMediaTypeAlbum)
+        {
+            level = VideoCollectionCommon::ELevelAlbum; 
+        }
+        else 
+        {
+            collectionContentWidget->setEnabledAnimations(animationState);
+            return;
+        }
+        
+        // Start fetching content before changing.
+        collectionContentWidget->getModel().openItem(itemId);
+        
+        // deactivat current widget.
+        mCurrentList->deactivate();
+        
+        // activate video collection content widget and set it as current list.
+        mCurrentList = collectionContentWidget;
+        mCurrentList->activate(level);
 
-// -------------------------------------------------------------------------------------------------
-// finishCollectionClosedSlot
-// -------------------------------------------------------------------------------------------------
-//
-void VideoListView::finishCollectionClosedSlot(const HbEffect::EffectStatus &status)
-{
-	FUNC_LOG;
-    Q_UNUSED(status);
-    
-    mTransitionOngoing = false;
-    
-    // open collection view
-    openCollectionViewSlot();
-    
-    // update toolbar
-    if(mToolbarViewsActionGroup && mToolbarActions.contains(ETBActionCollections))
-    {
-        toolBar()->addActions(mToolbarViewsActionGroup->actions());
-        mToolbarActions[ETBActionCollections]->setChecked(true);
+        updateSubLabel();
+
+        // setup correct sorting, collection content contains always a list of videos so we use 
+        // ELevelVideos as target for sorting
+        VideoCollectionViewUtils::sortModel(&mCurrentList->getModel(), false, VideoCollectionCommon::ELevelVideos);
+        mCurrentList->getModel().invalidate();
+        
+        // update hint widget for correct content
+        setHintLevel(VideoHintWidget::Collection);
+        showHint();
+
+        // update toolbar for albums, default categories don't have one.
+        if(level == VideoCollectionCommon::ELevelAlbum && 
+           mToolbarCollectionActionGroup && mToolbarActions.contains(ETBActionCollections))
+        {
+            mToolbarActions[ETBActionCollections]->setChecked(false);
+            toolBar()->addActions(mToolbarCollectionActionGroup->actions());
+        }
     }
+    else
+    {
+        // open collection view
+        openCollectionViewSlot();
+        
+        // update toolbar
+        if(mToolbarViewsActionGroup && mToolbarActions.contains(ETBActionCollections))
+        {
+            toolBar()->addActions(mToolbarViewsActionGroup->actions());
+            mToolbarActions[ETBActionCollections]->setChecked(true);
+        }
+    }
+	// restore animations for collection content widget
+	collectionContentWidget->setEnabledAnimations(animationState);
+	
 }
 
 // -------------------------------------------------------------------------------------------------

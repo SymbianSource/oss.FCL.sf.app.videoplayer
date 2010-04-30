@@ -11,18 +11,18 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QMPXVideoPlaybackButtonBar
+* Description:  Implementation of QMPXVideoPlaybackToolBar
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  1 %
 
 
 
-#ifndef MPXVIDEOPLAYBACKBUTTONBAR_H_
-#define MPXVIDEOPLAYBACKBUTTONBAR_H_
+#ifndef MPXVIDEOPLAYBACKTOOLBAR_H_
+#define MPXVIDEOPLAYBACKTOOLBAR_H_
 
-#include <hbwidget.h>
+#include <QWidget>
 #include <mpxplaybackframeworkdefs.h>
 
 
@@ -31,19 +31,20 @@ class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 
 
-class QMPXVideoPlaybackButtonBar : public HbWidget
+class QMPXVideoPlaybackToolBar : public QWidget
 {
     Q_OBJECT
 
     public:
-        QMPXVideoPlaybackButtonBar( QMPXVideoPlaybackControlsController* controller );
-        virtual ~QMPXVideoPlaybackButtonBar();
+        QMPXVideoPlaybackToolBar( QMPXVideoPlaybackControlsController* controller );
+        virtual ~QMPXVideoPlaybackToolBar();
         void updateState( TMPXPlaybackState state );
         void aspectRatioChanged( int aspectRatio );
         void initialize();
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );
         void durationChanged( int duration );
         void positionChanged( int position );
+        void setVisible( bool visible );
 
     public:
         QMPXVideoPlaybackControlsController *mController;
@@ -51,7 +52,8 @@ class QMPXVideoPlaybackButtonBar : public HbWidget
         int mAspectRatio;
         int mPosition;
         int mDuration;
+        bool mVisible;
         TMPXPlaybackState mState;
 };
 
-#endif /*MPXVIDEOPLAYBACKBUTTONBAR_H_*/
+#endif /*MPXVIDEOPLAYBACKTOOLBAR_H_*/

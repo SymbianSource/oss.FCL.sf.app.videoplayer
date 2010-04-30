@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 3 %
 
 #ifndef VIDEOSERVICEBROWSE_H
 #define VIDEOSERVICEBROWSE_H
@@ -60,6 +60,14 @@ public:
      */
     QString contextTitle() const;
     
+    /**
+     * Return sort role.
+     * 
+     * @param None.
+     * @return int.
+     */
+    int sortRole() const;
+    
 public slots:
 
     /**
@@ -67,9 +75,10 @@ public slots:
      *
      *  @param title, Title of the embedded Videos application
      *  @param category, Category which type of videos are browsed
+     *  @param sort, Sort type.
      *  @return None
      */
-    void browseVideos( const QString &title, int category );
+    void browseVideos(const QString &title, int category, int sortRole);
 
 private:
     /** request index of the service */
@@ -83,6 +92,9 @@ private:
     
     /** title of the service client, if not set "Videos" is used */
     QString mTitle;
+    
+    /** sorting role */
+    int mSortRole;
 };
 
 #endif//VIDEOSERVICEBROWSE_H

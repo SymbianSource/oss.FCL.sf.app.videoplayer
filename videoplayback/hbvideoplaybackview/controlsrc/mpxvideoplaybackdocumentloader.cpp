@@ -15,12 +15,11 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 13 %
 
 
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
 #include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -47,7 +46,7 @@ QMPXVideoPlaybackDocumentLoader::QMPXVideoPlaybackDocumentLoader(
 //
 QMPXVideoPlaybackDocumentLoader::~QMPXVideoPlaybackDocumentLoader()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::QMPXVideoPlaybackDocumentLoader") );
+    MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::~QMPXVideoPlaybackDocumentLoader") );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -56,16 +55,15 @@ QMPXVideoPlaybackDocumentLoader::~QMPXVideoPlaybackDocumentLoader()
 //
 QObject *QMPXVideoPlaybackDocumentLoader::createObject( const QString& type, const QString &name )
 {
+    MPX_ENTER_EXIT(
+        _L("QMPXVideoPlaybackDocumentLoader::createObject()"),
+        _L("type = %s, name = %s"), type.data(), name.data() );
+    
     QObject *object = NULL;
 
     if ( name == "controlBarLayout" )
     {
         object = new QMPXVideoPlaybackControlBar( mController );
-        object->setObjectName( name );
-    }
-    else if ( name == "buttonBarLayout" )
-    {
-        object = new QMPXVideoPlaybackButtonBar( mController );
         object->setObjectName( name );
     }
     else if ( name == "progressBarLayout" )

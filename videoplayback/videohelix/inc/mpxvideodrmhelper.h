@@ -15,7 +15,9 @@
 *
 */
 
-// Version : %version: 5 %
+
+// Version : %version: 6 %
+
 
 #ifndef __MPXVIDEODRMHELPER_H__
 #define __MPXVIDEODRMHELPER_H__
@@ -52,13 +54,10 @@ class CMpxVideoDrmHelper : public CBase
 
         TInt GetDrmRightsStatus( RFile& aFile );
 
-        TBool IsTvOutAllowedL( RFile& aFile );
-
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-        TBool IsProtected64L( RFile64& aFile );       
+        TBool IsProtected64L( RFile64& aFile );
         TInt GetDrmRightsStatus64( RFile64& aFile );
-        TBool IsTvOutAllowed64L( RFile64& aFile );
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 63 %
+// Version : %version: 65 %
 
 // INCLUDE FILES
 #include <qstringlist.h>
@@ -791,10 +791,10 @@ void VideoSortFilterProxyModel::albumChangedSlot()
     if (mType == VideoCollectionCommon::EModelTypeCollectionContent)
     {
         INFO_1("VideoSortFilterProxyModel::albumChangedSlot() [0x%x] invalidating.", this);
-	    //otherwise newle created album content won't sort
+	    // sort and invalidate filtering, otherwise newle created album content won't sort
+    	invalidateFilter();
         setSortRole(mWantedSortRole);
         sort(0, mWantedSortOrder);
-    	invalidateFilter();
     }
 }
 

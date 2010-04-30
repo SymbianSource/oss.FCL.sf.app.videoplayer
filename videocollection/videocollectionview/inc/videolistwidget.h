@@ -149,6 +149,23 @@ signals:
      */
     void fileUri(const QString&);
 
+public slots:
+    
+    /**
+     * Signaled by HbInputDialog when it's closed. 
+     */
+    void renameDialogFinished(HbAction *action);
+    
+    /**
+     * Signaled by HbMessageBox when it's closed.
+     */
+    void deleteItemDialogFinished(HbAction *action);
+    
+    /**
+     * Signaled by HbMessageBox when it's closed.
+     */
+    void removeCollectionDialogFinished(HbAction *action);
+
 protected slots:
     
     /**
@@ -208,6 +225,12 @@ private slots:
      * Calls emitActivated for actually axecuting the functionality
      */
     void openItemSlot();
+    
+    /**
+     * Signaled when item's play functionality is initialized from context menu.
+     * Calls doActivateItem for actually executing the functionality.
+     */
+    void playItemSlot();
 
     /**
      * slot is connected to view's doDelayeds -signal
@@ -267,7 +290,8 @@ private:
         EActionRemoveCollection,
         EActionRename,
     	EActionPlay,
-    	EActionOpen
+    	EActionOpen,
+    	EActionAttach
     };
 
     /**
@@ -310,6 +334,14 @@ private:
      */
     void setNavigationAction();
     
+    /**
+     * Does the actual emitActivated functionality. Called from either emitActivated or
+     * openItemSlot.
+     * 
+     * @param index Index of the item.
+     */
+    void doEmitActivated (const QModelIndex &index);
+
     /**
      * handles single item activation. Either from 
      * user's single tap or from default action at context menu.

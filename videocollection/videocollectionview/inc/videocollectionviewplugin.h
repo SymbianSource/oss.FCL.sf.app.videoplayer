@@ -76,7 +76,7 @@ public: // from QViewPlugin
 
 signals:
     /**
-     * Command signal, plugin user shoulf connect this in case it wants
+     * Command signal, plugin user should connect this in case it wants
      * to receive commands emitted from the view.
      *
      * @param command id
@@ -93,7 +93,7 @@ public slots: // from QViewPlugin
 
     /**
      * Plugin user can notify orientation changes by connecting into this slot
-     * ti it's signal. In normal cases, view handles orientation chages itself.
+     * to it's signal. In normal cases, view handles orientation chages itself.
      *
      * @param orientation new orientation
      */
@@ -104,6 +104,13 @@ public slots: // from QViewPlugin
      *
      */
     void back();
+    
+private slots:
+
+    /**
+     * Gets notified when view is ready.
+     */
+    void viewReadySlot();
 
 private:
 
@@ -113,7 +120,7 @@ private:
 private:
 
     // async loading timeout
-    static const int DELAYED_LOAD_TIMEOUT = 4000; // ms
+    static const int DELAYED_LOAD_TIMEOUT = 500; // ms
 
     /** timer id */
     int mTimerId;

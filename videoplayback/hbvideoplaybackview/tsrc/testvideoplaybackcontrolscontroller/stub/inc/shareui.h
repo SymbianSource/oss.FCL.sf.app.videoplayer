@@ -1,4 +1,4 @@
-/*
+/**
 * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
@@ -11,28 +11,25 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QMPXVideoPlaybackNonTouchVolumeBar
+* Description: ShareUI STUB class definition
 *
 */
 
 // Version : %version:  1 %
 
+#ifndef SHAREUI_H_
+#define SHAREUI_H_
 
-
-#ifndef MPXVIDEOPLAYBACKNONTOUCHVOLUMEBAR_H_
-#define MPXVIDEOPLAYBACKNONTOUCHVOLUMEBAR_H_
-
-#include <qobject>
-
-class QMPXVideoPlaybackNonTouchVolumeBar : public QObject
+class ShareUi
 {
-    Q_OBJECT
-
+    
     public:
-        QMPXVideoPlaybackNonTouchVolumeBar();
 
-        virtual ~QMPXVideoPlaybackNonTouchVolumeBar();
+        ShareUi();
+        ~ShareUi();
+    
+        bool send( QStringList& fileList, bool embedded );
+    
 };
 
-#endif /*MPXVIDEOPLAYBACKNONTOUCHVOLUMEBAR_H_*/
-
+#endif

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -28,8 +28,7 @@
 #include <hbwidget.h>
 #include <mpxplaybackframeworkdefs.h>
 
-class HbFrameItem;
-class QMPXVideoPlaybackButtonBar;
+class QMPXVideoPlaybackToolBar;
 class QMPXVideoPlaybackProgressBar;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
@@ -55,9 +54,8 @@ class QMPXVideoPlaybackControlBar : public HbWidget
 
     private:
         QMPXVideoPlaybackControlsController *mController;
-        QMPXVideoPlaybackButtonBar          *mButtonBar;
+        QMPXVideoPlaybackToolBar            *mToolBar;
         QMPXVideoPlaybackProgressBar        *mProgressBar;
-        HbFrameItem                         *mFrameItem;
 };
 
 #endif /*MPXVIDEOPLAYBACKCONTROLBAR_H_*/

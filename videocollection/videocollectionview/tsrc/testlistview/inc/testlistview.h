@@ -198,16 +198,6 @@ private slots:
      */
     void testRemoveVideosFromCollectionSlot();
     
-    /**
-     * Tests finishCollectionOpenedSlot
-     */
-    void testFinishCollectionOpenedSlot();
-
-    /**
-     * Tests finishCollectionClosedSlot
-     */
-    void testFinishCollectionClosedSlot();
-    
 signals:
 
     // Signals needed in tests.

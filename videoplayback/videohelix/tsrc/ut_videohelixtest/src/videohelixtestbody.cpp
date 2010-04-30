@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 19 %
+// Version : %version: 21 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -1418,7 +1418,7 @@ CVHPPTestClass::HandlePlaybackMessage( CMPXMessage* aMsg, TInt /*aErr*/ )
 
                 callback->iEvent = EPbCmdTvOutEvent;
                 callback->iData  = *aMsg->Value<TInt>( KMPXMediaVideoTvOutConnected );
-                callback->iError = *aMsg->Value<TInt>( KMPXMediaVideoTvOutPlayAllowed );
+                callback->iError = KErrNone;
 
                 ProcessEvent( callback );
 
@@ -1964,19 +1964,6 @@ CVHPPTestClass::ConnectTvOutL( CStifItemParser& aItem )
     {
         iAccObserver->SetTvOutPlaybackAllowed( playable );
 
-        if ( ! playable )
-        {
-            TCallbackEvent* event = new TCallbackEvent;
-
-            event->iEvent = EPPaused;
-            event->iData  = 0;
-            event->iError = 0;
-
-            AddExpectedEvent( event );
-
-            iExpectedError = KMPXVideoTvOutPlaybackNotAllowed;
-        }
-
         //
         //  Add event for callback
         //
@@ -1984,7 +1971,7 @@ CVHPPTestClass::ConnectTvOutL( CStifItemParser& aItem )
 
         event->iEvent = EPbCmdTvOutEvent;
         event->iData  = ETrue;
-        event->iError = playable;
+        event->iError = KErrNone;
 
         AddExpectedEvent( event );
     }
@@ -2007,10 +1994,10 @@ CVHPPTestClass::DisconnectTvOutL()
 
     event->iEvent = EPbCmdTvOutEvent;
     event->iData  = EFalse;
-    event->iError = ETrue;
+    event->iError = KErrNone;
 
     AddExpectedEvent( event );
-
+    
     iAccObserver->UpdateTvOutStatusL( EFalse );
 
     return KErrNone;
@@ -2373,7 +2360,6 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
         
                         RFs fs;
                         TInt error = fs.Connect();
-                        TInt fileError = KErrNone;
                     
                         //
                         //  Open a file handle to the clip
@@ -2381,7 +2367,7 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
                         if ( fileHandle32 )
                         {
                             RFile file;
-                            fileError = file.Open( fs, fullPath, EFileRead );
+                            file.Open( fs, fullPath, EFileRead );
                             iPlaybackPlugin->InitialiseWithPositionL( file, position );
                             file.Close();
                         }
@@ -2389,7 +2375,7 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
                         else
                         {
                             RFile64 file64;
-                            fileError = file64.Open( fs, fullPath, EFileRead );
+                            file64.Open( fs, fullPath, EFileRead );
                             iPlaybackPlugin->Initialise64L( file64, position );
                             file64.Close();
                         }

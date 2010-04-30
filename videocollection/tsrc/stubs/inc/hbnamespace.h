@@ -378,6 +378,12 @@ public:
     };
  
     Q_DECLARE_FLAGS(InteractionModifiers, InteractionModifier)*/
+    
+    enum ActivationReason {
+            ActivationReasonActivity = 0,
+            ActivationReasonService,
+            ActivationReasonNormal
+    };
 };
 
 /*Q_DECLARE_METATYPE(Hb::GraphicsItemType)

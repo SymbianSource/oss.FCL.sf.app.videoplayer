@@ -31,7 +31,6 @@ class CMPXMedia;
 class VideoListDataModel;
 class VideoSortFilterProxyModel;
 
-// TODO: MVcxNsMyVideosCategoryModelObserver implementation should probably not be in this class
 class VideoCollectionWrapperPrivate : public QObject        
 {    
 	Q_DISABLE_COPY(VideoCollectionWrapperPrivate) 

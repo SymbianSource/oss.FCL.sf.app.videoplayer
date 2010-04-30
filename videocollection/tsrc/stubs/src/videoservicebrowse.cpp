@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 3 %
 
 #include <hbapplication.h>
 
@@ -83,8 +83,14 @@ QString VideoServiceBrowse::contextTitle() const
     \param category, Category which type of videos are browsed.
     \return None.
 */
-void VideoServiceBrowse::browseVideos(const QString &title, int category)
+void VideoServiceBrowse::browseVideos(const QString &title,
+    int category,
+    int sortRole)
 {
+    Q_UNUSED(title);
+    Q_UNUSED(category);
+    Q_UNUSED(sortRole);
+    
     // not stubbed
 }
 

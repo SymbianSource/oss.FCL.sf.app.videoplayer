@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 5 %
 
 
 
@@ -35,6 +35,7 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController( bool a
     : mViewMode( EFullScreenView )
     , mIsAttachOperation( attachOperation )
     , mAttachVideoDone( false )
+    , mSendVideoDone( false )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()"));
 
@@ -108,8 +109,19 @@ void QMPXVideoPlaybackControlsController::attachVideo()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"));
     
-    handleCommand( EMPXPbvCmdClose );    
     mAttachVideoDone = true;
+}    
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::sendVideo()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::sendVideo()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::sendVideo()"));
+    
+    handleCommand( EMPXPbvCmdPause );    
+    mSendVideoDone = true;
 }    
 
 // End of File

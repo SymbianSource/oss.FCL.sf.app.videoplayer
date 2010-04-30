@@ -55,18 +55,12 @@ static const char* DOCML_NAME_DIALOG                      = "mMultiSelectionDial
 static const char* DOCML_NAME_DLG_HEADINGLBL              = "mHeadingLabel";
 static const char* DOCML_NAME_CHECK_CONTAINER             = "mCheckBoxContainer";
 static const char* DOCML_NAME_MARKALL                     = "mCheckMarkAll";
+static const char* DOCML_NAME_LBL_MARKALL                 = "mCheckBoxText";
 static const char* DOCML_NAME_LBL_SELECTION               = "mSelectionCount";
 static const char* DOCML_NAME_LIST_CONTAINER              = "mListContainer";
 
 // async loading timeout
 static const int ASYNC_FIND_TIMEOUT                       = 50; // ms
-
-// Effect constants
-static const char* EFFECT_SLIDE_IN_TO_LEFT_FILENAME       = ":/effects/slide_in_to_left_and_fade_in.fxml";
-static const char* EFFECT_SLIDE_OUT_TO_LEFT_FILENAME      = ":/effects/slide_out_to_left_and_fade_out.fxml";
-
-static const char* EFFECT_SLIDE_IN_TO_LEFT                = "slide_in_to_left_and_fade_in";
-static const char* EFFECT_SLIDE_OUT_TO_LEFT               = "slide_out_to_left_and_fade_out";
 
 /** VideoCollectionUiLoader parameter class */ 
 class VideoCollectionUiLoaderParam

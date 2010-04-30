@@ -11,105 +11,105 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QMPXVideoPlaybackButtonBar
+* Description:  Implementation of HbToolBar
 *
 */
 
-// Version : %version: 2 %
+// Version : %version:  1 %
 
 
-
-#include <hbpushbutton.h>
+#include <QGraphicsLinearLayout>
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
-#include "mpxvideoplaybackviewfiledetails.h"
-#include "mpxcommonvideoplaybackview.hrh"
-
+#include "hbtoolbar.h"
+#include "hbtoolbutton.h"
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar()
+// HbToolBar::HbToolBar
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar( 
-        QMPXVideoPlaybackControlsController* controller )
-    : mController( controller )
+HbToolBar::HbToolBar()
+    : mVisible( false )
+    , mEnabled( false )
 {
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::QMPXVideoPlaybackButtonBar"));
+    MPX_ENTER_EXIT(_L("HbToolBar::HbToolBar()"));
+
+    mLayout = new QGraphicsLinearLayout();
+    setLayout( mLayout );
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::~QMPXVideoPlaybackButtonBar()
+// HbToolBar::~HbToolBar
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackButtonBar::~QMPXVideoPlaybackButtonBar()
+HbToolBar::~HbToolBar()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::~QMPXVideoPlaybackButtonBar()"));
+    MPX_DEBUG(_L("HbToolBar::HbToolBar") );
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::initialize()
+// HbToolBar::setEnabled
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::initialize()
+void HbToolBar::setEnabled( bool enabled )
 {
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackButtonBar::initialize()"));
+    MPX_DEBUG(_L("HbToolBar::setEnabled %d"), enabled );
+
+    mEnabled = enabled;
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::updateState()
+// HbToolBar::setVisible
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::updateState( TMPXPlaybackState state )
+void HbToolBar::setVisible( bool visible )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::updateState() state = %d"), state );
+    MPX_DEBUG(_L("HbToolBar::setVisible %d"), visible );
 
-    mState = state;
+    mVisible = visible;
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::aspectRatioChanged()
+// HbToolBar::setOrientation
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::aspectRatioChanged( int aspectRatio )
+void HbToolBar::setOrientation( int orientation )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::aspectRatioChanged() aspectRatio = %d"), aspectRatio );
-
-    mAspectRatio = aspectRatio;
+    MPX_DEBUG(_L("HbToolBar::setOrientation") );
+    Q_UNUSED( orientation );
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::updateWithFileDetails()
+// HbToolBar::clearActions
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::updateWithFileDetails(
-        QMPXVideoPlaybackViewFileDetails* details )
+void HbToolBar::clearActions()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::updateWithFileDetails()"));
-
-    mFileDetails = details;
+    MPX_DEBUG(_L("HbToolBar::clearActions") );
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::durationChanged
+// HbToolBar::addAction
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::durationChanged( int duration )
+void HbToolBar::addAction( HbAction *action )
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::durationChanged duration = %d"), duration );
+    MPX_DEBUG(_L("HbToolBar::addAction") );
+    Q_UNUSED( action );
 
-    mDuration = duration;
+    HbToolButton *button = new HbToolButton( action );
+    mLayout->addItem( button );
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackButtonBar::positionChanged
+// HbToolBar::addAction
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackButtonBar::positionChanged( int position )
+QGraphicsLayout* HbToolBar::layout()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackButtonBar::positionChanged position = %d"), position );
+    MPX_DEBUG(_L("HbToolBar::layout") );
 
-    mPosition = position;
+    return mLayout;
 }
 
-//End of file
+// End of file

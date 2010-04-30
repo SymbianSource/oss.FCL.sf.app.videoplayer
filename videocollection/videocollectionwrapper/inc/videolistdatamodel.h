@@ -283,7 +283,7 @@ private:
      *
      * @return QString detail string
      */
-    QString doDetailRow(int index, const QString duration) const;
+    QString doDetailRow(int index) const;
 
     /**
      * Generates a video count string for category or album at given index.
@@ -317,18 +317,6 @@ private:
      * @data data from operation
      */
     void reportAsyncStatus(int statusCode, QVariant &additional);
-            
-    /**
-     * Generates a short video length string from video item at given index
-     * 
-     * In case item is not found in the provided index, empty
-     * string is returned.
-     * 
-     * @param index, index of the item data is requested
-     * 
-     * @return Lengths as QString,  (for example "00:25:10").
-     */
-    QString prepareShortLengthString(int index) const;
 
 private:
     

@@ -23,6 +23,7 @@ QMap<int, ThumbnailManager::TnRequest> ThumbnailManager::mRequests = QMap<int, T
 
 bool ThumbnailManager::mGetThumbFails = false;
 int ThumbnailManager::mThumbnailReadyError = 0;
+int ThumbnailManager::mCancelRequestCount = 0;
 
 ThumbnailManager::ThumbnailManager( QObject* parentPtr ) :
 QObject( parentPtr )
@@ -127,6 +128,7 @@ void ThumbnailManager::deleteThumbnails( unsigned long int thumbnailId )
 
 bool ThumbnailManager::cancelRequest( int id )
 {
+    mCancelRequestCount++;
     if(mRequests.contains(id)) {
         mRequests[id].cancelled = true;
     }

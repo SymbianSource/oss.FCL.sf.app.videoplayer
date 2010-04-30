@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -36,6 +36,7 @@
 // -------------------------------------------------------------------------------------------------
 //
 HbVideoBasePlaybackView::HbVideoBasePlaybackView()
+    : mViewClosed( false )
 {
     MPX_DEBUG(_L("HbVideoBasePlaybackView::HbVideoBasePlaybackView()"));
 }
@@ -58,6 +59,16 @@ void HbVideoBasePlaybackView::mouseReleaseEvent( QGraphicsSceneMouseEvent *event
     MPX_DEBUG(_L("HbVideoBasePlaybackView::mouseReleaseEvent()"));
     Q_UNUSED( event );
     emit tappedOnScreen();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::closePlaybackView()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::closePlaybackView()
+{
+    MPX_DEBUG(_L("HbVideoBasePlaybackView::closePlaybackView()"));
+    mViewClosed = true;    
 }
 
 // EOF

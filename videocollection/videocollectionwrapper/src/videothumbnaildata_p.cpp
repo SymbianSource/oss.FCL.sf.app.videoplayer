@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 20 %
+// Version : %version: 21 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -73,7 +73,7 @@ VideoThumbnailDataPrivate::VideoThumbnailDataPrivate()
     , mBackgroundFetchingEnabled( true )
 {
 	FUNC_LOG;
-    initialize();
+	initialize();
 }
 
 // -----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ int VideoThumbnailDataPrivate::initialize()
         cleanup();
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -165,8 +165,8 @@ void VideoThumbnailDataPrivate::disconnectSignals()
             disconnect(model->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelChangedSlot()));
             disconnect(model->sourceModel(), SIGNAL(modelChanged()), this, SLOT(modelChangedSlot()));
             }
-		disconnect(mThumbnailFetcher, SIGNAL(thumbnailReady( QPixmap , void *, int )),
-                    this, SLOT(thumbnailReadySlot( QPixmap , void *, int )));
+		disconnect(mThumbnailFetcher, SIGNAL(thumbnailReady(QPixmap , const TMPXItemId &, int )),
+                    this, SLOT(thumbnailReadySlot(QPixmap , const TMPXItemId &, int )));
         disconnect(mThumbnailFetcher, SIGNAL(allThumbnailsFetched()),
                  this, SLOT(allThumbnailsFetchedSlot()));          
         disconnect(mBgFetchTimer, SIGNAL(timeout()), this, SLOT(doBackgroundFetching()));
@@ -188,8 +188,8 @@ int VideoThumbnailDataPrivate::connectSignals()
                 VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeAllVideos);
         if(!model)
             return -1;
-        if(!connect(mThumbnailFetcher, SIGNAL(thumbnailReady( QPixmap , void *, int )),
-                    this, SLOT(thumbnailReadySlot( QPixmap , void *, int))) ||
+        if(!connect(mThumbnailFetcher, SIGNAL(thumbnailReady( QPixmap , const TMPXItemId &, int )),
+                    this, SLOT(thumbnailReadySlot( QPixmap , const TMPXItemId &, int))) ||
             !connect(mThumbnailFetcher, SIGNAL(allThumbnailsFetched()),
                      this, SLOT(allThumbnailsFetchedSlot())) ||
            !connect(model->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelChangedSlot())) ||
@@ -253,7 +253,8 @@ int VideoThumbnailDataPrivate::startFetchingThumbnails(const QList<QModelIndex> 
     
     int started = mThumbnailFetcher->fetchCount() - fetchCountBefore;
     
-    mThumbnailFetcher->continueFetching();
+	// Start the fetches and cancel previous ones.
+    mThumbnailFetcher->continueFetching(true);
     
     return started;
 }
@@ -280,11 +281,7 @@ int VideoThumbnailDataPrivate::startFetchingThumbnail(TMPXItemId mediaId, int pr
     // Thumbnail fetcher signals into thumbnailReadySlot when thumbnail ready
     if(fileName.length() > 0)
     {
-        // object containing media id to be passed throught
-        // thumbnail generation process.
-        TMPXItemId *internal = new TMPXItemId(mediaId.iId1, mediaId.iId2);
-
-        mThumbnailFetcher->addFetch(fileName, internal, priority);
+        mThumbnailFetcher->addFetch(fileName, mediaId, priority);
     }
 
     return 0;
@@ -367,19 +364,8 @@ void VideoThumbnailDataPrivate::getModelIndexes(QList<QModelIndex> &indexes, int
 // VideoThumbnailDataPrivate::thumbnailReadySlot()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::thumbnailReadySlot(QPixmap tnData, void *internal, int error)
+void VideoThumbnailDataPrivate::thumbnailReadySlot(QPixmap tnData, const TMPXItemId &mediaId, int error)
 {
-    TMPXItemId mediaId(0, 0);
-    if(internal)
-    {
-        mediaId = *(static_cast<TMPXItemId*>(internal));
-        delete internal;
-    }
-    else
-    {
-        return;
-    }
-
     if(!error && !tnData.isNull())
     {
         mThumbnailData.insert(mediaId, new QIcon(tnData));
@@ -537,7 +523,7 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
 {
 	FUNC_LOG;
     // Stop timers.
-    if(mBgFetchTimer)
+	if(mBgFetchTimer)
     {
         mBgFetchTimer->stop();
     }
@@ -565,14 +551,9 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
 void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
 	FUNC_LOG;
-    if(!mBackgroundFetchingEnabled || !mThumbnailFetcher)
-    {
-        return;
-    }
-    
-    mThumbnailFetcher->cancelFetches();
-    
-    // If model is null, we continue using the current one. 
+
+    // If model is null, we continue using the current one. Model and index are kept up to date even
+	// fetching is not enabled.
     if(model)
     {
         mCurrentModel = model;
@@ -580,6 +561,13 @@ void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyMode
     
     mCurrentFetchIndex = fetchIndex;
     mCurrentBackgroundFetchCount = 0;
+	
+	if(!mBackgroundFetchingEnabled || !mThumbnailFetcher)
+    {
+        INFO("VideoThumbnailDataPrivate::startBackgroundFetching() fetching is disabled.");
+        return;
+    }
+    
     doBackgroundFetching();
 }
 
@@ -592,6 +580,7 @@ void VideoThumbnailDataPrivate::continueBackgroundFetch()
 	FUNC_LOG;
     if(!mBackgroundFetchingEnabled)
     {
+        INFO("VideoThumbnailDataPrivate::continueBackgroundFetch() fetching is disabled.")
         return;
     }
 

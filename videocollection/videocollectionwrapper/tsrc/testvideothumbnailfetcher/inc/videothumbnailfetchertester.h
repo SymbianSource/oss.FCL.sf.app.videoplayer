@@ -42,7 +42,7 @@ public:
     // Test methods for VideoThumbnailFetcher's methods.
     //
 
-    void startThumbnailFetches();
+    void startThumbnailFetches(bool cancelOngoingFetches);
     
     void startThumbnailCreation();
     

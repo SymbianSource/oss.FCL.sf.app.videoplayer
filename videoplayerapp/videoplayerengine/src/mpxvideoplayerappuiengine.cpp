@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  7 %
+// Version : %version:  ou1cpsw#8 %
 
 
 
@@ -97,8 +97,11 @@ void CMpxVideoPlayerAppUiEngine::ConstructL()
 void CMpxVideoPlayerAppUiEngine::LateInitL()
 {	       
     CreatePlaybackUtilityL();
-        
-    iRecognizer = CMediaRecognizer::NewL();               
+    
+    if ( ! iRecognizer )
+    {
+        iRecognizer = CMediaRecognizer::NewL();
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -209,6 +212,8 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile )
 
     TFileName filename;
     aFile.FullName(filename);
+    
+    LateInitL();
 
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL( filename, aFile );
 
@@ -240,6 +245,8 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( const TDesC& aFileName )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::OpenFileL()"),
                    _L("aFileName = %S"), &aFileName);    
+    
+    LateInitL();
     
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(aFileName);
 
@@ -299,7 +306,9 @@ void CMpxVideoPlayerAppUiEngine::OpenMediaL( const CMPXMedia& aMedia )
     CleanupStack::PushL( playList );
     playList->SetSingleItemPlaylist();
     playList->SetToFirst();
-
+    
+    LateInitL();
+    
     iPlaybackUtility->InitL( *playList, ETrue );
 
     CleanupStack::PopAndDestroy( playList );
@@ -479,12 +488,14 @@ void CMpxVideoPlayerAppUiEngine::DoHandelCollectionMediaL( const CMPXMedia& aMed
 
     //OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
 
+    LateInitL();
+    
     TPtrC mediaFile( aMedia.ValueText( KMPXMediaGeneralUri ) );
     CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL(mediaFile);
         
     if ( mediaType == CMediaRecognizer::ELocalRamFile ||
          mediaType == CMediaRecognizer::ELocalAsxFile )
-    {        
+    {   
         HandleMultiLinksFileL( mediaFile, mediaType );
     }    
     else

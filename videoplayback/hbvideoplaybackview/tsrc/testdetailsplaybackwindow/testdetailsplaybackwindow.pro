@@ -14,7 +14,7 @@
 # Description: Project file for building testdetailsplaybackwindow
 #
 #
-# Version : %version:  1 %
+# Version : %version:  3 %
 
 TEMPLATE = app
 TARGET = testdetailsplaybackwindow

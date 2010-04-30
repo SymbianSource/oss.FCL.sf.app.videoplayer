@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -26,6 +26,7 @@
 #include <hbstyle.h>
 
 class QGraphicsItem;
+class HbFrameDrawer;
 
 class HbPushButton : public HbWidget
 {
@@ -45,6 +46,8 @@ class HbPushButton : public HbWidget
         QGraphicsItem* primitive( HbStyle::Primitive primitive ) const;
         void press();
         void release();
+        HbFrameDrawer* frameBackground();
+        void setFrameBackground( HbFrameDrawer *drawer );
 
     signals:
         void pressed();
@@ -56,6 +59,7 @@ class HbPushButton : public HbWidget
         bool mSelected;
 
         QGraphicsItem *mBackground;
+        HbFrameDrawer *mFrameDrawer;
 };
 
 #endif /*HBPUSHBUTTON_H*/

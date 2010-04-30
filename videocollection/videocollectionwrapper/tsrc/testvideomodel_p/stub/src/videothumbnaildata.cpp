@@ -149,8 +149,6 @@ int VideoThumbnailData::startFetchingThumbnail( int mediaId, int priority )
 //
 const QIcon* VideoThumbnailData::defaultThumbnail()
 {
-    // TODO
-
     return 0;
 }
 
@@ -166,7 +164,6 @@ int VideoThumbnailData::removeThumbnail( TMPXItemId mediaId )
     {
         return -1;
     }
-    // TODO: do we need to do something with the tn wrapper as well?
     return 1;
   
 }

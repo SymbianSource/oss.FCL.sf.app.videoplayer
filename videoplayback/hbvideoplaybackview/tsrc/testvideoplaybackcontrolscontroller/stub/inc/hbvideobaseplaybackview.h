@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -48,6 +48,13 @@ class HbVideoBasePlaybackView : public HbView
 
     signals:
         void tappedOnScreen();
+
+    public slots:
+        void closePlaybackView();
+
+    public:
+        bool mViewClosed;
+
 };
 
 #endif  // __HBVIDEOBASEPLAYBACKVIEW_H__

@@ -63,21 +63,21 @@ VideoThumbnailFetcher::~VideoThumbnailFetcher()
 // VideoThumbnailFetcher::addFetch()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::addFetch(const QString fileName, void *internal, int priority)
+void VideoThumbnailFetcher::addFetch(const QString fileName, const TMPXItemId &mediaId, int priority)
 {
     mAddFetchCallCount++;
     if(mAddFetchFails) 
         return;
 
     int id = mRequests.count();
-    mRequests[id] = TnRequest(fileName, internal, priority, false);
+    mRequests[id] = TnRequest(fileName, mediaId, priority, false);
 }
 
 // -----------------------------------------------------------------------------
 // VideoThumbnailFetcher::continueFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::continueFetching()
+void VideoThumbnailFetcher::continueFetching(bool cancelOngoingFetches)
 {
     mContinueFetchingCallCount++;
 }
@@ -124,9 +124,9 @@ void VideoThumbnailFetcher::enableThumbnailCreation(bool enable)
 // VideoThumbnailFetcher::emitThumbnailReady()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::emitThumbnailReady(QPixmap pixmap, void *internal, int error)
+void VideoThumbnailFetcher::emitThumbnailReady(QPixmap pixmap, const TMPXItemId &mediaId, int error)
 {
-    emit thumbnailReady(pixmap, internal, error);
+    emit thumbnailReady(pixmap, mediaId, error);
 }
 
 // -----------------------------------------------------------------------------

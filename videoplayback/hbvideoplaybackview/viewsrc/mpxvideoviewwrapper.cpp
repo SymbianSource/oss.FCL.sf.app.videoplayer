@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#27 %
+// Version : %version: da1mmcf#30 %
 
 
 
@@ -555,13 +555,10 @@ void CMPXVideoViewWrapper::HandleVideoPlaybackMessage( CMPXMessage* aMessage )
             TMPXVideoPlaybackControlCommandIds cmdId = EMPXControlCmdTvOutDisconnected;
 
             TBool tvOutConnected( *aMessage->Value<TInt>( KMPXMediaVideoTvOutConnected ) );
-            TBool playbackAllowed = ETrue;
 
             if ( tvOutConnected )
             {
                 cmdId = EMPXControlCmdTvOutConnected;
-
-                playbackAllowed = *aMessage->Value<TInt>( KMPXMediaVideoTvOutPlayAllowed );
             }
 
             if ( iUserInputHandler )
@@ -571,7 +568,7 @@ void CMPXVideoViewWrapper::HandleVideoPlaybackMessage( CMPXMessage* aMessage )
 
             if ( iControlsController )
             {
-                iControlsController->handleEvent( cmdId, playbackAllowed );
+                iControlsController->handleEvent( cmdId );
             }
             break;
         }
@@ -834,15 +831,6 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
     }
 
     //
-    //  TV-Out Playback Allowed
-    //
-    if ( aMedia.IsSupported( KMPXMediaVideoTvOutPlayAllowed ) )
-    {
-        iFileDetails->mTvOutPlayAllowed =
-            aMedia.ValueTObjectL<TInt>( KMPXMediaVideoTvOutPlayAllowed );
-    }
-
-    //
     //  BitRate
     //
     if ( aMedia.IsSupported( KMPXMediaVideoBitRate ) )
@@ -962,15 +950,23 @@ void CMPXVideoViewWrapper::DoHandleMediaL( const CMPXMessage& aMedia, TInt aErro
 
         if ( iFileDetails->mVideoEnabled )
         {
-            RWindow *window = iView->getWindow();
+            //
+            // get window size
+            //
+            RWindow *window = iView->getWindow();            
+            TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
+            
+            //
+            // get window aspect ratio
+            //   if device is in landscape mode, width > height
+            //   if device is in portrait mode, width < height
+            //
+            TReal32 width = (TReal32) displayRect.Width();
+            TReal32 height = (TReal32) displayRect.Height();            
+            TReal32 displayAspectRatio = (width > height)? (width / height) : (height / width);
 
-            TRect displayRect = TRect( window->Position().iX,
-                                       window->Position().iY,
-                                       window->Position().iX + window->Size().iWidth,                  
-                                       window->Position().iY + window->Size().iHeight );
-
-            TReal displayAspectRatio = (TReal32)displayRect.Width() / (TReal32)displayRect.Height();
-
+            //
+            // get new aspect ratio
             TInt newAspectRatio = 
                 iDisplayHandler->SetDefaultAspectRatioL( iFileDetails, displayAspectRatio );
 
@@ -1039,7 +1035,7 @@ void CMPXVideoViewWrapper::HandlePropertyL( TMPXPlaybackProperty aProperty,
                                                  TInt aValue,
                                                  TInt aError )
 {
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::DoHandlePropertyL - Error(%d)"), aError );
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::HandlePropertyL - Error(%d)"), aError );
 
     if ( aError == KErrNone )
     {
@@ -1304,7 +1300,7 @@ void CMPXVideoViewWrapper::HandleVolumeCmdL( TMPXPlaybackCommand aCmd )
 //
 void CMPXVideoViewWrapper::HandleShortPressBackwardL()
 {
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL()"));
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleShortPressBackwardL()"));
 
     if( !iPlaylistView )
     {
@@ -1318,7 +1314,7 @@ void CMPXVideoViewWrapper::HandleShortPressBackwardL()
 //
 void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aForeground )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::HandleForegroundEventL()"),
+    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL()"),
                    _L("aForeground = %d"), aForeground );
 
     TMPXVideoPlaybackCommand videoCmd = EPbCmdHandleBackground;
@@ -1379,7 +1375,6 @@ void CMPXVideoViewWrapper::CreateControlsL()
     iFileDetails->mPlaybackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
 
     iFileDetails->mTvOutConnected   = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutConnected );
-    iFileDetails->mTvOutPlayAllowed = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutPlayAllowed );
 
     TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );    
     const QString qMimeType( (QChar*)mimeType.Ptr(), mimeType.Length() );
