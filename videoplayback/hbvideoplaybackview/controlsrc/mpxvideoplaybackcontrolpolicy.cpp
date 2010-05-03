@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#10 %
+// Version : %version: da1mmcf#12 %
 
 
 
@@ -71,17 +71,20 @@ QMPXVideoPlaybackControlPolicy::setControlProperties( TMPXVideoPlaybackControls 
         }
         case EMPXStatusPane:
         {
-            if ( details->mPlaybackMode != EMPXVideoLocal ||
-            	   viewMode == EAudioOnlyView ||
-            	   viewMode == EDetailsView )
-            {                
-                properties = EMPXAllProperties;
-            }
-            else
+            //
+            // If it is local playback & full screen view, show the controls while buffering
+            // If not, won't show
+            //
+            if ( details->mPlaybackMode == EMPXVideoLocal && viewMode == EFullScreenView )
             {
                 properties = EMPXShownWhenPlaying |
                              EMPXShownWhenPaused |
-                             EMPXShownWhenSeeking;
+                             EMPXShownWhenSeeking |
+                             EMPXShownWhenBuffering;
+            }
+            else
+            {                
+                properties = EMPXAllProperties;
             }
             break;
         }
@@ -102,9 +105,23 @@ QMPXVideoPlaybackControlPolicy::setControlProperties( TMPXVideoPlaybackControls 
             }
             else
             {
-                properties = EMPXShownWhenPlaying |
-                             EMPXShownWhenPaused |
-                             EMPXShownWhenSeeking;
+                //
+                // If it is local playback, show the controls while buffering
+                // If not, won't show
+                //
+                if ( details->mPlaybackMode == EMPXVideoLocal )
+                {
+                    properties = EMPXShownWhenPlaying |
+                                 EMPXShownWhenPaused |
+                                 EMPXShownWhenSeeking |
+                                 EMPXShownWhenBuffering;                    
+                }
+                else
+                {
+                    properties = EMPXShownWhenPlaying |
+                                 EMPXShownWhenPaused |
+                                 EMPXShownWhenSeeking;                    
+                }
             }
             break;
         }

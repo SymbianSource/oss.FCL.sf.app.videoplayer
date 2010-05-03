@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: e003sa33#19 %
+
+// Version : %version: 20 %
 
 
 #include <AudioPreference.h>
@@ -79,11 +80,7 @@ void CMpxVideoPlayerUtility::Close()
         iControllerEventMonitor = NULL;
     }
 
-    if ( ! iSurfaceId.IsNull() )
-    {
-        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoRemoveDisplayWindow ) );
-        iSurfaceId = TSurfaceId::CreateNullId();
-    }
+    iSurfaceId = TSurfaceId::CreateNullId();
 
     iController.Close();
     iDirectScreenAccessAbort = EFalse;
@@ -277,21 +274,6 @@ void CMpxVideoPlayerUtility::SetDisplayWindowL( const TRect& aScreenRect,
                 iVideoPlayControllerCustomCommands.DirectScreenAccessEvent( EResumeDSA ) );
 
         iDirectScreenAccessAbort = EFalse;
-    }
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerUtility::SurfaceRemovedFromView()
-// -------------------------------------------------------------------------------------------------
-//
-void CMpxVideoPlayerUtility::SurfaceRemovedFromView()
-{
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SurfaceRemovedFromView()"));
-
-    if ( ! iSurfaceId.IsNull() )
-    {
-        iSurfaceId = TSurfaceId::CreateNullId();
     }
 }
 
@@ -498,39 +480,34 @@ TInt CMpxVideoPlayerUtility::VideoSurfaceCreated()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::VideoSurfaceCreated()"));
 
-    TSurfaceId oldSurfaceId( iSurfaceId );
-    TBool replaceSurface = ! ( iSurfaceId.IsNull() );
+    TInt error = KErrNone;
 
-    TSurfaceId surfaceId;
-    TRect cropRect;
-    TVideoAspectRatio aspectRatio;
-
-    TInt error =
-        iVideoPlaySurfaceSupportCustomCommands.GetSurfaceParameters( surfaceId,
-                                                                     cropRect,
-                                                                     aspectRatio );
-
-    if ( error == KErrNone )
+    if ( iSurfaceId.IsNull() )
     {
-        //
-        //  Send data to the display handler to remove old surface and add new surface
-        //
-        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceCreated,
-                                             surfaceId,
-                                             cropRect,
-                                             aspectRatio ) );
+        TSurfaceId surfaceId;
+        TRect cropRect;
+        TVideoAspectRatio aspectRatio;
 
-        iSurfaceId = surfaceId;
+        error = iVideoPlaySurfaceSupportCustomCommands.GetSurfaceParameters( surfaceId,
+                                                                             cropRect,
+                                                                             aspectRatio );
 
-        //
-        //  if surface already existed tell video adaptation it is no longer in use.
-        //  Video adaptation will remove the surface when it receives this call therefore
-        //  the following code must be done at the end of this function.
-        //
-        if ( replaceSurface )
+        if ( error == KErrNone )
         {
-            error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( oldSurfaceId );
+            //
+            //  Send data to the display handler to remove old surface and add new surface
+            //
+            MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceCreated,
+                                                 surfaceId,
+                                                 cropRect,
+                                                 aspectRatio ) );
+
+            iSurfaceId = surfaceId;
         }
+    }
+    else
+    {
+        error = KErrAlreadyExists;
     }
 
     return error;
@@ -619,10 +596,10 @@ void CMpxVideoPlayerUtility::SendSurfaceCommandL( TInt aCmd )
         CMPXMessage* msg = CMPXMessage::NewL();
         CleanupStack::PushL( msg );
 
-        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplaySyncMessage );
+        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplayMessage );
         msg->SetTObjectValueL<TInt>( KMPXMediaVideoDisplayCommand, aCmd );
 
-        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackSyncMessage( *msg );
+        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackMessage( *msg );
 
         CleanupStack::PopAndDestroy( msg );
     }
@@ -645,13 +622,13 @@ void CMpxVideoPlayerUtility::SendSurfaceCommandL( TInt aCmd,
         CMPXMessage* msg = CMPXMessage::NewL();
         CleanupStack::PushL( msg );
 
-        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplaySyncMessage );
+        msg->SetTObjectValueL<TInt>( KMPXMessageGeneralId, KMPXMediaIdVideoDisplayMessage );
         msg->SetTObjectValueL<TInt>( KMPXMediaVideoDisplayCommand, aCmd );
         msg->SetTObjectValueL<TSurfaceId>( KMPXMediaVideoDisplayTSurfaceId, aSurfaceId );
         msg->SetTObjectValueL<TRect>( KMPXMediaVideoDisplayCropRect, aCropRect );
         msg->SetTObjectValueL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio, aAspectRatio );
 
-        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackSyncMessage( *msg );
+        iVideoPlaybackController->iMPXPluginObs->HandlePlaybackMessage( *msg );
 
         CleanupStack::PopAndDestroy( msg );
     }

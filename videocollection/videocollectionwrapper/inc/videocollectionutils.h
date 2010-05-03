@@ -125,12 +125,12 @@ public:
     QString prepareLengthString(quint32 length);
     
     /**
-     * Prepares length strings from given value.
+     * Prepares length string from given value in short format.
      * 
      * @param length Length value in seconds.
-     * @return Lengths as QStringList, first item tells the minutes, second tells seconds
+     * @return Length as QString (for example "00:25:10").
      */
-    const QStringList prepareLengthStrings(quint32 total);
+    const QString prepareShortLengthString(quint32 total);
     
     /**
      * Prepares size string from the given value.

@@ -22,57 +22,9 @@
 #include <hbdocumentloader.h>
 #include <qhash.h>
 #include <qmap.h>
+#include <qset.h>
 
-// Constants
-static const char* DOCML_VIDEOCOLLECTIONVIEW_FILE         = ":/layout/collectionview.docml";
-static const char* DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST = "listsSection";
-static const char* DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT = "hintSection";
-static const char* DOCML_NAME_VIEW                        = "view";
-
-// Videocollection View
-static const char* DOCML_NAME_VC_HEADINGBANNER            = "vc:mBanner";
-static const char* DOCML_NAME_VC_COLLECTIONWIDGET         = "vc:mCollectionWidget";
-static const char* DOCML_NAME_VC_COLLECTIONCONTENTWIDGET  = "vc:mCollectionContentWidget";
-static const char* DOCML_NAME_VC_VIDEOLISTWIDGET          = "vc:mListWidget";
-static const char* DOCML_NAME_VC_VIDEOHINTWIDGET          = "vc:mHintWidget";
-
-// Videocollection Options Menu
-static const char* DOCML_NAME_OPTIONS_MENU                = "vc:mOptionsMenu";
-static const char* DOCML_NAME_SORT_MENU                   = "vc:mSortBy";
-
-static const char* DOCML_NAME_SORT_BY_DATE                = "vc:mDate";
-static const char* DOCML_NAME_SORT_BY_NAME                = "vc:mName";
-static const char* DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS     = "vc:mNumberOfItems";
-static const char* DOCML_NAME_SORT_BY_RATING              = "vc:mRating";
-static const char* DOCML_NAME_SORT_BY_SIZE                = "vc:mSize";
-
-static const char* DOCML_NAME_ADD_TO_COLLECTION           = "vc:mAddtoCollection";
-static const char* DOCML_NAME_CREATE_COLLECTION           = "vc:mCreateNewCollection";
-static const char* DOCML_NAME_DELETE_MULTIPLE             = "vc:mDeleteMultiple";
-
-// Videocollection hint widget
-static const char* DOCML_NAME_HINT_BUTTON                 = "vc:mHintButton";
-static const char* DOCML_NAME_HINT_LABEL                  = "vc:mHintTextLabel";
-static const char* DOCML_NAME_NO_VIDEOS_LABEL             = "vc:mNoVideosLabel";
-
-// video multiselection dialog
-static const char* DOCML_VIDEOSELECTIONDIALOG_FILE        = ":/layout/videolistselectiondialog.docml";
-static const char* DOCML_NAME_DIALOG                      = "mMultiSelectionDialog";
-static const char* DOCML_NAME_DLG_HEADINGLBL              = "mHeadingLabel";
-static const char* DOCML_NAME_CHECK_CONTAINER             = "mCheckBoxContainer";
-static const char* DOCML_NAME_MARKALL                     = "mCheckMarkAll";
-static const char* DOCML_NAME_LBL_SELECTION               = "mSelectionCount";
-static const char* DOCML_NAME_LIST_CONTAINER              = "mListContainer";
-
-// async loading timeout
-static const int ASYNC_FIND_TIMEOUT                       = 50; // ms
-
-// Effect constants
-static const char* EFFECT_SLIDE_IN_TO_LEFT_FILENAME       = ":/effects/slide_in_to_left_and_fade_in.fxml";
-static const char* EFFECT_SLIDE_OUT_TO_LEFT_FILENAME      = ":/effects/slide_out_to_left_and_fade_out.fxml";
-
-static const char* EFFECT_SLIDE_IN_TO_LEFT                = "slide_in_to_left_and_fade_in";
-static const char* EFFECT_SLIDE_OUT_TO_LEFT               = "slide_out_to_left_and_fade_out";
+#include "videocollectionuiloaderdef.h"
 
 // Forward declarations
 class QActionGroup;
@@ -85,7 +37,7 @@ class VideoCollectionUiLoader:
 {
     Q_OBJECT
     
-private:
+public:
     /** actions used in menus and toolbars */
     enum ActionIds
     {
@@ -104,51 +56,6 @@ private:
         ETBActionRemoveVideos
     };
     
-    /** VideoCollectionUiLoader parameter class */ 
-    class Params
-    {
-    public:
-        Params(const QString& name,
-            bool isWidget = false,
-            QObject *receiver = 0,
-            const char *docml = 0,
-            const char *section = 0,
-            const char *member = 0):
-            mName(name),
-            mIsWidget(isWidget),
-            mReceiver(receiver),
-            mDocml(docml),
-            mSection(section),
-            mMember(member)
-            {
-            // nothing to do 
-            }
-        
-        bool isDuplicate(const Params& params) const
-            {
-            bool isSame(false);
-            
-            if (mName == params.mName &&
-                mReceiver == params.mReceiver &&
-                mDocml == params.mDocml &&
-                mSection == params.mSection &&
-                mMember == params.mMember)
-            {
-                isSame = true;
-            }
-            
-            return isSame;
-            }
-        
-    public:
-        QString mName;
-        bool mIsWidget;
-        QObject *mReceiver;
-        const char *mDocml;
-        const char *mSection;
-        const char *mMember;
-    };
-
 public:
     /**
      * C++ constructor.
@@ -161,19 +68,12 @@ public:
     virtual ~VideoCollectionUiLoader();
     
     /**
-     * Starts to load a specified UI section.
-     * 
-     * @param uiSection, UI section to load.
-     * @param receiver, Receiver of a ready signal.
-     * @param widgetSlot, Slot which is called when a widget is ready.
-     * @param objectSlot, Slot which is called when an object is ready.
-     * @return None.
+     * Adds data to ui loader loading queue.
      */
-    void startLoading(QSet<QString> uiSections,
+    void addData(QList<VideoCollectionUiLoaderParam> params,
         QObject *receiver,
-        const char *widgetSlot,
-        const char *objectSlot);
-
+        const char *slot);
+    
     /**
      * Returns the requested widget casted to correct type
      *
@@ -206,23 +106,26 @@ public:
     /**
      * load
      */
-    QObjectList load( const QString &fileName, bool *ok = 0 );
+    void load(const QString &fileName, bool *ok = 0);
 
     /**
      * load
      */
-    QObjectList load( const QString &fileName, const QString &section , bool *ok = 0 );
-
-signals:
+    void load(const QString &fileName, const QString &section , bool *ok = 0);
+    
+public slots:
     /**
-     * Signals that widget has been loaded asynchonously.
-     * 
-     * @param widget, Widget which was loaded.
-     * @param name, Name of the widget in document.
-     * @return None.
+     * Starts loading ui components belonging to the defined phase.
      */
-    void widgetReady(QGraphicsWidget *widget, const QString &name);
-
+    void loadPhase(int loadPhase);
+    
+private slots:
+    /**
+     * Remove object from list since it has been already deleted.
+     */
+    void removeOrphanFromList(QObject *object);
+    
+signals:
     /**
      * Signals that object has been loaded asynchonously.
      * 
@@ -231,8 +134,9 @@ signals:
      * @return None.
      */
     void objectReady(QObject *object, const QString &name);
+    
+protected:
 
-public:
     /**
      * Loads widget from document.
      * 
@@ -244,28 +148,47 @@ public:
     /**
      * Loads object from document.
      * 
-     * @param name, Widget name.
-     * @return QGraphicsWidget*.
+     * @param name, Object name.
+     * @return QObject*.
      */
     QObject* doFindObject(const QString &name);
     
-private:
     /**
      * Adds a ui section to async loading queue.
      */
-    void addToQueue(Params &params);
+    void addToQueue(VideoCollectionUiLoaderParam &param,
+        QObject *receiver,
+        const char *slot);
     
     /**
-     * Init a specific widget.
+     * Finds an object or widget from docml based on the parameter.
      */
-    void initWidget(QGraphicsWidget *widget,
-        const QString &name);
+    QObject* getObject(const VideoCollectionUiLoaderParam &param);
+    
+    /**
+     * Loads and prepares docml and sections if found from param.
+     */
+    bool prepareDocmlAndSection(const char *docml, const char *section);
     
     /**
      * Init a specific object.
      */
-    void initObject(QObject *object,
-        const QString& name);
+    void initObject(QObject *object, const QString& name);
+    
+    /**
+     * Execute ui loader request.
+     */
+    QObject* executeRequest(const VideoCollectionUiLoaderParam &param);
+    
+    /**
+     * Gets index of the item in queue, if one found.
+     */
+    int indexInQueue(const QString &name);
+    
+    /**
+     * Removes request from queue.
+     */
+    void removeFromQueue(const QString &name);
     
 private:
     /** from QObject */
@@ -283,19 +206,21 @@ private:
     /**
      * Check that set params are valid.
      */
-    bool isValid(const Params &params);
+    bool isValid(const VideoCollectionUiLoaderParam &param);
+    
+    /**
+     * Store object without a parent. 
+     */
+    void storeOrphans(const QObjectList &list);
     
 private:
     /** async queue */
-    QList<Params> mQueue;
+    QList<VideoCollectionUiLoaderParam> mQueue;
     
     /** timer id */
     int mTimerId;
     
-    /** list of loaded widgets */
-    QHash<QString, QGraphicsWidget*> mWidgets;
-
-    /** list of loaded objects */
+    /** list of initialized objects */
     QHash<QString, QObject*> mObjects;
     
     /** menu actions */
@@ -304,14 +229,26 @@ private:
     /** toolbar actions */
     QMap<ActionIds, HbAction*> mToolbarActions;
     
-    /** loaded docml's */
-    QList<QString> mDocmls;
+    /** loaded docmls */
+    QSet<QString> mDocmls;
+    
+    /** loaded sections */
+    QSet<QString> mSections;
     
     /** action group for "sort by" actions */
     QActionGroup* mSortGroup;
     
     /** is service */
     bool mIsService;
+    
+    /** load phases currently active */
+    QSet<int> mPhases;
+    
+    /**
+     * objects without a parent - these needs to be deleted manually unless
+     * a parent is set.
+     */
+    QObjectList mOrphans;
 };
 
 #endif // _VIDEOCOLLECTIONUILOADER_H_

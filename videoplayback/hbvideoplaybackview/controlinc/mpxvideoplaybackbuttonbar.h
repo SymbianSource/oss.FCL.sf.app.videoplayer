@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#9 %
+// Version : %version: da1mmcf#12 %
 
 
 
@@ -43,9 +43,19 @@ enum TMPXButton
     EMPXButtonStretch,
     EMPXButtonZoom,
     EMPXButtonDetails,
+    EMPXButtonAttach,
     EMPXButtonCount    // Should always be the last value
 };
 
+enum TMPXSeekingState
+{
+    EMPXNotSeeking,
+    EMPXFastForwarding,
+    EMPXRewinding
+};
+
+const int KMPXFastForward = 30;
+const int KMPXRewind = -10;
 
 class QMPXVideoPlaybackButtonBar : public HbWidget
 {
@@ -58,22 +68,28 @@ class QMPXVideoPlaybackButtonBar : public HbWidget
         void aspectRatioChanged( int aspectRatio );
         void initialize();
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );
+        void positionChanged( int position );
+        void durationChanged( int duration );
 
     private slots:
         void play();
         void pause();
         void changeAspectRatio();
         void handleButtonPressed();
-        void startFFSeeking();
-        void startRWSeeking();
-        void endSeeking();
+        void ffPressing();
+        void rwPressing();
+        void ffReleased();
+        void rwReleased();
         void openDetailsView();
 
     private:
         QMPXVideoPlaybackControlsController *mController;
-
         QList<HbPushButton*>                 mButtons;
-        bool                                 mInitialized;
+        TMPXSeekingState                     mSeekingState;
+
+        bool mInitialized;
+        int  mPosition;
+        int  mDuration;
 };
 
 #endif /*MPXVIDEOPLAYBACKBUTTONBAR_H_*/

@@ -14,54 +14,46 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#9 %
+# Version : %version: da1mmcf#11 %
 
 
 TEMPLATE = app
 TARGET = testvideoplayerengine
 DEFINES += BUILD_VIDEOPLAYERAPP_DLL
 
-DEPENDPATH += . \
-    inc \
-    src
+DEPENDPATH += inc src stub/src stub/inc
 
-INCLUDEPATH += . \
-              stub/inc \
-              /epoc32/include \
-              /epoc32/include/stdapis \
-              /epoc32/include/stdapis/sys \
-              ../../inc \
+INCLUDEPATH +=stub/inc \
+              $$MW_LAYER_SYSTEMINCLUDE \
               ../../../../inc
 
 CONFIG += qtestlib hb qt
 
-LIBS += -lestor.dll \
-    -lfbscli.dll \
-    -lbitgdi.dll \
-    -lgdi.dll \
-    -lxqserviceutil.dll
+LIBS += -lxqserviceutil.dll
 
 
 # Input
-HEADERS += stub/inc/mpxvideoplaybackwrapper.h \
-           stub/inc/mpxviewpluginqt.h \
-           stub/inc/testviewplugin.h \
-           stub/inc/xqpluginloader.h \
-           stub/inc/xqplugininfo.h \
-           stub/inc/hbinstance.h \
-           inc/testvideoplayerengine.h \
-           stub/inc/videoservices.h \
-           stub/inc/videoserviceurifetch.h \
-           stub/inc/videoserviceplay.h \
-           stub/inc/hbview.h \
+HEADERS += mpxvideoplaybackwrapper.h \
+           mpxviewpluginqt.h \
+           testviewplugin.h \
+           xqpluginloader.h \
+           xqplugininfo.h \
+           hbinstance.h \
+           testvideoplayerengine.h \
+           videoservices.h \
+           videoserviceurifetch.h \
+           videoserviceplay.h \
+           videoserviceview.h \
+           hbview.h \
            ../../../../inc/videoplayerengine.h
 
-SOURCES += stub/src/mpxvideoplaybackwrapper.cpp \
-           stub/src/testviewplugin.cpp \
-           stub/src/xqpluginloader.cpp \
-           stub/src/hbinstance.cpp \
-           src/testvideoplayerengine.cpp \
-           stub/src/videoservices.cpp \
-           stub/src/videoserviceurifetch.cpp \
-           stub/src/videoserviceplay.cpp \
+SOURCES += mpxvideoplaybackwrapper.cpp \
+           testviewplugin.cpp \
+           xqpluginloader.cpp \
+           hbinstance.cpp \
+           testvideoplayerengine.cpp \
+           videoservices.cpp \
+           videoserviceurifetch.cpp \
+           videoserviceplay.cpp \
+           videoserviceview.cpp \
            ../../src/videoplayerengine.cpp

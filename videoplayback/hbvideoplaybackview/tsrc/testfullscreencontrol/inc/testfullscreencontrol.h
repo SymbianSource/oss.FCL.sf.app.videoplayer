@@ -25,7 +25,6 @@
 #include "mpxvideoplaybackcontrol.hrh"
 
 
-class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 class QMPXVideoPlaybackFullScreenControl;
 
@@ -60,8 +59,6 @@ private slots:
         
         void testControlIndex();
         
-        void testVolumeChanged();
-
         void testDurationChanged();
 
         void testPositionChanged();
@@ -79,7 +76,6 @@ signals:
     void commandSignal(int);
     
 private:
-    QMPXVideoPlaybackViewFileDetails*        mFileDetails;
     QMPXVideoPlaybackControlsController*     mControlsController;
     QMPXVideoPlaybackFullScreenControl*      mFullScreenControl;
  

@@ -11,28 +11,36 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QVideoPlayerEngine
+* Description:  Implementation of VideoServicePlay
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: da1mmcf#2 %
 
 
-#include <videoservices.h>
+#include "videoservices.h"
 #include "videoserviceplay.h"
 #include "videoplayerengine.h"
+#include "mpxvideo_debug.h"
 
 
 VideoServicePlay::VideoServicePlay( VideoServices* parent, QVideoPlayerEngine* engine )
 {
+    MPX_DEBUG(_L("VideoServicePlay::VideoServicePlay()")); 
+    
+    Q_UNUSED( engine );    
 	mServiceApp = parent;
 }
 
 VideoServicePlay::~VideoServicePlay()
 {
+    MPX_DEBUG(_L("VideoServicePlay::~VideoServicePlay()")); 
 }
 
 void VideoServicePlay::playMedia( QString filePath )
 {
-   	mServiceApp->setCurrentService(VideoServices::EPlayback);
+    MPX_DEBUG(_L("VideoServicePlay::playMedia()")); 
+    
+    Q_UNUSED( filePath );    
+    mServiceApp->setCurrentService( VideoServices::EPlayback );
 }

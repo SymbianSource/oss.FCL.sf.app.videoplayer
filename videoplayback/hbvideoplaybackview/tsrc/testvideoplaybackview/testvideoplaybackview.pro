@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 6 %
+# Version : %version: 7 %
 
 TEMPLATE = app
 TARGET = testvideoplaybackview
@@ -31,24 +31,9 @@ INCLUDEPATH += ../../inc \
                ../../controlinc \
                $$MW_LAYER_SYSTEMINCLUDE 
 
-LIBS += -lmpxplaybackutility.dll \
-        -lmpxcommon.dll \
-        -lmpxviewplugin.dll \
-        -lcone.dll \
-        -lws32.dll \
-        -lestor.dll \
-        -leuser.dll \
+LIBS += -lcone.dll \
         -lcommonengine.dll \
-        -lavkon.dll \
-        -lefsrv.dll \
-        -lflogger.dll \
-        -lsysutil.dll \
-        -lmpxcollectionutility.dll \
-        -lremconcoreapi.dll \
-        -lremconInterfacebase.dll \
-        -lhal.dll \
-        -lcentralrepository.dll
-        
+        -lflogger.dll
         
 # Input
 HEADERS += stub/inc/mpxvideoviewwrapper.h \					 
@@ -56,12 +41,9 @@ HEADERS += stub/inc/mpxvideoviewwrapper.h \
            ../../../inc/hbvideobaseplaybackview.h \
            ../../../inc/hbvideoplaybackview.h \
            ../../inc/mpxvideoplaybackviewfiledetails.h
-           
-           
-           
-               
+
 SOURCES += stub/src/mpxvideoviewwrapper.cpp \					 				 
-					 src/testvideoplaybackview.cpp \
-					 ../../viewsrc/hbvideobaseplaybackview.cpp \
-					 ../../viewsrc/hbvideoplaybackview.cpp \
-			     ../../viewsrc/mpxvideoplaybackviewfiledetails.cpp
+            src/testvideoplaybackview.cpp \
+            ../../viewsrc/hbvideobaseplaybackview.cpp \
+            ../../viewsrc/hbvideoplaybackview.cpp \
+            ../../viewsrc/mpxvideoplaybackviewfiledetails.cpp

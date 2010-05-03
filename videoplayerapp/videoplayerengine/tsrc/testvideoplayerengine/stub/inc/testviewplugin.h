@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: %
+
 #include "stub/inc/mpxviewpluginqt.h"
 
 class TestViewPlugin : public MpxViewPlugin
@@ -90,22 +92,6 @@ public slots:
      * framework (eg. to switch to previous view).
      */ 
     virtual void back();
-
-signals:
-
-    /**
-     * Command is the only way to notify from plugin to application
-     * about action needed to be executed.
-     *
-     * @param aCommand  enumeration of command type. 
-     * Currently supported are: ViewBack, CloseApp, GoToNowPlaying, GoToCollectionView.
-     * NOTE: It should be specified how to determine between broadly supported operations 
-     * (back, close etc.) and application/plugin specific (go to collection, go to now playing etc.)
-     *
-     * There is also one major issue here, that there is no guaranted order of command delivery,
-     * so there is second option to use common observer pattern. Should be discussed.
-     */ 
-    void command(int aCommand);    
     
 private:
 

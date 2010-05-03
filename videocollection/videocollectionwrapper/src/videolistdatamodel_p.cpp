@@ -15,23 +15,27 @@
 * 
 */
 
-// INCLUDE FILES
+// Version : %version: %
 
+// INCLUDE FILES
+#include <hbglobal.h>
 #include <mpxmediageneraldefs.h>
+#include <mpxmediavideodefs.h>
 #include <thumbnailmanager_qt.h>
 #include <mpxmediaarray.h>
 #include <mpxmedia.h>
 #include <qvariant.h>
+#include <hbextendedlocale.h>
 
 #include "videolistdatamodel.h"
 #include "videocollectionclient.h"
 #include "videodeleteworker.h"
-
 #include "videolistdatamodel_p.h"
 #include "videothumbnaildata.h"
 #include "vcxmyvideosdefs.h"
 #include "videocollectionutils.h"
 #include "videocollectioncommon.h"
+#include "videocollectiontrace.h"
 
 /**
  * global qHash function required fo creating hash values for TMPXItemId -keys
@@ -39,7 +43,6 @@
 inline uint qHash(TMPXItemId key) 
 { 
     QPair<uint, uint> keyPair(key.iId1, key.iId2); 
-
     return qHash(keyPair);
 }
 
@@ -56,6 +59,7 @@ mVideoThumbnailData(0),
 mInitialized(false),
 mCurrentAlbum(TMPXItemId::InvalidId())
 {
+	FUNC_LOG;
 }
 	
 // -----------------------------------------------------------------------------
@@ -64,6 +68,7 @@ mCurrentAlbum(TMPXItemId::InvalidId())
 //
 VideoListDataModelPrivate::~VideoListDataModelPrivate()
 {
+	FUNC_LOG;
     QHash<TMPXItemId, QSet<TMPXItemId> >::iterator iter = mAlbumData.begin();
     while(iter != mAlbumData.end())
     {
@@ -80,6 +85,7 @@ VideoListDataModelPrivate::~VideoListDataModelPrivate()
 //
 int VideoListDataModelPrivate::initialize()
 {
+	FUNC_LOG;
     if(mInitialized)
     {
         return 0;
@@ -180,9 +186,18 @@ quint32 VideoListDataModelPrivate::getVideoAgeProfileFromIndex( int index ) cons
 //
 quint32 VideoListDataModelPrivate::getVideodurationFromIndex( int index ) const
 {
+    CMPXMedia *media = mMediaData.fromIndex(index);
+    return getVideoDuration(media);
+}
+
+// -----------------------------------------------------------------------------
+// getVideodurationFromIndex
+// -----------------------------------------------------------------------------
+//
+quint32 VideoListDataModelPrivate::getVideoDuration(CMPXMedia* media) const
+{
     quint32 returnDuration(0);
     float duration(0);
-    CMPXMedia *media = mMediaData.fromIndex(index);
     VideoCollectionUtils::instance().mediaValue<float>(media, KVcxMediaMyVideosDuration, duration );
     returnDuration = static_cast<quint32>(duration);
     return returnDuration;
@@ -194,9 +209,18 @@ quint32 VideoListDataModelPrivate::getVideodurationFromIndex( int index ) const
 //
 QDateTime VideoListDataModelPrivate::getVideoDateFromIndex( int index ) const
 {
+    return getVideoDate(mMediaData.fromIndex(index));
+}
+
+// -----------------------------------------------------------------------------
+// getVideoDate
+// -----------------------------------------------------------------------------
+//
+QDateTime VideoListDataModelPrivate::getVideoDate(CMPXMedia* media) const
+{
     QDateTime date;
     quint64 dateTimeValue;
-    if(!VideoCollectionUtils::instance().mediaValue<quint64>(mMediaData.fromIndex(index), KMPXMediaGeneralDate, dateTimeValue)) 
+    if(!VideoCollectionUtils::instance().mediaValue<quint64>(media, KMPXMediaGeneralDate, dateTimeValue)) 
     {
         return date;
     }
@@ -204,104 +228,6 @@ QDateTime VideoListDataModelPrivate::getVideoDateFromIndex( int index ) const
     date = QDateTime(QDate(temp.Year(), temp.Month()+1, temp.Day()+1), 
                        QTime(temp.Hour(), temp.Minute(), temp.Second(), temp.MicroSecond()));
     return date;
-}
-
-// -----------------------------------------------------------------------------
-// getMetaDataFromIndex
-// -----------------------------------------------------------------------------
-//
-QMap<QString, QVariant> VideoListDataModelPrivate::getMetaDataFromIndex(int index) const
-{
-    using namespace VideoCollectionCommon;
-    QMap<QString, QVariant> map;
-    CMPXMedia *media = mMediaData.fromIndex(index);
-    if(!media) {
-        return map;
-    }
-
-    // MetaKeyDate
-    QDateTime date = getVideoDateFromIndex(index);
-    if(date.isValid()) {
-        map[MetaKeyDate] = date.date();
-    }
-    
-    //TODO: Localisation
-    // MetaKeyDurationString
-    quint32 dur = getVideodurationFromIndex(index);
-    QString duration = VideoCollectionUtils::instance().prepareLengthString(dur);
-    if(!duration.isNull() && !duration.isEmpty()) {
-        map[MetaKeyDurationString] = duration;
-    }
-    
-    //TODO: Localisation
-    // MetaKeySizeString
-    quint32 s = getVideoSizeFromIndex(index);
-    QString size = VideoCollectionUtils::instance().prepareSizeString(s);
-    if(!size.isNull() && !size.isEmpty()) {
-        map[MetaKeySizeString] = size; 
-    }
-    
-    // MetaKeyStarRating
-    quint8 rating = 0;
-    if(VideoCollectionUtils::instance().mediaValue<quint8>(media, KVcxMediaMyVideosRating, rating)) 
-    {
-        map[MetaKeyStarRating] = rating;
-    }
-    
-    // MetaKeyDRMInfo
-    
-    // MetaKeyServiceURL
-    
-    // MetaKeyDescription
-    QString desc;
-    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralComment, desc)) {
-        map[MetaKeyDescription] = desc;
-    }
-    
-    // MetaKeyModifiedDate
-    quint64 dateTimeValue;
-    if(VideoCollectionUtils::instance().mediaValue<quint64>(media, KVcxMediaMyVideosModifiedDate, dateTimeValue)) {
-        TDateTime temp = TTime( dateTimeValue ).DateTime();
-        QDateTime date = QDateTime(QDate(temp.Year(), temp.Month()+1, temp.Day()), 
-                           QTime(temp.Hour(), temp.Minute(), temp.Second(), temp.MicroSecond()));
-        map[MetaKeyModifiedDate] = date.date();
-    }
-
-    // MetaKeyShotLocation
-    
-    // MetaKeyAuthor
-    QString author;
-    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KVcxMediaMyVideosAuthor, author)) {
-        map[MetaKeyAuthor] = author;
-    }
-    
-    // MetaKeyCopyright
-    QString copyright;
-    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralCopyright, copyright)) {
-        map[MetaKeyCopyright] = copyright;
-    }
-    
-    // MetaKeyAudioType
-    
-    // MetaKeyLanguageString
-    QString language;
-    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KVcxMediaMyVideosAudioLanguage, language)) {
-        map[MetaKeyLanguageString] = language;
-    }
-    
-    // MetaKeyKeywords
-    
-    // MetaKeyVideoResolutionString
-    
-    // MetaKeyBitRate
-    
-    // MetaKeyFormat
-    QString format;
-    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralMimeType, format)) {
-        map[MetaKeyFormat] = format;
-    }
-    
-    return map;
 }
 
 // -----------------------------------------------------------------------------
@@ -319,6 +245,7 @@ TMPXItemId VideoListDataModelPrivate::markVideoRemoved(const QModelIndex &itemIn
 //
 void VideoListDataModelPrivate::restoreRemoved(QList<TMPXItemId> *idList)
 {
+	FUNC_LOG;
     int startIndex = mMediaData.count();
     int restored = mMediaData.restoreRemovedItems(idList);
     if(restored > 0)
@@ -383,6 +310,7 @@ bool VideoListDataModelPrivate::belongsToAlbum(const TMPXItemId &itemId, TMPXIte
 //
 void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
 {
+	FUNC_LOG;
     mCurrentAlbum = albumId;
 }
 
@@ -393,6 +321,7 @@ void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
 int VideoListDataModelPrivate::removeItemsFromAlbum(TMPXItemId &albumId, 
                                         const QList<TMPXItemId> &items)
 {
+	FUNC_LOG;
     QHash<TMPXItemId, QSet<TMPXItemId> >::iterator iter = mAlbumData.find(albumId);
     if(iter == mAlbumData.end())
     {
@@ -431,6 +360,9 @@ void VideoListDataModelPrivate::appendDataToContainerL(
     CMPXMediaArray *videoArray,
     unsigned int startIndex)
 {
+	FUNC_LOG;
+	INFO_2("VideoListDataModelPrivate::appendDataToContainerL() array count: %d, start index: %d", videoArray->Count(), startIndex);
+	
     int count = videoArray->Count();
     if (!videoArray ||
         startIndex >= count)
@@ -451,7 +383,7 @@ void VideoListDataModelPrivate::appendDataToContainerL(
             mMediaData.append(newMedia);
             newMedia = 0;
         }
-    }    
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -491,6 +423,7 @@ bool VideoListDataModelPrivate::isValid(const CMPXMedia &media,
 void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
     CMPXMediaArray *videoArray)
 {
+	FUNC_LOG;
     if (!videoArray || albumId == TMPXItemId::InvalidId())
     {
         return;
@@ -503,7 +436,6 @@ void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
     int videoCount = videoArray->Count();
     CMPXMedia *media = 0;
     TMPXItemId id = TMPXItemId::InvalidId();
-    QModelIndex index;
     for (int i = videoCount - 1; i >= 0; i--)
     {
         media = videoArray->AtL(i);
@@ -530,8 +462,6 @@ void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
 //
 void VideoListDataModelPrivate::thumbnailsFetchedSlot(QList<TMPXItemId> mediaIds)
 {
-    // TODO: find way to optimize dataChanged events 
-    
     TMPXItemId id;
     QModelIndex rowIndex;
     
@@ -552,11 +482,12 @@ void VideoListDataModelPrivate::thumbnailsFetchedSlot(QList<TMPXItemId> mediaIds
 //
 void VideoListDataModelPrivate::newVideoListSlot( CMPXMediaArray *newVideoList )
 {
+	FUNC_LOG;
     if( !newVideoList )
     {
         return;
     }
-
+    
     int startIndex = mMediaData.count();
 
     TRAP_IGNORE(appendDataToContainerL(newVideoList));
@@ -577,6 +508,7 @@ void VideoListDataModelPrivate::newVideoListSlot( CMPXMediaArray *newVideoList )
 //
 void VideoListDataModelPrivate::appendVideoListSlot(CMPXMediaArray* videoList)
 {
+	FUNC_LOG;
     if(!videoList)
     {
         return;
@@ -606,6 +538,7 @@ void VideoListDataModelPrivate::appendVideoListSlot(CMPXMediaArray* videoList)
 //
 void VideoListDataModelPrivate::newVideoAvailableSlot(CMPXMedia *newVideo)
 {
+	FUNC_LOG;
     if(!newVideo ) 
     {
         return;        
@@ -641,6 +574,7 @@ void VideoListDataModelPrivate::newVideoAvailableSlot(CMPXMedia *newVideo)
 //
 void VideoListDataModelPrivate::itemDeletedSlot(TMPXItemId itemId)
 {
+	FUNC_LOG;
 	if(itemId == TMPXItemId::InvalidId())
     {
         return;
@@ -662,6 +596,7 @@ void VideoListDataModelPrivate::itemDeletedSlot(TMPXItemId itemId)
 //
 void VideoListDataModelPrivate::albumRemoved(TMPXItemId albumId)
 {
+	FUNC_LOG;
     if (albumId == TMPXItemId::InvalidId() || albumId.iId2 != KVcxMvcMediaTypeAlbum)
     {
         return;
@@ -705,6 +640,7 @@ void VideoListDataModelPrivate::albumRemoved(TMPXItemId albumId)
 //
 void VideoListDataModelPrivate::videoDeleted(TMPXItemId videoId)
 {
+	FUNC_LOG;
     if(videoId == TMPXItemId::InvalidId())
     {
         return;
@@ -726,7 +662,7 @@ void VideoListDataModelPrivate::videoDeleted(TMPXItemId videoId)
         if(index >= 0)
         {
             q_ptr->beginRemoveRows(QModelIndex(), index, index);
-            mMediaData.remove(videoId);            
+            mMediaData.remove(videoId);
             q_ptr->endRemoveRows();
             emit q_ptr->modelChanged();
         }
@@ -739,6 +675,7 @@ void VideoListDataModelPrivate::videoDeleted(TMPXItemId videoId)
 //
 void VideoListDataModelPrivate::videoDeleteCompletedSlot(int overallCount, QList<TMPXItemId> *failedMediaIds)
 {    
+	FUNC_LOG;
     Q_UNUSED(overallCount);
     if(!failedMediaIds)
     {
@@ -763,7 +700,7 @@ void VideoListDataModelPrivate::videoDeleteCompletedSlot(int overallCount, QList
             data = failedMediaIds->count();
         }  
         restoreRemoved(failedMediaIds);
-    }   
+    }
     q_ptr->reportAsyncStatus(status, data);
     emit q_ptr->modelChanged();
 }
@@ -774,6 +711,7 @@ void VideoListDataModelPrivate::videoDeleteCompletedSlot(int overallCount, QList
 //
 void VideoListDataModelPrivate::albumRemoveFailureSlot(QList<TMPXItemId> *failedMediaIds)
 {
+	FUNC_LOG;
     if(!failedMediaIds)
     {
         return;
@@ -803,12 +741,124 @@ void VideoListDataModelPrivate::albumRemoveFailureSlot(QList<TMPXItemId> *failed
 // VideoDetailsCompleted 
 // -----------------------------------------------------------------------------
 //
-void VideoListDataModelPrivate::videoDetailsCompletedSlot(TMPXItemId videoId)
+void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
 {
-    if(videoId != TMPXItemId::InvalidId())
+	FUNC_LOG;
+    if(!media)
     {
-        emit videoDetailsReady(videoId);
+        return;
     }
+    
+    using namespace VideoCollectionCommon;
+    QMap<QString, QVariant> map;
+
+    HbExtendedLocale locale = HbExtendedLocale::system();
+    
+    // MetaKeyDate
+    QDateTime date = getVideoDate(media);
+    if(date.isValid()) {
+        map[MetaKeyDate] = locale.format( date.date(), r_qtn_date_usual );
+    }
+    
+    //TODO: Localisation
+    // MetaKeyDurationString
+    quint32 dur = getVideoDuration(media);
+    QString duration = VideoCollectionUtils::instance().prepareLengthString(dur);
+    if(!duration.isNull() && !duration.isEmpty()) {
+        map[MetaKeyDurationString] = duration;
+    }
+    
+    //TODO: Localisation
+    // MetaKeySizeString
+    quint32 s;
+    VideoCollectionUtils::instance().mediaValue<quint32>(media, KMPXMediaGeneralSize, s );
+    QString size = VideoCollectionUtils::instance().prepareSizeString(s);
+    if(!size.isNull() && !size.isEmpty()) {
+        map[MetaKeySizeString] = size; 
+    }
+    
+    // MetaKeyStarRating
+    quint8 rating = 0;
+    if(VideoCollectionUtils::instance().mediaValue<quint8>(media, KVcxMediaMyVideosRating, rating)) 
+    {
+        map[MetaKeyStarRating] = rating;
+    }
+    
+    // MetaKeyDRMInfo
+    
+    // MetaKeyServiceURL
+    
+    // MetaKeyDescription
+    QString desc;
+    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralComment, desc)) {
+        map[MetaKeyDescription] = desc;
+    }
+    
+    // MetaKeyModifiedDate
+    quint64 dateTimeValue;
+    if(VideoCollectionUtils::instance().mediaValue<quint64>(media, KVcxMediaMyVideosModifiedDate, dateTimeValue)) {
+        TDateTime temp = TTime( dateTimeValue ).DateTime();
+        QDateTime date = QDateTime(QDate(temp.Year(), temp.Month()+1, temp.Day()), 
+                           QTime(temp.Hour(), temp.Minute(), temp.Second(), temp.MicroSecond()));
+        map[MetaKeyModifiedDate] = locale.format( date.date(), r_qtn_date_usual );
+    }
+
+    // MetaKeyShotLocation
+    
+    // MetaKeyAuthor
+    QString author;
+    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KVcxMediaMyVideosAuthor, author)) {
+        map[MetaKeyAuthor] = author;
+    }
+    
+    // MetaKeyCopyright
+    QString copyright;
+    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralCopyright, copyright)) {
+        map[MetaKeyCopyright] = copyright;
+    }
+    
+    // MetaKeyAudioType
+    
+    // MetaKeyLanguageString
+    QString language;
+    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KVcxMediaMyVideosAudioLanguage, language)) {
+        map[MetaKeyLanguageString] = language;
+    }
+    
+    // MetaKeyKeywords
+    
+    // MetaKeyVideoResolutionString
+    quint16 width;
+    quint16 heigth;
+    if(VideoCollectionUtils::instance().mediaValue<quint16>(media, KMPXMediaVideoWidth, width) &&
+       VideoCollectionUtils::instance().mediaValue<quint16>(media, KMPXMediaVideoHeight, heigth)) 
+    {
+        map[MetaKeyVideoResolutionString] = hbTrId("txt_videos_list_l1l2").arg(width).arg(heigth);
+    }
+    
+    // MetaKeyBitRate
+    qint16 bitrate;
+    if(VideoCollectionUtils::instance().mediaValue<qint16>(media, KMPXMediaVideoBitRate, bitrate)) 
+    {
+        const char* loc = "txt_videos_list_l1_kbps";
+        
+        if(bitrate > 999)
+        {
+            loc = "txt_videos_list_l1_mbps";
+            bitrate = (double)bitrate / (double)1000 + 0.5;
+        }
+        
+        map[MetaKeyBitRate] = hbTrId(loc, bitrate);
+    }
+    
+    // MetaKeyFormat
+    QString format;
+    if(VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralMimeType, format)) {
+        map[MetaKeyFormat] = format;
+    }
+    
+    QVariant variant = QVariant(map);
+    emit videoDetailsReady(variant);
 }
 
 // -----------------------------------------------------------------------------
@@ -818,8 +868,28 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(TMPXItemId videoId)
 void VideoListDataModelPrivate::albumListAvailableSlot(TMPXItemId albumId,
     CMPXMediaArray *albumItems)
 {
+	FUNC_LOG;
     // currently only one album is kept in memory
     TRAP_IGNORE(albumDataChangedL(albumId, albumItems));
+}
+
+// -----------------------------------------------------------------------------
+// itemModifiedSlot 
+// -----------------------------------------------------------------------------
+//
+void VideoListDataModelPrivate::itemModifiedSlot(const TMPXItemId &itemId)
+{
+	FUNC_LOG;
+    int index = mMediaData.indexOfId(itemId);
+    if(index != -1)
+    {
+        QModelIndex rowIndex = q_ptr->index(index, 0);
+        if(rowIndex.isValid())
+        {
+            emit dataChanged(rowIndex, rowIndex);
+            emit q_ptr->itemModified(itemId);
+        }
+    }
 }
 
 // End of file

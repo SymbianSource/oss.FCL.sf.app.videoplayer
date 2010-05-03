@@ -14,7 +14,7 @@
 # Description: Project file for building testfullscreencontrol
 #
 #
-# Version : %version: 2 %
+# Version : %version: 3 %
 
 
 TEMPLATE = app
@@ -29,8 +29,7 @@ INCLUDEPATH += stub/inc \
                ../inc \
                ../../inc \   
                ../../../inc \            
-               ../../../../inc \  
-               /epoc32/include/platform/mw \                                        
+               ../../../../inc \                                 
 
 DEPENDPATH += stub/inc stub/src inc src 
         
@@ -51,5 +50,3 @@ SOURCES += ../../../controlsrc/mpxvideoplaybackfullscreencontrol.cpp \
            mpxvideoplaybackcontrolbar.cpp \
            mpxvideoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackdetailsplaybackwindow.cpp                    
-           				 
-           

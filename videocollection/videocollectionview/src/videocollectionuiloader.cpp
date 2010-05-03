@@ -15,6 +15,9 @@
 *
 */
 
+// Version : %version: 20 %
+
+// INCLUDE FILES
 #include <qgraphicswidget.h>
 #include <qaction.h>
 #include <qactiongroup.h>
@@ -32,17 +35,19 @@
 #include "videosortfilterproxymodel.h"
 #include "videocollectionviewutils.h"
 #include "videoservices.h"
+#include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
 // VideoCollectionUiLoader
 // ---------------------------------------------------------------------------
 //
-VideoCollectionUiLoader::VideoCollectionUiLoader():
-    HbDocumentLoader(),
-    mTimerId(0),
-    mSortGroup(0),
-    mIsService(false)
+VideoCollectionUiLoader::VideoCollectionUiLoader()
+    : HbDocumentLoader()
+    , mTimerId( 0 )
+    , mSortGroup( 0 )
+    , mIsService( false )
 {
+	FUNC_LOG;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,247 +56,132 @@ VideoCollectionUiLoader::VideoCollectionUiLoader():
 //
 VideoCollectionUiLoader::~VideoCollectionUiLoader()
 {
+	FUNC_LOG;
+
+    // delete objects without a parent
+	while (!mOrphans.isEmpty())
+	{
+		delete mOrphans.takeFirst();
+	}
+
+    // kill timer if running
     if (mTimerId)
     {
         killTimer(mTimerId);
         mTimerId = 0;
     }
 
-	// selection dialog needs to be deleted manually
-    QGraphicsWidget *widget =
-        HbDocumentLoader::findWidget(DOCML_NAME_DIALOG);
-
-    VideoListSelectionDialog *dialog =
-        qobject_cast<VideoListSelectionDialog*>(widget);
-    delete dialog;
-    
     // clear queue and hash tables
     mQueue.clear();
     mDocmls.clear();
-    mWidgets.clear();
+    mSections.clear();
     mObjects.clear();
+    mPhases.clear();
 }
 
 // ---------------------------------------------------------------------------
 // load
 // ---------------------------------------------------------------------------
 //
-QObjectList VideoCollectionUiLoader::load( const QString &fileName, bool *ok )
+void VideoCollectionUiLoader::load(const QString &fileName, bool *ok)
 {
-	QObjectList list;
+	FUNC_LOG;
 	if (!mDocmls.contains(fileName))
 	{
-		mDocmls.append(fileName);
-		list = HbDocumentLoader::load(fileName, ok);
-		//TODO: save returned and delete on destructor
+		QObjectList list = HbDocumentLoader::load(fileName, ok);
+		if (ok && *ok)
+		{
+	        mDocmls.insert(fileName);
+		}
+		
+		// add objects without a parent to orphan list
+		storeOrphans(list);
 	}
-	return list;
+	else
+	{
+	    *ok = true;
+	}
 }
 
 // ---------------------------------------------------------------------------
 // load
 // ---------------------------------------------------------------------------
 //
-QObjectList VideoCollectionUiLoader::load( const QString &fileName, const QString &section , bool *ok )
+void VideoCollectionUiLoader::load(const QString &fileName,
+    const QString &section,
+    bool *ok)
 {
-	return HbDocumentLoader::load(fileName, section, ok);
-	//TODO: save returned and delete on destructor
+	FUNC_LOG;
+    if (!mSections.contains(section))
+    {
+        QObjectList list = HbDocumentLoader::load(fileName, section, ok);
+        if (ok && *ok)
+        {
+            mSections.insert(section);
+        }
+
+        // add objects without a parent to orphan list
+        storeOrphans(list);
+    }
+    else
+    {
+        *ok = true;
+    }
 }
 
 // ---------------------------------------------------------------------------
-// startLoading
+// addData
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
+void VideoCollectionUiLoader::addData(
+    QList<VideoCollectionUiLoaderParam> params,
     QObject *receiver,
-    const char *widgetSlot,
-    const char *objectSlot)
+    const char *slot)
 {
-    if (uiSections.contains(DOCML_NAME_VC_HEADINGBANNER))
+	FUNC_LOG;
+    // go through all parameters and add then in to the queue
+    foreach (VideoCollectionUiLoaderParam param, params)
     {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_VC_HEADINGBANNER,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            widgetSlot);
-        addToQueue(params);
+        addToQueue(param, receiver, slot);
     }
-    if (uiSections.contains(DOCML_NAME_VC_VIDEOLISTWIDGET))
+}
+
+// ---------------------------------------------------------------------------
+// loadPhase
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::loadPhase(int loadPhase)
+{
+	FUNC_LOG;
+    if (!mPhases.contains(loadPhase))
     {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_VC_VIDEOLISTWIDGET,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            widgetSlot);
-        addToQueue(params);
+        mPhases.insert(loadPhase);
+        if (!mTimerId)
+        {
+            runNext();
+        }
     }
-    if (uiSections.contains(DOCML_NAME_OPTIONS_MENU))
+}
+
+// ---------------------------------------------------------------------------
+// removeOrphanFromList
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::removeOrphanFromList(QObject *object)
+{
+	FUNC_LOG;
+    // remove from orphan list
+    if (mOrphans.contains(object))
     {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_OPTIONS_MENU,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            widgetSlot);
-        addToQueue(params);
+        mOrphans.removeOne(object);
     }
-    if (uiSections.contains(DOCML_NAME_ADD_TO_COLLECTION))
+    
+    // remove from initialized objects list
+    const QString &name = mObjects.key(object);
+    if (!name.isEmpty())
     {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_ADD_TO_COLLECTION,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_CREATE_COLLECTION))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_CREATE_COLLECTION,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_DELETE_MULTIPLE))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_DELETE_MULTIPLE,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_VC_VIDEOHINTWIDGET))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_VC_VIDEOHINTWIDGET,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_HINT_BUTTON))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_HINT_BUTTON,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_NO_VIDEOS_LABEL))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_NO_VIDEOS_LABEL,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_BY_DATE))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_BY_DATE,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_BY_NAME))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_BY_NAME,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-			0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-			0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_BY_SIZE))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_BY_SIZE,
-            false, // is object
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            objectSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_SORT_MENU))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_SORT_MENU,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            0,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_VC_COLLECTIONWIDGET))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_VC_COLLECTIONWIDGET,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET))
-    {
-        VideoCollectionUiLoader::Params params(
-            DOCML_NAME_VC_COLLECTIONCONTENTWIDGET,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOCOLLECTIONVIEW_FILE,
-            DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
-            widgetSlot);
-        addToQueue(params);
-    }
-    if (uiSections.contains(DOCML_NAME_DIALOG))
-    {
-        VideoCollectionUiLoader::Params params(DOCML_NAME_DIALOG,
-            true, // is widget
-            receiver,
-            DOCML_VIDEOSELECTIONDIALOG_FILE,
-            0,
-            widgetSlot);
-        addToQueue(params);
+        // found from list, remove
+        mObjects.remove(name);
     }
 }
 
@@ -301,6 +191,7 @@ void VideoCollectionUiLoader::startLoading(QSet<QString> uiSections,
 //
 void VideoCollectionUiLoader::setIsService(bool isService)
 {
+	FUNC_LOG;
     mIsService = isService;
 }
 
@@ -310,82 +201,36 @@ void VideoCollectionUiLoader::setIsService(bool isService)
 //
 QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
 {
+	FUNC_LOG;
     QGraphicsWidget *widget = 0;
     
     // 1. check from hash
-    if (mWidgets.contains(name))
+    if (mObjects.contains(name))
     {
-        widget = mWidgets.value(name);
+        widget = qobject_cast<QGraphicsWidget*>(mObjects.value(name));
     }
-    
-    // 2. load from document
+
+    // 2. load from document and initialize
     else
     {
-        widget = HbDocumentLoader::findWidget(name);
-        if (!widget)
+        // find object from queue
+        int index = indexInQueue(name);
+        if (index != -1)
         {
-            // check if the widget is being loaded and remove it from queue
-            int count = mQueue.count();
-            for (int i = 0; i < count; i++)
-            {
-                const Params& params = mQueue.at(i);
-                if (params.mName.compare(name) == 0)
-                {
-					bool ok(true);
-					
-					if(!mDocmls.contains(params.mDocml))
-					{
-						load(params.mDocml, &ok);
-
-						if (ok)
-						{
-							mDocmls.append(params.mDocml);
-						}
-					}
-					if ((params.mSection != 0) && ok)
-					{
-						load(params.mDocml, params.mSection, &ok);
-					}
-					if(ok)
-					{
-						widget = HbDocumentLoader::findWidget(params.mName);
-					}
-                    break;
-                }
-            }            
-        }
-        if (widget)
-        {
-            // initialize widget
-            initWidget(widget, name);
+            // object found from queue, load and initialize object 
+            const VideoCollectionUiLoaderParam &param = mQueue.at(index);
+            widget = qobject_cast<QGraphicsWidget*>(executeRequest(param));
             
-            // add it to the hash
-            mWidgets.insert(name, widget);
-
-            // check if the widget is being loaded and remove it from queue
-            int count = mQueue.count();
-            for (int i = 0; i < count; i++)
-            {
-                const Params& params = mQueue.at(i);
-                if (params.mName.compare(name) == 0)
-                {
-                    if (connect(
-                        this, SIGNAL(widgetReady(QGraphicsWidget*, const QString&)),
-                        params.mReceiver, params.mMember))
-                    {
-                        emit widgetReady(widget, params.mName);
-                        disconnect(
-                            this, SIGNAL(widgetReady(QGraphicsWidget*, const QString&)),
-                            params.mReceiver, params.mMember);
-                    }
-                    mQueue.removeAt(i);
-                    runNext(); //removes timer if queue is empty
-                    break;
-                }
-            }            
+            // object in loading queue, remove it
+            removeFromQueue(name);
+        }
+        else
+        {
+            // assuming that docml and section has already been loaded
+            widget = HbDocumentLoader::findWidget(name);
         }
     }
-    
+
     return widget;
 }
 
@@ -395,6 +240,7 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
 //
 QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
 {
+	FUNC_LOG;
     QObject *object = 0;
     
     // 1. check from hash
@@ -402,75 +248,28 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
     {
         object = mObjects.value(name);
     }
-    
-    // 2. load from document and cancel async loading
+
+    // 2. load from document and initialize
     else
     {
-        object = HbDocumentLoader::findObject(name);
-        if (!object)
+        // find object from queue
+        int index = indexInQueue(name);
+        if (index != -1)
         {
-            // check if the object is being loaded and remove it from queue
-            int count = mQueue.count();
-            for (int i = 0; i < count; i++)
-            {
-                const Params& params = mQueue.at(i);
-                if (params.mName.compare(name) == 0)
-                {
-					bool ok(true);
-					
-					if(!mDocmls.contains(params.mDocml))
-					{
-						load(params.mDocml, &ok);
-
-						if (ok)
-						{
-							mDocmls.append(params.mDocml);
-						}
-					}
-					if ((params.mSection != 0) && ok)
-					{
-						load(params.mDocml, params.mSection, &ok);
-					}
-					if(ok)
-					{
-						object = HbDocumentLoader::findObject(params.mName);
-					}
-                    break;
-                }
-            }            
-        }
-        if (object)
-        {
-            // initialize widget
-            initObject(object, name);
+            // object found from queue, load and initialize object 
+            const VideoCollectionUiLoaderParam &param = mQueue.at(index);
+            object = executeRequest(param);
             
-            // add it to the hash
-            mObjects.insert(name, object);
-
-            // check if the object is being loaded and remove it from queue
-            int count = mQueue.count();
-            for (int i = 0; i < count; i++)
-            {
-                const Params& params = mQueue.at(i);
-                if (params.mName.compare(name) == 0)
-                {
-                    if (connect(
-                        this, SIGNAL(objectReady(QObject*, const QString&)),
-                        params.mReceiver, params.mMember))
-                    {
-                        emit objectReady(object, params.mName);
-                        disconnect(
-                            this, SIGNAL(objectReady(QObject*, const QString&)),
-                            params.mReceiver, params.mMember);
-                    }
-                    mQueue.removeAt(i);
-                    runNext(); //removes timer if queue is empty
-                    break;
-                }
-            }            
+            // object in loading queue, remove it
+            removeFromQueue(name);
+        }
+        else
+        {
+            // assuming that docml and section has already been loaded
+            object = HbDocumentLoader::findObject(name);
         }
     }
-    
+
     return object;
 }
 
@@ -478,39 +277,105 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
 // addToQueue
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionUiLoader::addToQueue(Params &params)
+void VideoCollectionUiLoader::addToQueue(VideoCollectionUiLoaderParam &param,
+    QObject *receiver,
+    const char *slot)
 {
-    if (isValid(params))
+	FUNC_LOG;
+
+	INFOQSTR_1("VideoCollectionUiLoader::addToQueue() name: %S", param.mName);
+	
+    // set receiver if not already set
+    if (!param.mReceiver)
+    {
+        param.mReceiver = receiver;
+    }
+    
+    // set slot if not already set
+    if (!param.mMember)
+    {
+        param.mMember = slot;        
+    }
+    
+    // check validity and hit it
+    if (isValid(param))
     {
         // add the params in async queue
-        mQueue.append(params);
-        runNext();
+        mQueue.append(param);
     }
 }
 
 // ---------------------------------------------------------------------------
-// initWidget
+// getObject
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
+QObject* VideoCollectionUiLoader::getObject(
+    const VideoCollectionUiLoaderParam &param)
+{
+	FUNC_LOG;
+    QObject *object = 0;
+    
+    if (param.mIsWidget)
+    {
+        object = HbDocumentLoader::findWidget(param.mName);
+    }
+    else
+    {
+        object = HbDocumentLoader::findObject(param.mName);
+    }
+    
+    return object;
+}
+
+// ---------------------------------------------------------------------------
+// prepareDocmlAndSection
+// ---------------------------------------------------------------------------
+//
+bool VideoCollectionUiLoader::prepareDocmlAndSection(const char *docml,
+    const char *section)
+{
+	FUNC_LOG;
+    bool ok = true;
+
+    // prepare docml
+    if (docml && !mDocmls.contains(docml))
+    {
+        load(docml, &ok);
+    }
+        
+    // prepare section
+    if (ok && section && !mSections.contains(section))
+    {
+        load(docml, section, &ok);
+    }
+    
+    return ok;
+}
+
+// ---------------------------------------------------------------------------
+// initObject
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::initObject(QObject *object,
     const QString &name)
 {
-    if (widget)
+	FUNC_LOG;
+    if (object)
     {
+        INFOQSTR_1("VideoCollectionUiLoader::initObject() name: %S", name);
         VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
-        
         if (name.compare(DOCML_NAME_VC_VIDEOLISTWIDGET) == 0)
         {
-            VideoListWidget *videoList = qobject_cast<VideoListWidget*>(widget);
+            VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
             if (videoList)
             {
                 VideoSortFilterProxyModel *model =
-                    wrapper.getModel(VideoCollectionWrapper::EAllVideos);
+                    wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
                 if(model)
                 {
                     // open and sort model
                     model->open(VideoCollectionCommon::ELevelVideos);
-                    VideoCollectionViewUtils::sortModel(model, true);
+                    VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelVideos);
                     
                     // init widget
                     VideoServices *videoServices = 0;
@@ -525,14 +390,15 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         else if (name.compare(DOCML_NAME_VC_COLLECTIONWIDGET) == 0)
         {
             VideoSortFilterProxyModel *model = wrapper.getModel(
-                VideoCollectionWrapper::ECollections);
+            		VideoCollectionCommon::EModelTypeCollections);
             if (model)
             {
                 model->open(VideoCollectionCommon::ELevelCategory);
+                VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelCategory);
 
                 // initialize video collection widget
                 VideoListWidget *videoList =
-                    qobject_cast<VideoListWidget*>(widget);
+                    qobject_cast<VideoListWidget*>(object);
                 if (videoList)
                 {
                     // init widget
@@ -548,10 +414,10 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         else if (name.compare(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET) == 0)
         {
             VideoSortFilterProxyModel *model = wrapper.getModel(
-                VideoCollectionWrapper::ECollectionContent);
+            		VideoCollectionCommon::EModelTypeCollectionContent);
             if (model)
             {
-                VideoListWidget *videoList = qobject_cast<VideoListWidget*>(widget);
+                VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
                 if (videoList)
                 {
                     // init widget
@@ -576,7 +442,7 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         {
             // by default, initialize the selection dialog to delete mode
             VideoListSelectionDialog *dialog =
-                qobject_cast<VideoListSelectionDialog*>(widget);
+                qobject_cast<VideoListSelectionDialog*>(object);
             if (dialog)
             {
                 dialog->setupContent(VideoListSelectionDialog::EDeleteVideos,
@@ -585,7 +451,7 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         }
         else if (name.compare(DOCML_NAME_SORT_MENU) == 0)
         {
-            HbMenu *menu = qobject_cast<HbMenu*>(widget);
+            HbMenu *menu = qobject_cast<HbMenu*>(object);
             if (menu)
             {
                 // create sort by menu action
@@ -617,7 +483,7 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         }
         else if (name.compare(DOCML_NAME_VC_VIDEOHINTWIDGET) == 0)
         {
-            VideoHintWidget *hintWidget = qobject_cast<VideoHintWidget*>(widget);
+            VideoHintWidget *hintWidget = qobject_cast<VideoHintWidget*>(object);
             if (hintWidget)
             {
                 hintWidget->initialize();
@@ -627,28 +493,16 @@ void VideoCollectionUiLoader::initWidget(QGraphicsWidget *widget,
         {
             // ensure that all the actions related to options menu are loaded
             // when options menu is loaded
-        	// when applicaton has been launched as a service,
-        	// do not load components which are not required
-        	if(!mIsService)
-        	{
-				findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION);
-				findObject<HbAction>(DOCML_NAME_CREATE_COLLECTION);
-				findObject<HbAction>(DOCML_NAME_DELETE_MULTIPLE);
-        	}
+            // when applicaton has been launched as a service,
+            // do not load components which are not required
+            if(!mIsService)
+            {
+                findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION);
+                findObject<HbAction>(DOCML_NAME_CREATE_COLLECTION);
+                findObject<HbAction>(DOCML_NAME_DELETE_MULTIPLE);
+            }
         }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// initObject
-// ---------------------------------------------------------------------------
-//
-void VideoCollectionUiLoader::initObject(QObject *object,
-    const QString &name)
-{
-    if (object)
-    {
-        if (name.compare(DOCML_NAME_ADD_TO_COLLECTION) == 0)
+        else if (name.compare(DOCML_NAME_ADD_TO_COLLECTION) == 0)
         {
             HbAction *action = qobject_cast<HbAction*>(object);
             if (action)
@@ -708,126 +562,124 @@ void VideoCollectionUiLoader::initObject(QObject *object,
 }
 
 // ---------------------------------------------------------------------------
+// executeRequest
+// ---------------------------------------------------------------------------
+//
+QObject* VideoCollectionUiLoader::executeRequest(
+    const VideoCollectionUiLoaderParam &param)
+{
+	FUNC_LOG;
+    QObject *object = getObject(param);
+    if (!object)
+    {
+        // object was not found, try preparing docml and section
+        bool ok = prepareDocmlAndSection(param.mDocml, param.mSection);
+        if (ok)
+        {
+            // try to get the object again
+            object = getObject(param);
+        }
+    }
+    
+    // initialize object if it was found from docml
+    if (object)
+    {
+        if (!mObjects.contains(param.mName))
+        {
+            // initialize object
+            initObject(object, param.mName);
+
+            // insert object in hash table
+            mObjects.insert(param.mName, object);
+        }
+        
+        bool ok = connect(
+            this, SIGNAL(objectReady(QObject*, const QString&)),
+            param.mReceiver, param.mMember);
+        if (ok)
+        {
+            // signal client and disconnect
+            emit objectReady(object, param.mName);        
+            disconnect(
+                this, SIGNAL(objectReady(QObject*, const QString&)),
+                param.mReceiver, param.mMember);
+        }
+    }    
+    
+    return object;
+}
+
+// ---------------------------------------------------------------------------
+// indexInQueue
+// ---------------------------------------------------------------------------
+//
+int VideoCollectionUiLoader::indexInQueue(const QString &name)
+{
+	FUNC_LOG;
+    int index = -1;
+    
+    int count = mQueue.count();
+    for (int i = 0; i < count; i++)
+    {
+        const VideoCollectionUiLoaderParam &param = mQueue.at(i);
+        if (param.mName == name)
+        {
+            // found from queue
+            index = i;
+            break;
+        }
+    }
+    
+    return index;
+}
+
+// ---------------------------------------------------------------------------
+// removeFromQueue
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::removeFromQueue(const QString &name)
+{
+	FUNC_LOG;
+    int count = mQueue.count();
+    for (int i = 0; i < count; i++)
+    {
+        const VideoCollectionUiLoaderParam &param = mQueue.at(i);
+        if (param.mName == name)
+        {
+            mQueue.removeAt(i);
+            break;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // timerEvent
 // ---------------------------------------------------------------------------
 //
 void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
 {
+	FUNC_LOG;
     if (event)
     {
         if (event->timerId() == mTimerId)
         {
-            // get current request from queue
-            const Params &params = mQueue.at(0);
-            
-            // load the widget / object
-            if (params.mIsWidget)
+            // get current request from queue and execute it
+            int count = mQueue.count();
+            for (int i = 0; i < count; i++)
             {
-                // correct timer id, emit signal for receiver
-                bool ok = connect(
-                    this, SIGNAL(widgetReady(QGraphicsWidget*, const QString&)),
-                    params.mReceiver, params.mMember);
-                if (ok)
+                const VideoCollectionUiLoaderParam &param = mQueue.at(i);
+                if (mPhases.contains(param.mPhase))
                 {
-                    QGraphicsWidget *widget =
-                        HbDocumentLoader::findWidget(params.mName);
-                    if (!widget)
-                    {
-                        // widget not found, try to load the docml
-                    	if(!mDocmls.contains(params.mDocml))
-						{
-							load(params.mDocml, &ok);
-
-							if (ok)
-							{
-								mDocmls.append(params.mDocml);
-							}
-						}
-						if ((params.mSection != 0) && ok)
-						{
-							load(params.mDocml, params.mSection, &ok);
-						}
-						if(ok)
-						{
-							widget = HbDocumentLoader::findWidget(params.mName);
-						}
-                    }
-                    if (widget)
-                    {
-                        // widget found, add it to the hash
-                        if (!mWidgets.contains(params.mName))
-                        {
-                            // initialize widget
-                            initWidget(widget, params.mName);
-
-                            // insert widget in hash table
-                            mWidgets.insert(params.mName, widget);
-                        }
-                        emit widgetReady(widget, params.mName);
-                    }
+                    // load and initialize
+                    executeRequest(param);
+                                
+                    // remove the current request from queue and run next
+                    removeFromQueue(param.mName);
+                    break;
                 }
-                
-                // disconnect
-                disconnect(
-                    this, SIGNAL(widgetReady(QGraphicsWidget*, const QString&)),
-                    params.mReceiver, params.mMember);
             }
-            else
-            {
-                // correct timer id, emit signal for receiver
-                bool ok = connect(
-                    this, SIGNAL(objectReady(QObject*, const QString&)),
-                    params.mReceiver, params.mMember);
-                if (ok)
-                {
-                    QObject *object =
-                        HbDocumentLoader::findObject(params.mName);
-                    if (!object)
-                    {
-                        // widget not found, try to load the docml
-						if(!mDocmls.contains(params.mDocml))
-						{
-							load(params.mDocml, &ok);
-
-							if (ok)
-							{
-								mDocmls.append(params.mDocml);
-							}
-						}
-						if ((params.mSection != 0) && ok)
-						{
-							load(params.mDocml, params.mSection, &ok);
-						}
-						if(ok)
-						{
-							object = HbDocumentLoader::findObject(params.mName);
-						}
-                    }
-                    if (object)
-                    {
-                        // object found, add it to the hash
-                        if (!mObjects.contains(params.mName))
-                        {
-                            // initialize object
-                            initObject(object, params.mName);
-
-                            // add object in hash table
-                            mObjects.insert(params.mName, object);
-                        }
-                        emit objectReady(object, params.mName);
-                    }
-                }
-                
-                // disconnect
-                disconnect(
-                    this, SIGNAL(objectReady(QObject*, const QString&)),
-                    params.mReceiver, params.mMember);
-            }
+            runNext();
         }
-        
-        // remove the request from the queue and run next request if any
-        mQueue.removeAt(0);
-        runNext();
     }
 }
 
@@ -837,6 +689,7 @@ void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
 //
 QObject* VideoCollectionUiLoader::createObject( const QString& type, const QString &name )
 {
+	FUNC_LOG;
     QObject* object = 0;
 
     if ( type == VideoListView::staticMetaObject.className() )
@@ -870,7 +723,20 @@ QObject* VideoCollectionUiLoader::createObject( const QString& type, const QStri
 //
 void VideoCollectionUiLoader::runNext()
 {
-    if (mQueue.count())
+	FUNC_LOG;
+    bool runNext = false;
+    int count = mQueue.count();
+    for (int i = 0; i < count; i++)
+    {
+        const VideoCollectionUiLoaderParam &param = mQueue.at(i);
+        if (mPhases.contains(param.mPhase))
+        {
+            runNext = true;
+            break;
+        }
+    }
+    
+    if (runNext)
     {
         if (!mTimerId)
         {
@@ -893,21 +759,22 @@ void VideoCollectionUiLoader::runNext()
 // isValid
 // ---------------------------------------------------------------------------
 //
-bool VideoCollectionUiLoader::isValid(const Params &params)
+bool VideoCollectionUiLoader::isValid(const VideoCollectionUiLoaderParam &param)
 {
     bool valid = true;
     
-    if (params.mName.length() &&
-        params.mDocml &&
-        params.mMember &&
-        params.mReceiver)
+    if (param.mName.length() &&
+        param.mDocml &&
+        param.mMember &&
+        param.mReceiver)
     {
         // check if the param is already in the queue
         int count = mQueue.count();
         for (int i = 0; i < count; i++)
         {
-            if (mQueue.at(i).isDuplicate(params))
+            if (mQueue.at(i) == param)
             {
+                INFO("VideoCollectionUiLoader::isValid() already in queue.");
                 valid = false;
                 break;
             }
@@ -916,20 +783,39 @@ bool VideoCollectionUiLoader::isValid(const Params &params)
         // check that the item has not already been loaded
         if (valid)
         {
-            if (params.mIsWidget)
-            {
-                valid = !mWidgets.contains(params.mName);
-            }
-            else
-            {
-                valid = !mObjects.contains(params.mName);
-            }
+            valid = !mObjects.contains(param.mName);
         }
     }
     else
     {
+        INFO("VideoCollectionUiLoader::isValid() params missing.");
         valid = false;
     }
     
     return valid;
 }
+
+// ---------------------------------------------------------------------------
+// storeOrphans
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionUiLoader::storeOrphans(const QObjectList &list)
+{
+	FUNC_LOG;
+    foreach (QObject *object, list)
+    {
+        if (!mOrphans.contains(object))
+        {
+            // add to list
+            mOrphans.append(object);
+            
+            // connect to "destroyed" signal
+            connect(
+                object, SIGNAL(destroyed(QObject*)),
+                this, SLOT(removeOrphanFromList(QObject*)));
+        }
+    }
+}
+
+// end of file
+

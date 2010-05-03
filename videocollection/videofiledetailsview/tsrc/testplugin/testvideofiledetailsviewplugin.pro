@@ -56,6 +56,7 @@ HEADERS += inc/testvideofiledetails.h \
            stub/inc/videocollectionwrapper.h \
            stub/inc/videosortfilterproxymodel.h \
            stub/inc/hbmessagebox.h \
+           stub/inc/shareui.h \
            stub/inc/thumbnailmanager_qt.h \
            stub/inc/videoservices.h \
            stub/inc/videoserviceurifetch.h \
@@ -66,6 +67,7 @@ SOURCES += src/testvideofiledetails.cpp \
            stub/src/videocollectionwrapper.cpp \
            stub/src/videosortfilterproxymodel.cpp \
            stub/src/hbmessagebox.cpp \
+           stub/src/shareui.cpp \
            stub/src/thumbnailmanager_qt.cpp \
            stub/src/videoservices.cpp \
            stub/src/videoserviceurifetch.cpp \

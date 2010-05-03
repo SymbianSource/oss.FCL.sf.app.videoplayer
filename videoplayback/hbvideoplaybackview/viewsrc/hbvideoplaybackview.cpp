@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#9 %
+// Version : %version:  da1mmcf#10 %
 
 
 
@@ -115,8 +115,7 @@ void HbVideoPlaybackView::handlePluginError( int aError )
         case KErrCorrupt:
         case KErrTooBig:
         {
-            const QString qString = "Invalid Clip. Operation canceled";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_invalid_clip_operation_canceled" ) );
             break;
         }
 
@@ -124,8 +123,7 @@ void HbVideoPlaybackView::handlePluginError( int aError )
         case KErrMMInvalidURL:
         case KErrArgument:
         {
-            const QString qString = "Unable to connect: Invalid URL";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_unable_to_connect_invalid_url" ) );
             break;
         }
 
@@ -133,8 +131,7 @@ void HbVideoPlaybackView::handlePluginError( int aError )
         {
             if ( ! mVideoMpxWrapper->IsLive() )
             {
-                const QString qString = "Resource Lost";
-                showDialog( qString );
+                showDialog( hbTrId( "txt_videos_info_resource_lost" ) );
             }
             else
             {
@@ -144,20 +141,17 @@ void HbVideoPlaybackView::handlePluginError( int aError )
         }
         case KErrTimedOut:
         {
-            const QString qString = "Unable to connect: Connection timeout";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_unable_to_connect_connection_time" ) );
             break;
         }
         case KErrNotFound:
         {
-            const QString qString = "Unable to connect: File not found";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_unable_to_connect_file_not_found" ) );
             break;
         }
         case KErrMMNotEnoughBandwidth:
         {
-            const QString qString = "Unable to connect: Not enough bandwidth";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_unable_to_connect_not_enough_band" ) );
             break;
         }
         case KErrDisconnected:
@@ -165,14 +159,12 @@ void HbVideoPlaybackView::handlePluginError( int aError )
         case KErrCouldNotConnect:
         case KErrAbort:
         {
-            const QString qString = "Unable to connect";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_unable_to_connect" ) );
             break;
         }
         case KMPXVideoPlayOver2GDuringVoiceCallError:
         {
-            const QString qString = "Video play not allowed during voice call over 2G network";
-            showDialog( qString, false );
+            showDialog( hbTrId( "txt_videos_info_video_play_not_allowed_during_voic" ), false );
             break;
         }
         default:

@@ -25,9 +25,9 @@ class HbListWidget : public HbWidget
     Q_OBJECT
 
 public:
-    HbListWidget(QGraphicsItem *parent = 0) : HbWidget(parent) {};
-    virtual ~HbListWidget();
-  
+    HbListWidget(QGraphicsItem *parent = 0) : HbWidget(parent) {}
+    virtual ~HbListWidget() {}
+    
 };
 
 #endif // HBLISTWIDGET_H

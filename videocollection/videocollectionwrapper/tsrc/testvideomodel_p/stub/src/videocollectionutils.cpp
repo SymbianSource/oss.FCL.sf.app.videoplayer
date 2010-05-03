@@ -58,6 +58,7 @@ VideoCollectionUtils::~VideoCollectionUtils()
 //
 QString VideoCollectionUtils::prepareLengthString(quint32 length)
 {
+    Q_UNUSED(length);
     return mPrepareLengthStringReturnValue;
 }
 
@@ -67,6 +68,7 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 //
 QString VideoCollectionUtils::prepareSizeString(quint32 size)
 {
+    Q_UNUSED(size);
     return mPrepareSizeStringReturnValue;    
 }
 

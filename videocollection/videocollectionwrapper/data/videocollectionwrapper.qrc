@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/icons" >
         <file alias="default_thumbnail_video.svg" >icons/pri_large_video.svg</file>
-        <file alias="default_thumbnail_collection.svg" >icons/pri_large_video_collection.svg</file>
     </qresource>
 </RCC>

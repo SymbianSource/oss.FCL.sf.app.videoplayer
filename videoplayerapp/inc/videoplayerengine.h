@@ -15,13 +15,15 @@
 *
 */
 
-// Version : %version: ou1cpsw#10 %
+// Version : %version: 12 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
 
 #include <qobject.h>
 #include <mpxviewpluginqt.h>
+
+#include <f32file.h>
 
 #include "mpxhbvideocommondefs.h"
 #include "videoplayerappexport.h"
@@ -54,6 +56,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
     public:
         void initialize();
         void playMedia( QString filePath );
+        void playMedia( RFile file );
         void setEmbedded();
 
     public slots:
@@ -70,9 +73,13 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
     
         void switchView();    
     
-        void loadPlugin( MpxHbVideoCommon::MpxHbVideoViewType viewType );
+        void loadPluginAndCreateView( MpxHbVideoCommon::MpxHbVideoViewType viewType );
         
         void doDelayedLoad();
+        
+        void createPlayAndDetailsViews();
+        
+        void setCurrentView();
 
     private:
         bool                      mIsService;

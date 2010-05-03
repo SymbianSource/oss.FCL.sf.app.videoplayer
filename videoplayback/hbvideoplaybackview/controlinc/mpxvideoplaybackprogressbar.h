@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#9 %
+// Version : %version: da1mmcf#10 %
 
 
 
@@ -25,8 +25,8 @@
 #include <hbwidget.h>
 #include <mpxplaybackframeworkdefs.h>
 
-class HbLabel;
-class HbProgressBar;
+class QTimer;
+class HbProgressSlider;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 
@@ -37,9 +37,6 @@ class QMPXVideoPlaybackProgressBar : public HbWidget
     public:
         QMPXVideoPlaybackProgressBar( QMPXVideoPlaybackControlsController* controller );
         virtual ~QMPXVideoPlaybackProgressBar();
-        void mousePressEvent( QGraphicsSceneMouseEvent *event );
-        void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
-        void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
         void initialize();
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );
         void updateState( TMPXPlaybackState state );
@@ -48,20 +45,31 @@ class QMPXVideoPlaybackProgressBar : public HbWidget
         void durationChanged( int duration );
         void positionChanged( int position );
 
+    private slots:
+        void handleSliderPressed();
+        void handleSliderMoved( int value );
+        void handleSliderReleased();
+        void handleSeekingTimeout();
+
     private:
         QString valueToReadableFormat( int value );
         void updatePostion( int position );
 
     private:
         QMPXVideoPlaybackControlsController *mController;
-        HbProgressBar                       *mProgressSlider;
-        HbLabel                             *mDurationLabel;
-        HbLabel                             *mPositionLabel;
+        HbProgressSlider                    *mProgressSlider;
 
-        int                                  mDuration;
-        bool                                 mNeedToResumeAfterSetPosition;
-        bool                                 mInitialized;
-        bool                                 mDragging;
+        int     mDuration;
+        int     mDraggingPosition;
+        int     mSetPosition;
+
+        bool    mNeedToResumeAfterSetPosition;
+        bool    mInitialized;
+        bool    mSliderDragging;
+        bool    mLongTimeFormat;
+        bool    mLiveStreaming;
+
+        QTimer *mSeekingTimer;
 };
 
 #endif /*MPXVIDEOPLAYBACKPROGRESSBAR_H_*/

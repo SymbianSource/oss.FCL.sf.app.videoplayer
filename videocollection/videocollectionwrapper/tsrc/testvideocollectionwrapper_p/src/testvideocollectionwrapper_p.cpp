@@ -87,11 +87,10 @@ void TestVideCollectionWrapper_p::testGetModelInitFail()
     QVERIFY(mTestObject);        
     
     VideoSortFilterProxyModel *proxyGotten = 0;
-    int type = -1;
            
     // source model init fails
     VideoListDataModel::mInitFails = true;
-    type = VideoCollectionWrapper::EAllVideos;
+    VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(!proxyGotten);
     
@@ -99,30 +98,23 @@ void TestVideCollectionWrapper_p::testGetModelInitFail()
     VideoSortFilterProxyModel::setInitFailure(true);
     
     // VideoCollectionWrapper::EAllvideos -> init fails
-    type = VideoCollectionWrapper::EAllVideos;
+    type = VideoCollectionCommon::EModelTypeAllVideos;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(!proxyGotten);
     
     // VideoCollectionWrapper::ECollections -> init fails
-    type = VideoCollectionWrapper::ECollections;
+    type = VideoCollectionCommon::EModelTypeAllVideos;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(!proxyGotten);
     
     // VideoCollectionWrapper::EGeneric -> init fails
-    type = VideoCollectionWrapper::EGeneric;
+    type = VideoCollectionCommon::EModelTypeGeneric;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(!proxyGotten);
     
-    type = VideoCollectionWrapper::ECollectionContent;
+    type = VideoCollectionCommon::EModelTypeCollectionContent;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(!proxyGotten);
-    
-    // called with invalid type param
-    type = -1;
-    VideoListDataModel::mInitFails = false;
-    proxyGotten = mTestObject->getModel(type);
-    QVERIFY(!proxyGotten);
-    
 }
 
  
@@ -135,10 +127,11 @@ void TestVideCollectionWrapper_p::testGetModelSucceed()
     QVERIFY(mTestObject);        
        
     VideoSortFilterProxyModel *proxyGotten = 0;
-    int type = -1;    
     VideoSortFilterProxyModel::setInitFailure(false);
+    VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos;
+
     // VideoCollectionWrapper::EAllvideos
-    type = VideoCollectionWrapper::EAllVideos;
+    type = VideoCollectionCommon::EModelTypeAllVideos;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(proxyGotten);
     QVERIFY(proxyGotten->mType == type);
@@ -149,7 +142,7 @@ void TestVideCollectionWrapper_p::testGetModelSucceed()
     proxyGotten = 0;
    
     // VideoCollectionWrapper::ECollections
-    type = VideoCollectionWrapper::ECollections;
+    type = VideoCollectionCommon::EModelTypeCollections;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(proxyGotten);
     QVERIFY(proxyGotten->mType == type);
@@ -160,7 +153,7 @@ void TestVideCollectionWrapper_p::testGetModelSucceed()
     proxyGotten = 0;
    
    // VideoCollectionWrapper::EGeneric
-    type = VideoCollectionWrapper::EGeneric;
+    type = VideoCollectionCommon::EModelTypeGeneric;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(proxyGotten);
     QVERIFY(proxyGotten->mType == type);
@@ -171,7 +164,7 @@ void TestVideCollectionWrapper_p::testGetModelSucceed()
     proxyGotten = 0;
     
     // VideoCollectionWrapper::ECollectionContent
-    type = VideoCollectionWrapper::ECollectionContent;
+    type = VideoCollectionCommon::EModelTypeCollectionContent;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(proxyGotten);
     QVERIFY(proxyGotten->mType == type);
@@ -180,13 +173,6 @@ void TestVideCollectionWrapper_p::testGetModelSucceed()
     QVERIFY(proxyGotten->mType == type);
     delete proxyGotten;
     proxyGotten = 0;
-   
-    // called with invalid type param
-    type = -1;
-    VideoListDataModel::mInitFails = false;
-    proxyGotten = mTestObject->getModel(type);
-    QVERIFY(!proxyGotten);
-    
 }
 
 // -----------------------------------------------------------------------------
@@ -199,10 +185,8 @@ void TestVideCollectionWrapper_p::testAboutToQuitSlot()
     connect(this, SIGNAL(testSignal()), mTestObject, SLOT(aboutToQuitSlot()));
     
     VideoSortFilterProxyModel *proxyGotten = 0;
-    int type = -1;    
-    
     VideoSortFilterProxyModel::setInitFailure(false);
-    type = VideoCollectionWrapper::EAllVideos;
+    VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos;
     proxyGotten = mTestObject->getModel(type);
     QVERIFY(proxyGotten);
     QVERIFY(!mTestObject->mSourceModel.isNull());
@@ -211,7 +195,6 @@ void TestVideCollectionWrapper_p::testAboutToQuitSlot()
     
     emit testSignal();
     QVERIFY(mTestObject->mSourceModel.isNull());
-    
     
     disconnect(this, SIGNAL(testSignal()), mTestObject, SLOT(aboutToQuitSlot()));
 }

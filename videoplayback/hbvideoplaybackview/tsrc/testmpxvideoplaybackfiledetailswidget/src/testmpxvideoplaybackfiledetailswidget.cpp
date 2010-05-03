@@ -15,14 +15,17 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  4 %
 
 
-#include <qdebug>
+#include <QDateTime>
+#include <QFileInfo>
+
 #include <hbmainwindow.h>
 #include <hbapplication.h>
 #include <hblistwidget.h>
 #include <hblistwidgetitem.h>
+#include <hbextendedlocale.h>
 
 #include "mpxvideoplaybackviewfiledetails.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
@@ -174,25 +177,12 @@ void TestMPXVideoPlaybackFileDetailsWidget::testDuration()
     //
     // If it's local mode, need to show the duration
     //
-    details->mPlaybackMode = EMPXVideoLiveStreaming;
-    details->mDuration = 3700000;
-    
-    mWidget->updateWithFileDetails( details );
-
-    verifyResult( "Duration", "" );
-
-    mWidget->mListWidget->clear();
-    mWidget->mFileDetailsUpdated = false;
-
-    //
-    // If it's local mode, need to show the duration
-    //
     details->mPlaybackMode = EMPXVideoLocal;
     details->mDuration = 3700000;
     
     mWidget->updateWithFileDetails( details );
 
-    verifyResult( "Duration", true, "1 hr 1 min 40 sec " );
+    verifyResult( "Duration", true, "1 hr 1 min 40 sec" );
 
     cleanup();
 }
@@ -208,30 +198,82 @@ void TestMPXVideoPlaybackFileDetailsWidget::testDate()
     init();
 
     QMPXVideoPlaybackViewFileDetails *details = mController->fileDetails();
-
+    
+    QDateTime dateTime;
+    QString created("");
+    QString modified("");
+    details->mClipName = KFILEPATH;
+    QFileInfo fileInfo( details->mClipName ); 
+    
     //
     // If it is streaming case, we don't show size information
-    //
-    details->mClipName = KFILEPATH;
+    //    
     details->mPlaybackMode = EMPXVideoStreaming;
     mWidget->updateWithFileDetails( details );
 
+    //
+    // verify results for streaming clip
+    //
     verifyResult( "Date", false );
     verifyResult( "Modified", false );
 
+    //
+    // clear the widget list
+    //
     mWidget->mListWidget->clear();
     mWidget->mFileDetailsUpdated = false;
 
     //
-    // If it is local, we  show size information
+    // local clip, with no date/time metadata
     //
-    details->mClipName = KFILEPATH;
     details->mPlaybackMode = EMPXVideoLocal;
     mWidget->updateWithFileDetails( details );
 
-    verifyResult( "Date", true, "", false );
-    verifyResult( "Modified", true, "", false );
+    //
+    // compare and verify 'Date' for non-metadata local clip
+    //
+    dateTime = fileInfo.created();
+    created = dateTimeStringFormat( dateTime );
+    verifyResult( "Date", true, created, true );
+    
+    //
+    // compare and verify 'Modified' for non-metadata local clip
+    //
+    dateTime = fileInfo.lastModified();
+    modified = dateTimeStringFormat( dateTime );
+    verifyResult( "Modified", true, modified, true );
+    
+    //
+    // clear the widget list
+    //
+    mWidget->mListWidget->clear();
+    mWidget->mFileDetailsUpdated = false;
+    
+    //
+    // local clip, with date/time metadata 
+    //
+    details->mPlaybackMode = EMPXVideoLocal;
+    details->mCreationTime = 1242367251;        // POSIX creation time
+    details->mModificationTime = 1270773249;    // POSIX modification time    
+    mWidget->updateWithFileDetails( details );
 
+    //
+    // compare and verify 'Date' for metadata local clip
+    //
+    dateTime.setTime_t( details->mCreationTime );
+    created = dateTimeStringFormat( dateTime );
+    verifyResult( "Date", true, created, true );
+    
+    //
+    // compare and verify 'Modified' for metadata local clip
+    //
+    dateTime.setTime_t( details->mModificationTime ); 
+    modified = dateTimeStringFormat( dateTime );
+    verifyResult( "Modified", true, modified, true );
+
+    //
+    // clean up
+    //
     cleanup();
 }
 
@@ -404,7 +446,7 @@ void TestMPXVideoPlaybackFileDetailsWidget::testResolution()
 
     mWidget->updateWithFileDetails( details );
 
-    QString resolution = QString("%1 x %2")
+    QString resolution = QString("%1x%2")
             .arg( details->mVideoWidth ).arg( details->mVideoHeight );
 
     verifyResult( "Resolution", true, resolution );
@@ -444,11 +486,11 @@ void TestMPXVideoPlaybackFileDetailsWidget::testBitrate()
     init();
 
     QMPXVideoPlaybackViewFileDetails *details = mController->fileDetails();
-    details->mBitRate = 1024;
+    details->mBitRate = 512;
     
     mWidget->updateWithFileDetails( details );
 
-    verifyResult( "Bitrate", true, "1024 Kbps" );
+    verifyResult( "Bitrate", true, "512 kbps" );
 
     cleanup();
 }
@@ -498,6 +540,9 @@ void TestMPXVideoPlaybackFileDetailsWidget::testFolder()
 void TestMPXVideoPlaybackFileDetailsWidget::verifyResult( 
         QString primaryText, bool exist, QString expectedSecondaryText, bool needToBeCompared )
 {
+    MPX_DEBUG(_L("TestMPXVideoPlaybackFileDetailsWidget::verifyResult(%s, %d, %s, %d)"),
+            primaryText.data(), exist, expectedSecondaryText.data(), needToBeCompared );
+    
     QString secondaryText = "";
     int i = 0;
 
@@ -519,10 +564,16 @@ void TestMPXVideoPlaybackFileDetailsWidget::verifyResult(
     {
         if ( needToBeCompared )
         {
+            MPX_DEBUG(_L("TestMPXVideoPlaybackFileDetailsWidget::verifyResult() : secondaryText(%s)"),
+                    secondaryText.data() );
+            
             QVERIFY( expectedSecondaryText == secondaryText );
         }
         else
         {
+            MPX_DEBUG(_L("TestMPXVideoPlaybackFileDetailsWidget::verifyResult() : i(%d) count(%d)"),
+                    i, mWidget->mListWidget->count() );
+            
             //
             // Doens't need to compare the secondary text. Just make sure it's in the list
             //
@@ -537,6 +588,24 @@ void TestMPXVideoPlaybackFileDetailsWidget::verifyResult(
     {
         QVERIFY( i == mWidget->mListWidget->count() );
     }
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// dateTimeStringFormat
+// -------------------------------------------------------------------------------------------------
+//
+QString TestMPXVideoPlaybackFileDetailsWidget::dateTimeStringFormat( QDateTime dateTime )
+{
+    HbExtendedLocale locale = HbExtendedLocale::system();
+    QString date = locale.format( dateTime.date(), r_qtn_date_usual );
+    QString time = locale.format( dateTime.time(), r_qtn_time_long_with_zero );
+    QString dateTimeString( date + "  " + time );
+    
+    MPX_DEBUG(_L("TestMPXVideoPlaybackFileDetailsWidget::dateTimeStringFormat() ret '%s'"),
+            dateTimeString.data() );
+    
+    return dateTimeString;    
 }
 
 // End of file

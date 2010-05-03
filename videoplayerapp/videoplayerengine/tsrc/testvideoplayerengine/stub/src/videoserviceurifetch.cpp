@@ -11,20 +11,24 @@
 *
 * Contributors:
 *
-* Description:   ?Description
+* Description:   Implementation of VideoServiceUriFetch Stub
 *
 */
 
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
+// Version : %version: %
+
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
+#include "mpxvideo_debug.h"
 
 
 // ----------------------------------------------------------------------------
 // VideoServiceUriFetch()
 // ----------------------------------------------------------------------------
 //
-VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent)
+VideoServiceUriFetch::VideoServiceUriFetch( VideoServices* parent )
 {
+    MPX_DEBUG(_L("VideoServiceUriFetch::VideoServiceUriFetch()"));
 	mServiceApp = parent;
 }
 
@@ -34,14 +38,17 @@ VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent)
 //
 VideoServiceUriFetch::~VideoServiceUriFetch()
 {
-
+    MPX_DEBUG(_L("VideoServiceUriFetch::~VideoServiceUriFetch()"));
 }
 
 // ----------------------------------------------------------------------------
 // fetch()
 // ----------------------------------------------------------------------------
 //
-void VideoServiceUriFetch::fetch(const QString& title)
+void VideoServiceUriFetch::fetch( const QString& title )
 {
-    mServiceApp->setCurrentService(VideoServices::EUriFetcher);
+    MPX_DEBUG(_L("VideoServiceUriFetch::fetch()"));
+
+    Q_UNUSED( title );    
+    mServiceApp->setCurrentService( VideoServices::EUriFetcher );
 }

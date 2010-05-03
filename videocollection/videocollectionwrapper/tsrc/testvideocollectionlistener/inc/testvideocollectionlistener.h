@@ -83,9 +83,22 @@ private slots:
     void testHandleOpenLPlaylistFunc();
      
     /**
-     * verifies HandleCommandComplete
+     * verifies HandleCommandComplete with invalid
+     * params
      */
-    void testHandleCommandComplete();
+    void testHandleCommandCompleteInvalid();
+    
+    /**
+     * verifies HandleCommandComplete (and handleGetVideoDetailsResp)  for
+     * KVcxCommandMyVideosGetMediaFullDetailsByMpxId command
+     */
+    void testHandleCommandCompleteGetDetails();
+    
+    /**
+     * verifies HandleCommandComplete  for
+     * KVcxCommandMyVideosRemoveAlbums command
+     */
+    void testHandleCommandCompleteRemoveAlbums();
     
     /**
      * verifies HandleCollectionMessage 

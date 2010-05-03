@@ -89,7 +89,7 @@ inline uint qHash(TMPXItemId key)
 // setRowCount
 // ---------------------------------------------------------------------------
 //
-void TestVideoListSelectionDialog::setRowCount(int count, int type, VideoListDataModel *model)
+void TestVideoListSelectionDialog::setRowCount(int count, VideoCollectionCommon::TModelType type, VideoListDataModel *model)
 {
     if (!model)
     {
@@ -141,7 +141,7 @@ void TestVideoListSelectionDialog::init()
     
     mTestUiLoader = new VideoCollectionUiLoader();
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
-    mModel = VideoCollectionWrapper::instance().getModel(VideoCollectionWrapper::EGeneric);
+    mModel = VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeGeneric);
     
     mTestHelper->mTestable = mTestObject;
     QVERIFY(mTestHelper->connectSignals());
@@ -240,8 +240,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -262,8 +262,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
         
@@ -288,8 +288,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == false);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(!VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -314,8 +314,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(!VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -340,8 +340,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -366,8 +366,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -391,8 +391,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -416,8 +416,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);  
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);  
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
     
@@ -441,8 +441,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mCheckboxContainer->isVisible() == true);
     QVERIFY(mTestObject->mItemCount != 0);
     QVERIFY(mTestObject->mCheckBox != 0);
-    QVERIFY(mTestObject->primaryAction() != 0);
-    QVERIFY(mTestObject->secondaryAction() != 0);  
+    QVERIFY(mTestObject->mPrimaryAction != 0);
+    QVERIFY(mTestObject->mSecondaryAction != 0);  
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
 }
@@ -821,20 +821,20 @@ void TestVideoListSelectionDialog::testSelectionChangedSlot()
     setRowCount(10);
     
     // select item
-    mTestObject->primaryAction()->mDisable = true;
+    mTestObject->mPrimaryAction->setEnabled(false);
     QModelIndex index = mModel->index(0, 0);
     QItemSelectionRange range(mModel->index(0, 0));
     selected.append(range);
     mTestHelper->emitSelectionChangedSlot(selected, deselected);
     QVERIFY(mTestObject->mSelection.count() == 1);
-    QVERIFY(mTestObject->primaryAction()->mDisable == false);
+    QVERIFY(mTestObject->mPrimaryAction->isEnabled() == true);
     
     // deselect item
     selected.clear();
     deselected.append(range);
     mTestHelper->emitSelectionChangedSlot(selected, deselected);
     QVERIFY(mTestObject->mSelection.count() == 0);
-    QVERIFY(mTestObject->primaryAction()->mDisable == true);
+    QVERIFY(mTestObject->mPrimaryAction->isEnabled() == false);
     
     mTestHelper->disconnectSignals();
 
@@ -869,23 +869,23 @@ void TestVideoListSelectionDialog::testModelReadySlot()
     mTestHelper->connectSignals();
     mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, TMPXItemId(1,2));
     
-    mTestObject->primaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
     
     // type of selection != ESelectCollection    
     mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->primaryAction()->mTriggeredCount == 0);    
+    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 0);    
     
     mTestObject->setupContent(VideoListSelectionDialog::ESelectCollection, TMPXItemId(1,2));
     // no items in model
     setRowCount(0);
     mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->primaryAction()->mTriggeredCount == 1);    
+    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 1);    
     
-    mTestObject->primaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
     setRowCount(10);
     // type of selection is ESelectCollection and there are items in model
     mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->primaryAction()->mTriggeredCount == 0);   
+    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 0);   
     
     mTestHelper->disconnectSignals();
 }
@@ -945,52 +945,52 @@ void TestVideoListSelectionDialog::testPrimaryActionTriggeredSlot()
     mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, mpxId);
     
     // nothing selected, album id invalid, selection type != EAddToCollection
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = VideoListSelectionDialog::EDeleteVideos;
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 0);
-    QCOMPARE(mTestObject->secondaryAction()->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mSecondaryAction->mTriggeredCount, 0);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 0);
     
     // nothing selected, album id invalid, selection type EAddToCollection
     mTestObject->mSelectedAlbumId = TMPXItemId::InvalidId();
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = VideoListSelectionDialog::EAddToCollection;
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 0);
-    QCOMPARE(mTestObject->secondaryAction()->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mSecondaryAction->mTriggeredCount, 0);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 0);
     
     // nothing selected, album id invalid, selection type ESelectCollection
     mTestObject->mSelectedAlbumId = TMPXItemId::InvalidId();
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = VideoListSelectionDialog::ESelectCollection;
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 0);
-    QCOMPARE(mTestObject->secondaryAction()->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mSecondaryAction->mTriggeredCount, 0);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 0);
     
     // nothing selected, album id invalid, selection type invalid
     mTestObject->mSelectedAlbumId = TMPXItemId::InvalidId();
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = 555;
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 0);
-    QCOMPARE(mTestObject->secondaryAction()->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mSecondaryAction->mTriggeredCount, 0);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 0);
 
     // nothing selected, album id ok
     mTestObject->mSelectedAlbumId = TMPXItemId(0, KVcxMvcMediaTypeAlbum);
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = VideoListSelectionDialog::ESelectCollection;
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 1);
-    QCOMPARE(mTestObject->secondaryAction()->mTriggeredCount, 0);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 1);
+    QCOMPARE(mTestObject->mSecondaryAction->mTriggeredCount, 0);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 0);
 
     setRowCount(10);
@@ -1002,12 +1002,12 @@ void TestVideoListSelectionDialog::testPrimaryActionTriggeredSlot()
     QItemSelectionRange range(mTestObject->mModel->index(0, 0), mTestObject->mModel->index(1, 0));
     selected.append(range);
     mTestObject->mSelection.merge(selected, QItemSelectionModel::Select);
-    mTestObject->primaryAction()->mTriggeredCount = 0;
-    mTestObject->secondaryAction()->mTriggeredCount = 0;
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->mSecondaryAction->mTriggeredCount = 0;
     mTestObject->mTypeOfSelection = VideoListSelectionDialog::EAddToCollection;
     mTestObject->mSelectedVideos.clear();
     mTestHelper->emitPrimaryActionTriggeredSlot();
-    QCOMPARE(mTestObject->primaryAction()->mTriggeredCount, 1);
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 1);
     QCOMPARE(mTestObject->mSelectedVideos.count(), 1);
   
     mTestHelper->disconnectSignals(); 
@@ -1026,20 +1026,20 @@ void TestVideoListSelectionDialog::testGetSelectedName()
     VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
     // mSelectedAlbumId is video
     mTestObject->mSelectedAlbumId = TMPXItemId(1,0);
-    mTestHelper->emitFinishedSlot(mTestObject->primaryAction());
+    mTestHelper->emitFinishedSlot(mTestObject->mPrimaryAction);
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.isValid());
     QVERIFY(!VideoCollectionViewUtilsData::mLastStatusAdditional.toString().length());
     
     mTestObject->mSelectedAlbumId = TMPXItemId(1,2);
     // fetching collections model unsucceeds
     VideoCollectionWrapperData::mGetModelFails = true;
-    mTestHelper->emitFinishedSlot(mTestObject->primaryAction());
+    mTestHelper->emitFinishedSlot(mTestObject->mPrimaryAction);
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.isValid());
     QVERIFY(!VideoCollectionViewUtilsData::mLastStatusAdditional.toString().length());
     VideoCollectionWrapperData::mGetModelFails = false;
     
     // invalid index for selected album
-    mTestHelper->emitFinishedSlot(mTestObject->primaryAction());
+    mTestHelper->emitFinishedSlot(mTestObject->mPrimaryAction);
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.isValid());
     QVERIFY(!VideoCollectionViewUtilsData::mLastStatusAdditional.toString().length());
     
@@ -1047,17 +1047,15 @@ void TestVideoListSelectionDialog::testGetSelectedName()
     // need to add album ib into selected list, because stub proxy overwrites
     // VideoSortFilterProxyModelData::mItemIds at removeitems removeItemsFromAlbum -method
     // and we need valid index for id
-    QStringList testnameList;
-    testnameList.append("testname");
-    VideoListDataModelData::mData[Qt::DisplayRole] = testnameList;
+    QString testname("testname");
+    VideoListDataModelData::mData[VideoCollectionCommon::KeyTitle] = testname;
     mTestObject->mSelectedVideos.insert(TMPXItemId(1,2));   
-    mTestHelper->emitFinishedSlot(mTestObject->primaryAction());
+    mTestHelper->emitFinishedSlot(mTestObject->mPrimaryAction);
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.isValid());
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.toString().length() > 0);
     QVERIFY(VideoCollectionViewUtilsData::mLastStatusAdditional.toString() == "testname");
     
     mTestHelper->disconnectSignals(); 
 }
-
 
 // end of file

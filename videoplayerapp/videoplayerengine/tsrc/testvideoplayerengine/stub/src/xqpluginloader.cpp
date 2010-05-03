@@ -18,34 +18,41 @@
 #include "stub/inc/xqpluginloader.h"
 #include "stub/inc/xqplugininfo.h"
 #include "testviewplugin.h"
+#include "mpxvideo_debug.h"
 
 QHash<int, MpxViewPlugin*> XQPluginLoader::mPluginList;
 int XQPluginLoader::mFailToLoadPluginUid = -1;
 
-XQPluginLoader::XQPluginLoader(int uid, QObject* parent)
+XQPluginLoader::XQPluginLoader( int uid, QObject* parent )
 {
+    MPX_DEBUG(_L("XQPluginLoader::XQPluginLoader()"));  
+    
+    Q_UNUSED( parent );    
     mUid = uid;
 }
 
 XQPluginLoader::~XQPluginLoader()
 {
-    
+    MPX_DEBUG(_L("XQPluginLoader::~XQPluginLoader()"));      
 }
 
-bool XQPluginLoader::listImplementations(const QString &interfaceName, 
-                         QList<XQPluginInfo > &impls)
+bool XQPluginLoader::listImplementations( const QString &interfaceName, 
+                                          QList<XQPluginInfo > &impls )
 {
+    MPX_DEBUG(_L("XQPluginLoader::listImplementations()"));  
     return true;
 }
 
 QObject* XQPluginLoader::instance()
 {
-    if(mUid == mFailToLoadPluginUid)
+    MPX_ENTER_EXIT(_L("XQPluginLoader::instance()"));
+    
+    if ( mUid == mFailToLoadPluginUid )
     {
         return 0;
     }
     
-    if(!mPluginList.contains(mUid))
+    if ( ! mPluginList.contains( mUid ) )
     {
         mPluginList[mUid] = new TestViewPlugin();
     }
@@ -55,6 +62,8 @@ QObject* XQPluginLoader::instance()
 
 void XQPluginLoader::cleanup()
 {
+    MPX_ENTER_EXIT(_L("XQPluginLoader::cleanup()"));
+    
     QHash<int, MpxViewPlugin*>::const_iterator i = mPluginList.constBegin();
     while(i != mPluginList.constEnd()) 
     {
@@ -69,7 +78,8 @@ void XQPluginLoader::cleanup()
 /**
  * Sets plugin load to fail.
  */
-void XQPluginLoader::setPluginLoadFailure(int uid)
+void XQPluginLoader::setPluginLoadFailure( int uid )
 {
+    MPX_DEBUG(_L("XQPluginLoader::setPluginLoadFailure()"));
     mFailToLoadPluginUid = uid;
 }

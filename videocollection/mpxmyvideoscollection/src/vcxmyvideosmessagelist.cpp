@@ -271,7 +271,7 @@ void CVcxMyVideosMessageList::AddL( CMPXMessage* aMessage )
 //
 void CVcxMyVideosMessageList::SendL()
     {
-    MPX_FUNC("CVcxMyVideosMessageList::SendL()");
+    MPX_DEBUG1("CVcxMyVideosMessageList::SendL");
     
     if ( iMessageCount == 0 || !iMessageList )
         {

@@ -255,23 +255,6 @@ QDateTime VideoListDataModelPrivate::getVideoDateFromIndex( int index ) const
 }
 
 // -----------------------------------------------------------------------------
-// getMetaDataFromIndex
-// -----------------------------------------------------------------------------
-//
-QMap<QString, QVariant> VideoListDataModelPrivate::getMetaDataFromIndex(int /*index*/) const
-{
-    QMap<QString, QVariant> map;
-    
-    // no need to actually populate the map with real like data, as the datamodel
-    // is not responsible in anyway what data the actual map contains. So here we
-    // only need to make sure that the map received in test has been gotten by
-    // calling this function.
-    map["metadata"] = QString("metadata");
-    
-    return map;
-}
-
-// -----------------------------------------------------------------------------
 // getMediaIdFromIndex
 // -----------------------------------------------------------------------------
 //
@@ -489,9 +472,9 @@ void VideoListDataModelPrivate::videoDeleteCompletedSlot(int overallCount, QList
 // videoDetailsCompleted
 // -----------------------------------------------------------------------------
 // 
-void VideoListDataModelPrivate::videoDetailsCompletedSlot(TMPXItemId videoId)
+void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
 {
-    Q_UNUSED(videoId);      
+    Q_UNUSED(media);      
 }
 
 // -----------------------------------------------------------------------------
@@ -503,6 +486,15 @@ void VideoListDataModelPrivate::albumListAvailableSlot(TMPXItemId albumId,
 {
     Q_UNUSED(albumId);
     Q_UNUSED(albumItems);
+}
+
+// -----------------------------------------------------------------------------
+// itemModifiedSlot
+// -----------------------------------------------------------------------------
+// 
+void VideoListDataModelPrivate::itemModifiedSlot(const TMPXItemId &itemId)
+{
+    Q_UNUSED(itemId);
 }
 
 // -----------------------------------------------------------------------------

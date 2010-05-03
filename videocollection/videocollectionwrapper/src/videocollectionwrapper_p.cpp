@@ -15,17 +15,20 @@
 * 
 */
 
-// INCLUDE FILES
+// Version : %version: %
 
+// INCLUDE FILES
 #include <qapplication.h>
 #include <qabstractitemmodel.h>
 #include <vcxmyvideosdefs.h>
+
 #include "videocollectionwrapper.h"
 #include "videocollectionwrapper_p.h"
 #include "videolistdatamodel.h"
 #include "videosortfilterproxymodel.h"
 #include "videocollectionclient.h"
 #include "videocollectioncommon.h"
+#include "videocollectiontrace.h"
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -34,12 +37,13 @@
 // VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate()
 // -----------------------------------------------------------------------------
 //
-VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate() : 
-mAllVideosModel(0),
-mCollectionsModel(0),
-mGenericModel(0),
-mSourceModel(0)
+VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate() 
+    : mAllVideosModel( 0 )
+    , mCollectionsModel( 0 )
+    , mGenericModel( 0 )
+    , mSourceModel( 0 )
 {
+	FUNC_LOG;
     // NOP 
 }
 
@@ -49,6 +53,7 @@ mSourceModel(0)
 //
 VideoCollectionWrapperPrivate::~VideoCollectionWrapperPrivate()
 {
+	FUNC_LOG;
     // NOP here
 }
 
@@ -57,9 +62,11 @@ VideoCollectionWrapperPrivate::~VideoCollectionWrapperPrivate()
 // VideoCollectionWrapperPrivate::getModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
+VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(VideoCollectionCommon::TModelType &type)
 {
-    
+	FUNC_LOG;
+    INFO_1("VideoCollectionWrapperPrivate::getModel() type: %d", type);
+	
     VideoSortFilterProxyModel *model = 0;
     if(!mSourceModel)
     {
@@ -67,20 +74,21 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
         if(!mSourceModel || mSourceModel->initialize() < 0 || 
             !connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(aboutToQuitSlot())) )
         {
+            ERROR(-1, "VideoCollectionWrapperPrivate::getModel() sourceModel setup failed.");
             return 0;
         }
     }
     bool needsInitialization = false;
-    if(type == VideoCollectionWrapper::EAllVideos)
+    if(type == VideoCollectionCommon::EModelTypeAllVideos)
     {
         if(!mAllVideosModel)
         {
-            mAllVideosModel = new VideoSortFilterProxyModel(type); 
+            mAllVideosModel = new VideoSortFilterProxyModel(type);
             needsInitialization = true;
         }
         model = mAllVideosModel;
     }
-    else if(type == VideoCollectionWrapper::ECollections)
+    else if(type == VideoCollectionCommon::EModelTypeCollections)
     {
         if(!mCollectionsModel)
         {
@@ -89,7 +97,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
         }
         model = mCollectionsModel;
     }
-    else if(type == VideoCollectionWrapper::ECollectionContent)
+    else if(type == VideoCollectionCommon::EModelTypeCollectionContent)
     {
         if(!mCollectionContentModel)
         {
@@ -98,7 +106,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
         }
         model = mCollectionContentModel;
     }
-    else if(type == VideoCollectionWrapper::EGeneric)
+    else if(type == VideoCollectionCommon::EModelTypeGeneric)
     {
         if(!mGenericModel)
         {
@@ -110,12 +118,13 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
     
     if(needsInitialization)
     {        
-        if(model && model->initialize(mSourceModel) < 0 )
+        if(model && model->initialize(mSourceModel) < 0)
         {
+            ERROR(-1, "VideoCollectionWrapperPrivate::getModel() no model or init failed.");
             delete model;
             return 0;
         }
-        if (!connect(model, SIGNAL(shortDetailsReady(TMPXItemId)), mSourceModel, SIGNAL(shortDetailsReady(TMPXItemId))))
+        if(!connect(model, SIGNAL(shortDetailsReady(TMPXItemId)), mSourceModel, SIGNAL(shortDetailsReady(TMPXItemId))))
         {
         	delete model;
         	return 0;
@@ -130,6 +139,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(int &type)
 //
 void VideoCollectionWrapperPrivate::aboutToQuitSlot()
 {    
+	FUNC_LOG;
     if(!mSourceModel.isNull())
     {
         delete mSourceModel;

@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#17 %
+# Version : %version: da1mmcf#20 %
 
 
 TEMPLATE = lib
@@ -24,7 +24,7 @@ DEFINES += BUILD_VIDEOPLAYBACK_DLL
 
 symbian:
 {
-    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.CAPABILITY = ALL -TCB -DRM
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.UID3 = 0x20024334
     INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \
@@ -37,7 +37,6 @@ INCLUDEPATH += ../../inc \
 
 LIBS += -lmpxplaybackutility.dll \
         -lmpxcommon.dll \
-        -lmpxviewplugin.dll \
         -lestor.dll \
         -lcommonengine.dll \
         -lflogger.dll \
@@ -48,7 +47,14 @@ LIBS += -lmpxplaybackutility.dll \
         -lcentralrepository.dll \
         -lthumbnailmanagerqt.dll \
         -lmediaclientvideodisplay.dll \
-        -lalfdecoderserverclient.dll
+        -lalfdecoderserverclient.dll \
+        -lxqserviceutil.dll \
+        -lvideoplayerengine.dll \
+        -lcone.dll \
+        -lefsrv.dll \
+        -lws32.dll \
+        -lhal.dll \
+        -lgdi.dll
 
 DEPENDPATH += ../inc inc viewinc controlinc
 VPATH += viewsrc controlsrc
@@ -70,7 +76,6 @@ HEADERS += hbvideobaseplaybackview.h \
            mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackfiledetailswidget.h \
            mpxvideoplaybackuserinputhandler.h \
-           mpxvideoplaybacknontouchvolumebar.h \
            mpxvideoplaybackdetailsplaybackwindow.h \
            mpxvideocontainer.h
 
@@ -90,7 +95,6 @@ SOURCES += hbvideobaseplaybackview.cpp \
            mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackuserinputhandler.cpp \
-           mpxvideoplaybacknontouchvolumebar.cpp \
            mpxvideoplaybackdetailsplaybackwindow.cpp \
            mpxvideocontainer.cpp
 

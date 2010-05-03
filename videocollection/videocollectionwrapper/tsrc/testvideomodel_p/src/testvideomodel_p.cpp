@@ -16,6 +16,8 @@
 */
 
 // INCLUDES
+#include <hbglobal.h>
+#include <hbextendedlocale.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxmediaarray.h>
 #include <mpxmedia.h>
@@ -30,6 +32,7 @@
 #include "mediaobjectfactory.h"
 #include "videocollectioncommon.h"
 #include "videocollectionutils.h"
+#include "metadatasignalspy.h"
 
 #define private public
 #include "videolistdatamodel_p.h"
@@ -454,85 +457,6 @@ void TestVideoModel_p::testGetVideoDateFromIndex()
 }
 
 // -----------------------------------------------------------------------------
-// testGetMetaDataFromIndex
-// -----------------------------------------------------------------------------
-//
-void TestVideoModel_p::testGetMetaDataFromIndex()
-{
-    using namespace VideoCollectionCommon;
-    QMap<QString, QVariant> map = mTestObject->getMetaDataFromIndex(0);
-    QVERIFY(map.isEmpty());
-    map = mTestObject->getMetaDataFromIndex(-1);
-    QVERIFY(map.isEmpty());
-    
-    mMediaFactory->removeArray();
-    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));           
-    mMediaFactory->createMediaItems(MEDIA_COUNT);
-    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
-        
-    map = mTestObject->getMetaDataFromIndex(-1);
-    QVERIFY(map.isEmpty());
-    
-    map = mTestObject->getMetaDataFromIndex(-1);
-    QVERIFY(map.isEmpty());
-    
-    map = mTestObject->getMetaDataFromIndex(0);
-    
-    QVERIFY(map.contains(MetaKeyDate));
-    QVERIFY(map.contains(MetaKeyDurationString));
-    QVERIFY(map.contains(MetaKeySizeString));
-    QVERIFY(map.contains(MetaKeyStarRating));
-    QVERIFY(map.contains(MetaKeyDescription));
-    QVERIFY(map.contains(MetaKeyModifiedDate));
-    QVERIFY(map.contains(MetaKeyAuthor));
-    QVERIFY(map.contains(MetaKeyCopyright));
-    QVERIFY(map.contains(MetaKeyLanguageString));
-    QVERIFY(map.contains(MetaKeyFormat));
-    
-    // one or several of these will fail, when rest of the metadata is implemented.
-    QVERIFY(map.contains(MetaKeyDRMInfo) == false);
-    QVERIFY(map.contains(MetaKeyServiceURL) == false);
-    QVERIFY(map.contains(MetaKeyShotLocation) == false);
-    QVERIFY(map.contains(MetaKeyAudioType) == false);
-    QVERIFY(map.contains(MetaKeyKeywords) == false);
-    QVERIFY(map.contains(MetaKeyVideoResolutionString) == false);
-    QVERIFY(map.contains(MetaKeyBitRate) == false);
-    
-    QCOMPARE(map[MetaKeyDate].toDate(), QDate(2009, 1, 1));
-    QVERIFY(map[MetaKeyDurationString].toString().isEmpty() == false);
-    QVERIFY(map[MetaKeySizeString].toString().isEmpty() == false);
-    QCOMPARE(map[MetaKeyStarRating].toUInt(), (uint)1);
-    QCOMPARE(map[MetaKeyDescription].toString(), gQTMediaDescPrefix + "0");
-    QCOMPARE(map[MetaKeyModifiedDate].toDate(), QDate::currentDate().addDays(2));
-    QCOMPARE(map[MetaKeyAuthor].toString(), gQTMediaAuthorPrefix + "0");
-    QCOMPARE(map[MetaKeyCopyright].toString(), gQTMediaCopyrightPrefix + "0");
-    QCOMPARE(map[MetaKeyLanguageString].toString(), gQTMediaLanguagePrefix + "0");
-    QCOMPARE(map[MetaKeyFormat].toString(), gQTMediaFormatPrefix + "0");
-    
-    // data does not exist
-    mTestObject->mMediaData.clear();
-    mMediaFactory->removeArray();
-    mMediaFactory->createMediaItems(MEDIA_COUNT, MediaDataId);    
-    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
-    VideoCollectionUtils::mPrepareLengthStringReturnValue = "";
-    VideoCollectionUtils::mPrepareSizeStringReturnValue = "";
-    
-    map = mTestObject->getMetaDataFromIndex(-1);
-    QVERIFY(map.isEmpty());
-    
-    map = mTestObject->getMetaDataFromIndex(MEDIA_COUNT);
-    QVERIFY(map.isEmpty());
-    
-    map = mTestObject->getMetaDataFromIndex(0);
-    QCOMPARE(map.count(), 0); 
-    
-    map = mTestObject->getMetaDataFromIndex(MEDIA_COUNT - 1);
-    QCOMPARE(map.count(), 0);
-    
-    disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));
-}
-
-// -----------------------------------------------------------------------------
 // testVideoMarkAndRestoreDeleted
 // -----------------------------------------------------------------------------
 //
@@ -657,7 +581,7 @@ void TestVideoModel_p::testGetFilePathForId()
     // data does not exist
     mTestObject->mMediaData.clear();
     mMediaFactory->removeArray();
-    mMediaFactory->createMediaItems(MEDIA_COUNT, MediaDataId);    
+    mMediaFactory->createMediaItems(MEDIA_COUNT, MediaDataId);
     emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
     
     path = mTestObject->getFilePathForId(TMPXItemId(0,0));
@@ -876,7 +800,7 @@ void TestVideoModel_p::testAppendVideoListSlot()
     VideoListDataModel::mLastInserted = -1;
     
     // append null
-   emit signalAppendVideoList(0);
+    emit signalAppendVideoList(0);
     QVERIFY(VideoListDataModel::mFirstInserted == -1);
     QVERIFY(VideoListDataModel::mLastInserted == -1);
     QVERIFY(mTestObject->getVideoCount() == 0);
@@ -1012,11 +936,54 @@ void TestVideoModel_p::testAlbumListAvailableSlot()
 }
 
 // -----------------------------------------------------------------------------
+// testItemModifiedSlot
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testItemModifiedSlot()
+{
+    mMediaFactory->removeArray();
+
+    QVERIFY(connect(this, SIGNAL(signalItemModified(const TMPXItemId &)), mTestObject, SLOT(itemModifiedSlot(const TMPXItemId &))));  
+    
+    QSignalSpy spysignal(mTestObject, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
+
+    // invalid item id, no items
+    TMPXItemId id = TMPXItemId::InvalidId();
+    emit signalItemModified(id);
+    QVERIFY(spysignal.count() == 0);
+    
+    // invalid item id, model has items
+    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));           
+    mMediaFactory->createMediaItems(MEDIA_COUNT);
+    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
+
+    emit signalItemModified(id);
+    QVERIFY(spysignal.count() == 0);
+    
+    // ok item id, model has items
+    id = TMPXItemId(0, 0);
+    emit signalItemModified(id);
+    QVERIFY(spysignal.count() == 1);
+    spysignal.clear();
+    
+    // ok item id, model has items but returns invalid index
+    VideoListDataModel::mIndexReturnsInvalid = true;
+    id = TMPXItemId(0, 0);
+    emit signalItemModified(id);
+    QVERIFY(spysignal.count() == 0);
+    spysignal.clear();
+
+    disconnect(this, SIGNAL(signalItemModified(const TMPXItemId &)), mTestObject, SLOT(itemModifiedSlot(const TMPXItemId &)));    
+    VideoListDataModel::mIndexReturnsInvalid = false;
+}
+
+// -----------------------------------------------------------------------------
 // testNewVideoAvailableSlot
 // -----------------------------------------------------------------------------
 //
 void TestVideoModel_p::testNewVideoAvailableSlot()
 {
+    VideoListDataModel::mIndexReturnsInvalid = false;
     QVERIFY(mTestObject->initialize() == 0);
     
     connect(this, SIGNAL(signalNewVideoAvailable(CMPXMedia*)), mTestObject, SLOT(newVideoAvailableSlot(CMPXMedia*)));
@@ -1321,34 +1288,84 @@ void TestVideoModel_p::testAlbumRemoveFailureSlot()
 // testVideoDetailsCompletedSlot
 // -----------------------------------------------------------------------------
 //
-
 void TestVideoModel_p::testVideoDetailsCompletedSlot()
 {
+    using namespace VideoCollectionCommon;
+    
     mMediaFactory->removeArray();
-    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
-    QVERIFY(connect(this, SIGNAL(signalVideoDetailsCompleted(TMPXItemId)), mTestObject, SLOT(videoDetailsCompletedSlot(TMPXItemId))));      
+//    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
+    QVERIFY(connect(this, SIGNAL(signalVideoDetailsCompleted(CMPXMedia*)), mTestObject, SLOT(videoDetailsCompletedSlot(CMPXMedia*))));      
     
-    QSignalSpy spysignal(mTestObject, SIGNAL(videoDetailsReady(TMPXItemId)));
-
-    // no videos, id ok
-    emit signalVideoDetailsCompleted(TMPXItemId(0,0));
-    QVERIFY(spysignal.count() == 1);        
+    HbExtendedLocale locale = HbExtendedLocale::system();
+    
+    MetaDataSignalSpy spysignal(mTestObject, SIGNAL(videoDetailsReady(QVariant&)));
+    
+    // check with NULL media.
+    emit signalVideoDetailsCompleted(0);
+    QCOMPARE(spysignal.count, 0);
+    
+    // setup medias.
+    mMediaFactory->createMediaItems(2);
+    CMPXMedia* media = mMediaFactory->mediaArray()->operator [](0);
+    
+    // ok case
+    emit signalVideoDetailsCompleted(media);
+    QCOMPARE(spysignal.count, 1);
+    QMap<QString, QVariant> map = spysignal.arg.toMap();
+    
+    QVERIFY(map.contains(MetaKeyDate));
+    QVERIFY(map.contains(MetaKeyDurationString));
+    QVERIFY(map.contains(MetaKeySizeString));
+    QVERIFY(map.contains(MetaKeyStarRating));
+    QVERIFY(map.contains(MetaKeyDescription));
+    QVERIFY(map.contains(MetaKeyModifiedDate));
+    QVERIFY(map.contains(MetaKeyAuthor));
+    QVERIFY(map.contains(MetaKeyCopyright));
+    QVERIFY(map.contains(MetaKeyLanguageString));
+    QVERIFY(map.contains(MetaKeyFormat));
+    QVERIFY(map.contains(MetaKeyVideoResolutionString));
+    QVERIFY(map.contains(MetaKeyBitRate));
+    
+    // one or several of these will fail, when rest of the metadata is implemented.
+    QVERIFY(map.contains(MetaKeyDRMInfo) == false);
+    QVERIFY(map.contains(MetaKeyServiceURL) == false);
+    QVERIFY(map.contains(MetaKeyShotLocation) == false);
+    QVERIFY(map.contains(MetaKeyAudioType) == false);
+    QVERIFY(map.contains(MetaKeyKeywords) == false);
+    
+    QCOMPARE(map[MetaKeyDate].toString(), locale.format(QDate(2009, 1, 1), r_qtn_date_usual));
+    QVERIFY(map[MetaKeyDurationString].toString().isEmpty() == false);
+    QVERIFY(map[MetaKeySizeString].toString().isEmpty() == false);
+    QCOMPARE(map[MetaKeyStarRating].toUInt(), (uint)1);
+    QCOMPARE(map[MetaKeyDescription].toString(), gQTMediaDescPrefix + "0");
+    QCOMPARE(map[MetaKeyModifiedDate].toString(), locale.format(QDate::currentDate().addDays(2), r_qtn_date_usual));
+    QCOMPARE(map[MetaKeyAuthor].toString(), gQTMediaAuthorPrefix + "0");
+    QCOMPARE(map[MetaKeyCopyright].toString(), gQTMediaCopyrightPrefix + "0");
+    QCOMPARE(map[MetaKeyLanguageString].toString(), gQTMediaLanguagePrefix + "0");
+    QCOMPARE(map[MetaKeyFormat].toString(), gQTMediaFormatPrefix + "0");
+    QCOMPARE(map[MetaKeyVideoResolutionString].toString(), hbTrId("txt_videos_list_l1l2").arg(1).arg(2));
+    QCOMPARE(map[MetaKeyBitRate].toString(), hbTrId("txt_videos_list_l1_kbps", 800));
+    
+    // Mbps case
+    media = mMediaFactory->mediaArray()->operator [](1);
+    emit signalVideoDetailsCompleted(media);
+    QCOMPARE(spysignal.count, 2);
+    map = spysignal.arg.toMap();    
+    QVERIFY(map.contains(MetaKeyBitRate));
+    QCOMPARE(map[MetaKeyBitRate].toString(), hbTrId("txt_videos_list_l1_mbps", 2));
+    
+    // empty media case
     spysignal.clear();
+    mMediaFactory->removeArray();
+    mMediaFactory->createMediaItems(1, MediaDataId);
+    CMPXMedia* emptyMedia = mMediaFactory->mediaArray()->operator [](0);
     
-    mMediaFactory->createMediaItems(MEDIA_COUNT);
-    emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
-    
-    // invalid id
-    emit signalVideoDetailsCompleted(TMPXItemId::InvalidId());
-    QVERIFY(spysignal.count() == 0); 
-    
-    // correct ids
-    emit signalVideoDetailsCompleted(TMPXItemId(0,0));
-    QVERIFY(spysignal.count() == 1); 
-    QVERIFY(spysignal.value(0).at(0).toInt() == 0);
-    spysignal.clear();
-    emit signalVideoDetailsCompleted(TMPXItemId(MEDIA_COUNT - 1,0));
-    QVERIFY(spysignal.count() == 1); 
+    emit signalVideoDetailsCompleted(emptyMedia);
+    QCOMPARE(spysignal.count, 1);
+    map = spysignal.arg.toMap();
+    QCOMPARE(map.count(), 2);
+    QVERIFY(map.contains(MetaKeyDurationString));
+    QVERIFY(map.contains(MetaKeySizeString));
     
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));  
     disconnect(this, SIGNAL(signalVideoDetailsCompleted(TMPXItemId)), mTestObject, SLOT(videoDetailsCompletedSlot(TMPXItemId)));

@@ -38,7 +38,7 @@ class HbGroupBox;
 class VideoListSelectionDialog;
 class HbMenu;
 class VideoServices;
-
+class TMPXItemId;
 
 /**
  * Class acts as an container for widgets that are used to display different
@@ -78,9 +78,10 @@ public:
      * Activates current widget to be shown, enables menu and connects
      * orientation change signals.
      *
+     * @param itemId, Id of the widget which is to be activated
      * @return 0 activation ok, < 0 if activation fails
      */
-    int activateView();
+    int activateView(const TMPXItemId &itemId);
 
     /**
      * Deactivates current widget, disables menu and disconnects
@@ -215,6 +216,11 @@ private slots:
      *
      */
     void aboutToShowMainMenuSlot();
+    
+    /**
+     * Prepare menu when videos used through browsing service.
+     */
+    void prepareBrowseServiceMenu();
 
     /**
      * Slot is connected into hbInstance's primary window's
@@ -263,11 +269,6 @@ private slots:
     void finishCollectionClosedSlot(const HbEffect::EffectStatus &status);    
     
     /**
-     * Slot which is called when a widget has been loaded.
-     */
-    void widgetReadySlot(QGraphicsWidget *widget, const QString &name);
-    
-    /**
      * Slot which is called when an object has been loaded.
      */
     void objectReadySlot(QObject *object, const QString &name);
@@ -280,25 +281,6 @@ private slots:
     void debugNotImplementedYet();
 
 private:
-
-    /**
-     * Delayed load of multiselection dialog component
-	 *
-     */
-    void loadMultiSelection();
-
-    /**
-     * Delayed load videolistwidgets
-	 *
-     */
-    void loadLists(bool doAsync);
-    
-    /**
-     * Delayed load of hint components
-	 *
-     */
-    void loadHint(bool doAsync);
-
     /**
      * Cleans all possibly created objects from this. In some cases there are no quarantees
      * that they were created correctly, and thus is better to start again from clean slate.
@@ -349,14 +331,14 @@ private:
     void showAction(bool show, const QString &name);
     
     /**
-     * Check if menu action is checked.
+     * Activate to all videos view. 
      */
-    bool isActionChecked(const QString &name);
+    int activateVideosView();
     
     /**
-     * Sets an action as checked.
+     * Activate to collection content view.
      */
-    void setActionChecked(bool setChecked, const QString &name);
+    int activateCollectionContentView(const TMPXItemId &itemId);
     
 private:
 
@@ -391,21 +373,6 @@ private:
      * Boolean for knowing when the app was started as a service.
      */
     bool mIsService;
-    
-    /**
-     * Boolean for knowing wether the hint component has been loaded or not.
-     */
-    bool mHintLoaded;
-
-    /**
-     * Boolean for knowing wether the list widgets have been loaded or not.
-     */
-    bool mListsLoaded;
-    
-    /**
-     * Boolean for knowing wether the multiselection component has been loaded or not.
-     */
-    bool mMultiselectionLoaded;
     
     /**
      * Boolean for knowing when the model is ready.

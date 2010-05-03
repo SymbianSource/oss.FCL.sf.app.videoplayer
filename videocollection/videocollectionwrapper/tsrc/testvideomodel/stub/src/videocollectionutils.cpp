@@ -20,6 +20,8 @@
 
 #include <qobject.h>
 #include "videocollectionutils.h"
+#include <QTime>
+#include <hbextendedlocale.h>
 
 QString VideoCollectionUtils::mPrepareLengthStringReturnValue = "test duration";
 QString VideoCollectionUtils::mPrepareSizeStringReturnValue = "test size";
@@ -110,53 +112,28 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 }
 
 // -----------------------------------------------------------------------------
-// VideoCollectionUtils::prepareLengthStrings()
+// VideoCollectionUtils::prepareShortLengthString()
 // -----------------------------------------------------------------------------
 //
-const QStringList VideoCollectionUtils::prepareLengthStrings(quint32 total)
+const QString VideoCollectionUtils::prepareShortLengthString(quint32 total)
 {
-    const int secondsInMinute( 60 );
+	const int secondsInMinute( 60 );
+    const int secondsInHour( 3600 );
 
-    quint32 minutes(0);
-    quint32 seconds(0);
-    
-    if ( total > 0 )
-    {
-        minutes = (total / secondsInMinute);
-        seconds = (total % secondsInMinute);
-    }
-    
-    QString mins("");
-    QString secs("");
-    
-    if (minutes < 10)
-    {
-        mins = "0" + QString::number(minutes); 
-        
-    }
-    else
-    {
-        mins = QString::number(minutes);
-    }
-      
-    QString secondsStr("");
-    
-    if (seconds < 10)
-    {
-        secs = "0" + QString::number(seconds); 
-        
-    }
-    else
-    {
-        secs = QString::number(seconds);
-    }
-    
-    QStringList retVal;
-    
-    retVal.append(mins);
-    retVal.append(secs);
-    
-    return retVal;
+    int hour = total / secondsInHour;
+    total = total % secondsInHour;
+    int minutes = total / secondsInMinute;
+    total = total % secondsInMinute;
+    int second = total;
+
+    QTime time( hour ,minutes ,second );
+    QString str;
+
+    HbExtendedLocale locale = HbExtendedLocale::system();
+
+    str = locale.format( time, r_qtn_time_durat_long_with_zero );
+
+    return str;
 }
 
 

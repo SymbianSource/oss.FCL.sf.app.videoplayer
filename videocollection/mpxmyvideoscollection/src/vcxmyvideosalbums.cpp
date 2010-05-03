@@ -166,6 +166,51 @@ CVcxMyVideosAlbum* CVcxMyVideosAlbums::Album( TUint32 aMdsId, TInt* aPos )
 //
 void CVcxMyVideosAlbums::AddVideosToAlbumL( CMPXMedia* aCmd )
     {    
+    TInt albumId = TVcxMyVideosCollectionUtil::Uint32ValueL( *aCmd );
+    CVcxMyVideosAlbum* album = Album( albumId );
+    if ( album )
+        {
+        CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( *aCmd );
+        TInt count = mediaArray->Count();
+        CMPXMedia* video;
+        TInt mdsId;
+        RArray<TUint32> uniqueVideoIds;
+        uniqueVideoIds.Reset();
+        CleanupClosePushL( uniqueVideoIds );
+        
+        for ( TInt i = 0; i < count; i++ )
+            {
+            video = mediaArray->AtL( i );
+            mdsId = TVcxMyVideosCollectionUtil::IdL( *video ).iId1;
+
+            // Mark duplicates as failed to aCmd (KErrAlreadyExists)
+            if ( uniqueVideoIds.Find( mdsId ) == KErrNotFound )
+                {
+                uniqueVideoIds.AppendL( mdsId );
+
+                // Mark videos which are already in album as failed to aCmd (KErrAlreadyExists)
+                if ( album->BelongsToAlbum( mdsId ) )
+                    {
+                    MPX_DEBUG3("CVcxMyVideosAlbums:: %d already belongs to %d album",
+                            mdsId, albumId );
+                    video->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, KErrAlreadyExists );
+                    }
+                else
+                    {
+                    video->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, KErrNone );
+                    }
+                }
+            else
+                {
+                MPX_DEBUG2("CVcxMyVideosAlbums:: %d already present in the aCmd, marking as KErrAlreadyExists", mdsId);
+                video->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, KErrAlreadyExists );
+                }
+
+            }
+        
+        CleanupStack::PopAndDestroy( &uniqueVideoIds );
+        }
+    
     iCollection.iMyVideosMdsDb->iAlbums->AddVideosToAlbumL( aCmd, *this );
     }
 
@@ -217,6 +262,11 @@ void CVcxMyVideosAlbums::RemoveVideosFromAlbumL( CMPXMedia* aCmd )
 //
 void CVcxMyVideosAlbums::AddAlbumL( CMPXMedia& aCmd )
     {
+    if ( TVcxMyVideosCollectionUtil::Title( aCmd ).Length() > 255 )
+        {
+        User::Leave( KErrArgument );
+        }
+    
     iCollection.iMyVideosMdsDb->iAlbums->AddAlbumL( aCmd );
     
     TUint32 mdsId = TVcxMyVideosCollectionUtil::IdL( aCmd ).iId1;
@@ -243,7 +293,6 @@ void CVcxMyVideosAlbums::AddAlbumL( CMPXMedia& aCmd )
 //
 void CVcxMyVideosAlbums::RemoveAlbumsFromMdsOnlyL( CMPXMedia* aCmd )
     {
-    //TODO: find out what happens to relations, do we have to clean them out
     iCollection.iMyVideosMdsDb->iAlbums->RemoveAlbumsL( aCmd, *this );
     }
 
@@ -294,6 +343,19 @@ TBool CVcxMyVideosAlbums::RemoveAlbumL( TUint32 aMdsId, TBool aCompress )
         return ETrue;
         }
     return EFalse;
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::CalculateAttributesL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::CalculateAttributesL()
+    {
+    TInt count = iAlbums.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        iAlbums[i]->CalculateAttributesL();
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -429,36 +491,71 @@ void CVcxMyVideosAlbums::DoHandleAddVideosToAlbumRespL( CMPXMedia* aCmd,
     {
     MPX_DEBUG1("CVcxMyVideosAlbums::DoHandleAddVideosToAlbumResp() start");
 
+    TUint32 albumId = TVcxMyVideosCollectionUtil::Uint32ValueL( *aCmd );
+    CVcxMyVideosAlbum* album = Album( albumId );
+
     CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( *aCmd );
     
     TVcxMyVideosAlbumVideo video;
-    TUint albumId;
-    CVcxMyVideosAlbum* album;
-    
-    TInt count = aItemArray.Count();
-    for ( TInt i = 0; i < count; i++ )
+    RArray<CVcxMyVideosAlbum*> modifiedAlbums;
+    modifiedAlbums.Reset();
+    CleanupClosePushL( modifiedAlbums );
+
+    TInt mediaArrayCount  = mediaArray->Count();
+    TInt resultArrayCount = aItemArray.Count();
+    CMPXMedia* media;
+    TInt j = 0;
+    for ( TInt i = 0; i < mediaArrayCount; i++ )
         {
-        video.iRelationMdsId = aItemArray[i]->Id(); 
-        MPX_DEBUG3( "CVcxMyVideosAlbums:: item result[%d] = %d (id)", i, video.iRelationMdsId );
-        if ( video.iRelationMdsId == KNoId )
+        if ( j > resultArrayCount - 1 )
             {
-            mediaArray->AtL( i )->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
-                    KErrGeneral );
+            MPX_DEBUG1("CVcxMyVideosAlbums:: result array already at end, skipping the rest");
+            break; //break from for loop
+            }
+
+        media = mediaArray->AtL( i );
+
+        // Skip items which were already failed (KErrAlreadyExists)
+        if ( TVcxMyVideosCollectionUtil::Int32ValueL( *media ) != KErrAlreadyExists )
+            {
+            video.iRelationMdsId = aItemArray[j]->Id(); 
+            MPX_DEBUG3( "CVcxMyVideosAlbums:: item result[%d] = %d (id)", j, video.iRelationMdsId );
+            if ( video.iRelationMdsId == KNoId )
+                {
+                media->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                        KErrGeneral );
+                }
+            else
+                {
+                media->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value, KErrNone );
+                video.iMdsId = TVcxMyVideosCollectionUtil::IdL( *media ).iId1;
+                if ( album )
+                    {
+                    album->AddL( video );
+                    if ( modifiedAlbums.Find( album ) == KErrNotFound )
+                        {
+                        modifiedAlbums.AppendL( album );
+                        }
+                    iCollection.iMessageList->AddEventL( TMPXItemId( albumId, KVcxMvcMediaTypeAlbum ),
+                            EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
+                    }
+                }
+            j++;
             }
         else
             {
-            mediaArray->AtL( i )->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value, KErrNone );
-            video.iMdsId = TVcxMyVideosCollectionUtil::IdL( *mediaArray->AtL( i ) ).iId1;
-            albumId      = TVcxMyVideosCollectionUtil::Uint32ValueL( *aCmd );
-            album = Album( albumId );
-            if ( album )
-                {
-                album->AddL( video );
-                iCollection.iMessageList->AddEventL( TMPXItemId( albumId, KVcxMvcMediaTypeAlbum ),
-                        EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
-                }
+            MPX_DEBUG2("CVcxMyVideosAlbums:: skipping already failed %d(KErrAlreadyExists) media array item",
+                    TVcxMyVideosCollectionUtil::IdL( *media ).iId1 );
             }
         }
+
+    TInt count = modifiedAlbums.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        modifiedAlbums[i]->CalculateAttributesL();
+        }
+    
+    CleanupStack::PopAndDestroy( &modifiedAlbums );
     
     iCollection.iActiveTask->Done();
     iCollection.iMessageList->SendL();
@@ -549,20 +646,33 @@ void CVcxMyVideosAlbums::HandleRelationEvent( TObserverNotificationType /*aType*
         const RArray<TMdERelation>& aRelationArray )
     {    
     TRAP_IGNORE(
-    
+
+    RArray<CVcxMyVideosAlbum*> modifiedAlbums;
+    modifiedAlbums.Reset();
+    CleanupClosePushL( modifiedAlbums );
+
     TUint albumId;
     CVcxMyVideosAlbum* album;
     TInt count = aRelationArray.Count();
+    
+    
     for ( TInt i = 0; i < count; i++ )
         {
         albumId = aRelationArray[i].LeftObjectId();
+        
+        MPX_DEBUG3("CVcxMyVideosAlbums:: relation (%d,%d) deleted from MDS",
+                aRelationArray[i].LeftObjectId(), aRelationArray[i].RightObjectId() );
         
         if ( iAlbumListIsComplete )
             {
             album = Album( albumId );
             if ( album )
                 {
-                album->Remove( aRelationArray[i].RightObjectId(), ETrue /* compress */ );                
+                if ( modifiedAlbums.Find( album ) == KErrNotFound )
+                    {
+                    modifiedAlbums.AppendL( album );
+                    }
+                album->Remove( aRelationArray[i].RightObjectId(), ETrue /* compress */ );
                 iCollection.iMessageList->AddEventL( TMPXItemId( albumId, KVcxMvcMediaTypeAlbum ),
                         EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
                 }
@@ -574,15 +684,28 @@ void CVcxMyVideosAlbums::HandleRelationEvent( TObserverNotificationType /*aType*
             //album fetching from scratch.
             }
         }
+    
+    count = modifiedAlbums.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        modifiedAlbums[i]->CalculateAttributesL();
+        }
+    
+    CleanupStack::PopAndDestroy( &modifiedAlbums );
+    
     iCollection.iMessageList->SendL();
     
     );
     }
 
+//HandleRelationIdEvent
+
 // ----------------------------------------------------------------------------
 // CVcxMyVideosAlbums::UpdateAlbumL
 // Updates album attributes from aAlbum, if album is not found from memory,
 // nothing is done (no fetching from MDS).
+// This func is also called (by MDS modified event) when items are added or
+// removed from album.
 // ----------------------------------------------------------------------------
 //
 TBool CVcxMyVideosAlbums::UpdateAlbumL( const CMPXMedia& aAlbum )
@@ -608,7 +731,39 @@ TBool CVcxMyVideosAlbums::UpdateAlbumL( const CMPXMedia& aAlbum )
                 changed = ETrue;
                 }
             }
+        // calculate attributes, in case that videos were removed or added to this album
+        album->CalculateAttributesL();
         }
+        
     return changed;
     }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::NewVideoFlagChangedL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::NewVideoFlagChangedL( TUint32 aMdsId )
+    {    
+    TInt count = iAlbums.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        if ( iAlbums[i]->BelongsToAlbum( aMdsId ) )
+            {
+            iAlbums[i]->CalculateAttributesL();
+            iCollection.iMessageList->AddEventL(
+                    TMPXItemId( iAlbums[i]->iMdsId, KVcxMvcMediaTypeAlbum ),
+                    EMPXItemModified, EVcxMyVideosListNoInfo );
+            }
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::VideoTitleChangedL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::VideoTitleChangedL( TUint32 aMdsId )
+    {    
+    NewVideoFlagChangedL( aMdsId ); // same calculation works for this
+    }
+
 // END OF FILE

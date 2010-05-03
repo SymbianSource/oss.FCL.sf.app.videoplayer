@@ -18,7 +18,7 @@
 
 #include "hbaction.h"
 #include "hblabel.h"
-#include "HbDialog.h"
+#include "hbdialog.h"
 
 HbDialog *HbDialog::currentInstance = 0;
 bool HbDialog::execReturnPrimary = true;
@@ -29,8 +29,6 @@ HbDialog::HbDialog(QGraphicsItem *parent) :
 HbWidget(parent),
 mHeadingWidget(0),
 mContentWidget(0),
-mPrimaryAction(0),
-mSecondaryAction(0),
 mTimeout(NoTimeout),
 mDismissPolicy(NoDismiss)
 
@@ -45,8 +43,6 @@ mDismissPolicy(NoDismiss)
 HbDialog::~HbDialog()
 {
     delete mHeadingWidget;
-    delete mPrimaryAction;
-    delete mSecondaryAction;
     delete mContentWidget;
     currentInstance = 0;
     mActions.clear();
@@ -60,11 +56,21 @@ void HbDialog::open( QObject* receiver, const char* member)
     }
     if(execReturnPrimary)
     {
-        emit finished(mPrimaryAction);
+        HbAction *action = 0;
+        if(mActions.count() >= 1)
+        {
+            action = mActions[0];
+        }
+        emit finished(action);
     }
     else
     {
-        emit finished(mSecondaryAction);
+        HbAction *action = 0;
+        if(mActions.count() >= 2)
+        {
+            action = mActions[1];
+        }
+        emit finished(action);
     }
     if(receiver && member)
     {
@@ -81,7 +87,7 @@ void HbDialog::setTimeout(HbDialog::DefaultTimeout timeout)
 {
     mTimeout = timeout;
 }
-    
+
 void HbDialog::setHeadingWidget(QGraphicsWidget *headingWidget)
 {
     mHeadingWidget = headingWidget;
@@ -92,39 +98,11 @@ void HbDialog::setContentWidget(QGraphicsWidget *contentWidget)
     mContentWidget = contentWidget;
 }
 
-void HbDialog::setPrimaryAction(HbAction *action)
-{
-    mPrimaryAction = action;
-}
-
-HbAction* HbDialog::primaryAction()
-{
-    if(primaryReturnNull)
-    {
-        return 0;
-    }
-    return mPrimaryAction;
-}
-
-void HbDialog::setSecondaryAction(HbAction *action)
-{
-    mSecondaryAction = action;
-}
-
-HbAction* HbDialog::secondaryAction()
-{
-    if(secondaryReturnNull)
-    {
-        return 0;
-    }
-    return mSecondaryAction;
-}
-
 void HbDialog::addAction(HbAction *action)
 {
     mActions.append(action);
 }
-           
+
 void HbDialog::setMinimumSize(QSize size)
 {
     mMinSize.setHeight(size.height());
@@ -135,13 +113,4 @@ void HbDialog::setMaximumSize(QSize size)
 {
     mMaxSize.setHeight(size.height());
     mMaxSize.setWidth(size.width());
-}
-
-HbAction* HbDialog::exec()
-{   
-    if(execReturnPrimary)
-    {
-        return mPrimaryAction;
-    }
-    return mSecondaryAction;
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -45,10 +45,12 @@ class HbPushButton : public HbWidget
         QGraphicsItem* primitive( HbStyle::Primitive primitive ) const;
         void press();
         void release();
+        void pressing();
 
     signals:
         void pressed();
         void released();
+        void longPress( QPointF );
 
     public:
         bool mVisible;

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 23 %
+// Version : %version: da1mmcf#25 %
 
 
 #include <QApplication>
@@ -35,17 +35,18 @@
 // QVideoPlayerEngine()
 // -------------------------------------------------------------------------------------------------
 //
-QVideoPlayerEngine::QVideoPlayerEngine(bool isService)
+QVideoPlayerEngine::QVideoPlayerEngine( bool isService )
     : mIsService( isService )
-    , mEmbedded(false)
-    , mDelayedLoadDone(false)
+    , mEmbedded( false )
+    , mDelayedLoadDone( false )
     , mCurrentViewPlugin( 0 )
     , mPlaybackViewPlugin( 0 )
     , mCollectionViewPlugin( 0 )
     , mFileDetailsViewPlugin( 0 )
     , mPlaybackWrapper( 0 )
-    , mVideoServices(0)
+    , mVideoServices( 0 )
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::QVideoPlayerEngine()"));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -90,6 +91,7 @@ QVideoPlayerEngine::~QVideoPlayerEngine()
 void QVideoPlayerEngine::initialize()
 {
     MPX_ENTER_EXIT(_L("QVideoPlayerEngine::initialize()"));	
+	
     //
     // Clean up QVideoPlayerEngine when qApp try to quit
     //
@@ -120,29 +122,27 @@ void QVideoPlayerEngine::initialize()
     XQPluginLoader::listImplementations("org.nokia.mmdt.MpxViewPlugin/1.0", impls);
 
     //
-    // Pre-load collectionview and playbackview plugins
+    // Pre-load collection plugin and create collection view
     //
-    loadPlugin( MpxHbVideoCommon::CollectionView );
-
-    if ( mCollectionViewPlugin ) 
+    loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );
+    
+    //
+    // if app is opened via serviceFW create remaining views
+    // otherwise activate default view i.e. the collection view.    
+    //
+    if( mIsService )
     {
-        mCollectionViewPlugin->createView();
-        hbInstance->allMainWindows().value(0)->addView( mCollectionViewPlugin->getView() );
+        createPlayAndDetailsViews(); 
     }
-    
-    //
-    // default view in the app is the collection view.
-    //
-    if(!mIsService)
-    {
+    else
+    {        
         activateView( MpxHbVideoCommon::CollectionView );
-    } 
-    
+    }
+        
     // delayed initialization of some uiengine member variables
     // to help application startup time & improve playback start time
     //
-    mPlaybackWrapper->lateInit();        
-    
+    mPlaybackWrapper->lateInit();         
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -151,8 +151,9 @@ void QVideoPlayerEngine::initialize()
 //
 void QVideoPlayerEngine::handleCommand( int commandCode )
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::handleCommand()"));	
-	  
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::handleCommand()"),
+                   _L("commandCode = %d"), commandCode );
+    
     switch ( commandCode )
     {
         case MpxHbVideoCommon::ActivateCollectionView:
@@ -201,30 +202,32 @@ void QVideoPlayerEngine::handleCommand( int commandCode )
 //
 void QVideoPlayerEngine::doDelayedLoad()
 {
-    if ( !mPlaybackViewPlugin )
-	{
-	    loadPlugin( MpxHbVideoCommon::PlaybackView );
-
-	    if ( mPlaybackViewPlugin ) 
-	    {
-	        mPlaybackViewPlugin->createView();
-	        hbInstance->allMainWindows().value(0)->addView( mPlaybackViewPlugin->getView() );
-	    }
-	}
-
-    if ( !mFileDetailsViewPlugin )
-	{
-	    loadPlugin( MpxHbVideoCommon::VideoDetailsView );
-
-		if ( mFileDetailsViewPlugin )
-		{
-			mFileDetailsViewPlugin->createView();
-			hbInstance->allMainWindows().value(0)->addView( mFileDetailsViewPlugin->getView() );
-		}
-	}
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::doDelayedLoad()"));
+	
+    createPlayAndDetailsViews();
 	
 	mDelayedLoadDone = true;
 }
+
+// -------------------------------------------------------------------------------------------------
+// createPlayAndDetailsViews()
+// -------------------------------------------------------------------------------------------------
+//
+void QVideoPlayerEngine::createPlayAndDetailsViews()
+{
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::createPlayAndDetailsViews()"));
+    
+    if ( ! mPlaybackViewPlugin )
+    {
+        loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
+    }
+
+    if ( ! mFileDetailsViewPlugin )
+    {
+        loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );
+    }    
+}
+
 
 // -------------------------------------------------------------------------------------------------
 // activateView()
@@ -233,8 +236,9 @@ void QVideoPlayerEngine::doDelayedLoad()
 //
 void QVideoPlayerEngine::activateView( MpxHbVideoCommon::MpxHbVideoViewType viewType )
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::activateView()"));
-	  
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::activateView() "),
+                   _L("viewType = %d"), viewType );
+    	  
     disconnectView();
     
     if ( mCurrentViewPlugin )
@@ -245,69 +249,49 @@ void QVideoPlayerEngine::activateView( MpxHbVideoCommon::MpxHbVideoViewType view
 
     if ( viewType == MpxHbVideoCommon::CollectionView && mCollectionViewPlugin  ) 
     {
-        if ( mIsService &&  (VideoServices::EPlayback == mVideoServices->currentService()) )
-            {
-                qApp->quit();
-                XQServiceUtil::toBackground(false);
-                return;
-            }
-            else
-            {
-                mCurrentViewPlugin = mCollectionViewPlugin;
-            }
+        if ( mIsService &&  
+             ( mVideoServices->currentService() == VideoServices::EPlayback ||
+               mVideoServices->currentService() == VideoServices::EView ) )
+        {
+            qApp->quit();
+            XQServiceUtil::toBackground( false );
+        }
+        else
+        {
+            mCurrentViewPlugin = mCollectionViewPlugin;
+            setCurrentView();
+        }
     }
     else if ( viewType == MpxHbVideoCommon::PlaybackView ) 
     {
-		if(!mPlaybackViewPlugin)
+		if( ! mPlaybackViewPlugin )
     	{
-    		loadPlugin( MpxHbVideoCommon::PlaybackView );
-    	    if ( mPlaybackViewPlugin ) 
-    	    {
-    	        mPlaybackViewPlugin->createView();
-    	        hbInstance->allMainWindows().value(0)->addView( mPlaybackViewPlugin->getView() );
-    	    }
-    		else
-    		{
-    			return;
-    		}
-    	}
+    		loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
+        }
+		
         mCurrentViewPlugin = mPlaybackViewPlugin;
+        setCurrentView();
     }
     else if ( viewType == MpxHbVideoCommon::VideoDetailsView ) 
     {
-		if(!mFileDetailsViewPlugin)
+		if( ! mFileDetailsViewPlugin )
     	{
-    		loadPlugin( MpxHbVideoCommon::VideoDetailsView );	
-    		if ( mFileDetailsViewPlugin )
-    		{
-    			mFileDetailsViewPlugin->createView();
-    			hbInstance->allMainWindows().value(0)->addView( mFileDetailsViewPlugin->getView() );
-    		}
-    		else
-    		{
-    			return;
-    		}
+    		loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );	
     	}
+		
         mCurrentViewPlugin = mFileDetailsViewPlugin;
+        setCurrentView();
     }
-    else
-    {
-        // invalid plugin activation request, do nothing
-        return;
-    }
-    
-    hbInstance->allMainWindows().value(0)->setCurrentView( static_cast<HbView*>( mCurrentViewPlugin->getView() ), false );
-    connectView();
-    mCurrentViewPlugin->activateView();
 }
 
 // -------------------------------------------------------------------------------------------------
-// loadPlugin()
+// loadPluginAndCreateView()
 // -------------------------------------------------------------------------------------------------
 //
-void QVideoPlayerEngine::loadPlugin( MpxHbVideoCommon::MpxHbVideoViewType viewType )
+void QVideoPlayerEngine::loadPluginAndCreateView( MpxHbVideoCommon::MpxHbVideoViewType viewType )
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::loadPlugin()"));
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::loadPluginAndCreateView() "), 
+                   _L("viewType = %d"), viewType );
 	  
     int viewTypeUid( 0 );
 
@@ -326,24 +310,59 @@ void QVideoPlayerEngine::loadPlugin( MpxHbVideoCommon::MpxHbVideoViewType viewTy
 
     if ( viewTypeUid )
     {
-        // activate the collection view
+        // 
+		// load corresponding plug-in
+		//
         XQPluginLoader pluginLoader( viewTypeUid );
         QObject* instance = pluginLoader.instance();
 
         if ( instance )
         {
+            MpxViewPlugin *currentViewPlugin = NULL;
+
             if ( viewType == MpxHbVideoCommon::CollectionView ) 
             {
                 mCollectionViewPlugin = qobject_cast<MpxViewPlugin*>( instance )->viewPlugin();
+                currentViewPlugin = mCollectionViewPlugin;
             }
             else if ( viewType == MpxHbVideoCommon::PlaybackView )
             {
                 mPlaybackViewPlugin = qobject_cast<MpxViewPlugin*>( instance )->viewPlugin();
+                currentViewPlugin = mPlaybackViewPlugin;
             }
             else if ( viewType == MpxHbVideoCommon::VideoDetailsView )
             {
                 mFileDetailsViewPlugin = qobject_cast<MpxViewPlugin*>( instance )->viewPlugin();
+                currentViewPlugin = mFileDetailsViewPlugin;
             }
+            else
+            {
+                MPX_DEBUG(_L("QVideoPlayerEngine::loadPluginAndCreateView() : plugin not FOUND ! "));                
+            }
+            
+			//
+			// create corresponding view
+			//
+            if ( currentViewPlugin ) 
+            {
+                QGraphicsWidget *view = currentViewPlugin->getView();
+          
+                if ( ! view )
+                {
+                    MPX_DEBUG(_L("QVideoPlayerEngine::loadPluginAndCreateView() : create view "));
+                    
+                    currentViewPlugin->createView();
+                    hbInstance->allMainWindows().value(0)->addView( currentViewPlugin->getView() );
+                }
+                else
+                {
+                    MPX_DEBUG(_L("QVideoPlayerEngine::loadPluginAndCreateView() : view has already been created! "));                    
+                }
+            }
+            else
+            {
+                MPX_DEBUG(_L("QVideoPlayerEngine::loadPluginAndCreateView() : currentViewPlugin is NULL ! "));                    
+            }            
         }
     }
 }
@@ -355,7 +374,7 @@ void QVideoPlayerEngine::loadPlugin( MpxHbVideoCommon::MpxHbVideoViewType viewTy
 //
 void QVideoPlayerEngine::connectView()
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::connectView()"));
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::connectView()"));
 	  
     connect( mCurrentViewPlugin,
              SIGNAL( command( int ) ),
@@ -370,7 +389,7 @@ void QVideoPlayerEngine::connectView()
 //
 void QVideoPlayerEngine::disconnectView()
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::disconnectView()"));
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::disconnectView()"));
 	  
     if ( mCurrentViewPlugin )
     {
@@ -387,7 +406,7 @@ void QVideoPlayerEngine::disconnectView()
 //
 void QVideoPlayerEngine::handleQuit()
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::handleQuit()"));
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::handleQuit()"));
 	  
     delete this;
 }
@@ -399,9 +418,21 @@ void QVideoPlayerEngine::handleQuit()
 //
 void QVideoPlayerEngine::playMedia( QString filePath )
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::playMedia()")); 
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::playMedia()"),
+                   _L("filePath = %s"), filePath.data() );  
 	  	
     mPlaybackWrapper->playMedia( filePath );
+}
+
+// -------------------------------------------------------------------------------------------------
+// playMedia()
+// -------------------------------------------------------------------------------------------------
+//
+void QVideoPlayerEngine::playMedia( RFile file )
+{
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::playMedia( RFile )")); 
+        
+    mPlaybackWrapper->playMedia( file );    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -410,9 +441,38 @@ void QVideoPlayerEngine::playMedia( QString filePath )
 //
 void QVideoPlayerEngine::setEmbedded()
 {
-	  MPX_ENTER_EXIT(_L("QVideoPlayerEngine::setEmbedded()")); 
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::setEmbedded()")); 
 	  
     mEmbedded = true;
 }
+
+// -------------------------------------------------------------------------------------------------
+// setCurrentView()
+// -------------------------------------------------------------------------------------------------
+//
+void QVideoPlayerEngine::setCurrentView()
+{
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::setCurrentView()")); 
+	
+    if ( mCurrentViewPlugin )
+    {
+        //
+        // set current view
+        //
+        hbInstance->allMainWindows().value(0)->setCurrentView( 
+		                            qobject_cast<HbView*>( mCurrentViewPlugin->getView() ), false );
+
+        //
+        // connect view
+        //
+        connectView();
+
+        // 
+        // activate view
+        //
+        mCurrentViewPlugin->activateView();
+    }
+}
+
 
 // End of file

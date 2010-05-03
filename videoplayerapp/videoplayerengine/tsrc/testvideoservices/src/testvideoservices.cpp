@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version:  %
+
 // INCLUDES
 #include <QtTest/QtTest>
 #include <qdebug.h>
@@ -23,6 +25,7 @@
 #include "mpxhbvideocommondefs.h"
 #include "videoplayerengine.h"
 #include "testvideoservices.h"
+#include "mpxvideo_debug.h"
 
 #define private public
 #include "videoservices.h"
@@ -50,13 +53,16 @@ int main(int argc, char *argv[])
 
 
 TestVideoServices::TestVideoServices()
-	: mTestObject(0),
-	  mEngine(0)
+    : mTestObject( 0 )
+	, mEngine( 0 )
 {
+    MPX_DEBUG(_L("TestVideoServices::TestVideoServices()"));
 }
 
 TestVideoServices::~TestVideoServices()
 {
+    MPX_ENTER_EXIT(_L("TestVideoServices::~TestVideoServices()"));
+    
     delete mTestObject;
     mTestObject = 0;
 }
@@ -64,10 +70,13 @@ TestVideoServices::~TestVideoServices()
 
 void TestVideoServices::init()
 {
+    MPX_DEBUG(_L("TestVideoServices::init()"));
 }
 
 void TestVideoServices::cleanup()
 {
+    MPX_ENTER_EXIT(_L("TestVideoServices::cleanup()"));
+    
     delete mEngine;
     mEngine = 0;
 	
@@ -81,23 +90,29 @@ void TestVideoServices::cleanup()
 
 void TestVideoServices::testCreateDelete()
 {
+    MPX_DEBUG(_L("TestVideoServices::testCreateDelete()"));
+    
 	mTestObject = VideoServices::instance();
 
     QVERIFY(mTestObject);
     QVERIFY(mTestObject->mServicePlay);
     QVERIFY(mTestObject->mServiceUriFetch);
+    QVERIFY(mTestObject->mServiceView);
     QVERIFY(mTestObject->mEngine == 0);
     QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
 }
 
 void TestVideoServices::testCreateDeleteEngine()
 {
+    MPX_DEBUG(_L("TestVideoServices::testCreateDeleteEngine()"));
+    
 	mEngine = new QVideoPlayerEngine();
 	mTestObject = VideoServices::instance(mEngine);
 
     QVERIFY(mTestObject);
     QVERIFY(mTestObject->mServicePlay);
     QVERIFY(mTestObject->mServiceUriFetch);
+    QVERIFY(mTestObject->mServiceView);
     QVERIFY(mTestObject->mEngine == mEngine);
     QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
 }
@@ -105,11 +120,14 @@ void TestVideoServices::testCreateDeleteEngine()
 
 void TestVideoServices::testCurrentService()
 {
+    MPX_DEBUG(_L("TestVideoServices::testCurrentService()"));
+    
 	mTestObject = VideoServices::instance();
 
     QVERIFY(mTestObject);
     QVERIFY(mTestObject->mServicePlay);
     QVERIFY(mTestObject->mServiceUriFetch);
+    QVERIFY(mTestObject->mServiceView);
     QVERIFY(mTestObject->mEngine == 0);
     QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
 
@@ -130,6 +148,7 @@ void TestVideoServices::testCurrentService()
 	QVERIFY(mTestObject);
     QVERIFY(mTestObject->mServicePlay);
     QVERIFY(mTestObject->mServiceUriFetch);
+    QVERIFY(mTestObject->mServiceView);
     QVERIFY(mTestObject->mEngine == mEngine);
     QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
 
@@ -142,6 +161,7 @@ void TestVideoServices::testCurrentService()
 
 void TestVideoServices::cleanupTestCase()
 {
+    MPX_DEBUG(_L("TestVideoServices::cleanupTestCase()"));
     // all common cleanup here
 }
 

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 // INCLUDE FILES
@@ -31,7 +31,7 @@
 const TInt KDefaultPlaySpeed(100);        // 1x
 const TInt KDefaultTrickPlaySpeed(400);   // 4x
 #else
-const TInt KTrickPlayTimeout(5000000);    // 5 sec
+const TInt KTrickPlayTimeout(2000000);    // 2 sec
 const TInt KSpeedInterval(125000);        // 125 msec
 const TInt KDurationA(90000000);          // 90 sec
 const TInt KDurationB(180000000);         // 180 sec

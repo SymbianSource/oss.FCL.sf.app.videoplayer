@@ -15,28 +15,27 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  3 %
 
 
 #include <qdebug>
 #include <hbmainwindow.h>
 #include <hbapplication.h>
 #include <qgraphicssceneevent>
-#include <hbprogressbar.h>
+#include <hbprogressslider.h>
 
 
 #include "testprogressbar.h"
 #include "mpxvideoplaybackviewfiledetails.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
-#include "hblabel.h"
 
 #define private public
 #include "mpxvideoplaybackprogressbar.h"
 #undef private
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // main
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 int main(int argc, char *argv[])
 {
@@ -50,7 +49,7 @@ int main(int argc, char *argv[])
     char *pass[3];
     pass[0] = argv[0];
     pass[1] = "-o";
-    pass[2] = "c:\\data\\TestProgressBar.txt";
+    pass[2] = "c:\\data\\testprogressbar.txt";
     
     int res = QTest::qExec(&tv, 3, pass);
     
@@ -58,18 +57,18 @@ int main(int argc, char *argv[])
 }
 
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // init
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::init()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::init()"));
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // setup
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::setup()
 {
@@ -81,9 +80,9 @@ void TestProgressBar::setup()
     mProgBar->initialize();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // cleanup
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::cleanup()
 {
@@ -102,149 +101,301 @@ void TestProgressBar::cleanup()
     }
 }
 
-// ---------------------------------------------------------------------------
-// testMousePressEvent
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// testHandleSliderPressed
+// -------------------------------------------------------------------------------------------------
 //
-void TestProgressBar::testMousePressEvent()
+void TestProgressBar::testHandleSliderPressed()
 {
-    MPX_ENTER_EXIT(_L("TestProgressBar::testMousePressEvent()"));
+    MPX_ENTER_EXIT(_L("TestProgressBar::testHandleSliderPressed()"));
 
-    setup();    
+    setup();
+
+    //
+    // If it is playing state
+    //
     mController->mState = EPbStatePlaying;        
-    QGraphicsSceneMouseEvent* event = new QGraphicsSceneMouseEvent( QEvent::GraphicsSceneMousePress );       
-    event->setAccepted( false );    
 
-    mProgBar->mousePressEvent(event);
-    
-    QVERIFY( mController->mTimerAction == EMPXTimerCancel );        
-    QVERIFY( mProgBar->mNeedToResumeAfterSetPosition );    
-    QVERIFY( event->isAccepted() );      
-    
-    delete event;
-    event = NULL;     
+    emit mProgBar->mProgressSlider->press();
+
+    QVERIFY( mController->mTimerAction == EMPXTimerCancel );
+    QVERIFY( mController->mCommand == EMPXPbvCmdCustomPause );
+    QVERIFY( mProgBar->mSliderDragging );
+    QVERIFY( mProgBar->mNeedToResumeAfterSetPosition );
+
+    //
+    // If it is pause state
+    //
+    mController->mState = EPbStatePaused;        
+    mController->mCommand = EMPXPbvCmdStop;        
+
+    emit mProgBar->mProgressSlider->press();
+
+    QVERIFY( mController->mTimerAction == EMPXTimerCancel );
+    QVERIFY( mController->mCommand == EMPXPbvCmdStop );
+    QVERIFY( mProgBar->mSliderDragging );
+    QVERIFY( mProgBar->mNeedToResumeAfterSetPosition );
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
-// testMouseReleaseEvent
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// testHandleSliderReleased
+// -------------------------------------------------------------------------------------------------
 //
-void TestProgressBar::testMouseReleaseEvent()
+void TestProgressBar::testHandleSliderReleased()
 {
-    MPX_ENTER_EXIT(_L("TestProgressBar::testMouseReleaseEvent()"));
+    MPX_ENTER_EXIT(_L("TestProgressBar::testHandleSliderReleased()"));
 
     setup();
-    QGraphicsSceneMouseEvent* event = new QGraphicsSceneMouseEvent( QEvent::GraphicsSceneMouseRelease );       
-    event->setAccepted( false );     
+
+    //
+    // Moved position >= duration
+    //
+    mProgBar->mDuration = 120;
+    mProgBar->mProgressSlider->mSliderValue = 130;
+    mController->mTimerAction = EMPXTimerCancel;
+    mController->mCommand = EMPXPbvCmdStop;        
+
+    emit mProgBar->mProgressSlider->release();
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( ! mProgBar->mSliderDragging );
+    QVERIFY( mController->mCommand == EMPXPbvCmdEndOfClip );
+
+    //
+    // Moved position < 0
+    //
+    mProgBar->mProgressSlider->mSliderValue = -1;
+    mController->mTimerAction = EMPXTimerCancel;
+    mController->mCommand = EMPXPbvCmdStop;        
+    mController->mValue = 100;        
+
+    emit mProgBar->mProgressSlider->release();
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( ! mProgBar->mSliderDragging );
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mValue == 0 );
     
-    mProgBar->mouseReleaseEvent(event);
-    
-    QVERIFY( mController->mTimerAction == EMPXTimerReset );    
-    QVERIFY( event->isAccepted() );      
-    
-    delete event;
-    event = NULL; 
+    //
+    // 0 <= moved position < duration
+    //
+    mProgBar->mProgressSlider->mSliderValue = 60;
+    mController->mTimerAction = EMPXTimerCancel;
+    mController->mCommand = EMPXPbvCmdStop;        
+
+    emit mProgBar->mProgressSlider->release();
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( ! mProgBar->mSliderDragging );
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mValue == mProgBar->mProgressSlider->mSliderValue );
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
-// testMouseMoveEvent
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// testHandleSliderMoved
+// -------------------------------------------------------------------------------------------------
 //
-void TestProgressBar::testMouseMoveEvent()
+void TestProgressBar::testHandleSliderMoved()
 {
-    MPX_ENTER_EXIT(_L("TestProgressBar::testMouseMoveEvent()"));
+    MPX_ENTER_EXIT(_L("TestProgressBar::testHandleSliderMoved()"));
 
     setup();
-    QGraphicsSceneMouseEvent* event = new QGraphicsSceneMouseEvent( QEvent::GraphicsSceneMouseMove );       
-    event->setAccepted( false );
-    mProgBar->mDuration = 0;
-    
-    mProgBar->mouseMoveEvent(event);
-        
-    QVERIFY( mProgBar->mPositionLabel->mTextSet );
-    QVERIFY( event->isAccepted() );      
-    
-    delete event;
-    event = NULL; 
+
+    //
+    // If user is dragging the slider
+    //
+    int movedPositoin = 5;
+    mProgBar->mDuration = 20;
+    mProgBar->mSliderDragging = true;
+    emit mProgBar->mProgressSlider->move( movedPositoin );
+
+    QVERIFY( mProgBar->mDraggingPosition == movedPositoin );
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == movedPositoin );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == movedPositoin );
+
+    //
+    // If user isnot dragging the slider and movedPosition > mDuration
+    //
+    movedPositoin = 30;
+    mProgBar->mSliderDragging = false;
+
+    emit mProgBar->mProgressSlider->move( movedPositoin );
+
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == mProgBar->mDuration );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == mProgBar->mDuration );
+    QVERIFY( mController->mCommand == EMPXPbvCmdEndOfClip );
+
+    //
+    // If user isnot dragging the slider and movedPosition < mDuration
+    //
+    movedPositoin = 10;
+
+    emit mProgBar->mProgressSlider->move( movedPositoin );
+
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == movedPositoin );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == movedPositoin );
+
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mValue == movedPositoin );
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateWithFileDetails
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::testUpdateWithFileDetails()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::testUpdateWithFileDetails()"));
 
     setup();
-    
-    // test for live
-    mController->mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming;    
-    mProgBar->updateWithFileDetails( mController->mFileDetails );    
-    QVERIFY( mProgBar->mDurationLabel->mLabelText == "Live" );
-    
+
     // test for tv-out
     mController->mFileDetails->mPlaybackMode = EMPXVideoLocal; 
     mController->mFileDetails->mTvOutConnected = true;
     mController->mFileDetails->mTvOutPlayAllowed = false;
     mProgBar->updateWithFileDetails( mController->mFileDetails );
-    QVERIFY( ! mProgBar->isEnabled() );
-        
+    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
+
+    // live streaming
+    mController->mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming; 
+    mProgBar->updateWithFileDetails( mController->mFileDetails );
+    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
+
+    // other cases
+    mController->mFileDetails->mPlaybackMode = EMPXVideoLocal; 
+    mController->mFileDetails->mTvOutConnected = false;
+    mProgBar->updateWithFileDetails( mController->mFileDetails );
+    QVERIFY( mProgBar->mProgressSlider->isEnabled() );
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateState
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::testUpdateState()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::testUpdateState()"));
 
     setup();
-    
+
     // test for 1st block of cases
-    mController->mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming; 
-    mController->mViewMode =  EAudioOnlyView;
-    mProgBar->updateState(EPbStatePlaying);
-    QVERIFY( mProgBar->mDurationLabel->mLabelText == "Live" );    
-    
+    mProgBar->updateState( EPbStatePlaying );
+    QVERIFY( mProgBar->isEnabled() );
+
     // test for 2nd block of cases
-    mProgBar->updateState(EPbStateBuffering);
+    mProgBar->updateState( EPbStateBuffering );
     QVERIFY( ! mProgBar->isEnabled() );
-    
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testDurationChanged
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::testDurationChanged()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::testDurationChanged()"));
 
     setup();
-    
-    mProgBar->durationChanged( 120 );
-    
-    QVERIFY( mProgBar->mDuration == 120 );
-    QVERIFY( mProgBar->mProgressSlider->maximum() == 120 );
-    
+
+    int duration = 120;
+    mProgBar->durationChanged( duration );
+
+    QVERIFY( mProgBar->mDuration == duration );
+    QVERIFY( mProgBar->mProgressSlider->maximum() == duration );
+    QVERIFY( mProgBar->mProgressSlider->maxText() == "2:00" );
+
+    cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testPositionChanged
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestProgressBar::testPositionChanged()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::testPositionChanged()"));
 
     setup();
-    mProgBar->mDragging = false;
-    
-    mProgBar->positionChanged( 60 );
-    QVERIFY( mProgBar->mPositionLabel->mTextSet );
-        
+
+    //
+    // position < duration
+    //
+    int position = 60;
+    int duration = 120;
+    mProgBar->durationChanged( duration );
+
+    mProgBar->mSliderDragging = false;
+    mProgBar->positionChanged( position );
+
+    QVERIFY( mProgBar->mProgressSlider->minText() == "1:00" );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == position );
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == position );
+
+    //
+    // position > duration
+    //
+    position = 130;
+
+    mProgBar->positionChanged( position );
+
+    QVERIFY( mProgBar->mProgressSlider->minText() == "2:00" );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == duration );
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == duration );
+
+    //
+    // position < 0
+    //
+    position = -1;
+
+    mProgBar->positionChanged( position );
+
+    QVERIFY( mProgBar->mProgressSlider->minText() == "0:00" );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == 0 );
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == 0 );
+
+    //
+    // duration >= 1 hour
+    //
+    duration = 3600;
+    mProgBar->durationChanged( duration );
+
+    position = 5;
+    mProgBar->positionChanged( position );
+
+    QVERIFY( mProgBar->mProgressSlider->minText() == "0:00:05" );
+    QVERIFY( mProgBar->mProgressSlider->sliderValue() == position );
+    QVERIFY( mProgBar->mProgressSlider->progressValue() == position );
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// testHandleSeekingTimeout
+// -------------------------------------------------------------------------------------------------
+//
+void TestProgressBar::testHandleSeekingTimeout()
+{
+    MPX_ENTER_EXIT(_L("TestProgressBar::testHandleSeekingTimeout()"));
+
+    setup();
+
+    mProgBar->mDraggingPosition = 10; 
+    mProgBar->mDuration = 30;
+    mProgBar->mSetPosition = 0;
+
+    connect( this, SIGNAL( commandSignal() ), mProgBar, SLOT( handleSeekingTimeout() ) );
+    emit commandSignal();
+
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mValue == mProgBar->mDraggingPosition );
+
+    cleanup();
 }
 
 // End of file

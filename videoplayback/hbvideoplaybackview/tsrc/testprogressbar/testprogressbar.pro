@@ -14,7 +14,7 @@
 # Description: Project file for building testprogressbar
 #
 #
-# Version : %version:  1 %
+# Version : %version:  2 %
 
 TEMPLATE = app
 TARGET = testprogressbar
@@ -32,12 +32,12 @@ HEADERS += testprogressbar.h \
            mpxvideoplaybackcontrolscontroller.h \
            mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackviewfiledetails.h \
-           hblabel.h \
+           hbprogressslider.h \
            ../../controlinc/mpxvideoplaybackprogressbar.h
   
 SOURCES += testprogressbar.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
            mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
-           hblabel.cpp \
+           hbprogressslider.cpp \
            ../../controlsrc/mpxvideoplaybackprogressbar.cpp

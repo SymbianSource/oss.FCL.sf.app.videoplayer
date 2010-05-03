@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -31,8 +31,10 @@
 // QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()
+QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController( bool attachOperation )
     : mViewMode( EFullScreenView )
+    , mIsAttachOperation( attachOperation )
+    , mAttachVideoDone( false )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()"));
 
@@ -85,5 +87,29 @@ void QMPXVideoPlaybackControlsController::resetDisappearingTimers( TMPXTimerActi
 
     mTimerAction = timerAction;
 }
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isAttachOperation()
+// -------------------------------------------------------------------------------------------------
+//
+bool QMPXVideoPlaybackControlsController::isAttachOperation()
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
+            mIsAttachOperation);
+
+    return mIsAttachOperation;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::attachVideo()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::attachVideo()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"));
+    
+    handleCommand( EMPXPbvCmdClose );    
+    mAttachVideoDone = true;
+}    
 
 // End of File

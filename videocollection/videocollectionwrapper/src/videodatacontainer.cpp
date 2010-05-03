@@ -11,14 +11,19 @@
 *
 * Contributors:
 *
-* Description:   VideoListData class declaration*
+* Description:   VideoDataContainer class declaration*
 */
 
+// Version : %version: %
+
+// INCLUDE FILES
 #include <mpxmediageneraldefs.h>
 #include <mpxmedia.h>
 #include <vcxmyvideosdefs.h>
+
 #include "videodatacontainer.h"
 #include "videocollectionutils.h"
+#include "videocollectiontrace.h"
 
 /**
  * global qHash function required fo creating hash values for TMPXItemId -keys
@@ -30,14 +35,13 @@ inline uint qHash(TMPXItemId key)
     return qHash(keyPair);
 }
 
-
 // -----------------------------------------------------------------------------
 // VideoDataContainer
 // -----------------------------------------------------------------------------
 //
 VideoDataContainer::VideoDataContainer()
 {
-    // NOP
+	FUNC_LOG;
 }
     
 // -----------------------------------------------------------------------------
@@ -46,6 +50,7 @@ VideoDataContainer::VideoDataContainer()
 //
 VideoDataContainer::~VideoDataContainer()
 {
+	FUNC_LOG;
     clear();
     clearRemoved();
 }
@@ -56,6 +61,7 @@ VideoDataContainer::~VideoDataContainer()
 //
 void VideoDataContainer::clear()
 {
+	FUNC_LOG;
     QHash<TMPXItemId, QPair<int, CMPXMedia*> >::iterator i = mMediaData.begin();
     while(i != mMediaData.end())
     {
@@ -101,6 +107,7 @@ void VideoDataContainer::append(CMPXMedia *media)
         // could not get id or id does not match ==> NOP
         return;       
     }
+    
     QHash<TMPXItemId, QPair<int, CMPXMedia*> >::iterator iter = mMediaData.find(mediaId);
     // if item is in the removal list, not allowed to append
     if(mRemovedMedia.contains(mediaId))
@@ -131,7 +138,6 @@ CMPXMedia* VideoDataContainer::fromIndex(int index) const
     }
     return 0;  
 }
-   
  
 // -----------------------------------------------------------------------------
 // indexOfId
@@ -144,7 +150,6 @@ int VideoDataContainer::indexOfId(const TMPXItemId &id) const
     {
         return iter->first;
     }
-    
     return -1;
 }
 
@@ -225,6 +230,7 @@ TMPXItemId VideoDataContainer::markItemRemoved(const int &itemIndex)
 //
 int VideoDataContainer::clearRemoved(QList<TMPXItemId> *itemIds)
 {
+	FUNC_LOG;
     int count = 0;
     QList<TMPXItemId> ids;
 
@@ -259,6 +265,7 @@ int VideoDataContainer::clearRemoved(QList<TMPXItemId> *itemIds)
 //
 int VideoDataContainer::restoreRemovedItems(QList<TMPXItemId> *itemIds)
 {  
+	FUNC_LOG;
     
     int count = 0;
     QList<TMPXItemId> ids;
@@ -282,7 +289,7 @@ int VideoDataContainer::restoreRemovedItems(QList<TMPXItemId> *itemIds)
         {
             // append data to actual containers and remove item from deleted hash
             mMediaIds.append(iter.key());
-            mMediaData[iter.key()] = qMakePair(mMediaIds.count() - 1, iter.value());              
+            mMediaData[iter.key()] = qMakePair(mMediaIds.count() - 1, iter.value());
             mRemovedMedia.remove((*idIter));
             count++;    
         }
@@ -303,7 +310,7 @@ CMPXMedia* VideoDataContainer::getRemovedMedia(TMPXItemId itemId)
     {
         return itemIter.value();
     }
-   return 0;
+    return 0;
 }
 
 // end of file

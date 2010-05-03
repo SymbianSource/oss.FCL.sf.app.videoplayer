@@ -90,12 +90,9 @@ signals:
 
     /**
      * This signal is emitted, collection notifies details for item has been
-     * fetched
-     * 
-     * @param itemId
-     * 
+     * fetched and provides a QMap of the details'.
      */
-    void videoDetailsReady(TMPXItemId itemId);
+    void videoDetailsReady(QVariant &);
 
 private slots:
 
@@ -170,7 +167,7 @@ private slots: //slots from VideoDataSignalReceiver
      * has completed.
      * 
      */
-    void videoDetailsCompletedSlot(TMPXItemId videoId);      
+    void videoDetailsCompletedSlot(CMPXMedia* media);      
     
     /**
      * Signalled when album items are recieved.
@@ -179,6 +176,13 @@ private slots: //slots from VideoDataSignalReceiver
      * @param albumItems, Items belonging to the current album.
      */
     void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+    
+    /**
+     * Signalled when item has been mofidied.
+     * 
+     * @param itemId, item that has been modified.
+     */
+    void itemModifiedSlot(const TMPXItemId &itemId);
 
 public: // services 
     
@@ -261,6 +265,15 @@ public: // services
     quint32 getVideodurationFromIndex(int index) const;
     
     /**
+     * Returns the duration of the video from given media.
+     * 
+     * @param media The video media object. 
+     * 
+     * @return guint32 duration
+     */
+    quint32 getVideoDuration(CMPXMedia* media) const;
+    
+    /**
      * Returns the creation/download date of the video.
      * 
      * @param index: item position where client wants the date from.
@@ -270,14 +283,11 @@ public: // services
     QDateTime getVideoDateFromIndex(int index) const;
     
     /**
-     * Returns the metadata for the video.
+     * Returns the creation/download date of the video
      * 
-     * @param index: item position where client wants the data from.
-     * 
-     * @return QMap map of the QVariants that hold the data. Keys defined 
-     *      in VideoCollectionCommon
+     * @param media The video media object.
      */
-    QMap<QString, QVariant> getMetaDataFromIndex(int index) const;
+    QDateTime getVideoDate(CMPXMedia* media) const;
     
     /**
      * marks videos to be removed: it's id and index are saved to 

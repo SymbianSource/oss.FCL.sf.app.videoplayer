@@ -33,8 +33,7 @@ VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *pare
     mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
     mSignalsConnected(false),
     mIsService(false),
-    mNavKeyBackAction(0),
-    mNavKeyQuitAction(0),
+    mNavKeyAction(0),
     mContextMenu(0),
     mSelectionMode(HbAbstractItemView::NoSelection),
     mScrollPositionTimer(0),
@@ -107,8 +106,7 @@ void VideoListWidget::setContextMenu()
 
 VideoCollectionCommon::TCollectionLevels VideoListWidget::getLevel()
 {
-    // not stubbed
-    return VideoCollectionCommon::ELevelInvalid;
+    return mCurrentLevel;
 }
 
 VideoSortFilterProxyModel& VideoListWidget::getModel()
@@ -128,13 +126,19 @@ void VideoListWidget::setSelectionMode(int mode)
     // not stubbed
 }
 
-void VideoListWidget::longPressGesture (const QPointF &point)
+void VideoListWidget::longPressedSlot(HbAbstractViewItem *item, const QPointF &point)
 {
     Q_UNUSED(point);
     // not stubbed
 }
 
-void VideoListWidget::playItemSlot()
+void VideoListWidget::panGesture (const QPointF &point)
+{
+    Q_UNUSED(point);
+    // not stubbed
+}
+
+void VideoListWidget::openItemSlot()
 {
     // not stubbed
 }
@@ -165,11 +169,6 @@ void VideoListWidget::removeCollectionSlot()
 }
 
 void VideoListWidget::removeFromCollectionSlot()
-{
-    // not stubbed
-}
-
-void VideoListWidget::playAllSlot()
 {
     // not stubbed
 }
@@ -205,7 +204,7 @@ void VideoListWidget::fetchThumbnailsForVisibleItems()
     // not stubbed
 }
 
-void VideoListWidget::debugNotImplementedYet()
+void VideoListWidget::setNavigationAction()
 {
     // not stubbed
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -42,11 +42,15 @@ class QMPXVideoPlaybackButtonBar : public HbWidget
         void aspectRatioChanged( int aspectRatio );
         void initialize();
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );
+        void durationChanged( int duration );
+        void positionChanged( int position );
 
     public:
         QMPXVideoPlaybackControlsController *mController;
         QMPXVideoPlaybackViewFileDetails *mFileDetails;
         int mAspectRatio;
+        int mPosition;
+        int mDuration;
         TMPXPlaybackState mState;
 };
 

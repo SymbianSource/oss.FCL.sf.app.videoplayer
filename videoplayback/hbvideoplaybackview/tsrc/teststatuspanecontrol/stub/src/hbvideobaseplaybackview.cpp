@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   3 %
+// Version : %version:   4 %
 
 
 
@@ -102,9 +102,18 @@ void HbVideoBasePlaybackView::startClosingPlaybackView()
 //   HbVideoBasePlaybackView::setTitleBarFlags()
 // -------------------------------------------------------------------------------------------------
 //
-void HbVideoBasePlaybackView::setTitleBarFlags( HbTitleBarFlags flags )
+void HbVideoBasePlaybackView::setViewFlags( HbView::HbViewFlags flags )
 {
-    mTitleFlag = flags;
+    mFlag = flags;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::viewFlags()
+// -------------------------------------------------------------------------------------------------
+//
+HbView::HbViewFlags HbVideoBasePlaybackView::viewFlags()
+{
+    return mFlag;
 }
 
 // EOF

@@ -17,6 +17,7 @@
 
 #include "stub/inc/videocollectionclient.h"
 
+bool VideoCollectionClient::mSetOpenStatusStartOpening = false;
 int VideoCollectionClient::mStartOpenCurrentStateCallCount = 0;
 
 // -----------------------------------------------------------------------------
@@ -81,8 +82,9 @@ int VideoCollectionClient::getOpenStatus()
 // setOpenStatus
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::setOpenStatus(int status)
+void VideoCollectionClient::setOpenStatus(int status, bool startOpening)
 {
+    mSetOpenStatusStartOpening = startOpening;
     mOpenStatus = status;
 }
 

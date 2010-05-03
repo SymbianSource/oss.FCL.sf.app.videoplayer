@@ -34,6 +34,8 @@ int VideoCollectionClient::mSortOrderSetCount = 0;
 QString VideoCollectionClient::mAddNewCollectionName = QString();
 QString VideoCollectionClient::mAddNewCollectionThumb = QString();
 QList<TMPXItemId> VideoCollectionClient::mAddNewCollectionIds = QList<TMPXItemId>();
+int VideoCollectionClient::mRenameAlbumReturnValue = 0;
+int VideoCollectionClient::mBackReturnValue = 0;
 
 // -----------------------------------------------------------------------------
 // VideoCollectionClient
@@ -145,12 +147,23 @@ void VideoCollectionClient::getCategoryId(TMPXItemId &id)
     id.iId1 = 1;
     id.iId2 = 2;
 }
+
 // -----------------------------------------------------------------------------
 // back
 // -----------------------------------------------------------------------------
 //
 int VideoCollectionClient::back()
 {
-    return 0;
+    return mBackReturnValue;
 }
 
+// -----------------------------------------------------------------------------
+// renameAlbum
+// -----------------------------------------------------------------------------
+//
+int VideoCollectionClient::renameAlbum(const TMPXItemId &albumId, const QString &newTitle)
+{
+    Q_UNUSED(albumId);
+    Q_UNUSED(newTitle);
+    return mRenameAlbumReturnValue;
+}

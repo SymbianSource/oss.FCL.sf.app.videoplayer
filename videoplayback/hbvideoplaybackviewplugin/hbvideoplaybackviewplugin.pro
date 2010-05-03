@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#15 %
+# Version : %version: da1mmcf#16 %
 
 
 TEMPLATE = lib
@@ -23,7 +23,7 @@ TARGET = hbvideoplaybackviewplugin
 
 symbian: 
 { 
-    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    TARGET.CAPABILITY = ALL -TCB -DRM
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.UID3 = 0x20024335
     INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \

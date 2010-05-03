@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:2 %
+// Version : %version:3 %
 
 
 
@@ -37,6 +37,8 @@
 //
 QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()   
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController") );
+
     initializeController();
 }
 
@@ -46,18 +48,10 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()
 //
 void QMPXVideoPlaybackControlsController::initializeController()
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::initializeController") );
+
     mLoader = new QMPXVideoPlaybackDocumentLoader();		
     mFileDetails = new QMPXVideoPlaybackViewFileDetails();
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::addFileDetails()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::addFileDetails(
-    QMPXVideoPlaybackViewFileDetails* details )
-{
-    Q_UNUSED( details );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -82,108 +76,14 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::handleEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleEvent(
-    TMPXVideoPlaybackControlCommandIds event, int value )
-{
-    switch ( event )
-    {
-        case EMPXControlCmdTvOutConnected:
-        {
-            handleTvOutEvent( true, event, value );
-            break;
-        }
-        case EMPXControlCmdTvOutDisconnected:
-        {
-            handleTvOutEvent( false, event, value );
-            break;
-        }
-        case EMPXControlCmdSetVolume:
-        {
-            mFileDetails->mAudioEnabled = false;
-            break;
-        }
-        case EMPXControlCmdSetDuration:
-        {
-            mFileDetails->mDuration = value;
-            break;
-        }
-        case EMPXControlCmdShowVolumeControls:
-        {
-            mFileDetails->mAudioEnabled = true;   
-            break;
-        }
-        case EMPXControlCmdSetPosition:
-        {
-            mFileDetails->mSeekable = true;
-            break;    
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::handleStateChange
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleStateChange( TMPXPlaybackState newState )
-{
-    Q_UNUSED( newState );
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::controlsListUpdated()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::controlsListUpdated()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::appendControl()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackControls controlIndex )
-{
-    Q_UNUSED( controlIndex );
-}
-
-// -------------------------------------------------------------------------------------------------
 // QMPXVideoPlaybackControlsController::resetDisappearingTimers()
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackControlsController::resetDisappearingTimers( TMPXTimerAction timerAction )
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::resetDisappearingTimers") );
+
     mTimerAction = timerAction;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::hideAllControls()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::hideAllControls()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::showControls()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::showControls()
-{
-        
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::isVisible()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::isVisible()
-{
-    return false;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -193,192 +93,10 @@ bool QMPXVideoPlaybackControlsController::isVisible()
 void QMPXVideoPlaybackControlsController::handleCommand( 
         TMPXVideoPlaybackViewCommandIds command, int value )
 {
-    Q_UNUSED( command );
-    Q_UNUSED( value );
-}
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleCommand") );
 
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::volumeChanged()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::volumeChanged( int volume )
-{
-    Q_UNUSED( volume );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::showVolumeControls()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::showVolumeControls()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::durationChanged()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::durationChanged( int duration )
-{
-    Q_UNUSED( duration );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::positionChanged()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::positionChanged( int position )
-{
-    Q_UNUSED( position );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::aspectRatioChanged()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::aspectRatioChanged( int aspectRatio )
-{
-    Q_UNUSED( aspectRatio );
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::realFormat()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::realFormat( QString filename )
-{
-    Q_UNUSED( filename );
-    return false;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::realFormatForStreaming()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& des )
-{
-    Q_UNUSED( des );
-    bool realFormat = false;
-    return realFormat;
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::realFormatForLocal()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::realFormatForLocal()
-{
-    bool realFormat = false;
-    
-    return realFormat;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::setDownloadSize()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::setDownloadSize( int size )
-{
-    Q_UNUSED( size );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::updateDownloadPosition()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::updateDownloadPosition( int size )
-{
-    Q_UNUSED( size );
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::handleErrors
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleErrors()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::isSoftKeyVisible()
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
-{
-    return false;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::handleTvOutEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleTvOutEvent(
-        bool connected, TMPXVideoPlaybackControlCommandIds event, int value )
-{
-    Q_UNUSED( event );
-    Q_UNUSED( value );
-    mFileDetails->mTvOutConnected = connected;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::updateVideoRectDone
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::updateVideoRectDone()
-{
-    mViewTransitionIsGoingOn = false;
-    
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::skipToPreviousVideoItem
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::skipToPreviousVideoItem()
-{
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::skipToNextVideoItem
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::skipToNextVideoItem()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::updateVideoRect()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::updateVideoRect( bool transitionEffect )
-{
-    Q_UNUSED( transitionEffect );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::handleTappedOnScreen()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleTappedOnScreen()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::changeViewMode
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::changeViewMode( 
-        TPlaybackViewMode viewMode, bool transitionEffect )
-{
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::changeViewMode()"));
-    
-    Q_UNUSED( transitionEffect );
-    mViewMode = viewMode;
+    mCommand = command;
+    mValue = value;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -386,7 +104,9 @@ void QMPXVideoPlaybackControlsController::changeViewMode(
 // -------------------------------------------------------------------------------------------------
 //
 QMPXVideoPlaybackDocumentLoader* QMPXVideoPlaybackControlsController::layoutLoader()
-{    
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::layoutLoader") );
+
     return mLoader;
 }
 
@@ -396,8 +116,9 @@ QMPXVideoPlaybackDocumentLoader* QMPXVideoPlaybackControlsController::layoutLoad
 //
 TPlaybackViewMode QMPXVideoPlaybackControlsController::viewMode()
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::viewMode") );
+
     return mViewMode;
 }
-
 
 // End of File

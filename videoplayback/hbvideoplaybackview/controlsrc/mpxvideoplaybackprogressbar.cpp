@@ -15,21 +15,25 @@
 *
 */
 
-// Version : %version: da1mmcf#14 %
+// Version : %version: da1mmcf#18 %
 
 
 
 
 #include <QTime>
+#include <QTimer>
 #include <QGraphicsSceneMouseEvent>
 
 #include <hblabel.h>
-#include <hbprogressbar.h>
+#include <hbprogressslider.h>
+#include <hbextendedlocale.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
+
+const int KSeekingTimeOut = 250;
 
 // -------------------------------------------------------------------------------------------------
 // QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar
@@ -39,9 +43,13 @@ QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
     , mDuration( -1 )
+    , mDraggingPosition( 0 )
+    , mSetPosition( -1 )
     , mNeedToResumeAfterSetPosition( false )
     , mInitialized( false )
-    , mDragging( false )
+    , mSliderDragging( false )
+    , mLongTimeFormat( false )
+    , mLiveStreaming( false )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar()"));
 }
@@ -53,6 +61,19 @@ QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar(
 QMPXVideoPlaybackProgressBar::~QMPXVideoPlaybackProgressBar()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::~QMPXVideoPlaybackProgressBar()"));
+
+    disconnect( mSeekingTimer, SIGNAL( timeout() ), this, SLOT( handleSeekingTimeout() ) );
+
+    if ( mSeekingTimer )
+    {
+        if ( mSeekingTimer->isActive() )
+        {
+            mSeekingTimer->stop();
+        }
+
+        delete mSeekingTimer;
+        mSeekingTimer = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -71,30 +92,38 @@ void QMPXVideoPlaybackProgressBar::initialize()
     if ( loader && ! mInitialized )
     {
         mInitialized = true;
+        mLiveStreaming = 
+                ( mController->fileDetails()->mPlaybackMode == EMPXVideoLiveStreaming )? true:false;
+
+        //
+        // Create a timer for seeking. 
+        // We will issue SetPosition every KSeekingTimeOut msec to show the current frame to user
+        //
+        mSeekingTimer = new QTimer();
+        mSeekingTimer->setSingleShot( false );
+        mSeekingTimer->setInterval( KSeekingTimeOut );
+        connect( mSeekingTimer, SIGNAL( timeout() ), this, SLOT( handleSeekingTimeout() ) );
 
         //
         // progress slider
         //
         QGraphicsWidget *widget = loader->findWidget( QString( "progressSlider" ) );
-        mProgressSlider = qobject_cast<HbProgressBar*>( widget );
+        mProgressSlider = qobject_cast<HbProgressSlider*>( widget );
 
-        //
-        // position label
-        //
-        widget = loader->findWidget( QString( "positionLabel" ) );
-        mPositionLabel= qobject_cast<HbLabel*>( widget );
-
-        //
-        // duration label
-        //
-        widget = loader->findWidget( QString( "durationLabel" ) );
-        mDurationLabel= qobject_cast<HbLabel*>( widget );
+        connect( mProgressSlider, SIGNAL( sliderPressed() ), this, SLOT( handleSliderPressed() ) );
+        connect( mProgressSlider, SIGNAL( sliderReleased() ), this, SLOT( handleSliderReleased() ) );
+        connect( mProgressSlider, SIGNAL( sliderMoved( int ) ), this, SLOT( handleSliderMoved( int ) ) );
 
         //
         // If we init the progress bar after pp sends the duration informatin
         // we need to set the duration manually 
         //
         durationChanged( (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier );
+
+        //
+        // Set the position to 0 until we get position information
+        //
+        positionChanged( 0 );
     }
 }
 
@@ -106,9 +135,26 @@ void QMPXVideoPlaybackProgressBar::durationChanged( int duration )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::durationChanged duration = %d"), duration );
 
-    mDuration = duration;
+    if ( mLiveStreaming )
+    {
+        mProgressSlider->setMaxText( "Live" );
+    }
+    else
+    {
+        mDuration = duration;
 
-    mDurationLabel->setPlainText( valueToReadableFormat( mDuration ) );
+        if ( ( mDuration / 3600 ) > 0 )
+        {
+            mLongTimeFormat = true;
+        }
+        else
+        {
+            mLongTimeFormat = false;
+        }
+
+        mProgressSlider->setMaxText( valueToReadableFormat( mDuration ) );
+    }
+
     mProgressSlider->setRange( 0, mDuration );
 }
 
@@ -123,7 +169,7 @@ void QMPXVideoPlaybackProgressBar::positionChanged( int position )
     //
     // While dragging event, don't update old position information from mpx framework
     //
-    if ( ! mDragging )
+    if ( ! mSliderDragging )
     {
         updatePostion( position );
     }
@@ -139,15 +185,23 @@ void QMPXVideoPlaybackProgressBar::updatePostion( int position )
     {
         position = 0;
     }
-    else if ( position > mDuration )
+    else if ( position > mDuration && ! mLiveStreaming )
     {
         position = mDuration;
     }
 
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::updatePostion position = %d"), position );
+    MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::updatePostion position = %d"), position );
 
-    mPositionLabel->setPlainText( valueToReadableFormat( position ) );
-    mProgressSlider->setProgressValue( position );
+    mProgressSlider->setMinText( valueToReadableFormat( position ) );
+
+    //
+    // Don't need to set the slider for live streaming
+    //
+    if ( ! mLiveStreaming )
+    {
+        mProgressSlider->setSliderValue( position );
+        mProgressSlider->setProgressValue( position );
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -167,27 +221,29 @@ QString QMPXVideoPlaybackProgressBar::valueToReadableFormat( int value )
     QTime time( hour ,minutes ,second );
     QString str;
 
-    if ( hour == 0 )
+    HbExtendedLocale locale = HbExtendedLocale::system();
+
+    if ( mLongTimeFormat )
     {
-        str = time.toString("mm:ss");
+        str = locale.format( time, r_qtn_time_durat_long );
     }
     else
     {
-        str = time.toString("hh:mm:ss");
+        str = locale.format( time, r_qtn_time_durat_min_sec );
     }
 
     return str;
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackProgressBar::mousePressEvent
+// QMPXVideoPlaybackProgressBar::handleSliderPressed
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackProgressBar::mousePressEvent( QGraphicsSceneMouseEvent *event ) 
+void QMPXVideoPlaybackProgressBar::handleSliderPressed() 
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::mousePressEvent()"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::handleSliderPressed()"));
 
-    mDragging = true;
+    mSliderDragging = true;
 
     mController->resetDisappearingTimers( EMPXTimerCancel );
 
@@ -199,38 +255,81 @@ void QMPXVideoPlaybackProgressBar::mousePressEvent( QGraphicsSceneMouseEvent *ev
         mNeedToResumeAfterSetPosition = true;
         mController->handleCommand( EMPXPbvCmdCustomPause );   
     }
-
-    event->accept();
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackProgressBar::mouseReleaseEvent
+// QMPXVideoPlaybackProgressBar::handleSliderMoved
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackProgressBar::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+void QMPXVideoPlaybackProgressBar::handleSliderMoved( int value ) 
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::mouseReleaseEvent()"));
+    MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::handleSliderMoved() position = %d"), value);
 
-    mDragging = false;
+    updatePostion( value );
 
-    mController->resetDisappearingTimers( EMPXTimerReset );
-
-    int position = 
-        (int)( ( event->scenePos().x() - mProgressSlider->geometry().x() ) / 
-        mProgressSlider->geometry().width() * (qreal)mDuration );
-
-    if ( position > mDuration )
+    //
+    // If the slider is dragging, start the timer and seek every KSeekingTimeOut msec
+    //
+    if ( mSliderDragging )
     {
+        mDraggingPosition = value;
+        MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::handleSliderMoved() mDraggingPosition = %d"), mDraggingPosition);
+
+        if ( mSeekingTimer && ! mSeekingTimer->isActive() )
+        {
+            mSeekingTimer->start();
+        }
+    }
+    else
+    {
+        if ( value >= mDuration )
+        {
+            MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::setPosition() reached end of the clip"));
+
+            mController->handleCommand( EMPXPbvCmdEndOfClip );
+        }
+        else
+        {
+            value = mProgressSlider->sliderValue();
+
+            MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::setPosition() position = %d"), value);
+            mController->handleCommand( EMPXPbvCmdSetPosition, value );
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackProgressBar::handleSliderReleased
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackProgressBar::handleSliderReleased()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::handleSliderReleased()"));
+
+    mSliderDragging = false;
+
+    if ( mSeekingTimer && mSeekingTimer->isActive() )
+    {
+        mSeekingTimer->stop();
+    }
+    
+    mController->resetDisappearingTimers( EMPXTimerReset );
+    int value = mProgressSlider->sliderValue();
+
+    if ( value >= mDuration )
+    {
+        MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::setPosition() reached end of the clip"));
         mController->handleCommand( EMPXPbvCmdEndOfClip );
     }
     else
     {
-        if ( position < 0 )
+        if ( value < 0 )
         {
-            position = 0;
+            value = 0;
         }
 
-        mController->handleCommand( EMPXPbvCmdSetPosition, position );
+        MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::setPosition() position = %d"), value);
+        mController->handleCommand( EMPXPbvCmdSetPosition, value );
 
         //
         // Resume if it was playing
@@ -241,23 +340,6 @@ void QMPXVideoPlaybackProgressBar::mouseReleaseEvent( QGraphicsSceneMouseEvent *
             mController->handleCommand( EMPXPbvCmdCustomPlay );
         }
     }
-
-    event->accept();
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackProgressBar::mouseMoveEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackProgressBar::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
-{
-    qreal result = 
-        ( event->scenePos().x() - mProgressSlider->geometry().x() ) / 
-        mProgressSlider->geometry().width() * (qreal)mDuration;
-
-    updatePostion( result );
-
-    event->accept();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -271,16 +353,15 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
 
     if ( details->mPlaybackMode == EMPXVideoLiveStreaming )
     {
-        setEnabled( false );
-        mDurationLabel->setPlainText( "Live" );
+        mProgressSlider->setEnabled( false );
     }
     else if ( details->mTvOutConnected && ! details->mTvOutPlayAllowed )
     {
-        setEnabled( false );
+        mProgressSlider->setEnabled( false );
     }
-    else
+    else if ( ! mProgressSlider->isEnabled() )
     {
-        setEnabled( true );
+        mProgressSlider->setEnabled( true );
     }
 }
 
@@ -292,24 +373,51 @@ void QMPXVideoPlaybackProgressBar::updateState( TMPXPlaybackState state )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::updateState() state = %d"), state );
 
-    if ( mController->viewMode() == EAudioOnlyView )
+    switch ( state )
     {
-        switch ( state )
+        case EPbStatePlaying:
+        case EPbStatePaused:
         {
-            case EPbStatePlaying:
-            case EPbStatePaused:
+            if ( ! isEnabled() )
             {
-                updateWithFileDetails( mController->fileDetails() );
-                break;
+                setEnabled( true );
             }
-            case EPbStateNotInitialised:
-            case EPbStateInitialising:
-            case EPbStateBuffering:
+
+            break;
+        }
+        default:
+        {
+            if ( isEnabled() )
             {
                 setEnabled( false );
-                break;
             }
+            break;
         }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackProgressBar::handleSeekingTimeout()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackProgressBar::handleSeekingTimeout()
+{
+    if ( mDraggingPosition >= mDuration )
+    {
+        mDraggingPosition = mDuration;
+    }
+    else if( mDraggingPosition < 0 )
+    {
+        mDraggingPosition = 0;
+    }
+
+    MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::handleSeekingTimeout() Dragging pos = %d, Set pos = %d")
+            , mDraggingPosition, mSetPosition );
+
+    if ( mSetPosition != mDraggingPosition )
+    {
+        mSetPosition = mDraggingPosition;
+        mController->handleCommand( EMPXPbvCmdSetPosition, mSetPosition );
     }
 }
 

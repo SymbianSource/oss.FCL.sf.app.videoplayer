@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 6 %
+// Version : %version: 8 %
 
 //
 //  INCLUDE FILES
@@ -153,10 +153,12 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
 
     for ( TInt index = 0 ; index < count ; index++ )
     {
+        TAccPolGenericID genId = iGenericIdArray.GetGenericIDL( index );
+        
         //
         //  Get all supported capabilities for this connected accessory.
         //
-        iConnection.GetSubblockNameArrayL( iGenericIdArray.GetGenericIDL( index ), *nameArray );
+        iConnection.GetSubblockNameArrayL( genId, *nameArray );
 
         //
         //  Check if this connected accessory supports TV-Out
@@ -165,8 +167,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
         {
             MPX_DEBUG(_L("    TV-Out Capabilities Exist"));
 
-            tvOutConnected = ETrue;
-            break;
+            tvOutConnected = ETrue;                         
         }
     }
 
@@ -180,7 +181,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     {
         iTvOutConnected = tvOutConnected;
 
-        if ( iTvOutConnected )
+        if ( iTvOutConnected ) 
         {
             //
             //  Check the playablility of the clip
@@ -195,7 +196,7 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
         statusChanged   = ETrue;
     }
 
-    MPX_DEBUG(_L("    iTvOutConnected = %d"), iTvOutConnected);
+    MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL  iTvOutConnected = %d"), iTvOutConnected);
 
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::UpdateTvOutStatusL() ret = %d"), statusChanged);
 

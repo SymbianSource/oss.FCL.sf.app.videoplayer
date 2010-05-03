@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#13 %
+// Version : %version: da1mmcf#15 %
 
 
 
@@ -38,15 +38,15 @@ class QTimer;
 class QString;
 class HbAction;
 class ThumbnailManager;
-class QActionGroup;
+class HbVolumeSliderPopup ;
 class CMPXVideoViewWrapper;
 class HbVideoBasePlaybackView;
 class QMPXVideoPlaybackControlPolicy;
 class QMPXVideoPlaybackDocumentLoader;
 class QMPXVideoPlaybackFullScreenControl;
-class QMPXVideoPlaybackNonTouchVolumeBar;
 class QMPXVideoPlaybackControlsController;
 class QMPXVideoPlaybackControlConfiguration;
+class VideoServices;
 
 
 // DATA TYPES
@@ -151,6 +151,8 @@ class QMPXVideoPlaybackControlsController : public QObject
 
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
+        bool isAttachOperation();
+
     private:
         /**
         * Initialize controller
@@ -244,11 +246,6 @@ class QMPXVideoPlaybackControlsController : public QObject
 		                        TMPXVideoPlaybackControlCommandIds event,
 		                        int value );
 
-		HbAction* createAction( QActionGroup *actionsGroup,
-		                        int index,
-		                        const char *slot,
-		                        const QString& toolTip );
-
 		void updateVideoRect(  bool transitionEffect = true );
 
 		void showVolumeControls();
@@ -257,6 +254,15 @@ class QMPXVideoPlaybackControlsController : public QObject
 
 		void generateThumbNail();
 
+    signals:
+
+        /**
+        * Signals the file path of the current video to VideoServices
+        *
+        * @param filePath of the video
+        */
+        void attachVideoPath( const QString& );
+
     private slots:
         void hideAllControls();
         void skipToNextVideoItem();
@@ -264,6 +270,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         void handleTappedOnScreen();
         void handleThumbnailReady( QPixmap tnData, void *internal , int id, int error );
         void controlsListUpdated();
+        void attachVideo();
 
     private:
         HbVideoBasePlaybackView                   *mView;
@@ -278,11 +285,14 @@ class QMPXVideoPlaybackControlsController : public QObject
         QTimer                                    *mControlsTimer;
 
         QMPXVideoPlaybackDocumentLoader           *mLoader;
-        QMPXVideoPlaybackNonTouchVolumeBar        *mVolumeControl;
+        HbVolumeSliderPopup                       *mVolumeControl;
 
         ThumbnailManager                          *mThumbnailManager;
+        VideoServices                             *mVideoServices;
 
         bool                                       mViewTransitionIsGoingOn;
+        bool                                       mIsAttachOperation;
+        
         TThumbNailState                            mThumbNailState;
 
         TMPXPlaybackState                          mState;

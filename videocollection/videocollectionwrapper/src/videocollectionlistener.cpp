@@ -11,12 +11,13 @@
 *
 * Contributors:
 *
-* Description:   VideoCollectionClient class implementation
+* Description:   VideoCollectionListener class implementation
 * 
 */
 
-// INCLUDE FILES
+// Version : %version: 32 %
 
+// INCLUDE FILES
 #include <mpxmediageneraldefs.h>
 #include <mpxmessagegeneraldefs.h>
 #include <mpxmessage2.h>
@@ -34,18 +35,19 @@
 #include "videodatasignalreceiver.h"
 #include "videocollectionutils.h"
 #include "videocollectioncommon.h"
+#include "videocollectiontrace.h"
 
 // -----------------------------------------------------------------------------
 // VideoCollectionListener
 // -----------------------------------------------------------------------------
 //
-VideoCollectionListener::VideoCollectionListener(VideoCollectionClient &collectionClient,
-                                                VideoDataSignalReceiver &signalReceiver) : 
-mCollectionClient(collectionClient),
-mSignalReceiver(signalReceiver),
-mVideoUtils(VideoCollectionUtils::instance())
+VideoCollectionListener::VideoCollectionListener( VideoCollectionClient &collectionClient,
+                                                  VideoDataSignalReceiver &signalReceiver)  
+    : mCollectionClient( collectionClient )
+    , mSignalReceiver( signalReceiver )
+    , mVideoUtils( VideoCollectionUtils::instance() )
 {
-
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,7 +56,7 @@ mVideoUtils(VideoCollectionUtils::instance())
 //
 VideoCollectionListener::~VideoCollectionListener()
 {
-
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -65,7 +67,7 @@ void VideoCollectionListener::HandleCollectionMediaL(
         const CMPXMedia& /*aMedia*/,
         TInt /*aError*/)
 {
-   // NOP
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -78,29 +80,33 @@ void VideoCollectionListener::HandleOpenL(
         TBool /*aComplete*/,
         TInt aError)
 {
+	FUNC_LOG;
     if(aError != KErrNone)
     {
+        ERROR(aError, "VideoCollectionListener::HandleOpenL()");
         return;
     }
 
     // Check that current level is valid and entries has collection path. 
-    if(mCollectionClient.getCollectionLevel() < VideoCollectionCommon::ELevelCategory || 
-       !aEntries.IsSupported(KMPXMediaGeneralContainerPath))
+    if(mCollectionClient.getCollectionLevel() < VideoCollectionCommon::ELevelCategory )
     {
+        ERROR(-1, "VideoCollectionListener::HandleOpenL() invalid level");
         return;
     }
-    
+
     CMPXMediaArray *array =
                     mVideoUtils.mediaValuePtr<CMPXMessageArray>(&aEntries, KMPXMediaArrayContents);
     if(!array)
     {
-        // no videos!
+        ERROR(-1, "VideoCollectionListener::HandleOpenL() array contents is NULL.");
         return;
     }
 
-    CMPXCollectionPath* path = aEntries.Value<CMPXCollectionPath>(KMPXMediaGeneralContainerPath); 
+    CMPXCollectionPath* path = 
+                    mVideoUtils.mediaValuePtr<CMPXCollectionPath>(&aEntries, KMPXMediaGeneralContainerPath);
     if(!path)
 	{
+        ERROR(-1, "VideoCollectionListener::HandleOpenL() no container path in message.");
         return;
 	}
 
@@ -136,7 +142,7 @@ void VideoCollectionListener::HandleOpenL(
         const CMPXCollectionPlaylist& /*aPlaylist*/,
         TInt /*aError*/)
 {
-    // NOP
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -147,8 +153,10 @@ void VideoCollectionListener::HandleCommandComplete(
         CMPXCommand* aCommandResult, 
         TInt aError)
 {
+	FUNC_LOG;
     if(aError != KErrNone || !aCommandResult)
     {
+        ERROR_1(aError, "VideoCollectionListener::HandleCommandComplete() result: %d", aCommandResult);
         return;
     }
     int commandId = -1;
@@ -210,8 +218,10 @@ void VideoCollectionListener::HandleCollectionMessage(
         CMPXMessage* aMessage,
         TInt aError )
 {
+	FUNC_LOG;
     if(aError)
     {
+        ERROR(aError, "VideoCollectionListener::HandleCollectionMessage()");
         return;
     }  
 
@@ -240,17 +250,17 @@ void VideoCollectionListener::HandleCollectionMessage(
         }
         return;
     }
-           
+
     if( mainMessageId == KVcxCommandIdMyVideos)
     {        
         int myVideosMainMsgId = -1; 
 
-        if(!mVideoUtils.mediaValue<int>(aMessage, KVcxMediaMyVideosCommandId, myVideosMainMsgId ))
+        if(!mVideoUtils.mediaValue<int>(aMessage, KVcxMediaMyVideosCommandId, myVideosMainMsgId))
         {
             return;
         }
 
-        if ( myVideosMainMsgId == KVcxMessageMyVideosMessageArray )
+        if (myVideosMainMsgId == KVcxMessageMyVideosMessageArray)
         {
             handleMyVideosMessageArray(aMessage); 
         }
@@ -271,6 +281,7 @@ void VideoCollectionListener::HandleCollectionMessage(
 //
 void VideoCollectionListener::handleMyVideosMessageArray(CMPXMessage *aMessage)
 {   
+	FUNC_LOG;
     CMPXMessageArray* messageArray = NULL;
     
     messageArray = mVideoUtils.mediaValuePtr<CMPXMessageArray>(aMessage, KMPXMessageArrayContents);
@@ -279,7 +290,7 @@ void VideoCollectionListener::handleMyVideosMessageArray(CMPXMessage *aMessage)
         return;
     }
     
-    int count = messageArray->Count();    
+    int count = messageArray->Count();
     int myVideosMsgId;
     TMPXMessageId mpxMessageId;
     
@@ -305,6 +316,7 @@ void VideoCollectionListener::handleMyVideosMessageArray(CMPXMessage *aMessage)
 //
 void VideoCollectionListener::handleMyVideosMPXMessage(int &myVideosMsgId, CMPXMessage *aMessage)
 {
+	FUNC_LOG;
     switch (myVideosMsgId)
     {
         case KVcxMessageMyVideosGetMediasByMpxIdResp:
@@ -338,6 +350,7 @@ void VideoCollectionListener::handleMyVideosMPXMessage(int &myVideosMsgId, CMPXM
 //
 void VideoCollectionListener::handleMPXMessage(TMPXMessageId &mpxMessageId, CMPXMessage *aMessage)
 {
+	FUNC_LOG;
     switch(mpxMessageId)
     {
         case KMPXMessageGeneral:
@@ -357,6 +370,7 @@ void VideoCollectionListener::handleMPXMessage(TMPXMessageId &mpxMessageId, CMPX
 //
 void VideoCollectionListener::handleGeneralMPXMessage(CMPXMessage* aMessage)
 {
+	FUNC_LOG;
     if(mCollectionClient.getOpenStatus() != VideoCollectionClient::ECollectionOpening)
     {
         return;
@@ -386,7 +400,7 @@ void VideoCollectionListener::handleGeneralMPXMessage(CMPXMessage* aMessage)
 //
 void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
 {
-
+	FUNC_LOG;
     TMPXChangeEventType eventType = EMPXItemModified; 
     if(!mVideoUtils.mediaValue<TMPXChangeEventType>(
         aMessage,KMPXMessageChangeEventType, eventType))
@@ -399,7 +413,7 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
     {       
         return;
     }
-    
+    INFO_3("VideoCollectionListener::handleMyVideosItemsChanged event: %d - item id1: %d id2: %d", eventType, itemId.iId1, itemId.iId2);
     switch(eventType)
     {
         case EMPXItemDeleted:
@@ -411,7 +425,7 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
         {
             CMPXMedia *media = mVideoUtils.mediaValuePtr<CMPXMedia>(
                 aMessage, KMPXCommandColAddMedia);
-            if (media)
+            if(media)
             {
                 mSignalReceiver.newVideoAvailableSlot(media); 
             }
@@ -423,11 +437,18 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
         }
         case EMPXItemModified:
         {
-            if (itemId.iId2 == KVcxMvcMediaTypeAlbum)
+            INFO("VideoCollectionListener::handleMyVideosItemsChanged EMPXItemModified");
+            // Inform that item data has changed.
+            mSignalReceiver.itemModifiedSlot(itemId);
+            // Update category contents.
+            if(itemId.iId2 == KVcxMvcMediaTypeAlbum ||
+               itemId.iId2 == KVcxMvcMediaTypeCategory)
             {
-                // re-open the album in case album corresponds recently opened.
-                // to fetch the album contents.
+                INFO("VideoCollectionListener::handleMyVideosItemsChanged album or category modified, opening.");
                 mCollectionClient.openItem(itemId);
+                // collection is already opened at this stage, so we can safely set value here
+                // to make sure we do not let any other messages unhandled 
+                mCollectionClient.setOpenStatus(VideoCollectionClient::ECollectionOpened, false);
             }
             break;
         }
@@ -445,7 +466,7 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
 //
 void VideoCollectionListener::handleMyVideosDeleteMessage(CMPXMessage* aMessage)
     {
-
+	FUNC_LOG;
     CMPXMediaArray *messageArray = 
         mVideoUtils.mediaValuePtr<CMPXMediaArray>(aMessage, KMPXMediaArrayContents);
     if(!messageArray || messageArray->Count() == 0)
@@ -488,14 +509,14 @@ void VideoCollectionListener::handleMyVideosDeleteMessage(CMPXMessage* aMessage)
 //
 void VideoCollectionListener::handleGetMediasByMpxIdResp(CMPXMessage* aMessage)
 {
-    
+	FUNC_LOG;
     CMPXMediaArray* array = 
         mVideoUtils.mediaValuePtr<CMPXMediaArray>(aMessage, KMPXMediaArrayContents);
     if(!array || array->Count() < 1)
     {
         return;
     }
-    mSignalReceiver.newVideoAvailableSlot((*array)[0]);    
+    mSignalReceiver.newVideoAvailableSlot((*array)[0]);
 }
 
 // -----------------------------------------------------------------------------
@@ -504,16 +525,13 @@ void VideoCollectionListener::handleGetMediasByMpxIdResp(CMPXMessage* aMessage)
 //
 void VideoCollectionListener::handleGetVideoDetailsResp(CMPXMessage* aMessage)
 {
+	FUNC_LOG;
     CMPXMedia *item = mVideoUtils.mediaValuePtr<CMPXMedia>(aMessage,KMPXCommandColAddMedia); 
     if(!item)
     {
         return;
     }
-    TMPXItemId itemId;
-    if( !mVideoUtils.mediaValue<TMPXItemId>(item, KMPXMediaGeneralId, itemId))
-    {
-        return;
-    }
-    mSignalReceiver.videoDetailsCompletedSlot(itemId);
+    mSignalReceiver.videoDetailsCompletedSlot(item);
 }
 
+// End of file.

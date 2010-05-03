@@ -25,6 +25,7 @@ int VideoListViewData::mActivateViewCount = 0;
 int VideoListViewData::mBackCount = 0;
 int VideoListViewData::mDeactivateViewCount = 0;
 int VideoListViewData::mInitializeViewCount = 0;
+TMPXItemId VideoListViewData::mActivatedItemId = TMPXItemId::InvalidId();
 
 VideoListView::VideoListView(VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent) :
 HbView(parent),
@@ -60,8 +61,11 @@ void VideoListView::titleReadySlot(const QString& title)
     // not stubbed
 }
 
-int VideoListView::activateView()
+int VideoListView::activateView(const TMPXItemId &itemId)
 {
+    Q_UNUSED(itemId);
+    
+    VideoListViewData::mActivatedItemId = itemId;
     VideoListViewData::mActivateViewCount++;
     return 0;
 }
@@ -132,20 +136,6 @@ void VideoListView::showAction(bool show, const QString &name)
     // not stubbed
 }
 
-bool VideoListView::isActionChecked(const QString &name)
-{
-    Q_UNUSED(name);
-    // not stubbed
-    return true;
-}
-
-void VideoListView::setActionChecked(bool setChecked, const QString &name)
-{
-    Q_UNUSED(setChecked);
-    Q_UNUSED(name);
-    // not stubbed
-}
-
 void VideoListView::openAllVideosViewSlot()
 {
     // not stubbed
@@ -212,6 +202,11 @@ void VideoListView::aboutToShowMainMenuSlot()
     // not stubbed
 }
 
+void VideoListView::prepareBrowseServiceMenu()
+{
+    // not stubbed
+}
+
 void VideoListView::handleAsyncStatusSlot(int statusCode, QVariant &additional)
 {
     Q_UNUSED(statusCode);
@@ -226,13 +221,6 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
     Q_UNUSED(collectionOpened);
     Q_UNUSED(collection);
     Q_UNUSED(index);
-    // not stubbed
-}
-
-void VideoListView::widgetReadySlot(QGraphicsWidget *widget, const QString &name)
-{
-    Q_UNUSED(widget);
-    Q_UNUSED(name);
     // not stubbed
 }
 

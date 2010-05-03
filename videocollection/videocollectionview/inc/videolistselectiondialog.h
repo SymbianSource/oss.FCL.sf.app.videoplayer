@@ -256,8 +256,18 @@ private:
     
     /** 
      * List widget to show in selection
-     * */
+     */
     VideoListWidget *mListWidget;
+    
+    /**
+     * Action to accept the selection dialog. 
+     */
+    HbAction *mPrimaryAction;
+    
+    /**
+     * Action to cancel the selection dialog.
+     */
+    HbAction *mSecondaryAction;
 };
 
 #endif  //VIDEOLISTSELECTIONDIALOG_H

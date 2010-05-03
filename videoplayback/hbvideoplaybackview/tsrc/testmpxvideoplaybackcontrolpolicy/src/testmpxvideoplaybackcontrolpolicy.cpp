@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  4 %
 
 
 #include <qdebug>
@@ -119,13 +119,14 @@ void TestMPXVideoPlaybackControlPolicy::testStatusPanePolicy()
 
     TUint properties = 0;
 
-    mDetails->mPlaybackMode = EMPXVideoLocal;
-
-    mPolicy->setControlProperties( EMPXStatusPane, properties, mDetails, EFullScreenView );
-    QVERIFY( properties == ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking ) );
-
+    mDetails->mPlaybackMode = EMPXVideoStreaming;
     mPolicy->setControlProperties( EMPXStatusPane, properties, mDetails, EDetailsView );
     QVERIFY( properties == EMPXAllProperties );
+
+    mDetails->mPlaybackMode = EMPXVideoLocal;
+    mPolicy->setControlProperties( EMPXStatusPane, properties, mDetails, EFullScreenView );
+    QVERIFY( properties == 
+            ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking | EMPXShownWhenBuffering) );
 
     cleanup();
 }
@@ -148,8 +149,15 @@ void TestMPXVideoPlaybackControlPolicy::testControlBarPolicy()
     mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EAudioOnlyView );
     QVERIFY( properties == EMPXAllProperties );
 
+    mDetails->mPlaybackMode = EMPXVideoLocal;
     mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EFullScreenView );
-    QVERIFY( properties == ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking ) );
+    QVERIFY( properties == 
+            ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking | EMPXShownWhenBuffering ) );
+
+    mDetails->mPlaybackMode = EMPXVideoStreaming;
+    mPolicy->setControlProperties( EMPXControlBar, properties, mDetails, EFullScreenView );
+    QVERIFY( properties == 
+            ( EMPXShownWhenPlaying | EMPXShownWhenPaused | EMPXShownWhenSeeking ) );
 
     cleanup();
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: da1mmcf#3 %
 
 
 #include <qapplication>
@@ -27,6 +27,7 @@
 
 #include "videoplayerengine.h"
 #include "mpxvideoplaybackwrapper.h"
+#include "mpxvideo_debug.h"
 
 // -------------------------------------------------------------------------------------------------
 // QVideoPlayerEngine()
@@ -34,8 +35,9 @@
 //
 QVideoPlayerEngine::QVideoPlayerEngine(bool isService)
     : mIsService( isService )
-    , mEmbedded(false)
+    , mEmbedded( false )
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::QVideoPlayerEngine()"));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -44,6 +46,7 @@ QVideoPlayerEngine::QVideoPlayerEngine(bool isService)
 //
 QVideoPlayerEngine::~QVideoPlayerEngine()
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::~QVideoPlayerEngine()"));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -52,6 +55,7 @@ QVideoPlayerEngine::~QVideoPlayerEngine()
 //
 void QVideoPlayerEngine::initialize()
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::initialize()"));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -60,6 +64,8 @@ void QVideoPlayerEngine::initialize()
 //
 void QVideoPlayerEngine::handleCommand( int commandCode )
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::initialize()"));
+    Q_UNUSED( commandCode );
 }
 
 
@@ -69,6 +75,7 @@ void QVideoPlayerEngine::handleCommand( int commandCode )
 //
 void QVideoPlayerEngine::handleQuit()
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::handleQuit()"));
     delete this;
 }
 
@@ -79,6 +86,8 @@ void QVideoPlayerEngine::handleQuit()
 //
 void QVideoPlayerEngine::playMedia( QString filePath )
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::playMedia()"));
+    Q_UNUSED( filePath );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -87,7 +96,18 @@ void QVideoPlayerEngine::playMedia( QString filePath )
 //
 void QVideoPlayerEngine::setEmbedded()
 {
+    MPX_DEBUG(_L("QVideoPlayerEngine::setEmbedded()"));
     mEmbedded = true;
+}
+
+// -------------------------------------------------------------------------------------------------
+// playMedia()
+// -------------------------------------------------------------------------------------------------
+//
+void QVideoPlayerEngine::playMedia( RFile file )
+{    
+    MPX_DEBUG(_L("QVideoPlayerEngine::playMedia( file )"));
+    Q_UNUSED( file );
 }
 
 // End of file

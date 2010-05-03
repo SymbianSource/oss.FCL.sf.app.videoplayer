@@ -15,12 +15,15 @@
 * 
 */
 
+// Version : %version: %
+
 // INCLUDE FILES
 #include <qabstractitemmodel.h>
-#include <QDebug>
+
 #include "videocollectionwrapper.h"
 #include "videocollectionwrapper_p.h"
 #include "videosortfilterproxymodel.h"
+#include "videocollectiontrace.h"
 
 // -----------------------------------------------------------------------------
 // VideoCollectionWrapper::CVideoCollectionWrapper()
@@ -28,6 +31,7 @@
 //
 VideoCollectionWrapper &VideoCollectionWrapper::instance()
 {
+	FUNC_LOG;
     static VideoCollectionWrapper _staticWrapper;
 
     return _staticWrapper;
@@ -41,7 +45,7 @@ VideoCollectionWrapper::VideoCollectionWrapper() :
     d( new VideoCollectionWrapperPrivate ),
     mReferenceCount(0)
 {
-    qDebug() << "CVideoCollectionWrapper::CVideoCollectionWrapper(): Constructing singleton";
+	FUNC_LOG;
 }
 
 // -----------------------------------------------------------------------------
@@ -50,6 +54,7 @@ VideoCollectionWrapper::VideoCollectionWrapper() :
 //
 VideoCollectionWrapper::~VideoCollectionWrapper()
 {
+	FUNC_LOG;
     // NOP
 }
 
@@ -57,8 +62,9 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
 // CVideoCollectionWrapper::getModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
+VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(VideoCollectionCommon::TModelType type)
 {
+	FUNC_LOG;
     if(d)
     {
         return d->getModel(type);
@@ -72,6 +78,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
 //
 void VideoCollectionWrapper::sendAsyncStatus(int statusCode,  QVariant &additional)
 {
+	FUNC_LOG;
     emit asyncStatus(statusCode, additional);
 }
 

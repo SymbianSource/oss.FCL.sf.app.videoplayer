@@ -15,6 +15,7 @@
 * 
 */
 
+// Version : %version: %
 
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -81,6 +82,7 @@ void TestControlConfiguration::setup()
     mControlsController = new QMPXVideoPlaybackControlsController( mFileDetails );
                                                                      
     mControlConfig = new QMPXVideoPlaybackControlConfiguration( mControlsController );
+    mControlConfig->createControlList();
 }
 
 // ---------------------------------------------------------------------------

@@ -21,6 +21,8 @@
 // INCLUDES
 #include <QtTest/QtTest>
 
+#include <videocollectioncommon.h>
+
 class VideoListSelectionDialog;
 class VideoCollectionUiLoader;
 class VideoListDataModel;
@@ -34,7 +36,7 @@ class TestVideoListSelectionDialog : public QObject
 
 private:
     
-    void setRowCount(int count, int type = 0, VideoListDataModel *model = 0);
+    void setRowCount(int count, VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos, VideoListDataModel *model = 0);
     
     // test functions for the test framework
 

@@ -18,6 +18,9 @@ TEMPLATE = app
 
 TARGET = 
 
+CONFIG += qtestlib \
+    Hb
+
 DEPENDPATH += . \
     inc \
     src \

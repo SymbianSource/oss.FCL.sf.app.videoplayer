@@ -26,7 +26,15 @@
 #include "hbicon.h"
 #include "hbmenu.h"
 
-class  HbAction : public QObject
+class XQServiceUtil
+{
+public:
+    static void toBackground(bool value);
+    static bool isEmbedded(); 
+    static bool isService();
+};
+
+class  HbAction : public QAction
 {
     Q_OBJECT
 
@@ -35,7 +43,9 @@ public:
     /**
      * Constructor
      */
-    explicit HbAction(QObject *parent = 0)
+    explicit HbAction(QObject *parent = 0) 
+      : QAction(parent),
+        mMenu(0)
     {
         Q_UNUSED(parent);
         initializeCount++;
@@ -45,7 +55,9 @@ public:
     /**
      * Contructor.
      */       
-    explicit HbAction(const QString &txt, QObject *parent = 0) : mTxt(txt) 
+    explicit HbAction(const QString &txt, QObject *parent = 0) 
+      : QAction(txt, parent), 
+        mMenu(0)
     {
         Q_UNUSED(parent);
         initializeCount++;
@@ -55,7 +67,9 @@ public:
     /**
      * Contructor.
      */ 
-    explicit HbAction(Hb::SoftKeyAction actType, QObject *parent = 0) : mTxt("")
+    explicit HbAction(Hb::SoftKeyAction actType, QObject *parent = 0) 
+      : QAction(parent),
+        mMenu(0)
     {
         Q_UNUSED(parent);
         Q_UNUSED(actType);
@@ -63,11 +77,14 @@ public:
         mTriggeredCount = 0;
     }
     
-    explicit HbAction(Hb::NavigationAction action, QObject* parent = 0) : mTxt("")
+    explicit HbAction(Hb::NavigationAction action, QObject* parent = 0) 
+      : QAction(parent),
+        mMenu(0)
     {
         Q_UNUSED(parent);
         Q_UNUSED(action);
         initializeCount++;
+        mNavAction = action;
         mTriggeredCount = 0;
     }
     
@@ -77,63 +94,35 @@ public:
     virtual ~HbAction(){initializeCount--;}
     
     /**
-     * sets mDisable;
+     * icon
      */
-    void setDisabled(bool disable){mDisable = disable;}
+    void setIcon(const HbIcon &icon) { mIcon = icon; }
     
     /**
-     * sets mVisible;
+     * icon
      */
-    void setVisible(bool visible){mVisible = visible;}
+    HbIcon icon() const { return mIcon; }
     
     /**
-     * not stubbed yet.
+     * menu
      */
-    void setIcon(const HbIcon &icon) { Q_UNUSED(icon); }
+    void setMenu(HbMenu* menu) { mMenu = menu; }
     
     /**
-     * not stubbed yet.
+     * menu
      */
-    HbIcon icon() const { return HbIcon(); }
-    
-    /**
-     * not stubbed yet.
-     */
-    HbMenu *menu() const { return 0; }
+    HbMenu *menu() const { return mMenu; }
     
     /**
      * Trigger stub
      */
-    void trigger() { mTriggeredCount++; };
+    void trigger() 
+    { 
+        mTriggeredCount++;
+        QAction::trigger();
+    }
     
-    /**
-     * SetText stub
-     */
-    void setText(QString text) { mText = text; };
-
-signals:
-        
-        /**
-         * dummy triggered
-         */
-        void triggered();
-        
 public: // data
-    
-    /**
-     * dummy member 
-     */
-    bool mDisable;
-    
-    /**
-     * dummy member
-     */
-    bool mVisible;
-    
-    /**
-     * text setted
-     */
-    QString mTxt;
     
     /**
      * counter to make sure alloc dealloc match
@@ -141,14 +130,25 @@ public: // data
     static int initializeCount;
     
     /**
+     * Hb navigation action type.
+     */
+    static Hb::NavigationAction mNavAction;
+    
+    /**
      * Count how many times this was triggered.
      */
     int mTriggeredCount;
     
     /**
-     * Set text.
+     * icon
      */
-    QString mText;    
+    HbIcon mIcon;
+    
+    /**
+     * menu
+     */
+    HbMenu* mMenu;
+    
 };
 
 #endif

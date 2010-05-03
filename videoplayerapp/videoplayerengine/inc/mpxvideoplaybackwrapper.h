@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -25,7 +25,7 @@
 #include <QObject>
 #include <QString>
 #include <QFile>
-
+#include <f32file.h>
 #include "mpxhbvideocommondefs.h"
 
 class CMpxVideoPlayerAppUiEngine;
@@ -39,11 +39,13 @@ class QMpxVideoPlaybackWrapper : public QObject
         virtual ~QMpxVideoPlaybackWrapper();
 
         int playMedia( QString aFileName );
+        int playMedia( RFile aFile ); 
         void openPlaybackView() ;
-        void lateInit();
+        void lateInit();        
 
     private:
         void initializePlugins();
+        int openFileWithNativePath(const TDesC& aFileName);
  
     signals:
         void handlePlaybackView( int viewId );

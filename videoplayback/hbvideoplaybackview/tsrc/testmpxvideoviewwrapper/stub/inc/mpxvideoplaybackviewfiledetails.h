@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -78,6 +78,8 @@ class QMPXVideoPlaybackViewFileDetails : public QObject
         int           mVideoWidth;
         int           mBitRate;
         int           mDuration;
+        int           mCreationTime;
+        int           mModificationTime;
 };
 
 #endif      // __MPXVIDEOPLAYBACKVIEWFILEDETAILS__  

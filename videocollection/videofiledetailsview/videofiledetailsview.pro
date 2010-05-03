@@ -45,8 +45,6 @@ INCLUDEPATH += .
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 INCLUDEPATH += $$OS_LAYER_STDCPP_SYSTEMINCLUDE \
-               ../../videoplayerapp/videoplayerengine/inc \
-               ../../videoplayerapp/inc \
     		/epoc32/include/mw/hb/hbtools \
     		/epoc32/include/mw
 
@@ -66,6 +64,8 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lthumbnailmanagerqt.dll \
         -lmediaclientvideodisplay.dll \
         -lxqserviceutil.dll \
-        -lvideoplayerengine.dll
+        -lvideoplayerengine.dll \
+        -lshareui.dll \
+        -lflogger.dll
 
 RESOURCES += data/videofiledetails.qrc

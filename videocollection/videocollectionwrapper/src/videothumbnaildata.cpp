@@ -15,7 +15,10 @@
 *
 */
 
+// Version : %version: %
+
 // INCLUDE FILES
+#include "videocollectiontrace.h"
 #include "videothumbnaildata.h"
 #include "videothumbnaildata_p.h"
 
@@ -28,6 +31,7 @@
 //
 VideoThumbnailData &VideoThumbnailData::instance()
 {
+	FUNC_LOG;
     static VideoThumbnailData _thumbnailData;
     return _thumbnailData;
 }
@@ -39,6 +43,7 @@ VideoThumbnailData &VideoThumbnailData::instance()
 VideoThumbnailData::VideoThumbnailData() :
 d_ptr(new VideoThumbnailDataPrivate())
 {
+	FUNC_LOG;
     connect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)), 
             this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
 }
@@ -49,6 +54,7 @@ d_ptr(new VideoThumbnailDataPrivate())
 //
 VideoThumbnailData::~VideoThumbnailData()
 {
+	FUNC_LOG;
     disconnect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)), 
             this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
     delete d_ptr;
@@ -60,6 +66,7 @@ VideoThumbnailData::~VideoThumbnailData()
 //
 bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
 {
+	FUNC_LOG;
     return d_ptr->removeThumbnail(mediaId);
 }
 
@@ -69,6 +76,7 @@ bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
 //
 const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 {
+	FUNC_LOG;
     return d_ptr->getThumbnail(mediaId);
 }
 
@@ -78,6 +86,7 @@ const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 //
 void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
+	FUNC_LOG;
     d_ptr->startBackgroundFetching(model, fetchIndex);
 }
 
@@ -87,6 +96,7 @@ void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *mode
 //
 void VideoThumbnailData::enableBackgroundFetching(bool enable)
 {
+	FUNC_LOG;
     d_ptr->enableBackgroundFetching(enable);
 }
 
@@ -96,6 +106,7 @@ void VideoThumbnailData::enableBackgroundFetching(bool enable)
 //
 void VideoThumbnailData::enableThumbnailCreation(bool enable)
 {
+	FUNC_LOG;
     d_ptr->enableThumbnailCreation(enable);
 }
 
@@ -105,6 +116,7 @@ void VideoThumbnailData::enableThumbnailCreation(bool enable)
 //
 void VideoThumbnailData::freeThumbnailData()
 {
+	FUNC_LOG;
     d_ptr->freeThumbnailData();
 }
 

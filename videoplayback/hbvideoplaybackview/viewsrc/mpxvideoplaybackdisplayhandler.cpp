@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  18 %
+// Version : %version:  19 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -172,6 +172,8 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
         delete iVideoContainer;
         iVideoContainer = NULL;
     }
+
+    iSurfaceId = TSurfaceId::CreateNullId();
 }
 
 // -------------------------------------------------------------------------------------------------

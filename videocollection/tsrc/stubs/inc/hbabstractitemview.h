@@ -22,6 +22,8 @@
 #include <QGraphicsWidget>
 #include <QItemSelectionModel>
 
+class HbAbstractViewItem;
+
 class HbAbstractItemView : public HbWidget
 {
     Q_OBJECT
@@ -42,6 +44,8 @@ public:
 signals:
 
     void activated(const QModelIndex &index);
+    
+    void longPressed(HbAbstractViewItem *item, const QPointF &point);
 
 };
 

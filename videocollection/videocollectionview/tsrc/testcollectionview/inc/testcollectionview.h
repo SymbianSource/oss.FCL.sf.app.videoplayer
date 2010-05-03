@@ -31,8 +31,11 @@ class TestCollectionView : public QObject
 
 public:
     
-    TestCollectionView();
-    
+
+
+    // test functions for the test framework
+private slots:
+
     /**
      * call to init a testcase
      */
@@ -43,13 +46,10 @@ public:
      */
     void cleanup();
     
-    // test functions for the test framework
-private slots:
-
     /**
      * called before anything else when test starts
      */
-     void initTestCase();
+    void initTestCase();
      
     /**
      * will be called after testing ends
@@ -64,13 +64,16 @@ private slots:
     void testGetView();
     void testBack();
     void testOrientationChange();
+    void testTimerEvent();
 
 signals:
 
     void commandSignal(int);
     
 private:
+    
     VideoCollectionViewPlugin* mTestView;
+    
 };
 
 

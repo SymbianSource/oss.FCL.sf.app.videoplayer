@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  4 %
 
 
 #include <qdebug>
@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
 // init
 // ---------------------------------------------------------------------------
 //
-void TestMPXVideoPlaybackButtonBar::init()
+void TestMPXVideoPlaybackButtonBar::init( bool attachOperation )
 {
     MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::init()"));
 
-    mController = new QMPXVideoPlaybackControlsController();   
+    mController = new QMPXVideoPlaybackControlsController( attachOperation );   
     mButtonBar = new QMPXVideoPlaybackButtonBar( mController );
 
     mButtonBar->initialize();
@@ -109,59 +109,138 @@ void TestMPXVideoPlaybackButtonBar::testPlay()
 }
 
 // ---------------------------------------------------------------------------
-// testStartFFSeeking
+// testLongTapOnFF
 // ---------------------------------------------------------------------------
 //
-void TestMPXVideoPlaybackButtonBar::testStartFFSeeking()
+void TestMPXVideoPlaybackButtonBar::testLongTapOnFF()
 {
-    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testStartFFSeeking()"));
+    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testLongTapOnFF()"));
 
     init();
 
+    //
+    // Start seeking
+    //
     mButtonBar->mButtons[EMPXButtonFF]->press();
-
-    QVERIFY( mButtonBar->mButtons[EMPXButtonFF]->mSelected == true );
     QVERIFY( mController->mTimerAction == EMPXTimerCancel );
+
+    mButtonBar->mButtons[EMPXButtonFF]->pressing();
+
+    QVERIFY( mButtonBar->mSeekingState == EMPXFastForwarding );
+    QVERIFY( mButtonBar->mButtons[EMPXButtonFF]->mSelected == true );
     QVERIFY( mController->mCommand == EMPXPbvCmdSeekForward );
 
+    //
+    // End seeking
+    //
+    mButtonBar->mButtons[EMPXButtonFF]->release();
+
+    QVERIFY( mButtonBar->mSeekingState == EMPXNotSeeking );
+    QVERIFY( mButtonBar->mButtons[EMPXButtonFF]->mSelected == false );
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdEndSeek );
+
     cleanup();
 }
 
 // ---------------------------------------------------------------------------
-// testStartRWSeeking
+// testLongTapOnRW
 // ---------------------------------------------------------------------------
 //
-void TestMPXVideoPlaybackButtonBar::testStartRWSeeking()
+void TestMPXVideoPlaybackButtonBar::testLongTapOnRW()
 {
-    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testStartRWSeeking()"));
+    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testLongTapOnRW()"));
 
     init();
 
+    //
+    // Start seeking
+    //
     mButtonBar->mButtons[EMPXButtonRW]->press();
-
-    QVERIFY( mButtonBar->mButtons[EMPXButtonRW]->mSelected == true );
     QVERIFY( mController->mTimerAction == EMPXTimerCancel );
+
+    mButtonBar->mButtons[EMPXButtonRW]->pressing();
+
+    QVERIFY( mButtonBar->mSeekingState == EMPXRewinding );
+    QVERIFY( mButtonBar->mButtons[EMPXButtonRW]->mSelected == true );
     QVERIFY( mController->mCommand == EMPXPbvCmdSeekBackward );
 
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
-// testEndSeeking
-// ---------------------------------------------------------------------------
-//
-void TestMPXVideoPlaybackButtonBar::testEndSeeking()
-{
-    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testEndSeeking()"));
-
-    init();
-
+    //
+    // End seeking
+    //
     mButtonBar->mButtons[EMPXButtonRW]->release();
 
-    QVERIFY( mButtonBar->mButtons[EMPXButtonFF]->mSelected == false );
+    QVERIFY( mButtonBar->mSeekingState == EMPXNotSeeking );
     QVERIFY( mButtonBar->mButtons[EMPXButtonRW]->mSelected == false );
     QVERIFY( mController->mTimerAction == EMPXTimerReset );
     QVERIFY( mController->mCommand == EMPXPbvCmdEndSeek );
+
+    cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testShortTapOnFF
+// ---------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackButtonBar::testShortTapOnFF()
+{
+    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testShortTapOnFF()"));
+
+    init();
+
+    //
+    // If mPostion + KMPXFastForward < mDuration
+    //
+    mButtonBar->mPosition = 30;
+    mButtonBar->mDuration = 70;
+    mButtonBar->mButtons[EMPXButtonFF]->release();
+
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mCommandValue == mButtonBar->mPosition + KMPXFastForward );
+
+    //
+    // If mPostion + KMPXFastForward < mDuration
+    //
+    mButtonBar->mDuration = 50;
+    mController->mCommand = EMPXPbvCmdPlay;
+
+    mButtonBar->mButtons[EMPXButtonFF]->release();
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdPlay );
+
+    cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testShortTapOnRW
+// ---------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackButtonBar::testShortTapOnRW()
+{
+    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testShortTapOnRW()"));
+
+    init();
+
+    //
+    // If mPostion + KMPXRewind > 0
+    //
+    mButtonBar->mPosition = 30;
+    mButtonBar->mButtons[EMPXButtonRW]->release();
+
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mCommandValue == mButtonBar->mPosition + KMPXRewind );
+
+    //
+    // If mPostion + KMPXRewind < 0
+    //
+    mButtonBar->mPosition = 4;
+    mButtonBar->mButtons[EMPXButtonRW]->release();
+
+    QVERIFY( mController->mTimerAction == EMPXTimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
+    QVERIFY( mController->mCommandValue == 0 );
 
     cleanup();
 }
@@ -400,6 +479,62 @@ void TestMPXVideoPlaybackButtonBar::testOpenDetailsView()
     QVERIFY( mController->mViewMode == EAudioOnlyView );
 
     cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testAttach
+// ---------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackButtonBar::testAttach()
+{
+    MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackButtonBar::testAttach()"));
+
+    //
+    // test when 'attach' operation is enabled
+    //
+    init( true );
+
+    //
+    // verify 'attach' button is visible
+    //
+    QVERIFY( mButtonBar->mButtons[EMPXButtonAttach]->isVisible() == true );
+    
+    //
+    // release 'attach' button
+    //
+    mButtonBar->mButtons[EMPXButtonAttach]->release();
+
+    //
+    // verify the controller attachVideo() slot has been called
+    //
+    QVERIFY( mController->mCommand == EMPXPbvCmdClose );
+    QVERIFY( mController->mAttachVideoDone == true );
+    
+    //
+    // clean up
+    //
+    cleanup();
+    
+    //
+    // test when 'attach' operation is disabled
+    //
+    init();
+
+    //
+    // verify 'attach' button is not visible
+    //
+    QVERIFY( mButtonBar->mButtons[EMPXButtonAttach]->isVisible() == false );
+        
+    //
+    // verify the controller attachVideo() slot is not called
+    //
+    QVERIFY( mController->mAttachVideoDone == false );
+    
+    //
+    // clean up
+    //
+    cleanup();
+    
 }
 
 // End of file

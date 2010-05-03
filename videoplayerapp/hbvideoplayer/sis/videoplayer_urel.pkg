@@ -39,9 +39,6 @@
 "/epoc32/release/armv5/urel/vcxmyvideoscollectionplugin.dll"      - "!:/sys/bin/vcxmyvideoscollectionplugin.dll"
 "/epoc32/data/z/resource/plugins/vcxmyvideoscollectionplugin.rsc" - "!:/resource/plugins/vcxmyvideoscollectionplugin.rsc"
 
-"/epoc32/release/armv5/urel/vcxconnectionutility.dll"             - "!:/sys/bin/vcxconnectionutility.dll"
-"/epoc32/release/armv5/urel/vcxconnutilpsworker.exe"              - "!:/sys/bin/vcxconnutilpsworker.exe"
-
 ;
 ; Playback Plugin
 ;

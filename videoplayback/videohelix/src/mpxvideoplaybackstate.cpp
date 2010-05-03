@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: e003sa33#36 %
+
+// Version : %version: 39 %
 
 
 //
@@ -116,8 +117,6 @@ void CMPXVideoPlaybackState::HandlePlay()
 
 //  ------------------------------------------------------------------------------------------------
 //    CMPXVideoPlaybackState::HandlePause()
-//
-//   @@FP for now we are assuming that Pause is only valid for Playing state
 //  ------------------------------------------------------------------------------------------------
 void CMPXVideoPlaybackState::HandlePause()
 {
@@ -187,8 +186,6 @@ void CMPXVideoPlaybackState::HandleForeground()
 void CMPXVideoPlaybackState::HandleBackground()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::HandleBackground()"));
-
-    // Just pause the plackback
     HandlePause();
 }
 
@@ -526,7 +523,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoDrmProtected ),
             iVideoPlaybackCtlr->iFileDetails->iDrmProtected );
     }
-    
+
     //
     //  Description
     //
@@ -537,7 +534,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoDescription ),
             *( iVideoPlaybackCtlr->iFileDetails->iDescription ) );
     }
-    
+
     //
     //  Location
     //
@@ -548,7 +545,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoLocation ),
             *( iVideoPlaybackCtlr->iFileDetails->iLocation ) );
     }
-    
+
     //
     //  Copyright
     //
@@ -559,7 +556,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoCopyright ),
             *( iVideoPlaybackCtlr->iFileDetails->iCopyright ) );
     }
- 
+
     //
     //  Language
     //
@@ -570,7 +567,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoLanguage ),
             *( iVideoPlaybackCtlr->iFileDetails->iLanguage ) );
     }
-     
+
     //
     //  Keywords
     //
@@ -580,7 +577,28 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
         aMedia->SetTextValueL(
             TMPXAttribute( KMPXMediaVideoKeywords ),
             *( iVideoPlaybackCtlr->iFileDetails->iKeywords ) );
-    }        
+    }
+    
+    //
+    //  Creation date/time 
+    //
+    if ( attrV & KMPXMediaVideoCreated.iAttributeId )
+    {
+        aMedia->SetTObjectValueL<TInt>(
+            TMPXAttribute( KMPXMediaVideoCreated ),
+            iVideoPlaybackCtlr->iFileDetails->iCreationTime );
+    }
+
+    //
+    //  Last Modified date/time 
+    //
+    if ( attrV & KMPXMediaVideoLastModified.iAttributeId )
+    {
+        aMedia->SetTObjectValueL<TInt>(
+            TMPXAttribute( KMPXMediaVideoLastModified ),
+            iVideoPlaybackCtlr->iFileDetails->iModificationTime );
+    }
+
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -673,6 +691,13 @@ void  CMPXVideoPlaybackState::CommandHandleBackground()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::CommandHandleBackground()"));
 
+    //
+    //  Block playback in the following cases:
+    //  -  App is not in foreground
+    //  -  Alarm
+    //  -  Phone call
+    //  -  Video call
+    //
     if ( !iVideoPlaybackCtlr->iAppInForeground ||
          iVideoPlaybackCtlr->IsAlarm() ||
          iVideoPlaybackCtlr->IsPhoneCall() ||
@@ -689,7 +714,7 @@ void  CMPXVideoPlaybackState::CommandHandleForeground()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::CommandHandleForeground()"));
 
-    if ( !iVideoPlaybackCtlr->IsActivePhoneCall() )
+    if ( ! iVideoPlaybackCtlr->IsActivePhoneCall() )
     {
         iVideoPlaybackCtlr->iAllowAutoPlay = ETrue;
     }
@@ -979,20 +1004,20 @@ void CMPXInitialisingState::HandleOpenComplete( TInt aError )
     if ( aError == KErrNone )
     {
         iVideoPlaybackCtlr->iPlaybackMode->HandleOpenComplete();
-		
+
         //
-		//  call setposition with converted value saved in openfile
+        //  call setposition with converted value saved in openfile
         //
-		if ( iVideoPlaybackCtlr->iSavedPosition > 0 )
-        {    
+        if ( iVideoPlaybackCtlr->iSavedPosition > 0 )
+        {
             MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  iSavedPosition %d"), iVideoPlaybackCtlr->iSavedPosition );
-                
+
             TInt64 pos( iVideoPlaybackCtlr->iSavedPosition );
             pos *= KPbMilliMultiplier;
-            
+
             MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->SetPositionL( pos ) );
         }
-               
+
         MPX_DEBUG(_L("CMPXInitialisingState::HandleOpenComplete()  Sending Prepare()"));
 
         iVideoPlaybackCtlr->iPlayer->Prepare();
@@ -1713,17 +1738,32 @@ CMPXBufferingState::~CMPXBufferingState()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXBufferingState::HandleLoadingStarted()
-//
-//  We transition to Buffering state after Play command is issued initially
-//
-//  No state transitions necessary here as we are already in Buffering state
+//    CMPXBufferingState::HandleLoadingStarted()
 //  ------------------------------------------------------------------------------------------------
 void CMPXBufferingState::HandleLoadingStarted()
 {
     MPX_DEBUG(_L("CMPXBufferingState::HandleLoadingStarted()"));
 
-    // no need to send any events - we are already in buffering state
+    TInt loadingPercentage = RetrieveBufferingPercentage();
+    
+    if ( loadingPercentage < 100 )
+    {
+        MPX_TRAPD( err,
+        {
+            CMPXMessage* message = CMPXMessage::NewL();
+            CleanupStack::PushL( message );
+    
+            message->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId, 
+                                                      KMPXMediaIdVideoPlayback );
+            
+            message->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, 
+                                                                 EPbCmdLoadingStarted );
+    
+            iVideoPlaybackCtlr->iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
+    
+            CleanupStack::PopAndDestroy( message );
+        } );
+    }
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1747,8 +1787,9 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
         }
         else
         {
-            //  delayed pause :
-            //  background event was received while we were in buffering state
+            //
+            //  Delayed pause, background event was received while we were in buffering state
+            //
             iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
         }
     }
@@ -1775,14 +1816,11 @@ void CMPXBufferingState::HandleStop()
 }
 
 //  ------------------------------------------------------------------------------------------------
-//  CMPXBufferingState::HandleBackground()
+//    CMPXBufferingState::HandleBackground()
 //  ------------------------------------------------------------------------------------------------
 void CMPXBufferingState::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXBufferingState::HandleBackground()"));
-
-    // we are in buffering state and received a background event
-    // we cannot pause now but need to pause when buffering is complete
     iVideoPlaybackCtlr->iPlaybackMode->HandleBackground();
 }
 
@@ -1793,8 +1831,10 @@ void CMPXBufferingState::HandleForeground()
 {
     MPX_DEBUG(_L("CMPXBufferingState::HandleForeground()"));
 
-    // we are in buffering state and received a background event
-    // we cannot pause now but need to pause when buffering is complete
+    //
+    //  We are in buffering state and received a background and foreground event
+    //  playback will continue when buffering is complete
+    //
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1888,7 +1928,8 @@ void CMPXSeekingState::HandlePlay()
 //  ------------------------------------------------------------------------------------------------
 void CMPXSeekingState::HandleBackground()
 {
-    MPX_DEBUG(_L("CMPXSeekingState::HandleBackground()"));
+    MPX_ENTER_EXIT(_L("CMPXSeekingState::HandleBackground()"));
+
     MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandleBackground();
 }
@@ -1898,7 +1939,8 @@ void CMPXSeekingState::HandleBackground()
 //  ------------------------------------------------------------------------------------------------
 void CMPXSeekingState::HandlePause()
 {
-    MPX_DEBUG(_L("CMPXSeekingState::HandlePause()"));
+    MPX_ENTER_EXIT(_L("CMPXSeekingState::HandlePause()"));
+
     MPX_TRAPD( err, HandleStopSeekL() );
     iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
 }

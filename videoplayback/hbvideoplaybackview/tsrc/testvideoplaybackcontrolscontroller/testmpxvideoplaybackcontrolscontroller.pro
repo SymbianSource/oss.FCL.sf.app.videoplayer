@@ -14,16 +14,15 @@
 # Description: Project file for building testmpxvideoplaybackcontrolscontroller
 #
 #
-# Version : %version: 2 %
+# Version : %version: 5 %
 
 
 TEMPLATE = app
 TARGET = testmpxvideoplaybackcontrolscontroller
 CONFIG += qtestlib hb qt
 
-DEPENDPATH += . \
-    inc \
-    src
+LIBS += -lxqserviceutil.dll \
+        -lefsrv.dll
 
 INCLUDEPATH += stub/inc \
                ../inc \
@@ -42,12 +41,16 @@ HEADERS += hbvideobaseplaybackview.h  \
            mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackfiledetailswidget.h \
            mpxvideoplaybackfullscreencontrol.h \
-           mpxvideoplaybacknontouchvolumebar.h \
            mpxvideoplaybackstatuspanecontrol.h \
            mpxvideoplaybackviewfiledetails.h \
            mpxvideoviewwrapper.h \
            thumbnailmanager_qt.h \
            testmpxvideoplaybackcontrolscontroller.h \
+           hbvolumesliderpopup.h \
+           xqserviceutilxtra.h \
+           xqserviceutil.h \
+           videoservices.h \
+           videoserviceurifetch.h \
            ../../inc/mpxvideoplaybackcontrolscontroller.h 
 					 
                
@@ -59,12 +62,16 @@ SOURCES += hbvideobaseplaybackview.cpp \
            mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackfullscreencontrol.cpp \
-           mpxvideoplaybacknontouchvolumebar.cpp \
            mpxvideoplaybackstatuspanecontrol.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
            mpxvideoviewwrapper.cpp \
            thumbnailmanager_qt.cpp \
            testmpxvideoplaybackcontrolscontroller.cpp \
+           hbvolumesliderpopup.cpp \
+           xqserviceutilxtra.cpp \
+           xqserviceutil.cpp \
+           videoservices.cpp \
+           videoserviceurifetch.cpp \
            ../../controlsrc/mpxvideoplaybackcontrolscontroller.cpp 
 					 
            

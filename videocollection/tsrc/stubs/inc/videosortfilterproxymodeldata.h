@@ -19,6 +19,7 @@
 #define VIDEOSORTFILTERPROXYMODELDATA_H
 
 #include <qnamespace.h>
+#include <qstring.h>
 
 class VideoSortFilterProxyModelData
 {
@@ -26,7 +27,7 @@ public: // methods
     static void reset()
     {
         mOpenFails = false;
-        mSortRole = 0;
+        mSortRole = -1;
         mSortOrder = Qt::AscendingOrder;
         mSortAsync = false;
         mDeleteItemsFails = true;
@@ -42,6 +43,9 @@ public: // methods
         mGenericFilterId = TMPXItemId::InvalidId();
         mGenericFilterValue = false;
         mNewAlbumId = TMPXItemId::InvalidId(); 
+        mLastAlbumNameInRename = "";
+        mRenameAlbumReturnValue= 0;
+        mLastAddedAlbumName = "";
     }
     
 public: // data
@@ -62,6 +66,9 @@ public: // data
     static TMPXItemId mGenericFilterId;
     static bool mGenericFilterValue; 
     static TMPXItemId mNewAlbumId;
+    static QString mLastAlbumNameInRename;
+    static int mRenameAlbumReturnValue;
+    static QString mLastAddedAlbumName;
 };
 
 #endif /* VIDEOSORTFILTERPROXYMODEL_H */

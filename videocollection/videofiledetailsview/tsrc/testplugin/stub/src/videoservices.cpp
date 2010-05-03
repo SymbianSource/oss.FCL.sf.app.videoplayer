@@ -15,8 +15,10 @@
 *
 */
 
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
+// Version : %version: %
+
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
 
 
 VideoServices *VideoServices::mInstance = 0;

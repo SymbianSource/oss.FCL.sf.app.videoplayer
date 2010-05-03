@@ -157,6 +157,17 @@ NONSHARABLE_CLASS(MVcxMyVideosMdsAlbumsObserver)
         virtual void HandleRelationEvent( TObserverNotificationType aType,
                 const RArray<TMdERelation>& aRelationArray ) = 0;
 
+#if 0
+        /**
+         * Event handler function for relation add events.
+         * 
+         * @param aType           Event type
+         * @param aRelationArray  Array containing relations.
+         */
+        virtual void HandleRelationIdEvent( TObserverNotificationType aType,
+                const RArray<TUint32>& aRelationIdArray ) = 0;
+#endif
+        
     };
 
 /**
@@ -443,6 +454,12 @@ private:
      * @param aObject Creation date is written here.
      */
     void SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject );
+
+    /**
+     * Opens MDS session.
+     */
+    void OpenMdsSessionL();
+    
 public:
 
     /**

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 
@@ -126,6 +126,8 @@ CMPXVideoFileDetails::ClearFileDetails()
     iFourCCCode = 0;
 
     iDuration = 0;
+    iCreationTime = 0;
+    iModificationTime = 0;
 }
 
 //  EOF

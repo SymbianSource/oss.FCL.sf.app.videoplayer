@@ -11,9 +11,11 @@
 *
 * Contributors:
 *
-* Description:   ?Description
+* Description:   Declaration of VideoServices Stub
 *
 */
+
+// Version : %version: %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -24,6 +26,7 @@
 //FORWARD CLASS DECLARATION
 class VideoServiceUriFetch;
 class VideoServicePlay;
+class VideoServiceView;
 class QVideoPlayerEngine;
 
 class VideoServices : public QObject
@@ -51,7 +54,8 @@ public:
     {
         ENoService,
         EUriFetcher,
-        EPlayback
+        EPlayback,
+        EView
     };
 
     /**
@@ -83,6 +87,9 @@ private:
 
     Q_DISABLE_COPY(VideoServices)
 
+signals:
+	void activated( int command );
+
 private:
 
     /**
@@ -93,12 +100,16 @@ private:
     VideoServiceUriFetch* mServiceUriFetch;
 
     VideoServicePlay* mServicePlay;
+    
+    VideoServiceView* mServiceView;
 
     VideoServices::TVideoService mCurrentService;
 
     friend class VideoServiceUriFetch;
 
     friend class VideoServicePlay;
+    
+    friend class VideoServiceView;
 
 public:
 

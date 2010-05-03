@@ -19,6 +19,7 @@
             <unit unitID="vado.testhintwidget" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testhintwidget" proFile="testhintwidget.pro" name="unittest.testhintwidget"/>
             <unit unitID="vado.testlistview" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testlistview" proFile="testlistview.pro" name="unittest.testlistview"/>
             <unit unitID="vado.testlistwidget" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testlistwidget" proFile="testlistwidget.pro" name="unittest.testlistwidget"/>
+            <unit unitID="vado.testvideocollectionuiloader" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testvideocollectionuiloader" proFile="testvideocollectionuiloader.pro" name="unittest.testvideocollectionuiloader"/>
             <unit unitID="vado.testvideocollectionviewutils" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testvideocollectionviewutils" proFile="testvideocollectionviewutils.pro" name="unittest.testvideocollectionviewutils"/>
             <unit unitID="vado.testvideolistselectiondialog" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testvideolistselectiondialog" proFile="testvideolistselectiondialog.pro" name="unittest.testvideolistselectiondialog"/>
             <unit unitID="vado.testvideocollectionclient" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionwrapper/tsrc/testvideocollectionclient" proFile="testvideocollectionclient.pro" name="unittest.testvideocollectionclient"/>
@@ -31,6 +32,7 @@
             <unit unitID="vado.testvideosortfilterproxymodel" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionwrapper/tsrc/testvideosortfilterproxymodel" proFile="testvideosortfilterproxymodel.pro" name="unittest.testvideosortfilterproxymodel"/>
             <unit unitID="vado.testvideothumbnaildata" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionwrapper/tsrc/testvideothumbnaildata" proFile="testvideothumbnaildata.pro" name="unittest.testvideothumbnaildata"/>
             <unit unitID="vado.testvideothumbnaildata_p" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionwrapper/tsrc/testvideothumbnaildata_p" proFile="testvideothumbnaildata_p.pro" name="unittest.testvideothumbnaildata_p"/>
+            <unit unitID="vado.testvideothumbnailfetcher" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionwrapper/tsrc/testvideothumbnailfetcher" proFile="testvideothumbnailfetcher.pro" name="unittest.testvideothumbnailfetcher"/>
         </module>
     </layer>
     

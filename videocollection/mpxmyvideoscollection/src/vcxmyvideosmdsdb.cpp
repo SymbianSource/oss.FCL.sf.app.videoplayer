@@ -78,47 +78,54 @@ CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
 //
 void CVcxMyVideosMdsDb::ConstructL()
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::ConstructL" );
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL start" );
 
     iCmdQueue = CVcxMyVideosMdsCmdQueue::NewL( *this );
 
     iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait;
     
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL CMdESession::NewL" );
+    OpenMdsSessionL();
 
-    //  Create session
+    //  Get the schema definitions
+    GetSchemaDefinitionsL();
+        
+    iAlbums = CVcxMyVideosMdsAlbums::NewL( *this, iAlbumsObserver );
+    
+    TCallBack callBack( AsyncHandleQueryCompleted, this );    
+    iAsyncHandleQueryCompleteCaller = new (ELeave) CAsyncCallBack( callBack,
+            CActive::EPriorityStandard );
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL exit" );
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::OpenMdsSessionL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::OpenMdsSessionL()
+    {
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::OpenMdsSessionL() start" );
+
     iMdsError = KErrNone;
 
     iMdsSession = CMdESession::NewL( *this );
-    if (!iMdsSession)
+    if ( !iMdsSession )
         {
         //  Failed to create session, leave
         User::Leave( iMdsError );
         }
-
-    //  Wait until session opened
-    iActiveSchedulerWait->Start();
-
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL iActiveSchedulerWait->Start done" );
-
+    
     if ( iMdsError != KErrNone )
         {
         MPX_DEBUG2("Failed to create session to MDS: %d", iMdsError);
         User::LeaveIfError( iMdsError );
         }
 
-    //  Get the schema definitions
-    iMdsError = KErrNone;
-    GetSchemaDefinitionsL();
+    //  Wait until session opened
+    iActiveSchedulerWait->Start();    
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL iActiveSchedulerWait->Start done" );
 
-    //  Is schema ok
-    if ( iMdsError != KErrNone )
-        {
-        //  Schema not loaded, abort
-        User::Leave( iMdsError );
-        }
-
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL Adding observers" );
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::OpenMdsSessionL Adding observers" );
 
     // We order all object notifications. If we set video condition, then we wont
     // receive remove notifications at all (mds feature). Extra notifications
@@ -128,12 +135,8 @@ void CVcxMyVideosMdsDb::ConstructL()
     iMdsSession->AddObjectObserverL( *this, NULL );
     
     iMdsSession->AddObjectPresentObserverL( *this );
-    
-    iAlbums = CVcxMyVideosMdsAlbums::NewL( *this, iAlbumsObserver );
-    
-    TCallBack callBack( AsyncHandleQueryCompleted, this );    
-    iAsyncHandleQueryCompleteCaller = new (ELeave) CAsyncCallBack( callBack,
-            CActive::EPriorityStandard );
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::OpenMdsSessionL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -192,8 +195,9 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
     {
     MPX_FUNC( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()" );
 
-    Cancel();
+    Cancel( EGetVideoList );
 
+    delete iAlbums;
     delete iCmdQueue;    
 
     if ( iMdsSession )
@@ -202,7 +206,6 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
         }
 
     delete iVideoQuery;
-    delete iAlbums;
     delete iMdsSession;
     delete iActiveSchedulerWait;
     delete iAsyncHandleQueryCompleteCaller;
@@ -214,7 +217,7 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
 //
 void CVcxMyVideosMdsDb::Cancel( TRequestType aType )
     {
-    MPX_FUNC("CVcxMyVideosMdsDb::Cancel()");
+    MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() start");
     
     iCmdQueue->Cancel( aType );
     
@@ -227,7 +230,12 @@ void CVcxMyVideosMdsDb::Cancel( TRequestType aType )
         iVideoListFetchingIsOngoing = EFalse;
         }
 
-    iAlbums->Cancel( aType );    
+    if ( aType != EGetVideoList )
+        {
+        iAlbums->CancelQueries( aType );
+        }
+    
+    MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() exit");
     }
     
 // ---------------------------------------------------------------------------

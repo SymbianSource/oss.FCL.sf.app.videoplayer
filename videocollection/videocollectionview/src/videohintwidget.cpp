@@ -15,6 +15,9 @@
 *
 */
 
+// Version : %version: 13 %
+
+// INCLUDE FILES
 #include <hbpushbutton.h>
 #include <hblabel.h>
 #include <qgraphicsitem.h>
@@ -23,20 +26,22 @@
 #include "videohintwidget.h"
 #include "videocollectionuiloader.h"
 #include "videocollectionviewutils.h"
+#include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
 //
-VideoHintWidget::VideoHintWidget(VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent) :
-HbWidget(parent),
-mUiLoader(uiLoader),
-mServiceIcon(0),
-mAddVideosIcon(0),
-mCurrentLevel(AllVideos),
-mButtonShown(false),
-mActivated(false)
+VideoHintWidget::VideoHintWidget( VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent ) 
+    : HbWidget( parent )
+    , mUiLoader( uiLoader )
+    , mServiceIcon( 0 )
+    , mAddVideosIcon( 0 )
+    , mCurrentLevel( AllVideos )
+    , mButtonShown( false )
+    , mActivated( false )
 {
+	FUNC_LOG;
     // NOP
 }
 
@@ -46,6 +51,7 @@ mActivated(false)
 //
 VideoHintWidget::~VideoHintWidget()
 {
+	FUNC_LOG;
     delete mServiceIcon;
     delete mAddVideosIcon;
 }
@@ -56,6 +62,7 @@ VideoHintWidget::~VideoHintWidget()
 //
 int VideoHintWidget::initialize()
 {
+	FUNC_LOG;
     VideoCollectionViewUtils& utils = VideoCollectionViewUtils::instance();
     return utils.getServiceIconStrings(mServiceIconString, mServiceIconPressedString);
 }
@@ -66,6 +73,8 @@ int VideoHintWidget::initialize()
 //
 void VideoHintWidget::setLevel(HintLevel level)
 {
+	FUNC_LOG;
+	INFO_1("VideoHintWidget::setLevel() level: %d", level);
     mCurrentLevel = level;
     if(mActivated) {
         updateUiComponents();
@@ -78,6 +87,8 @@ void VideoHintWidget::setLevel(HintLevel level)
 //
 void VideoHintWidget::setButtonShown(bool shown)
 {
+	FUNC_LOG;
+	INFO_1("VideoHintWidget::setButtonShown() shown: %d", shown);
     mButtonShown = shown;
     if(mActivated) {
         updateUiComponents();
@@ -90,6 +101,7 @@ void VideoHintWidget::setButtonShown(bool shown)
 //
 void VideoHintWidget::orientationChangedSlot(Qt::Orientation targetOrientation)
 {
+	FUNC_LOG;
     Q_UNUSED(targetOrientation);
     updateUiComponents();
 }
@@ -100,6 +112,7 @@ void VideoHintWidget::orientationChangedSlot(Qt::Orientation targetOrientation)
 //
 void VideoHintWidget::activate()
 {
+	FUNC_LOG;
     if (!mActivated)
     {
         if(mServiceIconString.isEmpty() || 
@@ -116,7 +129,7 @@ void VideoHintWidget::activate()
         mServiceIcon = new HbIcon(mServiceIconString);
         mServiceIcon->setIconName(mServiceIconPressedString, QIcon::Normal, QIcon::On);
         
-        mAddVideosIcon = new HbIcon(":/images/mono_video_addvideos.svg");
+        mAddVideosIcon = new HbIcon("qtg_mono_add_to_video_collection");
         
         updateUiComponents();
         
@@ -132,6 +145,7 @@ void VideoHintWidget::activate()
 //
 void VideoHintWidget::deactivate()
 {
+	FUNC_LOG;
     if (mActivated)
     {
         mActivated = false;
@@ -168,6 +182,7 @@ void VideoHintWidget::deactivate()
 //
 void VideoHintWidget::updateUiComponents()
 {
+	FUNC_LOG;
     HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
     if (mainWnd)
     {

@@ -30,7 +30,7 @@ class VideoListDataModel : public QAbstractItemModel
      */
     Q_DISABLE_COPY(VideoListDataModel) 
     
-   friend class VideoListDataModelPrivate;
+    friend class VideoListDataModelPrivate;
 
 public: 
 
@@ -104,6 +104,10 @@ public: // from QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const
     {
         Q_UNUSED(parent);
+        if(mIndexReturnsInvalid)
+        {
+            return QModelIndex();
+        }
         return createIndex(row, column);
     }
     
@@ -139,6 +143,12 @@ public: // from QAbstractItemModel
         mStatus = status;
         mStatusData = data;
     }
+
+    void itemModified(const TMPXItemId itemId)
+    {
+        mModifiedItemId = itemId;
+    }
+    
     /**
      * dummy collectionclient
      */
@@ -178,10 +188,17 @@ public: // from QAbstractItemModel
      * setted in reportAsyncStatus
      */
     static QVariant mStatusData;
+    
+    /**
+     * setted in itemModified 
+     */
+    static TMPXItemId mModifiedItemId;
+    
+    /**
+     * Flag if index() should return invalid index.
+     */
+    static bool mIndexReturnsInvalid;
 };
 #endif  // __STUBTESTMODEL_H__
 
 // End of file
-    
-
-

@@ -15,6 +15,9 @@
 *
 */
 
+// Version : %version: %
+
+#include "videocollectiontrace.h"
 #include "videodetailslabel.h"
 
 // SYSTEM INCLUDES
@@ -25,9 +28,10 @@
 // VideoDetailsLabel::VideoDetailsLabel
 // @see header
 //---------------------------------------------------------------
-VideoDetailsLabel::VideoDetailsLabel(QGraphicsItem *parent) :
-    HbLabel(parent)
+VideoDetailsLabel::VideoDetailsLabel(QGraphicsItem *parent) 
+    : HbLabel( parent )
 {
+	FUNC_LOG;
 }
 
 //---------------------------------------------------------------
@@ -36,6 +40,7 @@ VideoDetailsLabel::VideoDetailsLabel(QGraphicsItem *parent) :
 //---------------------------------------------------------------
 VideoDetailsLabel::~VideoDetailsLabel()
 {
+	FUNC_LOG;
 }
 
 //---------------------------------------------------------------
@@ -44,6 +49,7 @@ VideoDetailsLabel::~VideoDetailsLabel()
 //---------------------------------------------------------------
 void VideoDetailsLabel::click()
 {
+	FUNC_LOG;
 	emit clicked(true);
 }
 
@@ -53,6 +59,7 @@ void VideoDetailsLabel::click()
 //---------------------------------------------------------------
 void VideoDetailsLabel::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+	FUNC_LOG;
     Q_UNUSED(event);
     emit clicked(true);
 }

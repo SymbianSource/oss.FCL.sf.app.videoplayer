@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   3 %
+// Version : %version:   5 %
 
 
 
@@ -48,17 +48,20 @@ class HbVideoBasePlaybackView : public HbView
         
         virtual void handleClosePlaybackView();   
         
-        virtual void closePlaybackView();
-        
         void startClosingPlaybackView();
         
         virtual void doClosePlayer();
 
-        void setTitleBarFlags( HbTitleBarFlags flags );
+        void setViewFlags( HbView::HbViewFlags flags );
+        HbView::HbViewFlags viewFlags();
+
+    protected slots:
+
+        virtual void closePlaybackView();
 
     public:
         bool mViewActive;
-        HbTitleBarFlags mTitleFlag;
+        HbView::HbViewFlags mFlag;
         				
 };
 

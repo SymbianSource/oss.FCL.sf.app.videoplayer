@@ -17,6 +17,7 @@
 
 // INCLUDES
 
+#include <mpxmediavideodefs.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxmediaarray.h>
 #include <mpxmedia.h>
@@ -93,7 +94,6 @@ void MediaObjectFactory::createMediaItems(int count, int flags)
             mArray = 0;
             return;
         }
-
         
         TRAPD(error, mArray->AppendL(media));
         if(error != KErrNone)
@@ -419,7 +419,39 @@ bool MediaObjectFactory::fillData(CMPXMedia *media, int index, int dataSelection
         {
             return false;
         }
-    }    
+    }
+    
+    // set resolution
+    if(dataSelectionFlags & MediaDataResolution)
+    {
+        int width = index + 1;
+        int height = index + 2;
+        
+        TRAPD(error, media->SetTObjectValueL<quint16>(KMPXMediaVideoWidth, width));
+        if(error != KErrNone)
+        {
+            delete media;
+            return false;
+        }
+        TRAP(error, media->SetTObjectValueL<quint16>(KMPXMediaVideoHeight, height));
+        if(error != KErrNone)
+        {
+            delete media;
+            return false;
+        }
+    }
+    
+    // set bitrate
+    if(dataSelectionFlags & MediaDataBitrate)
+    {
+        int bitrate = (index+1) * 800;
+        TRAPD(error, media->SetTObjectValueL<qint16>(KMPXMediaVideoBitRate, bitrate));
+        if(error != KErrNone)
+        {
+            delete media;
+            return false;
+        }
+    }
     
     return true;
 }

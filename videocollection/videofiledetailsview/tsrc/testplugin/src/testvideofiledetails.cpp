@@ -20,6 +20,7 @@
 
 #include <QtTest/QtTest>
 #include <qdebug.h>
+#include <hbglobal.h>
 #include <hbinstance.h>
 #include <hbwidget.h>
 #include <hblistwidget.h>
@@ -33,6 +34,7 @@
 
 #include "videodetailslabel.h"
 #include "hbmessagebox.h"
+#include "shareui.h"
 #include "thumbnailmanager_qt.h"
 #include "videocollectioncommon.h"
 #include "mpxhbvideocommondefs.h"
@@ -63,7 +65,7 @@ void TestVideoFileDetails::initTestCase()
    mDummyModel = new VideoSortFilterProxyModel();
    
    connect(this, SIGNAL(shortDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(shortDetailsReady(TMPXItemId)));
-   connect(this, SIGNAL(fullDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(fullVideoDetailsReady(TMPXItemId)));
+   connect(this, SIGNAL(fullDetailsReady(QVariant&)), mDummyModel, SIGNAL(fullVideoDetailsReady(QVariant&)));
 
    connect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
            mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
@@ -81,7 +83,7 @@ void TestVideoFileDetails::initTestCase()
 void TestVideoFileDetails::cleanupTestCase()
 {
     disconnect(this, SIGNAL(shortDetailsReady(int)), mDummyModel, SIGNAL(shortDetailsReady(int)));
-    disconnect(this, SIGNAL(fullDetailsReady(int)),mDummyModel, SIGNAL(fullVideoDetailsReady(int)));
+    disconnect(this, SIGNAL(fullDetailsReady(QVariant&)),mDummyModel, SIGNAL(fullVideoDetailsReady(QVariant&)));
     disconnect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
             mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
     disconnect(this, SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
@@ -382,9 +384,7 @@ void TestVideoFileDetails::testBack()
 void TestVideoFileDetails::testShortDetailsReadySlot()
 {
     TMPXItemId testIndex(5,0);
-    QStringList display;
-    display.append("first row");
-    display.append("second row");
+    QString title("title");
     QString filepath("filepath");
     
     // TODO need to add the default thumbnail checking.
@@ -399,7 +399,7 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     QVERIFY( mPlugin->mTitleAnim->text().isEmpty() );
     QCOMPARE( mPlugin->mThumbnailManager->mRequests.count(), 0 );
     
-    mDummyModel->setData(Qt::DisplayRole, display);
+    mDummyModel->setData(VideoCollectionCommon::KeyTitle, title);
     mDummyModel->setData(VideoCollectionCommon::KeyFilePath, filepath);
     
     // no tn manager
@@ -407,7 +407,7 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     mPlugin->mThumbnailManager = 0;
     emit shortDetailsReady(testIndex);
     QCOMPARE( mPlugin->mVideoId, testIndex );
-    QCOMPARE( mPlugin->mTitleAnim->text(), display.at(0) );
+    QCOMPARE( mPlugin->mTitleAnim->text(), title );
     mPlugin->mThumbnailManager = tmpTnManager;
 
     // data exists
@@ -415,7 +415,7 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     
     QCOMPARE( mPlugin->mVideoId, testIndex );
     QCOMPARE( mDummyModel->lastId(), testIndex );
-    QCOMPARE( mPlugin->mTitleAnim->text(), display.at(0) );
+    QCOMPARE( mPlugin->mTitleAnim->text(), title );
     QVERIFY( ThumbnailManager::mRequests.contains(0) );
     ThumbnailManager::TnRequest request = ThumbnailManager::mRequests[0];
     QCOMPARE( request.name, filepath );
@@ -423,19 +423,19 @@ void TestVideoFileDetails::testShortDetailsReadySlot()
     QCOMPARE( request.priority, 5000 );
 
     
-    mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
-    emit fullDetailsReady(testIndex);
+    QVariant variant = QVariant(createDummyMetadata());
+    emit fullDetailsReady(variant);
              
     emit shortDetailsReady(testIndex);
     
-   int detailCount = sizeof(VideoCollectionCommon::VideoDetailLabelKeys) / sizeof(int);
+    int detailCount = sizeof(VideoCollectionCommon::VideoDetailLabelKeys) / sizeof(int);
 
-   HbListWidget* list = findWidget<HbListWidget>(TEST_VIDEO_DETAILS_LISTWIDGET);
+    HbListWidget* list = findWidget<HbListWidget>(TEST_VIDEO_DETAILS_LISTWIDGET);
    
-   QVERIFY(list);
-   QVERIFY(list->count() == 0);
+    QVERIFY(list);
+    QVERIFY(list->count() == 0);
 
-   cleanup();
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -454,9 +454,9 @@ void TestVideoFileDetails::testFullDetailsReadySlot()
     QVERIFY(list);
     QVERIFY(list->count() == 0);
     
-    mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
+    QVariant variant = QVariant(createDummyMetadata());
        
-    emit fullDetailsReady(testIndex);
+    emit fullDetailsReady(variant);
     
     // verify that actions are currently enabled.
     HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
@@ -479,9 +479,8 @@ void TestVideoFileDetails::testFullDetailsReadySlot()
     }
     
     // for coverity sake, retest without star-rating
-    mDummyModel->reset();
-    mDummyModel->setData(VideoCollectionCommon::KeyMetaData, createDummyMetadata() );
-    emit fullDetailsReady(testIndex);
+    variant = QVariant(createDummyMetadata());
+    emit fullDetailsReady(variant);
 
     int ii = 0;
     for(int i = 0; i<detailCount; i++) 
@@ -521,7 +520,8 @@ void TestVideoFileDetails::testStartPlaybackSlot()
     
     QCOMPARE( mDummyModel->startPlaybackIndex(), TMPXItemId::InvalidId() );
     
-    emit fullDetailsReady(testIndex);
+    QVariant variant = QVariant(createDummyMetadata());
+    emit fullDetailsReady(variant);
     mPlugin->mVideoId = testIndex;
     
     thumbLabel->click();
@@ -543,7 +543,38 @@ void TestVideoFileDetails::testStartPlaybackSlot()
 //
 void TestVideoFileDetails::testSendVideoSlot()
 {
-    // TODO add test after send video has been implemented.
+    QFAIL("Feature not yet implemented!");
+    
+    mDummyModel->reset();
+    init();
+    mPlugin->activateView();
+    
+    HbPushButton* shareAction = findWidget<HbPushButton>(VIDEO_DETAILS_BUTTON);
+    
+    QVERIFY( shareAction != 0 );
+    shareAction->click();
+    QCOMPARE( mDummyModel->dataAccessCount(), 0 );
+    mPlugin->mVideoId = (0,0);
+    
+    mDummyModel->setDataReturnInvalid(true);
+    QModelIndex expected = mDummyModel->index(0, 0);
+    shareAction->click();
+    QCOMPARE( mDummyModel->dataAccessCount(), 1 );
+    QVERIFY( mDummyModel->lastIndex() == expected );
+    QCOMPARE( ShareUi::mFileList.count(), 0 );
+    QVERIFY( ShareUi::mEmbedded == false );
+    
+    mDummyModel->setDataReturnInvalid(false);
+    QString filePath("dummyfilepath");
+    mDummyModel->setData(VideoCollectionCommon::KeyFilePath, filePath);
+    shareAction->click();
+    QCOMPARE( mDummyModel->dataAccessCount(), 2 );
+    QVERIFY( mDummyModel->lastIndex() == expected );
+    QVERIFY( ShareUi::mEmbedded );
+    QCOMPARE( ShareUi::mFileList.count(), 1 );
+    QCOMPARE( ShareUi::mFileList.at(0), filePath );
+    
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -580,10 +611,10 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     QStringList display;
     display.append("first row");
     display.append("second row");
-    mDummyModel->setData(Qt::DisplayRole, display);
+    mDummyModel->setData(VideoCollectionCommon::KeyTitle, display);
     
-    QString expectedText = tr("Do you want to delete \"%1\"?").arg(
-            display.at(0));
+    QString expectedText = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
+            display.first());
     
     HbMessageBox::mQuestionReturnValue = true;
     deleteAction->trigger();
@@ -632,7 +663,8 @@ void TestVideoFileDetails::testRowsRemovedSlot()
     QCOMPARE( mCommandReceived, false );
     QCOMPARE( mReceivedCommand, -1 );
     
-    emit fullDetailsReady(testID);
+    QVariant variant = QVariant(createDummyMetadata());
+    emit fullDetailsReady(variant);
     mPlugin->mVideoId = testID;
     mPlugin->mDeletedIndex = testIndex;
     
@@ -681,7 +713,7 @@ void TestVideoFileDetails::testHandleErrorSlot()
     QString txt = "testdata";
     additional = txt;
     emit testErrorSignal( VideoCollectionCommon::statusSingleDeleteFail , additional);
-    QCOMPARE(HbMessageBox::mLatestTxt, QString("Unable to delete item %1. It is currently open.").arg(txt));
+    QCOMPARE(HbMessageBox::mLatestTxt, hbTrId("txt_videos_info_unable_to_delete_1_it_is_current").arg(txt));
     
     HbMessageBox::mLatestTxt = "";
     // VideoCollectionCommon::statusMultipleDeleteFail
@@ -709,7 +741,7 @@ void TestVideoFileDetails::testThumbnailReadySlot()
     init();
     activateView();
     
-    mDummyModel->setData(Qt::DisplayRole, display);
+    mDummyModel->setData(VideoCollectionCommon::KeyTitle, display);
     mDummyModel->setData(VideoCollectionCommon::KeyFilePath, filepath);
 
     emit shortDetailsReady(testIndex);

@@ -451,16 +451,8 @@ void CVcxMyVideosCategories::UpdateCategoryL( CMPXMedia& aCategory, TInt aCatego
         MPX_DEBUG1("CVcxMyVideosCategories:: video added");
         if ( TVcxMyVideosCollectionUtil::FlagsL( aVideo ) & EVcxMyVideosVideoNew )
             {
-            TInt64 newItemsDate( 0 );
-            if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
-                {
-                newItemsDate = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-                }
-            TInt64 prevNewDate( 0 );
-            if ( aCategory.IsSupported( KMPXMediaGeneralDate ) )
-                {
-                prevNewDate = aCategory.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-                }
+            TInt64 newItemsDate = TVcxMyVideosCollectionUtil::CreationDateL( aVideo );
+            TInt64 prevNewDate  = TVcxMyVideosCollectionUtil::CreationDateL( aCategory );
 
             if ( static_cast<TInt64>(newItemsDate) > static_cast<TInt64>(prevNewDate) )
                 {                    

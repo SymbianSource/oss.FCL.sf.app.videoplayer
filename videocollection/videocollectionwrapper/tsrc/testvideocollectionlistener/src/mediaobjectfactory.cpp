@@ -73,7 +73,7 @@ CMPXMedia* MediaObjectFactory::newMedia(int id1, int id2  )
     TMPXItemId itemId;
     
     itemId.iId1 = id1;
-    id2 != 0 ? itemId.iId2 = id2 : itemId.iId2 = id1 + 1;
+    itemId.iId2 = id2;
     TRAPD(error, media->SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, itemId));
     if(error != KErrNone)
     {

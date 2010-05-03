@@ -127,6 +127,14 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         static TUint32 FlagsL( CMPXMedia& aVideo );
 
         /**
+         * Gets KMPXMediaGeneralDate (creation date) of aVideo.
+         * 
+         * @param aVideo  Media object to fetch parameter from.
+         * @return        Creation date, works with TTime.
+         */
+        static TInt64 CreationDateL( CMPXMedia& aVideo );
+
+        /**
         * Gets KVcxMediaMyVideosDownloadId attribute of aVideo.
         *
         * @param aVideo  Media object to fetch parameter from.
@@ -223,7 +231,7 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
          * @param aMedia  Media where from the attribute is fetched.
          * @return        Pointer to media array.
          */
-        static CMPXMediaArray* MediaArrayL( CMPXMedia& aMedia );
+        static CMPXMediaArray* MediaArrayL( const CMPXMedia& aMedia );
         
         /**
          * Gets KVcxMediaMyVideosInt32Value attribute from aMedia. Leaves

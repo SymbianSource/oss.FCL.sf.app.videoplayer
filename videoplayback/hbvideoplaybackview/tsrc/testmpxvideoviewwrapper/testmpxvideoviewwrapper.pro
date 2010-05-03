@@ -11,65 +11,47 @@
 #
 # Contributors:
 # 
-# Description: Project file for building Videoplayer components
+# Description: Project file for building testmpxvideoviewwrapper
 #
 #
-# Version : %version: 4 %
+# Version : %version: 5 %
 
 
 TEMPLATE = app
 TARGET = testmpxvideoviewwrapper
 CONFIG += qtestlib hb qt
 
-DEPENDPATH += . \
-    inc \
-    src
+DEPENDPATH += inc src stub/src stub/inc
 
 INCLUDEPATH += ../inc \
-							 ../../inc \   
+               ../../inc \   
                ../../../inc \            
                ../../../../inc \                                          
                ../../controlinc \ 
                ../../viewinc \ 
                $$MW_LAYER_SYSTEMINCLUDE                                            
 
-LIBS += -lmpxplaybackutility.dll \
-        -lmpxcommon.dll \
-        -lmpxviewplugin.dll \
-        -lcone.dll \
-        -lws32.dll \
-        -lestor.dll \
-        -leuser.dll \
-        -lcommonengine.dll \
-        -lavkon.dll \
-        -lefsrv.dll \
+LIBS += -lmpxcommon.dll \
         -lflogger.dll \
-        -lsysutil.dll \
         -lmpxcollectionutility.dll \
-        -lremconcoreapi.dll \
-        -lremconInterfacebase.dll \
-        -lhal.dll \
-        -lcentralrepository.dll
-        
-        
+        -lcone.dll \
+        -lws32.dll
+
 # Input
-HEADERS += stub/inc/mpxvideoplaybackuserinputhandler.h \
+HEADERS += testmpxvideoviewwrapper.h \
            stub/inc/hbvideobaseplaybackview.h  \
-           inc/testmpxvideoviewwrapper.h \
-           ../../viewinc/mpxvideoviewwrapper.h \
-           stub/inc/mpxvideoplaybackcontrolscontroller.h \           
-           stub/inc/mpxvideoplaybackviewfiledetails.h \
-           stub/inc/mpxplaybackutilityimpl.h
-					 
-               
-SOURCES += stub/src/hbvideobaseplaybackview.cpp \ 
-					 src/testmpxvideoviewwrapper.cpp \
-					 ../../viewsrc/mpxvideoviewwrapper.cpp \
-					 stub/src/mpxvideoplaybackdisplayhandler.cpp \					 
-					 stub/src/mpxvideoplaybackviewfiledetails.cpp \
-					 stub/src/mpxvideoplaybackcontrolscontroller.cpp \
-					 stub/src/mpxplaybackutility.cpp \
-					 stub/src/mpxplaybackutilityimpl.cpp \
-					 stub/src/mpxvideoplaybackuserinputhandler.cpp 
-					 
-           
+           mpxvideoplaybackuserinputhandler.h \
+           mpxvideoplaybackcontrolscontroller.h \           
+           mpxvideoplaybackviewfiledetails.h \
+           mpxplaybackutilityimpl.h \
+           ../../viewinc/mpxvideoviewwrapper.h
+					                
+SOURCES += testmpxvideoviewwrapper.cpp \
+            stub/src/hbvideobaseplaybackview.cpp \
+            mpxvideoplaybackdisplayhandler.cpp \					 
+            mpxvideoplaybackviewfiledetails.cpp \
+            mpxvideoplaybackcontrolscontroller.cpp \
+            mpxplaybackutility.cpp \
+            mpxplaybackutilityimpl.cpp \
+            mpxvideoplaybackuserinputhandler.cpp \
+            ../../viewsrc/mpxvideoviewwrapper.cpp

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 10 %
 
 
 
@@ -42,12 +42,11 @@ class QMPXVideoPlaybackFileDetailsWidget : public HbWidget
     public:
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );
 
-    private:
-        QString valueToReadableFormat( int value );
-        
+    private:        
         void makeTitleItem( QMPXVideoPlaybackViewFileDetails* details );
         void makeSizeItem( QMPXVideoPlaybackViewFileDetails* details );
         void makeBitRateItem( QMPXVideoPlaybackViewFileDetails* details );
+        void makeDateTimeItem( QMPXVideoPlaybackViewFileDetails* details );
         void addItemToListWidget( QString item, QString text );
         
     private:

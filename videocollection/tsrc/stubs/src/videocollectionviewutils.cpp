@@ -21,8 +21,10 @@
 int VideoCollectionViewUtilsData::mLastError = 0;
 bool VideoCollectionViewUtilsData::mLoadSortingValuesFails = false;
 bool VideoCollectionViewUtilsData::mGetServiceIconStringsFails = false;
-int VideoCollectionViewUtilsData::mSortRole = 0;
-Qt::SortOrder VideoCollectionViewUtilsData::mSortOrder = Qt::AscendingOrder;
+int VideoCollectionViewUtilsData::mVideoSortRole = -1;
+int VideoCollectionViewUtilsData::mCollectionSortRole = -1;
+Qt::SortOrder VideoCollectionViewUtilsData::mVideoSortOrder = Qt::AscendingOrder;
+Qt::SortOrder VideoCollectionViewUtilsData::mCollectionSortOrder = Qt::AscendingOrder;
 QString VideoCollectionViewUtilsData::mIconString = "";
 QString VideoCollectionViewUtilsData::mPressedString = "";
 QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
@@ -34,8 +36,10 @@ VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 }
 
 VideoCollectionViewUtils::VideoCollectionViewUtils():
-    mSortRole(-1),
-    mSortOrder(Qt::AscendingOrder)
+mVideosSortRole(-1),
+mCollectionsSortRole(-1),
+mVideosSortOrder(Qt::AscendingOrder),
+mCollectionsSortOrder(Qt::AscendingOrder)
 {
     // not stubbed
 }
@@ -45,23 +49,52 @@ VideoCollectionViewUtils::~VideoCollectionViewUtils()
     VideoCollectionViewUtilsData::reset();
 }
 
-int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
+int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order, VideoCollectionCommon::TCollectionLevels target)
 {
-    VideoCollectionViewUtilsData::mSortRole = role;
-    VideoCollectionViewUtilsData::mSortOrder = order;
-    return 0;
+    int status(0);
+    if(target == VideoCollectionCommon::ELevelCategory )
+    {
+        VideoCollectionViewUtilsData::mCollectionSortRole = role;
+        mCollectionsSortRole = role;
+        VideoCollectionViewUtilsData::mCollectionSortOrder = order;
+        mCollectionsSortOrder = order;
+    }
+    else if(target > VideoCollectionCommon::ELevelCategory && 
+            target <= VideoCollectionCommon::ELevelAlbum)
+    {
+        VideoCollectionViewUtilsData::mVideoSortRole = role;
+        mVideosSortRole = role;
+        VideoCollectionViewUtilsData::mVideoSortOrder = order;
+        mVideosSortOrder = order;
+    }
+    else
+    {
+        status = -1;
+    }
+    return status;
 }
 
-int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order)
+int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order,  VideoCollectionCommon::TCollectionLevels target)
 {
     if (VideoCollectionViewUtilsData::mLoadSortingValuesFails)
     {
         return -1;
     }
-    
-    role = VideoCollectionViewUtilsData::mSortRole;
-    order = VideoCollectionViewUtilsData::mSortOrder;
-    
+    if(target == VideoCollectionCommon::ELevelCategory )
+    {
+        role = VideoCollectionViewUtilsData::mCollectionSortRole;
+        order = VideoCollectionViewUtilsData::mCollectionSortOrder;
+    }
+    else if(target > VideoCollectionCommon::ELevelCategory && 
+            target <= VideoCollectionCommon::ELevelAlbum)
+    {
+        role = VideoCollectionViewUtilsData::mVideoSortRole;
+        order = VideoCollectionViewUtilsData::mVideoSortOrder;
+    }
+    else
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -92,10 +125,11 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
 }
 
 void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,
-    bool async)
+    bool async, VideoCollectionCommon::TCollectionLevels target)
 {
     Q_UNUSED(model);
     Q_UNUSED(async);
+    Q_UNUSED(target);
     // not stubbed
 }
 

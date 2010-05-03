@@ -15,16 +15,20 @@
 *
 */
 
+// Version : %version:  %
+
 // INCLUDE FILES
 #include "testviewplugin.h"
+#include "mpxvideo_debug.h"
 
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
 //
 TestViewPlugin::TestViewPlugin()
-      : mActive(false)
+    : mActive(false)
 {
+    MPX_DEBUG(_L("TestViewPlugin::TestViewPlugin()"));
 }
 
 // ---------------------------------------------------------------------------
@@ -33,6 +37,7 @@ TestViewPlugin::TestViewPlugin()
 //
 TestViewPlugin::~TestViewPlugin()
 {
+    MPX_DEBUG(_L("TestViewPlugin::~TestViewPlugin()"));
 }
 
 // ---------------------------------------------------------------------------
@@ -41,6 +46,7 @@ TestViewPlugin::~TestViewPlugin()
 //
 void TestViewPlugin::createView()
 {
+    MPX_DEBUG(_L("TestViewPlugin::createView()"));
 }
 
 // ---------------------------------------------------------------------------
@@ -49,6 +55,7 @@ void TestViewPlugin::createView()
 //
 void TestViewPlugin::destroyView()
 {
+    MPX_DEBUG(_L("TestViewPlugin::destroyView()"));
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +64,7 @@ void TestViewPlugin::destroyView()
 //
 void TestViewPlugin::activateView()
 {
+    MPX_DEBUG(_L("TestViewPlugin::activateView()"));
     mActive = true;
 }
 
@@ -66,6 +74,7 @@ void TestViewPlugin::activateView()
 //
 bool TestViewPlugin::activated()
 {
+    MPX_DEBUG(_L("TestViewPlugin::activateView() ret %d"), mActive);
     return mActive;
 }
 
@@ -75,6 +84,7 @@ bool TestViewPlugin::activated()
 //
 void TestViewPlugin::deactivateView()
 {
+    MPX_DEBUG(_L("TestViewPlugin::deactivateView()"));
     mActive = false;
 }
 
@@ -84,6 +94,7 @@ void TestViewPlugin::deactivateView()
 //
 QGraphicsWidget* TestViewPlugin::getView()
 {
+    MPX_DEBUG(_L("TestViewPlugin::getView()"));
     return 0;
 }
 
@@ -93,6 +104,7 @@ QGraphicsWidget* TestViewPlugin::getView()
 //
 MpxViewPlugin* TestViewPlugin::viewPlugin()
 {
+    MPX_DEBUG(_L("TestViewPlugin::viewPlugin()"));
     return this;
 }
 
@@ -102,6 +114,8 @@ MpxViewPlugin* TestViewPlugin::viewPlugin()
 //
 void TestViewPlugin::orientationChange( Qt::Orientation orientation )
 {
+    MPX_DEBUG(_L("TestViewPlugin::orientationChange()"));
+    Q_UNUSED( orientation );
 }
 
 // ---------------------------------------------------------------------------
@@ -110,6 +124,7 @@ void TestViewPlugin::orientationChange( Qt::Orientation orientation )
 //
 void TestViewPlugin::back()
 {
+    MPX_DEBUG(_L("TestViewPlugin::back()"));
 }
 
 // end of file

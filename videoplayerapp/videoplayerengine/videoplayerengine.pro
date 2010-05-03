@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#20 %
+# Version : %version: da1mmcf#24 %
 
 
 TEMPLATE = lib
@@ -38,35 +38,36 @@ INCLUDEPATH += ../../inc \
 
 LIBS += -lmpxviewframeworkqt.dll \
         -lxqplugins.dll \
-	-lmpxplaybackutility.dll \
+        -lmpxplaybackutility.dll \
         -lmpxcollectionutility.dll \
         -lmpxcollectionhelper.dll \    
         -lmpxcommon.dll \
-        -lestor.dll  \
-        -lfbscli.dll \
         -lplaybackhelper.dll \
         -lvideoplaylistutility.dll \
         -lservicehandler.dll \
         -lxqservice.dll \
         -lxqserviceutil.dll \
-        -lflogger.dll
+        -lflogger.dll \
+        -lefsrv.dll
 
-DEPENDPATH += ../inc inc
+DEPENDPATH += ../../inc ../inc inc
 VPATH += src
 
 HEADERS += videoplayerengine.h \
           mpxvideoplaybackwrapper.h \
           mpxvideoplayerappuiengine.h \
-          mpxvideoembeddedpdlhandler.h \
           videoservices.h \
           videoserviceplay.h \
-          videoserviceurifetch.h
+          videoserviceurifetch.h \
+          videoserviceview.h \
+          videoservicebrowse.h
 
 SOURCES += videoplayerengine.cpp \
            mpxvideoplaybackwrapper.cpp \
            mpxvideoplayerappuiengine.cpp \
-           mpxvideoembeddedpdlhandler.cpp \
            videoservices.cpp \
            videoserviceplay.cpp \
-           videoserviceurifetch.cpp
+           videoserviceurifetch.cpp \
+           videoserviceview.cpp \
+           videoservicebrowse.cpp
 

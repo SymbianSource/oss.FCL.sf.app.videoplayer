@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#32 %
+// Version : %version: da1mmcf#34 %
 
 
 
@@ -122,7 +122,7 @@ void HbVideoBasePlaybackView::handleActivateView()
     
     menu()->close();
 
-    hideItems( Hb::AllItems );
+    hideItems( Hb::ToolBarItem );
 
     //
     // Landscape orientation
@@ -159,7 +159,7 @@ void HbVideoBasePlaybackView::handleDeactivateView()
     //
     //hbInstance->allMainWindows()[0]->unsetOrientation();
 
-    showItems( Hb::AllItems );
+    showItems( Hb::ToolBarItem );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void HbVideoBasePlaybackView::handleClosePlaybackView()
     MPX_DEBUG(
       _L("HbVideoBasePlaybackView::handleClosePlaybackView()") );
 
-    if ( mVideoMpxWrapper->IsMultiItemPlaylist() )
+    if ( mVideoMpxWrapper && mVideoMpxWrapper->IsMultiItemPlaylist() )
     {
         TRAP_IGNORE( mVideoMpxWrapper->HandleCommandL( EMPXPbvCmdNextListItem ) );
     }
@@ -201,26 +201,22 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
         case KErrCANoRights:
         case KErrCANoPermission:
         {
-            const QString qString = "License has expired or it is missing";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_license_has_expired_or_it_is_missi" ) );
             break;
         }
         case KMPXVideoCallOngoingError:
         {
-            const QString qString = "Video playback is not allowed during video call";
-            showDialog( qString, false );
+            showDialog( hbTrId( "txt_videos_info_video_playback_is_not_allowed_duri" ), false );
             break;
         }
         case KMPXVideoTvOutPlaybackNotAllowed:
         {
-            const QString qString = "Protected clip, can not be played through TV-Out";
-            showDialog( qString, false );
+            showDialog( hbTrId( "txt_videos_info_protected_clip_can_not_be_played" ), false );
             break;
         }
         case KMPXVideoTvOutPlaybackNotAllowedClose:
         {
-            const QString qString = "Protected clip, can not be played through TV-Out";
-            showDialog( qString );
+            showDialog( hbTrId( "txt_videos_info_protected_clip_can_not_be_played" ) );
             break;
         }
         default:

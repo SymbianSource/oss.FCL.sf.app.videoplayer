@@ -255,6 +255,11 @@ signals:
      * signals when album data has changed
      */
     void albumChanged();
+    
+    /**
+     * signals when item has been modified
+     */
+    void itemModified(const TMPXItemId &itemId);
 	
 public:
     

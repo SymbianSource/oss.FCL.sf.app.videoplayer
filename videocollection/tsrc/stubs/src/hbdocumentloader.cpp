@@ -25,11 +25,33 @@
 #include "hbcheckbox.h"
 #include "hbpushbutton.h"
 #include "hblabel.h"
+#include "hbgroupbox.h"
 #include "videocollectionuiloader.h"
+#include "videocollectionuiloaderdef.h"
+#include "videolistwidget.h"
+#include "videolistview.h"
+#include "videohintwidget.h"
+#include "videolistselectiondialog.h"
 
 bool HbDocumentLoader::mFindWidgetFails = false;
 bool HbDocumentLoader::mFindObjectFails = false;
 bool HbDocumentLoader::mCreateObjectFails = false;
+bool HbDocumentLoader::mVideoListWidgetFailure = false;
+bool HbDocumentLoader::mCollectionWidgetFailure = false;
+bool HbDocumentLoader::mCollectionContentWidgetFailure = false;
+bool HbDocumentLoader::mLoadFails = false;
+QObjectList HbDocumentLoader::mLoadReturns;
+
+void HbDocumentLoader::cleanup() {
+    mFindWidgetFails = false;
+    mFindObjectFails = false;
+    mCreateObjectFails = false;
+    mVideoListWidgetFailure = false;
+    mCollectionWidgetFailure = false;
+    mCollectionContentWidgetFailure = false;
+    mLoadFails = false;
+    mLoadReturns.clear();
+}
 
 HbDocumentLoader::HbDocumentLoader() : mCreatingObject(false)
 {
@@ -44,6 +66,7 @@ HbDocumentLoader::HbDocumentLoader(const HbMainWindow *window) : mCreatingObject
 
 HbDocumentLoader::~HbDocumentLoader()
 {
+    cleanup();
     reset();
 }
 
@@ -53,9 +76,12 @@ QObjectList HbDocumentLoader::load( const QString &fileName, const QString &sect
     Q_UNUSED(section);
 
     *ok = true;
+    if(mLoadFails)
+    {
+        *ok = false;
+    }
     
-    QObjectList objs;
-    return objs;
+    return mLoadReturns;
 }
 
 QObjectList HbDocumentLoader::load( const QString &fileName, bool *ok)
@@ -64,9 +90,12 @@ QObjectList HbDocumentLoader::load( const QString &fileName, bool *ok)
     Q_UNUSED(ok);
 
     *ok = true;
+    if(mLoadFails)
+    {
+        *ok = false;
+    }
     
-    QObjectList objs;
-    return objs;
+    return mLoadReturns;
 }
     
 QGraphicsWidget *HbDocumentLoader::findWidget(const QString &name)
@@ -76,6 +105,21 @@ QGraphicsWidget *HbDocumentLoader::findWidget(const QString &name)
         return 0;
     }
     
+    if(mVideoListWidgetFailure && name == DOCML_NAME_VC_VIDEOLISTWIDGET)
+    {
+        return 0;
+    }
+    
+    if(mCollectionWidgetFailure && name == DOCML_NAME_VC_COLLECTIONWIDGET)
+    {
+        return 0;
+    }
+    
+    if(mCollectionContentWidgetFailure && name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET)
+    {
+        return 0;
+    }
+
     QObject *obj = 0;
     
     for(int i = 0; i < mObjects.count(); i++)
@@ -91,6 +135,10 @@ QGraphicsWidget *HbDocumentLoader::findWidget(const QString &name)
     {
         mCreatingObject = true;
         obj = createObject(QString(), name);
+        if(obj)
+        {   
+            mObjects.append(new ObjectData(obj, name));
+        }
         mCreatingObject = false;
     }
     
@@ -123,7 +171,10 @@ QObject *HbDocumentLoader::findObject(const QString &name)
     {
         mCreatingObject = true;
         obj = createObject(QString(), name);
-        mObjects.append(new ObjectData(obj, name));
+        if(obj)
+        {   
+            mObjects.append(new ObjectData(obj, name));
+        }
         mCreatingObject = false;
     }    
     
@@ -151,18 +202,6 @@ QObject *HbDocumentLoader::createObject(const QString& type, const QString &name
         return 0;
     }
     
-    if(name == DOCML_NAME_OPTIONS_MENU ||
-       name == DOCML_NAME_SORT_MENU)
-    {
-        obj = new HbMenu();
-        mObjects.append(new ObjectData(obj, name));
-    }
-
-    if(obj)
-    {
-        return obj;
-    }
-    
     obj = doCreateObject(name);
     return obj;
 }
@@ -172,67 +211,63 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     QObject *obj = 0;
     if(name == DOCML_NAME_VIEW)
     {
-        
+        obj = new VideoListView(0, 0);
     } 
     else if(name == DOCML_NAME_VC_HEADINGBANNER)
     {
-        
+        obj = new HbGroupBox();
     }
     else if(name == DOCML_NAME_VC_COLLECTIONWIDGET)
     {
-        
+        obj = new VideoListWidget(0, 0);
     }
     else if(name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET)
     {
-        
+        obj = new VideoListWidget(0, 0);
     }
     else if(name == DOCML_NAME_VC_VIDEOLISTWIDGET)
     {
-        
+        obj = new VideoListWidget(0, 0);
     }
     else if(name == DOCML_NAME_VC_VIDEOHINTWIDGET)
     {
-        
+        obj = new VideoHintWidget(0, 0);
     }
     else if(name == DOCML_NAME_OPTIONS_MENU)
     {
-        
+        obj = new HbMenu();
     }
     else if(name == DOCML_NAME_SORT_MENU)
     {
-        
+        obj = new HbMenu();
     }
     else if(name == DOCML_NAME_SORT_BY_DATE)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_SORT_BY_NAME)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS)
     {
-        
-    }
-    else if(name == DOCML_NAME_SORT_BY_RATING)
-    {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_SORT_BY_SIZE)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_ADD_TO_COLLECTION)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_CREATE_COLLECTION)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_DELETE_MULTIPLE)
     {
-        
+        obj = new HbAction();
     }
     else if(name == DOCML_NAME_HINT_BUTTON)
     {
@@ -248,11 +283,11 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     }
     else if(name == DOCML_VIDEOSELECTIONDIALOG_FILE)
     {
-        
+        obj = new VideoListSelectionDialog(0, 0);
     }
     else if(name == DOCML_NAME_DIALOG)
     {
-        
+        obj = new VideoListSelectionDialog(0, 0);
     }
     else if(name == DOCML_NAME_DLG_HEADINGLBL)
     {
@@ -274,11 +309,5 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     {
         obj = new HbStackedWidget();
     }
-    
-    if(obj)
-    {   
-        mObjects.append(new ObjectData(obj, name));
-    }
     return obj;
 }
-

@@ -67,7 +67,8 @@ public:
 public slots:
     
     /**
-     * emits finished -signal with mPrimaryAction if execReturnPrimary is true. 
+     * emits finished -signal with first action in actions if execReturnPrimary is true, 
+     * else second action is returned. 
      */
     void open( QObject* receiver = 0, const char* member = 0 );
     
@@ -92,32 +93,12 @@ public:
      * sets mContentWidget
      */
     void setContentWidget(QGraphicsWidget *contentWidget);
-
-    /**
-     * sets mPrimaryAction
-     */
-    void setPrimaryAction(HbAction *action);
     
     /**
      * add action into actions -list
      */
     void addAction(HbAction *action);
     
-    /**
-     * gets mPrimaryAction;
-     */
-    HbAction* primaryAction();
-
-    /**
-     * sets mSecondaryAction
-     */
-    void setSecondaryAction(HbAction *action);
-    
-    /**
-     * gets mSecondaryAction;
-     */
-    HbAction* secondaryAction();
-           
     /**
      * sets mMinSize
      */
@@ -127,11 +108,6 @@ public:
      * sets mMaxSize
      */
     void setMaximumSize(QSize size); 
-    
-    /**
-     * returns mPrimaryAction if execReturnPrimary is true.
-     */
-    HbAction* exec();
         
     /**
      * stubbed member

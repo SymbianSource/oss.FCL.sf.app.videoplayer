@@ -25,20 +25,21 @@ class HbGroupBox : public HbWidget
     Q_OBJECT
 
 public:
-    HbGroupBox(QGraphicsItem *parent = 0) : HbWidget(parent) {};
+    HbGroupBox(QGraphicsItem *parent = 0) : HbWidget(parent), mText(QString()) {};
     HbGroupBox( const QString &titleText, QGraphicsItem *parent = 0 ) : HbWidget(parent) {
-        Q_UNUSED(titleText);
+        mText = titleText;
     }
-    ~HbGroupBox();
+    ~HbGroupBox() {}
 
     void setHeading(const QString &text) {
-        Q_UNUSED(text);
+        mText = text;
     }
     
     QString heading() const {
-        return QString();
+        return mText;
     }
 	
+    QString mText;
 };
 
 #endif  //HbGroupBox_H

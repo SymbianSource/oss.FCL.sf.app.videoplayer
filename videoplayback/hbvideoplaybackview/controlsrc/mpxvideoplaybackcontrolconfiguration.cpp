@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#17 %
+// Version : %version: da1mmcf#19 %
 
 
 
@@ -40,7 +40,6 @@ QMPXVideoPlaybackControlConfiguration::QMPXVideoPlaybackControlConfiguration(
         QMPXVideoPlaybackControlsController* controller)
     : mControlsController( controller )
 {
-    createControlList();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -65,10 +64,11 @@ void QMPXVideoPlaybackControlConfiguration::createControlList()
 
     QMPXVideoPlaybackViewFileDetails* fileDetails = mControlsController->fileDetails();
 
-    if ( fileDetails->mPlaybackMode != EMPXVideoLocal )
+    if ( fileDetails->mPlaybackMode == EMPXVideoStreaming ||
+         fileDetails->mPlaybackMode == EMPXVideoLiveStreaming )
     {
         //
-        // if it's not local mode, add branding animation control to show while initializing
+        // streaming, add branding animation control to show while initializing
         //
         addControlToList( EMPXBufferingAnimation );
     }
@@ -132,7 +132,7 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
         case EMPXControlCmdTvOutConnected:
         case EMPXControlCmdAudionOnlyViewOpened:
         {
-            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() audion only view"));
+            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() audio only view"));
 
             widget->setVisible( false );
 

@@ -22,6 +22,7 @@
 // INCLUDES
 #include <QObject>
 
+#include <videocollectioncommon.h>
 
 // FORWARD DECLARATIONS
 class VideoSortFilterProxyModel;
@@ -58,7 +59,7 @@ public: // Constructor
      *
      * @return address to model or NULL if fails.
      */
-    VideoSortFilterProxyModel* getModel(TModelType type);
+    VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType type);
 
 /* Additional functions needed for testing purposes */
 

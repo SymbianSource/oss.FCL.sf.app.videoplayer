@@ -17,10 +17,7 @@
 &EN
 
 ; Provide value for uid
-#{"VCXMyVideosCollectionPluginTest"},(0x00000000),1,1,0,TYPE=SA
-
-; Series60 product id for S60 3.0
-[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+#{"VCXMyVideosCollectionPluginTest"},(0x00000000),1,0,0,TYPE=SA, RU
 
 ; Localised Vendor name
 %{"Nokia"}

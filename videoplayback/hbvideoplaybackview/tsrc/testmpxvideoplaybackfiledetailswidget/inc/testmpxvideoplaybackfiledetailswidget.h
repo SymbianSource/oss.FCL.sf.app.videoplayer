@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKFILEDETAILSWIDGET_H__
 #define __TESTMPXVIDEOPLAYBACKFILEDETAILSWIDGET_H__
@@ -26,6 +26,7 @@
 
 class QMPXVideoPlaybackFileDetailsWidget;
 class QMPXVideoPlaybackControlsController;
+class QDateTime;
 
 class TestMPXVideoPlaybackFileDetailsWidget : public QObject
 {
@@ -71,6 +72,8 @@ private:
                        QString expectedSecondaryText = "",
                        bool needToBeCompared = true );
 
+    QString dateTimeStringFormat( QDateTime dateTime );
+    
 signals:
     void commandSignal(int);
 

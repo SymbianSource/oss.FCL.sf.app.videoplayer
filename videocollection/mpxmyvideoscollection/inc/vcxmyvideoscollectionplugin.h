@@ -387,15 +387,6 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         */
         TBool iOrphanDownloadsCleared;
 
-                        
-#ifdef _DEBUG
-        /**
-        * Used for debugging that client receives all events.
-        */
-        TInt iTotalMessagesSent;
-        TInt iMessagesInArraySent;
-#endif
-
     };
 
 #endif   // VCXMYVIDEOSCOLLECTIONPLUGIN_H

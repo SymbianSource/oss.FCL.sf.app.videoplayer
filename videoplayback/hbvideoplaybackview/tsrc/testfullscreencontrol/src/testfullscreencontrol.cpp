@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 #include <hbapplication.h>
@@ -78,9 +78,8 @@ void TestFullScreenControl::setup(TMPXVideoPlaybackControls control)
 {
     MPX_ENTER_EXIT(_L("TestFullScreenControl::setup()"));
 
-    mFileDetails = new QMPXVideoPlaybackViewFileDetails();  
-    
-    mControlsController = new QMPXVideoPlaybackControlsController( mFileDetails );
+
+    mControlsController = new QMPXVideoPlaybackControlsController();
     
     createControl( control );                                                                                                                                           
 }
@@ -130,12 +129,6 @@ void TestFullScreenControl::cleanup()
 {
     MPX_ENTER_EXIT(_L("TestFullScreenControl::cleanup()"));
 
-    if ( mFileDetails )
-    {
-        delete mFileDetails;
-        mFileDetails = NULL;    
-    }
-    
     if ( mControlsController )
     {
         delete mControlsController;
@@ -160,18 +153,6 @@ void TestFullScreenControl::testControlIndex()
     setup( EMPXStatusPane );
     
     QVERIFY( mFullScreenControl->controlIndex() == EMPXStatusPane );
-}
-
-// ---------------------------------------------------------------------------
-// main
-// ---------------------------------------------------------------------------
-//
-void TestFullScreenControl::testVolumeChanged()
-{  
-    setup( EMPXStatusPane );
-    
-    QVERIFY( ! mFullScreenControl->volumeChanged( 50 ) );
-        
 }
 
 // ---------------------------------------------------------------------------
@@ -264,15 +245,21 @@ void TestFullScreenControl::testUpdateControlsWithFileDetails()
 {
     MPX_ENTER_EXIT(_L("TestFullScreenControl::testUpdateControlsWithFileDetails()"));
 
-    delete mFullScreenControl;
-    mFullScreenControl = NULL;     
+    QMPXVideoPlaybackViewFileDetails *fileDetails = new QMPXVideoPlaybackViewFileDetails(); 
+    
     setup( EMPXControlBar );
     
-    mFileDetails->mPausableStream = true;
+    fileDetails->mPausableStream = true;
     
-    mFullScreenControl->updateControlsWithFileDetails(mFileDetails);
+    mFullScreenControl->updateControlsWithFileDetails( fileDetails );
     
     QVERIFY( static_cast<QMPXVideoPlaybackControlBar*>(mFullScreenControl->mControl)->mFileDetails->mPausableStream );    
+
+    if ( fileDetails )
+    {
+        delete fileDetails;
+        fileDetails = NULL;    
+    }
 }
 
 // ---------------------------------------------------------------------------

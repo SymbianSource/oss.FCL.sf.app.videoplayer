@@ -13,6 +13,8 @@
 #
 # Description: 
 #
+
+DEFINES += XQSERVICEUTIL_H
     
 CONFIG += qtestlib \
     Hb \
@@ -23,8 +25,7 @@ LIBS += -lestor.dll \
     -lbitgdi.dll \
     -lxqplugins.dll \
     -lmpxviewframeworkqt.dll \
-    -lxqservice.dll \
-    -lxqserviceutil.dll
+    -lxqservice.dll
 
 HEADERS_TEMP = \
     inc/hbabstractitemview.h \
@@ -33,6 +34,7 @@ HEADERS_TEMP = \
     inc/hbcheckbox.h \
     inc/hbdeviceprofile.h \
     inc/hbdialog.h \
+    inc/hbnotificationdialog.h \
     inc/hbglobal.h \
     inc/hbgroupbox.h \
     inc/hbinputdialog.h \
@@ -61,13 +63,15 @@ HEADERS_TEMP = \
     inc/videocollectionwrapperdata.h \
     inc/videolistdatamodeldata.h \
     inc/videolistselectiondialogdata.h \
+    inc/videohintwidgetdata.h \
     inc/videolistwidgetdata.h \
     inc/videolistviewdata.h \
     inc/videoplayerappexport.h \
     inc/videosortfilterproxymodeldata.h \
     inc/videothumbnailtestdata.h \
-    inc/xqserviceutil.h \
     inc/xqserviceutilxtra.h \
+    # We need stub for this because it has static data and HW compilation of moc file fails because of that.
+    inc/videoservices.h \
     ../../videocollectionview/inc/videocollectionuiloader.h \
     ../../videocollectionview/inc/videocollectionviewutils.h \
     ../../videocollectionview/inc/videohintwidget.h \
@@ -78,14 +82,15 @@ HEADERS_TEMP = \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
     ../../videocollectionwrapper/inc/videothumbnaildata.h \
-    ../../../videoplayerapp/videoplayerengine/inc/videoservices.h \
     ../../../videoplayerapp/videoplayerengine/inc/videoserviceurifetch.h \
+    ../../../videoplayerapp/videoplayerengine/inc/videoservicebrowse.h
 
 SOURCES_TEMP = \
     src/hbdocumentloader.cpp \
     src/hbaction.cpp \
     src/hbcheckbox.cpp \
     src/hbdialog.cpp \
+    src/hbnotificationdialog.cpp \
     src/hbinputdialog.cpp \
     src/hbglobal.cpp \
     src/hblabel.cpp \
@@ -98,6 +103,9 @@ SOURCES_TEMP = \
     src/hbstackedwidget.cpp \
     src/hbstyleloader.cpp \
     src/hbwidget.cpp \
+    src/hbview.cpp \
+    src/hbeffect.cpp \
+    src/xqserviceutil.cpp \
     src/xqserviceutilxtra.cpp \
     src/videocollectionuiloader.cpp \
     src/videocollectionviewutils.cpp \
@@ -111,6 +119,7 @@ SOURCES_TEMP = \
     src/videothumbnaildata.cpp \
     src/videoservices.cpp \
     src/videoserviceurifetch.cpp \
+    src/videoservicebrowse.cpp
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)
 SOURCES += $$find(SOURCES_TEMP, ^(?!.*$$TESTEDCLASS).*$)

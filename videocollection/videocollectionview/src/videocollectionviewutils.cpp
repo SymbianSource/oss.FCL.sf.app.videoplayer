@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,26 +12,33 @@
 * Contributors:
 *
 * Description: video collection view plugin's ui utils class
-* 
+*
 */
 
+// Version : %version: 37 %
+
+// INCLUDE FILES
+#include <hbglobal.h>
 #include <hblistview.h>
 #include <hbscrollbar.h>
 #include <hblistviewitem.h>
 #include <hbdialog.h>
 #include <hbmessagebox.h>
+#include <hbnotificationdialog.h>
 #include <centralrepository.h>
 
 #include "videocollectioncommon.h"
 #include "videocollectionviewutils.h"
 #include "videosortfilterproxymodel.h"
+#include "videocollectiontrace.h"
 
 const int KVideoCollectionViewCenrepUid(0x2002BC63);
 const int KVideoCollectionViewCenrepServiceIconKey(0x2);
 const int KVideoCollectionViewCenrepServiceIconPressedKey(0x3);
-const int KVideoCollectionViewCenrepServiceUriKey(0x4);
-const int KVideoCollectionViewCenrepSortingRoleKey(0x5);
-const int KVideoCollectionViewCenrepSortingOrderKey(0x6);
+const int KVideoCollectionViewCenrepVideoSortingRoleKey(0x5);
+const int KVideoCollectionViewCenrepVideoSortingOrderKey(0x6);
+const int KVideoCollectionViewCenrepCollectionsSortingRoleKey(0x7);
+const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
 
 // ---------------------------------------------------------------------------
 // instance
@@ -39,6 +46,7 @@ const int KVideoCollectionViewCenrepSortingOrderKey(0x6);
 //
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
+	FUNC_LOG;
      static VideoCollectionViewUtils _popupInstance;
      return _popupInstance;
 }
@@ -48,10 +56,13 @@ VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 // ---------------------------------------------------------------------------
 //
 VideoCollectionViewUtils::VideoCollectionViewUtils():
-    mSortRole(-1),
-    mSortOrder(Qt::AscendingOrder)
+    mVideosSortRole(-1),
+    mCollectionsSortRole(-1),
+    mVideosSortOrder(Qt::AscendingOrder),
+    mCollectionsSortOrder(Qt::AscendingOrder)
 {
-    
+	FUNC_LOG;
+
 }
 
 // ---------------------------------------------------------------------------
@@ -60,6 +71,7 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
 //
 VideoCollectionViewUtils::~VideoCollectionViewUtils()
 {
+	FUNC_LOG;
 
 }
 
@@ -67,24 +79,45 @@ VideoCollectionViewUtils::~VideoCollectionViewUtils()
 // saveSortingValues
 // ---------------------------------------------------------------------------
 //
-int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
+int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order, VideoCollectionCommon::TCollectionLevels target)
 {
+	FUNC_LOG;
+	INFO_3("VideoCollectionViewUtils::saveSortingValues() saving: role: %d, order: %d, target: %d", role, order, target);
+
     int status = -1;
-    CRepository *cenRep = 0;
-    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-    if(cenRep)
-    {
-        status = cenRep->Set(KVideoCollectionViewCenrepSortingRoleKey, static_cast<TInt>(role));
-        if(status == KErrNone)
-        {
-            status = cenRep->Set(KVideoCollectionViewCenrepSortingOrderKey, static_cast<TInt>(order));
-        }
-        delete cenRep;
-    }
-    
-    mSortRole = role;
-    mSortOrder = order;
-    
+    if (target != VideoCollectionCommon::ELevelInvalid)
+	{
+	    CRepository *cenRep = 0;
+	    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
+
+		int *rolePtr            = &mVideosSortRole;
+		Qt::SortOrder *orderPtr = &mVideosSortOrder;
+
+		int roleKey(KVideoCollectionViewCenrepVideoSortingRoleKey);
+		int orderKey(KVideoCollectionViewCenrepVideoSortingOrderKey);
+
+		if(target == VideoCollectionCommon::ELevelCategory)
+	    {
+	    	rolePtr  = &mCollectionsSortRole;
+	    	orderPtr = &mCollectionsSortOrder;
+
+	    	roleKey  = KVideoCollectionViewCenrepCollectionsSortingRoleKey;
+			orderKey = KVideoCollectionViewCenrepCollectionsSortingOrderKey;
+	    }
+
+	    if(cenRep)
+	    {
+	    	status = cenRep->Set(roleKey, static_cast<TInt>(role));
+	        if(status == KErrNone)
+	        {
+	            status = cenRep->Set(orderKey, static_cast<TInt>(order));
+	        }
+	        delete cenRep;
+	    }
+
+	    *rolePtr = role;
+	    *orderPtr = order;
+	}
     return status;
 }
 
@@ -92,45 +125,72 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order)
 // loadSortingValues
 // ---------------------------------------------------------------------------
 //
-int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order)
+int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order, VideoCollectionCommon::TCollectionLevels target)
 {
+	FUNC_LOG;
     int err(0);
-    
-    if (mSortRole == -1)
+
+    if ((target > VideoCollectionCommon::ELevelCategory) &&
+		(mVideosSortRole != -1))
     {
-        CRepository *cenRep = 0;
-        TRAP(err, cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-        if(cenRep)
-        {
-            int sortRole(-1);
-            int sortOrder(-1);
-            err = cenRep->Get(KVideoCollectionViewCenrepSortingRoleKey, sortRole);
-            if(err == KErrNone)
-            {
-                mSortRole = sortRole;
-                err = cenRep->Get(KVideoCollectionViewCenrepSortingOrderKey, sortOrder);
-                if(err == KErrNone)
-                {
-                    mSortOrder = static_cast<Qt::SortOrder>(sortOrder);
-                }
-            }
-            delete cenRep;
-        }
+    	role = mVideosSortRole;
+    	order = mVideosSortOrder;
     }
-    
-    role = mSortRole;
-    order = mSortOrder;
-    
-    return err;        
+    else if ((target == VideoCollectionCommon::ELevelCategory) &&
+			 (mCollectionsSortRole != -1))
+    {
+    	role = mCollectionsSortRole;
+    	order = mCollectionsSortOrder;
+    }
+    else if (target != VideoCollectionCommon::ELevelInvalid)
+    {
+    	int *rolePtr            = &mVideosSortRole;
+    	Qt::SortOrder *orderPtr = &mVideosSortOrder;
+    	int roleKey(KVideoCollectionViewCenrepVideoSortingRoleKey);
+    	int orderKey(KVideoCollectionViewCenrepVideoSortingOrderKey);
+
+    	if(target == VideoCollectionCommon::ELevelCategory)
+        {
+    		roleKey  = KVideoCollectionViewCenrepCollectionsSortingRoleKey;
+    		orderKey = KVideoCollectionViewCenrepCollectionsSortingOrderKey;
+        	rolePtr  = &mCollectionsSortRole;
+        	orderPtr = &mCollectionsSortOrder;
+        }
+
+		CRepository *cenRep = 0;
+		TRAP(err, cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
+		if(cenRep)
+		{
+			int sortRole(-1);
+			int sortOrder(-1);
+			err = cenRep->Get(roleKey, sortRole);
+			if(err == KErrNone)
+			{
+				err = cenRep->Get(orderKey, sortOrder);
+				if(err == KErrNone)
+				{
+					*orderPtr = static_cast<Qt::SortOrder>(sortOrder);
+					*rolePtr = sortRole;
+				}
+			}
+			delete cenRep;
+		}
+
+		role  = *rolePtr;
+		order = *orderPtr;
+    }
+    INFO_3("VideoCollectionViewUtils::loadSortingValues() loaded: role: %d, order: %d, target: %d", role, order, target);
+    return err;
 }
 
 // ---------------------------------------------------------------------------
 // getServiceIconStrings
 // ---------------------------------------------------------------------------
 //
-int VideoCollectionViewUtils::getServiceIconStrings(QString& icon, 
+int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
         QString& iconPressed)
 {
+	FUNC_LOG;
     int status = -1;
     CRepository *cenRep = 0;
     TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
@@ -146,14 +206,14 @@ int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
             {
                 QString iconTemp((QChar*)iconValue.Ptr(),iconValue.Length());
                 QString pressedTemp((QChar*)pressedValue.Ptr(),pressedValue.Length());
-                
+
                 icon = iconTemp;
                 iconPressed = pressedTemp;
             }
         }
         delete cenRep;
     }
-    return status;        
+    return status;
 }
 
 // ---------------------------------------------------------------------------
@@ -162,6 +222,7 @@ int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
 //
 QString VideoCollectionViewUtils::getServiceUriString()
 {
+	FUNC_LOG;
     QString uri;
     CRepository *cenRep = 0;
     TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
@@ -175,7 +236,7 @@ QString VideoCollectionViewUtils::getServiceUriString()
         }
         delete cenRep;
     }
-    return uri;        
+    return uri;
 }
 
 // ---------------------------------------------------------------------------
@@ -184,6 +245,7 @@ QString VideoCollectionViewUtils::getServiceUriString()
 //
 void VideoCollectionViewUtils::initListView(HbListView *view)
 {
+	FUNC_LOG;
     if (view)
     {
         HbListViewItem *prototype = view->listItemPrototype();
@@ -194,7 +256,7 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
         }
         view->setItemRecycling(true);
         view->setClampingStyle(HbScrollArea::BounceBackClamping);
-        view->setScrollingStyle(HbScrollArea::PanOrFlick);
+        view->setScrollingStyle(HbScrollArea::PanWithFollowOn);
         view->setFrictionEnabled(true);
         view->setUniformItemSizes(true);  
         view->setSelectionMode(HbAbstractItemView::NoSelection);
@@ -214,19 +276,29 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
 //
 void VideoCollectionViewUtils::sortModel(
     VideoSortFilterProxyModel *model,
-    bool async)
+    bool async,
+    VideoCollectionCommon::TCollectionLevels target)
 {
+	FUNC_LOG;
     if (model)
     {
         // setup sorting order for model
         int sortRole(VideoCollectionCommon::KeyDateTime);
+
+        // default for categories
+        if(target == VideoCollectionCommon::ELevelCategory)
+        {
+            sortRole = VideoCollectionCommon::KeyTitle;
+        }
+
         Qt::SortOrder sortOrder(Qt::AscendingOrder);
-            
+
         // return value ignored, as in case of error the sortRole and sortOrder variables
         // stay at their predefined values, and in error cases those are the sorting values
         // that are used.
         VideoCollectionViewUtils &self = VideoCollectionViewUtils::instance();
-        self.loadSortingValues(sortRole, sortOrder);
+        self.loadSortingValues(sortRole, sortOrder, target);
+
         model->doSorting(sortRole, sortOrder, async);
     }
 }
@@ -237,6 +309,7 @@ void VideoCollectionViewUtils::sortModel(
 //
 void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &additional)
 {
+	FUNC_LOG;
     QString msg("");
     QString format("");
     bool error(true);
@@ -253,14 +326,14 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             msg = hbTrId("txt_videos_info_unable_to_delete_some_items_which");
         break;
         case VideoCollectionCommon::statusSingleRemoveFail:
-            format = tr("Unable to remove collection %1."); //localisation
+            format = hbTrId("txt_videos_info_unable_to_remove_collection_1");
             if(additional.isValid())
             {
                 msg = format.arg(additional.toString());
             }
         break;
         case VideoCollectionCommon::statusMultiRemoveFail:
-            msg = tr("Unable to remove some collections.");  //localisation
+            msg = hbTrId("txt_videos_info_unable_to_remove_some_collections");
         break;
         case VideoCollectionCommon::statusVideosAddedToCollection:
             format = hbTrId("txt_videos_dpopinfo_videos_added_to_1");
@@ -271,7 +344,7 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             error = false;
         break;
         case VideoCollectionCommon::statusAllVideosAlreadyInCollection:
-            msg = tr("All videos already added to this collection.");   //localisation
+            msg = hbTrId("txt_videos_info_all_videos_already_added_to_this_c");
         break;
         case VideoCollectionCommon::statusDeleteInProgress:
             format = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted");
@@ -282,9 +355,9 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             error = false;
         break;
         default: // no msg to show
-        return;    
+        return;
     }
-        
+
     if(msg.count() > 0)
     {
         if(error)
@@ -293,9 +366,13 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
         }
         else
         {
-            HbMessageBox::information(msg);
+            HbNotificationDialog *infoNote = new HbNotificationDialog();
+            infoNote->setAttribute(Qt::WA_DeleteOnClose);
+            // only title can be two rows for HbNotificationDialog
+            infoNote->setTitleTextWrapping(Hb::TextWordWrap);
+            infoNote->setTitle(msg);
+            infoNote->show();
         }
-     
-    }  
+    }
 }
 

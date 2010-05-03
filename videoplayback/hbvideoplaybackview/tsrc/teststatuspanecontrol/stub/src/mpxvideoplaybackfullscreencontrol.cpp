@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -99,6 +99,7 @@ TMPXVideoPlaybackControls QMPXVideoPlaybackFullScreenControl::controlIndex()
 //
 void QMPXVideoPlaybackFullScreenControl::updateState( TMPXPlaybackState state )
 {
+    Q_UNUSED( state );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ void QMPXVideoPlaybackFullScreenControl::updateState( TMPXPlaybackState state )
 void QMPXVideoPlaybackFullScreenControl::updateControlsWithFileDetails(
         QMPXVideoPlaybackViewFileDetails* details )
 {
-
+    Q_UNUSED( details );
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -73,6 +73,7 @@ LIBS += -lmpxcommon.dll \
         -lmpxcollectionutility.dll \
         -lthumbnailmanagerqt.dll \
         -lestor.dll \
-        -lcentralrepository.dll
-
+        -lcentralrepository.dll \
+        -lflogger.dll
+        
 RESOURCES += data/videocollectionwrapper.qrc

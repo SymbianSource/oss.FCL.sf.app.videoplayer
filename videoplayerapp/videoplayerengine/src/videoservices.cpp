@@ -15,10 +15,15 @@
 *
 */
 
-#include <videoplayerengine.h>
-#include <videoservices.h>
-#include <videoserviceurifetch.h>
-#include <videoserviceplay.h>
+// Version : %version: %
+
+#include "videoplayerengine.h"
+#include "videoservices.h"
+#include "videoserviceurifetch.h"
+#include "videoserviceplay.h"
+#include "videoserviceview.h"
+#include "videoservicebrowse.h"
+#include "mpxvideo_debug.h"
 
 VideoServices *VideoServices::mInstance = 0;
 
@@ -28,11 +33,13 @@ VideoServices *VideoServices::mInstance = 0;
 //
 VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
 {
-    if(!mInstance)
+    MPX_ENTER_EXIT(_L("VideoServices::instance()"));
+    
+    if ( ! mInstance )
     {
         mInstance = new VideoServices(engine);
     }
-    else if(engine && !mInstance->engine())
+    else if ( engine && ! mInstance->engine() )
     {
     	mInstance->setEngine(engine);
     }
@@ -46,9 +53,11 @@ VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
 //
 void VideoServices::decreaseReferenceCount()
 {
-    if(mInstance)
+    MPX_ENTER_EXIT(_L("VideoServices::decreaseReferenceCount()"));
+    
+    if ( mInstance )
     {
-        if(--mInstance->mReferenceCount == 0)
+        if( --mInstance->mReferenceCount == 0 )
         {
             delete mInstance;
             mInstance = NULL;
@@ -62,11 +71,20 @@ void VideoServices::decreaseReferenceCount()
 //
 void VideoServices::setEngine(QVideoPlayerEngine* engine)
 {
-    if (mServicePlay)
+    MPX_ENTER_EXIT(_L("VideoServices::setEngine()"));
+    
+    if ( mServicePlay )
     {
     	mEngine = engine;
     	mServicePlay->setEngine(engine);
     }
+    
+    if ( mServiceView )
+    {
+    	mEngine = engine;
+    	mServiceView->setEngine(engine);    	
+    }
+    		
 }
 
 // ----------------------------------------------------------------------------
@@ -75,6 +93,8 @@ void VideoServices::setEngine(QVideoPlayerEngine* engine)
 //
 QVideoPlayerEngine* VideoServices::engine()
 {
+    MPX_DEBUG(_L("VideoServices::engine"));
+	
 	return mEngine;
 }
 
@@ -82,13 +102,17 @@ QVideoPlayerEngine* VideoServices::engine()
 // VideoServices()
 // ----------------------------------------------------------------------------
 //
-VideoServices::VideoServices(QVideoPlayerEngine* engine) :
-mReferenceCount(0),
-mEngine(engine),
-mCurrentService(VideoServices::ENoService)
+VideoServices::VideoServices( QVideoPlayerEngine* engine ) 
+    : mReferenceCount( 0 )
+    , mEngine( engine )
+    , mCurrentService( VideoServices::ENoService )
 {
+    MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
+    
     mServiceUriFetch = new VideoServiceUriFetch(this);
 	mServicePlay     = new VideoServicePlay(this, engine);
+	mServiceView     = new VideoServiceView(this, engine);
+	mServiceBrowse   = new VideoServiceBrowse(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -97,8 +121,12 @@ mCurrentService(VideoServices::ENoService)
 //
 VideoServices::~VideoServices()
 {
+    MPX_ENTER_EXIT(_L("VideoServices::~VideoServices()"));
+    
 	delete mServiceUriFetch;
 	delete mServicePlay;
+	delete mServiceView;
+	delete mServiceBrowse;
 }
 
 // ----------------------------------------------------------------------------
@@ -107,7 +135,27 @@ VideoServices::~VideoServices()
 //
 VideoServices::TVideoService VideoServices::currentService()
 {
+    MPX_DEBUG(_L("VideoServices::currentService() ret %d"), mCurrentService );
+	
 	return mCurrentService;
+}
+
+// ----------------------------------------------------------------------------
+// getBrowseCategory()
+// ----------------------------------------------------------------------------
+//
+int VideoServices::getBrowseCategory() const
+{
+    MPX_DEBUG(_L("VideoServices::getBrowseCategory()"));
+	
+    int category = 0;
+    
+    if ( mServiceBrowse )
+    {
+        category = mServiceBrowse->getBrowseCategory();
+    }
+    
+    return category;
 }
 
 // ----------------------------------------------------------------------------
@@ -116,15 +164,31 @@ VideoServices::TVideoService VideoServices::currentService()
 //
 void VideoServices::setCurrentService(VideoServices::TVideoService service)
 {
-	mCurrentService = service;
+    MPX_DEBUG(_L("VideoServices::setCurrentService(%d)"), service );
+	
+	mCurrentService = service;	
 }
+
 // ----------------------------------------------------------------------------
 // contextTitle()
 // ----------------------------------------------------------------------------
 //
 QString VideoServices::contextTitle() const
 {
-    return mServiceUriFetch->contextTitle();
+    MPX_DEBUG(_L("VideoServices::contextTitle()") );
+	
+    QString title;
+    
+    if ( mCurrentService == VideoServices::EUriFetcher )
+    {
+        title = mServiceUriFetch->contextTitle();
+    }
+    else if ( mCurrentService == VideoServices::EBrowse )
+    {
+        title = mServiceBrowse->contextTitle();
+    }
+    
+    return title;
 }
 
 // ----------------------------------------------------------------------------
@@ -133,8 +197,26 @@ QString VideoServices::contextTitle() const
 //
 void VideoServices::itemSelected(const QString& item)
 {
+    MPX_ENTER_EXIT(_L("VideoServices::itemSelected()"),
+                   _L("item = %s"), item.data() );
+    
     QStringList list;
-    list.append(item);
-    mServiceUriFetch->complete(list);
+    list.append( item );
+    mServiceUriFetch->complete( list );
 }
 
+// ----------------------------------------------------------------------------
+// browsingEnded()
+// ----------------------------------------------------------------------------
+//
+void VideoServices::browsingEnded()
+{
+    MPX_ENTER_EXIT(_L("VideoServices::browsingEnded()"));
+	
+    if ( mServiceBrowse )
+    {
+        mServiceBrowse->complete();
+    }
+}
+
+// End of file

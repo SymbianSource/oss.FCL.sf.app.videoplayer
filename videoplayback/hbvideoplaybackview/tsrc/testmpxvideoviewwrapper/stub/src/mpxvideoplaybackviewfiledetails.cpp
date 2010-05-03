@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -71,6 +71,8 @@ QMPXVideoPlaybackViewFileDetails::clearFileDetails()
     mVideoHeight = 0;
     mVideoWidth  = 0;
     mBitRate = 0;
+    mCreationTime = 0;
+    mModificationTime = 0;
 }
 
 //  EOF

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 
@@ -58,9 +58,12 @@ QMpxHbVideoPlaybackViewPlugin::~QMpxHbVideoPlaybackViewPlugin()
 void QMpxHbVideoPlaybackViewPlugin::createView()
 {
     MPX_ENTER_EXIT(_L("QMpxHbVideoPlaybackViewPlugin::createView()"));
-
-    mView = new HbVideoPlaybackView();
-    connect( mView, SIGNAL( activatePreviousView() ), this, SLOT( back() ) );
+ 
+    if ( ! mView )
+    {
+        mView = new HbVideoPlaybackView();
+        connect( mView, SIGNAL( activatePreviousView() ), this, SLOT( back() ) );
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -73,6 +76,8 @@ void QMpxHbVideoPlaybackViewPlugin::destroyView()
 
     if ( mView )
     {
+        disconnect( mView, SIGNAL( activatePreviousView() ), this, SLOT( back() ) );
+    
         delete mView;
         mView = NULL;
     }
@@ -101,8 +106,11 @@ void QMpxHbVideoPlaybackViewPlugin::deactivateView()
 {
     MPX_ENTER_EXIT(_L("QMpxHbVideoPlaybackViewPlugin::deactivateView()"));
 
-    mView->handleDeactivateView();
-    mViewActivated = false;
+    if ( mView && mViewActivated )
+    {
+        mView->handleDeactivateView();
+        mViewActivated = false;
+    }
 }
 
 // ---------------------------------------------------------------------------
