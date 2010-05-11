@@ -16,7 +16,7 @@
 
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 #include <platform_paths.hrh>
 
@@ -29,6 +29,11 @@ PRJ_EXPORTS
 //
 ../rom/mpsettropmodel.iby      	CORE_APP_LAYER_IBY_EXPORT_PATH(mpsettropmodel.iby)
 ../rom/mpsettropmodelrsc.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(mpsettropmodelrsc.iby)
+
+// Generic configuration interface for component cenrep settings  
+// mediasettings_101F880B implementation specifics for cenrep data
+../conf/mediasettings.confml              APP_LAYER_CONFML(mediasettings.confml)
+../conf/mediasettings_101F880B.crml 	  APP_LAYER_CRML(mediasettings_101F880B.crml)
 
 PRJ_MMPFILES
 ../group/MPSettROPModel.mmp

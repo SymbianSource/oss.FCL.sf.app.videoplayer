@@ -65,6 +65,101 @@ _LIT( KVcxArtistPropertyName, "Artist" );                     //24
 
 
 // ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::NewL()
+// ---------------------------------------------------------------------------
+//
+CVcxMdsShutdownMonitor* CVcxMdsShutdownMonitor::NewL( MVcxMdsShutdownMonitorObserver& aObserver,
+                                                const TUid& aKeyCategory,
+                                                const TInt aPropertyKey,
+                                                TBool aDefineKey)
+    {
+    CVcxMdsShutdownMonitor* self = new( ELeave )CVcxMdsShutdownMonitor( aObserver, 
+                                                                  aKeyCategory,
+                                                                  aPropertyKey,
+                                                                  aDefineKey);
+    CleanupStack::PushL( self );
+    self->ConstructL();
+    CleanupStack::Pop( self );
+    return self;
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::CVcxMdsShutdownMonitor()
+// ---------------------------------------------------------------------------
+//
+CVcxMdsShutdownMonitor::CVcxMdsShutdownMonitor( MVcxMdsShutdownMonitorObserver& aObserver,
+                                          const TUid& aKeyCategory,
+                                          const TInt aPropertyKey,
+                                          TBool aDefineKey)
+    : CActive( CActive::EPriorityStandard ), iObserver( aObserver ),
+      iKeyCategory( aKeyCategory ), iPropertyKey(aPropertyKey), iDefineKey( aDefineKey )
+    {   
+    CActiveScheduler::Add( this );
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::ConstructL()
+// ---------------------------------------------------------------------------
+//
+void CVcxMdsShutdownMonitor::ConstructL()
+    { 
+    // define P&S property types
+    if ( iDefineKey )
+        {
+        RProperty::Define( iKeyCategory, iPropertyKey,
+                          RProperty::EInt, KAllowAllPolicy, KPowerMgmtPolicy );
+        }
+    
+    // attach to the property
+    TInt err = iProperty.Attach( iKeyCategory, iPropertyKey,EOwnerThread );
+    User::LeaveIfError( err );
+    
+    // wait for the previously attached property to be updated
+    iProperty.Subscribe( iStatus );
+    SetActive();
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::~CVcxMdsShutdownMonitor()
+// ---------------------------------------------------------------------------
+//
+CVcxMdsShutdownMonitor::~CVcxMdsShutdownMonitor()
+    {
+    Cancel();
+    iProperty.Close();
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::RunL()
+// ---------------------------------------------------------------------------
+//
+void CVcxMdsShutdownMonitor::RunL()
+    {
+    // resubscribe before processing new value to prevent missing updates
+    iProperty.Subscribe( iStatus );
+    SetActive();
+    
+    // retrieve the value
+    TInt value = 0;
+    TInt err = iProperty.Get( value );
+    MPX_DEBUG2("CVcxMyVideosMdsDb::RunL(): iProperty.Get(value); returns %d", err);
+    
+    User::LeaveIfError( err );
+
+    iObserver.ShutdownNotification( value );    
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMdsShutdownMonitor::DoCancel()
+// ---------------------------------------------------------------------------
+//
+void CVcxMdsShutdownMonitor::DoCancel()
+    {
+    iProperty.Cancel();
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::CVcxMyVideosMdsDb
 // ---------------------------------------------------------------------------
 //
 CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs )
@@ -73,58 +168,70 @@ CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver, RFs&
     }
 
 // ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::ConstructL
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosMdsDb::ConstructL()
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::ConstructL" );
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL start" );
 
     iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait;
     
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL CMdESession::NewL" );
+    OpenMdsSessionL();
 
-    //  Create session
-    iMDSError = KErrNone;
+    iMdsShutdownMonitor = CVcxMdsShutdownMonitor::NewL(
+            *this, KHarvesterPSShutdown, KMdSShutdown, EFalse );
+        
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL exit" );
+    }
 
-    iMDSSession = CMdESession::NewL( *this );
-    if (!iMDSSession)
-        {
-        //  Failed to create session, leave
-        User::Leave( iMDSError );
-        }
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::OpenMdsSessionL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::OpenMdsSessionL()
+    {
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::OpenMdsSessionL() start" );
 
-    //  Wait until session opened
-    iActiveSchedulerWait->Start();
+    iMdsSessionError = KErrNone;
 
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL iActiveSchedulerWait->Start done" );
-
-    if ( iMDSError != KErrNone )
-        {
-        MPX_DEBUG2("Failed to create session to MDS: %d", iMDSError);
-        User::LeaveIfError( iMDSError );
-        }
-
-    //  Get the schema definitions
-    iMDSError = KErrNone;
-    GetSchemaDefinitionsL();
-
-    //  Is schema ok
-    if ( iMDSError != KErrNone )
-        {
-        //  Schema not loaded, abort
-        User::Leave( iMDSError );
-        }
-
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL Adding observers" );
-
-    // We order all object notifications. If we set video condition, then we wont
-    // receive remove notifications at all (mds feature). Extra notifications
-    // do not bother us much since we try to fetch the item from the db
-    // after the add notification anyways, and then we use video condition.
-    // Eventually extra events are ignored.    
-    iMDSSession->AddObjectObserverL( *this, NULL );
+    delete iMdsSession;
+    iMdsSession = NULL;
+    iMdsSession = CMdESession::NewL( *this );
     
-    iMDSSession->AddObjectPresentObserverL( *this );    
+    if ( !iMdsSession )
+        {
+        User::Leave( KErrGeneral );
+        }
+    
+    //  Wait until session opened
+    iActiveSchedulerWait->Start();    
+    MPX_DEBUG1( "CVcxMyVideosMdsDb:: iActiveSchedulerWait->Start done" );
+
+    if ( iMdsSessionError == KErrNone )
+        {
+        MPX_DEBUG1( "CVcxMyVideosMdsDb:: session opened ok, adding observers" );
+
+        // We order all object notifications. If we set video condition, then we wont
+        // receive remove notifications at all (mds feature). Extra notifications
+        // do not bother us much since we try to fetch the item from the db
+        // after the add notification anyways, and then we use video condition.
+        // Eventually extra events are ignored.    
+        iMdsSession->AddObjectObserverL( *this, NULL );
+    
+        iMdsSession->AddObjectPresentObserverL( *this );
+        
+        GetSchemaDefinitionsL();
+        }
+    else
+        {
+        MPX_DEBUG2( "CVcxMyVideosMdsDb:: session opening failed: %d", iMdsSessionError );
+        iMdsSessionError = KErrGeneral; // this ensures that next time when mds is tried to use, it tries to open session again
+        delete iMdsSession;
+        iMdsSession = NULL;        
+        }
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::OpenMdsSessionL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -181,19 +288,16 @@ CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewLC(
 //
 CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()" );
-
-    if ( iMDSSession )
-        {
-        TRAP_IGNORE( iMDSSession->RemoveObjectObserverL( *this ) );        
-        }
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb() start" );
 
     Cancel();
-    
     delete iVideoQuery;
-    delete iMDSSession;
+    delete iMdsSession;
     delete iActiveSchedulerWait;
     delete iRepository;
+    delete iMdsShutdownMonitor;
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -202,13 +306,15 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
 //
 void CVcxMyVideosMdsDb::Cancel()
     {
-    MPX_FUNC("CVcxMyVideosMdsDb::Cancel()");
+    MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() start");
     
     if ( iVideoQuery )
         {
         iVideoQuery->Cancel();
         }
     iVideoListFetchingIsOngoing = EFalse;
+
+    MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() exit");
     }
     
 // ---------------------------------------------------------------------------
@@ -219,15 +325,9 @@ void CVcxMyVideosMdsDb::AddVideoL(
         CMPXMedia& aVideo, 
         TUint32& aMdsId )
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::AddVideoL" );
-
-    if ( !iMDSSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsDb:: no mds session(%d), leaving", iMDSError);
-        User::Leave( iMDSError );
-        }
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::AddVideoL() start" );
          
-    CMdEObject* object = iMDSSession->NewObjectLC(
+    CMdEObject* object = MdsSessionL().NewObjectLC(
             *iVideoObjectDef, aVideo.ValueText( KMPXMediaGeneralUri ) ); // 1->
 
     // Value from aVideo is taken in use in Media2ObjectL if aVideo contains creation date
@@ -255,11 +355,11 @@ void CVcxMyVideosMdsDb::AddVideoL(
         }
 
     Media2ObjectL( aVideo, *object );
-    TRAPD( err, aMdsId = iMDSSession->AddObjectL( *object ) );
+    TRAPD( err, aMdsId = MdsSessionL().AddObjectL( *object ) );
 
     if ( err != KErrNone )
         {
-        MPX_DEBUG2( "CVcxMyVideosMdsDb:: iMDSSession->AddObjectL leaved with error: %d", err );
+        MPX_DEBUG2( "CVcxMyVideosMdsDb:: MdsSessionL().AddObjectL leaved with error: %d", err );
         User::Leave( err );
         }
         
@@ -275,6 +375,7 @@ void CVcxMyVideosMdsDb::AddVideoL(
 
     CleanupStack::PopAndDestroy( object ); // <-1
 
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::AddVideoL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -283,20 +384,14 @@ void CVcxMyVideosMdsDb::AddVideoL(
 //
 TInt CVcxMyVideosMdsDb::RemoveVideo( TUint32 aMdsId )
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::RemoveVideoL" );
-
-    if ( !iMDSSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsDb:: no mds session, returning %d", iMDSError);
-        return iMDSError;
-        }
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::RemoveVideoL() start" );
 
     TInt retValue( KErrNone );
     TItemId id( 0 ); //init to avoid warning
 
     MPX_DEBUG2( "CVcxMyVideosMdsDb:: removing object %d", aMdsId );
     
-    TRAPD( err,  id = iMDSSession->RemoveObjectL( aMdsId ) );
+    TRAPD( err,  id = MdsSessionL().RemoveObjectL( aMdsId ) );
 
     if ( err == KErrNone )
         {
@@ -312,10 +407,11 @@ TInt CVcxMyVideosMdsDb::RemoveVideo( TUint32 aMdsId )
         }
     else
         {
-        MPX_DEBUG2( "CVcxMyVideosMdsDb:: iMDSSession->RemoveObjectL left: %d", err );
+        MPX_DEBUG2( "CVcxMyVideosMdsDb:: MdsSessionL().RemoveObjectL left: %d", err );
         retValue = err;        
         }
-        
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::RemoveVideoL() exit" );        
     return retValue;
     }
 
@@ -325,20 +421,14 @@ TInt CVcxMyVideosMdsDb::RemoveVideo( TUint32 aMdsId )
 //
 void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::UpdateVideoL" );
-
-    if ( !iMDSSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsDb:: no mds session(%d), leaving", iMDSError);
-        User::Leave( iMDSError );
-        }
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::UpdateVideoL() start" );
 
     TMPXItemId mpxId = aVideo.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
 
     MPX_DEBUG2("CVcxMyVideosMdsDb::UpdateVideoL updating object %d ", mpxId.iId1);
     
     CMdEObject* object =
-            iMDSSession->OpenObjectL( mpxId.iId1, *iVideoObjectDef );
+            MdsSessionL().OpenObjectL( mpxId.iId1, *iVideoObjectDef );
     if ( object == NULL )
         {
         // No object with this ID was found!
@@ -355,7 +445,7 @@ void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
             
             Media2ObjectL( aVideo, *object );
             
-            iMDSSession->CommitObjectL(*object);
+            MdsSessionL().CommitObjectL(*object);
 
             CleanupStack::PopAndDestroy(object);
             }
@@ -367,6 +457,8 @@ void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
             User::Leave( KErrInUse );
             }
         }
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::UpdateVideoL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -376,13 +468,7 @@ void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
 void CVcxMyVideosMdsDb::CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder,
         TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList )
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::CreateVideoListL" );
-
-    if ( !iMDSSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsDb:: no mds session(%d), leaving", iMDSError);
-        User::Leave( iMDSError );
-        }
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoListL() start" );
         
     if ( iVideoListFetchingIsOngoing )
         {
@@ -400,7 +486,7 @@ void CVcxMyVideosMdsDb::CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder
     delete iVideoQuery;
     iVideoQuery = NULL;
     
-    iVideoQuery = iMDSSession->NewObjectQueryL(
+    iVideoQuery = MdsSessionL().NewObjectQueryL(
             *iNamespaceDef,
             *iVideoObjectDef,
             this);
@@ -473,6 +559,8 @@ void CVcxMyVideosMdsDb::CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder
     aVideoList->SetTObjectValueL( KMPXMediaArrayCount, mediaArray->Count() );
 
     iVideoList = aVideoList; // lets store the pointer, ownership stays at observer
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoListL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -504,7 +592,7 @@ void CVcxMyVideosMdsDb::DoHandleQueryNewResultsL(
         TInt /*aNewItemCount*/ )
 #endif
     {
-    MPX_FUNC("CVcxMyVideosMdsDb::HandleQueryNewResults()");
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleQueryNewResults() start");
     
     if ( !iVideoList )
         {
@@ -536,6 +624,8 @@ void CVcxMyVideosMdsDb::DoHandleQueryNewResultsL(
     
     iMdsDbObserver->HandleCreateVideoListResp( iVideoList, aFirstNewItemIndex,
             EFalse /* not complete yet */);
+
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleQueryNewResults() exit");
     }
 
 
@@ -552,7 +642,7 @@ void CVcxMyVideosMdsDb::HandleQueryCompleted(
 #endif
         TInt /*aError*/)
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::HandleQueryCompleted" );
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::HandleQueryCompleted() start" );
 
     if ( !iVideoList )
         {
@@ -575,6 +665,8 @@ void CVcxMyVideosMdsDb::HandleQueryCompleted(
     iVideoListFetchingIsOngoing = EFalse;
     iMdsDbObserver->HandleCreateVideoListResp( iVideoList, KErrNotFound /* KErrNotFound = no new items */,
             ETrue /* complete */);
+
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::HandleQueryCompleted() exit" );
     
     iVideoList = NULL; // not owned by us -> just clear
     }
@@ -585,7 +677,7 @@ void CVcxMyVideosMdsDb::HandleQueryCompleted(
 //
 CMPXMedia* CVcxMyVideosMdsDb::CreateVideoL( TUint32 aId, TBool aFullDetails )
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::CreateVideoL" );
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoL() start" );
 
     CMdEObject* object = ObjectL( aId );
 
@@ -604,6 +696,8 @@ CMPXMedia* CVcxMyVideosMdsDb::CreateVideoL( TUint32 aId, TBool aFullDetails )
         CleanupStack::PopAndDestroy( object ); // <-1
         }
 
+    MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoL() exit" );
+
     return video;
     }
 
@@ -615,7 +709,7 @@ void CVcxMyVideosMdsDb::HandleSessionOpened(
         CMdESession& /*aSession*/,
         TInt aError)
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::HandleSessionOpened" );
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleSessionOpened() start" );
 
     iActiveSchedulerWait->AsyncStop();
 
@@ -623,10 +717,10 @@ void CVcxMyVideosMdsDb::HandleSessionOpened(
         {
         MPX_DEBUG2( "CVcxMyVideosMdsDb::HandleSessionOpened: %d", aError );
 
-        iMDSError = aError;
-        delete iMDSSession;
-        iMDSSession = NULL;
+        iMdsSessionError = aError;
         }
+        
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleSessionOpened() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -637,7 +731,7 @@ void CVcxMyVideosMdsDb::HandleSessionError(
         CMdESession& /*aSession*/,
         TInt aError)
     {
-    MPX_FUNC( "CVcxMyVideosMdsDb::HandleSessionError" );
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleSessionError() start" );
 
     if (iActiveSchedulerWait->IsStarted())
         {
@@ -649,17 +743,15 @@ void CVcxMyVideosMdsDb::HandleSessionError(
         {
         MPX_DEBUG1( "CVcxMyVideosMdsDb:: Videolist fetching was going on");
         iVideoListFetchingIsOngoing = EFalse;
-//        delete iVideoQuery;
-//        iVideoQuery = NULL;
         iMdsDbObserver->HandleCreateVideoListResp( iVideoList, -1 /* -1 = no new items */,
                 ETrue /* complete */);
         }
         
     MPX_DEBUG2( "CVcxMyVideosMdsDb::HandleSessionError: %d", aError );
 
-    iMDSError = aError;
-    delete iMDSSession;
-    iMDSSession = NULL;
+    iMdsSessionError = aError;
+
+    MPX_DEBUG1("CVcxMyVideosMdsDb::HandleSessionError() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -671,7 +763,7 @@ void CVcxMyVideosMdsDb::HandleObjectNotification(
         TObserverNotificationType aType,
         const RArray<TItemId>& aObjectIdArray)
     {
-    TRAP( iMDSError, DoHandleObjectNotificationL( aType, aObjectIdArray ));
+    TRAP_IGNORE( DoHandleObjectNotificationL( aType, aObjectIdArray ));
     }
     
 // ---------------------------------------------------------------------------
@@ -680,20 +772,17 @@ void CVcxMyVideosMdsDb::HandleObjectNotification(
 //
 CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
     {
-    if ( !iMDSSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsDb:: no mds session(%d), leaving", iMDSError);
-        User::Leave( iMDSError );
-        }
+    MPX_DEBUG1("CVcxMyVideosMdsDb::ObjectL start");
 
     //  If the id is not valid, just return NULL, because
-    //  iMDSSession->GetObjectL leaves in that case
+    //  MdsSessionL().GetObjectL leaves in that case
     if ( aId == KNoId )
         {
         return NULL;
         }
 
-    CMdEObject* object = iMDSSession->GetObjectL( aId, *iVideoObjectDef );
+    CMdEObject* object = NULL;
+    object = MdsSessionL().GetObjectL( aId, *iVideoObjectDef );
 
     if ( object )
         {
@@ -704,6 +793,7 @@ CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
         MPX_DEBUG2( "CVcxMyVideosMdsDb::ObjectL not found, id: %d", aId );
         }
 
+    MPX_DEBUG1("CVcxMyVideosMdsDb::ObjectL exit");
     return object;
     }
 
@@ -878,13 +968,10 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     if ( aObject.Property( *iOriginPropertyDef, property, 0 ) != KErrNotFound )
         {
         TUint8 origin = static_cast<CMdEUint8Property*>(property)->Value();
-        if ( origin == EVcxMyVideosOriginDownloaded ||
-                origin == EVcxMyVideosOriginSideLoaded ||
-                origin == EVcxMyVideosOriginTvRecording )
+        if( origin != EVcxMyVideosOriginCapturedWithCamera )
             {
             origin = EVcxMyVideosOriginOther;
-            }
-                
+            }           
         aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, origin );
         }
 
@@ -1416,7 +1503,7 @@ void CVcxMyVideosMdsDb::GetSchemaDefinitionsL()
     MPX_FUNC( "CVcxMyVideosMdsDb::GetSchemaDefinitionsL" );
 
     //  Namespace
-    iNamespaceDef = &(iMDSSession->GetDefaultNamespaceDefL());
+    iNamespaceDef = &(MdsSessionL().GetDefaultNamespaceDefL());
     
     //  Default object definitions
     iVideoObjectDef = &(iNamespaceDef->GetObjectDefL( KVcxVideoObjectName ));
@@ -1532,4 +1619,53 @@ void CVcxMyVideosMdsDb::SetCreationAndModifiedDatesL( CMdEObject& aObject )
     aObject.AddTimePropertyL( *iCreationDatePropertyDef, localTime ); 
     aObject.AddInt16PropertyL( *iTimeOffsetPropertyDef, timeOffset.Int() / secondsInMinute );
     aObject.AddTimePropertyL( *iLastModifiedDatePropertyDef, localTime );
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::MdsSessionL
+// ---------------------------------------------------------------------------
+//
+CMdESession& CVcxMyVideosMdsDb::MdsSessionL()
+    {
+    if ( iMdsSessionError == KErrServerTerminated )
+        {
+        // This ensures that the iMdsSessionError KErrServerTerminated
+        // value does not change, since the user can't access iMdsSession.
+        // Recovery happens in ShutDownNotification func.
+        User::Leave( KErrServerTerminated );
+        }
+
+    if ( !iMdsSession )
+        {
+        OpenMdsSessionL();
+        
+        if ( !iMdsSession )
+            {
+            User::Leave( KErrGeneral );
+            }
+        }
+
+    return *iMdsSession;
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::ShutdownNotification
+// From MVcxMdsShutDownMonitorObserver
+// ---------------------------------------------------------------------------
+//    
+void CVcxMyVideosMdsDb::ShutdownNotification( TInt aShutdownState )
+    {
+    if ( aShutdownState == 0 )
+        {
+        // Server has restarted, recreate session.
+        MPX_DEBUG1("CVcxMyVideosMdsDb:: MDS Server restarted!");
+        OpenMdsSessionL();
+        return;
+        }
+        
+    if ( aShutdownState == 1 )
+        {
+        MPX_DEBUG1("CVcxMyVideosMdsDb:: MDS Server went down!");
+        iMdsSessionError = KErrServerTerminated;
+        }
     }

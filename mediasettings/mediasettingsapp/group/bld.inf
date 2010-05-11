@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 #include <platform_paths.hrh>
 
@@ -30,11 +30,6 @@ PRJ_EXPORTS
 ../loc/mediasettings.loc             APP_LAYER_LOC_EXPORT_PATH(mediasettings.loc)
 ../rom/mediasettings.iby             CORE_APP_LAYER_IBY_EXPORT_PATH(mediasettings.iby)
 ../rom/mediasettingsresources.iby    LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(mediasettingsresources.iby)
-
-// Generic configuration interface for component cenrep settings  
-// mediasettings_101F880B implementation specifics for cenrep data
-../conf/mediasettings.confml              APP_LAYER_CONFML(mediasettings.confml)
-../conf/mediasettings_101F880B.crml 	  APP_LAYER_CRML(mediasettings_101F880B.crml)
 
 PRJ_EXTENSIONS
 START EXTENSION s60/mifconv

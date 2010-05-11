@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 22 %
 
 
 // INCLUDE FILES
@@ -334,8 +334,7 @@ void CMPXVideoPlaybackProgressBar::HandlePointerEventL( const TPointerEvent& aPo
     //  - If TV-Out is connected and the clip is DRM protected
     //
     if ( iController->FileDetails()->iSeekable &&
-         ( state == EPbStatePlaying || state == EPbStatePaused ) &&
-         iController->IsTvOutPlaybackAllowed() )
+         ( state == EPbStatePlaying || state == EPbStatePaused ) )
     {
         TReal ratio = (TReal) ( aPointerEvent.iPosition.iX - iFrameIconRect.iTl.iX )/
                       (TReal)( iFrameIconRect.Width() - KMPXProgressSliderWidth );

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 8 %
+
+// Version : %version: 9 %
 
 
 #include <caf/data.h>
@@ -110,41 +111,6 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus( RFile& aFile )
     return drmError;
 }
 
-TBool CMpxVideoDrmHelper::IsTvOutAllowedL( RFile& aFile )
-{
-    TBool tvOutAllowed = ETrue;
-
-    if ( IsProtectedL( aFile ) )
-    {
-        ContentAccess::CContent* content = ContentAccess::CContent::NewLC( aFile );
-
-        ContentAccess::CData* data = content->OpenContentL( ContentAccess::EPeek );
-
-        TInt fileType;
-
-        TInt error = data->GetAttribute( ContentAccess::EFileType, fileType );
-
-        if ( error == KErrNone )
-        {
-            //
-            //  TV-out is not allowed for DRM content other than OMA1 DRM
-            //
-            if ( fileType != ContentAccess::EOma1Dcf )
-            {
-                tvOutAllowed = EFalse;
-            }
-        }
-
-        delete data;
-
-        CleanupStack::PopAndDestroy( content );
-    }
-
-    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsTvOutAllowedL(%d)"), tvOutAllowed);
-
-    return tvOutAllowed;
-}
-
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
 //  ------------------------------------------------------------------------------------------------
@@ -201,45 +167,6 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus64( RFile64& aFile )
     MPX_DEBUG(_L("CMpxVideoDrmHelper::GetDrmRightsStatus64() drmError = %d"), drmError);
 
     return drmError;
-}
-
-//  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsTvOutAllowed64L()
-//  ------------------------------------------------------------------------------------------------
-//
-TBool CMpxVideoDrmHelper::IsTvOutAllowed64L( RFile64& aFile )
-{
-    TBool tvOutAllowed = ETrue;
-
-    if ( IsProtected64L( aFile ) )
-    {
-        ContentAccess::CContent* content = ContentAccess::CContent::NewLC( aFile );
-
-        ContentAccess::CData* data = content->OpenContentL( ContentAccess::EPeek );
-
-        TInt fileType;
-
-        TInt error = data->GetAttribute( ContentAccess::EFileType, fileType );
-
-        if ( error == KErrNone )
-        {
-            //
-            //  TV-out is not allowed for DRM content other than OMA1 DRM
-            //
-            if ( fileType != ContentAccess::EOma1Dcf )
-            {
-                tvOutAllowed = EFalse;
-            }
-        }
-
-        delete data;
-
-        CleanupStack::PopAndDestroy( content );
-    }
-
-    MPX_DEBUG(_L("CMpxVideoDrmHelper::IsTvOutAllowed64L(%d)"), tvOutAllowed);
-
-    return tvOutAllowed;
 }
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API

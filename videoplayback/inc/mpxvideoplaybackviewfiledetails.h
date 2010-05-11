@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#13 %
+// Version : %version: 14 %
 
 
 #ifndef __MPXVIDEOPLAYBACKVIEWFILEDETAILS__
@@ -51,13 +51,13 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
         * @return generated file name, ownership is transferred
         */
         IMPORT_C HBufC* GenerateFileNameL();
-        
+
         /**
          * Parse file title
          * if title exists, then use it as title content directly.
          * if title is null, then for streaming/live streaming clip,
          * parse its file name as title content.
-         * 
+         *
          * @return  generated file title, ownership is transferred
          */
         IMPORT_C HBufC* GenerateFileTitleL();
@@ -84,7 +84,6 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackViewFileDetails ) : public CBase
         TBool          iVideoEnabled;
         TBool          iPartialPlayback;
         TBool          iTvOutConnected;
-        TBool          iTvOutPlayAllowed;
         TBool          iDrmProtected;
 
         TInt           iVideoHeight;

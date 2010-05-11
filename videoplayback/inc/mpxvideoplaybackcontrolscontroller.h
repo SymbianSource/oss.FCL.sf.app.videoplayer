@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#14 %
+// Version : %version: 15 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -106,11 +106,6 @@ class CMPXVideoPlaybackControlsController : public CBase
         * Return ETrue if TV-out cable gets connected
         */
         inline TBool IsTvOutConnected();
-
-        /*
-         * Return ETrue if TV-out cable is connected and content can be played
-         */
-        inline TBool IsTvOutPlaybackAllowed();
 
         /**
         * Reset or cancel timers for the controls
@@ -313,9 +308,7 @@ class CMPXVideoPlaybackControlsController : public CBase
         /**
         * Handle tvout connected/disconnected event
         */
-        void HandleTvOutEventL( TBool aConnected,
-                                TMPXVideoPlaybackControlCommandIds aEvent,
-                                TInt aValue );
+        void HandleTvOutEventL( TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent );
         /**
         * Handle softkey pressed event
         */
@@ -408,14 +401,6 @@ TBool CMPXVideoPlaybackControlsController::IsTvOutConnected()
         iFileDetails->iTvOutConnected);
 
     return iFileDetails->iTvOutConnected;
-}
-
-inline
-TBool CMPXVideoPlaybackControlsController::IsTvOutPlaybackAllowed()
-{
-    TBool playable = ( ! iFileDetails->iTvOutConnected || iFileDetails->iTvOutPlayAllowed );
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsTvOutPlaybackAllowed() [%d]"), playable);
-    return playable;
 }
 
 inline

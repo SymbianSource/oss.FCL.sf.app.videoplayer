@@ -477,9 +477,9 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         TBool ValidOrigin( CMPXMedia& aMedia );
 
         /** 
-         * Saves MPX id of highlighted item.
+         * Saves MPX id of first (topmost) visible item.
          */
-        void SaveHighlightedItemIdL();
+        void SaveFirstListItemIdL();
 
         /**
          * Update scrollbar strip type depending on sort order
@@ -576,15 +576,15 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         TInt iCurrentCategoryIndex;
 
         /**
-         * Flag for indicating that highlight should restore to the position
+         * Flag for indicating that list should restore to the position
          * where it was before model deactivating. 
          */ 
-        TBool iRestoreHighlightPosition;
+        TBool iRestoreListPosition;
         
         /**
-         * MPX id of highlighted item in a video list.
+         * MPX id of first (topmost) visible item in a video list.
          */
-        TMPXItemId iHighlightedItemId;
+        TMPXItemId iFirstListItemId;
 
         /**
          * Downloading has been resumed for these MPX IDs. Needed for showing

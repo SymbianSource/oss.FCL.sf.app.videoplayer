@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 27 %
+// Version : %version: 28 %
 
 
 // INCLUDE FILES
@@ -577,7 +577,6 @@ void CMPXVideoPlaybackContainer::CreateControlsL()
     iFileDetails->iPlaybackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
 
     iFileDetails->iTvOutConnected   = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutConnected );
-    iFileDetails->iTvOutPlayAllowed = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutPlayAllowed );
 
     TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );
     iFileDetails->iMimeType = mimeType.AllocL();

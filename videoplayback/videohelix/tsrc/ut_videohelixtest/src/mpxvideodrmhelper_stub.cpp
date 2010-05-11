@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 #include "mpxvideodrmhelper.h"
@@ -108,13 +108,6 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus( RFile& aFile )
     return drmError;
 }
 
-TBool CMpxVideoDrmHelper::IsTvOutAllowedL( RFile& aFile )
-{
-    TBool tvOutAllowed = ETrue;
-
-    return tvOutAllowed;
-}
-
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
 //  ------------------------------------------------------------------------------------------------
@@ -178,17 +171,6 @@ TInt CMpxVideoDrmHelper::GetDrmRightsStatus64( RFile64& aFile )
     fs.Close();
 
     return drmError;
-}
-
-//  ------------------------------------------------------------------------------------------------
-//    CMpxVideoDrmHelper::IsTvOutAllowed64L()
-//  ------------------------------------------------------------------------------------------------
-//
-TBool CMpxVideoDrmHelper::IsTvOutAllowed64L( RFile64& aFile )
-{
-    TBool tvOutAllowed = ETrue;
-
-    return tvOutAllowed;
 }
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API

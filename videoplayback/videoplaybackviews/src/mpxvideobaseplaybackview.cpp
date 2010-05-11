@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 75 %
+// Version : %version: 77 %
 
 
 //  Include Files
@@ -129,6 +129,12 @@ void CMPXVideoBasePlaybackView::InitializeVideoPlaybackViewL()
 CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
 {
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()"));
+
+    if ( iClipName )
+    {
+        delete iClipName;
+        iClipName = NULL;
+    }
 
     if ( iCloseAO )
     {
@@ -532,6 +538,12 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
 
     iMediaRequested = EFalse;
     iPlaybackState = EPbStateNotInitialised;
+
+    if ( iClipName )
+    {
+        delete iClipName;
+        iClipName = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -867,18 +879,15 @@ void CMPXVideoBasePlaybackView::HandleVideoPlaybackMessage( CMPXMessage* aMessag
             TMPXVideoPlaybackControlCommandIds cmdId = EMPXControlCmdTvOutDisconnected;
 
             TBool tvOutConnected( *aMessage->Value<TInt>( KMPXMediaVideoTvOutConnected ) );
-            TBool playbackAllowed = ETrue;
 
             if ( tvOutConnected )
             {
                 cmdId = EMPXControlCmdTvOutConnected;
-
-                playbackAllowed = *aMessage->Value<TInt>( KMPXMediaVideoTvOutPlayAllowed );
             }
 
             if ( iContainer )
             {
-                MPX_TRAPD( err, iContainer->HandleEventL( cmdId, playbackAllowed ) );
+                MPX_TRAPD( err, iContainer->HandleEventL( cmdId ) );
             }
             break;
         }
@@ -956,17 +965,6 @@ void CMPXVideoBasePlaybackView::HandlePluginErrorL( TInt aError )
         case KMPXVideoCallOngoingError:
         {
             DisplayInfoMessageL( R_MPX_VIDEO_CALL_ONGOING );
-            break;
-        }
-        case KMPXVideoTvOutPlaybackNotAllowed:
-        {
-            DisplayInfoMessageL( R_MPX_VIDEO_DRM_NO_TV_OUT );
-            break;
-        }
-        case KMPXVideoTvOutPlaybackNotAllowedClose:
-        {
-            DisplayErrorMessageL( R_MPX_VIDEO_DRM_NO_TV_OUT );
-            HandleClosePlaybackViewL();
             break;
         }
         default:
@@ -1216,15 +1214,6 @@ void CMPXVideoBasePlaybackView::ParseMetaDataL( const CMPXMessage& aMedia )
     }
 
     //
-    //  TV-Out Playback Allowed
-    //
-    if ( aMedia.IsSupported( KMPXMediaVideoTvOutPlayAllowed ) )
-    {
-        iFileDetails->iTvOutPlayAllowed =
-            aMedia.ValueTObjectL<TInt>( KMPXMediaVideoTvOutPlayAllowed );
-    }
-
-    //
     //  Video BitRate
     //
     if ( aMedia.IsSupported( KMPXMediaVideoBitRate ) )
@@ -1368,17 +1357,26 @@ void CMPXVideoBasePlaybackView::HandleMediaL( const CMPXMedia& aMedia, TInt aErr
     }
     else
     {
+        //
+        //  Retreive the clip name for all use cases
+        //
+        if ( aMedia.IsSupported( KMPXMediaGeneralUri ) )
+        {
+            if ( iClipName )
+            {
+                delete iClipName;
+                iClipName = NULL;
+            }
+            
+            TPtrC uri( aMedia.ValueText( KMPXMediaGeneralUri ) );
+            iClipName = uri.AllocL();
+        }
+
         if ( aMedia.IsSupported( KMPXMediaVideoError ) )
         {
             TInt error = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoError );
 
-            // Reset the controls
-            iContainer->HandleCommandL( EMPXPbvCmdResetControls );
-
-            // Set the iMediaRequested flag to false
             iMediaRequested = EFalse;
-
-            // Handle the plugin error
             HandlePluginErrorL( error );
         }
         else
@@ -1974,10 +1972,10 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandleL( RFile& aFile )
     TInt openError = KErrNotFound;
     RFs& fs = iCoeEnv->FsSession();
 
-    if ( iPlaylistView && iFileDetails->iClipName )
+    if ( iPlaylistView && iClipName )
     {
         openError = aFile.Open( fs,
-                                iFileDetails->iClipName->Des(),
+                                iClipName->Des(),
                                 EFileRead | EFileShareReadersOrWriters );
     }
     else
@@ -2002,11 +2000,14 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandleL( RFile& aFile )
                 //
                 HBufC* tempFileName = s->UriL();
 
-                openError = aFile.Open( fs,
-                                        tempFileName->Des(),
-                                        EFileRead | EFileShareReadersOrWriters );
+                if ( tempFileName )
+                {
+                    openError = aFile.Open( fs,
+                                            tempFileName->Des(),
+                                            EFileRead | EFileShareReadersOrWriters );
 
-                delete tempFileName;
+                    delete tempFileName;
+                }
             }
         }
     }
@@ -2110,10 +2111,10 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
     TInt openError = KErrNotFound;
     RFs& fs = iCoeEnv->FsSession();
 
-    if ( iPlaylistView && iFileDetails->iClipName )
+    if ( iPlaylistView && iClipName )
     {
         openError = aFile.Open( fs,
-                                iFileDetails->iClipName->Des(),
+                                iClipName->Des(),
                                 EFileRead | EFileShareReadersOrWriters );
     }
     else
@@ -2139,11 +2140,14 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
                 //
                 HBufC* tempFileName = s->UriL();
 
-                openError = aFile.Open( fs,
-                                        tempFileName->Des(),
-                                        EFileRead | EFileShareReadersOrWriters );
+                if ( tempFileName )
+                {
+                    openError = aFile.Open( fs,
+                                            tempFileName->Des(),
+                                            EFileRead | EFileShareReadersOrWriters );
 
-                delete tempFileName;
+                    delete tempFileName;
+                }
             }
         }
     }

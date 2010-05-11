@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -64,14 +64,6 @@ NONSHARABLE_CLASS( CMPXVideoAccessoryObserver ) : public CActive
          *     EFalse   cable is not connected.
          */
         TBool IsTvOutConnected();
-
-        /*
-         *  Returns if the playback is allowed when the TV-Out cable is connected
-         *  @return  playback is allowed
-         *     ETrue    playback is allowed.
-         *     EFalse   playback is not allowed.
-         */
-        TBool IsTvOutPlaybackAllowed();
 
     private:
 
@@ -133,7 +125,6 @@ NONSHARABLE_CLASS( CMPXVideoAccessoryObserver ) : public CActive
 
         CMPXVideoPlaybackController*        iController;
         TBool                               iTvOutConnected;
-        TBool                               iTvOutPlaybackAllowed;
 
 #ifdef __ACCESSORY_FW
         RAccessoryServer                    iServer;

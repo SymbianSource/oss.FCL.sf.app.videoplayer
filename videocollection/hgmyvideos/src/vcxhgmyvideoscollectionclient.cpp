@@ -60,7 +60,8 @@ const TUint32 KVcxHgMyVideosTransactionId = 5;
 //
 CVcxHgMyVideosCollectionClient::CVcxHgMyVideosCollectionClient()
   : iCollectionOpenStatus( EVcxHgCollectionNotOpen ),
-    iPendingCommand( EVcxHgMyVideosCollectionCommandNone )
+    iPendingCommand( EVcxHgMyVideosCollectionCommandNone ),
+    iCollectionLevel( KErrNotFound ) 
     {
     }
 
@@ -185,7 +186,11 @@ void CVcxHgMyVideosCollectionClient::GetCategoryListL()
         }
     else
         {
-        if ( CollectionLevelL() == KVcxMpxLevelVideos )
+        if ( iCollectionLevel == KErrNotFound )
+            {
+            iCollectionLevel = CollectionLevelL();
+            }
+        if ( iCollectionLevel == KVcxMpxLevelVideos )
             {
             iCollectionUtility->Collection().BackL();
             }
@@ -201,13 +206,15 @@ void CVcxHgMyVideosCollectionClient::GetVideoListL( TInt aIndex )
     IPTVLOGSTRING2_LOW_LEVEL( 
         "MPX My Videos UI # GetVideoListL(%d)", aIndex );
 
-    TInt collectionLevel = CollectionLevelL();
-
-    if ( collectionLevel == KVcxMpxLevelCategories )
+    if ( iCollectionLevel == KErrNotFound )
+        {
+        iCollectionLevel = CollectionLevelL();
+        }
+    if ( iCollectionLevel == KVcxMpxLevelCategories )
         {    
         iCollectionUtility->Collection().OpenL( aIndex );
         }
-    else if ( collectionLevel == KVcxMpxLevelVideos )
+    else if ( iCollectionLevel == KVcxMpxLevelVideos )
         {
         iCollectionUtility->Collection().BackL();
         iCollectionUtility->Collection().OpenL( aIndex );
@@ -568,6 +575,7 @@ void CVcxHgMyVideosCollectionClient::HandleSingleCollectionMessageL(
                                 }
                             iCollectionUtility->Collection().OpenL();
                             }
+                        iCollectionLevel = CollectionLevelL();
                         }
                         break;                        
                     case TMPXCollectionMessage::ECollectionChanged:

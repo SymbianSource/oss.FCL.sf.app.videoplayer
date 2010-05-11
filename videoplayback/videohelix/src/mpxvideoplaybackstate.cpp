@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 39 %
+// Version : %version: 41 %
 
 
 //
@@ -24,6 +24,7 @@
 //
 #include <mpxcommandgeneraldefs.h>
 #include <mpxmessagegeneraldefs.h>
+#include <mpxmediageneralextdefs.h>
 
 #include "mpxvideoplaybackcontroller.h"
 #include "mpxvideoplaybackstate.h"
@@ -54,7 +55,6 @@ void CMPXVideoPlaybackState::ConstructL( CMPXVideoPlaybackController* aVideoPlay
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::ConstructL()"));
 
     iVideoPlaybackCtlr = aVideoPlaybackCtlr;
-    iVideoPlaybackCtlr->iPBPluginError = KErrNone;
 
     User::LeaveIfError( iFs.Connect() );
     iFs.ShareProtected();
@@ -296,8 +296,15 @@ TInt CMPXVideoPlaybackState::RetrieveFileDetailsL( const TArray<TMPXAttribute>& 
     TUint attrG(0);  //  General attributes
     TUint attrV(0);  //  Video attributes
 
-    if (iVideoPlaybackCtlr->iPBPluginError != KErrNone)
+    if ( iVideoPlaybackCtlr->iPBPluginError != KErrNone )
     {
+        if ( iVideoPlaybackCtlr->iClipName )
+        {
+            aMedia->SetTextValueL(
+                TMPXAttribute( KMPXMediaIdGeneral, EMPXMediaGeneralUri ),
+                *( iVideoPlaybackCtlr->iClipName ) );
+        }
+
         aMedia->SetTObjectValueL<TInt>(
             TMPXAttribute( KMPXMediaVideoError ), iVideoPlaybackCtlr->iPBPluginError );
 
@@ -485,16 +492,6 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
     }
 
     //
-    //  TV-Out Playback Allowed
-    //
-    if ( attrV & KMPXMediaVideoTvOutPlayAllowed.iAttributeId )
-    {
-        aMedia->SetTObjectValueL<TInt>(
-            TMPXAttribute( KMPXMediaVideoTvOutPlayAllowed ),
-            iVideoPlaybackCtlr->iAccessoryMonitor->IsTvOutPlaybackAllowed() );
-    }
-
-    //
     //  BitRate
     //
     if ( attrV & KMPXMediaVideoBitRate.iAttributeId )
@@ -578,9 +575,9 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
             TMPXAttribute( KMPXMediaVideoKeywords ),
             *( iVideoPlaybackCtlr->iFileDetails->iKeywords ) );
     }
-    
+
     //
-    //  Creation date/time 
+    //  Creation date/time
     //
     if ( attrV & KMPXMediaVideoCreated.iAttributeId )
     {
@@ -590,7 +587,7 @@ void CMPXVideoPlaybackState::RetrieveVideoAttributesL(  CMPXMedia* aMedia, TUint
     }
 
     //
-    //  Last Modified date/time 
+    //  Last Modified date/time
     //
     if ( attrV & KMPXMediaVideoLastModified.iAttributeId )
     {
@@ -752,7 +749,7 @@ void CMPXVideoPlaybackState::IssuePlayCommand( TMPXVideoPlaybackState aState,
                                                MMPXPlaybackPluginObserver::TEvent aEvent,
                                                TBool aSendEvent )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::CMPXVideoPlaybackState::IssuePlayCommand()"),
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::IssuePlayCommand()"),
                    _L("aState = %d, aEvent  = %d, aSendEvent = %d"), aState, aEvent, aSendEvent );
 
     MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->PlayL() );
@@ -769,6 +766,21 @@ void CMPXVideoPlaybackState::IssuePlayCommand( TMPXVideoPlaybackState aState,
     else
     {
         TRAP_IGNORE( SendErrorToViewL( err ) );
+    }
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackState::UpdateSeekableL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackState::UpdateSeekableL( CMPXCommand& aCmd )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::UpdateSeekableL()"));
+
+    iVideoPlaybackCtlr->iSeekable = aCmd.ValueTObjectL<TBool>(KMPXMediaGeneralExtVideoSeekable);
+
+    if ( iVideoPlaybackCtlr->iFileDetails )
+    {
+        iVideoPlaybackCtlr->iFileDetails->iSeekable &= iVideoPlaybackCtlr->iSeekable;
     }
 }
 
@@ -829,6 +841,16 @@ TInt CMPXNotInitialisedState::RetrieveFileDetailsL( const TArray<TMPXAttribute>&
 
     if ( iVideoPlaybackCtlr->iPBPluginError != KErrNone )
     {
+        if ( iVideoPlaybackCtlr->iClipName )
+        {
+            //
+            //  Send the clip name and error code for further processing
+            //
+            aMedia->SetTextValueL(
+                TMPXAttribute( KMPXMediaIdGeneral, EMPXMediaGeneralUri ),
+                *( iVideoPlaybackCtlr->iClipName ) );
+        }
+
         aMedia->SetTObjectValueL<TInt>(
             TMPXAttribute( KMPXMediaVideoError ), iVideoPlaybackCtlr->iPBPluginError );
 
@@ -900,6 +922,21 @@ void CMPXNotInitialisedState::HandlePlay()
     MPX_DEBUG(_L("CMPXNotInitialisedState::HandlePlay() Plugin error"));
 
      MPX_TRAPD( err, SendErrorToViewL( iVideoPlaybackCtlr->iPBPluginError ) );
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXNotInitialisedState::UpdateSeekableL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXNotInitialisedState::UpdateSeekableL( CMPXCommand& /*aCmd*/ )
+{
+    MPX_DEBUG(_L("CMPXNotInitialisedState::UpdateSeekableL()"));
+
+    //
+    //  Do not update the seekable state since the plugin is in the not initialized state
+    //  An error probably occurred, plugin went to not initialized.  If update was applied,
+    //  it would not be cleared for the next clip since we are already in not initialized
+    //  state.
+    //
 }
 
 // *************************************************************************************************
@@ -1024,25 +1061,7 @@ void CMPXInitialisingState::HandleOpenComplete( TInt aError )
     }
     else
     {
-        //
-        // Transistion back to EMPXVideoNotInitialized, for pre loaded plugin
-        // this state will alert the view that pre loading failed
-        //
-        iVideoPlaybackCtlr->ChangeState( EMPXVideoNotInitialized );
-
-        // Store the error, in case of pre loaded pluging this can
-        // later be sent to the view
-        iVideoPlaybackCtlr->iPBPluginError = aError;
-
-        //
-        //  move the FW state to Initialized irrespective of the playback state
-        //  This enables the FW to send initailized event to view, which in turn
-        //  queries for the error
-        //
-        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent(
-            MMPXPlaybackPluginObserver::EPInitialised,
-            0,
-            KErrNone );
+        iVideoPlaybackCtlr->HandleError( aError );
     }
 }
 
@@ -1090,23 +1109,7 @@ void CMPXInitialisingState::HandlePrepareComplete( TInt aError )
     }
     else
     {
-        //
-        // Transistion back to EMPXVideoNotInitialized, for pre loaded plugin
-        // this state will alert the view that pre loading failed
-        //
-        iVideoPlaybackCtlr->ChangeState( EMPXVideoNotInitialized );
-
-        // Store the error, in case of pre loaded pluging this can
-        // later be sent to the view
-        iVideoPlaybackCtlr->iPBPluginError = aError;
-
-        //
-        //  move the FW state to Initialized irrespective of the playback state
-        //  This enables the FW to send initailized event to view, which in turn
-        //  queries for the error
-        //
-        iVideoPlaybackCtlr->iMPXPluginObs->
-            HandlePluginEvent( MMPXPlaybackPluginObserver::EPInitialised, 0, KErrNone );
+        iVideoPlaybackCtlr->HandleError( aError );
     }
 }
 
@@ -1745,22 +1748,22 @@ void CMPXBufferingState::HandleLoadingStarted()
     MPX_DEBUG(_L("CMPXBufferingState::HandleLoadingStarted()"));
 
     TInt loadingPercentage = RetrieveBufferingPercentage();
-    
+
     if ( loadingPercentage < 100 )
     {
         MPX_TRAPD( err,
         {
             CMPXMessage* message = CMPXMessage::NewL();
             CleanupStack::PushL( message );
-    
-            message->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId, 
+
+            message->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId,
                                                       KMPXMediaIdVideoPlayback );
-            
-            message->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, 
+
+            message->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
                                                                  EPbCmdLoadingStarted );
-    
+
             iVideoPlaybackCtlr->iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
-    
+
             CleanupStack::PopAndDestroy( message );
         } );
     }

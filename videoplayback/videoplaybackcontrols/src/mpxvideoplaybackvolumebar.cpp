@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 21 %
+
+// Version : %version: 22 %
 
 
 // INCLUDE FILES
@@ -775,11 +776,7 @@ void CMPXVideoPlaybackVolumeBar::HandlePointerEventL( const TPointerEvent& aPoin
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandlePointerEventL()"));
 
-    //
-    //  Block pointer events in the following cases:
-    //  - If TV-Out is connected and the clip is DRM protected
-    //
-    if ( iController->IsTvOutPlaybackAllowed() && iController->FileDetails()->iAudioEnabled )
+    if ( iController->FileDetails()->iAudioEnabled )
     {
         //
         //  Volume up

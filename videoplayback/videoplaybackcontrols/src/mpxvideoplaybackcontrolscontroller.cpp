@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#36 %
+// Version : %version: 37 %
 
 
 // INCLUDE FILES
@@ -314,14 +314,14 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutConnected]"));
             iTvOutConnected = ETrue;
-            HandleTvOutEventL( ETrue, aEvent, aValue );
+            HandleTvOutEventL( ETrue, aEvent );
             break;
         }
         case EMPXControlCmdTvOutDisconnected:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutDisConnected]"));
             iTvOutConnected = EFalse;
-            HandleTvOutEventL( EFalse, aEvent, aValue );
+            HandleTvOutEventL( EFalse, aEvent );
             break;
         }
         case EMPXControlCmdHandleBackgroundEvent:
@@ -1797,21 +1797,11 @@ TBool CMPXVideoPlaybackControlsController::IsSoftKeyVisible( TInt aValue )
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackControlsController::HandleTvOutEventL(
-        TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent, TInt aValue )
+        TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::HandleTvOutEventL()"));
 
     iFileDetails->iTvOutConnected = aConnected;
-
-    if ( iFileDetails->iTvOutConnected )
-    {
-        iFileDetails->iTvOutPlayAllowed = aValue;
-    }
-    else
-    {
-        iFileDetails->iTvOutPlayAllowed = ETrue;
-    }
-
     iControlsConfig->UpdateControlListL( aEvent );
     ControlsListUpdatedL();
 }
@@ -1950,19 +1940,19 @@ TBool CMPXVideoPlaybackControlsController::SetBackgroundBlack()
 //
 TBool CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()
 {
-	MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()"));
 
     TBool retVal = EFalse;
 
     if ( iFileDetails->iVideoEnabled &&
-    	 iFileDetails->iVideoHeight > 0 &&
-  	     iFileDetails->iVideoWidth > 0 &&
-  	     AknLayoutUtils::PenEnabled() )
+         iFileDetails->iVideoHeight > 0 &&
+         iFileDetails->iVideoWidth > 0 &&
+         AknLayoutUtils::PenEnabled() )
     {
         TRect displayRect = iContainer->Rect();
         TReal displayAspectRatio = ( TReal32 )displayRect.Width() / ( TReal32 )displayRect.Height();
         TReal videoAspectRatio = ( TReal32 )iFileDetails->iVideoWidth /
-        		                 ( TReal32 )iFileDetails->iVideoHeight;
+                                 ( TReal32 )iFileDetails->iVideoHeight;
 
         // If clip's AR is as same as screen display AR, AspectRatioIcon does not display.
         if ( displayAspectRatio != videoAspectRatio )

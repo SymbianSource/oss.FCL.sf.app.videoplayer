@@ -15,8 +15,8 @@
 *
 */
 
-// Version : %version: 18 %
 
+// Version : %version: 19 %
 
 
 // INCLUDE FILES
@@ -328,43 +328,40 @@ void CMPXVideoPlaybackButtonBar::HandleButtonDownEventL( const TPointerEvent& aP
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandleButtonDownEventL()"));
 
-    if ( iController->IsTvOutPlaybackAllowed() )
+    if ( iSeekingTimer->IsActive() )
     {
-        if ( iSeekingTimer->IsActive() )
-        {
-            iSeekingTimer->Cancel();
-        }
+        iSeekingTimer->Cancel();
+    }
 
-        if ( iMiddleButtonRect.Contains( aPointerEvent.iPosition ) )
-        {
-            iButtonPressed = EMPXMiddleButtonPressed;
-        }
-        else if ( iTopButtonRect.Contains( aPointerEvent.iPosition ) &&
-                  iButtons[EMPXButtonFastForward]->IsVisible() &&
-                  ! iButtons[EMPXButtonFastForward]->IsDimmed() )
-        {
-            iButtons[EMPXButtonFastForward]->SetPressed( ETrue );
+    if ( iMiddleButtonRect.Contains( aPointerEvent.iPosition ) )
+    {
+        iButtonPressed = EMPXMiddleButtonPressed;
+    }
+    else if ( iTopButtonRect.Contains( aPointerEvent.iPosition ) &&
+              iButtons[EMPXButtonFastForward]->IsVisible() &&
+              ! iButtons[EMPXButtonFastForward]->IsDimmed() )
+    {
+        iButtons[EMPXButtonFastForward]->SetPressed( ETrue );
 
-            iSeekingTimer->Start(
-                KMPXLongPressInterval,
-                KMPXTactileInterval,
-                TCallBack( CMPXVideoPlaybackButtonBar::StartSeekingL, this ) );
+        iSeekingTimer->Start(
+            KMPXLongPressInterval,
+            KMPXTactileInterval,
+            TCallBack( CMPXVideoPlaybackButtonBar::StartSeekingL, this ) );
 
-            iButtonPressed = EMPXTopButtonPressed;
-        }
-        else if( iBottomButtonRect.Contains( aPointerEvent.iPosition ) &&
-                 iButtons[EMPXButtonRewind]->IsVisible() &&
-                 ! iButtons[EMPXButtonRewind]->IsDimmed() )
-        {
-            iButtons[EMPXButtonRewind]->SetPressed( ETrue );
+        iButtonPressed = EMPXTopButtonPressed;
+    }
+    else if( iBottomButtonRect.Contains( aPointerEvent.iPosition ) &&
+             iButtons[EMPXButtonRewind]->IsVisible() &&
+             ! iButtons[EMPXButtonRewind]->IsDimmed() )
+    {
+        iButtons[EMPXButtonRewind]->SetPressed( ETrue );
 
-            iSeekingTimer->Start(
-                KMPXLongPressInterval,
-                KMPXTactileInterval,
-                TCallBack( CMPXVideoPlaybackButtonBar::StartSeekingL, this ) );
+        iSeekingTimer->Start(
+            KMPXLongPressInterval,
+            KMPXTactileInterval,
+            TCallBack( CMPXVideoPlaybackButtonBar::StartSeekingL, this ) );
 
-            iButtonPressed = EMPXBottomButtonPressed;
-        }
+        iButtonPressed = EMPXBottomButtonPressed;
     }
 }
 

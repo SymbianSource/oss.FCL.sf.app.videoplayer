@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 56 %
+// Version : %version: 58 %
 
 
 //
@@ -155,7 +155,6 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
     iAccessPointId = KUseDefaultIap;
     iVideoSeeker = CMPXVideoSeeker::NewL( this );
 
-    // Initiliaze to True
     iSeekable = ETrue;
 
     InitVolumeWatchersL();
@@ -197,6 +196,12 @@ void CMPXVideoPlaybackController::OpenFileL( const TDesC& aMediaFile,
 
     ChangeState( EMPXVideoInitializing );
 
+    if ( iClipName )
+    {
+        delete iClipName;
+        iClipName = NULL;
+    }
+
     iClipName = aMediaFile.AllocL();
     iAccessPointId = aAccessPointId;
 
@@ -228,35 +233,28 @@ void CMPXVideoPlaybackController::OpenFileL( const TDesC& aMediaFile,
         iAccessoryMonitor = CMPXVideoAccessoryObserver::NewL( this );
     }
 
-    if ( iAccessoryMonitor->IsTvOutPlaybackAllowed() )
+    if ( fileExists )
     {
-        if ( fileExists )
+        //
+        //  Ensure there are rights for protected clips
+        //
+        TInt drmError = iDrmHelper->GetDrmRightsStatus( iFileHandle );
+
+        if ( drmError )
         {
             //
-            //  Ensure there are rights for protected clips
+            //  Send error to observer for handling
             //
-            TInt drmError = iDrmHelper->GetDrmRightsStatus( iFileHandle );
-
-            if ( drmError )
-            {
-                //
-                //  Send error to observer for handling
-                //
-                HandleError( drmError );
-            }
-            else
-            {
-                iState->OpenFileL( iFileHandle );
-            }
+            HandleError( drmError );
         }
         else
         {
-            iState->OpenFileL( iClipName->Des() );
+            iState->OpenFileL( iFileHandle );
         }
     }
     else
     {
-        HandleError( KMPXVideoTvOutPlaybackNotAllowedClose );
+        iState->OpenFileL( iClipName->Des() );
     }
 }
 
@@ -418,7 +416,7 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
         {
             case EPbCmdInitView:
             {
-                if ( iState != iNotIntialisedState)
+                if ( iState != iNotIntialisedState )
                 {
                     aCmd.SetTextValueL( KMPXMediaVideoPlaybackFileName, *iClipName );
                     aCmd.SetTObjectValueL<TInt>( KMPXMediaVideoMode, iPlaybackMode->GetMode() );
@@ -426,12 +424,10 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
                     aCmd.SetTObjectValueL<TInt>( KMPXMediaVideoTvOutConnected,
                                                  iAccessoryMonitor->IsTvOutConnected() );
 
-                    aCmd.SetTObjectValueL<TInt>( KMPXMediaVideoTvOutPlayAllowed,
-                                                 iAccessoryMonitor->IsTvOutPlaybackAllowed() );
-
                     if ( iRecognizedMimeType )
                     {
-                        aCmd.SetTextValueL( KMPXMediaVideoRecognizedMimeType, *iRecognizedMimeType );
+                        aCmd.SetTextValueL( KMPXMediaVideoRecognizedMimeType,
+                                            *iRecognizedMimeType );
                     }
                 }
 
@@ -475,7 +471,9 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
             }
             case EPbCmdHandleBackground:
             {
-                iAppInForeground = static_cast<TBool>(aCmd.ValueTObjectL<TBool>(KMPXMediaVideoAppForeground));
+                iAppInForeground =
+                    static_cast<TBool>(aCmd.ValueTObjectL<TBool>(KMPXMediaVideoAppForeground));
+
                 iState->HandleBackground();
                 break;
             }
@@ -496,13 +494,7 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
             }
             case EPbCmdUpdateSeekable:
             {
-                iSeekable = aCmd.ValueTObjectL<TBool>(KMPXMediaGeneralExtVideoSeekable);
-
-                if ( iFileDetails )
-                {
-                    iFileDetails->iSeekable &= iSeekable;
-                }
-
+                iState->UpdateSeekableL( aCmd );
                 break;
             }
             case EPbCmdEndofClipReached:
@@ -1773,7 +1765,7 @@ TBool CMPXVideoPlaybackController::IsKeyLocked()
 //   CMPXVideoPlaybackController::SendTvOutEventL
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed )
+void CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::SendTvOutEventL()"));
 
@@ -1788,7 +1780,6 @@ void CMPXVideoPlaybackController::SendTvOutEventL( TBool aConnected, TBool aPlay
     message->SetTObjectValueL<TMPXVideoPlaybackCommand>
         ( KMPXMediaVideoPlaybackCommand, EPbCmdTvOutEvent );
     message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutConnected, aConnected );
-    message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutPlayAllowed, aPlaybackAllowed );
 
     iMPXPluginObs->HandlePlaybackMessage( message, KErrNone );
 
@@ -1829,9 +1820,7 @@ void CMPXVideoPlaybackController::HandleTvOutEventL( TBool aConnected )
     MPX_ENTER_EXIT( _L("CMPXVideoPlaybackController::HandleTvOutEventL()"),
                     _L("aConnected = %d"), aConnected );
 
-    TBool playbackAllowed = iAccessoryMonitor->IsTvOutPlaybackAllowed();
-
-    SendTvOutEventL( aConnected, playbackAllowed );
+    SendTvOutEventL( aConnected );
 
     //
     //  Check playback status of clip with new Tv-Out status
@@ -1841,25 +1830,12 @@ void CMPXVideoPlaybackController::HandleTvOutEventL( TBool aConnected )
         //
         //  TV-Out accessory connected
         //
-        if ( ! playbackAllowed )
+        // If lights are being controlled enable display timer so that screen backlight will be turned
+        // of after timeout.
+        if ( iBackLightTimer->IsActive() )
         {
-            //
-            //  Clip has DRM protection and TV-Out is connected
-            //  Pause playback and display info note
-            //
-            DoHandleCommandL( EPbCmdPause );
-
-            iState->SendErrorToViewL( KMPXVideoTvOutPlaybackNotAllowed );
+            RestartDisplayTimer();
         }
-        else
-        {
-            // If lights are being controlled enable display timer so that screen backlight will be turned
-            // of after timeout.
-            if ( iBackLightTimer->IsActive() )
-            {
-                RestartDisplayTimer();
-            }
-         }
     }
     else
     {
@@ -1922,6 +1898,7 @@ void CMPXVideoPlaybackController::DoHandleBackLightTimeout()
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::DoHandleBackLightTimeout()"));
 
     TBool tvOutConnected( EFalse );
+
     if ( iAccessoryMonitor )
     {
         tvOutConnected = iAccessoryMonitor->IsTvOutConnected();
@@ -1931,7 +1908,8 @@ void CMPXVideoPlaybackController::DoHandleBackLightTimeout()
     // it keeps resetting display timer and keeps lights on whenever there is user activity
     if ( tvOutConnected )
     {
-        MPX_DEBUG ( _L("CMPXVideoPlaybackController::DoHandleBackLightTimeout() inactivity time = %d"), User::InactivityTime().Int() );
+        MPX_DEBUG(_L("CMPXVideoPlaybackController::DoHandleBackLightTimeout() inactivity time = %d"), User::InactivityTime().Int() );
+
         // Cancel activity timer. Otherwise resetting inactivity time would fire user activity detection
         CancelUserActivityTimer();
     }
@@ -2357,7 +2335,7 @@ void CMPXVideoPlaybackController::HandleError( TInt error )
     ChangeState( EMPXVideoNotInitialized );
 
     //
-    // Move the FW state to Initialized so that it can request for Media
+    //  Move the FW state to Initialized so that it can request for Media
     //
     iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPInitialised, 0, KErrNone );
 
@@ -2390,12 +2368,6 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
         iFileDetails = NULL;
     }
 
-    if ( iClipName )
-    {
-        delete iClipName;
-        iClipName = NULL;
-    }
-
     if ( iRecognizedMimeType )
     {
         delete iRecognizedMimeType;
@@ -2414,7 +2386,6 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
     }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-    // reset to True
     iSeekable = ETrue;
 
     //
@@ -2497,6 +2468,12 @@ void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
 
     ChangeState( EMPXVideoInitializing );
 
+    if ( iClipName )
+    {
+        delete iClipName;
+        iClipName = NULL;
+    }
+
     iClipName = aMediaFile.AllocL();
     iAccessPointId = aAccessPointId;
 
@@ -2528,35 +2505,28 @@ void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
         iAccessoryMonitor = CMPXVideoAccessoryObserver::NewL( this );
     }
 
-    if ( iAccessoryMonitor->IsTvOutPlaybackAllowed() )
+    if ( fileExists )
     {
-        if ( fileExists )
+        //
+        //  Ensure there are rights for protected clips
+        //
+        TInt drmError = iDrmHelper->GetDrmRightsStatus64( iFileHandle64 );
+
+        if ( drmError )
         {
             //
-            //  Ensure there are rights for protected clips
+            //  Send error to observer for handling
             //
-            TInt drmError = iDrmHelper->GetDrmRightsStatus64( iFileHandle64 );
-
-            if ( drmError )
-            {
-                //
-                //  Send error to observer for handling
-                //
-                HandleError( drmError );
-            }
-            else
-            {
-                iState->OpenFile64L( iFileHandle64 );
-            }
+            HandleError( drmError );
         }
         else
         {
-            iState->OpenFileL( iClipName->Des() );
+            iState->OpenFile64L( iFileHandle64 );
         }
     }
     else
     {
-        HandleError( KMPXVideoTvOutPlaybackNotAllowedClose );
+        iState->OpenFileL( iClipName->Des() );
     }
 }
 

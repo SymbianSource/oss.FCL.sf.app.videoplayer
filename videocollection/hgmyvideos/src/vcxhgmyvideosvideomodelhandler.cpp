@@ -113,7 +113,7 @@ CVcxHgMyVideosVideoModelHandler::CVcxHgMyVideosVideoModelHandler(
       iView( aView ),
       iScroller( aScroller ),
       iCurrentCategoryIndex( KErrNotFound ),
-      iRestoreHighlightPosition( EFalse )
+      iRestoreListPosition( EFalse )
     {
     }
 
@@ -188,19 +188,20 @@ void CVcxHgMyVideosVideoModelHandler::DoModelDeactivate()
     iModel.CollectionClient().SetVideoModelObserver( NULL );
     iScroller.DisableScrollBuffer();
 
-    TRAP_IGNORE( SaveHighlightedItemIdL() );
+    TRAP_IGNORE( SaveFirstListItemIdL() );
 
     IPTVLOGSTRING_LOW_LEVEL( 
         "MPX My Videos UI # CVcxHgMyVideosVideoModelHandler::DoModelDeactivate() - Exit" );    
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::SaveHighlightedItemIdL()
+// CVcxHgMyVideosVideoModelHandler::SaveFirstListItemIdL()
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosVideoModelHandler::SaveHighlightedItemIdL()
+void CVcxHgMyVideosVideoModelHandler::SaveFirstListItemIdL()
     {
-    iHighlightedItemId = iVideoArray->ArrayIndexToMpxItemIdL( Highlight() );
+    iFirstListItemId = iVideoArray->ArrayIndexToMpxItemIdL(
+            iScroller.FirstIndexOnScreen() );
     }
 
 // -----------------------------------------------------------------------------
@@ -216,8 +217,8 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListL( TInt aCategoryIndex )
 
     // If we are re-opening the same video list again, then try 
     // restore the highlight to previous position.
-    aCategoryIndex == iCurrentCategoryIndex ? iRestoreHighlightPosition = ETrue :
-                                              iRestoreHighlightPosition = EFalse;
+    aCategoryIndex == iCurrentCategoryIndex ? iRestoreListPosition = ETrue :
+                                              iRestoreListPosition = EFalse;
     // Removes videos from video list.
     iVideoArray->RemoveVideoList();
          
@@ -1214,15 +1215,16 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
         {
         ResizeScrollerL( videoCount );
 
-        TInt highlight( KErrNotFound );
+        TInt firstItemIndex( KErrNotFound );
 
-        if ( iRestoreHighlightPosition )
+        if ( iRestoreListPosition )
             {
-            highlight = iVideoArray->IndexByMPXItemId( iHighlightedItemId );
+            firstItemIndex = iVideoArray->IndexByMPXItemId( iFirstListItemId );
             }
         
-        highlight != KErrNotFound ? iScroller.SetSelectedIndex( highlight ) :
-                                    iScroller.SetSelectedIndex( 0 );
+        IPTVLOGSTRING2_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::NewVideoListL() Setting list position first index = %d", firstItemIndex );
+        firstItemIndex != KErrNotFound ? iScroller.SetFirstIndexOnScreen( firstItemIndex ) :
+                                    iScroller.SetFirstIndexOnScreen( 0 );
         }
     else
         {

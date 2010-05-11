@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#11 %
+// Version : %version: 12 %
 
 
 //
@@ -92,7 +92,6 @@ CMPXVideoPlaybackViewFileDetails::ClearFileDetails()
 
     iDuration = 0;
     iTvOutConnected   = EFalse;
-    iTvOutPlayAllowed = ETrue;
     iDrmProtected = EFalse;
 
     iVideoHeight = 0;

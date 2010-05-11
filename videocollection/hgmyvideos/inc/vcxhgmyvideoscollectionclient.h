@@ -380,6 +380,11 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          * Variable for storing pending collection command.
          */
         TVcxHgMyVideosCollectionCommand iPendingCommand;
+
+		/**
+		 * Variable for storing current collection level.
+		 */
+        TInt iCollectionLevel;
         
 #if defined(_DEBUG) && IPTV_LOGGING_METHOD != 0
     private:

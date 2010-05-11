@@ -15,7 +15,8 @@
  *
 */
 
-// Version : %version: 17 %
+
+// Version : %version: 18 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -48,7 +49,6 @@ class CMPXVideoPlaybackController;
  */
 NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
 {
-
     public:
         //
         //  Constructors and destructor
@@ -103,6 +103,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
         virtual TInt RetrieveBufferingPercentage();
 
         virtual void ResolveTimeoutError( TInt aError );
+
+        virtual void UpdateSeekableL( CMPXCommand& aCmd );
 
         //
         // Set aspect ratio to mmf controller
@@ -165,9 +167,9 @@ class CMPXNotInitialisedState : public CMPXVideoPlaybackState
         virtual void HandleBackground();
         virtual void HandleForeground();
         virtual void HandlePlay();
+        virtual void UpdateSeekableL( CMPXCommand& aCmd );
 
         inline virtual TMPXVideoPlaybackState GetState();
-
 };
 
 
