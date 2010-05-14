@@ -128,6 +128,7 @@ void VideoListWidget::setSelectionMode(int mode)
 
 void VideoListWidget::longPressedSlot(HbAbstractViewItem *item, const QPointF &point)
 {
+    Q_UNUSED(item);
     Q_UNUSED(point);
     // not stubbed
 }
@@ -139,6 +140,11 @@ void VideoListWidget::panGesture (const QPointF &point)
 }
 
 void VideoListWidget::openItemSlot()
+{
+    // not stubbed
+}
+
+void VideoListWidget::playItemSlot()
 {
     // not stubbed
 }

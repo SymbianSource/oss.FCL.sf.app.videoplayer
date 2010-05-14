@@ -19,12 +19,13 @@
 #define __VIDEOTHUMBNAILDATAPRIVATE_H__
 
 // INCLUDES
-#include <QObject>
-#include <QPointer>
-#include <QCache>
-#include <QIcon>
-#include <QSet>
-#include <QList>
+#include <qobject.h>
+#include <qpointer.h>
+#include <qcache.h>
+#include <qicon.h>
+#include <qset.h>
+#include <qlist.h>
+#include <qhash.h>
 #include <e32const.h>
 #include <mpxitemid.h>
 
@@ -201,11 +202,11 @@ private slots:
      * for some item. Thumbnail data is saved to icon cache.
      *
      * @param tnData: thumbnail
-     * @param internal: internal data contains pointer to the media id used in emitted signal
+     * @param mediaId: pointer to the media id used in emitted signal
      * @param error: possible error code from thumbnail manager ( 0 == ok )
      *
      */
-    void thumbnailReadySlot(QPixmap tnData, void *internal, int error);
+    void thumbnailReadySlot(QPixmap tnData, const TMPXItemId &mediaId, int error);
 
     /**
      * VideoListDataModel signals this slot when the model has been changed.

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 4 %
 
 // INCLUDE FILES
 #include <qpixmap.h>
@@ -24,6 +24,15 @@
 #include "videothumbnailfetcher.h"
 #include "videocollectiontrace.h"
 
+/**
+ * global qHash function required fo creating hash values for TMPXItemId -keys
+ */
+inline uint qHash(TMPXItemId key) 
+{ 
+    QPair<uint, uint> keyPair(key.iId1, key.iId2);
+
+    return qHash(keyPair);
+}
 // ================= MEMBER FUNCTIONS =======================
 //
 
@@ -66,20 +75,21 @@ VideoThumbnailFetcher::~VideoThumbnailFetcher()
 // VideoThumbnailFetcher::addFetch()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::addFetch(const QString fileName, void *internal, int priority)
+void VideoThumbnailFetcher::addFetch(const QString fileName, const TMPXItemId &mediaId, int priority)
 {
     ThumbnailFetchData *fetch = new ThumbnailFetchData;
     fetch->mFileName = fileName;
-    fetch->mInternal = internal;
+    fetch->mMediaId = mediaId;
     fetch->mPriority = priority;
-    mFetchList.append(fetch);
+    fetch->mRequestId = -1;
+    mFetchList.insert(mediaId, fetch);
 }
 
 // -----------------------------------------------------------------------------
 // VideoThumbnailFetcher::continueFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::continueFetching()
+void VideoThumbnailFetcher::continueFetching(bool cancelOngoingFetches)
 {
 	FUNC_LOG;
     mPaused = false;
@@ -88,7 +98,7 @@ void VideoThumbnailFetcher::continueFetching()
     // start thumbnail creation for one thumbnail at a time. 
     if(!mFetchList.isEmpty())
     {
-        startThumbnailFetches();
+        startThumbnailFetches(cancelOngoingFetches);
     }
     else if(!mCreationList.isEmpty())
     {
@@ -106,9 +116,10 @@ void VideoThumbnailFetcher::continueFetching()
 // VideoThumbnailFetcher::startThumbnailFetches()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::startThumbnailFetches()
+void VideoThumbnailFetcher::startThumbnailFetches(bool cancelOngoingFetches)
 {
 	FUNC_LOG;
+	
     if(!mThumbnailManager)
     {
         return;
@@ -117,23 +128,57 @@ void VideoThumbnailFetcher::startThumbnailFetches()
     // Only fetch those thumbnails that are already been created.
     mThumbnailManager->setMode(ThumbnailManager::DoNotCreate);
     
-    // Push all from thumbnail manager.
-    while(!mFetchList.isEmpty())
+    // Cancel ongoing fetches, but only those that are not in the list of new fetches.
+    if(cancelOngoingFetches)
     {
-        ThumbnailFetchData *fetch = mFetchList.takeFirst();
-
-        int requestId = mThumbnailManager->getThumbnail(fetch->mFileName,
-               fetch->mInternal, fetch->mPriority);
-        
-        if(requestId != -1)
+        QHash<TMPXItemId, ThumbnailFetchData*>::iterator iter = mStartedFetchList.begin();
+        while(iter != mStartedFetchList.end())
         {
-            // Request succeed, add to list of started fetches.
-            mStartedFetchList.insert(requestId, fetch);
+            if(!mFetchList.contains(iter.key()))
+            {
+                ThumbnailFetchData *fetch = iter.value();
+                INFO_3("VideoThumbnailFetcher::startThumbnailFetches() canceling - mpx id: (%d, %d), requestId: %d", fetch->mMediaId.iId1, fetch->mMediaId.iId2, fetch->mRequestId);
+                mThumbnailManager->cancelRequest(fetch->mRequestId);
+                iter = mStartedFetchList.erase(iter);
+                delete fetch;
+            }
+            else
+            {
+                iter++;    
+            }
+        }
+    }
+    
+    // Start fetches.
+    QHash<TMPXItemId, ThumbnailFetchData*>::iterator iter = mFetchList.begin();
+    while(iter != mFetchList.end())
+    {
+        ThumbnailFetchData *fetch = iter.value(); 
+        iter = mFetchList.erase(iter);
+
+        if(!mStartedFetchList.contains(fetch->mMediaId))
+        {
+            TMPXItemId *internal = new TMPXItemId(fetch->mMediaId.iId1, fetch->mMediaId.iId2);
+            
+            fetch->mRequestId = mThumbnailManager->getThumbnail(fetch->mFileName,
+                   internal, fetch->mPriority);
+            INFO_3("VideoThumbnailFetcher::startThumbnailFetches() started - mpx id: (%d, %d), requestId: %d", fetch->mMediaId.iId1, fetch->mMediaId.iId2, fetch->mRequestId);
+            if(fetch->mRequestId != -1)
+            {
+                // Request succeed, add to list of started fetches.
+                mStartedFetchList.insert(fetch->mMediaId, fetch);
+            }
+            else
+            {
+                // Request failed, free data.
+                delete internal;
+                delete fetch;
+            }
         }
         else
         {
-            // Request failed, free internal data.
-            delete fetch->mInternal;
+            INFO_3("VideoThumbnailFetcher::startThumbnailFetches() already fetching - mpx id: (%d, %d), requestId: %d", fetch->mMediaId.iId1, fetch->mMediaId.iId2, fetch->mRequestId);
+            // Already fetching this one, fetch data not needed anymore.
             delete fetch;
         }
     }
@@ -173,23 +218,20 @@ void VideoThumbnailFetcher::startThumbnailCreation()
     }
     
     ThumbnailFetchData *fetch = mCreationList.takeAt(indexWithHighestPriority);
+    TMPXItemId *internal = new TMPXItemId(fetch->mMediaId.iId1, fetch->mMediaId.iId2);
     
     // Do request to thumbnail manager.
     int requestId = mThumbnailManager->getThumbnail(fetch->mFileName,
-            fetch->mInternal, fetch->mPriority);
+            internal, fetch->mPriority);
+    INFO_3("VideoThumbnailFetcher::startThumbnailCreation() started - mpx id: (%d, %d), requestId: %d", fetch->mMediaId.iId1, fetch->mMediaId.iId2, requestId);
     
-    // Request failed, free internal data.
+    // Request failed, free data.
     if(requestId == -1)
     {
-        delete fetch->mInternal;
-        delete fetch;
+        delete internal;
     }
-    else 
-    {
-        // Don't keep track of fetches when creating thumbnails, if
-        // it fails with -1 it would be only tried to create again.  
-        delete fetch;
-    }
+    // No need for the fetch data anymore when creating thumbnails.
+    delete fetch;
 }
 
 // -----------------------------------------------------------------------------
@@ -209,21 +251,27 @@ void VideoThumbnailFetcher::pauseFetching()
 void VideoThumbnailFetcher::cancelFetches()
 {
 	FUNC_LOG;
-    // Clear list of started fetches, thumbnail manager has the internal 
-    // pointer.
-    QList<int> keys = mStartedFetchList.keys();
-    for(int i = 0; i < keys.count(); i++ )
+	
+    QHash<TMPXItemId, ThumbnailFetchData*>::const_iterator iter = mStartedFetchList.constBegin();
+    while(iter != mStartedFetchList.constEnd())
     {
-        delete mStartedFetchList.take(keys[i]);
+        mThumbnailManager->cancelRequest(iter.value()->mRequestId);
+        delete *iter;
+        iter++;
     }
+    mStartedFetchList.clear();
     
-    // Merge lists and free data.
-    mFetchList.append(mCreationList);
-    mCreationList.clear();
-    while(!mFetchList.isEmpty())
+    iter = mFetchList.constBegin();
+    while(iter != mFetchList.constEnd())
     {
-        ThumbnailFetchData *fetch = mFetchList.takeFirst();
-        delete fetch->mInternal;
+        delete *iter;
+        iter++;
+    }
+    mFetchList.clear();
+	
+    while(!mCreationList.isEmpty())
+    {
+        ThumbnailFetchData *fetch = mCreationList.takeFirst();
         delete fetch;
     }
 }
@@ -253,35 +301,40 @@ void VideoThumbnailFetcher::enableThumbnailCreation(bool enable)
 //
 void VideoThumbnailFetcher::thumbnailReadySlot(QPixmap tnData, void *internal, int requestId, int error)
 {
-    // Thumbnail has not been generated yet, put it into creation list.
-    if(error == -1 && internal)
+    INFO_2("VideoThumbnailFetcher::thumbnailReadySlot() requestId: %d, error: %d", requestId, error);
+    
+    TMPXItemId mediaId = TMPXItemId::InvalidId();
+    if(internal)
     {
-        if(mStartedFetchList.contains(requestId))
+        mediaId = *(static_cast<TMPXItemId*>(internal));
+    }
+    delete internal;
+
+    // Thumbnail has not been generated yet, put it into creation list.
+    if(error == -1)
+    {   
+        if(mStartedFetchList.contains(mediaId))
         {
-            ThumbnailFetchData *fetch = mStartedFetchList.take(requestId);
+            ThumbnailFetchData *fetch = mStartedFetchList.take(mediaId);
             mCreationList.append(fetch);
         }
-        else
-        {
-            // Fetch data was not found, meaning cancelFetches was called.
-            delete internal;
-        }
+        // If it's not found from started list then cancelFetches has been called and 
+        // there's nothing to do with the failed fetch.
     }
     else
     {
-        // Report that thumbnail was fetched.
-        emit thumbnailReady(tnData, internal, error);
-        
-        if(mStartedFetchList.contains(requestId))
+        // Report that thumbnail was fetched, internal data pointer ownership moves.
+        emit thumbnailReady(tnData, mediaId, error);
+        if(mStartedFetchList.contains(mediaId))
         {
-            delete mStartedFetchList.take(requestId);
+            delete mStartedFetchList.take(mediaId);
         }
     }
     
     // Continue the fetching process.
     if(!mPaused && mStartedFetchList.isEmpty())
     {
-        continueFetching();
+        continueFetching(false); // No need to cancel fetches because there's none.
     }
 }
 

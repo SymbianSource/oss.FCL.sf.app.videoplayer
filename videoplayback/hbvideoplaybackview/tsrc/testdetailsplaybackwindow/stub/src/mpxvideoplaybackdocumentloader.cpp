@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  4 %
 
 
 
@@ -82,7 +82,8 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
 
     QGraphicsWidget *object = NULL;
         
-    if ( name == "detailsViewPlayButton" || name == "detailsAttachButton" ||
+    if ( name == "detailsViewPlayButton" || 
+         name == "detailsAttachButton" ||
          name == "detailsShareButton" )
     {
         object = new HbPushButton();

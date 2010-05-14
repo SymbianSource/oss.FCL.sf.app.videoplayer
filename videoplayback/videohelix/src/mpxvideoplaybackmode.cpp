@@ -15,8 +15,8 @@
  *
 */
 
-// Version : %version: 23 %
 
+// Version : %version: 25 %
 
 
 //
@@ -177,29 +177,31 @@ void CMPXVideoPlaybackMode::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleBackground()"));
 
+    //
+    //  Pause in all cases to remove the different behavior based on the decoder
+    //
+    iVideoPlaybackCtlr->iState->HandlePause();
+
     if ( iVideoPlaybackCtlr->iAppInForeground )
     {
         if ( iVideoPlaybackCtlr->IsAlarm() )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
-            iVideoPlaybackCtlr->iState->HandlePause();
         }
-        else if ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
+                  iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
-            iVideoPlaybackCtlr->iState->HandlePause();
             iVideoPlaybackCtlr->SendHideControlsEventL();
         }
         else if ( iVideoPlaybackCtlr->IsPhoneCall() || iVideoPlaybackCtlr->IsVideoCall() )
         {
             iVideoPlaybackCtlr->iForegroundPause = EFalse;
-            iVideoPlaybackCtlr->iState->HandlePause();
         }
     }
     else
     {
         iVideoPlaybackCtlr->iForegroundPause = EFalse;
-        iVideoPlaybackCtlr->iState->HandlePause();
     }
 }
 
@@ -223,11 +225,6 @@ TBool CMPXVideoPlaybackMode::CanPlayNow()
                   iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
             iVideoPlaybackCtlr->iForegroundPause = ETrue;
-        }
-        else if ( ! iVideoPlaybackCtlr->iAccessoryMonitor->IsTvOutPlaybackAllowed() )
-        {
-            MPX_TRAPD( err,
-                iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoTvOutPlaybackNotAllowed ) );
         }
         else
         {
@@ -277,22 +274,6 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::IsNetworkMode2GL(%d)"), networkMode2g);
 
     return networkMode2g;
-}
-
-
-//  ------------------------------------------------------------------------------------------------
-//    CMPXVideoPlaybackMode::IsTvOutAllowedL()
-//  ------------------------------------------------------------------------------------------------
-TBool CMPXVideoPlaybackMode::IsTvOutAllowedL()
-{
-    MPX_DEBUG(_L("CMPXVideoPlaybackMode::IsTvOutAllowedL()"));
-
-    TBool allowTvOut =
-        iVideoPlaybackCtlr->iDrmHelper->IsTvOutAllowedL( iVideoPlaybackCtlr->iFileHandle );
-
-    MPX_DEBUG(_L("CMPXVideoPlaybackMode::IsTvOutAllowedL(%d)"), allowTvOut);
-
-    return allowTvOut;
 }
 
 //************************************************************************************************//
@@ -412,7 +393,7 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
         else
         {
             MPX_TRAPD( err,
-            		   playAllowed = !( iVideoPlaybackCtlr->IsVoiceCall() && IsNetworkMode2GL() ) );
+                       playAllowed = !( iVideoPlaybackCtlr->IsVoiceCall() && IsNetworkMode2GL() ) );
 
             if ( !playAllowed )
             {
@@ -424,15 +405,6 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
     }
 
     return  playAllowed;
-}
-
-//  ------------------------------------------------------------------------------------------------
-//    CMPXStreamingPlaybackMode::IsTvOutAllowedL()
-//  ------------------------------------------------------------------------------------------------
-TBool CMPXStreamingPlaybackMode::IsTvOutAllowedL()
-{
-    MPX_ENTER_EXIT(_L("CMPXStreamingPlaybackMode::IsTvOutAllowedL(1)"));
-    return ETrue;
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -517,19 +489,10 @@ void CMPXLiveStreamingPlaybackMode::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXLiveStreamingPlaybackMode::HandleBackground()"));
 
-    if ( iVideoPlaybackCtlr->iAppInForeground )
-    {
-        if ( iVideoPlaybackCtlr->IsPhoneCall() ||
-             iVideoPlaybackCtlr->IsVideoCall() ||
-             ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ))
-        {
-            iVideoPlaybackCtlr->iState->HandlePause();
-        }
-    }
-    else
-    {
-        iVideoPlaybackCtlr->iState->HandlePause();
-    }
+    //
+    //  Pause in all cases to remove the different behavior based on the decoder
+    //
+    iVideoPlaybackCtlr->iState->HandlePause();
 }
 
 //************************************************************************************************//

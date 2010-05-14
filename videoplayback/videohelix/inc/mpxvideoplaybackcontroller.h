@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 24 %
+// Version : %version: 25 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -186,7 +186,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         CHWRMLight* GetLightsL();
         void ReleaseLights();
 
-        void SendTvOutEventL( TBool aConnected, TBool aPlaybackAllowed );
+        void SendTvOutEventL( TBool aConnected );
 
     protected:
 

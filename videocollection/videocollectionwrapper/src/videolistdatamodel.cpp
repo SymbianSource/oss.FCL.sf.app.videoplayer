@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 51 %
+// Version : %version: 52 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -262,9 +262,7 @@ QString VideoListDataModel::prepareDetailRow(int index) const
     }
     else //video
     {
-        const QString duration = prepareShortLengthString( index );
-
-        retString = doDetailRow(index, duration);
+        retString = doDetailRow(index);
     }
     return retString; 
 }
@@ -305,51 +303,72 @@ QString VideoListDataModel::prepareSizeString(int index) const
 }
 
 // -----------------------------------------------------------------------------
-// VideoListDataModel::prepareShortLengthString()
-// -----------------------------------------------------------------------------
-//
-QString VideoListDataModel::prepareShortLengthString(int index) const
-{
-    quint32 total = d_ptr->getVideodurationFromIndex(index);
-    return VideoCollectionUtils::instance().prepareShortLengthString(total);
-}
-
-// -----------------------------------------------------------------------------
 // VideoListDataModel::doDetailRow()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::doDetailRow(int index, const QString duration) const
+QString VideoListDataModel::doDetailRow(int index) const
 {
-    QString detailStr("");
+	QString detailStr("");
 	
     quint32 size = d_ptr->getVideoSizeFromIndex(index);
+    
+    quint32 total = d_ptr->getVideodurationFromIndex(index);
 	
-	const int videoSizeGB( 0x40000000 );
+    
+	const int secondsInMinute( 60 );
+    const int secondsInHour( 3600 );
+
+    const int videoSizeGB( 0x40000000 );
 	const int videoSizeHalfGB( 0x20000000 );
 	const int videoSizeMB( 0x100000 );
 	const int videoSizeHalfMB( 0x80000 );
 	const int videoSizeKB( 0x400 );
 
 	quint32 dispSize = 0;
+
+    int hour = total / secondsInHour;
+    total = total % secondsInHour;
+    int minutes = total / secondsInMinute;
+    total = total % secondsInMinute;
+    int second = total;
 	
-	if ( size >= videoSizeGB )
+    QString hrs(QString::number(hour));
+    if(hour < 10)
+    {
+    	hrs.prepend(QString::number(0));
+    }
+    QString mins(QString::number(minutes));
+    if(minutes < 10)
+    {
+    	mins.prepend(QString::number(0));
+    }
+    QString secs(QString::number(second));
+    if(second < 10)
+    {
+    	secs.prepend(QString::number(0));
+    }
+	
+    const char* loc = "txt_videos_dblist_captured_val_l1_l2_gb";
+
+    if ( size >= videoSizeGB )
 	{
 		dispSize  = size + videoSizeHalfGB;
 		dispSize /= videoSizeGB;
-		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_gb").arg(duration).arg(QString::number(dispSize));
 	}
 	else if ( size >= videoSizeMB )
 	{
 		dispSize  = size + videoSizeHalfMB;
 		dispSize /= videoSizeMB;
-		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_mb").arg(duration).arg(QString::number(dispSize));
+		loc = "txt_videos_dblist_captured_val_l1_l2_mb";
 	}
 	else
 	{
 		dispSize  = size + videoSizeKB;
 		dispSize /= videoSizeKB;
-		detailStr = hbTrId("txt_videos_dblist_captured_val_l1_l2_kb").arg(duration).arg(QString::number(dispSize));
+		loc = "txt_videos_dblist_captured_val_l1_l2_kb";
 	}
+	
+    detailStr = hbTrId(loc).arg(hrs).arg(mins).arg(secs).arg(QString::number(dispSize));
 	
 	return detailStr;
 }

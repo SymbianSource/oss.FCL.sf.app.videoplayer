@@ -15,9 +15,13 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  2 %
+
+
 
 #include <qgraphicswidget>
+
+#include <hbframedrawer.h>
 
 #include "mpxvideo_debug.h"
 #include "hbpushbutton.h"
@@ -30,6 +34,7 @@ HbPushButton::HbPushButton()
     : mVisible( false )
     , mEnabled( false )
     , mSelected( false )
+    , mFrameDrawer( NULL )
 {
     MPX_ENTER_EXIT(_L("HbPushButton::HbPushButton()"));
 
@@ -149,6 +154,28 @@ void HbPushButton::release()
     MPX_DEBUG(_L("HbPushButton::release") );
 
     emit released();
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbPushButton::frameBackground
+// -------------------------------------------------------------------------------------------------
+//
+HbFrameDrawer* HbPushButton::frameBackground()
+{
+    MPX_DEBUG(_L("HbPushButton::frameBackground") );
+
+    return mFrameDrawer;
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbPushButton::setFrameBackground
+// -------------------------------------------------------------------------------------------------
+//
+void HbPushButton::setFrameBackground( HbFrameDrawer *drawer )
+{
+    MPX_DEBUG(_L("HbPushButton::setFrameBackground") );
+
+    mFrameDrawer = drawer;
 }
 
 // End of file

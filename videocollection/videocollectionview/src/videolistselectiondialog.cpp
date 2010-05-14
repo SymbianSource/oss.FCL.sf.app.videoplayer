@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 22 %
+// Version : %version: 25 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -26,6 +26,7 @@
 #include <hbabstractitemview.h>
 #include <hbinputdialog.h>
 #include <vcxmyvideosdefs.h>
+#include <hbstyleloader.h>
 
 #include "videocollectionuiloader.h"
 #include "videolistwidget.h"
@@ -58,6 +59,7 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
     , mHeading( 0 )
     , mCheckboxContainer( 0 )
     , mItemCount( 0 )
+    , mCheckBoxText( 0 )
     , mCheckBox( 0 )
     , mListContainer( 0 )
     , mForcedCheck( false )
@@ -67,6 +69,9 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
     , mSecondaryAction( 0 )
 {
 	FUNC_LOG;
+    
+	HbStyleLoader::registerFilePath( ":/style/hbdialog.css" );
+
     setDismissPolicy(HbDialog::NoDismiss);
     setTimeout(HbDialog::NoTimeout);    
 
@@ -84,6 +89,8 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
             delete mListWidget;
             mListWidget = 0;
         }
+        // disable list related animations to make dialog faster 
+        mListWidget->setEnabledAnimations(HbAbstractItemView::None);
     }
 }
 
@@ -94,7 +101,9 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
 VideoListSelectionDialog::~VideoListSelectionDialog() 
 {
 	FUNC_LOG;
+	HbStyleLoader::unregisterFilePath( ":/style/hbdialog.css" );
     delete mListWidget;
+    mListWidget = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -198,6 +207,12 @@ bool VideoListSelectionDialog::initDialog()
     {
         mCheckBox = mUiLoader->findWidget<HbCheckBox >(DOCML_NAME_MARKALL);
     }
+
+    if(!mCheckBoxText)
+    {
+        mCheckBoxText = mUiLoader->findWidget<HbLabel >(DOCML_NAME_LBL_MARKALL);
+    }
+
     // HbDialog connects actions to finished signal by default. 
     if(!mPrimaryAction)
     {
@@ -209,9 +224,10 @@ bool VideoListSelectionDialog::initDialog()
         mSecondaryAction = new HbAction(hbTrId("txt_common_button_cancel"));
         addAction(mSecondaryAction);
     }
-    if(!mListContainer || !mHeading || !mCheckBox)
+    
+    if(!mListContainer || !mHeading || !mCheckBox || !mCheckBoxText)
     {
-        ERROR(-1, "VideoListSelectionDialog::initDialog() !mListContainer || !mHeading || !mCheckBox");
+        ERROR(-1, "VideoListSelectionDialog::initDialog() !mListContainer || !mHeading || !mCheckBox || !mCheckBoxText");
         return false;
     }
     return true;  
@@ -331,18 +347,56 @@ void VideoListSelectionDialog::finishedSlot(HbAction *action)
     QString albumName("");
     if( mTypeOfSelection == ESelectCollection )
     {
+        mTypeOfSelection = EAddToCollection;
         if( mSelectedAlbumId == TMPXItemId::InvalidId())
         {
-            albumName = queryNewAlbumSelected();
-            if(mSelectedAlbumId == TMPXItemId::InvalidId())
-            {
-                // user canceled new album creation
-                return;
-            }           
+            QString label(hbTrId("txt_videos_title_enter_name"));
+            HbInputDialog *dialog = new HbInputDialog();
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->getText(label, this, SLOT(newAlbumNameDialogFinished(HbAction *)), 
+                    hbTrId("txt_videos_dialog_entry_new_collection"));
        }
-       mTypeOfSelection = EAddToCollection;
+       else
+       {
+           finalize();
+       }
     }
+    else
+    {
+        finalize();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// newAlbumNameDialogFinished
+// ---------------------------------------------------------------------------
+//
+void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
+{
+    FUNC_LOG;
+    Q_UNUSED(action);
     
+    HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
+    
+    QVariant variant = dialog->value();
+    
+    if(dialog->actions().first() == action && variant.isValid())
+    {
+        QString text = mModel->resolveAlbumName(variant.toString());
+        if(text.length())
+        {
+            mSelectedAlbumId = mModel->addNewAlbum(text);
+            finalize(text);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// finalize
+// ---------------------------------------------------------------------------
+//
+void VideoListSelectionDialog::finalize(QString albumName)
+{
     // Must be checked again if type was ESelectCollection
     if(mTypeOfSelection == EAddToCollection)
     {  
@@ -624,26 +678,5 @@ QString VideoListSelectionDialog::getSelectedName()
     }
     
     return name;
-}
-
-// ---------------------------------------------------------------------------
-// queryNewAlbumSelected
-// ---------------------------------------------------------------------------
-//
-QString VideoListSelectionDialog::queryNewAlbumSelected()
-{
-	FUNC_LOG;
-    mSelectedAlbumId = TMPXItemId::InvalidId();
-    bool ok = false;
-    QString label(hbTrId("txt_videos_title_enter_name"));
-    QString text("");
-    text = HbInputDialog::getText(label, hbTrId("txt_videos_dialog_entry_new_collection"), &ok);
-    if (ok && text.length())
-    {
-       // check for duplicate album name and add new album
-        text = mModel->resolveAlbumName(text);
-        mSelectedAlbumId = mModel->addNewAlbum(text);
-    }
-    return text;
 }
 

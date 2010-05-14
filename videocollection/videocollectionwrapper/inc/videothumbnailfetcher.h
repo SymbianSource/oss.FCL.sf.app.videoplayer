@@ -23,7 +23,7 @@
 #include <qicon.h>
 #include <qlist.h>
 #include <qhash.h>
-
+#include <mpxitemid.h>
 #include <thumbnailmanager_qt.h>
 
 // FORWARD DECLARATIONS
@@ -55,11 +55,11 @@ public:
      * when fetch is complete. 
      * 
      * @param fileName path to the media.
-     * @param internal data identifying the media.
+     * @param mediaId mpx id for the media.
      * @param priority priority for the fetch.
      * 
      */
-    void addFetch(const QString fileName, void *internal, int priority);    
+    void addFetch(const QString fileName, const TMPXItemId &mediaId, int priority);    
     
     /**
      * Empties fetch list. This does not cancel the possible ongoing fetch on
@@ -86,9 +86,12 @@ public:
      * started without create thumbnail flag. If there's not any of those, 
      * starts creating thumbnails for fetches that have no thumbnail yet. 
      * Signal allThumbnailsFetched is emitted if there's nothing to do.
-     * 
+     *
+     * @param cancelOngoingFetches if true then all ongoing thumbnail fetches
+     *                             will be canceled.
+     *                             
      */
-    void continueFetching();
+    void continueFetching(bool cancelOngoingFetches);
     
     /**
      * Enables or disables the thumbnail creation for videos that do  
@@ -104,10 +107,10 @@ private:
     class ThumbnailFetchData
     {
         public:         
-        ThumbnailFetchData() { mInternal = 0; };
             QString mFileName;
             int mPriority;
-            void *mInternal;
+            TMPXItemId mMediaId;
+            int mRequestId;
     };
     
 protected:
@@ -117,9 +120,12 @@ protected:
      * disabled. Thumbnail manager signals to thumbnailReadySlot. If thumbnail 
      * fetch fails with -1 the fetch is added to thumbnail creation list, 
      * otherwise signal thumbnailReady signal emitted.
+     *
+     * @param cancelOngoingFetches if true then all ongoing thumbnail fetches
+     *                             will be canceled.
      * 
      */
-    void startThumbnailFetches();
+    void startThumbnailFetches(bool cancelOngoingFetches);
     
     /**
      * Starts fetching thumbnail with highest priority from creation list. 
@@ -136,11 +142,11 @@ signals:
      * thumbnail fetch process is complete.
      *
      * @param tnData thumbnail
-     * @param internal internal data to identify the request
+     * @param mediaId mpx id for the media. 
      * @param error possible error code from thumbnail manager ( 0 == ok )
      * 
      */
-    void thumbnailReady(QPixmap tnData, void *internal, int error);
+    void thumbnailReady(QPixmap tnData, const TMPXItemId &mediaId, int error);
 
     /**
      * Signaled when all the fetches have been done.
@@ -167,35 +173,38 @@ private: // Data
     /**
      * Thumbnail manager object.
      */
-    ThumbnailManager                *mThumbnailManager;
+    ThumbnailManager                        *mThumbnailManager;
     
     /**
      * List containing not started thumbnail fetches.
+     * 
+     * key is mpx id.
+     * value is thumbnail fetch data.  
      */
-    QList<ThumbnailFetchData *>     mFetchList;
+    QHash<TMPXItemId, ThumbnailFetchData *> mFetchList;
     
     /**
      * Hash containing ongoing thumbnail fetches.
      * 
-     * key is thumbnail request id.
-     * value is thumbnail fetch data.  
+     * key is mpx id.
+     * value is thumbnail fetch data.
      */
-    QHash<int, ThumbnailFetchData *> mStartedFetchList;
+    QHash<TMPXItemId, ThumbnailFetchData *> mStartedFetchList;
     
     /**
      * List containing thumbnails that have not been created yet.
      */
-    QList<ThumbnailFetchData *>      mCreationList;    
+    QList<ThumbnailFetchData *>             mCreationList;
     
     /**
      * Flag indicating if fetching has been paused.
      */
-    bool                             mPaused;
+    bool                                    mPaused;
     
     /**
      * Flag indicating if thumbnail creation is enabled.
      */
-    bool                             mTbnCreationEnabled;
+    bool                                    mTbnCreationEnabled;
 };
 
 #endif // __VIDEOTHUMBNAILDATAFETCHER_H__

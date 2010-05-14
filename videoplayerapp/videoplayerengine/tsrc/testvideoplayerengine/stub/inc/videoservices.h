@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: da1mmcf#4 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -117,6 +117,11 @@ public:
      * Reference count.
      */
     static int mReferenceCount;
+
+    /*
+     * indicate fetch service and attach operation has been selected
+     */
+    bool         mFetchSelected;
 
 };
 

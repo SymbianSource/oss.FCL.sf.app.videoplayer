@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#34 %
+// Version : %version: da1mmcf#37 %
 
 
 
@@ -37,6 +37,7 @@
 #include <hbvolumesliderpopup.h>
 #include <hbtransparentwindow.h>
 #include <hbiconanimationmanager.h>
+#include <shareui.h>
 
 #include "mpxvideoviewwrapper.h"
 #include "hbvideobaseplaybackview.h"
@@ -268,7 +269,7 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
 
     if ( details->mTvOutConnected )
     {
-        handleEvent( EMPXControlCmdTvOutConnected, details->mTvOutPlayAllowed );
+        handleEvent( EMPXControlCmdTvOutConnected );
     }
 
     //
@@ -371,14 +372,14 @@ void QMPXVideoPlaybackControlsController::handleEvent(
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutConnected]"));
 
-            handleTvOutEvent( true, event, value );
+            handleTvOutEvent( true, event );
             break;
         }
         case EMPXControlCmdTvOutDisconnected:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdTvOutDisConnected]"));
 
-            handleTvOutEvent( false, event, value );
+            handleTvOutEvent( false, event );
             break;
         }
         case EMPXControlCmdHandleErrors:
@@ -1072,7 +1073,7 @@ bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackControlsController::handleTvOutEvent(
-        bool connected, TMPXVideoPlaybackControlCommandIds event, int value )
+        bool connected, TMPXVideoPlaybackControlCommandIds event )
 {
     Q_UNUSED( event );
 
@@ -1085,11 +1086,6 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
     if ( mFileDetails->mTvOutConnected )
     {
         generateThumbNail();
-        mFileDetails->mTvOutPlayAllowed = value;
-    }
-    else
-    {
-        mFileDetails->mTvOutPlayAllowed = ETrue;
     }
 
     //
@@ -1366,18 +1362,42 @@ bool QMPXVideoPlaybackControlsController::isAttachOperation()
 //
 void QMPXVideoPlaybackControlsController::attachVideo()
 {
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"),
+                   _L("file = %s"), mFileDetails->mClipName.data() );
     
-	//
-	// close and release resources
-	//
-    handleCommand( EMPXPbvCmdClose );
+    //
+    // close playback view
+    //
+    mView->closePlaybackView();
 	
-	//
-	// emit signal to launch videoservices itemSelected() slot
-	//
+    //
+    // emit signal to launch videoservices itemSelected() slot
+    //
     emit( attachVideoPath( mFileDetails->mClipName ) );
     
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::sendVideo()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::sendVideo()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::sendVideo()"),
+                   _L("file = %s"), mFileDetails->mClipName.data() );
+    
+    //
+    // pause playback
+    //
+    handleCommand( EMPXPbvCmdPause );
+    
+    // 
+    // send video to shareUI
+    //
+    ShareUi dlg;
+    QStringList fileList;
+    fileList.append( mFileDetails->mClipName );
+    dlg.send( fileList, true );   
 }
 
 // End of File

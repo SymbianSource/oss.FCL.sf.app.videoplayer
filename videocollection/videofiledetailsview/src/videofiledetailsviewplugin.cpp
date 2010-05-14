@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 69 %
+// Version : %version: 73 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -124,7 +124,6 @@ void VideoFileDetailsViewPlugin::createView()
 	if (!mModel)
 		{
 	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() get model failed.");
-		// TODO need to throw exception instead?
 		return;
 		}
 
@@ -204,6 +203,16 @@ void VideoFileDetailsViewPlugin::createView()
 
 	connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap,void*,int,int)),
 			this, SLOT(thumbnailReadySlot(QPixmap,void*,int,int)));
+	
+    HbListWidget* list = findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET);
+    if(!list)
+    {
+        ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details list widget.");
+        return;
+    }
+    
+    list->setEnabledAnimations(HbAbstractItemView::None);
+
 }
 
 // ---------------------------------------------------------------------------
@@ -534,9 +543,9 @@ void VideoFileDetailsViewPlugin::startPlaybackSlot()
 void VideoFileDetailsViewPlugin::sendVideoSlot()
 {
 	FUNC_LOG;
-	HbMessageBox::information(tr("Not implemented yet"));
+//	HbMessageBox::information(tr("Not implemented yet"));
 	
-/*    if(mVideoId != TMPXItemId::InvalidId())
+    if(mVideoId != TMPXItemId::InvalidId())
     {
         ShareUi dialog;
         QModelIndex modelIndex = mModel->indexOfId(mVideoId);
@@ -547,7 +556,7 @@ void VideoFileDetailsViewPlugin::sendVideoSlot()
             fileList.append(variant.toString());
             dialog.send(fileList, true);
         }
-    }*/
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -567,11 +576,26 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
             QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
 			   variant.toString());
 
-            if (HbMessageBox::question(text))
-            {
-                deleteItem(modelIndex);
-            }
+            HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
+            messageBox->setAttribute(Qt::WA_DeleteOnClose);
+            messageBox->open(this, SLOT(deleteVideoDialogFinished(HbAction *)));
+            
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// deleteVideoDialogFinished
+// ---------------------------------------------------------------------------
+//
+void VideoFileDetailsViewPlugin::deleteVideoDialogFinished(HbAction *action)
+{
+    FUNC_LOG;
+    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
+    QModelIndex modelIndex = mModel->indexOfId(mVideoId);
+    if(action == dlg->actions().at(0) && modelIndex.isValid()) 
+    {
+        deleteItem(modelIndex);
     }
 }
 

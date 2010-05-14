@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 //
 //  INCLUDE FILES
@@ -84,7 +84,6 @@ CMPXVideoAccessoryObserver::CMPXVideoAccessoryObserver( CMPXVideoPlaybackControl
     : CActive( CActive::EPriorityStandard )
     , iController( aController )
     , iTvOutConnected( EFalse )
-    , iTvOutPlaybackAllowed( ETrue )
 {
     CActiveScheduler::Add( this );
 }
@@ -180,19 +179,6 @@ TBool CMPXVideoAccessoryObserver::UpdateTvOutStatusL()
     if ( iTvOutConnected != tvOutConnected )
     {
         iTvOutConnected = tvOutConnected;
-
-        if ( iTvOutConnected ) 
-        {
-            //
-            //  Check the playablility of the clip
-            //
-            iTvOutPlaybackAllowed = iController->iPlaybackMode->IsTvOutAllowedL();
-        }
-        else
-        {
-            iTvOutPlaybackAllowed = ETrue;
-        }
-
         statusChanged   = ETrue;
     }
 
@@ -273,18 +259,6 @@ TBool CMPXVideoAccessoryObserver::IsTvOutConnected()
     MPX_DEBUG(_L("CMPXVideoAccessoryObserver::IsTvOutConnected(%d)"), iTvOutConnected);
 
     return iTvOutConnected;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoAccessoryObserver::IsTvOutPlaybackAllowed
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMPXVideoAccessoryObserver::IsTvOutPlaybackAllowed()
-{
-    TBool playAllowed = ( ! iTvOutConnected || iTvOutPlaybackAllowed );
-    MPX_DEBUG(_L("CMPXVideoAccessoryObserver::IsTvOutPlaybackAllowed(%d)"), playAllowed);
-
-    return playAllowed;
 }
 
 //  End of File

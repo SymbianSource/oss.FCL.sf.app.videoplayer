@@ -106,7 +106,7 @@ public slots: // from QViewPlugin
 
     /**
      * Plugin user can notify orientation changes by connecting into this slot
-     * ti it's signal. In normal cases, view handles orientation chages itself.
+     * to it's signal. In normal cases, view handles orientation chages itself.
      *
      * @param orientation new orientation
      */
@@ -117,6 +117,11 @@ public slots: // from QViewPlugin
      *
      */
     void back();
+    
+    /**
+     * Signaled by HbMessageBox when it's closed.
+     */
+    void deleteVideoDialogFinished(HbAction *action);
 
 private slots:
 

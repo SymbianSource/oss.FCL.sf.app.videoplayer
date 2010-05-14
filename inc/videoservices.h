@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: ou1cpsw#3 %
+
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
 
@@ -56,6 +58,14 @@ public:
      *
      */
     QString contextTitle() const;
+    
+    /**
+     * Returns sort type defined by the service client.
+     * 
+     * @param None.
+     * @return int.
+     */
+    int sortRole() const;
 
 	/*
 	 * Enum reflecting the services provided 
@@ -185,6 +195,14 @@ private:
 	friend class VideoServiceView;
     
     friend class VideoServiceBrowse;
+    
+public:
+    
+    /*
+     * indicate fetch service and attach operation has been selected
+     */
+    bool         mFetchSelected;
+    
     };
 
 #endif //__VIDEOSERVICES_H__

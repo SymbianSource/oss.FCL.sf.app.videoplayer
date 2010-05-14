@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #ifndef __TESTDETAILSPLAYBACKWINDOW_H__
@@ -57,6 +57,7 @@ private slots:
     void testMousePressEvent();
     void testMouseReleaseEvent();
     void testAttach();
+    void testSend();
 
 signals:
     void commandSignal();

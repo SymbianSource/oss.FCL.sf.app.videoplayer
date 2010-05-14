@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -78,7 +78,7 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
         
         TInt SetDefaultAspectRatioL( QMPXVideoPlaybackViewFileDetails* aFileDetails, 
-                                     TReal aDisplayAspectRatio );
+                                     TReal32 aDisplayAspectRatio );
 
         void UpdateVideoRectL(  TRect aRect, TBool transitionEffect  );
 

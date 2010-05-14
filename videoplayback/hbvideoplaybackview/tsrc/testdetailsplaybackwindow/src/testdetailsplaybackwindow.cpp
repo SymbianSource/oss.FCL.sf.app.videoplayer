@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  6 %
 
 
 #include <qdebug>
@@ -203,7 +203,6 @@ void TestDetailsPlaybackWindow::testAttach()
     //
     // verify the controller attachVideo() slot has been called
     //
-    QVERIFY( mController->mCommand == EMPXPbvCmdClose );
     QVERIFY( mController->mAttachVideoDone == true );
 
     //
@@ -218,5 +217,46 @@ void TestDetailsPlaybackWindow::testAttach()
         
 }
 
+// ---------------------------------------------------------------------------
+// testSend
+// ---------------------------------------------------------------------------
+//
+void TestDetailsPlaybackWindow::testSend()
+{
+    MPX_ENTER_EXIT(
+            _L("TestDetailsPlaybackWindow::testSend()"));
+
+    //
+    // test when 'share' operation is enabled
+    //
+    init( false );
+    
+    //
+    // connect signal/slot
+    //
+    connect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
+    
+    //
+    // emit signal
+    //
+    emit commandSignal();     
+    
+    //
+    // verify the controller sendVideo() slot has been called
+    //
+    QVERIFY( mController->mCommand == EMPXPbvCmdPause );
+    QVERIFY( mController->mSendVideoDone == true );
+
+    //
+    // disconnect signal/slot
+    //
+    disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
+
+    //
+    // clean up
+    //
+    cleanup();
+        
+}
 
 // End of file

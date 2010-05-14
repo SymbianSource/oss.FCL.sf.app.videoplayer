@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 26 %
 
 // INCLUDE FILES
 #include "videocollectiontrace.h"
@@ -66,7 +66,7 @@ VideoThumbnailData::~VideoThumbnailData()
 //
 bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
 {
-	FUNC_LOG;
+	INFO_2("VideoThumbnailData::removeThumbnail() mediaId (%d, %d)", mediaId.iId1, mediaId.iId2);
     return d_ptr->removeThumbnail(mediaId);
 }
 
@@ -76,7 +76,7 @@ bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
 //
 const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 {
-	FUNC_LOG;
+	INFO_2("VideoThumbnailData::getThumbnail() mediaId (%d, %d)", mediaId.iId1, mediaId.iId2);
     return d_ptr->getThumbnail(mediaId);
 }
 
@@ -86,7 +86,7 @@ const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 //
 void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
-	FUNC_LOG;
+	INFO_2("VideoThumbnailData::startBackgroundFetching() model: 0x%x, fetchIndex: %d", model, fetchIndex);
     d_ptr->startBackgroundFetching(model, fetchIndex);
 }
 
@@ -96,7 +96,7 @@ void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *mode
 //
 void VideoThumbnailData::enableBackgroundFetching(bool enable)
 {
-	FUNC_LOG;
+    INFO_1("VideoThumbnailData::enableBackgroundFetching() enable: %d", enable);
     d_ptr->enableBackgroundFetching(enable);
 }
 
@@ -106,7 +106,7 @@ void VideoThumbnailData::enableBackgroundFetching(bool enable)
 //
 void VideoThumbnailData::enableThumbnailCreation(bool enable)
 {
-	FUNC_LOG;
+    INFO_1("VideoThumbnailData::enableThumbnailCreation() enable: %d", enable);
     d_ptr->enableThumbnailCreation(enable);
 }
 

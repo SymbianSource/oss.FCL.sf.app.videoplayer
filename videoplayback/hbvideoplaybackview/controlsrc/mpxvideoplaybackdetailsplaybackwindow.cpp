@@ -11,19 +11,16 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QMPXVideoPlaybackProgressBar
+* Description:  Implementation of QMPXVideoPlaybackDetailsPlaybackWindow
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  16 %
 
 
 
-#include <QFileInfo>
 #include <QGraphicsSceneMouseEvent>
 
-
-#include <hblabel.h>
 #include <hbframeitem.h>
 #include <hbpushbutton.h>
 #include <hbframedrawer.h>
@@ -82,18 +79,21 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
 
         connect( mPlayButton, SIGNAL( released() ), this, SLOT( playPause() ) );
 
-        QGraphicsItem *widget1 = mPlayButton->primitive( HbStyle::P_PushButton_background );
-        widget1->setVisible( false );
-
         //
         // Set framedrawer for semi transparent background
         //
-        HbFrameItem *frameItem = new HbFrameItem ( mPlayButton );
-        frameItem->setGeometry( mPlayButton->boundingRect() );
-        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
-        frameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
-        frameItem->frameDrawer().setFillWholeRect( true );
-        
+        HbFrameDrawer *drawer = mPlayButton->frameBackground();
+
+        if( drawer == NULL )
+        {
+            drawer = new HbFrameDrawer();
+        }
+
+        drawer->setFillWholeRect( true );
+        drawer->setFrameType( HbFrameDrawer::NinePieces );
+        drawer->setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        mPlayButton->setFrameBackground( drawer );
+
         //
         // create 'attach' button and connect corresponding signal/slot
         //
@@ -102,11 +102,11 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         connect( attachButton, SIGNAL( released() ), mController, SLOT( attachVideo() ) );
 
         //
-        // create 'share' button
-        //     signal and slot to be created when requirement for 'share' operation is confirmed
-		//
+        // create 'share' button and connect corresponding signal/slot
+        //
         QGraphicsWidget *detailsShareWidget = loader->findWidget( QString( "detailsShareButton" ) );
         HbPushButton *shareButton = qobject_cast<HbPushButton*>( detailsShareWidget );
+        connect( shareButton, SIGNAL( released() ), mController, SLOT( sendVideo() ) );
         
         //
         // by default in xml layout, attachButton is not visible while shareButton is visible.
@@ -117,7 +117,17 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
             attachButton->setVisible( true );
             shareButton->setVisible( false );
         }    
-        
+        else
+        {            
+            //
+            // dim "share" button for streaming
+            //
+            if ( mController->fileDetails()->mPlaybackMode == EMPXVideoStreaming ||
+                 mController->fileDetails()->mPlaybackMode == EMPXVideoLiveStreaming )
+            {
+                shareButton->setEnabled( false );                  
+            }            
+        }
     }
 
     updateState( mController->state() );
@@ -176,9 +186,9 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent( QGraphicsSceneMo
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent"));
 
-    Q_UNUSED( event );
-
     playPause();
+
+    event->accept();
 }
 
 //End of file

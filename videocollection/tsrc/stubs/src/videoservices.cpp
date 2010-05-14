@@ -67,7 +67,8 @@ QVideoPlayerEngine* VideoServices::engine()
 VideoServices::VideoServices(QVideoPlayerEngine* engine):
     mReferenceCount(0),
     mEngine(engine),
-    mCurrentService(VideoServices::ENoService)
+    mCurrentService(VideoServices::ENoService),
+    mSortRole(0)
 {
     mServiceUriFetch = new VideoServiceUriFetch(this);
     mServiceBrowse = new VideoServiceBrowse(this);
@@ -100,10 +101,17 @@ void VideoServices::setCurrentService(VideoServices::TVideoService service)
 {
 	mCurrentService = service;
 }
+
 QString VideoServices::contextTitle() const
 {
     // not stubbed
     return QString();
+}
+
+int VideoServices::sortRole() const
+{
+    // not stubbed
+    return mSortRole;
 }
 
 void VideoServices::itemSelected(const QString& item)

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 #include <hbmenu.h>
@@ -70,7 +70,7 @@ QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
 //
 QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl"));
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl"));
 
     disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
     disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );

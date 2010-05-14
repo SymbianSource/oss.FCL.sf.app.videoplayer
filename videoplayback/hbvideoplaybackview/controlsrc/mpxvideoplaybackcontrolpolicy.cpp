@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#12 %
+// Version : %version: da1mmcf#13 %
 
 
 
@@ -91,7 +91,7 @@ QMPXVideoPlaybackControlPolicy::setControlProperties( TMPXVideoPlaybackControls 
         case EMPXControlBar:
         {
             //
-            // We don't delete ButtonBar and Progress Bar from the controlsList 
+            // We don't delete Tool Bar and Progress Bar from the controlsList 
             // to update information all the time though it's not visible or activated
             // So just hide these if it is details view
             //

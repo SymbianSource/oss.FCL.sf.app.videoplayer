@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  1 %
 
 
 
@@ -31,7 +31,6 @@
 #include "mpxvideoplaybackviewfiledetails.h"
 
 // FORWARD DECLARATIONS
-class QMPXVideoPlaybackDocumentLoader;
 
 
 // DATA TYPES
@@ -50,6 +49,7 @@ enum TPlaybackViewMode
 };
 
 // CLASS DECLARATION
+class HbVideoBasePlaybackView;
 
 class QMPXVideoPlaybackControlsController : public QObject
 {
@@ -85,12 +85,12 @@ class QMPXVideoPlaybackControlsController : public QObject
         */
         inline TMPXPlaybackState state();
 
+        inline HbVideoBasePlaybackView* view();
+
         /**
         * Return file details
         */
         inline QMPXVideoPlaybackViewFileDetails* fileDetails();
-
-        inline QMPXVideoPlaybackDocumentLoader* layoutLoader();
 
         TPlaybackViewMode viewMode();
 
@@ -100,10 +100,11 @@ class QMPXVideoPlaybackControlsController : public QObject
         
     private slots:
         void attachVideo();
+        void sendVideo();
                 
     public:
         QMPXVideoPlaybackViewFileDetails          *mFileDetails;
-        QMPXVideoPlaybackDocumentLoader           *mLoader;
+        HbVideoBasePlaybackView                   *mView;
 
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
@@ -112,6 +113,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         int                                        mCommandValue;
         bool                                       mIsAttachOperation;
         bool                                       mAttachVideoDone;
+        bool                                       mSendVideoDone;
 };
 
 // INLINE METHODS
@@ -136,16 +138,6 @@ QMPXVideoPlaybackViewFileDetails* QMPXVideoPlaybackControlsController::fileDetai
 }
 
 // -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::layoutLoader
-// -------------------------------------------------------------------------------------------------
-//
-inline
-QMPXVideoPlaybackDocumentLoader* QMPXVideoPlaybackControlsController::layoutLoader()
-{
-    return mLoader;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   QMPXVideoPlaybackControlsController::viewMode
 // -------------------------------------------------------------------------------------------------
 //
@@ -153,6 +145,16 @@ inline
 TPlaybackViewMode QMPXVideoPlaybackControlsController::viewMode()
 {
     return mViewMode;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   QMPXVideoPlaybackControlsController::view
+// -------------------------------------------------------------------------------------------------
+//
+inline
+HbVideoBasePlaybackView* QMPXVideoPlaybackControlsController::view()
+{
+    return mView;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

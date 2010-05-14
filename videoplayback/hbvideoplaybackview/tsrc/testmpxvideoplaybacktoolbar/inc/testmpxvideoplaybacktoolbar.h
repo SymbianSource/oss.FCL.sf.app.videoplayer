@@ -11,23 +11,23 @@
 *
 * Contributors:
 *
-* Description:   tester for methods in TestMPXVideoPlaybackButtonBar
+* Description:   tester for methods in TestMPXVideoPlaybackToolBar
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  1 %
 
-#ifndef __TESTMPXVIDEOPLAYBACKBUTTONBAR_H__
-#define __TESTMPXVIDEOPLAYBACKBUTTONBAR_H__
+#ifndef __TESTMPXVIDEOPLAYBACKTOOLBAR_H__
+#define __TESTMPXVIDEOPLAYBACKTOOLBAR_H__
 
 
 // INCLUDES
 #include <QtTest/QtTest>
 
-class QMPXVideoPlaybackButtonBar;
+class QMPXVideoPlaybackToolBar;
 class QMPXVideoPlaybackControlsController;
 
-class TestMPXVideoPlaybackButtonBar : public QObject
+class TestMPXVideoPlaybackToolBar : public QObject
 {
     Q_OBJECT
 
@@ -63,17 +63,18 @@ private slots:
     void testUpdateWithFileDetails();
     void testOpenDetailsView();
     void testAttach();
+    void testSend();
 
 signals:
-    void commandSignal(int);
+    void commandSignal();
 
 private:
-    QMPXVideoPlaybackButtonBar*           mButtonBar;
+    QMPXVideoPlaybackToolBar*             mVideoToolBar;
     QMPXVideoPlaybackControlsController*  mController;
 };
 
 
-#endif  // __TESTMPXVIDEOPLAYBACKBUTTONBAR_H__
+#endif  // __TESTMPXVIDEOPLAYBACKTOOLBAR_H__
 
 // End of file
     

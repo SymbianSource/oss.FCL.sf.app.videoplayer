@@ -381,7 +381,24 @@ void VideoListWidget::deleteItemSlot()
     {
         QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
                 variant.toString());
-        if(HbMessageBox::question(text))
+        
+        HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->open(this, SLOT(deleteItemDialogFinished(HbAction *)));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// deleteItemDialogFinished
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::deleteItemDialogFinished(HbAction *action)
+{
+    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
+    if(action == dlg->actions().at(0)) 
+    {
+        QModelIndex index = currentIndex();
+        if(index.isValid())
         {
             QModelIndexList list;
             list.append(index);
@@ -416,15 +433,17 @@ void VideoListWidget::createContextMenu()
         
         if (service == VideoServices::EUriFetcher)
         {
+            mContextMenuActions[EActionAttach]    = 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_attach"), this, SLOT(openItemSlot())); 
             mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(openItemSlot())); 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
             mContextMenuActions[EActionDetails] = 
                     mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
         }
         else if (service == VideoServices::EBrowse)
         {
             mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(openItemSlot())); 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
             mContextMenuActions[EActionDelete]           = 
                     mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
             mContextMenuActions[EActionDetails] = 
@@ -433,7 +452,7 @@ void VideoListWidget::createContextMenu()
         else
         {
             mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(openItemSlot())); 
+                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
             mContextMenuActions[EActionOpen]    = 
                                 mContextMenu->addAction(hbTrId("txt_common_menu_open"), this, SLOT(openItemSlot()));  
             mContextMenuActions[EActionAddToCollection] = 
@@ -503,6 +522,8 @@ void VideoListWidget::setContextMenu()
     	{
 			mContextMenuActions[EActionAddToCollection]->setVisible(true);
     		mContextMenuActions[EActionDelete]->setVisible(true);
+    	} else {
+            mContextMenuActions[EActionAttach]->setVisible(true);
     	}
     	mContextMenuActions[EActionPlay]->setVisible(true);
 		mContextMenuActions[EActionDetails]->setVisible(true);
@@ -523,7 +544,9 @@ void VideoListWidget::setContextMenu()
     	{
 			mContextMenuActions[EActionRemove]->setVisible(true);
             mContextMenuActions[EActionDelete]->setVisible(true);
-    	}
+        } else {
+            mContextMenuActions[EActionAttach]->setVisible(true);
+        }
     	mContextMenuActions[EActionPlay]->setVisible(true);
 		mContextMenuActions[EActionDetails]->setVisible(true);
     }
@@ -575,12 +598,21 @@ void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
         emit activated(modelIndex);
         return;
     }
+    doEmitActivated(modelIndex);
+}
+
+// ---------------------------------------------------------------------------
+// doEmitActivated
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::doEmitActivated (const QModelIndex &index)
+{
     if(mIsService &&
        mVideoServices &&
        mVideoServices->currentService() == VideoServices::EUriFetcher &&
        mCurrentLevel != VideoCollectionCommon::ELevelCategory)
     {
-        QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
+        QVariant variant = mModel->data(index, VideoCollectionCommon::KeyFilePath);
         if ( variant.isValid()  )
         {
             QString itemPath = variant.value<QString>();
@@ -589,7 +621,7 @@ void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
     }
     else
     {
-        doActivateItem(modelIndex);
+        doActivateItem(index);
     }
 }
 
@@ -632,7 +664,7 @@ void VideoListWidget::setSelectionMode(int mode)
 {
 	FUNC_LOG_ADDR(this);
     HbAbstractItemView::SelectionMode selMode = HbAbstractItemView::NoSelection;
-    if(mode >= HbAbstractItemView::NoSelection && mode <= HbAbstractItemView::ContiguousSelection)
+    if(mode >= HbAbstractItemView::NoSelection && mode <= HbAbstractItemView::MultiSelection)
     {
         selMode = HbAbstractItemView::SelectionMode(mode);
     }
@@ -706,10 +738,20 @@ void VideoListWidget::doDelayedsSlot()
 }
 
 // ---------------------------------------------------------------------------
-// playItemSlot
+// openItemSlot
 // ---------------------------------------------------------------------------
 //
 void VideoListWidget::openItemSlot()
+{
+    FUNC_LOG_ADDR(this);
+    doEmitActivated(currentIndex());
+}
+
+// ---------------------------------------------------------------------------
+// playItemSlot
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::playItemSlot()
 {
     FUNC_LOG_ADDR(this);
     doActivateItem(currentIndex());
@@ -746,15 +788,37 @@ void VideoListWidget::renameSlot()
 
     if(variant.isValid() && itemId.iId2 == KVcxMvcMediaTypeAlbum)
     {
-        bool ok = false;
         QString label(hbTrId("txt_videos_title_enter_name"));
         QString albumName = variant.toString();
-        QString newAlbumName;
+        
+        HbInputDialog *dialog = new HbInputDialog();
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->getText(label, this, SLOT(renameDialogFinished(HbAction *)), albumName);
+    }
+}
 
-        // Query a name for the collection
-        newAlbumName = HbInputDialog::getText(label, albumName, &ok);
-        // Rename only when name has changed. 
-        if(ok && newAlbumName.length() && newAlbumName.trimmed() != albumName)
+// -------------------------------------------------------------------------------------------------
+// renameDialogFinished
+// -------------------------------------------------------------------------------------------------
+//
+void VideoListWidget::renameDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+
+    HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
+    
+    QModelIndex index = currentIndex();
+    TMPXItemId itemId = mModel->getMediaIdAtIndex(index);
+    QVariant newNameVariant = dialog->value();
+    QVariant oldNameVariant = mModel->data(index, VideoCollectionCommon::KeyTitle);
+    
+    if(dialog->actions().first() == action &&
+       oldNameVariant.isValid() && newNameVariant.isValid() && itemId.iId2 == KVcxMvcMediaTypeAlbum)
+    {
+        QString newAlbumName = newNameVariant.toString();
+        QString oldAlbumName = oldNameVariant.toString();
+        
+        if(newAlbumName.length() && newAlbumName.trimmed() != oldAlbumName)
         {
             // Resolve collection true name and rename the album
             newAlbumName = mModel->resolveAlbumName(newAlbumName);
@@ -762,7 +826,6 @@ void VideoListWidget::renameSlot()
         }
     }
 }
-
 // ---------------------------------------------------------------------------
 // addToCollectionSlot
 // ---------------------------------------------------------------------------
@@ -828,11 +891,27 @@ void VideoListWidget::removeCollectionSlot()
     {
         QString text = hbTrId("txt_videos_info_do_you_want_to_remove_collection").arg(
                 variant.toString());
-        if(HbMessageBox::question(text))
+        HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->open(this, SLOT(removeCollectionDialogFinished(HbAction *)));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// removeCollectionDialogFinished
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::removeCollectionDialogFinished(HbAction *action)
+{
+    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
+    if(action == dlg->actions().at(0)) 
+    {
+        QModelIndex index = currentIndex();
+        if(index.isValid())
         {
             QModelIndexList list;
             list.append(index);
-        	mModel->removeAlbums(list);
+            mModel->removeAlbums(list);
         }
     }
 }

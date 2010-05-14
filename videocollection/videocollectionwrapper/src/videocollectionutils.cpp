@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 15 %
 
 // INCLUDE FILES
 #include <qobject.h>
@@ -63,85 +63,30 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 	FUNC_LOG;
     const int secondsInMinute( 60 );
     const int secondsInHour( 3600 );
-    QString hour;
-    QString min;
-    QString sec;
     
-    HbExtendedLocale locale = HbExtendedLocale::system();
-    
-    if ( length > 0 )
+	quint32 hours = length / secondsInHour;
+	quint32 minutes = length / secondsInMinute % secondsInMinute;
+	quint32 seconds = length % secondsInMinute;
+	
+    QString hrs(QString::number(hours));
+    if(hours < 10)
     {
-        quint32 hours = length / secondsInHour;
-        quint32 minutes = length / secondsInMinute % secondsInMinute;
-        quint32 seconds = length % secondsInMinute;
-        
-        if ( hours > 0 )
-        {
-            if(hours == 1)
-            {
-                hour = QObject::tr("%1 hour ").arg(locale.toString(hours)); //localisation
-            }
-            else
-            {
-                hour = QObject::tr("%1 hours ").arg(locale.toString(hours)); //localisation
-            }
-        }
-
-        if ( minutes > 0 )
-        {
-            if(minutes == 1)
-            {
-                min = QObject::tr("%1 minute ").arg(locale.toString(minutes)); //localisation
-            }
-            else
-            {
-                min = QObject::tr("%1 minutes ").arg(locale.toString(minutes)); //localisation
-            }
-        }
-        if (seconds > 0)
-        {
-            if(seconds == 1)
-            {
-                sec = QObject::tr("%1 second").arg(locale.toString(seconds)); //localisation
-            }
-            else
-            {
-                sec = QObject::tr("%1 seconds").arg(locale.toString(seconds)); //localisation
-            }
-        }
-    } 
-    else 
+    	hrs.prepend(QString::number(0));
+    }
+    QString mins(QString::number(minutes));
+    if(minutes < 10)
     {
-        sec = QObject::tr("0 seconds"); //localisation
+    	mins.prepend(QString::number(0));
+    }
+    QString secs(QString::number(seconds));
+    if(seconds < 10)
+    {
+    	secs.prepend(QString::number(0));
     }
     
-    QString lengthStr(hbTrId( "txt_videos_list_l1_l2_l3" ).arg( hour ).arg( min ).arg( sec ));
+    QString lengthStr(hbTrId( "txt_videos_list_l1l2l3" ).arg( hrs ).arg( mins ).arg( secs ));
     
     return lengthStr.trimmed();
-}
-// -----------------------------------------------------------------------------
-// VideoCollectionUtils::prepareShortLengthString()
-// -----------------------------------------------------------------------------
-//
-const QString VideoCollectionUtils::prepareShortLengthString(quint32 total)
-{
-	const int secondsInMinute( 60 );
-    const int secondsInHour( 3600 );
-
-    int hour = total / secondsInHour;
-    total = total % secondsInHour;
-    int minutes = total / secondsInMinute;
-    total = total % secondsInMinute;
-    int second = total;
-
-    QTime time( hour ,minutes ,second );
-    QString str;
-
-    HbExtendedLocale locale = HbExtendedLocale::system();
-
-    str = locale.format( time, r_qtn_time_durat_long_with_zero );
-
-    return str;
 }
 
 // -----------------------------------------------------------------------------

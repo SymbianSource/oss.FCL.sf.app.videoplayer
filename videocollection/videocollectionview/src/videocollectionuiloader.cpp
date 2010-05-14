@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 20 %
+// Version : %version: 21 %
 
 // INCLUDE FILES
 #include <qgraphicswidget.h>
@@ -427,14 +427,6 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                         videoServices = VideoServices::instance();
                     }
                     videoList->initialize(*model, videoServices);
-
-                    HbEffect::add(videoList,
-                                   EFFECT_SLIDE_IN_TO_LEFT_FILENAME,
-                                   EFFECT_SLIDE_IN_TO_LEFT);
-
-                    HbEffect::add(videoList,
-                            EFFECT_SLIDE_OUT_TO_LEFT_FILENAME,
-                            EFFECT_SLIDE_OUT_TO_LEFT);
                 }
             }
         }

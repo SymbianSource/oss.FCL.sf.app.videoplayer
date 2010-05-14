@@ -15,14 +15,13 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 1 %
 
 
 
 // INCLUDE FILES
 
-
-#include "mpxvideoplaybackdocumentloader.h"
+#include "hbvideobaseplaybackview.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 
 // ================= MEMBER FUNCTIONS ==============================================================
@@ -35,11 +34,12 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController( bool a
     : mViewMode( EFullScreenView )
     , mIsAttachOperation( attachOperation )
     , mAttachVideoDone( false )
+    , mSendVideoDone( false )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()"));
 
-    mLoader = new QMPXVideoPlaybackDocumentLoader();
     mFileDetails = new QMPXVideoPlaybackViewFileDetails();
+    mView = new HbVideoBasePlaybackView();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -49,6 +49,18 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController( bool a
 QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController"));
+
+    if ( mFileDetails )
+    {
+        delete mFileDetails;
+        mFileDetails = NULL;
+    }
+
+    if ( mView )
+    {
+        delete mView;
+        mView = NULL;       
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -110,6 +122,18 @@ void QMPXVideoPlaybackControlsController::attachVideo()
     
     handleCommand( EMPXPbvCmdClose );    
     mAttachVideoDone = true;
+}    
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::sendVideo()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::sendVideo()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::sendVideo()"));
+    
+    handleCommand( EMPXPbvCmdPause );    
+    mSendVideoDone = true;
 }    
 
 // End of File

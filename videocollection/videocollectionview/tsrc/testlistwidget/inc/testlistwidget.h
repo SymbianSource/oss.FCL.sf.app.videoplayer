@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24 %
+// Version : %version: 25 %
 
 #ifndef __TESTLISTWIDGET_H__
 #define __TESTLISTWIDGET_H__
@@ -134,6 +134,11 @@ private slots:
      * verifies openItemSlot
      */
     void testOpenItemSlot();
+    
+    /**
+     * verifies openItemSlot
+     */
+    void testPlayItemSlot();
     
     /**
      * verifies addToCollectionSlot

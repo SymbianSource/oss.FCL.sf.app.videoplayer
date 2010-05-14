@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#18 %
+// Version : %version: da1mmcf#21 %
 
 
 
@@ -25,6 +25,8 @@
 #include <QGraphicsSceneMouseEvent>
 
 #include <hblabel.h>
+#include <hbframeitem.h>
+#include <hbframedrawer.h>
 #include <hbprogressslider.h>
 #include <hbextendedlocale.h>
 
@@ -42,6 +44,7 @@ const int KSeekingTimeOut = 250;
 QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar( 
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
+    , mFrameItem( NULL )
     , mDuration( -1 )
     , mDraggingPosition( 0 )
     , mSetPosition( -1 )
@@ -50,6 +53,7 @@ QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar(
     , mSliderDragging( false )
     , mLongTimeFormat( false )
     , mLiveStreaming( false )
+    , mSeekingTimer( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar()"));
 }
@@ -62,10 +66,10 @@ QMPXVideoPlaybackProgressBar::~QMPXVideoPlaybackProgressBar()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::~QMPXVideoPlaybackProgressBar()"));
 
-    disconnect( mSeekingTimer, SIGNAL( timeout() ), this, SLOT( handleSeekingTimeout() ) );
-
     if ( mSeekingTimer )
     {
+        disconnect( mSeekingTimer, SIGNAL( timeout() ), this, SLOT( handleSeekingTimeout() ) );
+        
         if ( mSeekingTimer->isActive() )
         {
             mSeekingTimer->stop();
@@ -124,6 +128,17 @@ void QMPXVideoPlaybackProgressBar::initialize()
         // Set the position to 0 until we get position information
         //
         positionChanged( 0 );
+
+
+        //
+        // Set framedrawer for semi transparent background
+        //
+        mFrameItem = new HbFrameItem ( parentItem() );
+        mFrameItem->setGeometry( boundingRect() );
+        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
+        mFrameItem->frameDrawer().setFillWholeRect( true );
+        mFrameItem->setVisible( false );
     }
 }
 
@@ -355,14 +370,12 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
     {
         mProgressSlider->setEnabled( false );
     }
-    else if ( details->mTvOutConnected && ! details->mTvOutPlayAllowed )
-    {
-        mProgressSlider->setEnabled( false );
-    }
     else if ( ! mProgressSlider->isEnabled() )
     {
         mProgressSlider->setEnabled( true );
     }
+
+    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
 }
 
 // -------------------------------------------------------------------------------------------------

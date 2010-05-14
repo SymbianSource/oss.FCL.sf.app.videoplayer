@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#15 %
+// Version : %version: da1mmcf#17 %
 
 
 
@@ -115,11 +115,6 @@ class QMPXVideoPlaybackControlsController : public QObject
         * Return ETrue if TV-out cable gets connected
         */
         inline bool isTvOutConnected();
-
-        /*
-         * Return ETrue if TV-out cable is connected and content can be played
-         */
-        inline bool isTvOutPlaybackAllowed();
 
         /**
         * Reset or cancel timers for the controls
@@ -243,8 +238,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         * Handle tvout connected/disconnected event
         */
 		void handleTvOutEvent( bool connected, 
-		                        TMPXVideoPlaybackControlCommandIds event,
-		                        int value );
+		                       TMPXVideoPlaybackControlCommandIds event );
 
 		void updateVideoRect(  bool transitionEffect = true );
 
@@ -271,6 +265,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         void handleThumbnailReady( QPixmap tnData, void *internal , int id, int error );
         void controlsListUpdated();
         void attachVideo();
+        void sendVideo();
 
     private:
         HbVideoBasePlaybackView                   *mView;
@@ -331,21 +326,6 @@ bool QMPXVideoPlaybackControlsController::isTvOutConnected()
             mFileDetails->mTvOutConnected);
 
     return mFileDetails->mTvOutConnected;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::isTvOutPlaybackAllowed
-// -------------------------------------------------------------------------------------------------
-//
-inline
-bool QMPXVideoPlaybackControlsController::isTvOutPlaybackAllowed()
-{
-    bool playable = ( ! mFileDetails->mTvOutConnected || mFileDetails->mTvOutPlayAllowed );
-
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isTvOutPlaybackAllowed() [%d]"),
-            playable);
-
-    return playable;
 }
 
 // -------------------------------------------------------------------------------------------------

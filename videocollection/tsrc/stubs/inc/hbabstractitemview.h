@@ -28,7 +28,20 @@ class HbAbstractItemView : public HbWidget
 {
     Q_OBJECT
     
+    Q_PROPERTY(ItemAnimations enabledAnimations READ enabledAnimations WRITE setEnabledAnimations)
+    
 public:
+    
+    enum ItemAnimation
+    {
+        None               = 0x00000,
+        Appear             = 0x00001,
+        Disappear          = 0x00002,
+        TouchDown          = 0x00004,
+        All                = 0xFFFFF
+    };
+    
+    Q_DECLARE_FLAGS(ItemAnimations, ItemAnimation)
     
     enum SelectionMode
     {
@@ -40,6 +53,16 @@ public:
     };
     
     HbAbstractItemView(QGraphicsWidget *parent = 0) : HbWidget(parent){}
+    
+    void setEnabledAnimations(ItemAnimations flags)
+    {
+        Q_UNUSED(flags);
+    }
+    
+    ItemAnimations enabledAnimations() const
+    {
+        return None;
+    }
     
 signals:
 

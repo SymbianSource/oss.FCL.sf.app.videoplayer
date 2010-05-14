@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 3 %
 
 #include <hbapplication.h>
 
@@ -32,6 +32,9 @@ VideoServiceBrowse::VideoServiceBrowse( VideoServices* parent )
     : XQServiceProvider( QLatin1String("com.nokia.Videos.IVideoBrowse"), parent )
     , mRequestIndex( 0 )
     , mServiceApp( parent )
+    , mCategory( 0 )
+    , mTitle( "" )
+    , mSortRole( 0 )
 {
     MPX_ENTER_EXIT(_L("VideoServiceBrowse::VideoServiceBrowse()"));
 
@@ -95,10 +98,22 @@ QString VideoServiceBrowse::contextTitle() const
 }
 
 // -------------------------------------------------------------------------------------------------
+// sortRole()
+// -------------------------------------------------------------------------------------------------
+//
+int VideoServiceBrowse::sortRole() const
+{
+    MPX_DEBUG(_L("VideoServiceBrowse::getBrowseCategory() ret %d"), mSortRole);
+    return mSortRole;
+}
+
+// -------------------------------------------------------------------------------------------------
 // browseVideos()
 // -------------------------------------------------------------------------------------------------
 //
-void VideoServiceBrowse::browseVideos(const QString &title, int category)
+void VideoServiceBrowse::browseVideos(const QString &title,
+    int category,
+    int sortRole)
 {    
     MPX_ENTER_EXIT(_L("VideoServiceBrowse::browseVideos()"));	
 
@@ -111,6 +126,7 @@ void VideoServiceBrowse::browseVideos(const QString &title, int category)
     
     mTitle = appTitle;
     mCategory = category;
+    mSortRole = sortRole;
 
     // start service
     mServiceApp->setCurrentService(VideoServices::EBrowse);

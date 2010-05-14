@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 #define __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
@@ -113,6 +113,11 @@ private slots:
     // test private slot attachVideo()
     //
     void testslot_attachVideo();  
+
+    //
+    // test private slot attachVideo()
+    //
+    void testslot_sendVideo();  
   
 signals:
 

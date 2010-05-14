@@ -11,13 +11,13 @@
 #
 # Contributors:
 # 
-# Description: Project file for building testmpxvideoplaybackbuttonbar
+# Description: Project file for building testmpxvideoplaybacktoolbar
 #
 #
 # Version : %version:  1 %
 
 TEMPLATE = app
-TARGET = testmpxvideoplaybackbuttonbar
+TARGET = testmpxvideoplaybacktoolbar
 CONFIG += qtestlib qt hb
 
 INCLUDEPATH += stub/inc \
@@ -28,16 +28,18 @@ INCLUDEPATH += stub/inc \
 DEPENDPATH += inc src stub/inc stub/src
                 
 # Input
-HEADERS += testmpxvideoplaybackbuttonbar.h \
+HEADERS += testmpxvideoplaybacktoolbar.h \
            mpxvideoplaybackcontrolscontroller.h \
-           mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackviewfiledetails.h \
-           hbpushbutton.h \
-           ../../controlinc/mpxvideoplaybackbuttonbar.h
+           hbvideobaseplaybackview.h \
+           hbtoolbar.h \
+           hbtoolbutton.h \
+           ../../controlinc/mpxvideoplaybacktoolbar.h
   
-SOURCES += testmpxvideoplaybackbuttonbar.cpp \
+SOURCES += testmpxvideoplaybacktoolbar.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
-           mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
-           hbpushbutton.cpp \
-           ../../controlsrc/mpxvideoplaybackbuttonbar.cpp
+           hbvideobaseplaybackview.cpp \
+           hbtoolbar.cpp \
+           hbtoolbutton.cpp \
+           ../../controlsrc/mpxvideoplaybacktoolbar.cpp

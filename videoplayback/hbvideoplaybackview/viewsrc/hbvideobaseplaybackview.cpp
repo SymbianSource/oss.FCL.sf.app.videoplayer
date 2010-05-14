@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#34 %
+// Version : %version: da1mmcf#38 %
 
 
 
@@ -28,7 +28,6 @@
 
 #include <hbmenu.h>
 #include <hbaction.h>
-#include <hbgesture.h>
 #include <hbinstance.h>
 #include <hbnotificationdialog.h>
 #include <hblabel.h>
@@ -88,10 +87,10 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
 {
     MPX_DEBUG(_L("HbVideoBasePlaybackView::~HbVideoBasePlaybackView()"));
 
-    disconnect( mTimerForClosingView, SIGNAL( timeout() ), this, SIGNAL( activatePreviousView() ) );
-
     if ( mTimerForClosingView )
-    {
+    {        
+        disconnect( mTimerForClosingView, SIGNAL( timeout() ), this, SIGNAL( activatePreviousView() ) );
+        
         if ( mTimerForClosingView->isActive() )
         {
             mTimerForClosingView->stop();
@@ -101,6 +100,11 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
         mTimerForClosingView = NULL;
     }
 
+    if ( mVideoMpxWrapper )
+    {
+        delete mVideoMpxWrapper;
+        mVideoMpxWrapper = NULL;
+    }
 
     setParentItem( 0 );
 }
@@ -121,8 +125,6 @@ void HbVideoBasePlaybackView::handleActivateView()
     TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() ); 
     
     menu()->close();
-
-    hideItems( Hb::ToolBarItem );
 
     //
     // Landscape orientation
@@ -158,8 +160,6 @@ void HbVideoBasePlaybackView::handleDeactivateView()
     // go back to device orientation
     //
     //hbInstance->allMainWindows()[0]->unsetOrientation();
-
-    showItems( Hb::ToolBarItem );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -207,16 +207,6 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
         case KMPXVideoCallOngoingError:
         {
             showDialog( hbTrId( "txt_videos_info_video_playback_is_not_allowed_duri" ), false );
-            break;
-        }
-        case KMPXVideoTvOutPlaybackNotAllowed:
-        {
-            showDialog( hbTrId( "txt_videos_info_protected_clip_can_not_be_played" ), false );
-            break;
-        }
-        case KMPXVideoTvOutPlaybackNotAllowedClose:
-        {
-            showDialog( hbTrId( "txt_videos_info_protected_clip_can_not_be_played" ) );
             break;
         }
         default:

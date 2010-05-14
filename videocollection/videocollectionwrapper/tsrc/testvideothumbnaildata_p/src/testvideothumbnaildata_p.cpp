@@ -630,29 +630,21 @@ void TestVideoThumbnailData_p::testThumbnailReadySlot()
     init();
     
     int error = 0;
-    void *internal = 0;
     QPixmap nullpmap;
     QIcon icon(":/icons/default_thumbnail.svg");
     QPixmap pmap = icon.pixmap(500, 500);
+    TMPXItemId mediaId = TMPXItemId(10, 10); 
     
-    // Internal is null and error.
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, internal, error);
-    QCOMPARE(mTestObject->mThumbnailData.count(), 0);
-    QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 0);
-    QVERIFY(!mTestObject->mTbnReportTimer->isActive());
-    
-    // Internal is not null but there's error.
-    internal = (void *)new TMPXItemId(5, 5);
+    // There's error.
     error = -5;
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, internal, error);
+    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, mediaId, error);
     QCOMPARE(mTestObject->mThumbnailData.count(), 0);
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 0);
     QVERIFY(!mTestObject->mTbnReportTimer->isActive());
     
     // Pixmap is null.
-    internal = (void *)new TMPXItemId(5, 5);
     error = 0;
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(nullpmap, internal, error);
+    mTestObject->mThumbnailFetcher->emitThumbnailReady(nullpmap, mediaId, error);
     QCOMPARE(mTestObject->mThumbnailData.count(), 0);
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 0);
     QVERIFY(!mTestObject->mTbnReportTimer->isActive());
@@ -660,9 +652,8 @@ void TestVideoThumbnailData_p::testThumbnailReadySlot()
     
     // Good case.
     init();
-    internal = (void *)new TMPXItemId(5, 5);
     error = 0;
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, internal, error);
+    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, mediaId, error);
     QCOMPARE(mTestObject->mThumbnailData.count(), 1);
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 1);
     QVERIFY(mTestObject->mTbnReportTimer->isActive());
@@ -670,10 +661,9 @@ void TestVideoThumbnailData_p::testThumbnailReadySlot()
     
     // Good case, thumbnail report timer already running.
     init();
-    internal = (void *)new TMPXItemId(5, 5);
     error = 0;
     mTestObject->mTbnReportTimer->start(1000000);
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, internal, error);
+    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, mediaId, error);
     QCOMPARE(mTestObject->mThumbnailData.count(), 1);
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 1);
     QVERIFY(mTestObject->mTbnReportTimer->isActive());
@@ -681,11 +671,10 @@ void TestVideoThumbnailData_p::testThumbnailReadySlot()
     
     // Thumbnail report timer is null.
     init();
-    internal = (void *)new TMPXItemId(5, 5);
     error = 0;
     QTimer *backup = mTestObject->mTbnReportTimer;
     mTestObject->mTbnReportTimer = 0;
-    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, internal, error);
+    mTestObject->mThumbnailFetcher->emitThumbnailReady(pmap, mediaId, error);
     QCOMPARE(mTestObject->mThumbnailData.count(), 1);
     QCOMPARE(mTestObject->mReadyThumbnailMediaIds.count(), 1);
     mTestObject->mTbnReportTimer = backup;
@@ -836,7 +825,7 @@ void TestVideoThumbnailData_p::testStartBackgroundFetching()
     mTestObject->mBackgroundFetchingEnabled = false;
     mTestObject->mCurrentFetchIndex = -5;
     mTestObject->startBackgroundFetching(0, 10);
-    QVERIFY(mTestObject->mCurrentFetchIndex == -5);
+    QVERIFY(mTestObject->mCurrentFetchIndex == 10);
     
     // Set new model.
     mTestObject->mBackgroundFetchingEnabled = true;
@@ -865,7 +854,7 @@ void TestVideoThumbnailData_p::testEnableBackgroundFetching()
     mTestObject->mCurrentFetchIndex = -1;
     mTestObject->enableBackgroundFetching(false);
     QVERIFY(mTestObject->mBackgroundFetchingEnabled == false);
-    QCOMPARE(mTestObject->mCurrentFetchIndex, -1);
+    QCOMPARE(mTestObject->mCurrentFetchIndex, 0);
     
     mTestObject->mBgFetchTimer->setSingleShot(false);
     mTestObject->continueBackgroundFetch();

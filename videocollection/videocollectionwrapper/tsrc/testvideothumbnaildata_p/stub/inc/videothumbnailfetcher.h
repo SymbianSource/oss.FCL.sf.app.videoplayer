@@ -25,6 +25,7 @@
 #include <qhash.h>
 #include <qmap.h>
 #include <qpixmap.h>
+#include <mpxitemid.h>
 
 // FORWARD DECLARATIONS
 
@@ -35,6 +36,7 @@ class ThumbnailFetchData
         QString mFileName;
         int mPriority;
         void *mInternal;
+        TMPXItemId mediaId;
 };
 
 class VideoThumbnailFetcher : public QObject
@@ -64,11 +66,11 @@ public:
      * when fetch is complete. 
      * 
      * @param fileName path to the media.
-     * @param internal data identifying the media.
+     * @param mediaId mpx id for the media.
      * @param priority priority for the fetch.
      * 
      */
-    void addFetch(const QString fileName, void *internal, int priority);
+    void addFetch(const QString fileName, const TMPXItemId &mediaId, int priority);    
     
     /**
      * Empties fetch list. This does not cancel the possible ongoing fetch on
@@ -97,7 +99,7 @@ public:
      * Signal allThumbnailsFetched is emitted if there's nothing to do.
      * 
      */
-    void continueFetching();
+    void continueFetching(bool cancelOngoingFetches);
     
     /**
      * Enables or disables the thumbnail creation for videos that do  
@@ -111,22 +113,22 @@ public:
 // Test helper methods
 public:
     
-    void emitThumbnailReady(QPixmap pixmap, void *internal, int error);
+    void emitThumbnailReady(QPixmap pixmap, const TMPXItemId &mediaId, int error);
     
     void emitAllThumbnailsFetched();
 
 signals:
-    
+
     /**
      * Signaled after signal from thumbnail manager has been processed and
      * thumbnail fetch process is complete.
      *
      * @param tnData thumbnail
-     * @param internal internal data to identify the request
+     * @param mediaId mpx id for the media. 
      * @param error possible error code from thumbnail manager ( 0 == ok )
      * 
      */
-    void thumbnailReady(QPixmap tnData, void *internal, int error);
+    void thumbnailReady(QPixmap tnData, const TMPXItemId &mediaId, int error);
 
     /**
      * Signaled when all the fetches have been done.
@@ -139,11 +141,11 @@ public:
     struct TnRequest
     {
        QString name;
-       void *id;
+       TMPXItemId id;
        int priority;
        bool cancelled;
 
-       TnRequest(QString name, void *id, int priority, bool cancelled) {
+       TnRequest(QString name, const TMPXItemId &id, int priority, bool cancelled) {
            this->name = name;
            this->id = id;
            this->priority = priority;
@@ -152,7 +154,6 @@ public:
 
        TnRequest() {
            name = QString("");
-           id = 0;
            priority = -1;
            cancelled = false;
        }

@@ -141,14 +141,6 @@ QString VideoListDataModel::prepareSizeString(int index) const
     return QString();
 }
 
-QString VideoListDataModel::prepareShortLengthString(int index) const
-{
-    Q_UNUSED(index);
-    
-    // not stubbed
-    return QString();
-}
-
 QVariant VideoListDataModel::data(const QModelIndex &index, int role) const
 {
     QVariant returnValue = QVariant();

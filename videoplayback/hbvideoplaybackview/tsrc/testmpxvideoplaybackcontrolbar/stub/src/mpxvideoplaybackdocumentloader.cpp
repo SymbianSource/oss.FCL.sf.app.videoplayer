@@ -15,13 +15,12 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
@@ -86,13 +85,7 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
 
     QGraphicsWidget *object = NULL;
         
-    if ( name == "buttonBarLayout" )
-    {
-        object = new QMPXVideoPlaybackButtonBar( mController );
-        object->setObjectName( name );
-        mWidgets.append( object );
-    }
-    else if ( name == "progressBarLayout" )
+    if ( name == "progressBarLayout" )
     {
         object = new QMPXVideoPlaybackProgressBar( mController );
         object->setObjectName( name );

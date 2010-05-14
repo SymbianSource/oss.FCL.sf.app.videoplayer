@@ -231,17 +231,6 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
     // not stubbed
 }
 
-
-void VideoListView::finishCollectionOpenedSlot(const HbEffect::EffectStatus &status)
-{
-    Q_UNUSED(status);
-}
-
-void VideoListView::finishCollectionClosedSlot(const HbEffect::EffectStatus &status)
-{
-    Q_UNUSED(status);
-}
-
 void VideoListView::doSorting(int value)
 {
     Q_UNUSED(value);

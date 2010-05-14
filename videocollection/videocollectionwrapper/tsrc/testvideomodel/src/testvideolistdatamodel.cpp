@@ -698,8 +698,6 @@ void TestVideoListDataModel::testPrepareLengthString()
     //
     // cannot check the actual strin due localisation
     //
-    // cannot call prepareShortLengthString directly, need to call indirectly using 
-    // public data -method. That means: 
     // - we cannot test without videolistdata -object -case because tested throught data -call and
     //   existence is tested there already
     

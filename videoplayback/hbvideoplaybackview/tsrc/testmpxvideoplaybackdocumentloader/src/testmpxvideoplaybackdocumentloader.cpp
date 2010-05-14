@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  5 %
 
 
 #include <qdebug>
@@ -101,9 +101,6 @@ void TestMPXVideoPlaybackDocumentLoader::testCreateObject()
 
     QObject *object = mLoader->createObject( "", "controlBarLayout" );
     QVERIFY( object->objectName() == "controlBarLayout" );
-
-    object = mLoader->createObject( "", "buttonBarLayout" );
-    QVERIFY( object->objectName() == "buttonBarLayout" );
 
     object = mLoader->createObject( "", "progressBarLayout" );
     QVERIFY( object->objectName() == "progressBarLayout" );

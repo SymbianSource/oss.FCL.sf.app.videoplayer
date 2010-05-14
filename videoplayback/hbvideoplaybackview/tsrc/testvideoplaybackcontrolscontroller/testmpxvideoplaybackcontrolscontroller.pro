@@ -14,7 +14,7 @@
 # Description: Project file for building testmpxvideoplaybackcontrolscontroller
 #
 #
-# Version : %version: 5 %
+# Version : %version: 6 %
 
 
 TEMPLATE = app
@@ -28,7 +28,7 @@ INCLUDEPATH += stub/inc \
                ../inc \
                ../../inc \
                ../../../inc \            
-               ../../../../inc \                                          
+               ../../../../inc                                           
 
 DEPENDPATH += stub/inc stub/src inc src  
         
@@ -51,6 +51,7 @@ HEADERS += hbvideobaseplaybackview.h  \
            xqserviceutil.h \
            videoservices.h \
            videoserviceurifetch.h \
+           shareui.h \
            ../../inc/mpxvideoplaybackcontrolscontroller.h 
 					 
                
@@ -72,6 +73,7 @@ SOURCES += hbvideobaseplaybackview.cpp \
            xqserviceutil.cpp \
            videoservices.cpp \
            videoserviceurifetch.cpp \
+           shareui.cpp \
            ../../controlsrc/mpxvideoplaybackcontrolscontroller.cpp 
 					 
            

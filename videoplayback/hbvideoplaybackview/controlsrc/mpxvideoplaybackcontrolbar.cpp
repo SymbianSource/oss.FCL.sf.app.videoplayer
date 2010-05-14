@@ -15,15 +15,12 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
-
-#include <hbframeitem.h>
-#include <hbframedrawer.h>
 
 #include "mpxvideo_debug.h"
-#include "mpxvideoplaybackbuttonbar.h"
+#include "mpxvideoplaybacktoolbar.h"
 #include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "mpxcommonvideoplaybackview.hrh"
@@ -38,14 +35,14 @@
 QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar( 
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
-    , mButtonBar( NULL )
     , mProgressBar( NULL )
-    , mFrameItem( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar"));
 
-    HbEffect::add( this, ":/hbvideoplaybackview/effects/controlbar_appear.fxml", "appear" );
-    HbEffect::add( this, ":/hbvideoplaybackview/effects/controlbar_disappear.fxml", "disappear" );
+    //
+    // button bar
+    //
+    mToolBar = new QMPXVideoPlaybackToolBar( mController );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -56,8 +53,11 @@ QMPXVideoPlaybackControlBar::~QMPXVideoPlaybackControlBar()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::~QMPXVideoPlaybackControlBar()"));
 
-    HbEffect::remove( this, ":/hbvideoplaybackview/effects/controlbar_appear.fxml", "appear" );
-    HbEffect::remove( this, ":/hbvideoplaybackview/effects/controlbar_disappear.fxml", "disappear" );
+    if ( mToolBar )
+    {
+        delete mToolBar;
+        mToolBar = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -73,39 +73,18 @@ void QMPXVideoPlaybackControlBar::initialize()
     //
     // Don't need to initialize buttons once it gets initialized
     //
-    if ( mButtonBar == NULL && mProgressBar == NULL )
+    if ( mProgressBar == NULL )
     {
-        //
-        // button bar
-        //
-        QGraphicsWidget *widget = loader->findWidget( QString( "buttonBarLayout" ) );
-        mButtonBar = qobject_cast<QMPXVideoPlaybackButtonBar*>( widget );
-
-        if ( mButtonBar )
-        {
-            mButtonBar->initialize();
-        }
-        
         //
         // progress bar
         //
-        widget = loader->findWidget( QString( "progressBarLayout" ) );
+        QGraphicsWidget *widget = loader->findWidget( QString( "progressBarLayout" ) );
         mProgressBar = qobject_cast<QMPXVideoPlaybackProgressBar*>( widget );
 
         if ( mProgressBar )
         {
             mProgressBar->initialize();
         }
-
-        //
-        // Set framedrawer for semi transparent background
-        //
-        mFrameItem = new HbFrameItem ( this );
-        mFrameItem->setGeometry( boundingRect() );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
-        mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->setVisible( false );
     }
 }
 
@@ -117,9 +96,9 @@ void QMPXVideoPlaybackControlBar::updateState( TMPXPlaybackState state )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::updateState() state = %d"), state );
 
-    if ( mButtonBar )
+    if ( mToolBar )
     {
-        mButtonBar->updateState( state );
+        mToolBar->updateState( state );
     }
 
     if ( mProgressBar )
@@ -136,9 +115,9 @@ void QMPXVideoPlaybackControlBar::aspectRatioChanged( int aspectRatio )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::aspectRatioChanged() aspectRatio = %d"), aspectRatio );
 
-    if ( mButtonBar )
+    if ( mToolBar )
     {
-        mButtonBar->aspectRatioChanged( aspectRatio );
+        mToolBar->aspectRatioChanged( aspectRatio );
     }
 }
 
@@ -151,17 +130,15 @@ void QMPXVideoPlaybackControlBar::updateWithFileDetails(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::updateWithFileDetails()"));
 
-    if ( mButtonBar )
+    if ( mToolBar )
     {
-        mButtonBar->updateWithFileDetails( details );
+        mToolBar->updateWithFileDetails( details );
     }
 
     if ( mProgressBar )
     {
         mProgressBar->updateWithFileDetails( details );
     }
-
-    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse ); 
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -173,49 +150,10 @@ void QMPXVideoPlaybackControlBar::setVisibleToControlBar( bool visible )
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlBar::setVisibleToControlBar()"),
                    _L("visible = %d, current visibility = %d"), visible, isVisible() );
 
-    //
-    // Change the visibility if the following condition meet:
-    // - visible is true
-    // - appear effect is not going on
-    // - disappear effect is going on (assume current visiblity is false)
-    //
-    if ( visible && 
-         ! HbEffect::effectRunning( this, "appear" ) &&
-         ( ! isVisible() || HbEffect::effectRunning( this, "disappear" ) ) )
+    if ( visible != isVisible() )
     {
-        //
-        // If disappear effect is running on this, cancel
-        //
-        if ( HbEffect::effectRunning( this, "disappear" ) )
-        {
-            HbEffect::cancel( this );
-        }
-
-        if ( ! isEnabled() )
-        {
-            setEnabled( true );
-        }
-
-        setVisible( true );
-
-        HbEffect::start( this, "appear", this, "appeared" );
-    }
-    else if ( ! visible && isVisible()&& ! HbEffect::effectRunning( this, "disappear" ) )
-    {
-        //
-        // If appear effect is running on this, cancel
-        //
-        if( HbEffect::effectRunning( this, "appear" ) )
-        {
-            HbEffect::cancel( this );
-        }
-
-        if ( isEnabled() )
-		{
-            setEnabled( false );
-		}
-
-        HbEffect::start( this, "disappear", this, "disappeared" );
+        setVisible( visible );
+        mToolBar->setVisible( visible );        
     }
 }
 
@@ -270,9 +208,9 @@ void QMPXVideoPlaybackControlBar::durationChanged( int duration )
         mProgressBar->durationChanged( duration );
     }
 
-    if ( mButtonBar )
+    if ( mToolBar )
     {
-        mButtonBar->durationChanged( duration );
+        mToolBar->durationChanged( duration );
     }
 }
 
@@ -289,9 +227,9 @@ void QMPXVideoPlaybackControlBar::positionChanged( int position )
         mProgressBar->positionChanged( position );
     }
     
-    if ( mButtonBar )
+    if ( mToolBar )
     {
-        mButtonBar->positionChanged( position );
+        mToolBar->positionChanged( position );
     }
 }
 

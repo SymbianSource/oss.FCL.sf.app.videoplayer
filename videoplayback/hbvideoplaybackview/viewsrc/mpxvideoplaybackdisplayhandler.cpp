@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  19 %
+// Version : %version:  20 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -242,7 +242,7 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 //
 TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
                                           QMPXVideoPlaybackViewFileDetails* aFileDetails,
-                                          TReal aDisplayAspectRatio )
+                                          TReal32 aDisplayAspectRatio )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
 

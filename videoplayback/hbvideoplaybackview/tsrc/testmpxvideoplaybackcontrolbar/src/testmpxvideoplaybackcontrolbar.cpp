@@ -15,14 +15,14 @@
 * 
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #include <qdebug>
 #include <hbmainwindow.h>
 #include <hbapplication.h>
 
-#include "mpxvideoplaybackbuttonbar.h"
+#include "mpxvideoplaybacktoolbar.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "testmpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackviewfiledetails.h"
@@ -103,11 +103,11 @@ void TestMPXVideoPlaybackControlBar::testupdateState()
 
     TMPXPlaybackState state = EPbStatePlaying;
     mControlBar->updateState( state );
-    QVERIFY( mControlBar->mButtonBar->mState == EPbStatePlaying );
+    QVERIFY( mControlBar->mToolBar->mState == EPbStatePlaying );
 
     state = EPbStatePaused;
     mControlBar->updateState( state );
-    QVERIFY( mControlBar->mButtonBar->mState == EPbStatePaused );
+    QVERIFY( mControlBar->mToolBar->mState == EPbStatePaused );
 
     cleanup();
 }
@@ -124,7 +124,7 @@ void TestMPXVideoPlaybackControlBar::testaspectRatioChanged()
 
     int aspectRatio = 1;
     mControlBar->aspectRatioChanged( aspectRatio );
-    QVERIFY( mControlBar->mButtonBar->mAspectRatio == aspectRatio );
+    QVERIFY( mControlBar->mToolBar->mAspectRatio == aspectRatio );
 
     cleanup();
 }
@@ -145,7 +145,7 @@ void TestMPXVideoPlaybackControlBar::testUpdateWithFileDetails()
 
     mControlBar->updateWithFileDetails( details );
 
-    QVERIFY( mControlBar->mButtonBar->mFileDetails->mSeekable == details->mSeekable );
+    QVERIFY( mControlBar->mToolBar->mFileDetails->mSeekable == details->mSeekable );
     QVERIFY( mControlBar->mProgressBar->mFileDetails->mVideoEnabled == details->mVideoEnabled );
 
     cleanup();

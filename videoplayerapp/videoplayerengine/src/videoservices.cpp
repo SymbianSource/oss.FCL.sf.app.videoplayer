@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 6 %
 
 #include "videoplayerengine.h"
 #include "videoservices.h"
@@ -43,6 +43,7 @@ VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
     {
     	mInstance->setEngine(engine);
     }
+
     mInstance->mReferenceCount++;
     return mInstance;
 }
@@ -95,7 +96,7 @@ QVideoPlayerEngine* VideoServices::engine()
 {
     MPX_DEBUG(_L("VideoServices::engine"));
 	
-	return mEngine;
+    return mEngine;
 }
 
 // ----------------------------------------------------------------------------
@@ -106,13 +107,14 @@ VideoServices::VideoServices( QVideoPlayerEngine* engine )
     : mReferenceCount( 0 )
     , mEngine( engine )
     , mCurrentService( VideoServices::ENoService )
+    , mFetchSelected( false )
 {
     MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
     
     mServiceUriFetch = new VideoServiceUriFetch(this);
-	mServicePlay     = new VideoServicePlay(this, engine);
-	mServiceView     = new VideoServiceView(this, engine);
-	mServiceBrowse   = new VideoServiceBrowse(this);
+    mServicePlay     = new VideoServicePlay(this, engine);
+    mServiceView     = new VideoServiceView(this, engine);
+    mServiceBrowse   = new VideoServiceBrowse(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -123,10 +125,10 @@ VideoServices::~VideoServices()
 {
     MPX_ENTER_EXIT(_L("VideoServices::~VideoServices()"));
     
-	delete mServiceUriFetch;
-	delete mServicePlay;
-	delete mServiceView;
-	delete mServiceBrowse;
+    delete mServiceUriFetch;
+    delete mServicePlay;
+    delete mServiceView;
+    delete mServiceBrowse;
 }
 
 // ----------------------------------------------------------------------------
@@ -137,7 +139,7 @@ VideoServices::TVideoService VideoServices::currentService()
 {
     MPX_DEBUG(_L("VideoServices::currentService() ret %d"), mCurrentService );
 	
-	return mCurrentService;
+    return mCurrentService;
 }
 
 // ----------------------------------------------------------------------------
@@ -166,7 +168,7 @@ void VideoServices::setCurrentService(VideoServices::TVideoService service)
 {
     MPX_DEBUG(_L("VideoServices::setCurrentService(%d)"), service );
 	
-	mCurrentService = service;	
+    mCurrentService = service;	
 }
 
 // ----------------------------------------------------------------------------
@@ -179,16 +181,34 @@ QString VideoServices::contextTitle() const
 	
     QString title;
     
-    if ( mCurrentService == VideoServices::EUriFetcher )
+    if (mCurrentService == VideoServices::EUriFetcher && mServiceUriFetch)
     {
         title = mServiceUriFetch->contextTitle();
     }
-    else if ( mCurrentService == VideoServices::EBrowse )
+    else if (mCurrentService == VideoServices::EBrowse && mServiceBrowse)
     {
         title = mServiceBrowse->contextTitle();
     }
     
     return title;
+}
+
+// ----------------------------------------------------------------------------
+// sortRole()
+// ----------------------------------------------------------------------------
+//
+int VideoServices::sortRole() const
+{
+    MPX_ENTER_EXIT(_L("VideoServices::sortType()"));
+    
+    int sortRole = 0;
+    
+    if (mCurrentService == EBrowse && mServiceBrowse)
+    {
+        sortRole = mServiceBrowse->sortRole();
+    }
+    
+    return sortRole;
 }
 
 // ----------------------------------------------------------------------------
@@ -203,6 +223,7 @@ void VideoServices::itemSelected(const QString& item)
     QStringList list;
     list.append( item );
     mServiceUriFetch->complete( list );
+    mFetchSelected = true;
 }
 
 // ----------------------------------------------------------------------------

@@ -125,11 +125,6 @@ public:
     QString prepareLengthString(quint32 length);
     
     /**
-     * prepares length string
-     */
-    const QString prepareShortLengthString(quint32 total);
-    
-    /**
      * Prepares size string from the given value.
      * 
      * @param size Size value in bytes

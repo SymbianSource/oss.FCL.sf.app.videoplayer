@@ -55,7 +55,7 @@ void CVcxMyVideosMdsAlbums::ConstructL()
     if ( iObserver )
         {
         //ENotifyAdd and ENotifyModify are not supported
-        iMdsDb.iMdsSession->AddRelationItemObserverL( *this, NULL,
+        iMdsDb.MdsSessionL().AddRelationItemObserverL( *this, NULL,
                 ENotifyRemove, iMdsDb.iNamespaceDef );
 
 #if 0
@@ -64,13 +64,13 @@ void CVcxMyVideosMdsAlbums::ConstructL()
         // the add operation instead. This way we don't receive
         // add events if someone else adds videos to our albums
         // but the performance is the best possible.
-        iMdsDb.iMdsSession->AddRelationObserverL( *this, NULL,
+        iMdsDb.MdsSessionL().AddRelationObserverL( *this, NULL,
                 ENotifyAdd | ENotifyModify | ENotifyRemove );        
 #endif
         }
     
     //TODO: do we need this?
-    //iMdsDb.iMdsSession->AddRelationPresentObserverL();
+    //iMdsDb.MdsSessionL().AddRelationPresentObserverL();
     }
 
 // ---------------------------------------------------------------------------
@@ -154,18 +154,7 @@ void CVcxMyVideosMdsAlbums::DoCancel()
     {
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() start");
 
-#if 0
-    // Seems like the only way to cancel these is to close session to MDS and reopen it...
-    // Update: even this does not cancel the operation
-    MPX_DEBUG1("CVcxMyVideosMdsAlbums:: closing mds session");
-
-    delete iMdsDb.iMdsSession;
-    iMdsDb.iMdsSession = NULL;
-    
-    MPX_DEBUG1("CVcxMyVideosMdsAlbums:: opening mds session");
-    TRAP_IGNORE( iMdsDb.OpenMdsSessionL() );
-    MPX_DEBUG2("CVcxMyVideosMdsAlbums:: opened mds session (%d)", iMdsDb.iMdsError);
-#endif
+    // MDS does not offer way to cancel these async requests
     
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() exit");
     }
@@ -228,7 +217,7 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumsL( CMPXMedia* aAlbumList,
     delete iAlbumQuery;
     iAlbumQuery = NULL;
     
-    iAlbumQuery = iMdsDb.iMdsSession->NewObjectQueryL( *iNamespaceDef, *iAlbumObjectDef, this );
+    iAlbumQuery = iMdsDb.MdsSessionL().NewObjectQueryL( *iNamespaceDef, *iAlbumObjectDef, this );
 
     CMdELogicCondition& rootCondition = iAlbumQuery->Conditions();
     rootCondition.SetOperator( ELogicConditionOperatorOr );
@@ -277,7 +266,7 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentIdsL( TUint32 aAlbumId,
     iAlbumId      = aAlbumId;
     iAlbumContent = &aContentArray;
     
-    iRelationQuery = iMdsDb.iMdsSession->NewRelationQueryL( *iNamespaceDef, this );
+    iRelationQuery = iMdsDb.MdsSessionL().NewRelationQueryL( *iNamespaceDef, this );
 
     CMdELogicCondition& rootCondition = iRelationQuery->Conditions();
 
@@ -337,12 +326,13 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentVideosL( TUint32 aAlbumId, CMPXMedi
     iVideoList = &aVideoList;
     iAlbumId   = aAlbumId;
     
-    iVideoQuery = iMdsDb.iMdsSession->NewObjectQueryL( *iNamespaceDef, *iMdsDb.iVideoObjectDef, this );
+    iVideoQuery = iMdsDb.MdsSessionL().NewObjectQueryL( *iNamespaceDef, *iMdsDb.iVideoObjectDef, this );
     CMdELogicCondition& rootCondition = iVideoQuery->Conditions();
     CMdERelationCondition& relationCondition = 
             rootCondition.AddRelationConditionL( *iContainsRelationDef );
 
     CMdELogicCondition& leftCondition = relationCondition.LeftL();
+    CMdELogicCondition& rightCondition = relationCondition.RightL();
 
     //...left side is an album...
     leftCondition.AddObjectConditionL( *iAlbumObjectDef );
@@ -364,7 +354,7 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentVideosL( TUint32 aAlbumId, CMPXMedi
 //
 void CVcxMyVideosMdsAlbums::GetSchemaDefinitionsL()
     {
-    iNamespaceDef = &(iMdsDb.iMdsSession->GetDefaultNamespaceDefL());
+    iNamespaceDef = &(iMdsDb.MdsSessionL().GetDefaultNamespaceDefL());
     
     _LIT( KVcxAlbumObjectName, "Album" );
     iAlbumObjectDef = &(iNamespaceDef->GetObjectDefL( KVcxAlbumObjectName ));
@@ -634,7 +624,7 @@ void CVcxMyVideosMdsAlbums::HandleVideoQueryResultsL( CMdEQuery& /*aQuery*/, TIn
         iMdsDb.Object2MediaL( object, *media );
         
 #ifdef _DEBUG
-        TBuf<200> title;
+        TBuf<256> title;
         title = TVcxMyVideosCollectionUtil::Title( *media );
         MPX_DEBUG2("CVcxMyVideosMdsAlbums:: object title: %S", &title);
 #endif        
@@ -724,7 +714,7 @@ void CVcxMyVideosMdsAlbums::DoAddVideosToAlbumL( CMPXMedia* aCmd,
         if ( TVcxMyVideosCollectionUtil::Int32ValueL( *videoArray->AtL( i ) ) 
                 != KErrAlreadyExists )
             {
-            relation = iMdsDb.iMdsSession->NewRelationL(
+            relation = iMdsDb.MdsSessionL().NewRelationL(
                     *iContainsRelationDef, albumId,
                     TVcxMyVideosCollectionUtil::IdL( *videoArray->AtL( i ) ) );
             CleanupStack::PushL( relation );
@@ -738,7 +728,7 @@ void CVcxMyVideosMdsAlbums::DoAddVideosToAlbumL( CMPXMedia* aCmd,
 
     iAsyncOperation = EVcxAddVideosToAlbum;
 
-    iMdsDb.iMdsSession->AddItemsAsyncL( iItemArray, iStatus, iResultBuffer );
+    iMdsDb.MdsSessionL().AddItemsAsyncL( iItemArray, iStatus, iResultBuffer );
     SetActive();
     }
 
@@ -779,7 +769,7 @@ void CVcxMyVideosMdsAlbums::DoRemoveRelationsL( RArray<TUint32>& aRelationIds,
     
     iAsyncOperation = EVcxRemoveRelations;
     
-    iMdsDb.iMdsSession->RemoveRelationsAsyncL( *iIdArray, iStatus, iResultBuffer, iNamespaceDef );
+    iMdsDb.MdsSessionL().RemoveRelationsAsyncL( *iIdArray, iStatus, iResultBuffer, iNamespaceDef );
     SetActive();
     
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoRemoveRelationsL() exit");
@@ -792,14 +782,8 @@ void CVcxMyVideosMdsAlbums::DoRemoveRelationsL( RArray<TUint32>& aRelationIds,
 void CVcxMyVideosMdsAlbums::AddAlbumL( CMPXMedia& aAlbum )
     {
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::AddAlbumL() start");
-    
-    if ( !iMdsDb.iMdsSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsAlbums:: no mds session(%d), leaving", iMdsDb.iMdsError);
-        User::Leave( iMdsDb.iMdsError );
-        }
-         
-    CMdEObject* object = iMdsDb.iMdsSession->NewObjectLC(
+             
+    CMdEObject* object = iMdsDb.MdsSessionL().NewObjectLC(
             *iAlbumObjectDef, KNullDesC ); // 1->
 
     Media2ObjectL( aAlbum, *object );
@@ -808,16 +792,16 @@ void CVcxMyVideosMdsAlbums::AddAlbumL( CMPXMedia& aAlbum )
     TUint32 mdsId;
 
 #ifdef _DEBUG
-    TRAPD( err, mdsId = iMdsDb.iMdsSession->AddObjectL( *object ) );
+    TRAPD( err, mdsId = iMdsDb.MdsSessionL().AddObjectL( *object ) );
 
     if ( err != KErrNone )
         {
-        MPX_DEBUG2( "CVcxMyVideosMdsAlbums:: iMdsDb.iMdsSession->AddObjectL leaved with error: %d", err );
+        MPX_DEBUG2( "CVcxMyVideosMdsAlbums:: iMdsDb.MdsSessionL().AddObjectL leaved with error: %d", err );
         User::Leave( err );
         }
 #else
 
-    mdsId = iMdsDb.iMdsSession->AddObjectL( *object );
+    mdsId = iMdsDb.MdsSessionL().AddObjectL( *object );
 
 #endif
     
@@ -844,18 +828,12 @@ void CVcxMyVideosMdsAlbums::SetAlbumL( CMPXMedia& aVideo )
     {
     MPX_DEBUG1("CVcxMyVideosMdsDb::SetAlbumL() start");
 
-    if ( !iMdsDb.iMdsSession )
-        {
-        MPX_DEBUG2("CVcxMyVideosMdsAlbums:: no mds session(%d), leaving", iMdsDb.iMdsError);
-        User::Leave( iMdsDb.iMdsError );
-        }
-
     TMPXItemId mpxId = TVcxMyVideosCollectionUtil::IdL( aVideo );
 
     MPX_DEBUG2("CVcxMyVideosMdsAlbums::SetAlbumL updating object %d ", mpxId.iId1);
     
     CMdEObject* object =
-            iMdsDb.iMdsSession->OpenObjectL( mpxId.iId1, *iAlbumObjectDef );
+            iMdsDb.MdsSessionL().OpenObjectL( mpxId.iId1, *iAlbumObjectDef );
     if ( !object )
         {
         // No object with this ID was found!
@@ -872,7 +850,7 @@ void CVcxMyVideosMdsAlbums::SetAlbumL( CMPXMedia& aVideo )
             
             Media2ObjectL( aVideo, *object );
             
-            iMdsDb.iMdsSession->CommitObjectL( *object );
+            iMdsDb.MdsSessionL().CommitObjectL( *object );
 
             CleanupStack::PopAndDestroy( object );
             }
@@ -929,7 +907,7 @@ void CVcxMyVideosMdsAlbums::DoRemoveAlbumsL( CMPXMedia* aMpxCmd,
     
     iAsyncOperation = EVcxRemoveAlbums;
     
-    iMdsDb.iMdsSession->RemoveObjectsAsyncL( idArray, iStatus, iResultBuffer, iNamespaceDef );
+    iMdsDb.MdsSessionL().RemoveObjectsAsyncL( idArray, iStatus, iResultBuffer, iNamespaceDef );
     
     CleanupStack::PopAndDestroy( &idArray );
     SetActive();
@@ -982,7 +960,7 @@ void CVcxMyVideosMdsAlbums::HandleAddVideosToAlbumCompletedL()
     {
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::HandleAddVideosToAlbumCompletedL() start");
     
-    iMdsDb.iMdsSession->DeserializeItemsL( iResultBuffer, iItemArray );
+    iMdsDb.MdsSessionL().DeserializeItemsL( iResultBuffer, iItemArray );
     
     iClient->HandleAddVideosToAlbumResp( iMpxCmd, iItemArray );
     iResultBuffer.Close();
@@ -999,7 +977,7 @@ void CVcxMyVideosMdsAlbums::HandleRemoveRelationsCompletedL()
     {
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::HandleRemoveRelationsCompletedL() start");
     
-    iMdsDb.iMdsSession->DeserializeIdsL( iResultBuffer, NULL, NULL, iResultArrayUint32 );
+    iMdsDb.MdsSessionL().DeserializeIdsL( iResultBuffer, NULL, NULL, iResultArrayUint32 );
 
 #ifdef _DEBUG
     TItemId result;
@@ -1028,7 +1006,7 @@ void CVcxMyVideosMdsAlbums::HandleRemoveAlbumsCompletedL()
     resultArray.Reset();
     CleanupClosePushL( resultArray );
     
-    iMdsDb.iMdsSession->DeserializeIdsL( iResultBuffer, &resultArray, NULL, NULL  );
+    iMdsDb.MdsSessionL().DeserializeIdsL( iResultBuffer, &resultArray, NULL, NULL  );
 
 #ifdef _DEBUG
     TItemId result;

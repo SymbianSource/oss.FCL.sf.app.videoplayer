@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 37 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -760,7 +760,6 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
         map[MetaKeyDate] = locale.format( date.date(), r_qtn_date_usual );
     }
     
-    //TODO: Localisation
     // MetaKeyDurationString
     quint32 dur = getVideoDuration(media);
     QString duration = VideoCollectionUtils::instance().prepareLengthString(dur);
@@ -768,7 +767,6 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
         map[MetaKeyDurationString] = duration;
     }
     
-    //TODO: Localisation
     // MetaKeySizeString
     quint32 s;
     VideoCollectionUtils::instance().mediaValue<quint32>(media, KMPXMediaGeneralSize, s );
@@ -798,7 +796,7 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
     quint64 dateTimeValue;
     if(VideoCollectionUtils::instance().mediaValue<quint64>(media, KVcxMediaMyVideosModifiedDate, dateTimeValue)) {
         TDateTime temp = TTime( dateTimeValue ).DateTime();
-        QDateTime date = QDateTime(QDate(temp.Year(), temp.Month()+1, temp.Day()), 
+        QDateTime date = QDateTime(QDate(temp.Year(), temp.Month()+1, temp.Day()+1), 
                            QTime(temp.Hour(), temp.Minute(), temp.Second(), temp.MicroSecond()));
         map[MetaKeyModifiedDate] = locale.format( date.date(), r_qtn_date_usual );
     }
@@ -848,7 +846,7 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
             bitrate = (double)bitrate / (double)1000 + 0.5;
         }
         
-        map[MetaKeyBitRate] = hbTrId(loc, bitrate);
+        map[MetaKeyBitRate] = hbTrId(loc).arg(bitrate);
     }
     
     // MetaKeyFormat

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  4 %
+// Version : %version:  6 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -969,6 +969,11 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
     init();    
         
     //
+    // verify view closePlaybackView() slot is not yet called
+    //
+    QVERIFY( mController->mView->mViewClosed == false ); 
+
+    //
     // connect signal with controller attachVideo() slot
     //
     bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( attachVideo() ) );
@@ -979,10 +984,10 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
     emit commandSignal();     
     
     //
-    // verify command EMPXPbvCmdClose has been issued
+    // verify view closePlaybackView() slot is called
     //
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdClose ); 
-    
+    QVERIFY( mController->mView->mViewClosed == true ); 
+
     //
     // verify videoservices itemSelected() slot is called
     //
@@ -1003,6 +1008,45 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
     //
     extraUtil->decreaseReferenceCount();
     
+}
+
+// -------------------------------------------------------------------------------------------------
+// TestMPXVideoPlaybackControlsController::testslot_sendVideo
+// -------------------------------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackControlsController::testslot_sendVideo()
+{
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_sendVideo()") );
+        
+    //
+    // initialize controlscontroller
+    //
+    init();    
+        
+    //
+    // connect signal with controller sendVideoo() slot
+    //
+    bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
+    
+    //
+    // emit signal, this will in turns invoke mController sendVideo() slot
+    //
+    emit commandSignal();     
+    
+    //
+    // verify command EMPXPbvCmdClose has been issued
+    //
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause ); 
+        
+    //
+    // disconnect signal
+    //
+    disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
+    
+    //
+    // clean up
+    //
+    cleanup();      
 }
 
 

@@ -44,9 +44,9 @@ VideoThumbnailFetcherTester::~VideoThumbnailFetcherTester()
 // VideoThumbnailFetcherTester::startThumbnailFetches()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcherTester::startThumbnailFetches()
+void VideoThumbnailFetcherTester::startThumbnailFetches(bool cancelOngoingFetches)
 {
-    VideoThumbnailFetcher::startThumbnailFetches();
+    VideoThumbnailFetcher::startThumbnailFetches(cancelOngoingFetches);
 }
 
 // -----------------------------------------------------------------------------
