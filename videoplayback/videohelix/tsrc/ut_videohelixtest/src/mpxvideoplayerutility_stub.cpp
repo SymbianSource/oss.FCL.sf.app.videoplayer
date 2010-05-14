@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 17 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -425,6 +425,29 @@ void CMpxVideoPlayerUtility::OpenUrlL( const TDesC& aUrl, TInt aApId )
     TInt openError = ReadOpenError();
 }
 
+void CMpxVideoPlayerUtility::GetFrameL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetFrameL()"));    
+    
+    if ( iStifObserver )
+    {
+        TCallbackEvent* event = new TCallbackEvent;
+        event->iEvent = EPbCmdSetPosterFrame;
+        event->iData  = 0;
+        event->iError = KErrNone;
+        iStifObserver->HandleUtilityEvent( event );
+    }    
+    
+    iVideoPlaybackController->HandleFrameReady( KErrGeneral );    
+}
+ 
+CFbsBitmap& CMpxVideoPlayerUtility::GetBitmap()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetBitmap()"));
+    
+    iPosterFrameBitmap = new (ELeave) CFbsBitmap;    
+    return *iPosterFrameBitmap;
+}
 
 TInt CMpxVideoPlayerUtility::ReadOpenError()
 {
@@ -751,6 +774,11 @@ TInt CMpxVideoPlayerUtility::SurfaceParametersChanged()
 TInt CMpxVideoPlayerUtility::RemoveSurface()
 {
     return KErrNone;
+}
+
+void CMpxVideoPlayerUtility::SendSurfaceCreatedCommand() 
+{ 
+    MPX_DEBUG(_L("CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()")); 
 }
 
 #endif

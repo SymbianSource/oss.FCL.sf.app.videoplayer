@@ -41,7 +41,7 @@
     #ifdef _MPX_FILE_LOGGING_
         #define FU_DEBUG MPXDebug::FileLog
     #else        
-        #define FU_DEBUG MPXDebug::NullLog
+        #define FU_DEBUG
     #endif
 #endif 
 
@@ -49,15 +49,6 @@
 class MPXDebug
 {
     public:
-        inline static void NullLog( TRefByValue<const TDesC16> /*aFmt*/, ... )
-        {
-        }
-
-        inline static void NullLog( TRefByValue<const TDesC> /*aFunctionName*/,
-		                            TRefByValue<const TDesC16> /*aFmt*/, ... )
-        {
-        }
-
         inline static void FileLog( TRefByValue<const TDesC16> aFmt, ... )
         {
             VA_LIST list;
@@ -77,8 +68,8 @@ class MPXDebug
     #define MPX_DEBUG             TFusionLog::FusionLog
     #define MPX_ENTER_EXIT        TEnterExitLog _s
 #else
-    #define MPX_DEBUG             MPXDebug::NullLog
-    #define MPX_ENTER_EXIT        MPXDebug::NullLog
+    #define MPX_DEBUG
+    #define MPX_ENTER_EXIT
 #endif
 
 
@@ -160,8 +151,13 @@ _LIT(_KMPXErrorInfo, "#Fu# MPXVideo Error : error %d file %s line %d");
             FU_DEBUG(_KMPXErrorInfo, aErr, MPX_S(__FILE__), __LINE__);\
     }
 
-#define MPX_TRAP(_r, _s) TRAP(_r,_s);MPX_ERROR_LOG(_r);
-#define MPX_TRAPD(_r, _s) TRAPD(_r,_s);MPX_ERROR_LOG(_r);
+#ifdef _DEBUG
+    #define MPX_TRAP(_r, _s) TRAP(_r,_s);MPX_ERROR_LOG(_r);
+    #define MPX_TRAPD(_r, _s) TRAPD(_r,_s);MPX_ERROR_LOG(_r);
+#else // _DEBUG
+    #define MPX_TRAP(_r, _s) TRAP(_r,_s);(_r=_r);
+    #define MPX_TRAPD(_r, _s) TRAPD(_r,_s);(_r=_r);
+#endif // _DEBUG
 
 #endif  // __MPXVIDEO_DEBUG_H__
 

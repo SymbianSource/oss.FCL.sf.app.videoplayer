@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#17 %
+// Version : %version: da1mmcf#18 %
 
 
 
@@ -146,7 +146,7 @@ class QMPXVideoPlaybackControlsController : public QObject
 
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
-        bool isAttachOperation();
+        inline bool isAttachOperation();
 
     private:
         /**
@@ -266,6 +266,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         void controlsListUpdated();
         void attachVideo();
         void sendVideo();
+        void handleOrientationChanged( Qt::Orientation orientation );
 
     private:
         HbVideoBasePlaybackView                   *mView;
@@ -292,6 +293,7 @@ class QMPXVideoPlaybackControlsController : public QObject
 
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
+        Qt::Orientation                            mOrientation;
 };
 
 // INLINE METHODS
@@ -356,6 +358,19 @@ inline
 TPlaybackViewMode QMPXVideoPlaybackControlsController::viewMode()
 {
     return mViewMode;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isAttachOperation
+// -------------------------------------------------------------------------------------------------
+//
+inline
+bool QMPXVideoPlaybackControlsController::isAttachOperation()
+{        
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
+        mIsAttachOperation );
+    
+    return mIsAttachOperation;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

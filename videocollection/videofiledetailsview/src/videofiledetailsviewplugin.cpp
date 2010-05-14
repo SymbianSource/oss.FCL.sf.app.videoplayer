@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 73 %
+// Version : %version: 76 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -46,16 +46,29 @@
 #include "videodetailslabel.h"
 #include "videocollectiontrace.h"
 
+// Object names.
+const char* const VIDEO_DETAILS_OBJECT_NAME_THUMBLABEL          = "vc:FileDetailsThumbnailLabel";
+const char* const VIDEO_DETAILS_OBJECT_NAME_DELETE_VIDEO        = "vc:FileDetailsMessageBoxDeleteVideo";
+const char* const VIDEO_DETAILS_OBJECT_NAME_MESSAGE_BOX_WARNING = "vc:FileDetailsMessageBoxWarning";
+const char* const VIDEO_DETAILS_OBJECT_NAME_DELETE_ACTION       = "vc:FileDetailsDelete";
+const char* const VIDEO_DETAILS_OBJECT_NAME_NAVKEY_BACK         = "vc:FileDetailsNavKeyBack";
+const char* const VIDEO_DETAILS_OBJECT_NAME_TITLE_ANIM          = "vc:FileDetailsTitleAnim";
+
+// Docml constants.
 const char* const VIDEO_DETAILS_DOCML             = ":/xml/videofiledetails.docml";
 const char* const VIDEO_DETAILS_PORTRAIT          = "portrait";
 const char* const VIDEO_DETAILS_LANDSCAPE         = "landscape";
-const char* const VIDEO_DETAILS_GFX_DEFAULT       = ":/gfx/pri_large_video.svg";
 const char* const VIDEO_DETAILS_VIEW              = "videofiledetailsview";
 const char* const VIDEO_DETAILS_TITLE             = "mLblTitle";
 const char* const VIDEO_DETAILS_THUMBNAIL         = "mDetailsLabel";
 const char* const VIDEO_DETAILS_BUTTON            = "mButton";
 const char* const VIDEO_DETAILS_MENUACTION_DELETE = "mOptionsDelete";
 const char* const VIDEO_DETAILS_LISTWIDGET        = "mDetailsList";
+
+// Default thumbnail.
+const char* const VIDEO_DETAILS_GFX_DEFAULT       = "qtg_large_video";
+
+const int VIDEO_DETAILS_SECONDARY_TEXT_ROW_COUNT  = 255;
 
 // ---------------------------------------------------------------------------
 // Constructor
@@ -136,6 +149,7 @@ void VideoFileDetailsViewPlugin::createView()
     spec.setRole( HbFontSpec::Primary );
     mTitleAnim->setFontSpec( spec );
     mTitleAnim->setLoopCount(-1);
+    mTitleAnim->setObjectName(VIDEO_DETAILS_OBJECT_NAME_TITLE_ANIM);
 
 	connect(mModel->sourceModel(),
 			SIGNAL(shortDetailsReady(TMPXItemId)),
@@ -160,9 +174,9 @@ void VideoFileDetailsViewPlugin::createView()
 	// no deallocation needed for this since
 	// stackedwidget takes ownership
 	mThumbLabel = new VideoDetailsLabel;
-
 	mThumbLabel->setAlignment(Qt::AlignCenter);
-
+	mThumbLabel->setObjectName(VIDEO_DETAILS_OBJECT_NAME_THUMBLABEL);
+	
 	connect(mThumbLabel, SIGNAL(clicked(bool)), this, SLOT(startPlaybackSlot()));
 
 	thumbWidget->addWidget(mThumbLabel);
@@ -183,6 +197,7 @@ void VideoFileDetailsViewPlugin::createView()
         ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to delete action.");
         return;
     }
+    deleteAction->setObjectName(VIDEO_DETAILS_OBJECT_NAME_DELETE_ACTION);
 
 	if (mIsService)
 	{
@@ -195,7 +210,8 @@ void VideoFileDetailsViewPlugin::createView()
 
 	// Create navigation keys.
 	mNavKeyBackAction = new HbAction(Hb::BackNaviAction);
-
+	mNavKeyBackAction->setObjectName(VIDEO_DETAILS_OBJECT_NAME_NAVKEY_BACK);
+	
 	if (!mThumbnailManager)
 	{
 		mThumbnailManager = new ThumbnailManager();
@@ -212,7 +228,6 @@ void VideoFileDetailsViewPlugin::createView()
     }
     
     list->setEnabledAnimations(HbAbstractItemView::None);
-
 }
 
 // ---------------------------------------------------------------------------
@@ -484,19 +499,17 @@ void VideoFileDetailsViewPlugin::fullDetailsReadySlot(QVariant& variant)
         list->clear();
     }
 
-    //TODO: define maximum line count once >3 supported
     HbListViewItem *prototype = list->listItemPrototype();
-    prototype->setSecondaryTextRowCount(1, 3);
+    prototype->setSecondaryTextRowCount(1, VIDEO_DETAILS_SECONDARY_TEXT_ROW_COUNT);
 
     for(int i = 0; i< detailCount; i++) {
         if (metadata.contains(VideoDetailLabelKeys[i]))
         {
             HbListWidgetItem* listWidgetItem = new HbListWidgetItem();
             listWidgetItem->setEnabled(false);
-
-            listWidgetItem->setText( hbTrId(VideoDetailLabels[i]) );
-            listWidgetItem->setSecondaryText( metadata[VideoDetailLabelKeys[i]].toString() );
-            list->addItem( listWidgetItem );
+            listWidgetItem->setText( hbTrId(VideoDetailLabels[i]));
+            listWidgetItem->setSecondaryText(metadata[VideoDetailLabelKeys[i]].toString());
+            list->addItem(listWidgetItem);
         }
     }
 
@@ -578,8 +591,8 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
 
             HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
             messageBox->setAttribute(Qt::WA_DeleteOnClose);
+            messageBox->setObjectName(VIDEO_DETAILS_OBJECT_NAME_DELETE_VIDEO);
             messageBox->open(this, SLOT(deleteVideoDialogFinished(HbAction *)));
-            
         }
     }
 }
@@ -613,7 +626,6 @@ void VideoFileDetailsViewPlugin::deleteItem(QModelIndex index)
     mModel->deleteItems(list);
 }
 
-
 // ---------------------------------------------------------------------------
 // Slot: rowsRemovedSlot
 // ---------------------------------------------------------------------------
@@ -643,7 +655,7 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
     QString msg("");
     if(errorCode == VideoCollectionCommon::statusSingleDeleteFail)
     {
-        QString format = hbTrId("txt_videos_info_unable_to_delete_1_it_is_current"); 
+        QString format = hbTrId("txt_videos_info_unable_to_delete_1_it_is_current");
         if(additional.isValid())
         {
            msg = format.arg(additional.toString());
@@ -652,7 +664,10 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
     if(msg.count() > 0)
     {
         // show msg box if there's something to show
-        HbMessageBox::warning(msg);
+        HbMessageBox *messageBox = new HbMessageBox(msg, HbMessageBox::MessageTypeWarning);
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->setObjectName(VIDEO_DETAILS_OBJECT_NAME_MESSAGE_BOX_WARNING);
+        messageBox->show();
     }
 }
 
@@ -854,4 +869,4 @@ T* VideoFileDetailsViewPlugin::findObject(QString name)
 
 XQ_EXPORT_PLUGIN2( videofiledetailsview, VideoFileDetailsViewPlugin );
 
-// end of file
+// End of file

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#21 %
+// Version : %version: da1mmcf#22 %
 
 
 
@@ -44,7 +44,6 @@ const int KSeekingTimeOut = 250;
 QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar( 
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
-    , mFrameItem( NULL )
     , mDuration( -1 )
     , mDraggingPosition( 0 )
     , mSetPosition( -1 )
@@ -133,12 +132,11 @@ void QMPXVideoPlaybackProgressBar::initialize()
         //
         // Set framedrawer for semi transparent background
         //
-        mFrameItem = new HbFrameItem ( parentItem() );
-        mFrameItem->setGeometry( boundingRect() );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
-        mFrameItem->frameDrawer().setFillWholeRect( true );
-        mFrameItem->setVisible( false );
+        HbFrameItem *frameItem = new HbFrameItem();
+        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        frameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
+        frameItem->frameDrawer().setFillWholeRect( true );
+        setBackgroundItem( frameItem );
     }
 }
 
@@ -375,7 +373,7 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
         mProgressSlider->setEnabled( true );
     }
 
-    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
+    backgroundItem()->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
 }
 
 // -------------------------------------------------------------------------------------------------

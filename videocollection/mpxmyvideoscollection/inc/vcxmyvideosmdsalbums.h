@@ -359,8 +359,13 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
          * Called from RunL when albums remove completes.
          */
         void HandleRemoveAlbumsCompletedL();
+
+        /**
+         * Registers observing to MDS session.
+         */
+        void SetObservingL();
         
-    public:
+    protected:
 
         /**
         * From MMdEQueryObserver.
@@ -396,14 +401,12 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsAlbums) :
                     TObserverNotificationType aType,
                     const RArray<TMdERelation>& aRelationArray);
 
-#if 0 //not used
         /**
          * From MMdERelationObserver
          */
         void HandleRelationNotification(CMdESession& aSession, 
                 TObserverNotificationType aType,
                 const RArray<TItemId>& aRelationIdArray);
-#endif
         
     private:
         

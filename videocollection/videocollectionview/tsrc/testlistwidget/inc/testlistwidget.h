@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 25 %
+// Version : %version: 26 %
 
 #ifndef __TESTLISTWIDGET_H__
 #define __TESTLISTWIDGET_H__
@@ -104,11 +104,6 @@ private slots:
      * verifies longPressedSlot
      */
     void testLongPressedSlot();
-    
-    /**
-     * verifies panGesture
-     */
-    void testPanGesture();
     
     /**
      * verifies setContextMenu

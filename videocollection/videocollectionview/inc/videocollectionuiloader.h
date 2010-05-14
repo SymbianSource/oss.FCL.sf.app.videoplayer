@@ -78,24 +78,26 @@ public:
      * Returns the requested widget casted to correct type
      *
      * @param name Name of the widget
+     * @param loadIfNotFound Should the widget be loaded if not found in cache.
      * @return Pointer to the widget
      */
     template<class T>
-    T* findWidget(const QString &name)
+    T* findWidget(const QString &name, bool loadIfNotFound = true)
     {
-        return qobject_cast<T*>(doFindWidget(name));
+        return qobject_cast<T*>(doFindWidget(name, loadIfNotFound));
     }
 
     /**
      * Returns the requested object casted to correct type
      *
      * @param name Name of the object
+     * @param loadIfNotFound Should the widget be loaded if not found in cache.
      * @return Pointer to the object
      */
     template<class T>
-    T* findObject(const QString &name)
+    T* findObject(const QString &name, bool loadIfNotFound = true)
     {
-        return qobject_cast<T*>(doFindObject(name));
+        return qobject_cast<T*>(doFindObject(name, loadIfNotFound));
     }
     
     /**
@@ -141,9 +143,10 @@ protected:
      * Loads widget from document.
      * 
      * @param name, Widget name.
+     * @param loadIfNotFound Should the widget be loaded if not found in cache.
      * @return QGraphicsWidget*.
      */
-    QGraphicsWidget* doFindWidget(const QString &name);
+    QGraphicsWidget* doFindWidget(const QString &name, bool loadIfNotFound);
     
     /**
      * Loads object from document.
@@ -151,7 +154,7 @@ protected:
      * @param name, Object name.
      * @return QObject*.
      */
-    QObject* doFindObject(const QString &name);
+    QObject* doFindObject(const QString &name, bool loadIfNotFound);
     
     /**
      * Adds a ui section to async loading queue.

@@ -25,7 +25,8 @@ StubSignalReceiver::StubSignalReceiver() :
 mLatestPtr(0),
 mLatestItemId(TMPXItemId::InvalidId()),
 mLatestModifiedItemId(TMPXItemId::InvalidId()),
-mLatestInteger(-1)
+mLatestInteger(-1),
+mListComplete(false)
 {
     
 }
@@ -50,6 +51,7 @@ void StubSignalReceiver::resetLatestItems()
     mLatestModifiedItemId = TMPXItemId::InvalidId();
     mLatesListData.clear();
     mLatestInteger = -1;
+    mListComplete = false;
 }
 
 // -----------------------------------------------------------------------------
@@ -96,6 +98,15 @@ QList<TMPXItemId>& StubSignalReceiver::getLatestListData()
 int StubSignalReceiver::getLatestIntegerData()
 {
     return mLatestInteger;
+}
+
+// -----------------------------------------------------------------------------
+// getListComplete
+// -----------------------------------------------------------------------------
+//
+bool StubSignalReceiver::getListComplete()
+{
+    return mListComplete;
 }
 
 // -----------------------------------------------------------------------------
@@ -201,6 +212,15 @@ void StubSignalReceiver::itemDeletedSlot(TMPXItemId id)
 void StubSignalReceiver::itemModifiedSlot(const TMPXItemId &itemId)
 {
     mLatestModifiedItemId = itemId;
+}
+
+// -----------------------------------------------------------------------------
+// listCompleteSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::listCompleteSlot()
+{
+    mListComplete = true;
 }
 
 // -----------------------------------------------------------------------------

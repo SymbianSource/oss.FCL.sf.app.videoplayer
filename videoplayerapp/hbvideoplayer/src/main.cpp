@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 #include <QObject>
@@ -47,6 +47,20 @@ int main(int argc, char *argv[])
 
     // Install the translator
     app.installTranslator(&translator);
+
+    QTranslator translatorCommon;
+
+    loaded = false;
+
+    loaded = translatorCommon.load( "common_" + lang, QString("c:/resource/qt/translations") );
+
+    if (!loaded)
+    {
+        translatorCommon.load("common_" + lang, QString("z:/resource/qt/translations") );
+    }
+
+    // Install the common translator
+    app.installTranslator(&translatorCommon);
 
     // has the application been launched via XQ Service Framework
     bool isService = XQServiceUtil::isService();

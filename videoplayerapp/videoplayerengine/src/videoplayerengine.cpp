@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 27 %
+// Version : %version: da1mmcf#30 %
 
 
 #include <QApplication>
@@ -39,6 +39,7 @@ QVideoPlayerEngine::QVideoPlayerEngine( bool isService )
     : mIsService( isService )
     , mEmbedded( false )
     , mDelayedLoadDone( false )
+    , mIsPlayService( false )
     , mCurrentViewPlugin( 0 )
     , mPlaybackViewPlugin( 0 )
     , mCollectionViewPlugin( 0 )
@@ -120,25 +121,22 @@ void QVideoPlayerEngine::initialize()
 
     QList<XQPluginInfo> impls;
     XQPluginLoader::listImplementations("org.nokia.mmdt.MpxViewPlugin/1.0", impls);
-
-    //
-    // Pre-load collection plugin and create collection view
-    //
-    loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );
-    
-    //
-    // if app is opened via serviceFW create remaining views
-    // otherwise activate default view i.e. the collection view.    
-    //
-    if ( mIsService )
+        
+    if ( isPlayServiceInvoked() )
     {
         createPlayAndDetailsViews(); 
     }
     else
-    {        
-        activateView( MpxHbVideoCommon::CollectionView );
+    {
+        loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );   
+
+        if((mIsService && !(XQServiceUtil::interfaceName().contains("IVideoBrowse"))) || !mIsService)
+        {
+        	//Browse service will activate view once the category to be opened is informed from highway
+        	activateView( MpxHbVideoCommon::CollectionView );
+        }
     }
-        
+            
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -224,7 +222,9 @@ void QVideoPlayerEngine::createPlayAndDetailsViews()
         loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
     }
 
-    if ( ! mFileDetailsViewPlugin )
+    // details view need not be created for playback via serviceFW
+    if ( ! mIsPlayService && 
+         ! mFileDetailsViewPlugin )
     {
         loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );
     }
@@ -492,5 +492,29 @@ void QVideoPlayerEngine::setCurrentView()
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+// isPlayServiceInvoked()
+// -------------------------------------------------------------------------------------------------
+//
+bool QVideoPlayerEngine::isPlayServiceInvoked()
+{
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::isPlayServiceInvoked()"));       
+    
+    bool result = false;   
+    
+    if ( mIsService )
+    {
+        QString intface = XQServiceUtil::interfaceName();
+                        
+        if ( intface.contains("IVideoView") ||
+             intface.contains("IFileView") )
+        {
+            result = true;
+            mIsPlayService = true;
+        }
+    }
+    
+    return result;
+}
 
 // End of file

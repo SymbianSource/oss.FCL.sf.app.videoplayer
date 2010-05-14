@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 
@@ -228,7 +228,6 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
     iFileDetails->mRNFormat = false;
     iFileDetails->mDuration = 100;
     iFileDetails->mTvOutConnected  = false;
-    iFileDetails->mTvOutPlayAllowed = true;
     iFileDetails->mDrmProtected = false;
     iFileDetails->mMultiItemPlaylist = false;
     iFileDetails->mVideoHeight = 320;

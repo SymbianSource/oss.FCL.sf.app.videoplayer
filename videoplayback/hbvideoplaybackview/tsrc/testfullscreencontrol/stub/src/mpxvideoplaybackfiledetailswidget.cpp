@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -65,7 +65,7 @@ QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()
 void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         QMPXVideoPlaybackViewFileDetails* details )
 {
-
+    Q_UNUSED( details );
 }
 
 

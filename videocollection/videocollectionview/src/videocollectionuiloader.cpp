@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 22 %
 
 // INCLUDE FILES
 #include <qgraphicswidget.h>
@@ -199,7 +199,7 @@ void VideoCollectionUiLoader::setIsService(bool isService)
 // doFindWidget
 // ---------------------------------------------------------------------------
 //
-QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
+QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name, bool loadIfNotFound)
 {
 	FUNC_LOG;
     QGraphicsWidget *widget = 0;
@@ -211,7 +211,7 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
     }
 
     // 2. load from document and initialize
-    else
+    else if (loadIfNotFound)
     {
         // find object from queue
         int index = indexInQueue(name);
@@ -238,7 +238,7 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
 // doFindObject
 // ---------------------------------------------------------------------------
 //
-QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
+QObject* VideoCollectionUiLoader::doFindObject(const QString &name, bool loadIfNotFound)
 {
 	FUNC_LOG;
     QObject *object = 0;
@@ -250,7 +250,7 @@ QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
     }
 
     // 2. load from document and initialize
-    else
+    else if (loadIfNotFound)
     {
         // find object from queue
         int index = indexInQueue(name);
@@ -373,10 +373,8 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                     wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
                 if(model)
                 {
-                    // open and sort model
-                    model->open(VideoCollectionCommon::ELevelVideos);
-                    VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelVideos);
-                    
+                	VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelVideos);
+                	
                     // init widget
                     VideoServices *videoServices = 0;
                     if (mIsService)
@@ -393,9 +391,8 @@ void VideoCollectionUiLoader::initObject(QObject *object,
             		VideoCollectionCommon::EModelTypeCollections);
             if (model)
             {
-                model->open(VideoCollectionCommon::ELevelCategory);
                 VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelCategory);
-
+                
                 // initialize video collection widget
                 VideoListWidget *videoList =
                     qobject_cast<VideoListWidget*>(object);
@@ -417,6 +414,10 @@ void VideoCollectionUiLoader::initObject(QObject *object,
             		VideoCollectionCommon::EModelTypeCollectionContent);
             if (model)
             {
+                // collection content contains always a list of videos so we use 
+                // ELevelVideos as target for sorting
+                VideoCollectionViewUtils::sortModel(model, false, VideoCollectionCommon::ELevelVideos);
+                
                 VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
                 if (videoList)
                 {

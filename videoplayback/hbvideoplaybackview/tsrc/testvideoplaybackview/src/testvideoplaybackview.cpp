@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 9 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -134,13 +134,11 @@ void TestVideoPlaybackView::testHandlePluginError()
     verifyHandlePluginError( KErrMMDRMNotAuthorized );
     verifyHandlePluginError( KErrCANoRights );
     verifyHandlePluginError( KErrCANoPermission );
-    verifyHandlePluginError( KMPXVideoTvOutPlaybackNotAllowedClose );
     
     //
     // playback view remains open after displaying these error notes
     //
     verifyHandlePluginError( KMPXVideoCallOngoingError, false );
-    verifyHandlePluginError( KMPXVideoTvOutPlaybackNotAllowed, false );
     verifyHandlePluginError( KMPXVideoPlayOver2GDuringVoiceCallError, false );
             
     //
@@ -211,7 +209,7 @@ void TestVideoPlaybackView::testIssuePlayCommand()
     cleanup();
 }
 
-void TestVideoPlaybackView::testEvent()
+void TestVideoPlaybackView::testEventFilter()
 {
     setup();
     
@@ -223,14 +221,14 @@ void TestVideoPlaybackView::testEvent()
     //
     // declare foreground/background event
     //
-    QEvent* windowActivate   = new QEvent( QEvent::WindowActivate );
-    QEvent* windowDeactivate = new QEvent( QEvent::WindowDeactivate );
+    QEvent* appActivate   = new QEvent( QEvent::ApplicationActivate );
+    QEvent* appDeactivate = new QEvent( QEvent::ApplicationDeactivate );
     
     //
     // verify the returned value (consumed) of HbVideoBasePlaybackView::event() 
-    // for QEvent::WindowActivate is false
+    // for QEvent::ApplicationActivate is false
     //
-    QVERIFY( ! mVideoView->event( windowActivate ) );  
+    QVERIFY( ! mVideoView->eventFilter( NULL, appActivate ) );  
     
     //
     // verify view is in foreground
@@ -239,9 +237,9 @@ void TestVideoPlaybackView::testEvent()
 
     //
     // verify the returned value (consumed) of HbVideoBasePlaybackView::event() 
-    // for QEvent::WindowDeactivate is false
+    // for QEvent::ApplicationDeactivate is false
     //
-    QVERIFY( ! mVideoView->event( windowDeactivate ) );   
+    QVERIFY( ! mVideoView->eventFilter( NULL, appDeactivate ) );   
     
     //
     // verify view is in background
@@ -251,10 +249,18 @@ void TestVideoPlaybackView::testEvent()
     //
     // clean up
     //
-    delete windowActivate;
-    windowActivate = NULL;
-    delete windowDeactivate;
-    windowDeactivate = NULL;
+    if ( appActivate )
+    {
+        delete appActivate;
+        appActivate = NULL;
+    }
+
+    if ( appDeactivate )
+    {
+        delete appDeactivate;
+        appDeactivate = NULL;
+    }
+
     cleanup();
 }
 

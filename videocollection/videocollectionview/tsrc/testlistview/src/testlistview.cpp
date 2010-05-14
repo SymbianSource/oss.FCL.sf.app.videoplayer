@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 38 %
+// Version : %version: 41 %
 
 #define private public
 #include "videoservices.h"
@@ -406,7 +406,7 @@ void TestListView::testCreateAction()
 
 	HbAction* allVideos	= static_cast<HbAction*>(actions.at(0));
 	QVERIFY( allVideos->isCheckable() );
-	QCOMPARE( allVideos->icon().iconName(),	QString(":/images/qtg_mono_video_all.svg")	);
+	QCOMPARE( allVideos->icon().iconName(),	QString("qtg_mono_video") );
 	QVERIFY( allVideos->isChecked() );
 
 	HbAction* collections =	static_cast<HbAction*>(actions.at(1));
@@ -940,9 +940,18 @@ void TestListView::testModelReadySlot()
 {
     init();
     mTestView->mModelReady = false;
+    mTestView->mViewReady = false;
     connect( this, SIGNAL(testSignal()), mTestView, SLOT(modelReadySlot()) );
+    QSignalSpy spy(mTestView, SIGNAL(viewReady()));
     emit testSignal();
     QVERIFY(mTestView->mModelReady);
+    QVERIFY(mTestView->mViewReady);
+    QCOMPARE(spy.count(), 1);
+    spy.clear();
+    
+    emit testSignal();
+    QCOMPARE(spy.count(), 0);
+    
     cleanup();
 }
 
@@ -1246,6 +1255,7 @@ void TestListView::testUpdateSubLabel()
 {
 	init(true);
     setRowCount(1);
+    mTestView->mModelReady = true;
 	connect(this, SIGNAL(testLayoutChangedSignal()), mTestView, SLOT(layoutChangedSlot()));
 	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)), 
 	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
@@ -1300,18 +1310,23 @@ void TestListView::testShowHint()
     
     /////
     // hint widget showing
-    // model not ready (need to use another slot for this)
+    // model not ready, row count zero.
     mTestView->mModelReady = false;
+    setRowCount(0);
     mTestView->mCurrentList =  mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONWIDGET);
-    connect(this, SIGNAL(testSignal()), mTestView, SLOT(openAllVideosViewSlot()));
-    emit testSignal();
+    emit testLayoutChangedSignal();
     QVERIFY(hintWidget->isVisible() == false );
     QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
-    disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(openAllVideosViewSlot()));
+    
+    // model not ready, row count not zero.
+    setRowCount(1);
+    emit testLayoutChangedSignal();    
+    QVERIFY(hintWidget->isVisible() == false );
+    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
+    QVERIFY(mTestView->mModelReady);
     
     // model ready, row count not zero
     mTestView->mModelReady = true;
-    setRowCount(1);
     emit testLayoutChangedSignal();    
     QVERIFY(hintWidget->isVisible() == false );
     QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
@@ -1322,7 +1337,7 @@ void TestListView::testShowHint()
     QVERIFY(hintWidget->isVisible() == true );
     QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
 
-    // model ready, row count is zero show to be false
+    // model ready, row count is zero, show to be false
     connect(this, SIGNAL(testSignal()), mTestView, SLOT(openCollectionViewSlot()));
     emit testSignal();
     QVERIFY(hintWidget->isVisible() == false );
@@ -1519,6 +1534,8 @@ void TestListView::testCreateCollectionSlot()
     init(false);
     QVERIFY(connect(this, SIGNAL(testSignal()), mTestView, SLOT(createCollectionSlot())));
 
+    HbInputDialog *dialog = new HbInputDialog(); 
+    
     // not initialized, no mCurrentList
     emit testSignal();
     QCOMPARE(HbInputDialog::mGetTextCallCount, 0);
@@ -1528,28 +1545,36 @@ void TestListView::testCreateCollectionSlot()
     mTestView->activateView(TMPXItemId::InvalidId());
     
     // dialog canceled
-    HbInputDialog::mGetTextFails = true;
+    HbInputDialog::mValueCallCount = 0;
     emit testSignal();
+    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 1);
     QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
     QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "");
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
     
     // empty name
-    HbInputDialog::mGetTextFails = false;
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mValueReturnValue = "";
     HbInputDialog::mGetTextCallCount = 0;
-    HbInputDialog::mGetTextReturnValue = "";
     emit testSignal();
+    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 0);
     QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
     QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "");
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
     
     // Good case.
-    HbInputDialog::mGetTextReturnValue = "testAlbum";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mValueReturnValue = "testAlbum";
     HbInputDialog::mGetTextCallCount = 0;
     emit testSignal();
+    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 0);
     QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
     QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "testAlbum");
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
     
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mValueReturnValue = "";
     HbInputDialog::mGetTextCallCount = 0;
-    HbInputDialog::mGetTextReturnValue = QString();
     VideoSortFilterProxyModelData::mLastAddedAlbumName = "";
     
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(createCollectionSlot()));

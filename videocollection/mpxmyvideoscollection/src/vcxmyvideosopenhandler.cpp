@@ -219,6 +219,8 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
             {
             MPX_DEBUG1("CVcxMyVideosOpenHandler:: KVcxMvcCategoryIdAll: calling HandleOpen(iCache.iVideoList)");
             iCache.iVideoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            iCache.iVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
             iCollection.iObs->HandleOpen( iCache.iVideoList, KErrNone );                    
             }
         else
@@ -227,6 +229,8 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
             CMPXMedia* videoList = iCache.CreateVideoListByOriginL( origin );
             MPX_DEBUG1("CVcxMyVideosOpenHandler:: calling HandleOpen(new list)");
             videoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            iCache.iVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
             iCollection.iObs->HandleOpen( videoList, KErrNone );
             delete videoList;
             }
@@ -403,6 +407,8 @@ void CVcxMyVideosOpenHandler::HandleAlbumOpenL()
             //videolist complete
             CMPXMedia* videoList = album->CreateVideoListL();
             videoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            videoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete ); 
             iCollection.iObs->HandleOpen( videoList, KErrNone );
             delete videoList;
             iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
@@ -500,6 +506,11 @@ void CVcxMyVideosOpenHandler::HandleGetAlbumContentVideosRespL(
         MPX_DEBUG2("CVcxMyVideosOpenHandler:: First videos for album %d arrived, calling HandleOpen()", aAlbumId);
         
         iAlbumVideoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+        if ( aComplete )
+            {
+            iAlbumVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
+            }
         iCollection.iObs->HandleOpen( iAlbumVideoList, aError );
         iPendingAlbumOpenId = 0;
         }

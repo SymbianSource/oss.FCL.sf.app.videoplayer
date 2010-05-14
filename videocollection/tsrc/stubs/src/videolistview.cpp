@@ -246,4 +246,10 @@ void VideoListView::debugNotImplementedYet()
     // not stubbed
 }
 
+void VideoListView::createCollectionDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
 // end of file

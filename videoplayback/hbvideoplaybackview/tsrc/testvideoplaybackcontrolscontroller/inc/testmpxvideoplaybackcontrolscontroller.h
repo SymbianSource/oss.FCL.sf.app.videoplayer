@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 #define __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
@@ -56,14 +56,7 @@ private:
     
 private slots:
     
-    //
-    // test addFileDetails()
-    //
     void testAddFileDetails();
-    
-    //
-    // test handleEvent()
-    //
     void testHandleEventSetPosition();
     void testHandleEventSetDuration();
     void testHandleEventStateChanged();
@@ -117,11 +110,16 @@ private slots:
     //
     // test private slot attachVideo()
     //
-    void testslot_sendVideo();  
+    void testslot_sendVideo();
+
+    //
+    // test private slot handleOrientationChanged()
+    //
+    void testslot_handleOrientationChanged();
   
 signals:
-
     void commandSignal();
+    void commandSignal( Qt::Orientation );
     
 private:
 

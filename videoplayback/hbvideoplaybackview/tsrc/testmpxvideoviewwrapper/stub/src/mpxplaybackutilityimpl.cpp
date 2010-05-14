@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 4 %
 
 #include <bamdesca.h>
 #include <s32mem.h>
@@ -258,6 +258,7 @@ MMPXSource* CMPXPlaybackUtility::Source()
 //
 MMPXPlayerManager& CMPXPlaybackUtility::PlayerManager()
     {
+    return *this;
     }
 
 // ----------------------------------------------------------------------------
@@ -534,6 +535,7 @@ TInt CMPXPlaybackUtility::SubPlayerL() const
 //
 TUid CMPXPlaybackUtility::UidL() const
     {
+    return TUid::Uid( 0 );
     }
 
 // ----------------------------------------------------------------------------

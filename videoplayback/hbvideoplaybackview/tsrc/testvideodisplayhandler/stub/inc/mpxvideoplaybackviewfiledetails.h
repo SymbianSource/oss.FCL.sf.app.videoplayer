@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -70,7 +70,6 @@ class QMPXVideoPlaybackViewFileDetails : public QObject
         bool          mPartialPlayback;
         bool          mRNFormat;
         bool          mTvOutConnected;
-        bool          mTvOutPlayAllowed;
         bool          mDrmProtected;
         bool          mMultiItemPlaylist;
 

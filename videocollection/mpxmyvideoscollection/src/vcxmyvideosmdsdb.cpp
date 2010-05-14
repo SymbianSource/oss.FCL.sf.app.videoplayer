@@ -233,6 +233,7 @@ void CVcxMyVideosMdsDb::OpenMdsSessionL()
         if ( iAlbums )
             {
             iAlbums->GetSchemaDefinitionsL();
+            iAlbums->SetObservingL();
             }
         }
     else

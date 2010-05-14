@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  6 %
+// Version : %version:  8 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -339,6 +339,8 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult()"));  
 
+    mController->mOrientation = Qt::Horizontal;
+
     if ( value == EPbStateInitialised && 
             ( mController->mFileDetails->mPlaybackMode == EMPXVideoStreaming ||
               mController->mFileDetails->mPlaybackMode == EMPXVideoLiveStreaming ) )
@@ -578,7 +580,6 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventTvOutResult( bool 
         QVERIFY( ( mController->mFileDetails->mPlaybackMode == EMPXVideoLocal )? 
                    mController->mThumbNailState == EThumbNailRequsted : 
                    mController->mThumbNailState == EThumbNailNotAvailable ); 
-        QVERIFY( mController->mFileDetails->mTvOutPlayAllowed == value );      
         QVERIFY( mController->mViewMode == EAudioOnlyView );          
         QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdTvOutConnected );          
         QVERIFY( mController->mThumbnailManager->mThumbSize == ThumbnailManager::ThumbnailLarge );          
@@ -588,13 +589,11 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventTvOutResult( bool 
     else if ( mController->mFileDetails->mVideoEnabled )
     {
         QVERIFY( mController->mViewTransitionIsGoingOn == true );          
-        QVERIFY( mController->mFileDetails->mTvOutPlayAllowed == true );      
         QVERIFY( mController->mViewMode == EFullScreenView );          
     }
     else if ( ! mController->mFileDetails->mVideoEnabled )
     {
         QVERIFY( mController->mViewTransitionIsGoingOn == false );          
-        QVERIFY( mController->mFileDetails->mTvOutPlayAllowed == true );      
         QVERIFY( mController->mViewMode == EAudioOnlyView );          
     }
 
@@ -782,7 +781,8 @@ void TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()") );
     
     init();    
-    
+    mController->mOrientation = Qt::Horizontal;
+
     //
     // preset variables
     //
@@ -792,23 +792,23 @@ void TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()
     //
     // playing state
     //
-    mController->mState = EPbStatePlaying;                
-    mBaseVideoView->mouseReleaseEvent(0);    
+    mController->mState = EPbStatePlaying;
+    mBaseVideoView->mouseReleaseEvent(0);
     QVERIFY( mController->mControlsTimer->isActive() == true );
     for ( int i = 0 ; i < mController->mControls.count() ; i++ )
     {
-        QVERIFY( mController->mControls[i]->mVisibilityState == EPbStatePlaying );
+        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );
     }
     
     //
     // pause state
     //
     mController->mState = EPbStatePaused;
-    mBaseVideoView->mouseReleaseEvent(0);    
+    mBaseVideoView->mouseReleaseEvent(0);
     QVERIFY( mController->mControlsTimer->isActive() == false );
     for ( int i = 0 ; i < mController->mControls.count() ; i++ )
     {
-        QVERIFY( mController->mControls[i]->mVisibilityState == EPbStatePaused );    
+        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );    
     }
     
     cleanup();    
@@ -1049,8 +1049,54 @@ void TestMPXVideoPlaybackControlsController::testslot_sendVideo()
     cleanup();      
 }
 
+// -------------------------------------------------------------------------------------------------
+// TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged
+// -------------------------------------------------------------------------------------------------
+//
+void TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged()
+{
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged()") );
+        
+    //
+    // initialize controlscontroller
+    //
+    init();    
+        
+    //
+    // connect signal with controller handleOrientationChanged() slot
+    //
+    bool res = connect( this, SIGNAL( commandSignal( Qt::Orientation ) ),
+                        mController, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
+    
+    //
+    // emit signal, this will in turns invoke mController handleOrientationChanged() slot
+    //
+    mController->mOrientation = Qt::Vertical;
+
+    emit commandSignal( Qt::Horizontal );     
+    
+    //
+    // verify command EMPXPbvCmdClose has been issued
+    //
+    QVERIFY( mController->mOrientation == Qt::Horizontal ); 
+
+    mController->mState = EPbStatePlaying;                
+
+    for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+    {
+        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );    
+    }
+
+    //
+    // disconnect signal
+    //
+    disconnect( this, SIGNAL( commandSignal( Qt::Orientation ) ), 
+                mController, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
+    
+    //
+    // clean up
+    //
+    cleanup();      
+}
 
 // End of file
-    
-
-

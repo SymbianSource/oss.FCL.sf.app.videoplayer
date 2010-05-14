@@ -2,7 +2,4 @@
     <qresource prefix="/xml" >
         <file alias="videofiledetails.docml">videofiledetails.xml</file>
     </qresource>
-    <qresource prefix="/gfx" >
-        <file alias="pri_large_video.svg">pri_large_video.svg</file>
-    </qresource>
 </RCC>

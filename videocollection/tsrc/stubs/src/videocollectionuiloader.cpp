@@ -97,8 +97,9 @@ void VideoCollectionUiLoader::load(const QString &fileName, const QString &secti
     storeOrphans(list);
 }
 
-QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
+QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name, bool loadIfNotFound)
 {
+    Q_UNUSED(loadIfNotFound);
     QGraphicsWidget *widget = 0;
     if(VideoCollectionUiLoaderData::mFindFailure)
     {
@@ -111,8 +112,9 @@ QGraphicsWidget* VideoCollectionUiLoader::doFindWidget(const QString &name)
     return widget;
 }
 
-QObject* VideoCollectionUiLoader::doFindObject(const QString &name)
+QObject* VideoCollectionUiLoader::doFindObject(const QString &name, bool loadIfNotFound)
 {
+    Q_UNUSED(loadIfNotFound);
     QObject *object = 0;
     if(VideoCollectionUiLoaderData::mFindFailure)
     {
@@ -199,7 +201,7 @@ void VideoCollectionUiLoader::timerEvent(QTimerEvent *event)
 QObject* VideoCollectionUiLoader::createObject(const QString& type,
     const QString &name)
 {
-    QObject* object = doFindObject(name);
+    QObject* object = doFindObject(name, true);
     if (!object)
     {
         if (name == DOCML_NAME_VIEW)

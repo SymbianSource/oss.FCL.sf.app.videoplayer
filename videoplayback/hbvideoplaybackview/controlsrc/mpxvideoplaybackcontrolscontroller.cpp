@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#37 %
+// Version : %version: da1mmcf#39 %
 
 
 
@@ -26,18 +26,15 @@
 #include <f32file.h>
 
 #include <QTimer>
-#include <QFileInfo>
 #include <thumbnailmanager_qt.h>
 #include <xqserviceutil.h>
 
 #include <hblabel.h>
-#include <hbiconitem.h>
-#include <hbratingslider.h>
-#include <hbiconanimator.h>
 #include <hbvolumesliderpopup.h>
 #include <hbtransparentwindow.h>
 #include <hbiconanimationmanager.h>
 #include <shareui.h>
+#include <hbinstance.h>
 
 #include "mpxvideoviewwrapper.h"
 #include "hbvideobaseplaybackview.h"
@@ -93,12 +90,22 @@ void QMPXVideoPlaybackControlsController::initializeController()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::initializeController()"));
 
+    mOrientation = hbInstance->allMainWindows()[0]->orientation();
+    bool ok = connect( hbInstance->allMainWindows()[0], SIGNAL( orientationChanged( Qt::Orientation ) ),
+                       this, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
+
+    MPX_DEBUG(
+        _L("QMPXVideoPlaybackControlsController::initializeController() orientation = %d, ok =%d"), 
+        mOrientation, ok );
+
     setParent( mView );
+
+    mView->hideItems( Hb::AllItems );
 
     //
     // Create layout loader
     //
-    bool ok = false;
+    ok = false;
     mLoader = new QMPXVideoPlaybackDocumentLoader( this );
     mLoader->load( KMPXPLAYBACKVIEW_XML, &ok );
 
@@ -180,9 +187,10 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()"));
 
     disconnect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
-
     disconnect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
     disconnect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
+    disconnect( hbInstance->allMainWindows()[0], SIGNAL( orientationChanged( Qt::Orientation ) ),
+                this, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
 
     mView->setWidget( NULL );
 
@@ -280,21 +288,6 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
         mVolumeControl->setValue( 0 );
         mVolumeControl->setEnabled( false );
     }
-
-    //
-    // If title is not available, show clip name
-    //
-    QString title = mFileDetails->mTitle;
-
-    if ( title.count() == 0 )
-    {
-        QFileInfo fileInfo( mFileDetails->mClipName );
-        title = fileInfo.baseName ();
-    }
-
-    QGraphicsWidget *widget = mLoader->findWidget( QString( "title" ) );
-    HbLabel *titleLabel = qobject_cast<HbLabel*>( widget );
-    titleLabel->setPlainText( title );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -578,7 +571,6 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
             QGraphicsWidget *widget = mLoader->findWidget( QString( "fileDetailsLayout" ) );
             QMPXVideoPlaybackFileDetailsWidget *fileDetails = 
                 qobject_cast<QMPXVideoPlaybackFileDetailsWidget*>( widget );
-            fileDetails->initialize();
 
             control = new QMPXVideoPlaybackFullScreenControl( this,
                                                               controlIndex,
@@ -713,7 +705,7 @@ void QMPXVideoPlaybackControlsController::showControls()
 
     resetDisappearingTimers( EMPXTimerReset );
 
-    if ( ! mViewTransitionIsGoingOn )
+    if ( ! mViewTransitionIsGoingOn && mOrientation == Qt::Horizontal )
     {
         for ( int i = 0 ; i < mControls.count() ; i++ )
         {
@@ -728,7 +720,7 @@ void QMPXVideoPlaybackControlsController::showControls()
 //
 bool QMPXVideoPlaybackControlsController::isVisible()
 {
-    bool visible = EFalse;
+    bool visible = false;
 
     for ( int i = 0 ; i < mControls.count() ; i++ )
     {
@@ -736,7 +728,7 @@ bool QMPXVideoPlaybackControlsController::isVisible()
         {
             if ( mControls[i]->isVisible() )
             {
-                visible = ETrue;
+                visible = true;
             }
 
             break;
@@ -877,7 +869,7 @@ void QMPXVideoPlaybackControlsController::updateState()
 //
 bool QMPXVideoPlaybackControlsController::realFormat( QString filename )
 {
-    bool realFormat = EFalse;
+    bool realFormat = false;
 
     if ( !filename.isNull() && !filename.isEmpty() )
     {
@@ -904,7 +896,7 @@ bool QMPXVideoPlaybackControlsController::realFormat( QString filename )
 //
 bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& des )
 {
-    bool realFormat = EFalse;
+    bool realFormat = false;
     TParse filePath;
 
     _LIT(KMPXRMEXT, ".R" );
@@ -967,7 +959,7 @@ bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& d
         // RealMedia Branding
         if ( ! buf.Compare( KMPXRMEXT ) )
         {
-            realFormat = ETrue;
+            realFormat = true;
         }
     }
 
@@ -992,7 +984,7 @@ bool QMPXVideoPlaybackControlsController::realFormatForLocal()
     {
         realFormat = true;
     }
-        
+
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::realFormatForLocal() [%d]"), realFormat);
 
     return realFormat;
@@ -1048,7 +1040,7 @@ void QMPXVideoPlaybackControlsController::handleErrors()
 //
 bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
 {
-    bool visible = EFalse;
+    bool visible = false;
 
     for ( int i = 0 ; i < mControls.count() ; i++ )
     {
@@ -1056,7 +1048,7 @@ bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
         {
             if ( mControls[i]->isVisible() )
             {
-                visible = ETrue;
+                visible = true;
             }
 
             break;
@@ -1345,18 +1337,6 @@ void QMPXVideoPlaybackControlsController::handleThumbnailReady(
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::isAttachOperation
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::isAttachOperation()
-{        
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
-	    mIsAttachOperation );
-    
-    return mIsAttachOperation;
-}
-
-// -------------------------------------------------------------------------------------------------
 // QMPXVideoPlaybackControlsController::attachVideo()
 // -------------------------------------------------------------------------------------------------
 //
@@ -1398,6 +1378,24 @@ void QMPXVideoPlaybackControlsController::sendVideo()
     QStringList fileList;
     fileList.append( mFileDetails->mClipName );
     dlg.send( fileList, true );   
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleOrientationChanged()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleOrientationChanged( Qt::Orientation orientation )
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::handleOrientationChanged()"),
+                   _L("old orientation %d, new orientation = %d"), mOrientation, orientation );
+
+    Qt::Orientation  oldOrientaiton = mOrientation;
+    mOrientation = orientation;
+
+    if ( oldOrientaiton == Qt::Vertical && orientation == Qt::Horizontal )
+    {
+        showControls();
+    }
 }
 
 // End of File

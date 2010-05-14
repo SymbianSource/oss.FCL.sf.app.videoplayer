@@ -19,22 +19,49 @@
 #ifndef HBMESSAGEBOX_H
 #define HBMESSAGEBOX_H
 
+#include <qobject.h>
 #include <qstring.h>
+#include "hbaction.h"
 
 class QGraphicsWidget;
 class QGraphicsScene;
 class QGraphicsItem;
 
-class HbMessageBox
+class HbMessageBox : public QObject
 {   
+    Q_OBJECT
+    
 public:
+    enum MessageBoxType {
+        MessageTypeInformation,
+        MessageTypeQuestion,
+        MessageTypeWarning
+    };
+    
+    HbMessageBox(MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
+    HbMessageBox(const QString &text, MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
+    ~HbMessageBox();
+    
+    /**
+    * Create new HbMessageBox and call emitDialogFinished after this one to finish the sequence.
+     */
+    void open( QObject* receiver = 0, const char* member = 0 );
+    
+    void emitDialogFinished( QObject* receiver, const char* member, int actionNum );
+
+    void show();
+    
+    void setAttribute(int attribute);
+    
     /** stubbed from HbMessgeBox */
-    static bool question(const QString &questionText,
-        const QString &primaryButtonText = QString(),
-        const QString &secondaryButtonText = QString(),
-        QGraphicsWidget *headWidget = 0,
-        QGraphicsScene *scene = 0,
-        QGraphicsItem *parent = 0);
+/*    static void question(const QString &questionText,
+                            QObject *receiver,
+                            const char *member,
+                            const QString &primaryButtonText = tr("Yes"),
+                            const QString &secondaryButtonText = tr("No"),
+                            QGraphicsWidget *headWidget = 0,
+                            QGraphicsScene *scene = 0,
+                            QGraphicsItem *parent = 0 );*/
 
     /** stubbed from HbMessgeBox */
     static void information(const QString &informationText,
@@ -47,8 +74,20 @@ public:
         QGraphicsWidget *headWidget = 0,
         QGraphicsScene *scene = 0,
         QGraphicsItem *parent = 0 );
+    
+    QList<HbAction*> actions() const
+    {
+        return mActions;
+    }
+
+signals:
+
+    void finished(HbAction *action);
+    
+public:
+    
+    QList<HbAction*> mActions;
+    
 };
-
-
 
 #endif // HBMESSAGEBOX_H

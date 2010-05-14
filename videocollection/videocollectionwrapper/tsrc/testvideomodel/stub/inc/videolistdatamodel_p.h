@@ -315,7 +315,12 @@ public slots:
      * not used in stub
      */
     void itemDeletedSlot(TMPXItemId id);
-
+    
+    /**
+     * not used in stub
+     */
+    void listCompleteSlot();
+    
 public:    
     
     /**

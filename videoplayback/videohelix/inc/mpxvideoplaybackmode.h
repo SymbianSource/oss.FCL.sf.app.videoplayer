@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKMODE_H_
@@ -37,6 +37,7 @@
 //
 class CMPXVideoPlaybackController;
 class CMPXVideoDlMgrIf;
+class CMPXVideoPosterFrameSetter;
 
 
 //
@@ -71,6 +72,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
         virtual TBool CanPlayNow();
         virtual void OpenFileL( const TDesC& aMediaFile );
         virtual void OpenFileL( const RFile& aMediaFile );
+        virtual void HandleSetPosterFrame();
+        virtual void HandleFrameReady(TInt aError);
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         virtual void OpenFile64L( const RFile64& aMediaFile );
@@ -95,6 +98,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
         //  Data
         //
         CMPXVideoPlaybackController*        iVideoPlaybackCtlr;   // not owned
+        
+        CMPXVideoPosterFrameSetter*         iPosterFrameSetter;
 
 };
 
@@ -113,6 +118,8 @@ class CMPXLocalPlaybackMode : public CMPXVideoPlaybackMode
 
         // Methods where video plabkack behavior varies for local media
         inline virtual TInt GetMode();
+        virtual void HandleSetPosterFrame();
+        virtual void HandleFrameReady(TInt aError);
 };
 
 

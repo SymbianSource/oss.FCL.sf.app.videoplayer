@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -34,13 +34,14 @@ class HbLabel : public HbWidget
         virtual ~HbLabel();
 
     public:
-        void setVisible( bool visible );
-       
+        void setVisible( bool visible );       
         bool isVisible();
+        void setPlainText( QString string );
 
     public:
         bool mVisible;
+        QString mString;
 };
 
-#endif /*HBPUSHBUTTON_H*/
+#endif /*HBLABEL_H_*/
 

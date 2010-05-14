@@ -187,7 +187,8 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     CMPXCollectionPath* collectionPath = 0;
     TRAP_IGNORE(
            collectionPath =  CMPXCollectionPath::NewL();
-           collectionPath->AppendL( KVcxUidMyVideosMpxCollection ););
+           collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
+           );
     
     // empty array, path exists level incorrect (new video list, not category neither album level)     
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
@@ -204,7 +205,8 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
           collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
           collectionPath->AppendL( KVcxMvcCategoryIdAll););
 
-    // array of items from different levels, everything is reported 
+    // array of items from different levels, everything is reported
+    // first call does not contain the KVcxMediaMyVideosInt32Value.
     mStubCollectionClient->setCollectionLevel(VideoCollectionCommon::ELevelCategory);
     mMediaFactory->putArrayContent(array, mMediaFactory->newMedia(1, 2));
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
@@ -213,15 +215,19 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
+    QVERIFY(mSignalReceiver->getListComplete() == false);
 
-    
     mStubCollectionClient->setCollectionLevel(VideoCollectionCommon::ELevelVideos);
     delete array;
-    array = mMediaFactory->newMediaArray();  
+    array = mMediaFactory->newMediaArray();
     mMediaFactory->putArrayContent(array, mMediaFactory->newMedia(1));
     mMediaFactory->putArrayContent(array, mMediaFactory->newMedia(2));
     mMediaFactory->putArrayContent(array, mMediaFactory->newMedia(3));
 
+    // second call contains the KVcxMediaMyVideosInt32Value, but it's not equal to EVcxMyVideosVideoListComplete
+    int invalid(-100);
+    mMediaFactory->putTValue<int>(media, KVcxMediaMyVideosInt32Value, invalid);
+    
     mMediaFactory->putValuePtr<CMPXMediaArray>(media, KMPXMediaArrayContents, array);
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
     mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
@@ -229,6 +235,7 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
+    QVERIFY(mSignalReceiver->getListComplete() == false);
     
     delete collectionPath;
     collectionPath = 0;
@@ -238,12 +245,16 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
          collectionPath->AppendL( KVcxMvcMediaTypeCategory););
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
     
+    // third call contains KVcxMediaMyVideosInt32Value with value EVcxMyVideosVideoListComplete.
+    int listComplete(EVcxMyVideosVideoListComplete);
+    mMediaFactory->putTValue<int>(media, KVcxMediaMyVideosInt32Value, listComplete);
+    
     mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
        
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
-    
+    QVERIFY(mSignalReceiver->getListComplete());
     
     CMPXMediaArray *gottenArray = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(gottenArray->Count() == 3);

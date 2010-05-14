@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: da1mmcf#12 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -97,6 +97,13 @@ void TestVideoPlayerEngine::init( bool isService )
     mVideoServices         = 0;
 
     mTestObject = new QVideoPlayerEngine(isService);
+    
+    if ( isService )
+    {
+        mTestObject->mIsPlayService = true;
+    }
+    		
+    
 }
 
 void TestVideoPlayerEngine::cleanup()
@@ -214,10 +221,10 @@ void TestVideoPlayerEngine::testInitializeService()
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
+    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
+    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
     QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
+    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
     QVERIFY(mTestObject->mPlaybackWrapper != 0);
     QVERIFY(mTestObject->mVideoServices != 0);
     QVERIFY(mTestObject->mIsService == true);
@@ -291,10 +298,10 @@ void TestVideoPlayerEngine::testMultipleInitializeService()
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
+    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
+    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
     QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
+    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
     QVERIFY(mTestObject->mVideoServices != 0);
     QVERIFY(mTestObject->mIsService == true);
     QVERIFY(VideoServices::mReferenceCount == 1);

@@ -15,12 +15,13 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 24 %
 
 // INCLUDE FILES
 #include <qapplication.h>
 #include <qpixmap.h>
 #include <qtimer.h>
+#include <qpainter.h>
 #include <mpxmediageneraldefs.h>
 #include <hbicon.h>
 
@@ -45,12 +46,16 @@ const int THUMBNAIL_READY_SIGNAL_TIMEOUT = 50;
 // Priority for background thumbnail fetches.
 const int BACKGROUND_FETCH_PRIORITY = 3000;
 
+// Size for default thumbnail, these match with large thumbnail in lists. 
+const int DEFAULT_THUMBNAIL_WIDTH = 114;
+const int DEFAULT_THUMBNAIL_HEIGHT = 64;
+
 /**
  * global qHash function required fo creating hash values for TMPXItemId -keys
  */
 inline uint qHash(TMPXItemId key) 
-{ 
-    QPair<uint, uint> keyPair(key.iId1, key.iId2); 
+{
+    QPair<uint, uint> keyPair(key.iId1, key.iId2);
 
     return qHash(keyPair);
 }
@@ -430,7 +435,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
     {
         if(!mDefaultThumbnails.contains(defaultIdVideo))
         {
-            mDefaultThumbnails[defaultIdVideo] = HbIcon(":/icons/default_thumbnail_video.svg");
+            mDefaultThumbnails[defaultIdVideo] = loadIcon("qtg_large_video");
         }
         return &mDefaultThumbnails[defaultIdVideo].qicon();
     }
@@ -441,7 +446,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
         {
             if(!mDefaultThumbnails.contains(defaultIdAlbum))
             {
-                mDefaultThumbnails[defaultIdAlbum] = HbIcon("qtg_large_video_collection");
+                mDefaultThumbnails[defaultIdAlbum] = loadIcon("qtg_large_video_collection");
             }
             return &mDefaultThumbnails[defaultIdAlbum].qicon();
         }
@@ -453,7 +458,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
             {
                 if(!mDefaultThumbnails.contains(defaultIdDownloads))
                 {
-                    mDefaultThumbnails[defaultIdDownloads] = HbIcon("qtg_large_video_download");
+                    mDefaultThumbnails[defaultIdDownloads] = loadIcon("qtg_large_video_download");
                 }
                 return &mDefaultThumbnails[defaultIdDownloads].qicon();
             }
@@ -462,7 +467,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
             {
                 if(!mDefaultThumbnails.contains(defaultIdCaptured))
                 {
-                    mDefaultThumbnails[defaultIdCaptured] = HbIcon("qtg_large_video_capture");
+                    mDefaultThumbnails[defaultIdCaptured] = loadIcon("qtg_large_video_capture");
                 }
                 return &mDefaultThumbnails[defaultIdCaptured].qicon();
             }
@@ -471,11 +476,61 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
             {
                 if(!mDefaultThumbnails.contains(defaultIdAlbum))
                 {
-                    mDefaultThumbnails[defaultIdAlbum] = HbIcon("qtg_large_video_collection");
+                    mDefaultThumbnails[defaultIdAlbum] = loadIcon("qtg_large_video_collection");
                 }
                 return &mDefaultThumbnails[defaultIdAlbum].qicon();
             }
         }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailDataPrivate::loadIcon()
+// -----------------------------------------------------------------------------
+//
+HbIcon VideoThumbnailDataPrivate::loadIcon(QString iconName)
+{
+    HbIcon icon(iconName);
+    
+    if(!icon.isNull())
+    {
+        QPixmap dest = QPixmap(DEFAULT_THUMBNAIL_WIDTH, DEFAULT_THUMBNAIL_HEIGHT);
+
+        // Scale the icon into the thumbnail area.
+        QPixmap source = icon.pixmap();
+        // Smooth scaling is very expensive (size^2). Therefore we reduce the size
+        // to 2x of the destination size and using fast transformation before doing final smooth scaling.
+        if(source.size().width() > (6*dest.width()) || source.size().height() > (6*dest.height()))
+        {
+            QSize intermediate_size = QSize( dest.width() * 2, dest.height() * 2 );
+            source = source.scaled(intermediate_size, Qt::KeepAspectRatio, Qt::FastTransformation );
+        }
+        QPixmap scaled = source.scaled(dest.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+        // Center the icon.
+        int xDiff = 0;
+        int yDiff = 0;
+        if(dest.width() > scaled.width())
+        {
+            xDiff = (dest.width() - scaled.width()) / 2;
+        }
+        if(dest.height() > scaled.height())
+        {
+            yDiff = (dest.height() - scaled.height()) / 2;
+        }
+        
+        // Paint it.
+        QPainter painter(&dest);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.fillRect(dest.rect(), Qt::transparent);
+        painter.drawPixmap(xDiff, yDiff, scaled.width(), scaled.height(), scaled);
+        painter.end();
+        
+        return HbIcon(dest);
+    }
+    else
+    {
+        return HbIcon();
     }
 }
 

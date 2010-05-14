@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 #ifndef VIDEOSERVICEBROWSE_H
 #define VIDEOSERVICEBROWSE_H
@@ -25,13 +25,14 @@
 
 // FORWARD DECLARATIONS
 class VideoServices; 
+class QLatin1String;
 
 class VideoServiceBrowse : public XQServiceProvider
 {
     Q_OBJECT
     
 public:
-    VideoServiceBrowse( VideoServices *parent = 0 );
+    VideoServiceBrowse( VideoServices *parent, QLatin1String service );
     ~VideoServiceBrowse();
     
 public:
@@ -68,6 +69,14 @@ public:
      */
     int sortRole() const;
     
+    /**
+     * Returns service active status
+     *
+     * @return bool true if active, false if not active
+     *
+     */
+    bool isActive();
+
 public slots:
 
     /**
@@ -79,6 +88,15 @@ public slots:
      *  @return None
      */
     void browseVideos(const QString &title, int category, int sortRole);
+
+    /**
+     *  Browse video
+     *
+     *  @param category, Category which type of videos are browsed
+     *  @param sort, Sort type.
+     *  @return None
+     */
+    void browseVideos(int category, int sortRole);
 
 private:
     /** request index of the service */

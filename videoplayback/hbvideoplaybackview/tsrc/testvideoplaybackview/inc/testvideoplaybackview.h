@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 6 %
 
 #ifndef __TESTVIDEOPLAYBACKVIEW_H__
 #define __TESTVIDEOPLAYBACKVIEW_H__
@@ -60,7 +60,7 @@ private slots:
     void testShowDialog();
     void testGetWindow();
     void testIssuePlayCommand();
-    void testEvent();
+    void testEventFilter();
     void testClosePlaybackView();
     void testMousePressEvent();
     void testMouseReleaseEvent();

@@ -75,5 +75,3 @@ LIBS += -lmpxcommon.dll \
         -lestor.dll \
         -lcentralrepository.dll \
         -lflogger.dll
-        
-RESOURCES += data/videocollectionwrapper.qrc

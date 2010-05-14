@@ -29,11 +29,11 @@
 #define DISABLE_TRACE 0
 
 /**
- * 0 = Tracing into RDebug in all builds.
- * 1 = Tracing into RDebug in winscw, file in ARM. (Default)
+ * 0 = Tracing into RDebug in all builds. (Default)
+ * 1 = Tracing into RDebug in winscw, file in ARM.
  * 2 = Tracing into file in all builds. 
  */
-#define TRACE_OUTPUT 1
+#define TRACE_OUTPUT 0
 
 //-----------------------------------------------------------------------------
 // Trace configuration

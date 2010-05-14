@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -85,6 +85,12 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
     if ( name == "fileDetails" )
     {
         object = new HbListWidget();
+        object->setObjectName( name );
+        mWidgets.append( object );
+    }
+    else if ( name == "content" )
+    {
+        object = new QGraphicsWidget();
         object->setObjectName( name );
         mWidgets.append( object );
     }

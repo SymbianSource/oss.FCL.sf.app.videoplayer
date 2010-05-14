@@ -22,10 +22,11 @@
 #include "hbdocumentloader.h"
 #include "hbstackedwidget.h"
 #include "hbcheckbox.h"
+#include "hbinputdialog.h"
 #include "hbdialog.h"
 #include "hbwidget.h"
 #include "hblistview.h"
-#include "hbinputdialog.h"
+#include "hbmessagebox.h"
 
 #include "testvideolistselectiondialog.h"
 
@@ -590,33 +591,35 @@ void TestVideoListSelectionDialog::testFinishedSlot()
     QVERIFY(VideoSortFilterProxyModelData::mItemIds.at(0) == TMPXItemId(1,0));
     QVERIFY(VideoSortFilterProxyModelData::mItemIds.at(1) == TMPXItemId(2,0));
     
+    HbInputDialog *dialog = new HbInputDialog();
     
     VideoCollectionViewUtilsData::mLastError = -1;
     //  mSelectedAlbumId == TMPXItemId::InvalidId())
     mpxId = TMPXItemId::InvalidId();
-    //    queryNewAlbumSelected does not set selected
-    HbInputDialog::mGetTextFails = true;   
+    // query for new album name does not set selected
     mTestObject->setupContent(VideoListSelectionDialog::ESelectCollection, mpxId);
     mTestObject->mSelectedVideos.insert(TMPXItemId(1,0));
     mTestObject->mSelectedVideos.insert(TMPXItemId(2,0));
     VideoSortFilterProxyModelData::reset();
     VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId::InvalidId();
-    mTestObject->exec();     
+    mTestObject->exec();
+    dialog->emitDialogFinished(mTestObject, SLOT(newAlbumNameDialogFinished(HbAction *)), 1); // No selected.
     // type of selection does not change
-    QVERIFY(mTestObject->mTypeOfSelection == VideoListSelectionDialog::ESelectCollection);
+    QVERIFY(mTestObject->mTypeOfSelection == VideoListSelectionDialog::EAddToCollection);
     // since there's no selected videos, status code does not change
     QVERIFY(VideoCollectionViewUtilsData::mLastError == -1);
     QVERIFY(VideoSortFilterProxyModelData::mLastItemId == TMPXItemId::InvalidId());
     QVERIFY(!VideoSortFilterProxyModelData::mItemIds.count());
  
-    //    queryNewAlbumSelected sets selected
-    HbInputDialog::mGetTextFails = false;   
+    // query for new album name sets selected
     mTestObject->setupContent(VideoListSelectionDialog::ESelectCollection, mpxId);
     mTestObject->mSelectedVideos.insert(TMPXItemId(1,0));
     mTestObject->mSelectedVideos.insert(TMPXItemId(2,0));
     VideoSortFilterProxyModelData::reset();
     VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId(1,2);
+    HbInputDialog::mValueReturnValue = QVariant(QString("testname"));
     mTestObject->exec();  
+    dialog->emitDialogFinished(mTestObject, SLOT(newAlbumNameDialogFinished(HbAction *)), 0); // Yes selected.
     // type of selection has changed
     QVERIFY(mTestObject->mTypeOfSelection == VideoListSelectionDialog::EAddToCollection);
     // videos added into collection
@@ -679,13 +682,13 @@ void TestVideoListSelectionDialog::testFinishedSlot()
     VideoCollectionViewUtilsData::mLastError = -1;
     // selected album exist, selected videos exists, name for selected album exist
     // (using ESelectCollection type to fetch albumname)
-    HbInputDialog::mGetTextFails = false;   
     mTestObject->setupContent(VideoListSelectionDialog::ESelectCollection, mpxId);
     mTestObject->mSelectedVideos.insert(TMPXItemId(1,0));
     mTestObject->mSelectedVideos.insert(TMPXItemId(2,0));
     VideoSortFilterProxyModelData::reset();
     VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId(1,2);
-    mTestObject->exec();  
+    mTestObject->exec();
+    dialog->emitDialogFinished(mTestObject, SLOT(newAlbumNameDialogFinished(HbAction *)), 0); // Yes selected.
     // type of selection has changed
     QVERIFY(mTestObject->mTypeOfSelection == VideoListSelectionDialog::EAddToCollection);
     // videos added into collection

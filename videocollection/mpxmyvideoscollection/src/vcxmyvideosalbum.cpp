@@ -294,8 +294,8 @@ void CVcxMyVideosAlbum::AppendToVideoListL( CMPXMedia& aFromVideoList,
 //
 void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
     {
+    TInt videoCount = 0;
     TUint32 count = iVideoList.Count();
-    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
     TInt newCount = 0;
     CMPXMedia* video;
     CMPXMedia* latestNewVideo = NULL;
@@ -308,6 +308,7 @@ void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
         video = iCollection.iCache->FindVideoByMdsIdL( iVideoList[i].iMdsId, pos );
         if ( video )
             {
+            videoCount++;
             flags = TVcxMyVideosCollectionUtil::FlagsL( *video );
             if ( flags & EVcxMyVideosVideoNew )
                 {
@@ -321,7 +322,7 @@ void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
                 }
             }
         }
-    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
+    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, videoCount );
     iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryNewItemCount, newCount );
     if ( latestNewVideo )
         {

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 37 %
+// Version : %version: 38 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -451,8 +451,8 @@ void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
     // signal that album has been updated
     emit q_ptr->albumChanged();
 
-    // signal that model is ready
-    emit q_ptr->modelReady();
+    // signal that model has changed.
+    emit q_ptr->modelChanged();
 }
 
 
@@ -497,9 +497,8 @@ void VideoListDataModelPrivate::newVideoListSlot( CMPXMediaArray *newVideoList )
     {
         q_ptr->beginInsertRows(QModelIndex(), startIndex, endIndex);
         q_ptr->endInsertRows();
+        emit q_ptr->modelChanged();
     }
-
-	emit q_ptr->modelReady();
 }
 
 // -----------------------------------------------------------------------------
@@ -888,6 +887,15 @@ void VideoListDataModelPrivate::itemModifiedSlot(const TMPXItemId &itemId)
             emit q_ptr->itemModified(itemId);
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+// listCompleteSlot 
+// -----------------------------------------------------------------------------
+//
+void VideoListDataModelPrivate::listCompleteSlot()
+{
+    emit q_ptr->modelReady();
 }
 
 // End of file

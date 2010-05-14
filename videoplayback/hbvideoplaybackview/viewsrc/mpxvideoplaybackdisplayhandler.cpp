@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  20 %
+// Version : %version:  21 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -132,7 +132,9 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
     MPX_DEBUG(_L("VideoWindow ordinal position is: %d"), videoWindow->OrdinalPosition());
     MPX_DEBUG(_L("UiWindow ordinal position is: %d"), (&aWin)->OrdinalPosition());
 
-    TRAPD
+    int status = KErrNone;
+
+    TRAP
     ( status,
         {
             CAlfCompositionSource* me = CAlfCompositionSource::NewL( aWin );

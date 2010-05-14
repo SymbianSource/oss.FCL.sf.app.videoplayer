@@ -49,6 +49,7 @@ CVcxMyVideosAlbums::CVcxMyVideosAlbums( CVcxMyVideosCollectionPlugin& aCollectio
 void CVcxMyVideosAlbums::ConstructL()
     {
     iAlbums.Reset();
+    iChangedAlbums.Reset();
     }
 
 // ---------------------------------------------------------------------------
@@ -81,6 +82,7 @@ CVcxMyVideosAlbums::~CVcxMyVideosAlbums()
     iMdsOpResults.Close();
     iMdsOpResultsUint32.Close();
     iRemoveFromAlbumVideos.Close();
+    iChangedAlbums.Close();
     }
     
 // ----------------------------------------------------------------------------
@@ -766,4 +768,39 @@ void CVcxMyVideosAlbums::VideoTitleChangedL( TUint32 aMdsId )
     NewVideoFlagChangedL( aMdsId ); // same calculation works for this
     }
 
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::VideoAddedOrRemovedFromCacheL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::VideoAddedOrRemovedFromCacheL( CMPXMedia& aVideo )
+    {
+    TInt count = iAlbums.Count();
+    TUint32 mdsId = TVcxMyVideosCollectionUtil::IdL( aVideo ).iId1;
+    for ( TInt i = 0; i < count; i++ )
+        {
+        if ( iAlbums[i]->BelongsToAlbum( mdsId ) )
+            {
+            if ( iChangedAlbums.Find( i ) == KErrNotFound )
+                {
+                iChangedAlbums.AppendL( i );
+                }
+            }
+        }    
+    }
+// ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::UpdateChangedAlbumsL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::UpdateChangedAlbumsL()
+    {
+    TInt count = iChangedAlbums.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        iCollection.iMessageList->AddEventL(
+                TMPXItemId( iAlbums[iChangedAlbums[i]]->iMdsId, KVcxMvcMediaTypeAlbum ),
+                EMPXItemModified, EVcxMyVideosVideoListOrderChanged );
+        iAlbums[iChangedAlbums[i]]->CalculateAttributesL();
+        }
+    iChangedAlbums.Reset();
+    }
 // END OF FILE

@@ -28,6 +28,7 @@ LIBS += -lestor.dll \
     -lxqservice.dll
 
 HEADERS_TEMP = \
+    inc/testobjectstore.h \
     inc/hbabstractitemview.h \
     inc/hbdocumentloader.h \
     inc/hbaction.h \
@@ -86,6 +87,7 @@ HEADERS_TEMP = \
     ../../../videoplayerapp/videoplayerengine/inc/videoservicebrowse.h
 
 SOURCES_TEMP = \
+    src/testobjectstore.cpp \
     src/hbdocumentloader.cpp \
     src/hbaction.cpp \
     src/hbcheckbox.cpp \

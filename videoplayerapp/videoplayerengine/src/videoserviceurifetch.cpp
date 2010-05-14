@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 5 %
 
 #include <hbapplication.h>
 
@@ -23,14 +23,15 @@
 #include "videoserviceurifetch.h"
 #include "mpxhbvideocommondefs.h"
 #include "mpxvideo_debug.h"
+#include <xqaiwdecl.h>
 
 
 // ----------------------------------------------------------------------------
 // VideoServiceUriFetch()
 // ----------------------------------------------------------------------------
 //
-VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent)
-    : XQServiceProvider( QLatin1String("com.nokia.Videos.IVideoFetch"), parent )
+VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent, QLatin1String service)
+    : XQServiceProvider( service, parent )
     , mRequestIndex( 0 )
     , mServiceApp( parent )
 {
@@ -125,14 +126,52 @@ QString VideoServiceUriFetch::contextTitle() const
 // fetch()
 // ----------------------------------------------------------------------------
 //
+void VideoServiceUriFetch::fetch()
+{
+	MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetch()"));
+
+	emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
+    
+    XQRequestInfo info = requestInfo();
+    
+    QVariant variant = info.info("WindowTitle");
+    
+    if(variant.isValid())
+    {
+    	mTitle = variant.toString();
+    }
+    
+    if (mTitle.isEmpty())
+    {
+    	mTitle = hbTrId("txt_videos_title_videos");
+    }
+
+	emit mServiceApp->titleReady(mTitle);
+    mServiceApp->setCurrentService(VideoServices::EUriFetcher);
+
+    mRequestIndex = setCurrentRequestAsync();
+    MPX_DEBUG(_L("VideoServiceUriFetch::fetch() : mRequestIndex(%d)"), mRequestIndex );
+}
+
+// ----------------------------------------------------------------------------
+// fetch()
+// ----------------------------------------------------------------------------
+//
 void VideoServiceUriFetch::fetch(const QString& title)
 {
-    MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetch()"),
+	MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetch()"),
                    _L("title = %s"), title.data() );
     
-    mTitle = title;
     emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
-    emit mServiceApp->titleReady(title);
+
+    mTitle = title;
+
+    if (mTitle.isEmpty())
+    {
+    	mTitle = hbTrId("txt_videos_title_videos");
+    }
+
+   	emit mServiceApp->titleReady(mTitle);
 
     mServiceApp->setCurrentService(VideoServices::EUriFetcher);
 

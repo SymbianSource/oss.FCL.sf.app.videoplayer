@@ -47,7 +47,7 @@
 #include "videofiledetailsviewplugin.h"
 #undef private
 
-const char *TEST_VIDEO_DETAILS_GFX_DEFAULT = ":/gfx/pri_large_video.svg";
+const char *TEST_VIDEO_DETAILS_GFX_DEFAULT = "qtg_large_video";
 const char *TEST_VIDEO_DETAILS_VIEW = "videofiledetailsview";
 const char *TEST_VIDEO_DETAILS_WIDGET = "mContent";
 const char *TEST_VIDEO_DETAILS_TITLE = "mLblTitle";
@@ -595,7 +595,7 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     
     QVERIFY( deleteAction != 0 ); 
     deleteAction->trigger();
-    QCOMPARE( mDummyModel->dataAccessCount(), 0 );    
+    QCOMPARE( mDummyModel->dataAccessCount(), 0 );
     mPlugin->mVideoId = (0,0);
 
     mDummyModel->setDataReturnInvalid(true);
@@ -612,6 +612,8 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     QCOMPARE( mDummyModel->dataAccessCount(), 2 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), -1 ); // verify that no file was deleted.
+
+    HbMessageBox *msgBox = new HbMessageBox();
     
     QStringList display;
     display.append("first row");
@@ -620,16 +622,15 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     
     QString expectedText = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
             display.first());
-    
-    HbMessageBox::mQuestionReturnValue = true;
     deleteAction->trigger();
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 0); // Yes selected
     QCOMPARE( mDummyModel->dataAccessCount(), 3 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), expected.row() );
     QCOMPARE( HbMessageBox::mLatestTxt, expectedText );
     
-    HbMessageBox::mQuestionReturnValue = false;
     deleteAction->trigger();
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 1); // No selected
     QCOMPARE( mDummyModel->dataAccessCount(), 4 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), expected.row() );
@@ -637,13 +638,14 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     
 
     mDummyModel->reset();
-    HbMessageBox::mQuestionReturnValue = false;
     deleteAction->trigger();
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 1); // No selected
     QCOMPARE( mDummyModel->dataAccessCount(), 1 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), -1 ); // verify that no file was deleted.
     QCOMPARE( HbMessageBox::mLatestTxt, expectedText );
     
+    delete msgBox;
     cleanup();
 }
 

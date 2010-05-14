@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 #include "videoservices.h"
 #include "videoserviceview.h"
@@ -26,8 +26,10 @@
 // VideoServiceView()
 // -------------------------------------------------------------------------------------------------
 // 
-VideoServiceView::VideoServiceView( VideoServices* parent, QVideoPlayerEngine* engine )
-    : XQServiceProvider( QLatin1String("com.nokia.Videos.com.nokia.symbian.IFileView"), parent )
+VideoServiceView::VideoServiceView( VideoServices* parent, 
+                                    QVideoPlayerEngine* engine, 
+                                    QLatin1String service )
+    : XQServiceProvider( service, parent )
     , mEngine( engine )
     , mServiceApp( parent )
 {
