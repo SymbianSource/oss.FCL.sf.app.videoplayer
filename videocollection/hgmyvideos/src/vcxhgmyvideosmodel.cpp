@@ -24,7 +24,6 @@
 #include "IptvDebug.h"
 #include "vcxhgmyvideosmodel.h"
 #include "vcxhgmyvideoscollectionclient.h"
-#include "vcxhgmyvideosdownloadclient.h"
 #include "thumbnaildata.h"
 #include "vcxhgmyvideoscenrepkeys.h"
 #include "vcxhgmyvideosthumbnailmanager.h"
@@ -112,15 +111,6 @@ TBool CVcxHgMyVideosModel::TouchSupport()
 CVcxHgMyVideosCollectionClient& CVcxHgMyVideosModel::CollectionClient()
     {
     return *iCollection;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosModel::DownloadClient()
-// -----------------------------------------------------------------------------
-//
-CVcxHgMyVideosDownloadClient& CVcxHgMyVideosModel::DownloadClient()
-    {
-    return iCollection->DownloadClient();
     }
 
 // -----------------------------------------------------------------------------
@@ -220,6 +210,48 @@ TInt CVcxHgMyVideosModel::GetLastWatchedIdL( TInt& aId )
         }
 
     return iCollectionCenRep->Get( KVcxMyVideosCollectionCenrepKeyLastWatchedMpxId, aId );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetLastWatchedNameL
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetLastWatchedNameL( TDes& aName )
+    {
+    if ( ! iCollectionCenRep )
+        {
+        iCollectionCenRep = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+        }
+
+    return iCollectionCenRep->Get( KVcxMyVideosCollectionCenrepKeyLastWatchedName, aName );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetLastWatchedPath
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetLastWatchedPathL( TDes& aPath )
+    {
+    if ( ! iCollectionCenRep )
+        {
+        iCollectionCenRep = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+        }
+
+    return iCollectionCenRep->Get( KVcxMyVideosCollectionCenrepKeyLastWatchedPath, aPath );
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosModel::GetLastWatchedPath
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosModel::GetLastWatchedIndicatorL( TInt& aValue )
+    {
+    if ( ! iCollectionCenRep )
+        {
+        iCollectionCenRep = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+        }
+
+    return iCollectionCenRep->Get( KVcxMyVideosCollectionCenrepKeyLastWatchedIndicator, aValue );
     }
 
 // -----------------------------------------------------------------------------

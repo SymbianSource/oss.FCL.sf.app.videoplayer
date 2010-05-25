@@ -53,9 +53,6 @@
 #include "vcxhgmyvideosthumbnailmanager.h"
 #include "vcxhgmyvideoscenrepkeys.h"
 
-const TInt KMyVideosTitleStringMaxLength = 64;
-const TInt KMyVideosTitleUrlMaxLength    = 128;
-
 _LIT( KVcxHgMyVideosMifFile, "\\resource\\apps\\vcxhgmyvideosicons.mif" );
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -96,7 +93,6 @@ CVcxHgMyVideosCategoryModelHandler::CVcxHgMyVideosCategoryModelHandler(
 CVcxHgMyVideosCategoryModelHandler::~CVcxHgMyVideosCategoryModelHandler()
     {
     delete iCategoryList;
-    delete iLastWatched;
     delete iVideoIndicator;
     
     iCategoryIdArray.Reset();
@@ -111,6 +107,8 @@ void CVcxHgMyVideosCategoryModelHandler::DoModelActivateL()
     IPTVLOGSTRING_LOW_LEVEL( 
         "MPX My Videos UI # CVcxHgMyVideosCategoryModelHandler::DoModelActivateL() - Enter" );
 
+	UpdateCategoryListL();
+	
     iModel.CollectionClient().SetCategoryModelObserver( this );
 
     iTnManager.AddObserverL( *this );
@@ -131,9 +129,8 @@ void CVcxHgMyVideosCategoryModelHandler::DoModelDeactivate()
     iModel.CollectionClient().SetCategoryModelObserver( NULL );
 
     iTnManager.RemoveObserver( *this );
-    
-    delete iLastWatched;
-    iLastWatched = NULL;
+	
+    TRAP_IGNORE( ClearLastWatchedIconL() )
     
     IPTVLOGSTRING_LOW_LEVEL( 
         "MPX My Videos UI # CVcxHgMyVideosCategoryModelHandler::DoModelDeactivate() - Exit" );
@@ -279,10 +276,15 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
             maskId = EMbmVcxhgmyvideosiconsQgn_prop_captured_thumbnail_video_mask;
             break;
         case KCategoryIdLastWatched:
-			 if ( !LastWatchedSetL() )
-			    {
-				LoadLastWatchedIconL();
-				}
+			 LoadLastWatchedIconL();
+			 if ( iTnRequestId == KErrNotFound )
+			     {
+                 // Last watched or preloaded not found => show default icon
+                 skinId.Set( KAknsIIDQgnPropRecentThumbnailVideo );
+                 iconFile = KVcxHgMyVideosMifFile;
+                 bitmapId = EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video;
+                 maskId = EMbmVcxhgmyvideosiconsQgn_prop_recent_thumbnail_video_mask;
+			     }
             break;
         case KCategoryIdExtraItem1:
             // ExtraItem1 is always interpreted as Ovi Store
@@ -359,19 +361,6 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::GetCategoryIconL( TInt aCategoryId
 // 
 HBufC* CVcxHgMyVideosCategoryModelHandler::FormatCategorySecondRowLC( CMPXMedia& aMedia )
     {    
-    if ( !aMedia.IsSupported( KMPXMediaGeneralType ) ||
-          aMedia.ValueTObjectL<TMPXGeneralType>( KMPXMediaGeneralType ) != EMPXGroup )
-        {
-        if ( aMedia.IsSupported( KMPXMediaGeneralTitle ) )
-            {
-            return aMedia.ValueText( KMPXMediaGeneralTitle ).AllocLC(); 
-            }
-	    else
-		    {
-			return KNullDesC().AllocLC();
-			}
-        }
-    
     HBufC* details = NULL;
     TInt newVideos = 0;
     TInt videos = 0;
@@ -448,14 +437,17 @@ HBufC* CVcxHgMyVideosCategoryModelHandler::FormatCategorySecondRowLC( TInt aCate
             {
             if ( LastWatchedSetL() )
                 {
-                CMPXMedia* media = GetCategoryDataL( aCategoryId );
-                if ( media )
+                TBuf<KMaxPath> path;
+                TInt error = iModel.GetLastWatchedPathL( path );
+                if ( BaflUtils::FileExists( iModel.FileServerSessionL(), path ) )
                     {
-                    secondRow = FormatCategorySecondRowLC( *media );
+                    TBuf<KMyVideosTitleStringMaxLength> string;
+                    TInt error = iModel.GetLastWatchedNameL( string );
+                    secondRow = error ? KNullDesC().AllocLC() : string.AllocLC();
                     }
                 else
                     {
-                    secondRow = KNullDesC().AllocLC();
+                    secondRow = StringLoader::LoadLC( R_VCXHGMYVIDEOS_NO_VIDEOS_IN_CATEGORY );
                     }
                 }
             else    
@@ -469,7 +461,7 @@ HBufC* CVcxHgMyVideosCategoryModelHandler::FormatCategorySecondRowLC( TInt aCate
                     }
                 else
                     {
-                    secondRow = KNullDesC().AllocLC();
+                    secondRow = StringLoader::LoadLC( R_VCXHGMYVIDEOS_NO_VIDEOS_IN_CATEGORY );
                     }
                 }
             }
@@ -607,9 +599,6 @@ void CVcxHgMyVideosCategoryModelHandler::CategoryListModifiedL()
     
     UpdateCategoryListL();
     
-    FetchLastWatchedL();
-    SetLastWatchedIndicatorL();
-    
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # CategoryListModifiedL() - Exit" );
     }
 
@@ -636,31 +625,28 @@ void CVcxHgMyVideosCategoryModelHandler::CategoryModifiedL( TMPXChangeEventType 
             
         case EMPXItemInserted:
             {
-            if ( !iLastWatched )
+            TInt id1( 0 );
+            TInt ret = iModel.GetLastWatchedIdL( id1 );
+
+            if (  ret == KErrNone &&
+                  id1 == aMpxItemId.iId1 )
                 {
-                TInt id1( 0 );
-                TInt ret = iModel.GetLastWatchedIdL( id1 );
-                TMPXItemId id ( id1 );
-                
-                if (  ret == KErrNone &&
-                      id1 == aMpxItemId.iId1 )
-                    {
-                    FetchLastWatchedL();
-                    }
-                }
+                UpdateCategoryListItemL( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
+				iScroller.RefreshScreen( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
+				}
             }
             break;
         case EMPXItemDeleted:
             {
-            if ( iLastWatched && 
-                 iLastWatched->IsSupported( KMPXMediaGeneralId ) &&
-                 iLastWatched->Value<TMPXItemId>( KMPXMediaGeneralId )->iId1 == aMpxItemId.iId1 )
+            TInt id1( 0 );
+            TInt ret = iModel.GetLastWatchedIdL( id1 );
+
+            if (  ret == KErrNone &&
+                  id1 == aMpxItemId.iId1 )
                 {
-                delete iLastWatched;
-                iLastWatched = NULL;
-                
+                ClearLastWatchedIconL();
                 UpdateCategoryListItemL( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
-                SetLastWatchedIndicatorL();
+				iScroller.RefreshScreen( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
                 }
             }
             break;
@@ -681,36 +667,29 @@ void CVcxHgMyVideosCategoryModelHandler::UpdateCategoryListL()
     {
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # UpdateCategoryListL() - Enter" );
     
-    if ( iCategoryList )
-        {        
-        TInt categoryCount = iCategoryList->Count();
-        
-        MakeCategoryIdArray( categoryCount );
-        
-        IPTVLOGSTRING2_LOW_LEVEL( 
-                "MPX My Videos UI # UpdateCategoryListL() - count = %d", categoryCount );
-        
-        if ( iCategoryIdArray.Count() != iScroller.ItemCount() )
-            {
-            iScroller.ResizeL( iCategoryIdArray.Count() );
-            }
-            
-        if ( iCategoryIdArray.Count() > 0 )
-            {                    
-            for ( TInt i = 0; i < iCategoryIdArray.Count(); i++ )
-                {
-                UpdateCategoryListItemL( i );
-                }
-            if ( iScroller.SelectedIndex() < 0 || 
-                    iScroller.SelectedIndex() >= iScroller.ItemCount() )
-                {
-                iScroller.SetSelectedIndex( 0 );    
-                }           
-            }        
-        
-        // Refresh the whole list.
-        iScroller.DrawDeferred();
+    MakeCategoryIdArray();
+    
+    if ( iCategoryIdArray.Count() != iScroller.ItemCount() )
+        {
+        iScroller.ResizeL( iCategoryIdArray.Count() );
         }
+        
+    if ( iCategoryIdArray.Count() > 0 )
+        {                    
+        for ( TInt i = 0; i < iCategoryIdArray.Count(); i++ )
+            {
+            UpdateCategoryListItemL( i );
+            }
+        if ( iScroller.SelectedIndex() < 0 || 
+                iScroller.SelectedIndex() >= iScroller.ItemCount() )
+            {
+            iScroller.SetSelectedIndex( 0 );    
+            }           
+        }        
+    
+    // Refresh the whole list.
+    iScroller.DrawDeferred();
+
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # UpdateCategoryListL() - Exit" );
     }
 
@@ -740,7 +719,10 @@ void CVcxHgMyVideosCategoryModelHandler::UpdateCategoryListItemL( TInt aListInde
         CleanupStack::PopAndDestroy( secondRow );
 
         // Set icon for category
-        listItem.SetIcon( GetCategoryIconL( iCategoryIdArray[ aListIndex ] ) );
+        if ( !listItem.Icon() )
+            {
+            listItem.SetIcon( GetCategoryIconL( iCategoryIdArray[ aListIndex ] ) );
+            }
         }
         
     IPTVLOGSTRING_LOW_LEVEL( 
@@ -778,10 +760,9 @@ TInt CVcxHgMyVideosCategoryModelHandler::ResolveCategoryId( TInt aScrollerIndex 
 // CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray()
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray( TInt aCategoriesAvailable )
+void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray()
     {
-    IPTVLOGSTRING2_LOW_LEVEL( 
-            "MPX My Videos UI # MakeCategoryArray (number of categories=%d)", aCategoriesAvailable );
+    IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray");
     
     iCategoryIdArray.Reset();    
     
@@ -838,19 +819,10 @@ void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray( TInt aCategoriesAv
         }
     else
         {
-        IPTVLOGSTRING_LOW_LEVEL( 
-            "MPX My Videos UI # MakeCategoryIdArray() Could not access CenRep!" ); 
-    
-        // If cenrep access fails then use these values as backup
-	    iCategoryIdArray.Append( KCategoryIdLastWatched );
-		
-    	for(TInt i = 0; i < aCategoriesAvailable; i++)
-        	{
-	        if( AcceptCategory( i ) )
-    	        {
-        	    iCategoryIdArray.Append( i );        
-            	}        
-        	}
+		iCategoryIdArray.Append( KCategoryIdLastWatched );
+		iCategoryIdArray.Append( KVcxMvcCategoryIdCaptured );	    
+        iCategoryIdArray.Append( KVcxMvcCategoryIdOther );  
+        iCategoryIdArray.Append( KCategoryIdExtraItem1 );
         }
     }
 
@@ -884,47 +856,12 @@ TBool CVcxHgMyVideosCategoryModelHandler::AcceptCategory( TInt aCategoryId )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::VideoFetchingCompletedL()
-// MPX Collection calls this callback when a single video has fetched.
-// -----------------------------------------------------------------------------
-// 
-void CVcxHgMyVideosCategoryModelHandler::VideoFetchingCompletedL( CMPXMedia* aVideo )
-    {
-    TInt id( 0 );
-    
-    TInt ret = iModel.GetLastWatchedIdL( id );
-                    
-    if ( ret == KErrNone && 
-         id && 
-		 aVideo &&
-         aVideo->IsSupported( KMPXMediaGeneralId ) &&
-         aVideo->Value<TMPXItemId>( KMPXMediaGeneralId )->iId1 == id )
-        {
-        delete iLastWatched;
-        iLastWatched = aVideo;
-		
-		LoadLastWatchedIconL();
-		SetLastWatchedIndicatorL();
-        }
-    else 
-		{
-		delete aVideo;
-		aVideo = NULL;
-		}
-    
-    UpdateCategoryListItemL( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
-    iScroller.RefreshScreen( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
-    }
-
-// -----------------------------------------------------------------------------
 // MPX Collection calls this callback when category list items have been fetched.
 // -----------------------------------------------------------------------------
 // 
 void CVcxHgMyVideosCategoryModelHandler::CategoryListFetchingCompletedL()
     {
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # CategoryListFetchingCompletedL()" ); 
-    FetchLastWatchedL();
-    SetLastWatchedIndicatorL();
 
     // Send custom command to appui that signals that the 
     // my videos main view is constructed.
@@ -943,41 +880,12 @@ void CVcxHgMyVideosCategoryModelHandler::CategoryListFetchingCompletedL()
 // 
 CMPXMedia* CVcxHgMyVideosCategoryModelHandler::GetCategoryDataL( TInt aCategoryId )
     {
-    if ( aCategoryId == KCategoryIdLastWatched )
-        {
-        return iLastWatched;
-        }
-    
-    if ( aCategoryId >= 0 && iCategoryList->Count() > aCategoryId )
+    if ( iCategoryList && aCategoryId >= 0 && iCategoryList->Count() > aCategoryId )
         {
         return (*iCategoryList)[ aCategoryId ];
         }
     
     return NULL;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::FetchLastWatchedL()
-// 
-// -----------------------------------------------------------------------------
-// 
-void CVcxHgMyVideosCategoryModelHandler::FetchLastWatchedL()
-    {
-    TInt id1( 0 );
-    TInt ret = iModel.GetLastWatchedIdL( id1 );
-    TMPXItemId id ( id1 );
-    
-    if (  id1 != 0 && 
-          KErrNone == ret )
-        {
-        if ( !iLastWatched ||
-		    ( iLastWatched &&
-              iLastWatched->IsSupported( KMPXMediaGeneralId ) &&
-              iLastWatched->Value<TMPXItemId>( KMPXMediaGeneralId )->iId1 != id1 ))
-            {
-            iModel.CollectionClient().FetchMpxMediaByMpxIdL( id );
-            } 
-        }
     }
 
 // -----------------------------------------------------------------------------
@@ -987,30 +895,26 @@ void CVcxHgMyVideosCategoryModelHandler::FetchLastWatchedL()
 // 
 void CVcxHgMyVideosCategoryModelHandler::PlayLastWatchedVidedoL()
     {
-    if ( LastWatchedSetL() )
+    TBuf<KMaxPath> path;
+    TInt error( KErrNotFound );
+	if ( LastWatchedSetL() )
         {
-        if (  iLastWatched && iLastWatched->IsSupported( KMPXMediaGeneralId ) )
-            {
-            iModel.CollectionClient().PlayVideoL(
-                        *iLastWatched->Value<TMPXItemId>( KMPXMediaGeneralId ) );
-    
-            iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
-            }
+        error = iModel.GetLastWatchedPathL( path );
         }
-    else
+    else if ( PreloadedExistsL() )
         {
-        if ( PreloadedExistsL() )
+        error = iModel.GetMyVideosCustomizationString( 
+                     KCRVideoPlayerPreloadedVideoPath, path );
+        }
+
+    if ( !error && path.Length() && BaflUtils::FileExists( iModel.FileServerSessionL(), path ) )
+        {
+        CAknAppUi* appui = static_cast<CAknAppUi*>( CCoeEnv::Static()->AppUi() );
+    
+        if ( appui )
             {
-            CAknAppUi* appui = static_cast<CAknAppUi*>( CCoeEnv::Static()->AppUi() );
-            
-            if ( appui )
-                {
-                TBuf<KMaxPath> path;
-                TInt error = iModel.GetMyVideosCustomizationString( 
-				                         KCRVideoPlayerPreloadedVideoPath, path );
-                appui->OpenFileL( path );
-                iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
-                }
+            appui->OpenFileL( path );
+            iModel.SetAppState( CVcxHgMyVideosModel::EVcxMyVideosAppStatePlayer );
             }
         }
     }
@@ -1023,13 +927,15 @@ void CVcxHgMyVideosCategoryModelHandler::PlayLastWatchedVidedoL()
 void CVcxHgMyVideosCategoryModelHandler::LoadLastWatchedIconL()
     {
     if ( LastWatchedSetL() )
-        {
-        if ( iLastWatched )
+        {    
+        TBuf<KMaxPath> path;
+        TInt error = iModel.GetLastWatchedPathL( path );
+        
+        if ( BaflUtils::FileExists( iModel.FileServerSessionL(), path ) )
             {
             CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC( 
-                            iLastWatched->ValueText( KMPXMediaGeneralUri ),
-                            KNullDesC );
-            
+                        path, 
+                        KNullDesC );
             iTnRequestId = iTnManager.GetL( *source );
             CleanupStack::PopAndDestroy( source );
             }
@@ -1052,6 +958,18 @@ void CVcxHgMyVideosCategoryModelHandler::LoadLastWatchedIconL()
 	}
 
 // -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::ClearLastWatchedIconL()
+// 
+// -----------------------------------------------------------------------------
+// 
+void CVcxHgMyVideosCategoryModelHandler::ClearLastWatchedIconL()
+    {        
+    CHgItem& item = iScroller.ItemL( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
+    item.ClearFlags( CHgItem::EHgItemFlagsIconOverlayIndicator );
+    item.SetIcon( NULL );
+    }
+
+// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoModelHandler::SetLastWatchedIndicatorL()
 // 
 // -----------------------------------------------------------------------------
@@ -1062,7 +980,13 @@ void CVcxHgMyVideosCategoryModelHandler::SetLastWatchedIndicatorL()
         {
         CHgItem& lastWatchedItem = iScroller.ItemL(
                 ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
-        if ( iLastWatched && VideoIndicatorL().IsIndicatorShown( *iLastWatched ) )
+        TInt isIndicator( 0 );
+        iModel.GetLastWatchedIndicatorL( isIndicator );
+		
+        TBuf<KMaxPath> path;
+        TInt error = iModel.GetLastWatchedPathL( path );
+		TBool exist = BaflUtils::FileExists( iModel.FileServerSessionL(), path );
+        if ( isIndicator && path.Length() && exist )
             {
             lastWatchedItem.SetFlags( CHgItem::EHgItemFlagsIconOverlayIndicator );
             }
@@ -1152,7 +1076,7 @@ void CVcxHgMyVideosCategoryModelHandler::ThumbnailReadyL(
         
         listItem.SetIcon( thumbnail ); // Takes ownership
         CleanupStack::Pop( thumbnail );
-        
+        SetLastWatchedIndicatorL();
         iScroller.RefreshScreen( lastWatchedIndex );
         }
     }
@@ -1295,8 +1219,11 @@ CGulIcon* CVcxHgMyVideosCategoryModelHandler::CreateEmptyHgListIconL()
 //
 TBool CVcxHgMyVideosCategoryModelHandler::LastWatchedSetL()
     {
-    TInt id;
-    if ( !iModel.GetLastWatchedIdL( id ) && id )
+    TBuf<KMaxPath> path;
+    TInt error = iModel.GetLastWatchedPathL( path );
+    TInt length = path.Length();
+    
+    if ( error == KErrNone && length > 0 )
         {
         return ETrue;
         }

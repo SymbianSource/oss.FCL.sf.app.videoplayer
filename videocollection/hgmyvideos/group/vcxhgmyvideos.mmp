@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: e92_30 %
+// Version : %version: 31 %
 
 #include <platform_paths.hrh>
 #include <bldvariant.hrh>
@@ -45,7 +45,6 @@ SOURCE                  vcxhgmyvideosvideomodelhandler.cpp
 SOURCE                  vcxhgmyvideosvideodataupdater.cpp
 SOURCE                  vcxhgmyvideosvideodata.cpp
 SOURCE                  vcxhgmyvideosvideolistitem.cpp
-SOURCE                  vcxhgmyvideosdownloadupdater.cpp
 SOURCE                  vcxhgmyvideosfulldrminfo.cpp
 SOURCE                  vcxhgmyvideosmemorystatus.cpp
 SOURCE                  vcxhgmyvideosindicatorhelper.cpp

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 37 %
+// Version : %version: 41 %
 
 
 // INCLUDE FILES
@@ -79,7 +79,6 @@ CMPXVideoPlaybackControlsController::CMPXVideoPlaybackControlsController(
     CMPXVideoPlaybackContainer* aContainer, TRect aRect )
     : iControls( EMPXControlsCount ),
       iRect( aRect ),
-      iSurfaceCreated( EFalse ),
       iContainer( aContainer )
 {
 }
@@ -194,6 +193,7 @@ EXPORT_C CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsControll
 
     if ( iRealOneBitmap )
     {
+        SetRealOneBitmapVisibility( EFalse );
         delete iRealOneBitmap;
         iRealOneBitmap = NULL ;
     }
@@ -337,6 +337,12 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
 
             break;
         }
+        case EMPXControlCmdHandleForegroundEvent:
+        {
+            MPX_DEBUG(_L("    [EMPXControlCmdHandleForegroundEvent]"));
+            UpdateControlsVisibility();
+            break;
+        }
         case EMPXControlCmdHandleErrors:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdHandleErrors]"));
@@ -372,15 +378,7 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         }
         case EMPXControlCmdSurfaceCreated:
         {
-            iSurfaceCreated = ETrue;
             SetRealOneBitmapVisibility( EFalse );
-            RedrawControlsForSurfaceChanges();
-            break;
-        }
-        case EMPXControlCmdSurfaceRemoved:
-        {
-            iSurfaceCreated = EFalse;
-            RedrawControlsForSurfaceChanges();
             break;
         }
         case EMPXControlCmdLoadingStarted:
@@ -1385,6 +1383,8 @@ void CMPXVideoPlaybackControlsController::AspectRatioChanged( TInt aAspectRatio 
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::AspectRatioChanged() [%d]"), aAspectRatio);
 
+    iAspectRatio = (TMMFScalingType)aAspectRatio;
+
     for ( TInt i = 0 ; i < iControls.Count() ; i++ )
     {
         if ( iControls[i]->AspectRatioChanged( aAspectRatio ) )
@@ -1799,7 +1799,7 @@ TBool CMPXVideoPlaybackControlsController::IsSoftKeyVisible( TInt aValue )
 void CMPXVideoPlaybackControlsController::HandleTvOutEventL(
         TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::HandleTvOutEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::HandleTvOutEventL()"));
 
     iFileDetails->iTvOutConnected = aConnected;
     iControlsConfig->UpdateControlListL( aEvent );
@@ -1923,18 +1923,6 @@ void CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackControlsController::SetBackgroundBlack
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMPXVideoPlaybackControlsController::SetBackgroundBlack()
-{
-    TBool backgroundBlack = iSurfaceCreated && ! iTvOutConnected;
-
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::SetBackgroundBlack(%d)"), backgroundBlack);
-    return backgroundBlack;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackControlsController::ShowAspectRatioIcon
 // -------------------------------------------------------------------------------------------------
 //
@@ -1981,24 +1969,5 @@ void CMPXVideoPlaybackControlsController::HandleLoadingStarted()
         UpdateControlsVisibility();
     }
 }
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges()
-{
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::RedrawControlsForSurfaceChanges()"));
-
-    //
-    //  A surface has been added or removed.
-    //  If the controls are visible, redraw them with the new transparency value.
-    //
-    if ( IsVisible() )
-    {
-        UpdateControlsVisibility();
-    }
-}
-
 
 // End of File

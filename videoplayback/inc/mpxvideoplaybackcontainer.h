@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKCONTAINER_H__
@@ -230,10 +230,6 @@ class CMPXVideoPlaybackContainer : public CCoeControl
         //  Bitmaps are owned by the Controls Controller
         //
         CEikImage*                              iRealOneBitmap;
-
-        TBool                                   iVolumeRepeatUp;
-        TBool                                   iSurfaceCreated;
-        TBool                                   iTvOutConnected;
 
         CMPXVideoPlaybackViewFileDetails*       iFileDetails;
         TKeyResponse                            iKeyResponse;

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 12 %
+
+// Version : %version: 14 %
 
 
 // INCLUDE FILES
@@ -50,7 +51,7 @@ CMPXVideoPlaybackAspectRatioIcon::CMPXVideoPlaybackAspectRatioIcon(
 //
 void CMPXVideoPlaybackAspectRatioIcon::ConstructL( TRect aRect )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackAspectRatioIcon::ConstructL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackAspectRatioIcon::ConstructL()"));
 
     SetRect( TRect( 0, 0, aRect.Width(), aRect.Height() ) );
 
@@ -93,7 +94,7 @@ CMPXVideoPlaybackAspectRatioIcon::NewL( CMPXVideoPlaybackControlsController* aCo
 //
 CMPXVideoPlaybackAspectRatioIcon::~CMPXVideoPlaybackAspectRatioIcon()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackAspectRatioIcon::~CMPXVideoPlaybackAspectRatioIcon()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackAspectRatioIcon::~CMPXVideoPlaybackAspectRatioIcon()"));
 
     if ( iNaturalIcon )
     {
@@ -114,7 +115,7 @@ CMPXVideoPlaybackAspectRatioIcon::~CMPXVideoPlaybackAspectRatioIcon()
     }
 
 #ifdef RD_TACTILE_FEEDBACK
-    if (iFeedback)
+    if ( iFeedback )
     {
         iFeedback->RemoveFeedbackForControl(this);
     }
@@ -127,7 +128,7 @@ CMPXVideoPlaybackAspectRatioIcon::~CMPXVideoPlaybackAspectRatioIcon()
 //
 void CMPXVideoPlaybackAspectRatioIcon::SkinChangeL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackAspectRatioIcon::SkinChangeL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackAspectRatioIcon::SkinChangeL()"));
 
     //
     // Create icons
@@ -218,33 +219,20 @@ void CMPXVideoPlaybackAspectRatioIcon::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( iController->SetBackgroundBlack() )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-            gc.Clear( aRect );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-            gc.Clear( aRect );
-        }
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+        gc.Clear( aRect );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        // draw a solid background so that the entire progress
-        // bar is shown not just the area representing the
-        // portion that has been played.
-        gc.SetBrushColor( KRgbBlack );
-        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-        gc.DrawRect( aRect );
-        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+        gc.Clear( aRect );
     }
 
-    switch( iAspectRatio )
+    switch ( iController->AspectRatio() )
     {
         case EMMFStretch:
         {
@@ -282,7 +270,8 @@ void CMPXVideoPlaybackAspectRatioIcon::Draw( const TRect& aRect ) const
 //
 void CMPXVideoPlaybackAspectRatioIcon::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackAspectRatioIcon::HandlePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackAspectRatioIcon::HandlePointerEventL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType );
 
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
     {
@@ -301,7 +290,7 @@ void CMPXVideoPlaybackAspectRatioIcon::HandlePointerEventL( const TPointerEvent&
     {
         TMPXVideoPlaybackViewCommandIds cmd = EMPXPbvCmdNaturalAspectRatio;
 
-        switch ( iAspectRatio )
+        switch ( iController->AspectRatio() )
         {
             case EMMFStretch:
             {
@@ -326,8 +315,6 @@ void CMPXVideoPlaybackAspectRatioIcon::HandlePointerEventL( const TPointerEvent&
 void CMPXVideoPlaybackAspectRatioIcon::AspectRatioChanged( TInt aAspectRatio )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackAspectRatioIcon::AspectRatioChanged() (%d)"), aAspectRatio);
-
-    iAspectRatio = (TMMFScalingType)aAspectRatio;
 
     if ( IsVisible() )
     {

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 21 %
+
+// Version : %version: 22 %
 
 
 // INCLUDE FILES
@@ -174,23 +175,15 @@ void CMPXVideoPlaybackControl::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( iController->SetBackgroundBlack() )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-        }
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-        gc.SetBrushColor( KRgbBlack );
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
     }
 
     gc.Clear( aRect );

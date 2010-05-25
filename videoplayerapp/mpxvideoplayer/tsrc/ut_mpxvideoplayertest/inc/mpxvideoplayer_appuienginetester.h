@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#13 %
+// Version : %version: ou1cpsw#14 %
 
 #ifndef MPXVIDEOPLAYER_APPUIENGINETESTER_H_
 #define MPXVIDEOPLAYER_APPUIENGINETESTER_H_
@@ -146,7 +146,7 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         CMPXMessage* CreateMpxMessageLC( TInt aEvent, TInt aType, TInt aData );
 
         void AddLocalFileCallbacksL( TDesC& aFileName,  TBool aUseFileHandle );
-        void AddCollectionMediaCallbacksL( );
+        void AddCollectionMediaCallbacksL( TDesC& aFileName );
         void AddSdpFileCallbacksL( TDesC& aFileName, TBool aUseFileHandle, CStifItemParser& aItem );
         void AddRamFileCallbacksL( TDesC& aFileName, TBool aUseFileHandle, CStifItemParser& aItem );
         void AddAsxFileCallbacksL( TDesC& aFileName, TBool aUseFileHandle, CStifItemParser& aItem );

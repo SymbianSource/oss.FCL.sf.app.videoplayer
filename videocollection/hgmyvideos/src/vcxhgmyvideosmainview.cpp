@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 42 %
+// Version : %version: 45 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -236,7 +236,10 @@ TTypeUid::Ptr CVcxHgMyVideosMainView::MopSupplyObject( TTypeUid aId )
 //
 void CVcxHgMyVideosMainView::HandleStatusPaneSizeChange()
     {
-    UpdateLayout(); 
+    if ( iContainer ) // If view is active
+        {
+        UpdateLayout(); 
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -379,22 +382,6 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
             if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
                 {
                 VideoListL()->DeleteVideosL();
-                }
-            }
-            break;
-        case EVcxHgMyVideosCmdResumeDownload:
-            {
-            if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
-                {
-                VideoListL()->ResumeDownloadL();
-                }
-            }
-            break;
-        case EVcxHgMyVideosCmdCancelDownload:
-            {
-            if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
-                {
-                VideoListL()->CancelDownloadL();
                 }
             }
             break;
@@ -544,9 +531,7 @@ TKeyResponse CVcxHgMyVideosMainView::HandleKeyEventL( const TKeyEvent& aKeyEvent
     {
     TKeyResponse response( EKeyWasNotConsumed );
     
-    // Clear key performs either 'Delete' or 'Cancel Download'. As Cancel Download
-    // cannot be performed if there are selections, selections always cause Delete.
-    // When there is no selections, video's status dictates the operation.
+    // Clear key performs 'Delete'.
     if ( aKeyEvent.iScanCode == EStdKeyBackspace && aType == EEventKey )
         {
         if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
@@ -558,15 +543,9 @@ TKeyResponse CVcxHgMyVideosMainView::HandleKeyEventL( const TKeyEvent& aKeyEvent
             TInt count = markedVideos.Count();
 			CleanupStack::PopAndDestroy( &markedVideos );
 			
-            if ( ( count > 0 ) ||
-                 ( VideoListL()->VideoModel().VideoDownloadState( VideoListL()->Highlight() )
-                   == EVcxMyVideosDlStateNone ) )
+            if ( count > 0 )
                 {
                 HandleCommandL( EVcxHgMyVideosCmdDelete );
-                }
-            else
-                {
-                HandleCommandL( EVcxHgMyVideosCmdCancelDownload );
                 }
             
 			response = EKeyWasConsumed;
@@ -617,8 +596,6 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
         {
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDelete, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDeleteMarked, ETrue );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdResumeDownload, ETrue );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCancelDownload, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdSortSubMenu, ETrue );        
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdVideoDetails, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdStopShowViaHomenet, ETrue );
@@ -886,4 +863,3 @@ void CVcxHgMyVideosMainView::LaunchBrowserL( const TDesC& aUrl )
     
     CleanupStack::PopAndDestroy( param );
     }
-

@@ -92,7 +92,6 @@ void CVcxHgMyVideosVideoCopier::ShowMenuItemsL(
         TBool& aShowCopy,
         TBool& aShowMove )
     {
-    TVcxMyVideosDownloadState dlState( EVcxMyVideosDlStateNone );
     CIptvDriveMonitor& driveMonitor = iModel.DriveMonitorL();
     HBufC* videoUri = NULL;
     TInt drive( 0 );
@@ -101,37 +100,31 @@ void CVcxHgMyVideosVideoCopier::ShowMenuItemsL(
 
     for ( TInt i = 0; i < aOperationTargets.Count(); i++ )
         {
-        dlState = iVideoModel.VideoDownloadState( aOperationTargets[i] );
-
-        // If video is not under download, there is source file that can be moved/copied.
-        if ( dlState == EVcxMyVideosDlStateNone )
+        // When we found source file that can be moved/copied, we need
+        // to also check that there is target drive that we can use.
+        videoUri = iVideoModel.GetVideoUri( aOperationTargets[i] ).AllocLC();
+        if ( videoUri->Length() > 0 )
             {
-            // When we found source file that can be moved/copied, we need
-            // to also check that there is target drive that we can use.
-            videoUri = iVideoModel.GetVideoUri( aOperationTargets[i] ).AllocLC();
-            if ( videoUri->Length() > 0 )
+            if ( iModel.FileServerSessionL().CharToDrive( videoUri->Des()[0], drive )
+                  == KErrNone )
                 {
-                if ( iModel.FileServerSessionL().CharToDrive( videoUri->Des()[0], drive )
-                      == KErrNone )
+                for ( TInt j = 0; j < driveMonitor.iAvailableDrives.Count(); j++ )
                     {
-                    for ( TInt j = 0; j < driveMonitor.iAvailableDrives.Count(); j++ )
-                        {
-                        flags = driveMonitor.iAvailableDrives[j].iFlags;
-    
-                        if ( driveMonitor.iAvailableDrives[j].iDrive != drive &&
-                                !(flags & TIptvDriveInfo::ELocked) && !(flags & TIptvDriveInfo::EMediaNotPresent) )
-                            {
-                            aShowMoveAndCopySubmenu = aShowCopy = aShowMove = ETrue;
+                    flags = driveMonitor.iAvailableDrives[j].iFlags;
 
-                            // No need to continue, we know that menu can be shown.
-                            CleanupStack::PopAndDestroy( videoUri );
-                            return;
-                            }
+                    if ( driveMonitor.iAvailableDrives[j].iDrive != drive &&
+                            !(flags & TIptvDriveInfo::ELocked) && !(flags & TIptvDriveInfo::EMediaNotPresent) )
+                        {
+                        aShowMoveAndCopySubmenu = aShowCopy = aShowMove = ETrue;
+
+                        // No need to continue, we know that menu can be shown.
+                        CleanupStack::PopAndDestroy( videoUri );
+                        return;
                         }
                     }
                 }
-            CleanupStack::PopAndDestroy( videoUri );
             }
+        CleanupStack::PopAndDestroy( videoUri );
         }
     }
 

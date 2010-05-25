@@ -259,7 +259,7 @@ void CVcxHgMyVideosVideoDataUpdater::RemoveItem( TInt aIndex )
 // -----------------------------------------------------------------------------
 //
 void CVcxHgMyVideosVideoDataUpdater::AddItemToFetchArrayL( TMPXItemId aMPXItemId )
-    {      
+    {
     CVcxHgMyVideosVideoData* newItem = CVcxHgMyVideosVideoData::NewLC();
     newItem->SetMPXItemId( aMPXItemId );
     iFetchArray.AppendL( newItem );   
@@ -849,16 +849,10 @@ void CVcxHgMyVideosVideoDataUpdater::StartThumbnailL(
             }
         else
             {
-            // Use shared file handle to minimize thumbnailserver overhead 
-            RFs& fs = iModel.FileServerSessionL();
-            RFile64 file;
-            User::LeaveIfError( file.Open( fs, uri, EFileShareReadersOrWriters ));
-            CleanupClosePushL( file );
             CThumbnailObjectSource* source = CThumbnailObjectSource::NewLC(
-                    file, mime );
+                    uri, mime );
             id = iModel.ThumbnailManager().GetL( *source );
             CleanupStack::PopAndDestroy( source ); 
-            CleanupStack::PopAndDestroy( &file );
             }
         aItem.SetThumbnailConversionId( id );
 

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 41 %
+// Version : %version: 43 %
 
 
 //
@@ -170,6 +170,14 @@ void CMPXVideoPlaybackState::HandleStartSeekL( TBool /*aForward*/ )
 void CMPXVideoPlaybackState::HandleStopSeekL()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleStopSeekL()"));
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleSetPosterFrame()"));    
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1195,8 +1203,6 @@ void CMPXInitialisedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
         IssuePlayCommand( EMPXVideoBuffering, MMPXPlaybackPluginObserver::EPBufferingStarted );
     }
     else
@@ -1365,6 +1371,18 @@ void CMPXPlayingState::HandlePlayPause()
     HandlePause();
 }
 
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXPlayingState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXPlayingState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXPlayingState::HandleSetPosterFrame()"));
+    
+    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();    
+}
+
+
 //  ------------------------------------------------------------------------------------------------
 //  CMPXPlayingState::HandleStartSeekL()
 //  ------------------------------------------------------------------------------------------------
@@ -1507,8 +1525,6 @@ void CMPXPausedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
         IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
     }
 }
@@ -1520,6 +1536,16 @@ void CMPXPausedState::HandlePlayPause()
 {
     MPX_DEBUG(_L("CMPXPausedState::HandlePlayPause()"));
     HandlePlay();
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXPausedState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXPausedState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXPausedState::HandleSetPosterFrame()"));    
+    
+    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1595,17 +1621,9 @@ void CMPXPausedState::HandleStartSeekL( TBool aForward )
 //  ------------------------------------------------------------------------------------------------
 void CMPXPausedState::HandleForeground()
 {
-    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleForeground()"),
-                   _L("foreground pause = %d"), iVideoPlaybackCtlr->iForegroundPause );
+    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleForeground()"));
 
-    if ( iVideoPlaybackCtlr->iForegroundPause )
-    {
-        iVideoPlaybackCtlr->iState->HandlePlay();
-    }
-    else
-    {
-        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
-    }
+    MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1619,8 +1637,6 @@ void CMPXPausedState::HandleCustomPlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
         IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying, EFalse );
     }
 }
@@ -1779,7 +1795,7 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
 
     if ( aError == KErrNone )
     {
-        if ( iVideoPlaybackCtlr->iAppInForeground && !iVideoPlaybackCtlr->iForegroundPause )
+        if ( iVideoPlaybackCtlr->iAppInForeground )
         {
             iVideoPlaybackCtlr->ChangeState( EMPXVideoPlaying );
 

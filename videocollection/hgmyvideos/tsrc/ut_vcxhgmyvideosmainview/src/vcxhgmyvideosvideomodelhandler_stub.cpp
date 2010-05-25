@@ -171,35 +171,6 @@ void CVcxHgMyVideosVideoModelHandler::MarkedVideosL(
     }
 
 // -----------------------------------------------------------------------------
-//  
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::OngoingDownloads(
-        RArray<TInt>& aDownloads )
-    {
-    }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//
-TVcxMyVideosDownloadState CVcxHgMyVideosVideoModelHandler::VideoDownloadState( 
-        TInt aIndex )
-    {
-    return (TVcxMyVideosDownloadState) 1;
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-TVcxMyVideosDownloadState CVcxHgMyVideosVideoModelHandler::VideoDownloadState( 
-        CMPXMedia& aMedia )
-    {
-    return (TVcxMyVideosDownloadState) 1;
-    }
-
-// -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
@@ -392,23 +363,6 @@ void CVcxHgMyVideosVideoModelHandler::PlayVideoL( TInt aIndex )
     {
     }
 
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::ResumeDownloadL( TInt aIndex )
-    {
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::CancelDownloadL( TInt aIndex )
-    {
-    }
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -443,30 +397,10 @@ void CVcxHgMyVideosVideoModelHandler::HandleRequestL( TInt aRequestStart,
 // -----------------------------------------------------------------------------
 // 
 HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowLC( 
-           CMPXMedia& aMedia, TBool& aIsDownloading )
+           CMPXMedia& aMedia )
         
     {
     return ( HBufC* ) NULL ;
-    }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-// 
-HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowCompletedLC( 
-        CMPXMedia& aMedia )
-    {
-    return ( HBufC* )NULL ;
-    }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-// 
-HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowDownloadingLC( 
-           CMPXMedia& aMedia )
-    {
-    return ( HBufC* )NULL ;
     }
 
 // -----------------------------------------------------------------------------
@@ -476,15 +410,6 @@ HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowDownloadingLC(
 void CVcxHgMyVideosVideoModelHandler::ReplaceVideoArrayL( CMPXMediaArray& aVideoList )
     {
 
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-// 
-TInt CVcxHgMyVideosVideoModelHandler::DownloadProgressL( const CMPXMedia& aMpxMedia )
-    {
-    return 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -551,14 +476,6 @@ void CVcxHgMyVideosVideoModelHandler::VideoModifiedL( TMPXChangeEventType aEvent
 // -----------------------------------------------------------------------------
 // 
 void CVcxHgMyVideosVideoModelHandler::VideoFetchingCompletedL( CMPXMedia* aVideo )
-    {
-    }
-
-// -----------------------------------------------------------------------------
-// Download updater calls this when resume has started from beginning.
-// -----------------------------------------------------------------------------
-// 
-void CVcxHgMyVideosVideoModelHandler::ResumeStartedFromBeginningL( TUint32 aMpxId )
     {
     }
 

@@ -187,6 +187,14 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          * @param aMpxId MPX ID.
          */
         void GetVideoDetailsL( TMPXItemId& aMpxId );
+                
+        /**
+         * Sets new general flags to given MPX Media object.
+         * 
+         * @param aMpxItemId MpxId of media object for which flags are set.
+         * @param aFlags New flags to be set.         
+         */
+        void SetFlagsL( TMPXItemId aMpxItemId, TUint32 aFlags );
 
     public: // From MMPXCollectionObserver
 

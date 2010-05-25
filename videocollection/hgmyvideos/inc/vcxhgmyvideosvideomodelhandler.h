@@ -33,11 +33,11 @@ class CVcxHgMyVideosModel;
 class CVcxHgMyVideosMainView;
 class CMPXMedia;
 class CVcxHgMyVideosVideoDataUpdater;
-class CVcxHgMyVideosDownloadUpdater;
 class CVcxHgMyVideosVideoDetailsDialog;
 class CVcxHgMyVideosVideoList;
 class CHgScroller;
 class CMyVideosIndicator;
+class CRepository;
 
 // CLASS DECLARATION
 
@@ -117,22 +117,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         TInt Highlight();        
         
         /**
-         * Gets video's download state base on video index.
-         * 
-         * @param aIndex Video's index on UI list.
-         * @return Video's download state as TVcxMyVideosDownloadState structure.
-         */
-        TVcxMyVideosDownloadState VideoDownloadState( TInt aIndex );
-        
-        /**
-         * Checks if progressive play (playback during download) is possible.
-         * 
-         * @param aIndex Video's index on UI list.
-         * @return ETrue if progressive play is possible.
-         */
-        TBool IsProgressivePlayPossible( TInt aIndex );
-
-        /**
          * Returns the count of videos in UI list model.
          *
          * @return Count of videos in UI list model.
@@ -153,15 +137,7 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @return List of currently marked video indexes.
          */
         void MarkedVideosL( RArray<TInt>& aMarkedVideos );
-        
-        /**
-         * Returns a list of item indexes which download 
-		 * state is different than EVcxMyVideosDlStateNone. 
-		 * 
-		 * @return List of item indexes.
-         */
-        void OngoingDownloads( RArray<TInt>& aDownloads );
-        
+
         /**
          * Handles mark command to video list.
          * 
@@ -226,20 +202,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          */
         void PlayVideoL( TInt aIndex );
         
-        /**
-         * Resumes paused or failed download from requested index.
-         * 
-         * @param aIndex Video's index on UI list.
-         */        
-        void ResumeDownloadL( TInt aIndex );
-
-        /**
-         * Cancels a video download from requested index.
-         * 
-         * @param aIndex Video's index on UI list.
-         */
-        void CancelDownloadL( TInt aIndex );
-
         /**
          * Returns age profile of a video.
          * 
@@ -323,12 +285,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         void VideoFetchingCompletedL( CMPXMedia* aVideo );
         
         /**
-         * Called when resume has started from beginning.
-         * @param aMpxId MPX ID of the video object.
-         */
-        void ResumeStartedFromBeginningL( TUint32 aMpxId );
-
-        /**
          * Called when multiple video deletion command is completed.
          * 
          * @param aFailedCount Count of failed deletions, if any.
@@ -403,41 +359,10 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         /**
          * Formats the second row string for video item.
          * 
-         * @param aIndex List index of video
-         * @param aMedia MPX Media object (video).
-         * @param aIsDownloading On return, ETrue if video is downloading.
-         * @return Second row string.
-         */
-        HBufC* FormatVideoSecondRowLC(
-                TInt aIndex,
-                CMPXMedia& aMedia,
-                TBool& aIsDownloading );        
-        
-        /**
-         * Formats the second row string for completed video.
-         * 
          * @param aMedia MPX Media object (video).
          * @return Second row string.
          */
-        HBufC* FormatVideoSecondRowCompletedLC( CMPXMedia& aMedia );
-
-        /**
-         * Formats the second row string for downloading video.
-         * 
-         * @param aIndex List index of video
-         * @param aMedia MPX Media object (video).
-         * @return Second row string.
-         */
-        HBufC* FormatVideoSecondRowDownloadingLC( TInt aIndex, CMPXMedia& aMedia );
-
-        /**
-         * Reads and returns download progress, makes sure that progress value
-         * returned gets a value between 0% and 99%.
-         * 
-         * @param aMpxMedia Reference to MPX Media object.
-         * @return Download progress. 
-         */
-        TInt DownloadProgressL( const CMPXMedia& aMpxMedia );
+        HBufC* FormatVideoSecondRowLC( CMPXMedia& aMedia );
         
         /**
          * Updates video list item at given list index.
@@ -504,6 +429,20 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * @param aNewItemCount New item count
          */
         void ResizeScrollerL( TInt aNewItemCount );
+		
+        /**
+         * Sets video as last watched.
+         *    
+         * @param aMedia Media that will be last watched.    
+         */
+        void SetVideoLastWatchedL( CMPXMedia& aMedia );
+        
+        /**
+         * Clears new video tag from the file.
+         * 
+         * @param aMedia Media from which new video tag will be cleared.         
+         */
+        void ClearNewVideoFlagL( CMPXMedia& aMedia );
 
         /**
          * Saves the marked MPXMedia items to iMarkedMediaList. This is called before
@@ -557,13 +496,7 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * Own.
          */
         CVcxHgMyVideosVideoDataUpdater* iDataUpdater;
-        
-        /**
-         * Class for polling & updating video download progress asynchrounously.
-         * Own.
-         */
-        CVcxHgMyVideosDownloadUpdater* iDownloadUpdater; 
-        
+
         /**
          * Hg list component.
          * Not own.
@@ -587,12 +520,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
         TMPXItemId iFirstListItemId;
 
         /**
-         * Downloading has been resumed for these MPX IDs. Needed for showing
-		 * note "Resuming download not possible, download starts from beginning".
-         */
-        RArray<TUint32> iResumeArray;
-
-        /**
          * Video indicator gives an overlay icon for video thumbnails.
          */
         CMyVideosIndicator* iVideoIndicator;
@@ -603,6 +530,11 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * the video list and is cleared after sorting.
          */
         RPointerArray<CMPXMedia> iMarkedMediaList;
+		
+        /**
+         * Cenrep session.
+         */
+        CRepository* iRepository;
 
     };
 

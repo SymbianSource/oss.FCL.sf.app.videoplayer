@@ -90,13 +90,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListItem ) : public CBase
 		 * @return MPX Media object.
          */
 		CMPXMedia* Media();
-		        
-        /**
-         * Gets item's download state.
-         * 
-         * @return Item's download state as TVcxMyVideosDownloadState structure.
-         */
-        TVcxMyVideosDownloadState DownloadState();
                 
         /**
          * Destructor.

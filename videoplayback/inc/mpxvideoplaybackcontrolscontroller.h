@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 15 %
+// Version : %version: 17 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -26,6 +26,7 @@
 #include <mpxplaybackframeworkdefs.h>
 #include <aknlayoutscalable_avkon.cdl.h>
 #include <f32file.h>
+#include <MMFScalingCustomCommandConstants.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackviewfiledetails.h"
@@ -117,6 +118,11 @@ class CMPXVideoPlaybackControlsController : public CBase
         */
         inline TMPXPlaybackState State();
 
+        /*
+         *   Return the Aspect Ratio for the clip
+         */
+        inline TMMFScalingType AspectRatio();
+
         /**
         * Return file details
         */
@@ -129,14 +135,12 @@ class CMPXVideoPlaybackControlsController : public CBase
 
         void SetRealOneBitmapVisibility( TBool aVisible );
 
-        TBool SetBackgroundBlack();
-
         inline TBool IsRealMediaFormat();
 
         /**
          *  Check aspect ratio icon
-         *  In case that Clip's AR is equals to Screen Display AR, also hide AR icon.  
-         *  
+         *  In case that Clip's AR is equals to Screen Display AR, also hide AR icon.
+         *
          *  @return ETrue in case that clip's AspectRatioIcon can be shown
          */
         TBool ShowAspectRatioIcon();
@@ -362,13 +366,13 @@ class CMPXVideoPlaybackControlsController : public CBase
         TInt                                    iVideoResourceOffset;
 
         TMPXPlaybackState                       iState;
+        TMMFScalingType                         iAspectRatio;
 
         CMPXVideoPlaybackViewFileDetails*       iFileDetails;     //  not owned
 
         RFs                                     iFs;
         TFileName                               iBitmapFileName;
 
-        TBool                                   iSurfaceCreated;
         TBool                                   iTvOutConnected;
         TBool                                   iRNFormat;
 
@@ -408,6 +412,13 @@ TBool CMPXVideoPlaybackControlsController::IsRealMediaFormat()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsRealFormat() [%d]"), iRNFormat);
     return iRNFormat;
+}
+
+inline
+TMMFScalingType CMPXVideoPlaybackControlsController::AspectRatio()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::AspectRatio(%d)"), iAspectRatio);
+    return iAspectRatio;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_*/

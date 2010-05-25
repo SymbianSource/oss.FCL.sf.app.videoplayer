@@ -15,8 +15,8 @@
 *
 */
 
-// Version : %version: 9 %
 
+// Version : %version: 10 %
 
 
 // INCLUDE FILES
@@ -39,7 +39,7 @@ CMPXVideoPlaybackButton::CMPXVideoPlaybackButton()
 // Symbian 2nd phase constructor can leave.
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackButton::ConstructL( CMPXVideoPlaybackControlsController* aController, 
+void CMPXVideoPlaybackButton::ConstructL( CMPXVideoPlaybackControlsController* aController,
                                           TRect aRect, const TDesC &aIconPath )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackButton::ConstructL()"));
@@ -55,8 +55,9 @@ void CMPXVideoPlaybackButton::ConstructL( CMPXVideoPlaybackControlsController* a
 // Two-phased constructor.
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackButton* CMPXVideoPlaybackButton::NewL( CMPXVideoPlaybackControlsController* aController, 
-                                                        TRect aRect, const TDesC &aIconPath)
+CMPXVideoPlaybackButton*
+CMPXVideoPlaybackButton::NewL( CMPXVideoPlaybackControlsController* aController,
+                               TRect aRect, const TDesC &aIconPath )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackButton::NewL()"));
 
@@ -196,33 +197,20 @@ void CMPXVideoPlaybackButton::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( iController->SetBackgroundBlack() )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-            gc.Clear( aRect );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-            gc.Clear( aRect );
-        }
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+        gc.Clear( aRect );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        // draw a solid background so that the entire progress
-        // bar is shown not just the area representing the
-        // portion that has been played.
-        gc.SetBrushColor( KRgbBlack );
-        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-        gc.DrawRect( aRect );
-        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+        gc.Clear( aRect );
     }
 
-    switch( iState )
+    switch ( iState )
     {
         case EMPXButtonNormal:
         {

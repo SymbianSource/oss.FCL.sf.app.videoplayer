@@ -44,6 +44,10 @@ enum TVcxHgMyVideosCategoryItemType
     TVcxHgMyVideosCategoryItemTypeUrl
     };
 
+// CONSTANTS
+const TInt KMyVideosTitleStringMaxLength = 256;
+const TInt KMyVideosTitleUrlMaxLength    = 256;
+
 // CLASS DECLARATION
 
 /**
@@ -164,14 +168,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
         void CategoryModifiedL( TMPXChangeEventType aEventType,
                                 TMPXItemId& aMpxItemId );
         
-        /*
-         * Called when a single video item has been fetched.
-         * Ownership of video is transferred.
-         * 
-         * @param aVideo Video item.
-         */
-        void VideoFetchingCompletedL( CMPXMedia* aVideo );
-
         /**
          * Called when category list items have been fetched.
 		 */
@@ -272,10 +268,8 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
         /**
          * Goes through given number of categories and
          * fills iCategoryIdArray from the accepted ones
-         *
-         * @param aCategoriesAvailable Number of categories
          */
-        void MakeCategoryIdArray( TInt aCategoriesAvailable );
+        void MakeCategoryIdArray();
         
         /**
          * Checks if the given category is accepted or not.
@@ -301,16 +295,15 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
         CMPXMedia* GetCategoryDataL( TInt aCategoryId );
 		
         /**
-         * Gets the last watched videos data from collection.
-		 * Result is returned asynchronously to VideoFetchingCompletedL callback.
-         */
-		void FetchLastWatchedL();
-		
-        /**
          * Gets the last watched videos icon from tbn server.
 		 * Result is returned asynchronously to ThumbnailReady callback.
          */
         void LoadLastWatchedIconL();
+        
+        /**
+         * Clears the last watched videos icon and indicator.
+         */
+        void ClearLastWatchedIconL();
 
         /**
          * Set indicator for last watched item
@@ -376,12 +369,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * Own.
          */
         CMPXMediaArray* iCategoryList;
-        
-        /**
-         * Last watched media.
-         * Own.
-         */
-        CMPXMedia* iLastWatched;
         
         /**
          * TArray containing category ID's. Each index 

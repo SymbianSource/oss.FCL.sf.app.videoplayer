@@ -150,16 +150,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
         void PlayVideoL();
         
         /**
-         * Resumes currently selected download.
-         */
-        void ResumeDownloadL();
-        
-        /**
-         * Cancels currently selected download.
-         */
-        void CancelDownloadL();        
-        
-        /**
          * Handles sort command to list.
          * 
          * @param aSortCommand Sort command.

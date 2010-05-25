@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 28 %
+// Version : %version: 29 %
 
 
 // INCLUDE FILES
@@ -419,34 +419,18 @@ void CMPXVideoPlaybackContainer::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
 
     gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+    gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
 
-    //
-    //  Make the window transparent when a surface has been created
-    //  unless TV-Out is connected
-    //
-    if ( iSurfaceCreated && ! iTvOutConnected )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetBrushColor( TRgb::Color16MAP(255) );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetBrushColor( TRgb::Color16MA(0) );
-        }
-
-        gc.Clear( aRect );
+        gc.SetBrushColor( TRgb::Color16MAP(255) );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        //
-        //  Set the background to black
-        //
-        gc.SetBrushColor( KRgbBlack );
-        gc.DrawRect( aRect );
+        gc.SetBrushColor( TRgb::Color16MA(0) );
     }
+
+    gc.Clear( aRect );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -465,16 +449,6 @@ void CMPXVideoPlaybackContainer::HandleEventL( TMPXVideoPlaybackControlCommandId
     else if ( aEvent == EMPXControlCmdHandleForegroundEvent )
     {
         iUserInputHandler->SetForeground(ETrue);
-    }
-    else if ( aEvent == EMPXControlCmdTvOutConnected )
-    {
-        iTvOutConnected = ETrue;
-        DrawNow();
-    }
-    else if ( aEvent == EMPXControlCmdTvOutDisconnected )
-    {
-        iTvOutConnected = EFalse;
-        DrawNow();
     }
 
     iControlsController->HandleEventL( aEvent, aValue );
@@ -498,6 +472,13 @@ EXPORT_C void CMPXVideoPlaybackContainer::HandleCommandL( TInt aCommand, TInt aV
         }
         case EMPXPbvCmdResetControls:
         {
+            if ( iRealOneBitmapTimer )
+            {
+                iRealOneBitmapTimer->Cancel();
+                delete iRealOneBitmapTimer;
+                iRealOneBitmapTimer = NULL;
+            }
+
             //
             //  Recreate the controls with the new clip
             //
@@ -522,14 +503,12 @@ EXPORT_C void CMPXVideoPlaybackContainer::HandleCommandL( TInt aCommand, TInt aV
         }
         case EMPXPbvSurfaceCreated:
         {
-            iSurfaceCreated = ETrue;
             iControlsController->HandleEventL( EMPXControlCmdSurfaceCreated );
             DrawNow();
             break;
         }
         case EMPXPbvSurfaceRemoved:
         {
-            iSurfaceCreated = EFalse;
             iControlsController->HandleEventL( EMPXControlCmdSurfaceRemoved );
             DrawNow();
             break;
@@ -610,8 +589,6 @@ void CMPXVideoPlaybackContainer::CreateControlsL()
 
         DrawNow();
     }
-
-    iTvOutConnected = iFileDetails->iTvOutConnected;
 }
 
 // -------------------------------------------------------------------------------------------------

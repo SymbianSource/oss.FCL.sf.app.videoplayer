@@ -65,14 +65,6 @@ NONSHARABLE_CLASS( MVcxHgMyVideosCategoryModelObserver )
         virtual void CategoryModifiedL( TMPXChangeEventType aEventType, 
                                         TMPXItemId& aMpxItemId ) = 0;
         
-        /*
-         * Called when a single video item has been fetched.
-         * Ownership of video is transferred.
-         * 
-         * @param aVideo Video item.
-         */
-        virtual void VideoFetchingCompletedL( CMPXMedia* aVideo ) = 0;
-        
         /**
          * Called when category list items have been fetched.
          */

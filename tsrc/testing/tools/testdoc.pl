@@ -110,7 +110,7 @@ my @gCfgFiles; # list of cfg files.
 my @caseDescs; # case description and the case itself in text
 my @notDocumentedCases; #array to hold information about the cases without documentation
 
-$regexpCaseName = '[\x3C\x3E\(\)\w.,\/:_\-&\' ]+';
+$regexpCaseName = '[\x3C\x3E\(\)\[\]\w.,\/:_\-&\' ]+';
 
 my $caseDefaultStatus = 			"NOT RUN";
 

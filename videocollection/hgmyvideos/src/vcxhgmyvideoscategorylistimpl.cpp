@@ -190,7 +190,8 @@ void CVcxHgMyVideosCategoryListImpl::HandleOpenL( TInt /*aIndex*/ )
             
             TVcxHgMyVideosCategoryItemType itemType;
             TUid appUid;
-            TBuf<64> urlString;
+            TBuf<KMyVideosTitleUrlMaxLength> urlString( KNullDesC );
+                        
             iCategoryModel->HandleExtraItemSelectionL( categoryId, itemType, appUid, urlString );
             
             if ( itemType == TVcxHgMyVideosCategoryItemTypeUid )

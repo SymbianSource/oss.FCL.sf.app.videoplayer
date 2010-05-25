@@ -151,31 +151,3 @@ CMPXMedia* CVcxHgMyVideosVideoListItem::Media()
     {
     return iMedia;
     }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoListItem::DownloadState()
-// -----------------------------------------------------------------------------
-//
-TVcxMyVideosDownloadState CVcxHgMyVideosVideoListItem::DownloadState()
-    {
-    TVcxMyVideosDownloadState state( EVcxMyVideosDlStateNone );
-
-    if ( iMedia && iMedia->IsSupported( KVcxMediaMyVideosDownloadId ) )
-        {
-        // Download ID is non-zero if download status exists.
-        if ( *( iMedia->Value<TUint32>( KVcxMediaMyVideosDownloadId ) ) != 0 )
-            {
-            if ( iMedia->IsSupported( KVcxMediaMyVideosDownloadState ) )
-                {
-                state = static_cast<TVcxMyVideosDownloadState>(
-                            *( iMedia->Value<TUint8>( KVcxMediaMyVideosDownloadState ) ) );
-
-                if ( state == EVcxMyVideosDlStateDownloaded )
-                    {
-                    state = EVcxMyVideosDlStateNone;
-                    }
-                }
-            }
-        }
-    return state;
-    }

@@ -195,13 +195,19 @@ CVcxHgMyVideosVideoListImpl::~CVcxHgMyVideosVideoListImpl()
 void CVcxHgMyVideosVideoListImpl::DoListActivateL( TInt aIndex )
     {
     TInt index = aIndex;
-    index = ( ( index != KErrNotFound ) ? index : iVideoModel->CurrentCategoryIndex() );
+    TInt currentIndex = iVideoModel->CurrentCategoryIndex();
+    index = ( ( index != KErrNotFound ) ? index : currentIndex );
     index = ( ( index != KErrNotFound ) ? index : 0 );
 
     iVideoModel->UpdateVideoListL( index );
     
     iVideoModel->DoModelActivateL();
     CVcxHgMyVideosListBase::DoListActivateL( index );
+    if ( index != currentIndex )
+        {
+        // Prevents old list from flickering
+        iScroller->DrawNow();
+        }
     iScroller->SetFocus( ETrue );
     }
 
@@ -500,24 +506,6 @@ void CVcxHgMyVideosVideoListImpl::PlayVideoL()
         }
     
     CleanupStack::PopAndDestroy( &operationTargets );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoListImpl::ResumeDownloadL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoListImpl::ResumeDownloadL()
-    {
-    iVideoModel->ResumeDownloadL( Highlight() );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoListImpl::CancelDownloadL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoListImpl::CancelDownloadL()
-    {
-    iVideoModel->CancelDownloadL( Highlight() );   
     }
 
 // -----------------------------------------------------------------------------
@@ -852,15 +840,8 @@ TInt CVcxHgMyVideosVideoListImpl::GetMskResourceL()
     iVideoModel->MarkedVideosL( markedVideos );
     TInt highlight = Highlight();
     TInt count = iVideoModel->VideoCount();
-    TVcxMyVideosDownloadState dlState( EVcxMyVideosDlStateNone );
-    TBool progressivePlay( EFalse );
-    if ( count > 0 && highlight >= 0 )
-        {
-        dlState = iVideoModel->VideoDownloadState( highlight );
-        progressivePlay = iVideoModel->IsProgressivePlayPossible( highlight );
-        }
-    TBool showPlay = ( ( markedVideos.Count() == 0 ) && ( highlight >= 0 ) && ( count > 0 )
-                       && ( ( dlState == EVcxMyVideosDlStateNone ) || ( progressivePlay ) ) );
+
+    TBool showPlay = ( ( markedVideos.Count() == 0 ) && ( highlight >= 0 ) && ( count > 0 ) );
     
     CleanupStack::PopAndDestroy( &markedVideos );
     
@@ -938,14 +919,11 @@ void CVcxHgMyVideosVideoListImpl::HandleSendL()
         {
         HBufC* videoUri = iVideoModel->GetVideoUri( operationTargets[i] ).AllocLC();
         TInt64 videoSize = iVideoModel->GetVideoSize( operationTargets[i] );
-        TVcxMyVideosDownloadState dlState = iVideoModel->VideoDownloadState( operationTargets[i] );
 
         IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::HandleSendL() file: %S (%ld bytes)", videoUri, videoSize );
 
         // Attach file to message
-        if ( videoUri->Length() > 0 &&
-                videoSize > 0 &&
-                EVcxMyVideosDlStateNone == dlState )
+        if ( videoUri->Length() > 0 && videoSize > 0 )
             {
             message->AppendAttachmentL( *videoUri );
             attachmentsTotalSize += videoSize;

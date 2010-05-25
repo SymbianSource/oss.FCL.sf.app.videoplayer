@@ -269,22 +269,6 @@ void CVcxHgMyVideosVideoListImpl::VideoDeletionCompletedL( TInt aFailedCount,
 //  
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosVideoListImpl::ResumeDownloadL()
-    {
-    }
-
-// -----------------------------------------------------------------------------
-//  
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoListImpl::CancelDownloadL()
-    { 
-    }
-
-// -----------------------------------------------------------------------------
-//  
-// -----------------------------------------------------------------------------
-//
 void CVcxHgMyVideosVideoListImpl::HandleSortCommandL( TInt aSortCommand )
     {
     }

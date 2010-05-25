@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: ou1cpsw#14 %
+// Version : %version: 15 %
 
 
 
@@ -43,6 +43,7 @@ SOURCE          mpxvideodlmgrif.cpp
 SOURCE          mpxvideoaccessoryobserver.cpp
 SOURCE          mpxvideoplayerutility.cpp
 SOURCE          mpxvideodrmhelper.cpp
+SOURCE          mpxvideoposterframesetter.cpp
 
 START RESOURCE  ../data/10282550.rss
 TARGET          mpxvideohelixplayback.rsc
@@ -76,6 +77,8 @@ LIBRARY  caf.lib
 LIBRARY  mmcommon.lib 
 LIBRARY  hwrmlightclient.lib   // Lights control
 LIBRARY  centralrepository.lib // For display backlight timeout value
+LIBRARY  fbscli.lib
+LIBRARY  thumbnailmanager.lib
 
 #ifdef __ACCESSORY_FW
 LIBRARY accclient.lib

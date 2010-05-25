@@ -106,18 +106,6 @@ RESOURCE MENU_PANE r_vcxhgmyvideos_mainview_menu
             command = EVcxHgMyVideosCmdDeleteMarked;
             txt = qtn_iptv_delete_video_clip;
             },
-        MENU_ITEM
-            {
-            command = EVcxHgMyVideosCmdResumeDownload; 
-            txt = qtn_iptv_resume_download;
-            flags = EEikMenuItemSpecific;
-            },    
-        MENU_ITEM 
-            { 
-            command = EVcxHgMyVideosCmdCancelDownload;
-            txt = qtn_iptv_cancel_download;
-            flags = EEikMenuItemSpecific;
-            },
         MENU_ITEM 
             { 
             command = EVcxHgMyVideosCmdVideoDetails;
@@ -790,24 +778,6 @@ RESOURCE TBUF r_vcxhgmyvideos_video_list_length_min_sec { buf = qtn_vcx_hg_video
 // -----------------------------------------------------------------------------
 //  
 RESOURCE TBUF r_vcxhgmyvideos_video_list_length_h_min { buf = qtn_iptv_video_list_length_full; }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//  
-RESOURCE TBUF r_vcxhgmyvideos_video_downloading { buf = qtn_iptv_video_downloading; }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//  
-RESOURCE TBUF r_vcxhgmyvideos_download_failed { buf = qtn_iptv_download_failed; }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//  
-RESOURCE TBUF r_vcxhgmyvideos_download_paused { buf = qtn_iptv_download_paused; }
 
 // -----------------------------------------------------------------------------
 //

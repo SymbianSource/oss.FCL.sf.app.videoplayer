@@ -52,6 +52,8 @@ const TInt KVcxMpxLevelVideos     = 3;
 
 const TUint32 KVcxHgMyVideosTransactionId = 5;
 
+const TInt KMpxMediaId2 = 0;
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -216,8 +218,9 @@ void CVcxHgMyVideosCollectionClient::GetVideoListL( TInt aIndex )
         }
     else if ( iCollectionLevel == KVcxMpxLevelVideos )
         {
-        iCollectionUtility->Collection().BackL();
-        iCollectionUtility->Collection().OpenL( aIndex );
+        // OpenL() will return a list if there has been any changes.
+        // No reply if list is same as with previous OpenL().
+        iCollectionUtility->Collection().OpenL();
         }
     else
         {
@@ -1063,13 +1066,6 @@ void CVcxHgMyVideosCollectionClient::HandleGetMediasByMpxIdRespL( CMPXMessage* a
                     // Ownership is transferred.
             	    iVideoModelObserver->VideoFetchingCompletedL( media );  
             	    }
-                
-                else if ( iCategoryModelObserver )
-                    {
-                    CMPXMedia* media = CMPXMedia::NewL( *( ( *array )[0] ) );
-                    // Ownership is transferred.
-                    iCategoryModelObserver->VideoFetchingCompletedL( media );  
-                    }
                 }
 			}
         CleanupStack::PopAndDestroy( entries );
@@ -1092,6 +1088,32 @@ void CVcxHgMyVideosCollectionClient::HandleMyVideosListCompleteL( CMPXMessage* /
             }
         }
     }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosCollectionClient::SetFlagsL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosCollectionClient::SetFlagsL( TMPXItemId aMpxItemId, TUint32 aFlags )
+{    
+    CMPXMedia* msg = CMPXMedia::NewL();
+    CleanupStack::PushL( msg );
+    
+    msg->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, TMPXItemId( aMpxItemId, KMpxMediaId2 ));
+    msg->SetTObjectValueL<TInt32>( KMPXMediaGeneralFlags, aFlags );
+    
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+    
+    cmd->SetTObjectValueL( KMPXCommandGeneralId, KMPXCommandIdCollectionSet );
+    cmd->SetTObjectValueL( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetCObjectValueL( KMPXCommandColSetMedia, msg );
+    cmd->SetTObjectValueL( KMPXCommandGeneralCollectionId, KVcxUidMyVideosMpxCollection );
+    
+    iCollectionUtility->Collection().CommandL( *cmd );
+    
+    CleanupStack::PopAndDestroy( cmd );    
+    CleanupStack::PopAndDestroy( msg );
+}
 
 // -----------------------------------------------------------------------------
 // CVcxHgMyVideosCollectionClient::HandleGetVideoDetailsRespL()

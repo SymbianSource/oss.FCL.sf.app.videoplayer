@@ -24,10 +24,8 @@ enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos
     {
     EVcxHgMyVideosCmdPlay = 700,             // Play video
     EVcxHgMyVideosCmdOpen,                   // Open video view
-    EVcxHgMyVideosCmdDelete,                 // Delete video (only for complete files)
-    EVcxHgMyVideosCmdDeleteMarked,           // Delete video (only for complete files)
-    EVcxHgMyVideosCmdResumeDownload,         // Resume download (only for downloads)
-    EVcxHgMyVideosCmdCancelDownload,         // Cancel download (only for downloads)
+    EVcxHgMyVideosCmdDelete,                 // Delete video
+    EVcxHgMyVideosCmdDeleteMarked,           // Delete video
     EVcxHgMyVideosCmdVideoDetails,           // Video details
     EVcxHgMyVideosCmdShowViaHomenet,         // Show video via Homenet (UPnP renderer)
     EVcxHgMyVideosCmdStopShowViaHomenet,     // Stop show via Homenet

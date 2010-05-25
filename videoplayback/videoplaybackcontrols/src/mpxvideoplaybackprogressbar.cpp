@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 22 %
+
+// Version : %version: 23 %
 
 
 // INCLUDE FILES
@@ -484,32 +485,17 @@ void CMPXVideoPlaybackProgressBar::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( iController->SetBackgroundBlack() )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-            gc.Clear( aRect );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-            gc.Clear( aRect );
-        }
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+        gc.Clear( aRect );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        //
-        //  draw a solid background so that the entire progress
-        //  bar is shown not just the area representing the
-        //  portion that has been played.
-        //
-        gc.SetBrushColor( KRgbBlack );
-        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-        gc.DrawRect( aRect );
-        gc.SetBrushStyle(CGraphicsContext::ENullBrush);
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+        gc.Clear( aRect );
     }
 
     //

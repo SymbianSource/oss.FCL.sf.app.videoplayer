@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 29 %
 
 
 //
@@ -35,6 +35,7 @@
 #include "mpxvideofiledetails.h"
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideodrmhelper.h"
+#include "mpxvideoposterframesetter.h"
 
 // Constants
 const TUid KUidInterfaceMMFHelixController = {0x101F855D};
@@ -69,6 +70,12 @@ CMPXVideoPlaybackMode::CMPXVideoPlaybackMode()
 CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()"));
+    
+    if ( iPosterFrameSetter )
+    {
+        delete iPosterFrameSetter;
+        iPosterFrameSetter = NULL;
+    }
 }
 
 //  ----------------------------------------------------------------------------
@@ -177,31 +184,26 @@ void CMPXVideoPlaybackMode::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleBackground()"));
 
-    //
-    //  Pause in all cases to remove the different behavior based on the decoder
-    //
-    iVideoPlaybackCtlr->iState->HandlePause();
-
     if ( iVideoPlaybackCtlr->iAppInForeground )
     {
         if ( iVideoPlaybackCtlr->IsAlarm() )
         {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
+            iVideoPlaybackCtlr->iState->HandlePause();
         }
         else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
                   iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
-            iVideoPlaybackCtlr->SendHideControlsEventL();
+            iVideoPlaybackCtlr->iState->HandlePause();
+            TRAP_IGNORE( iVideoPlaybackCtlr->SendHideControlsEventL() );
         }
         else if ( iVideoPlaybackCtlr->IsPhoneCall() || iVideoPlaybackCtlr->IsVideoCall() )
         {
-            iVideoPlaybackCtlr->iForegroundPause = EFalse;
+            iVideoPlaybackCtlr->iState->HandlePause();
         }
     }
     else
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
+         iVideoPlaybackCtlr->iState->HandlePause();
     }
 }
 
@@ -220,11 +222,6 @@ TBool CMPXVideoPlaybackMode::CanPlayNow()
         {
             MPX_TRAPD( err,
                 iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ) );
-        }
-        else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
-                  iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
-        {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
         }
         else
         {
@@ -276,6 +273,22 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
     return networkMode2g;
 }
 
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackMode::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleSetPosterFrame()"));
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackMode::HandleFrameReady(TInt /*aError*/)
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));        
+}
 //************************************************************************************************//
 //          CMPXLocalPlaybackMode
 //************************************************************************************************//
@@ -294,6 +307,30 @@ CMPXLocalPlaybackMode::~CMPXLocalPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXLocalPlaybackMode::~CMPXLocalPlaybackMode()"));
 }
+
+void CMPXLocalPlaybackMode::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleSetPosterFrame()"));
+         
+    // create poster frame setter if it does not already exist
+    if ( ! iPosterFrameSetter )
+    {
+        TRAP_IGNORE(iPosterFrameSetter = CMPXVideoPosterFrameSetter::NewL( iVideoPlaybackCtlr ));
+    }
+
+    if ( iPosterFrameSetter )
+    {
+        iPosterFrameSetter->RequestPosterFrame();
+    }    
+}
+
+void CMPXLocalPlaybackMode::HandleFrameReady(TInt aError)
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));      
+    
+    iPosterFrameSetter->HandlePosterFrameReady(aError);
+}
+
 
 //************************************************************************************************//
 //          CMPXStreamingPlaybackMode
@@ -385,10 +422,6 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
         {
             MPX_TRAPD(err,
                       iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ));
-        }
-        else if ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
-        {
-          //exit for live streaming
         }
         else
         {
@@ -489,10 +522,20 @@ void CMPXLiveStreamingPlaybackMode::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXLiveStreamingPlaybackMode::HandleBackground()"));
 
-    //
-    //  Pause in all cases to remove the different behavior based on the decoder
-    //
-    iVideoPlaybackCtlr->iState->HandlePause();
+    if ( iVideoPlaybackCtlr->iAppInForeground )
+    {
+        if ( iVideoPlaybackCtlr->IsPhoneCall() ||
+             iVideoPlaybackCtlr->IsVideoCall() ||
+             ( iVideoPlaybackCtlr->IsKeyLocked() &&
+               iVideoPlaybackCtlr->iFileDetails->iVideoEnabled ) )
+        {
+            iVideoPlaybackCtlr->iState->HandlePause();
+        }
+    }
+    else
+    {
+        iVideoPlaybackCtlr->iState->HandlePause();
+    }
 }
 
 //************************************************************************************************//

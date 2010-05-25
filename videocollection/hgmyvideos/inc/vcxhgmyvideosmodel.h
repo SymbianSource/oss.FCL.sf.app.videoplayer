@@ -30,7 +30,6 @@
 // FORWARD DECLARATIONS
 
 class CVcxHgMyVideosCollectionClient;
-class CVcxHgMyVideosDownloadClient;
 class CRepository;
 class CVcxHgMyVideosThumbnailManager;
 
@@ -119,14 +118,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
          * @return Reference to Collection client.
          */
         CVcxHgMyVideosCollectionClient& CollectionClient();
-        
-        /**
-         * Returns Download client.
-         *
-         * @return Reference to Download client.
-         */
-        CVcxHgMyVideosDownloadClient& DownloadClient();
-        
+
         /**
          * Returns reference to component's File Server session.
          * 
@@ -177,6 +169,30 @@ NONSHARABLE_CLASS( CVcxHgMyVideosModel ) : public CBase,
          */
         TInt GetLastWatchedIdL( TInt& aId );
 
+        /**
+         * Gets the last watched video name from CenRep.
+         * 
+         * @param aPath On return Video's path.
+         * @return System wide error code
+         */
+        TInt GetLastWatchedNameL( TDes& aName );
+        
+        /**
+         * Gets the last watched video path from CenRep.
+         * 
+         * @param aPath On return Video's path.
+         * @return System wide error code
+         */
+        TInt GetLastWatchedPathL( TDes& aPath );
+        
+        /**
+         * Gets the last watched video indicator from CenRep.
+         * 
+         * @param aValue On return Video's indicator value.
+         * @return System wide error code
+         */
+        TInt GetLastWatchedIndicatorL( TInt& aValue );
+        
         /**
          * Gets video list sort order (from CenRep).
          * 

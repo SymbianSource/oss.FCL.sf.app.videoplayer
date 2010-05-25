@@ -79,27 +79,19 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoList ) :
     public: // Data fetching and status information.
                
         /**
+         * Checks whether the new list has the same items as the old one.
+         * 
+		 * @param aVideoList The new video list.
+         * @return ETrue/EFalse.
+         */        
+        TBool HasSameItemsL( const CMPXMediaArray& aVideoList );
+
+        /**
          * Returns count of video items.
          * 
          * @return Count of items.
          */        
         TInt VideoCount();
-
-        /**
-         * Gets video's download state based on list index.
-         * 
-         * @param aIndex Index to video list.
-         * @return Video's download state as TVcxMyVideosDownloadState structure.
-         */
-        TVcxMyVideosDownloadState VideoDownloadState( TInt aIndex );
-        
-		/**
-		 * Returns a list of item indexes which downloading
-		 * state is different than EVcxMyVideosDlStateNone.
-		 * 
-		 * @return List of item indexes.
-		 */
-		void GetOngoingDownloads( RArray<TInt>& aDownloads );
 		
         /**
          * Removes MPX Media object from video array.

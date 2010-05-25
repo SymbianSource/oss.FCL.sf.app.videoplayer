@@ -1336,18 +1336,6 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             
             static_cast<CMdEUint32Property*>(property)->SetValueL( flags );
             }
-        
-        // Play pos has really changed -> put the video as last watched
-        if ( aObject.Property( *iLastPlayPositionPropertyDef, property, 0 ) == KErrNotFound ||
-             static_cast<CMdEReal32Property*>(property)->Value() != lastPlaybackPos  )
-            {
-            if ( !iRepository )
-                {
-                iRepository = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
-                }
-            iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedMpxId,
-                                            TInt ( aVideo.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ).iId1 ) );
-            }
         if ( aObject.Property( *iLastPlayPositionPropertyDef, property, 0 ) != KErrNotFound )
             {
             static_cast<CMdEReal32Property*>(property)->SetValueL( lastPlaybackPos );

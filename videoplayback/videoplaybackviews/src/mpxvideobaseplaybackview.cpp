@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 77 %
+// Version : %version: 79 %
 
 
 //  Include Files
@@ -1367,7 +1367,7 @@ void CMPXVideoBasePlaybackView::HandleMediaL( const CMPXMedia& aMedia, TInt aErr
                 delete iClipName;
                 iClipName = NULL;
             }
-            
+
             TPtrC uri( aMedia.ValueText( KMPXMediaGeneralUri ) );
             iClipName = uri.AllocL();
         }
@@ -2208,7 +2208,12 @@ void CMPXVideoBasePlaybackView::HandleWsEventL( const TWsEvent& aEvent,
 
         if ( visible & TWsVisibilityChangedEvent::ENotVisible )
         {
-            MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleWsEventL() ENotVisible"));
+            MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleWsEventL() ENotVisible"));
+            SendWindowCommandL( EPbCmdHandleBackground );
+        }
+        else if ( ! IsAppInFrontL() )
+        {
+            MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleWsEventL() App in Background"));
             SendWindowCommandL( EPbCmdHandleBackground );
         }
     }
@@ -2258,6 +2263,10 @@ void CMPXVideoBasePlaybackView::DoHandleInitializingStateL( TMPXPlaybackState aL
         {
             iMediaRequested = EFalse;
 
+            //
+            //  Refresh the screen by removing the surface and resetting the controls
+            //
+            iDisplayHandler->RemoveDisplayWindow();
             iContainer->HandleCommandL( EMPXPbvCmdResetControls );
 
             if ( iFileDetails )

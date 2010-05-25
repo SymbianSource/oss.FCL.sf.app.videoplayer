@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_22 %
+// Version : %version: ou1cpsw#e92_23 %
 
 
 #include "mpxvideoplayer_appuienginetester.h"
@@ -199,9 +199,9 @@ void CMpxVideoPlayer_AppUiEngineTester::AddLocalFileCallbacksL( TDesC& aFileName
     AddExpectedEvent( event );
 }
 
-void CMpxVideoPlayer_AppUiEngineTester::AddCollectionMediaCallbacksL()
+void CMpxVideoPlayer_AppUiEngineTester::AddCollectionMediaCallbacksL( TDesC& aFileName )
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::AddLocalFileCallbacksL()"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::AddCollectionMediaCallbacksL()"));
 
     TCallbackEvent* event = new (ELeave) TCallbackEvent;
     event->iEvent = EViewUtilityPreLoadView;
@@ -209,7 +209,8 @@ void CMpxVideoPlayer_AppUiEngineTester::AddCollectionMediaCallbacksL()
     AddExpectedEvent( event );
 
     event = new (ELeave) TCallbackEvent;
-    event->iEvent = EPlaybackUtilityInitPlaylist;
+    event->iEvent = EPlaybackUtilityInitFileName;
+    event->iFileName = aFileName;
 
     AddExpectedEvent( event );
 }
@@ -934,7 +935,7 @@ TInt CMpxVideoPlayer_AppUiEngineTester::HandleCollectionMediaL( CStifItemParser&
         //
         //  Add callback event
         //
-        AddCollectionMediaCallbacksL();
+        AddCollectionMediaCallbacksL( filename );
     }
 
 

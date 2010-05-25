@@ -106,43 +106,45 @@ void CVcxHgMyVideosVideoList::ReplaceVideoListL( CMPXMediaArray& aVideoList )
     }
 
 // -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//
+TBool CVcxHgMyVideosVideoList::HasSameItemsL( const CMPXMediaArray& aVideoList )
+    {
+    TInt count( iVideoList.Count() );
+    if ( aVideoList.Count() != count || count == 0 )
+        {
+        return EFalse;
+        }
+
+    TBool isSame( ETrue );
+    CMPXMedia* oldMedia = NULL;
+    CMPXMedia* newMedia = NULL;
+    for ( TInt i = 0; i < count; i++ )
+        {
+        oldMedia = iVideoList[i]->Media();
+        newMedia = aVideoList[i];
+        if ( oldMedia && oldMedia->IsSupported( KMPXMediaGeneralId )
+                && newMedia && newMedia->IsSupported( KMPXMediaGeneralId ) )
+            {
+            if ( oldMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) != 
+                    newMedia->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) )
+                {
+                isSame = EFalse;
+                break;
+                }
+            }
+        }
+    return isSame;
+    }
+
+// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoList::VideoCount()
 // -----------------------------------------------------------------------------
 //
 TInt CVcxHgMyVideosVideoList::VideoCount()
     {
     return iVideoList.Count();
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoList::VideoDownloadState()
-// -----------------------------------------------------------------------------
-//
-TVcxMyVideosDownloadState CVcxHgMyVideosVideoList::VideoDownloadState( TInt aIndex )
-    {
-    TVcxMyVideosDownloadState state( EVcxMyVideosDlStateNone );
-
-    if ( aIndex >= 0 && aIndex < iVideoList.Count() )
-        {
-        state = iVideoList[aIndex]->DownloadState();
-        }
-    return state;
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoList::GetOngoingDownloads()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoList::GetOngoingDownloads( RArray<TInt>& aDownloads )
-    {
-    TInt count( iVideoList.Count() );
-    for ( TInt i = 0; i < count; i++ )
-        {
-        if ( iVideoList[i]->DownloadState() != EVcxMyVideosDlStateNone )
-            {
-            aDownloads.Append( i );
-            }
-        }
     }
 
 // -----------------------------------------------------------------------------

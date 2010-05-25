@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  da1mmcf#14 %
 
 //  INCLUDES
 #include <appinfo.rh>
@@ -53,7 +53,6 @@ RESOURCE APP_REGISTRATION_INFO
         DATATYPE { priority=EDataTypePrioritySystem; type="application/x-pn-realmedia"; },
         DATATYPE { priority=EDataTypePrioritySystem; type="audio/x-pn-realaudio-plugin"; },
         DATATYPE { priority=EDataTypePrioritySystem; type="video/x-matroska"; },
-        DATATYPE { priority=EDataTypePrioritySystem; type="audio/x-matroska"; },
 
 #ifdef __WINDOWS_MEDIA
         DATATYPE { priority=EDataTypePriorityHigh; type="video/x-ms-wmv"; },

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,8 +15,8 @@
 *
 */
 
-// Version : %version: 6 %
 
+// Version : %version: 7 %
 
 
 #ifndef MPXVIDEOPLAYBACKASPECTRATIOICON_H
@@ -24,7 +24,6 @@
 
 //  INCLUDES
 #include <coecntrl.h>
-#include <MMFScalingCustomCommandConstants.h>
 
 // FORWARD DECLARATIONS
 class CMPXVideoPlaybackControlsController;
@@ -39,7 +38,7 @@ class CMPXVideoPlaybackAspectRatioIcon : public CCoeControl
         /**
         * Two-phased constructor.
         */
-        static CMPXVideoPlaybackAspectRatioIcon* NewL( 
+        static CMPXVideoPlaybackAspectRatioIcon* NewL(
                 CMPXVideoPlaybackControlsController* aController, TRect aRect );
 
         /**
@@ -59,7 +58,7 @@ class CMPXVideoPlaybackAspectRatioIcon : public CCoeControl
          */
         void ConstructL( TRect aRect );
 
-    private: 
+    private:
 
         /**
         * From CoeControl,CountComponentControls.
@@ -98,7 +97,6 @@ class CMPXVideoPlaybackAspectRatioIcon : public CCoeControl
         CGulIcon*        iStretchIcon;
         CGulIcon*        iZoomIcon;
 
-        TMMFScalingType  iAspectRatio;
         TRect            iAspectRatioRect;
 
 #ifdef RD_TACTILE_FEEDBACK

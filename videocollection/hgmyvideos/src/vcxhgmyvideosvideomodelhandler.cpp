@@ -31,16 +31,16 @@
 #include <vcxmyvideosdefs.h>
 #include <MPFileDetailsDialog.h>
 #include <myvideosindicator.h>
+#include <centralrepository.h>
+
 #include "IptvDebug.h"
 
 #include "vcxhgmyvideosmodel.h"
 #include "vcxhgmyvideosmainview.h"
 #include "vcxhgmyvideoscollectionclient.h"
-#include "vcxhgmyvideosdownloadclient.h"
 #include "vcxhgmyvideosvideomodelhandler.h"
 #include "vcxhgmyvideosvideolistimpl.h"
 #include "vcxhgmyvideosvideodataupdater.h"
-#include "vcxhgmyvideosdownloadupdater.h"
 
 #include "vcxhgmyvideos.hrh"
 #include "vcxhgmyvideoslistbase.h"
@@ -129,8 +129,6 @@ void CVcxHgMyVideosVideoModelHandler::ConstructL()
                                                          iScroller,                                                        
                                                          *iVideoArray );
 
-    iDownloadUpdater = CVcxHgMyVideosDownloadUpdater::NewL( *this, *iVideoArray );
-    
     iVideoIndicator = CMyVideosIndicator::NewL();
     }
 
@@ -140,14 +138,13 @@ void CVcxHgMyVideosVideoModelHandler::ConstructL()
 //
 CVcxHgMyVideosVideoModelHandler::~CVcxHgMyVideosVideoModelHandler()
     {
-    iResumeArray.Close();
     iMarkedMediaList.Close();
     
     delete iVideoDetails;
     delete iVideoIndicator;
     delete iDataUpdater;
-    delete iDownloadUpdater;
     delete iVideoArray;
+	delete iRepository;
     }
 
 // -----------------------------------------------------------------------------
@@ -160,7 +157,6 @@ void CVcxHgMyVideosVideoModelHandler::DoModelActivateL()
         "MPX My Videos UI # CVcxHgMyVideosVideoModelHandler::DoModelActivateL() - Enter" );
     
     iDataUpdater->SetPausedL( EFalse );
-    iDownloadUpdater->SetPausedL( EFalse );
     iModel.CollectionClient().SetVideoModelObserver( this );
 
     // Set scroller strip type
@@ -184,7 +180,6 @@ void CVcxHgMyVideosVideoModelHandler::DoModelDeactivate()
         "MPX My Videos UI # CVcxHgMyVideosVideoModelHandler::DoModelDeactivate() - Enter" );
     
     TRAP_IGNORE( iDataUpdater->SetPausedL( ETrue ) );
-    TRAP_IGNORE( iDownloadUpdater->SetPausedL( ETrue ) );
     iModel.CollectionClient().SetVideoModelObserver( NULL );
     iScroller.DisableScrollBuffer();
 
@@ -215,17 +210,24 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListL( TInt aCategoryIndex )
 
     CVcxHgMyVideosCollectionClient& collectionClient = iModel.CollectionClient();
 
-    // If we are re-opening the same video list again, then try 
-    // restore the highlight to previous position.
-    aCategoryIndex == iCurrentCategoryIndex ? iRestoreListPosition = ETrue :
-                                              iRestoreListPosition = EFalse;
-    // Removes videos from video list.
-    iVideoArray->RemoveVideoList();
-         
-    // Removes videos from scroller. After this command, list highlight 
-    // disappears, so don't forget to set highlight in NewVideoListL() 
-    // function.
-    iScroller.Reset();
+    if ( aCategoryIndex == iCurrentCategoryIndex )
+        {
+        // If we are re-opening the same video list again, then try 
+        // restore the highlight to previous position.
+        iRestoreListPosition = ETrue;
+        }
+    else
+        {
+        iRestoreListPosition = EFalse;
+        
+        // Removes videos from video list.
+        iVideoArray->RemoveVideoList();
+        
+        // Removes videos from scroller. After this command, list highlight 
+        // disappears, so don't forget to set highlight in NewVideoListL() 
+        // function.
+        iScroller.Reset();
+        }
         
     // Ask for video list from MPX collection.
     collectionClient.GetVideoListL( aCategoryIndex );
@@ -247,8 +249,6 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
         	
     if ( iScroller.ItemCount() > 0 )
         {
-        iDownloadUpdater->SetPausedL( ETrue );
-    	
         TVcxMyVideosSortingOrder sortOrder = iModel.VideolistSortOrderL();
 
         if ( iVideoListImpl.IsMarking() )
@@ -270,9 +270,6 @@ void CVcxHgMyVideosVideoModelHandler::ResortVideoListL()
             {
             RestoreMarkingsL();
             }
-
-        iDownloadUpdater->VideoArrayChangedL();
-        iDownloadUpdater->SetPausedL( EFalse );
 
         // Switch to appropriate scroller strip
         UpdateScrollbarTypeL( sortOrder );
@@ -316,35 +313,6 @@ void CVcxHgMyVideosVideoModelHandler::MarkedVideosL(
         RArray<TInt>& aMarkedVideos )
     {
     iScroller.GetMarkedItemsL( aMarkedVideos );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::OngoingDownloads()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::OngoingDownloads(
-        RArray<TInt>& aDownloads )
-    {
-    iVideoArray->GetOngoingDownloads( aDownloads );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::VideoDownloadState()
-// -----------------------------------------------------------------------------
-//
-TVcxMyVideosDownloadState CVcxHgMyVideosVideoModelHandler::VideoDownloadState( 
-        TInt aIndex )
-    {
-    return iVideoArray->VideoDownloadState( aIndex );
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::IsProgressivePlayPossible()
-// -----------------------------------------------------------------------------
-//
-TBool CVcxHgMyVideosVideoModelHandler::IsProgressivePlayPossible( TInt aIndex )
-    {
-    return iDownloadUpdater->IsPlayPossible( aIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -631,47 +599,10 @@ void CVcxHgMyVideosVideoModelHandler::PlayVideoL( TInt aIndex )
         {
         // Playback should be tried always when single clicking a video in My Videos
         TMPXItemId mpxItemId = media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
-        IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::PlayVideoL() aIndex=%d mpxItemId=%d", aIndex, (TInt) mpxItemId );
+        SetVideoLastWatchedL( *media );
+        ClearNewVideoFlagL( *media );
+		IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::PlayVideoL() aIndex=%d mpxItemId=%d", aIndex, (TInt) mpxItemId );
         iModel.CollectionClient().PlayVideoL( mpxItemId );        
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::ResumeDownloadL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::ResumeDownloadL( TInt aIndex )
-    {
-    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
-
-    if ( media && media->IsSupported( KMPXMediaGeneralId ) )
-        {
-        TVcxMyVideosDownloadState dlState = VideoDownloadState( aIndex );
-        
-        if ( dlState == EVcxMyVideosDlStatePaused || dlState == EVcxMyVideosDlStateFailed )
-            {
-            iModel.DownloadClient().ResumeDownloadL( *media );
-            
-            TUint32 mpxId = media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ).iId1;
-            if ( iResumeArray.Find( mpxId ) == KErrNotFound )
-                {
-                iResumeArray.AppendL( mpxId );
-                }
-            }
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::CancelDownloadL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::CancelDownloadL( TInt aIndex )
-    {
-    CMPXMedia* media = iVideoArray->MPXMedia( aIndex );
-
-    if ( media )
-        {            
-        iModel.DownloadClient().CancelDownloadL( *media );
         }
     }
 
@@ -739,30 +670,8 @@ void CVcxHgMyVideosVideoModelHandler::HandleRequestL( TInt aRequestStart,
 // CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowLC()
 // -----------------------------------------------------------------------------
 // 
-HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowLC(
-            TInt aIndex,
-            CMPXMedia& aMedia,
-            TBool& aIsDownloading )
+HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowLC( CMPXMedia& aMedia )
 
-    {
-    if ( VideoDownloadState( aIndex ) == EVcxMyVideosDlStateNone )
-        {
-        aIsDownloading = EFalse;
-        return FormatVideoSecondRowCompletedLC( aMedia );
-        }
-    else
-        {
-        aIsDownloading = ETrue;
-        return FormatVideoSecondRowDownloadingLC( aIndex, aMedia );
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowCompletedLC()
-// -----------------------------------------------------------------------------
-// 
-HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowCompletedLC( 
-        CMPXMedia& aMedia )
     {
     _LIT( KVcxSecondLineSeparator, "," );
 
@@ -867,52 +776,6 @@ HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowCompletedLC(
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowDownloadingLC()
-// -----------------------------------------------------------------------------
-// 
-HBufC* CVcxHgMyVideosVideoModelHandler::FormatVideoSecondRowDownloadingLC(
-            TInt aIndex,
-            CMPXMedia& aMedia )
-    {
-    HBufC* details = NULL;
-    TInt progress = DownloadProgressL( aMedia );
-
-    switch ( VideoDownloadState( aIndex ) )
-        {
-        case EVcxMyVideosDlStateDownloading:
-            {
-            details = StringLoader::LoadLC( R_VCXHGMYVIDEOS_VIDEO_DOWNLOADING, progress );
-            break;
-            }
-        case EVcxMyVideosDlStateFailed:
-            {
-            details = StringLoader::LoadLC( R_VCXHGMYVIDEOS_DOWNLOAD_FAILED, progress );
-            break;
-            }
-        case EVcxMyVideosDlStatePaused:
-            {
-            details = StringLoader::LoadLC( R_VCXHGMYVIDEOS_DOWNLOAD_PAUSED, progress );
-            break;
-            }
-        case EVcxMyVideosDlStateNone:            
-        case EVcxMyVideosDlStateDownloaded:
-        default:
-            {
-            IPTVLOGSTRING2_LOW_LEVEL( 
-                "MPX My Videos UI # FormatVideoSecondRowDownloadingL() Unexpected state (%d)!",
-                VideoDownloadState( aIndex ) );
-            #ifdef _DEBUG
-            User::Panic( KVcxHgMyVideosPanic, EVcxHgMyVideosPanicLogicalVideo );
-            #else
-            User::Leave( KErrArgument );
-            #endif // _DEBUG
-            }
-        }
-
-    return details;
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosVideoModelHandler::ReplaceVideoArrayL()
 // -----------------------------------------------------------------------------
 // 
@@ -920,32 +783,6 @@ void CVcxHgMyVideosVideoModelHandler::ReplaceVideoArrayL( CMPXMediaArray& aVideo
     {
     iVideoArray->ReplaceVideoListL( aVideoList );
     iDataUpdater->InfoArrayChanged();
-    iDownloadUpdater->VideoArrayChangedL();
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::DownloadProgressL()
-// -----------------------------------------------------------------------------
-// 
-TInt CVcxHgMyVideosVideoModelHandler::DownloadProgressL( const CMPXMedia& aMpxMedia )
-    {
-    TInt progress = 0;
-
-    if ( aMpxMedia.IsSupported( KVcxMediaMyVideosDownloadProgress ) )
-        {
-        progress = static_cast<TInt>( 
-                       aMpxMedia.ValueTObjectL<TInt8>( KVcxMediaMyVideosDownloadProgress ) );
-        }
-
-    IPTVLOGSTRING3_LOW_LEVEL(
-        "MPX My Videos UI # DownloadProgressL() Id:%d Progress:%d",
-        static_cast<TInt>( aMpxMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ) ),
-        progress );
-
-    progress = ( progress >= 0 ? progress : 0 );
-    progress = ( progress < 100 ? progress : 99 );
-
-    return progress;
     }
 
 // -----------------------------------------------------------------------------
@@ -977,10 +814,10 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL( TInt aListIndex )
                     }
                 CleanupStack::PopAndDestroy( name );
                 }
-            TBool isDownloading( EFalse );
+
             HBufC* details( NULL );
             
-            details = FormatVideoSecondRowLC( aListIndex, *media, isDownloading );
+            details = FormatVideoSecondRowLC( *media );
             if ( details->Length() > 0 )
                 {
                 item.SetTextL( *details );
@@ -1038,9 +875,8 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL( TInt aListIndex )
 // 
 void CVcxHgMyVideosVideoModelHandler::DeleteItemL( TMPXItemId aMpxItemId )
     {
-    // Remove video from data and download updaters.
+    // Remove video from data updater.
     iDataUpdater->ReleaseData( aMpxItemId );
-    iDownloadUpdater->RemoveDownload( aMpxItemId );
 
     // Remove video from video array.
     TInt removedIndex = iVideoArray->RemoveVideo( aMpxItemId );
@@ -1082,14 +918,6 @@ void CVcxHgMyVideosVideoModelHandler::DeleteItemL( TMPXItemId aMpxItemId )
         
         iScroller.DrawDeferred();
         iView.DynInitMskL();
-        }
-    
-    TInt index( KErrNotFound );
-    index = iResumeArray.Find( aMpxItemId.iId1 );
-    
-    if ( index >= 0 && index < iResumeArray.Count() )
-        {
-        iResumeArray.Remove( index );
         }
     }
 
@@ -1133,8 +961,6 @@ void CVcxHgMyVideosVideoModelHandler::InsertVideoL( CMPXMedia* aVideo )
                 iView.DynInitMskL();
                                                     
                 iDataUpdater->RequestDataL( itemId );    
-                iDownloadUpdater->VideoModifiedL( 
-                    EMPXItemInserted, itemId, EVcxMyVideosListNoInfo );
                 }
             }
          else
@@ -1208,12 +1034,19 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
     IPTVLOGSTRING2_LOW_LEVEL( 
         "MPX My Videos UI # NewVideoListL(count=%d) - Enter", aVideoList.Count() );
         
-    ReplaceVideoArrayL( aVideoList );
+    TBool sameItems = iVideoArray->HasSameItemsL( aVideoList );
+    if ( !sameItems )
+        {
+        ReplaceVideoArrayL( aVideoList );
+        }
     
     TInt videoCount = iVideoArray->VideoCount();         
     if (  videoCount > 0 )
         {
-        ResizeScrollerL( videoCount );
+        if ( !sameItems )
+            {
+            ResizeScrollerL( videoCount );
+            }
 
         TInt firstItemIndex( KErrNotFound );
 
@@ -1312,7 +1145,6 @@ void CVcxHgMyVideosVideoModelHandler::VideoModifiedL( TMPXChangeEventType aEvent
                 
                     if ( ! aSimulated )
                         {
-                        iDownloadUpdater->VideoModifiedL( aEventType, aMpxItemId, aExtraInfo );
                         iDataUpdater->RequestDataL( aMpxItemId );    
 					    }                      
                     iView.DynInitMskL();
@@ -1357,21 +1189,6 @@ void CVcxHgMyVideosVideoModelHandler::VideoFetchingCompletedL( CMPXMedia* aVideo
     else
         {
         delete aVideo;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::ResumeStartedFromBeginningL()
-// Download updater calls this when resume has started from beginning.
-// -----------------------------------------------------------------------------
-// 
-void CVcxHgMyVideosVideoModelHandler::ResumeStartedFromBeginningL( TUint32 aMpxId )
-    {
-    TInt index = iResumeArray.Find( aMpxId );
-    if ( index >= 0 )
-        {
-        iResumeArray.Remove( index );
-        iVideoListImpl.ShowResumeStartsFromBeginningNoteL();
         }
     }
 
@@ -1554,4 +1371,41 @@ void CVcxHgMyVideosVideoModelHandler::RestoreMarkingsL()
         }
 
     iMarkedMediaList.Reset();
+    }
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::SetVideoLastWatchedL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoModelHandler::SetVideoLastWatchedL( CMPXMedia& aMedia )
+    {    
+    if ( !iRepository )
+        {
+        iRepository = CRepository::NewL( TUid::Uid( KVcxMyVideosCollectionCenrepUid ) );
+        }
+    iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedMpxId, 
+                      TInt( aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ).iId1 ));
+
+    iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedName,
+                       aMedia.ValueText( KMPXMediaGeneralTitle ));
+
+    iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedPath,
+                       aMedia.ValueText( KMPXMediaGeneralUri ));
+
+    iRepository->Set( KVcxMyVideosCollectionCenrepKeyLastWatchedIndicator,
+                       TInt( VideoIndicator().IsIndicatorShown( aMedia )) );
+	}
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosVideoModelHandler::ClearNewVideoFlagL()
+// -----------------------------------------------------------------------------
+//
+void CVcxHgMyVideosVideoModelHandler::ClearNewVideoFlagL( CMPXMedia& aMedia )
+    {    
+    TUint32 flags = aMedia.ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
+    if( flags & EVcxMyVideosVideoNew )
+        {
+        flags &= ~EVcxMyVideosVideoNew;
+        iModel.CollectionClient().SetFlagsL( 
+		    aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ), flags );   
+        }    
     }

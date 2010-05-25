@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 
 // INCLUDE FILES
@@ -133,7 +133,7 @@ void CMPXVideoPlaybackButtonBar::CreateButtonsL()
     iController->LocateBitmapFileL( iconsPath );
 
     //
-    // Since button bar has 3 visible buttons - divide the height of aRect by 3
+    //  Since button bar has 3 visible buttons - divide the height of aRect by 3
     //
     TInt iconSize = Rect().Height() / 3;
     TInt leftOffset = ( Rect().Width() - iconSize ) / 2 ;
@@ -279,14 +279,13 @@ void CMPXVideoPlaybackButtonBar::SetContainerWindowL( const CCoeControl& aContai
 //
 void CMPXVideoPlaybackButtonBar::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandlePointerEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::HandlePointerEventL()"));
 
     switch ( aPointerEvent.iType )
     {
         case TPointerEvent::EButton1Down:
         {
             HandleButtonDownEventL( aPointerEvent );
-
             break;
         }
         case TPointerEvent::EButton1Up:
@@ -309,10 +308,6 @@ void CMPXVideoPlaybackButtonBar::HandlePointerEventL( const TPointerEvent& aPoin
             {
                 HandleMiddleButtonUpEventL();
             }
-            else
-            {
-                //Pass an event to controller to call toggle visibility
-            }
 
             iButtonPressed = EMPXNotPressed;
             break;
@@ -326,7 +321,7 @@ void CMPXVideoPlaybackButtonBar::HandlePointerEventL( const TPointerEvent& aPoin
 //
 void CMPXVideoPlaybackButtonBar::HandleButtonDownEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandleButtonDownEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::HandleButtonDownEventL()"));
 
     if ( iSeekingTimer->IsActive() )
     {
@@ -371,7 +366,7 @@ void CMPXVideoPlaybackButtonBar::HandleButtonDownEventL( const TPointerEvent& aP
 //
 void CMPXVideoPlaybackButtonBar::HandleTopButtonUpEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandleTopButtonUpEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::HandleTopButtonUpEventL()"));
 
     if ( iSeekingTimer->IsActive() )
     {
@@ -416,7 +411,7 @@ void CMPXVideoPlaybackButtonBar::HandleTopButtonUpEventL( const TPointerEvent& a
 //
 void CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()"));
 
     switch ( iController->State() )
     {
@@ -466,7 +461,7 @@ void CMPXVideoPlaybackButtonBar::HandleMiddleButtonUpEventL()
 //
 void CMPXVideoPlaybackButtonBar::HandleBottomButtonUpEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::HandleBottomButtonUpEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::HandleBottomButtonUpEventL()"));
 
     if ( iSeekingTimer->IsActive() )
     {
@@ -495,7 +490,7 @@ void CMPXVideoPlaybackButtonBar::HandleBottomButtonUpEventL( const TPointerEvent
         }
         else
         {
-			// Short press backward:
+            // Short press backward:
             iController->HandleCommandL( EMPXPbvCmdShortPressBackward );
         }
     }
@@ -522,7 +517,7 @@ TInt CMPXVideoPlaybackButtonBar::StartSeekingL( TAny* aPtr )
 //
 void CMPXVideoPlaybackButtonBar::DoStartSeekingL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::DoStartSeekingL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackButtonBar::DoStartSeekingL()"));
 
 #ifdef RD_TACTILE_FEEDBACK
     if (iFeedback)
@@ -560,30 +555,17 @@ void CMPXVideoPlaybackButtonBar::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     gc.SetClippingRect( aRect );
 
-    if ( iController->SetBackgroundBlack() )
+    if ( Window().DisplayMode() == EColor16MAP )
     {
-        if ( Window().DisplayMode() == EColor16MAP )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
-            gc.Clear( aRect );
-        }
-        else if ( Window().DisplayMode() == EColor16MA )
-        {
-            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-            gc.Clear( aRect );
-        }
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MAP( 255 ) );
+        gc.Clear( aRect );
     }
-    else
+    else if ( Window().DisplayMode() == EColor16MA )
     {
-        // draw a solid background so that the entire progress
-        // bar is shown not just the area representing the
-        // portion that has been played.
-        gc.SetBrushColor( KRgbBlack );
-        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-        gc.DrawRect( aRect );
-        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+        gc.Clear( aRect );
     }
 }
 
@@ -610,12 +592,12 @@ CCoeControl* CMPXVideoPlaybackButtonBar::ComponentControl(TInt aIndex) const
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackButtonBar::StateChanged()
+// CMPXVideoPlaybackButtonBar::UpdateStateOnButtonBar()
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackButtonBar::UpdateStateOnButtonBar( TMPXPlaybackState aState )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::StateChanged(%d)"), aState);
+    MPX_DEBUG(_L("CMPXVideoPlaybackButtonBar::UpdateStateOnButtonBar(%d)"), aState);
 
     switch ( aState )
     {
@@ -656,7 +638,6 @@ void CMPXVideoPlaybackButtonBar::UpdateStateOnButtonBar( TMPXPlaybackState aStat
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackButtonBar::UpdateButtonBarState
 // -------------------------------------------------------------------------------------------------
@@ -671,7 +652,7 @@ void CMPXVideoPlaybackButtonBar::UpdateButtonBarState( CMPXVideoPlaybackViewFile
         iButtons[EMPXButtonFastForward]->SetDimmed( EFalse );
     }
 
-    if ( !aDetails->iPausableStream )
+    if ( ! aDetails->iPausableStream )
     {
         iButtons[EMPXButtonPause]->SetDimmed( ETrue );
     }
@@ -693,6 +674,5 @@ void CMPXVideoPlaybackButtonBar::Reset()
         MPX_TRAPD( err, HandlePointerEventL(event) );
     }
 }
-
 
 //  End of File

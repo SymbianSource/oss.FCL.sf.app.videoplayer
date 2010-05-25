@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_69 %
+// Version : %version: e92_71 %
 
 
 #include <eikon.hrh>
@@ -632,7 +632,9 @@ void CMpxVideoPlayerAppUiEngine::DoHandleCollectionMediaL( const CMPXMedia& aMed
     }
     else
     {
-        OpenMediaL( aMedia ); // Initialize and initiate playback of a single video
+        // We use file name to initialize playback instead of mpxmedia object.
+        iViewUtility->PreLoadViewL( KVideoPlaybackViewUid );
+        InitializeFileL( fileUri );
     }
 }
 
