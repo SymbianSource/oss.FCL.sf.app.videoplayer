@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 23 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -99,7 +99,6 @@ TInt CVHPPTestClass::RunMethodL( CStifItemParser& aItem )
         ENTRY( "ChangeAspectRatioL", CVHPPTestClass::ChangeAspectRatioL),
 
         ENTRY( "AlarmOn", CVHPPTestClass::AlarmOn),
-        ENTRY( "AlarmAutoResume", CVHPPTestClass::AlarmAutoResume),
         ENTRY( "PhoneCallRejected", CVHPPTestClass::PhoneCallRejected),
         ENTRY( "VoiceCallAccepted", CVHPPTestClass::VoiceCallAccepted),
         ENTRY( "VideoCallAccepted", CVHPPTestClass::VideoCallAccepted),
@@ -1718,51 +1717,6 @@ CVHPPTestClass::AlarmOn( CStifItemParser& aItem )
 
         //reset alarm
         RProperty::Set( KPSUidCoreApplicationUIs, KLightsAlarmLightActive, ELightsNotBlinking );
-    }
-
-    return err;
-}
-
-// -----------------------------------------------------------------------------
-//  CVHPPTestClass::AlarmOnAndOff
-// -----------------------------------------------------------------------------
-//
-TInt
-CVHPPTestClass::AlarmAutoResume( CStifItemParser& aItem )
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::AlarmOnAndOff()"));
-    iLog->Log(_L("CVHPPTestClass::AlarmOnAndOff()"));
-
-    TInt backgroundCmd = 0;
-    TInt err = 0;//aItem.GetNextInt( backgroundCmd );
-
-    err = AlarmOn(aItem);
-
-    if ( err == KErrNone )
-    {
-        err = aItem.GetNextInt( backgroundCmd );
-
-        //reset alarm
-        RProperty::Set( KPSUidCoreApplicationUIs, KLightsAlarmLightActive, ELightsNotBlinking );
-
-        if ( err == KErrNone )
-        {
-            TCallbackEvent* event = new TCallbackEvent;
-            event->iError = 0;
-            event->iData  = 0;
-            event->iEvent = EPPlaying;
-            AddExpectedEvent( event );
-
-            //auto resume if alarm off
-            CMPXCommand* cmdPlay = CMPXCommand::NewL();
-            CleanupStack::PushL( cmdPlay );
-            cmdPlay->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
-            cmdPlay->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
-            cmdPlay->SetTObjectValueL<TInt>( KMPXMediaVideoPlaybackCommand, backgroundCmd );
-            cmdPlay->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, ETrue );
-            iPlaybackPlugin->CommandL( *cmdPlay );
-            CleanupStack::PopAndDestroy( cmdPlay );
-        }
     }
 
     return err;

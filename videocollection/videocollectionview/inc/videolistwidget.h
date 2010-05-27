@@ -174,12 +174,6 @@ protected slots:
      * Saves current selected item's index to mCurrentIndex
      */
     void longPressedSlot(HbAbstractViewItem *item, const QPointF &point);
-
-    /**
-     * Re-implemented in case context menu is visible, the below list shoud not
-     * be panned.
-     */
-    void panGesture(const QPointF &point);
     
 private slots:
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#14 %
+// Version : %version:  da1mmcf#15 %
 
 
 
@@ -92,10 +92,10 @@ class HbVideoBasePlaybackView : public HbView
         void showDialog( const QString& qString, bool closeView = true );
 
         virtual void handleClosePlaybackView();
-        
-        bool event( QEvent *event );
 
         RWindow *getWindow();
+
+        bool eventFilter( QObject *object, QEvent *event );
 
     protected:
 

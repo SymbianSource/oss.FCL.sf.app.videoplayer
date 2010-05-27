@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 #include <hbapplication.h>
 
@@ -23,13 +23,14 @@
 #include "videoservicebrowse.h"
 #include "mpxhbvideocommondefs.h"
 #include "mpxvideo_debug.h"
+#include <xqaiwdecl.h>
 
 // -------------------------------------------------------------------------------------------------
 // VideoServiceBrowse()
 // -------------------------------------------------------------------------------------------------
 //
-VideoServiceBrowse::VideoServiceBrowse( VideoServices* parent )
-    : XQServiceProvider( QLatin1String("com.nokia.Videos.IVideoBrowse"), parent )
+VideoServiceBrowse::VideoServiceBrowse(VideoServices* parent, QLatin1String service)
+    : XQServiceProvider( service, parent )
     , mRequestIndex( 0 )
     , mServiceApp( parent )
     , mCategory( 0 )
@@ -128,14 +129,67 @@ void VideoServiceBrowse::browseVideos(const QString &title,
     mCategory = category;
     mSortRole = sortRole;
 
+    // store async request id
+    mRequestIndex = setCurrentRequestAsync();
+
     // start service
     mServiceApp->setCurrentService(VideoServices::EBrowse);
     emit mServiceApp->titleReady(appTitle);
     emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
 
-    // store async request id
-    mRequestIndex = setCurrentRequestAsync();
     MPX_DEBUG(_L("VideoServiceBrowse::browseVideos() : mRequestIndex = %d"), mRequestIndex );
 }
+
+// ----------------------------------------------------------------------------
+// isActive()
+// ----------------------------------------------------------------------------
+//
+bool VideoServiceBrowse::isActive()
+{
+    MPX_DEBUG(_L("VideoServiceBrowse::isActive() ret %d"), mRequestIndex );
+	
+    return (mRequestIndex > 0);
+}
+
+// -------------------------------------------------------------------------------------------------
+// browseVideos()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoServiceBrowse::browseVideos(int category, int sortRole)
+{    
+    MPX_ENTER_EXIT(_L("VideoServiceBrowse::browseVideos()"));	
+
+    // set application title
+    XQRequestInfo info = requestInfo();
+    
+    QVariant variant = info.info("WindowTitle");
+    
+    QString appTitle;
+    
+    if(variant.isValid())
+    {
+    	appTitle = variant.toString();
+    }
+    
+    if (appTitle.isEmpty())
+    {
+        appTitle = hbTrId("txt_videos_title_videos");
+    }
+    
+    mTitle = appTitle;
+    mCategory = category;
+    mSortRole = sortRole;
+
+    // store async request id
+    mRequestIndex = setCurrentRequestAsync();
+
+    // start service
+    mServiceApp->setCurrentService(VideoServices::EBrowse);
+    emit mServiceApp->titleReady(appTitle);
+    emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
+
+    MPX_DEBUG(_L("VideoServiceBrowse::browseVideos() : mRequestIndex = %d"), mRequestIndex );
+}
+
 
 // End of file

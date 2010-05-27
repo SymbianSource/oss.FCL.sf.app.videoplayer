@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #include <qdebug>
@@ -255,9 +255,8 @@ void TestProgressBar::testUpdateWithFileDetails()
     // test for tv-out
     mController->mFileDetails->mPlaybackMode = EMPXVideoLocal; 
     mController->mFileDetails->mTvOutConnected = true;
-    mController->mFileDetails->mTvOutPlayAllowed = false;
     mProgBar->updateWithFileDetails( mController->mFileDetails );
-    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
+    QVERIFY( mProgBar->mProgressSlider->isEnabled() );
 
     // live streaming
     mController->mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming; 

@@ -397,7 +397,7 @@ bool MediaObjectFactory::fillData(CMPXMedia *media, int index, int dataSelection
         
         TDateTime dateTime;
 
-        dateTime.Set(date.date().year(), TMonth(date.date().month() - 1), date.date().day(), 
+        dateTime.Set(date.date().year(), TMonth(date.date().month() - 1), date.date().day() - 1, 
                           date.time().hour(), date.time().minute(), 
                               date.time().second(), date.time().msec());
         TTime ttimeDate(dateTime);

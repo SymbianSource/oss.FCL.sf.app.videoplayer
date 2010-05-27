@@ -74,6 +74,11 @@ public:
      */
     int getLatestIntegerData();
     
+    /**
+     * return mListComplete
+     */
+    bool getListComplete();
+    
 public slots:
 
     /**
@@ -133,6 +138,11 @@ public slots:
      */
     virtual void itemModifiedSlot(const TMPXItemId &itemId);
     
+    /**
+     * Sets boolean mListComplete to true;
+     */
+    void listCompleteSlot();
+    
 private:
     /**
      * Contains address of latest pointer passed to object
@@ -158,6 +168,11 @@ private:
      * contains contents of list received from signal
      */
     QList<TMPXItemId> mLatesListData;
+    
+    /**
+     * True if listCompleteSlot has been called.
+     */
+    bool mListComplete;
 };
 
 #endif

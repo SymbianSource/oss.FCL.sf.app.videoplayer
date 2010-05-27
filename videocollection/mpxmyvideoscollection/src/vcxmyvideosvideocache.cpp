@@ -14,7 +14,7 @@
 * Description:   Video list cache. Contains cached data from MDS.*
 */
 
-// Version : %version: TB101_57 %
+// Version : %version: TB101_58 %
 
 
 // INCLUDE FILES
@@ -1504,6 +1504,7 @@ TInt CVcxMyVideosVideoCache::AddToCorrectPlaceL( CMPXMedia& aVideo,
     if ( aUpdateCategories )
         {
         iCollection.CategoriesL().VideoAddedL( aVideo );
+        iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( aVideo );
         }
 
     return KErrNone;
@@ -1563,6 +1564,7 @@ TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
             pos != KErrNotFound /* no need to update if item is on iPartialVideoList*/ )
         {
         iCollection.CategoriesL().VideoRemovedL( *video );
+        iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( *video );
         }
         
     if ( pos != KErrNotFound )

@@ -717,7 +717,7 @@ void TestVideoModel_p::testNewVideoListSlot()
     VideoListDataModel::mFirstRemoved = -1;
     VideoListDataModel::mLastRemoved = -1;    
     
-    QSignalSpy spyModelReady(mStubModel, SIGNAL(modelReady()));
+    QSignalSpy spyModelChanged(mStubModel, SIGNAL(modelChanged()));
     
     mMediaFactory->removeArray();
     mMediaFactory->createMediaItems(MEDIA_COUNT);
@@ -728,8 +728,8 @@ void TestVideoModel_p::testNewVideoListSlot()
     QVERIFY(VideoListDataModel::mLastInserted == MEDIA_COUNT - 1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mLastRemoved == -1); 
-    QCOMPARE(spyModelReady.count(), 1);
-    spyModelReady.clear();
+    QCOMPARE(spyModelChanged.count(), 1);
+    spyModelChanged.clear();
     VideoListDataModel::mFirstInserted = -1;
     VideoListDataModel::mLastInserted = -1;
     VideoListDataModel::mFirstRemoved = -1;
@@ -743,7 +743,7 @@ void TestVideoModel_p::testNewVideoListSlot()
     QVERIFY(VideoListDataModel::mLastInserted == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mLastRemoved == -1); 
-    QCOMPARE(spyModelReady.count(), 0);
+    QCOMPARE(spyModelChanged.count(), 0);
     VideoListDataModel::mFirstInserted = -1;
     VideoListDataModel::mLastInserted = -1;
     VideoListDataModel::mFirstRemoved = -1;
@@ -758,8 +758,8 @@ void TestVideoModel_p::testNewVideoListSlot()
     QVERIFY(VideoListDataModel::mLastInserted == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mLastRemoved == -1); 
-    QCOMPARE(spyModelReady.count(), 1);
-    spyModelReady.clear();
+    QCOMPARE(spyModelChanged.count(), 0);
+    spyModelChanged.clear();
     VideoListDataModel::mFirstInserted = -1;
     VideoListDataModel::mLastInserted = -1;
     VideoListDataModel::mFirstRemoved = -1;
@@ -773,8 +773,8 @@ void TestVideoModel_p::testNewVideoListSlot()
     QVERIFY(VideoListDataModel::mLastInserted == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mLastRemoved == -1); 
-    QCOMPARE(spyModelReady.count(), 1);
-    spyModelReady.clear();
+    QCOMPARE(spyModelChanged.count(), 0);
+    spyModelChanged.clear();
     VideoListDataModel::mFirstInserted = -1;
     VideoListDataModel::mLastInserted = -1;
     VideoListDataModel::mFirstRemoved = -1;
@@ -818,6 +818,7 @@ void TestVideoModel_p::testAppendVideoListSlot()
     // send 10 videos
     mMediaFactory->createMediaItems(10);
     emit signalNewVideoList(mMediaFactory->copyOfMediaArray());
+    spyModelChanged.clear();
     VideoListDataModel::mFirstInserted = -1;
     VideoListDataModel::mLastInserted = -1;
     
@@ -1411,6 +1412,18 @@ void TestVideoModel_p::testGetCollectionIdFromIndex()
     QVERIFY(mTestObject->getMediaIdFromIndex(1) == TMPXItemId(KVcxMvcCategoryIdCaptured, 1));
     
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));  
+}
+
+// -----------------------------------------------------------------------------
+// testListCompleteSlot
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testListCompleteSlot()
+{
+    QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(listCompleteSlot())));
+    QSignalSpy spy(mStubModel, SIGNAL(modelReady()));
+    emit signalListCompleteSlot();
+    QCOMPARE(spy.count(), 1);
 }
 
 // End of file

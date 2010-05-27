@@ -15,7 +15,7 @@
 *
 */
 
-
+// Version : %version:  3 %
 
 #ifndef CMPXPLAYBACKUTILITY_H
 #define CMPXPLAYBACKUTILITY_H
@@ -42,7 +42,8 @@ NONSHARABLE_STRUCT( TMPXPlaybackUtilityStruct )
 *  this interface:
 */
 NONSHARABLE_CLASS(CMPXPlaybackUtility) : public MMPXPlaybackUtility,
-					                               public MMPXSource
+                                         public MMPXSource,
+                                         public MMPXPlayerManager
     {
 public:
     /**

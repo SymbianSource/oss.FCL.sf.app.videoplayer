@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -500,7 +500,7 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
         if ( mButtons.count() )
         {
-            disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
+            disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
             connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                      mController, SLOT( attachVideo() ) );
         }
@@ -539,7 +539,7 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
                 if ( mButtons.count() )
                 {
-                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
+                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
                     connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                              this, SLOT( changeAspectRatio() ) );
                 }
@@ -569,7 +569,7 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
                 if ( mButtons.count() )
                 {
-                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
+                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
                     connect( mButtons[EMPX1stButton], SIGNAL( released() ), 
                              mController, SLOT( sendVideo() ) );
                 }

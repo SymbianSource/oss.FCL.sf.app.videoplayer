@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 13 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -25,6 +25,7 @@
 //  INCLUDES
 //
 #include <mmf/common/mmfcontroller.h>
+#include <e32base.h>
 
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <mmf/common/mmfstandardcustomcommandsimpl.h>
@@ -42,12 +43,13 @@
 //  FORWARD DECLARATIONS
 //
 class CMPXVideoPlaybackController;
+class CFbsBitmap;
 
 //
 //  CLASS DECLARATION
 //
 
-NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
+NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CActive,
                                               public MMMFControllerEventMonitorObserver
 {
     public:
@@ -101,11 +103,18 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         void SetPlayVelocityL( TInt aVelocity );
 
         void GetVideoLoadingProgressL( TInt& aPercentageProgress );
+        
+        void GetFrameL();
 
         //
         //  MMMFControllerEventMonitorObserver Implementation
         //
         void HandleEvent( const TMMFEvent& aEvent );
+             
+        CFbsBitmap& GetBitmap();
+        
+        void RunL();
+        void DoCancel();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         void OpenFile64L( const RFile64& aFile );
@@ -123,6 +132,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
                                   const TSurfaceId& aSurfaceId,
                                   const TRect& aCropRect,
                                   TVideoAspectRatio aAspectRatio );
+
+        void SendSurfaceCreatedCommand();
 
 #endif
 
@@ -150,11 +161,15 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         RMMFVideoPlaySurfaceSupportCustomCommands iVideoPlaySurfaceSupportCustomCommands;
 
         TSurfaceId                                iSurfaceId;
+        TRect                                     iCropRect;
+        TVideoAspectRatio                         iAspectRatio;
 #endif
 
         CMMFControllerEventMonitor*               iControllerEventMonitor;
 
         TBool                                     iDirectScreenAccessAbort;
+        
+        CFbsBitmap*                               iPosterFrameBitmap;
 };
 
 #endif /* __MPXVIDEOPLAYERUTILITY__ */

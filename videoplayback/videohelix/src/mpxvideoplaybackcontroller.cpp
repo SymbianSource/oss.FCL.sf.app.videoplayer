@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 58 %
+// Version : %version: 62 %
 
 
 //
@@ -168,6 +168,7 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
     iDrmHelper = CMpxVideoDrmHelper::NewL();
 
     iSavedPosition = 0;
+    iViewActivated  = EFalse;
 }
 
 //  ----------------------------------------------------------------------------
@@ -264,7 +265,6 @@ void CMPXVideoPlaybackController::OpenFileL( const TDesC& aMediaFile,
 //
 CMPXVideoPlaybackController::CMPXVideoPlaybackController()
     : iAppInForeground(ETrue)
-    , iForegroundPause(EFalse)
     , iAllowAutoPlay(ETrue)
     , iHelixLoadingStarted(EFalse)
     , iLightStatus(CHWRMLight::ELightStatusUnknown)
@@ -371,6 +371,7 @@ CMPXVideoPlaybackController::~CMPXVideoPlaybackController()
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
+    iViewActivated  = EFalse;
 }
 
 //  ----------------------------------------------------------------------------
@@ -539,6 +540,11 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
                                              bufferingPercentage );
 
                 break;
+            }
+            case EPbCmdSetPosterFrame:
+            {
+                iState->HandleSetPosterFrame();
+                break;    
             }
         }
     }
@@ -879,26 +885,19 @@ void CMPXVideoPlaybackController::SetVolumeCenRepL( TInt aVolume )
             volume = aVolume;
         }
 
+        //
+        // Volume needs to have n number of steps.
+        // For example, if we get 26, we need to save it as 25 in 20 volume steps
+        // For example, if we get 77, we need to save it as 70 in 10 volume steps
+        //
+        volume -= volume % iVolumeNormalizer;
+ 
         MPX_DEBUG(
             _L("CMPXVideoPlaybackController::SetVolumeCenRepL(): Setting volume = %d"), volume );
 
-        if ( volume > 0 )
-        {
-            //
-            // Media player's CenRep volume range : 0 - number of volume steps
-            // MPX framework volume range : 0-100
-            //
-            iVolumeWatcher->SetValueL( volume / iVolumeNormalizer );
-            SetMuteCenRepL( EFalse );
-        }
-        else
-        {
-            //
-            // save both mute and current volume values in CenRep
-            //
-            iVolumeWatcher->SetValueL( 0 );
-            SetMuteCenRepL( ETrue );
-        }
+        iVolumeWatcher->SetValueL( volume );
+
+        SetMuteCenRepL( volume > 0? EFalse: ETrue );
     }
     else
     {
@@ -939,7 +938,8 @@ void CMPXVideoPlaybackController::SetVolumeMMFL()
     TInt volume = iVolumeWatcher->CurrentValueL();
     TBool mute = iMuteWatcher->CurrentValueL();
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackController::SetVolumeMMFL() volume = %d, mute = %d")
+    MPX_DEBUG(
+            _L("CMPXVideoPlaybackController::SetVolumeMMFL() volume = %d, mute = %d")
             , volume, mute );
 
     TInt newVolume = 0;
@@ -947,15 +947,14 @@ void CMPXVideoPlaybackController::SetVolumeMMFL()
     if ( ! mute )
     {
         //
-        // If it was muted and previous volume level was 0, set the volume to 1
+        // If it was muted and previous volume level was KPbPlaybackVolumeLevelMin, set the volume to next level
         //
-        if ( volume == 0 )
+        if ( volume == KPbPlaybackVolumeLevelMin )
         {
-            volume++;
+            volume = KPbPlaybackVolumeLevelMin + iVolumeNormalizer;
         }
 
-        newVolume =
-            volume  * iVolumeNormalizer * iFileDetails->iMaxVolume / KPbPlaybackVolumeLevelMax;
+        newVolume = volume * iFileDetails->iMaxVolume / KPbPlaybackVolumeLevelMax;
     }
 
     MPX_DEBUG(_L("CMPXVideoPlaybackController::SetVolumeMMFL() new volume = %d"), newVolume );
@@ -1101,7 +1100,7 @@ void CMPXVideoPlaybackController::GetPropertyL( TMPXPlaybackProperty aProperty )
 
             if ( ! iMuteWatcher->CurrentValueL() )
             {
-                volume = iVolumeWatcher->CurrentValueL() * iVolumeNormalizer;
+                volume = iVolumeWatcher->CurrentValueL();
             }
 
             value = volume;
@@ -1153,6 +1152,10 @@ void CMPXVideoPlaybackController::SendMediaL( const TArray<TMPXAttribute>& aAttr
     MPX_ENTER_EXIT( _L("CMPXVideoPlaybackController::SendMediaL()"));
 
     TInt retError = KErrNone;
+
+    iViewActivated = ETrue;
+
+    iPlayer->SendSurfaceCreatedCommand();
 
     RArray<TInt> suppIds;
     CleanupClosePushL( suppIds );
@@ -2307,10 +2310,6 @@ void CMPXVideoPlaybackController::InitVolumeWatchersL()
 
     //
     // MPX framework volume range : 0-100
-    // Media player volume range : 0-10
-    // MPX video player volume range : 0 - volume steps (defined in PlaybackHelper)
-    // For IAD, need to manipulate volume to save in cenrep
-    // MPX Framework volume / iVolumeNormalizer => CenRep
     //
     CDevSoundIf* devSoundIf = CDevSoundIf::NewL();
     TInt volumeSteps =  devSoundIf->GetNumberOfVolumeSteps();
@@ -2401,6 +2400,8 @@ void CMPXVideoPlaybackController::ResetMemberVariables()
     iHelixLoadingStarted = EFalse;
 
     iSavedPosition = 0;
+
+    iViewActivated  = EFalse;
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -2412,31 +2413,20 @@ void CMPXVideoPlaybackController::HandleVolumeL( TBool aIncrease )
     MPX_ENTER_EXIT( _L("CMPXVideoPlaybackController::HandleVolumeL()"),
                     _L("aIncrease = %d"), aIncrease );
 
-    //
-    // Media player's CenRep volume range : 0 - number of volume steps
-    // MPX framework volume range : 0-100
-    //
     TInt volume = iVolumeWatcher->CurrentValueL();
+    TInt diff = iVolumeNormalizer;
 
-    if ( aIncrease )
+    if ( ! aIncrease )
     {
-        //
-        // increase the current volume
-        //
-        volume++;
+        diff *= -1;
     }
-    else if ( volume > 0 )
-    {
-        //
-        // decrease the current volume
-        //
-        volume--;
-    }
+
+    volume += diff;
 
     //
     // save the current volume level in CenRep
     //
-    SetVolumeCenRepL( volume * iVolumeNormalizer );
+    SetVolumeCenRepL( volume );
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -2532,4 +2522,24 @@ void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
+//  ------------------------------------------------------------------------------------------------ 
+//    CMPXVideoPlaybackController::IsViewActivated() 
+//  ------------------------------------------------------------------------------------------------ 
+// 
+TBool CMPXVideoPlaybackController::IsViewActivated() 
+{ 
+    MPX_DEBUG(_L("CMPXVideoPlaybackController::IsViewActivated")); 
+    return iViewActivated; 
+} 
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackController::HandleFrameReady()
+//  ------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackController::HandleFrameReady(TInt aError)
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackController::HandleFrameReady"));
+    
+    iPlaybackMode->HandleFrameReady(aError);
+}
 // End of file

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -80,11 +80,14 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         void createPlayAndDetailsViews();
         
         void setCurrentView();
+        
+        bool isPlayServiceInvoked();        
 
     private:
         bool                      mIsService;
         bool                      mEmbedded;
         bool					  mDelayedLoadDone;
+        bool                      mIsPlayService;
 
         MpxViewPlugin*            mCurrentViewPlugin;
         MpxViewPlugin*            mPlaybackViewPlugin; 

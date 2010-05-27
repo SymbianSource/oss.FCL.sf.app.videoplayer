@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 #include <qdebug>
@@ -418,7 +418,6 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoHeight = 1;
     details->mVideoWidth = 1;
     details->mTvOutConnected = false;
-    details->mTvOutPlayAllowed = true;
     details->mSeekable = true;
     details->mPausableStream = true;
     mController->mViewMode = EFullScreenView;
@@ -455,7 +454,6 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoHeight = 0;
     details->mVideoWidth = 1;
     details->mTvOutConnected = true;
-    details->mTvOutPlayAllowed = true;
     details->mSeekable = false;
     details->mPausableStream = false;
 
@@ -474,7 +472,6 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoHeight = 0;
     details->mVideoWidth = 1;
     details->mTvOutConnected = true;
-    details->mTvOutPlayAllowed = true;
     details->mSeekable = false;
     details->mPausableStream = false;
     mController->mViewMode = EAudioOnlyView;
@@ -516,7 +513,6 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoHeight = 1;
     details->mVideoWidth = 1;
     details->mTvOutConnected = false;
-    details->mTvOutPlayAllowed = true;
     details->mSeekable = true;
     details->mPausableStream = true;
 

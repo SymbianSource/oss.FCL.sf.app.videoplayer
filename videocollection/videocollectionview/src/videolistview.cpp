@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 101 %
+// Version : %version: 106 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -47,6 +47,10 @@
 #include "mpxhbvideocommondefs.h"
 #include "videocollectiontrace.h"
 
+// Object names.
+const char* const LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION = "vc::ListViewInputDialogCreateCollection";
+const char* const LIST_VIEW_OBJECT_NAME_OPTIONS_MENU      = "vc::ListViewOptionsMenu";
+
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
@@ -58,6 +62,7 @@ VideoListView::VideoListView( VideoCollectionUiLoader *uiLoader, QGraphicsItem *
     , mUiLoader( uiLoader )
     , mIsService( false )
     , mModelReady( false )
+    , mViewReady( false )
     , mHintLevel( VideoHintWidget::AllVideos )
     , mVideoServices( 0 )
     , mCurrentList( 0 )
@@ -302,8 +307,9 @@ void VideoListView::modelReadySlot()
 	
 	// if mModelReady is false, then it means that this is the first time modelReady
 	// signal fires. Signaling that view is ready.
-	if(!mModelReady)
+	if(!mViewReady)
 	{
+	    mViewReady = true;
 	    emit viewReady();
 	}
 	
@@ -322,12 +328,10 @@ void VideoListView::modelReadySlot()
 void VideoListView::layoutChangedSlot()
 {
 	FUNC_LOG;
+	// Note that showHint should be executed before updateSubLabel as it
+	// can modify the mModelReady flag.
+    showHint();
     updateSubLabel();
-    
-    if(mModelReady)
-    {
-        showHint();
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -351,8 +355,9 @@ void VideoListView::deactivateView()
                this, SLOT(handleAsyncStatusSlot(int, QVariant&)));
     
     HbMenu *menu = mUiLoader->findWidget<HbMenu>(DOCML_NAME_OPTIONS_MENU);
-    if (menu)
+    if(menu)
     {
+        menu->setObjectName(LIST_VIEW_OBJECT_NAME_OPTIONS_MENU);
         menu->hide();
     }
     
@@ -407,9 +412,9 @@ void VideoListView::cleanup()
 int VideoListView::createToolbar()
 {
 	FUNC_LOG;
-    // Create actiongroup and add all actions to it. This ensures that only one is
+    
+	// Create actiongroup and add all actions to it. This ensures that only one is
     // active at certain moment.
-
     if(!mToolbarViewsActionGroup && !mToolbarCollectionActionGroup)
     {
     	mToolbarViewsActionGroup = new QActionGroup(this);
@@ -418,7 +423,7 @@ int VideoListView::createToolbar()
         // create toolbar item actions
 
         // All Videos tab
-        mToolbarActions[ETBActionAllVideos] = createAction(":/images/qtg_mono_video_all.svg",
+        mToolbarActions[ETBActionAllVideos] = createAction("qtg_mono_video",
                 mToolbarViewsActionGroup, SLOT(openAllVideosViewSlot()));
 
         // Collections tab
@@ -514,30 +519,34 @@ void VideoListView::showHint(bool show)
 
     VideoSortFilterProxyModel &model = mCurrentList->getModel();
     
-    // prepare hint widget
+    if(!mModelReady && model.rowCount() == 0)
+    {
+        return;
+    }
+    
+    mModelReady = true;
+    
+    // decide if the hintwidget needs to be shown or not.
+    show = show && model.rowCount() == 0;
+    
+    // If show is false, then hint widget is fetched only if it exists. If
+    // show is true then hint widget is also created and prepared if it does not exists.
     VideoHintWidget *hintWidget =
         mUiLoader->findWidget<VideoHintWidget>(
-            DOCML_NAME_VC_VIDEOHINTWIDGET);
+            DOCML_NAME_VC_VIDEOHINTWIDGET, show);
+    
     if (hintWidget)
     {
         hintWidget->setLevel(mHintLevel);
-        if (mModelReady &&
-            model.rowCount() == 0)
+        if (show)
         {
-            show ? hintWidget->activate() : hintWidget->deactivate();
-        }
-        else
-        {
-            show = false;
-            hintWidget->deactivate();
-        }
-        if(show)
-        {
+            hintWidget->activate();
             bool showHintBtns = (mCurrentList->getLevel() != VideoCollectionCommon::ELevelDefaultColl); 
             hintWidget->setButtonShown(showHintBtns);
         }
         else
         {
+            hintWidget->deactivate();
             hintWidget->setButtonShown(true);
         }
     }
@@ -595,7 +604,7 @@ void VideoListView::updateSubLabel()
         model = &mCurrentList->getModel(); 
     }
     
-    if (model)
+    if (model && mModelReady)
     {
         int itemCount = model->rowCount();
         
@@ -823,11 +832,10 @@ void VideoListView::openAllVideosViewSlot()
         mCurrentList = videoListWidget;
         mCurrentList->activate(VideoCollectionCommon::ELevelVideos);
 
-        // since collection is not to be opened at this point,
-        // we do not receive lauoutChanged for updating the hind -widget
-        // if needed, need to show it here is needed
         setHintLevel(VideoHintWidget::AllVideos);
-        showHint();
+        
+        // update the sublabel, as in most cases the data is already up to date.
+        updateSubLabel();
     }
 }
 
@@ -854,10 +862,11 @@ void VideoListView::openCollectionViewSlot()
         
         VideoSortFilterProxyModel &model = mCurrentList->getModel(); 
 
-        VideoCollectionViewUtils::sortModel(&model, false, mCurrentList->getLevel());
-
-        // the collection view is not empty, so we can hide the hint in advance.
+        // the collection view is not empty, so we should hide the hint in advance.
         showHint(false);
+        
+        // also update the sublabel immediatelly, as the data is up to date almost always.
+        updateSubLabel();
     }
 }
 
@@ -1023,7 +1032,10 @@ void VideoListView::createCollectionSlot()
     
     HbInputDialog *dialog = new HbInputDialog();
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->getText(label, this, SLOT(createCollectionDialogFinished(HbAction *)), text);
+    dialog->setObjectName(LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION);
+    dialog->setPromptText(label);
+    dialog->setValue(text);
+    dialog->open(this, SLOT(createCollectionDialogFinished(HbAction *)));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1033,7 +1045,6 @@ void VideoListView::createCollectionSlot()
 void VideoListView::createCollectionDialogFinished(HbAction *action)
 {
     FUNC_LOG;
-    Q_UNUSED(action);
     
     HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
     
@@ -1362,7 +1373,8 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
         }
         
         // Start fetching content before changing.
-        collectionContentWidget->getModel().openItem(itemId);
+        VideoSortFilterProxyModel &model = collectionContentWidget->getModel();
+        model.openItem(itemId);
         
         // deactivat current widget.
         mCurrentList->deactivate();
@@ -1373,14 +1385,11 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
 
         updateSubLabel();
 
-        // setup correct sorting, collection content contains always a list of videos so we use 
-        // ELevelVideos as target for sorting
-        VideoCollectionViewUtils::sortModel(&mCurrentList->getModel(), false, VideoCollectionCommon::ELevelVideos);
-        mCurrentList->getModel().invalidate();
+        model.invalidate();
         
         // update hint widget for correct content
+        mModelReady = model.rowCount() > 0;
         setHintLevel(VideoHintWidget::Collection);
-        showHint();
 
         // update toolbar for albums, default categories don't have one.
         if(level == VideoCollectionCommon::ELevelAlbum && 
@@ -1404,7 +1413,6 @@ void VideoListView::collectionOpenedSlot(bool collectionOpened,
     }
 	// restore animations for collection content widget
 	collectionContentWidget->setEnabledAnimations(animationState);
-	
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1514,5 +1522,4 @@ void VideoListView::debugNotImplementedYet()
     HbMessageBox::information(tr("Not implemented yet"));
 }
 
-// end of file
-
+// End of file

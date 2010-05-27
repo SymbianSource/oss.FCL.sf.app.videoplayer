@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#38 %
+// Version : %version: da1mmcf#40 %
 
 
 
@@ -116,9 +116,11 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
 void HbVideoBasePlaybackView::handleActivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleActivateView()"));
-    
+
     TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) ); 
-    
+
+    QCoreApplication::instance()->installEventFilter( this );
+
     //
     //  Request the needed Media from the Playback Plugin
     //
@@ -128,11 +130,12 @@ void HbVideoBasePlaybackView::handleActivateView()
 
     //
     // Landscape orientation
-    //
-    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal );  
+    // Workaround: Disable orientation transition effect 
+	// since orbit couldn't emit the orientationChanged signal with transition effect
+	// 
+    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal, false );  
 
     mActivated = true;   
-       
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -142,6 +145,8 @@ void HbVideoBasePlaybackView::handleActivateView()
 void HbVideoBasePlaybackView::handleDeactivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleDeactivateView()"));
+
+    QCoreApplication::instance()->removeEventFilter( this );
 
     mActivated = false;
 
@@ -306,7 +311,11 @@ void HbVideoBasePlaybackView::doClosePlayer()
 void HbVideoBasePlaybackView::issuePlayCommand()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::issuePlayCommand()"));
-    TRAPD(err, mVideoMpxWrapper->CreateGeneralPlaybackCommandL( EPbCmdPlay ));
+
+    int err = KErrNone;
+
+    TRAP( err, mVideoMpxWrapper->CreateGeneralPlaybackCommandL( EPbCmdPlay ));
+
     MPX_DEBUG(_L("HbVideoBasePlaybackView::issuePlayCommand() error = %d"), err);
 }
 
@@ -326,7 +335,6 @@ void HbVideoBasePlaybackView::retrievePdlInformation()
 void HbVideoBasePlaybackView::handleBufferingState()
 {
     MPX_DEBUG(_L("HbVideoBasePlaybackView::handleBufferingState()"));
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -340,28 +348,37 @@ void HbVideoBasePlaybackView::closePlaybackView()
     mTimerForClosingView->start( 0 );    
 }
 
-// -------------------------------------------------------------------------------------------------
-//   HbVideoBasePlaybackView::event()
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// HbVideoBasePlaybackView::eventFilter
+// ---------------------------------------------------------------------------
 //
-bool HbVideoBasePlaybackView::event( QEvent *event )
+bool HbVideoBasePlaybackView::eventFilter( QObject *object, QEvent *event )
 {
-    bool consumed = false;
+    Q_UNUSED( object );
 
-    if ( event->type() == QEvent::WindowActivate && mActivated )
+    switch ( event->type() )
     {
-        TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( true ) );
-    }
-    else if ( event->type() == QEvent::WindowDeactivate && mActivated )
-    {
-        TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( false ) );
-    }
-    else
-    {
-         consumed = QGraphicsWidget::event( event );
+        case QEvent::ApplicationActivate:
+        {
+            if ( mActivated )
+            {
+                MPX_DEBUG(_L("HbVideoBasePlaybackView::eventFilter foreground()") );
+                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( true ) );
+            }
+            break;
+        }
+        case QEvent::ApplicationDeactivate:
+        {
+            if ( mActivated )
+            {
+                MPX_DEBUG(_L("HbVideoBasePlaybackView::eventFilter background()") );
+                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( false ) );
+            }
+            break;
+        }
     }
 
-    return consumed;
+    return QObject::eventFilter( object, event );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -408,6 +425,5 @@ void HbVideoBasePlaybackView::handleClosePopupDialog()
 
     handleClosePlaybackView();
 }
-
 
 // EOF

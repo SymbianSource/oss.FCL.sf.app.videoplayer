@@ -15,12 +15,13 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
-#include <hbwidget.h>
-#include <hbtransparentwindow.h>
-#include <hblabel.h>
+#include <QGraphicsWidget>
+
+#include "hblabel.h"
+#include "hbgroupbox.h"
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -83,20 +84,23 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
 
     QGraphicsWidget *object = NULL;
         
-    if ( name == "transparentWindow" )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating transparentWindow") );
-        
-        object = new HbTransparentWindow();
+    if ( name == "titleLayout" )
+    {        
+        object = new QGraphicsWidget();
 		object->setObjectName( name );
         
-        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending to object list") );
         mWidgets.append( object );                
     }
     else if ( name == "title" )
     {        
         object = new HbLabel();
 		object->setObjectName( name );
+        mWidgets.append( object );
+    }
+    else if ( name == "titleGroupBox" )
+    {
+        object = new HbGroupBox();
+        object->setObjectName( name );
         mWidgets.append( object );
     }
 

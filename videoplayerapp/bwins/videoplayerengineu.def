@@ -50,4 +50,5 @@ EXPORTS
 	?createPlayAndDetailsViews@QVideoPlayerEngine@@AAEXXZ @ 49 NONAME ; void QVideoPlayerEngine::createPlayAndDetailsViews(void)
 	?setCurrentView@QVideoPlayerEngine@@AAEXXZ @ 50 NONAME ; void QVideoPlayerEngine::setCurrentView(void)
 	?sortRole@VideoServices@@QBEHXZ @ 51 NONAME ; int VideoServices::sortRole(void) const
+	?isPlayServiceInvoked@QVideoPlayerEngine@@AAE_NXZ @ 52 NONAME ; bool QVideoPlayerEngine::isPlayServiceInvoked(void)
 

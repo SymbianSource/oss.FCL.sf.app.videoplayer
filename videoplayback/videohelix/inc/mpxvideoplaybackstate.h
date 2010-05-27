@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 18 %
+// Version : %version: 19 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -72,6 +72,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
         virtual void  HandleStartSeekL( TBool aForward );
         virtual void  HandleStopSeekL();
         virtual void  HandleClose();
+        virtual void  HandleSetPosterFrame();
         virtual void  HandleForeground();
         virtual void  HandleBackground();
 
@@ -246,6 +247,7 @@ class CMPXPlayingState : public CMPXVideoPlaybackState
         virtual void HandlePause();
         virtual void HandleStop();
         virtual void HandleStartSeekL( TBool aForward );
+        virtual void HandleSetPosterFrame();
         virtual void HandlePlayPause();
         virtual void HandleBackground();
 
@@ -310,7 +312,8 @@ class CMPXPausedState : public CMPXVideoPlaybackState
         virtual void HandlePlay();
         virtual void HandleStop();
         virtual void HandleStartSeekL( TBool aForward );
-        virtual void  HandlePlayPause();
+        virtual void HandlePlayPause();
+        virtual void HandleSetPosterFrame();        
         virtual void HandleForeground();
         virtual void HandleCustomPlay();
 

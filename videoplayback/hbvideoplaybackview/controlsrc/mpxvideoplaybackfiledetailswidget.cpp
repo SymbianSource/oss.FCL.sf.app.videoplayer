@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  23 %
+// Version : %version:  25 %
 
 
 #include <QDir>
@@ -28,6 +28,7 @@
 #include <hblistwidget.h>
 #include <hblistviewitem.h>
 #include <hbextendedlocale.h>
+#include <hbanchorlayout.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -57,22 +58,6 @@ QMPXVideoPlaybackFileDetailsWidget::QMPXVideoPlaybackFileDetailsWidget(
 QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()"));
-
-    if ( mListWidget ) 
-    {
-        delete mListWidget;
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFileDetailsWidget::initialize
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackFileDetailsWidget::initialize()
-{
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::initialize"));
-
-    updateWithFileDetails( mController->fileDetails() );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -101,25 +86,24 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         //
         HbListViewItem *prototype = mListWidget->listItemPrototype();
         prototype->setSecondaryTextRowCount( 1, 30 );
-        
+
+        //
+        // Title
+        //            
+        makeTitleItem( details );
+
         if ( ! mFileDetailsUpdated )
         {
             HbExtendedLocale locale = HbExtendedLocale::system();
 
             mFileDetailsUpdated = true;
-            
-            //
-            // Title
-            //            
-            makeTitleItem( details );
-            
+
             //
             // Description
             //
             addItemToListWidget( 
                     hbTrId( "txt_videos_list_description" ), details->mDescription ); 
 
-            
             //
             // Duration
             //
@@ -132,11 +116,11 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
                 value = value % 60;
                 QString sec = locale.toString( value );
 
-                addItemToListWidget( 
+                addItemToListWidget(
                         hbTrId( "txt_videos_list_duration" ),
-                        hbTrId( "txt_videos_list_l1_l2_l3" ).arg( hour ).arg( min ).arg( sec ) );                                                                        
+                        hbTrId( "txt_videos_list_l1l2l3" ).arg( hour ).arg( min ).arg( sec ) );                                                                        
             }    
-            
+
             //
             // Date/Time
             //
@@ -146,27 +130,27 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             // Location
             //
             addItemToListWidget( hbTrId( "txt_videos_list_location" ), details->mLocation );                                                
-            
+
             //
             // Author
             //
             addItemToListWidget( hbTrId( "txt_videos_list_author" ), details->mArtist );                                            
-            
+
             //
             // Copyright
             //
             addItemToListWidget( hbTrId( "txt_videos_list_copyright" ), details->mCopyright );                                        
-            
+
             //
             // Language
             //
             addItemToListWidget( hbTrId( "txt_videos_list_language" ), details->mLanguage );                                    
-            
+
             //
             // Keywords
             //
             addItemToListWidget( hbTrId( "txt_videos_list_keywords" ), details->mKeywords );                                
-            
+
             //
             // Size
             //
@@ -182,17 +166,17 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
                        .arg( locale.toString( details->mVideoHeight ) );            
                 addItemToListWidget( hbTrId( "txt_videos_list_resolution" ), resolution );                    
             }
-            
+
             //
             // Format
             //
             addItemToListWidget( hbTrId( "txt_videos_list_format" ), details->mMimeType );                    
-            
+
             //
             // Bitrate
             //
             makeBitRateItem( details );
-            
+
             //
             // Folder
             //
@@ -203,29 +187,44 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
                 QString folder = fileInfo.dir().dirName();
                 addItemToListWidget( hbTrId( "txt_videos_list_collection_name" ), folder );
             }
-            
         }
 
         //
         // Set the rect size dynamically based on the view mode
         //
-        QString sectionName;
+        QGraphicsWidget *content = loader->findWidget( QString( "content" ) );
+        HbAnchorLayout *layout = static_cast<HbAnchorLayout*>( content->layout() );
 
-        if ( mController->viewMode() == EDetailsView )
+        if ( layout )
         {
-            sectionName = "detailsView";
-        }
-        else if ( mController->viewMode() == EAudioOnlyView )
-        {
-            sectionName = "audioOnlyView";
-        }
+            QGraphicsWidget *titleLayout = loader->findWidget( QString( "titleLayout" ) );
+            QRectF titleRect = titleLayout->geometry();
 
-        bool ok = false;
-        loader->load( KMPXPLAYBACKVIEW_XML, sectionName, &ok );
+            switch ( mController->viewMode() )
+            {
+                case EDetailsView:
+                {
+                    layout->setAnchor( titleLayout, Hb::BottomEdge, this, Hb::TopEdge, 0 );
+                    layout->setAnchor( layout, Hb::BottomEdge, this, Hb::BottomEdge, 0 );
 
-        if ( ! ok )
-        {
-            MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget failed to load section"));
+                    break;
+                }
+                case EAudioOnlyView:
+                {
+                    QGraphicsWidget *controlLayout = loader->findWidget( QString( "controlBarLayout" ) );
+                    QRectF controlRect = controlLayout->geometry();
+
+                    layout->setAnchor(
+                            this, Hb::TopEdge, titleLayout,
+                            Hb::BottomEdge, titleRect.bottom() - titleRect.top() );
+
+                    layout->setAnchor(
+                            this, Hb::BottomEdge,
+                            layout, Hb::BottomEdge, layout->geometry().height() - controlRect.top() );
+
+                    break;
+                }
+            }
         }
     }
 }

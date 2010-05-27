@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -62,7 +62,6 @@ QMPXVideoPlaybackFullScreenControl::~QMPXVideoPlaybackFullScreenControl()
 //
 void QMPXVideoPlaybackFullScreenControl::setVisible( bool visible )
 {
-    //mControl->setVisible( visible );
     mVisible = visible;
 }
 
@@ -72,7 +71,6 @@ void QMPXVideoPlaybackFullScreenControl::setVisible( bool visible )
 //
 bool QMPXVideoPlaybackFullScreenControl::isVisible()
 {
-    //return mControl->isVisible();
     return mVisible;
 }
 

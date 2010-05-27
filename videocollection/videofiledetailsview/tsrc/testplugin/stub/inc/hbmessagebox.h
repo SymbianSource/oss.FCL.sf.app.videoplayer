@@ -19,23 +19,37 @@
 #ifndef HBMESSAGEBOX_H
 #define HBMESSAGEBOX_H
 
+#include <QObject>
 #include <QString>
+#include <QGraphicsItem>
 
+#include <hbaction.h>
 
-class HbMessageBox 
+class HbMessageBox : public QObject 
 {
-   
+    Q_OBJECT
 public:
+
+    enum MessageBoxType {
+        MessageTypeInformation,
+        MessageTypeQuestion,
+        MessageTypeWarning
+    };
+    
+    HbMessageBox(MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
+    HbMessageBox(const QString &text, MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
+    ~HbMessageBox();
+    
+    void show();
     
     /**
-     * saves provided text to mLatestTxt
-     * returns mQuestionReturnValue
+     * Create new HbMessageBox and call emitDialogFinished after this one to finish the sequence.
      */
-    static bool question(QString text)
-    {
-        mLatestTxt = text;
-        return mQuestionReturnValue;
-    }
+    void open( QObject* receiver = 0, const char* member = 0 );
+    
+    void emitDialogFinished( QObject* receiver, const char* member, int actionNum );
+    
+    void setAttribute(int attribute);
     
     /**
      * saves provided text to mLatestTxt
@@ -53,18 +67,26 @@ public:
         mLatestTxt = text;
     }
     
-    /**
-     * returned from question
-     */
-    static bool mQuestionReturnValue;
+    QList<HbAction*> actions() const
+    {
+        return mActions;
+    }
     
     /**
      * saved text
      */
     static QString mLatestTxt;
     
+    static int mType;
+    static int mAttribute;
+    static int mOpenCallCount;
+    static int mShowCallCount;
+    
+    QList<HbAction*> mActions;
+    
+signals:
+
+    void finished(HbAction *action);
 };
-
-
 
 #endif // HBMESSAGEBOX_H

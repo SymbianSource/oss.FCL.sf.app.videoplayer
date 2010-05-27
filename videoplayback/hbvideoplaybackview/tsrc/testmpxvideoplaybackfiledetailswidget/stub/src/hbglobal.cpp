@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   3 %
 
 
 
@@ -89,7 +89,7 @@ QString hbTrId( QString string, int n )
     {
         loc = "Bitrate";
     }
-    else if ( string == "txt_videos_list_l1_l2_l3" )
+    else if ( string == "txt_videos_list_l1l2l3" )
     {
         loc = "%L1 hr %L2 min %L3 sec";
     }

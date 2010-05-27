@@ -40,6 +40,23 @@
 #include "videocollectioncommon.h"
 #include "mpxhbvideocommondefs.h"
 
+// Object names.
+const char* const LIST_WIDGET_OBJECT_NAME_CONTEXT_MENU             = "vc:ListWidgetContextMenu";
+const char* const LIST_WIDGET_OBJECT_NAME_DELETE_VIDEO             = "vc:ListWidgetMessageBoxDeleteVideo";
+const char* const LIST_WIDGET_OBJECT_NAME_RENAME_VIDEO             = "vc:ListWidgetInputDialogRenameVideo";
+const char* const LIST_WIDGET_OBJECT_NAME_REMOVE_COLLECTION        = "vc:ListWidgetMessageBoxRemoveCollection";
+const char* const LIST_WIDGET_OBJECT_NAME_NAV_KEY_BACK             = "vc:ListWidgetNavKeyBack";
+const char* const LIST_WIDGET_OBJECT_NAME_NAV_KEY_QUIT             = "vc:ListWidgetNavKeyQuit";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_ATTACH            = "vc:ListWidgetActionAttach";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_PLAY              = "vc:ListWidgetActionPlay";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_DETAILS           = "vc:ListWidgetActionDetails";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_DELETE            = "vc:ListWidgetActionDelete";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_OPEN              = "vc:ListWidgetActionOpen";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_ADD_TO            = "vc:ListWidgetActionAddToCollection";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_REMOVE_FROM       = "vc:ListWidgetActionRemoveFromCollection";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_RENAME            = "vc:ListWidgetActionRename";
+const char* const LIST_WIDGET_OBJECT_NAME_ACTION_REMOVE_COLLECTION = "vc:ListWidgetActionRemoveCollection";
+
 // Interval in ms to report the scroll position.
 const int SCROLL_POSITION_TIMER_TIMEOUT = 100;
 
@@ -313,7 +330,6 @@ bool VideoListWidget::isBrowsingService() const
     }
     
     return isBrowsingService;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -330,22 +346,21 @@ void VideoListWidget::setNavigationAction()
         if (isBrowsingService())
         {
             mNavKeyAction = new HbAction(Hb::QuitNaviAction);
-            if (mNavKeyAction)
-            {
-                connect(
-                    mNavKeyAction, SIGNAL(triggered()),
-                    mVideoServices, SLOT(browsingEnded()));
-            }
+            mNavKeyAction->setObjectName(LIST_WIDGET_OBJECT_NAME_NAV_KEY_QUIT);
+            connect(mNavKeyAction, SIGNAL(triggered()),
+                mVideoServices, SLOT(browsingEnded()));
         }
         else if (mModel)
         {
             if (VideoCollectionCommon::EModelTypeCollectionContent == mModel->getType())
             {
                 mNavKeyAction = new HbAction(Hb::BackNaviAction);
+                mNavKeyAction->setObjectName(LIST_WIDGET_OBJECT_NAME_NAV_KEY_BACK);
             }
             else
             {
                 mNavKeyAction = new HbAction(Hb::QuitNaviAction);
+                mNavKeyAction->setObjectName(LIST_WIDGET_OBJECT_NAME_NAV_KEY_QUIT);
             }
         }
     }
@@ -384,6 +399,7 @@ void VideoListWidget::deleteItemSlot()
         
         HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->setObjectName(LIST_WIDGET_OBJECT_NAME_DELETE_VIDEO);
         messageBox->open(this, SLOT(deleteItemDialogFinished(HbAction *)));
     }
 }
@@ -420,54 +436,77 @@ void VideoListWidget::createContextMenu()
     }
     
     mContextMenu = new HbMenu();
-    if (mContextMenu)
+    mContextMenu->setDismissPolicy(HbPopup::TapAnywhere);
+    mContextMenu->setObjectName(LIST_WIDGET_OBJECT_NAME_CONTEXT_MENU);
+
+    VideoServices::TVideoService service = VideoServices::ENoService;
+    if (mIsService &&
+        mVideoServices)
     {
-        mContextMenu->setDismissPolicy(HbPopup::TapAnywhere);
+        service = mVideoServices->currentService();
+    }
+    
+    if (service == VideoServices::EUriFetcher)
+    {
+        mContextMenuActions[EActionAttach] = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_attach"), this, SLOT(openItemSlot()));
+        mContextMenuActions[EActionAttach]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_ATTACH);
         
-        VideoServices::TVideoService service = VideoServices::ENoService;
-        if (mIsService &&
-            mVideoServices)
-        {
-            service = mVideoServices->currentService();
-        }
+        mContextMenuActions[EActionPlay]    = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot()));
+        mContextMenuActions[EActionPlay]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_PLAY);
         
-        if (service == VideoServices::EUriFetcher)
-        {
-            mContextMenuActions[EActionAttach]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_attach"), this, SLOT(openItemSlot())); 
-            mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
-            mContextMenuActions[EActionDetails] = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
-        }
-        else if (service == VideoServices::EBrowse)
-        {
-            mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
-            mContextMenuActions[EActionDelete]           = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
-            mContextMenuActions[EActionDetails] = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
-        }
-        else
-        {
-            mContextMenuActions[EActionPlay]    = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot())); 
-            mContextMenuActions[EActionOpen]    = 
-                                mContextMenu->addAction(hbTrId("txt_common_menu_open"), this, SLOT(openItemSlot()));  
-            mContextMenuActions[EActionAddToCollection] = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_add_to_collection"), this, SLOT(addToCollectionSlot()));
-            mContextMenuActions[EActionRemove]           = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_remove_from_collection"), this, SLOT(removeFromCollectionSlot()));
-            mContextMenuActions[EActionRename]           = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_rename_item"), this, SLOT(renameSlot()));
-            mContextMenuActions[EActionRemoveCollection] = 
-                    mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(removeCollectionSlot()));   
-            mContextMenuActions[EActionDelete]           = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
-            mContextMenuActions[EActionDetails]          = 
-                    mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
-        }
+        mContextMenuActions[EActionDetails] = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        mContextMenuActions[EActionDetails]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DETAILS);
+    }
+    else if (service == VideoServices::EBrowse)
+    {
+        mContextMenuActions[EActionPlay]    = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot()));
+        mContextMenuActions[EActionPlay]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_PLAY);
+        
+        mContextMenuActions[EActionDelete]           = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
+        mContextMenuActions[EActionDelete]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DELETE);
+        
+        mContextMenuActions[EActionDetails] = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        mContextMenuActions[EActionDetails]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DETAILS);
+    }
+    else
+    {
+        mContextMenuActions[EActionPlay]    = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot()));
+        mContextMenuActions[EActionPlay]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_PLAY);
+        
+        mContextMenuActions[EActionOpen]    = 
+                            mContextMenu->addAction(hbTrId("txt_common_menu_open"), this, SLOT(openItemSlot()));
+        mContextMenuActions[EActionOpen]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_OPEN);
+        
+        mContextMenuActions[EActionAddToCollection] = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_add_to_collection"), this, SLOT(addToCollectionSlot()));
+        mContextMenuActions[EActionAddToCollection]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_ADD_TO);
+        
+        mContextMenuActions[EActionRemove]           = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_remove_from_collection"), this, SLOT(removeFromCollectionSlot()));
+        mContextMenuActions[EActionRemove]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_REMOVE_FROM);
+        
+        mContextMenuActions[EActionRename]           = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_rename_item"), this, SLOT(renameSlot()));
+        mContextMenuActions[EActionRename]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_RENAME);
+        
+        mContextMenuActions[EActionRemoveCollection] = 
+                mContextMenu->addAction(hbTrId("txt_videos_menu_remove_collection"), this, SLOT(removeCollectionSlot()));
+        mContextMenuActions[EActionRemoveCollection]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_REMOVE_COLLECTION);
+        
+        mContextMenuActions[EActionDelete]           = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_delete"), this, SLOT(deleteItemSlot()));
+        mContextMenuActions[EActionDelete]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DELETE);
+        
+        mContextMenuActions[EActionDetails]          = 
+                mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
+        mContextMenuActions[EActionDetails]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DETAILS);
     }
 }
 
@@ -705,26 +744,6 @@ void VideoListWidget::longPressedSlot(HbAbstractViewItem *item, const QPointF &p
 }
 
 // ---------------------------------------------------------------------------
-// panGesture
-// ---------------------------------------------------------------------------
-//
-void VideoListWidget::panGesture(const QPointF &point)
-{
-	FUNC_LOG_ADDR(this);
-    if (mContextMenu)
-    {
-        if (!mContextMenu->isVisible())
-        {
-            HbListView::panGesture(point);
-        }
-    }
-    else
-    {
-        HbListView::panGesture(point);
-    }
-}
-
-// ---------------------------------------------------------------------------
 // doDelayedsSlot
 // ---------------------------------------------------------------------------
 //
@@ -793,7 +812,10 @@ void VideoListWidget::renameSlot()
         
         HbInputDialog *dialog = new HbInputDialog();
         dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->getText(label, this, SLOT(renameDialogFinished(HbAction *)), albumName);
+        dialog->setObjectName(LIST_WIDGET_OBJECT_NAME_RENAME_VIDEO);
+        dialog->setPromptText(label);
+        dialog->setValue(albumName);
+        dialog->open(this, SLOT(renameDialogFinished(HbAction *)));
     }
 }
 
@@ -893,6 +915,7 @@ void VideoListWidget::removeCollectionSlot()
                 variant.toString());
         HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->setObjectName(LIST_WIDGET_OBJECT_NAME_REMOVE_COLLECTION);            
         messageBox->open(this, SLOT(removeCollectionDialogFinished(HbAction *)));
     }
 }

@@ -380,6 +380,11 @@ private:
      * Boolean for knowing when the model is ready.
      */
     bool mModelReady;
+    
+    /**
+     * Boolean for knowing when the view is ready.
+     */
+    bool mViewReady;
 
     /**
      * Hint level for the hint widget.

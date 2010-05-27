@@ -541,6 +541,8 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
 
     CleanupStack::PopAndDestroy( &nonVideoIds );
     
+    iAlbums->UpdateChangedAlbumsL();
+    
     iMessageList->SendL();
     }
     

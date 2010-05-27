@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 13 %
+// Version : %version: 14 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -155,7 +155,6 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt ChangeAspectRatioL( CStifItemParser& aItem );
 
         virtual TInt AlarmOn( CStifItemParser& aItem );
-        virtual TInt AlarmAutoResume( CStifItemParser& aItem );
 
         virtual TInt PhoneCallRejected( CStifItemParser& aItem );
         virtual TInt VoiceCallAccepted( CStifItemParser& aItem );

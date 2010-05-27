@@ -15,7 +15,7 @@
 * 
 */ 
       
-// Version : %version: 1 % 
+// Version : %version: 2 % 
       
 #ifndef __VIDEOSERVICEVIEW_H__ 
 #define __VIDEOSERVICEVIEW_H__ 
@@ -28,6 +28,7 @@
 class VideoServices; 
 class QVideoPlayerEngine; 
 class QFile; 
+class QLatin1String;
     
 class VideoServiceView : public XQServiceProvider 
     { 
@@ -35,7 +36,7 @@ class VideoServiceView : public XQServiceProvider
     Q_OBJECT 
       
     public: 
-        VideoServiceView( VideoServices* parent, QVideoPlayerEngine* engine ); 
+        VideoServiceView( VideoServices *parent, QVideoPlayerEngine* engine, QLatin1String service ); 
         virtual ~VideoServiceView(); 
      
         void setEngine( QVideoPlayerEngine* engine ); 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -58,7 +58,6 @@ QMPXVideoPlaybackViewFileDetails::clearFileDetails()
 
     mDuration = 0;
     mTvOutConnected   = false;
-    mTvOutPlayAllowed = true;
     mDrmProtected = false;
     mMultiItemPlaylist = false;
 

@@ -15,6 +15,8 @@
 * 
 */
 
+// Version : %version:  %
+
 #include <e32err.h>
 #include <w32std.h>
 
@@ -187,7 +189,6 @@ void TestMPXVideoViewWrapper::testHandlePlaybackMessage()
         message->SetTObjectValueL<TMPXVideoPlaybackCommand>
                                             ( KMPXMediaVideoPlaybackCommand, EPbCmdTvOutEvent );
         message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutConnected, ETrue );
-        message->SetTObjectValueL<TInt>( KMPXMediaVideoTvOutPlayAllowed, EFalse );
     );
     mVideoViewWrapper->HandlePlaybackMessage( message, KErrNone );
     QVERIFY( mVideoViewWrapper->iFileDetails->mTvOutConnected );    

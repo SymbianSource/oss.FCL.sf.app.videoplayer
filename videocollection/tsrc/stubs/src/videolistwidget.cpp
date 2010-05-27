@@ -133,12 +133,6 @@ void VideoListWidget::longPressedSlot(HbAbstractViewItem *item, const QPointF &p
     // not stubbed
 }
 
-void VideoListWidget::panGesture (const QPointF &point)
-{
-    Q_UNUSED(point);
-    // not stubbed
-}
-
 void VideoListWidget::openItemSlot()
 {
     // not stubbed
@@ -212,6 +206,24 @@ void VideoListWidget::fetchThumbnailsForVisibleItems()
 
 void VideoListWidget::setNavigationAction()
 {
+    // not stubbed
+}
+
+void VideoListWidget::renameDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
+void VideoListWidget::deleteItemDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
+void VideoListWidget::removeCollectionDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
     // not stubbed
 }
 

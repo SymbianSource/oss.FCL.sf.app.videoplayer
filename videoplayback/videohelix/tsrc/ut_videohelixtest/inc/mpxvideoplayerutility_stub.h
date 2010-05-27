@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 12 %
+// Version : %version: 14 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -42,6 +42,7 @@ typedef CArrayPtrFlat<TMMFEvent> CMmfCallbackArray;
 //  FORWARD DECLARATIONS
 //
 class CMPXVideoPlaybackController;
+class CFbsBitmap;
 
 //
 //  CLASS DECLARATION
@@ -112,6 +113,9 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         void SetVolumeSteps( TInt aVolumeSteps );
 
         void SurfaceRemovedFromView();
+        
+        void GetFrameL();
+        CFbsBitmap& GetBitmap();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         void OpenFile64L( const RFile64& aFile );
@@ -122,6 +126,7 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         TInt VideoSurfaceCreated();
         TInt SurfaceParametersChanged();
         TInt RemoveSurface();
+        void SendSurfaceCreatedCommand();
 
 #endif
 
@@ -179,6 +184,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
 
         TTimeIntervalMicroSeconds iPosition;
         TTimeIntervalMicroSeconds iDuration;
+        
+        CFbsBitmap* iPosterFrameBitmap;
 };
 
 #endif /* __MPXVIDEOPLAYERUTILITY__ */

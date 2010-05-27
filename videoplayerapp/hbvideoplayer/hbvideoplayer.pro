@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#16 %
+# Version : %version: da1mmcf#17 %
 
 
 TARGET = videoplayer
@@ -64,7 +64,6 @@ RSS_RULES += \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/x-pn-realmedia\"; },     " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-pn-realaudio-plugin\"; },    " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/x-matroska\"; },               " \
-"        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-matroska\"; },               " \
 "        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-wmv\"; },                   " \
 "        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-asf\"; },                   " \
 "        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gp\"; },                        " \

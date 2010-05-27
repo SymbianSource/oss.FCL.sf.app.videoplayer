@@ -15,12 +15,14 @@
 *
 */
 
-// Version : %version:   4 %
+// Version : %version:   5 %
 
 
 
 //  Include Files
 #include <hbinstance.h>
+#include <HbAction.h>
+#include <HbMenu.h>
 
 #include "../inc/hbvideobaseplaybackview.h"
 
@@ -33,6 +35,7 @@
 //
 HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 {
+    mMenu = new HbMenu();
     mViewActive = false;
 }
 
@@ -42,6 +45,11 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 //
 HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
 {
+    if ( mMenu )
+    {
+        delete mMenu;
+        mMenu = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -114,6 +122,41 @@ void HbVideoBasePlaybackView::setViewFlags( HbView::HbViewFlags flags )
 HbView::HbViewFlags HbVideoBasePlaybackView::viewFlags()
 {
     return mFlag;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::setTitleBarVisible()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::setTitleBarVisible( bool visible )
+{
+    mTitleBarVisible = visible;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::setStatusBarVisible()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::setStatusBarVisible( bool visible )
+{
+    mStatusBarVisible = visible;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::setNavigationAction()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::setNavigationAction( HbAction *action )
+{
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::menu()
+// -------------------------------------------------------------------------------------------------
+//
+HbMenu* HbVideoBasePlaybackView::menu()
+{
+    return mMenu;
 }
 
 // EOF

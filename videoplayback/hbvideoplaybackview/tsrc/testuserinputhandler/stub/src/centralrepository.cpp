@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -25,7 +25,7 @@
 #include "centralrepository.h"
 
 
-CRepository* CRepository::NewLC( TUid aRepositoryUid )
+CRepository* CRepository::NewLC( TUid /* aRepositoryUid */ )
 {
     CRepository* self = new (ELeave) CRepository();
     
@@ -35,9 +35,9 @@ CRepository* CRepository::NewLC( TUid aRepositoryUid )
 }
 
 
-TInt CRepository::Get(TUint32 aKey, TInt& aValue)
+TInt CRepository::Get( TUint32 /* aKey */, TInt& aValue )
 {
-		aValue = 10;
+    aValue = 10;
     return KErrNone;        
 }
 

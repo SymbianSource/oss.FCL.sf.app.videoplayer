@@ -50,27 +50,8 @@ CVcxMyVideosMdsAlbums::CVcxMyVideosMdsAlbums( CVcxMyVideosMdsDb& aMdsDb,
 void CVcxMyVideosMdsAlbums::ConstructL()
     {
     GetSchemaDefinitionsL();
-    CActiveScheduler::Add( this );
-    
-    if ( iObserver )
-        {
-        //ENotifyAdd and ENotifyModify are not supported
-        iMdsDb.MdsSessionL().AddRelationItemObserverL( *this, NULL,
-                ENotifyRemove, iMdsDb.iNamespaceDef );
-
-#if 0
-        // We receive only IDs from here. We need to make query to get
-        // relation objects-> slow to use. We use the response from
-        // the add operation instead. This way we don't receive
-        // add events if someone else adds videos to our albums
-        // but the performance is the best possible.
-        iMdsDb.MdsSessionL().AddRelationObserverL( *this, NULL,
-                ENotifyAdd | ENotifyModify | ENotifyRemove );        
-#endif
-        }
-    
-    //TODO: do we need this?
-    //iMdsDb.MdsSessionL().AddRelationPresentObserverL();
+    SetObservingL();
+    CActiveScheduler::Add( this );    
     }
 
 // ---------------------------------------------------------------------------
@@ -157,6 +138,30 @@ void CVcxMyVideosMdsAlbums::DoCancel()
     // MDS does not offer way to cancel these async requests
     
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsAlbums::SetObservingL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsAlbums::SetObservingL()
+    {
+    if ( iObserver )
+        {
+        //ENotifyAdd and ENotifyModify are not supported
+        iMdsDb.MdsSessionL().AddRelationItemObserverL( *this, NULL,
+                ENotifyRemove, iMdsDb.iNamespaceDef );
+
+#if 0
+        // We receive only IDs from here. We need to make query to get
+        // relation objects-> slow to use. We use the response from
+        // the add operation instead. This way we don't receive
+        // add events if someone else adds videos to our albums
+        // but the performance is the best possible.
+        iMdsDb.MdsSessionL().AddRelationObserverL( *this, NULL,
+                ENotifyAdd | ENotifyModify | ENotifyRemove );        
+#endif    
+        }
     }
 
 // ---------------------------------------------------------------------------

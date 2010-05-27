@@ -179,6 +179,17 @@ protected:
      *
      */
     const QIcon* defaultThumbnail(TMPXItemId mediaId);
+    
+    /**
+     * Loads icon from file or resource, the icon is scaled to size of the 
+     * video list view thumbnail.
+     * 
+     * @param iconName name of the file or resource.
+     * 
+     * @return HbIcon the icon load from resource or file.
+     * 
+     */
+    HbIcon loadIcon(QString iconName);
 
     /**
      * Starts timer that continues the background thumbnail fetching at timeout.
@@ -258,11 +269,6 @@ private: // Data
      *  - data is the actual thumbnail data.
      */
     QHash<TMPXItemId, HbIcon>       mDefaultThumbnails;
-    
-    /**
-     * Default thumbnail for a category.
-     */
-    QIcon                           *mDefaultTnCategory;
 
     /**
      * Current model, set at call to startBackgroundFetching.

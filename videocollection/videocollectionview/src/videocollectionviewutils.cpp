@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 37 %
+// Version : %version: 39 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -32,6 +32,11 @@
 #include "videosortfilterproxymodel.h"
 #include "videocollectiontrace.h"
 
+// Object names.
+const char* const VIEW_UTILS_OBJECT_NAME_STATUS_MSG          = "vc:ViewUtilsStatusMessage";
+const char* const VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING = "vc:ViewUtilsMessageBoxWarning";
+
+// Cenrep constants.
 const int KVideoCollectionViewCenrepUid(0x2002BC63);
 const int KVideoCollectionViewCenrepServiceIconKey(0x2);
 const int KVideoCollectionViewCenrepServiceIconPressedKey(0x3);
@@ -40,15 +45,19 @@ const int KVideoCollectionViewCenrepVideoSortingOrderKey(0x6);
 const int KVideoCollectionViewCenrepCollectionsSortingRoleKey(0x7);
 const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
 
+const int KAddToCollectionDataCount(2);
+const int KAddToCollectionCountIndex(0);
+const int KAddToCollectionNameIndex(1);
+
 // ---------------------------------------------------------------------------
 // instance
 // ---------------------------------------------------------------------------
 //
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
-	FUNC_LOG;
-     static VideoCollectionViewUtils _popupInstance;
-     return _popupInstance;
+    FUNC_LOG;
+    static VideoCollectionViewUtils _popupInstance;
+    return _popupInstance;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,7 +71,6 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
     mCollectionsSortOrder(Qt::AscendingOrder)
 {
 	FUNC_LOG;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +80,6 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
 VideoCollectionViewUtils::~VideoCollectionViewUtils()
 {
 	FUNC_LOG;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -335,11 +342,16 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
         case VideoCollectionCommon::statusMultiRemoveFail:
             msg = hbTrId("txt_videos_info_unable_to_remove_some_collections");
         break;
-        case VideoCollectionCommon::statusVideosAddedToCollection:
-            format = hbTrId("txt_videos_dpopinfo_videos_added_to_1");
-            if(additional.isValid())
+        case VideoCollectionCommon::statusVideosAddedToCollection:            
+            // videos added to collection - status should containg both count and collection name
+            if(additional.isValid() && additional.toList().count() == KAddToCollectionDataCount)
             {
-                msg = format.arg(additional.toString());
+                int count = additional.toList().at(KAddToCollectionCountIndex).toInt();
+                QString name = additional.toList().at(KAddToCollectionNameIndex).toString();
+                if(count && name.length())
+                {
+                    msg = hbTrId("txt_videos_dpopinfo_ln_videos_added_to_1", count).arg(name);
+                }
             }
             error = false;
         break;
@@ -347,10 +359,9 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             msg = hbTrId("txt_videos_info_all_videos_already_added_to_this_c");
         break;
         case VideoCollectionCommon::statusDeleteInProgress:
-            format = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted");
             if(additional.isValid())
             {
-                msg = format.arg(additional.toString());
+                msg = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted", additional.toInt());
             }
             error = false;
         break;
@@ -362,7 +373,10 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
     {
         if(error)
         {
-            HbMessageBox::warning(msg);
+            HbMessageBox *messageBox = new HbMessageBox(msg, HbMessageBox::MessageTypeWarning);
+            messageBox->setAttribute(Qt::WA_DeleteOnClose);
+            messageBox->setObjectName(VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING);
+            messageBox->show();
         }
         else
         {
@@ -371,8 +385,10 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             // only title can be two rows for HbNotificationDialog
             infoNote->setTitleTextWrapping(Hb::TextWordWrap);
             infoNote->setTitle(msg);
+            infoNote->setObjectName(VIEW_UTILS_OBJECT_NAME_STATUS_MSG);
             infoNote->show();
         }
     }
 }
 
+// End of file

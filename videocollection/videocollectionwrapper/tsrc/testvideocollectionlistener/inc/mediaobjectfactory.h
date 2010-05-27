@@ -52,7 +52,7 @@ public:
      * 
      * @return CMPXMedia 
      */
-    CMPXMedia* newMedia(int id = -1, int id2 = 0 );
+    CMPXMedia* newMedia(int id = -1, int id2 = 0);
     
     /**
      * appends media object to mediaarray

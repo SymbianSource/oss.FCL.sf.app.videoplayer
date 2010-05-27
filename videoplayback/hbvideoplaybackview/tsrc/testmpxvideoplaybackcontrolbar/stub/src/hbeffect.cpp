@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   3 %
 
 
 
@@ -100,6 +100,7 @@ bool HbEffect::effectRunning( QGraphicsItem *item, const QString &effectEvent )
     MPX_DEBUG(_L("HbEffect::effectRunning"));
 
     Q_UNUSED( item );
+    Q_UNUSED( effectEvent );
 
     return false;
 }

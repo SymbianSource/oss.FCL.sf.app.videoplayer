@@ -28,6 +28,10 @@ public:
         mLatestTxt = "";
         mWarningCallCount = 0;
         mInformationCallCount = 0;
+        mType = -1;
+        mAttribute = -1;
+        mOpenCallCount = 0;
+        mShowCallCount = 0;
     }
     
 public: // data
@@ -35,8 +39,10 @@ public: // data
     static QString mLatestTxt;
     static int mWarningCallCount;
     static int mInformationCallCount;
+    static int mType;
+    static int mAttribute;
+    static int mOpenCallCount;
+    static int mShowCallCount;
 };
-
-
 
 #endif // HBMESSAGEBOXDATA_H_
