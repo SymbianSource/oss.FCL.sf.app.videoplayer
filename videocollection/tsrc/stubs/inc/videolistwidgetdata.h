@@ -29,6 +29,7 @@ public: // methods
         mActivateReturnValue = 0;
         mActive = false;
         mDeactivateCount = 0;
+        mEmitActivatedIndex = QModelIndex();
     }
     
 public: // data
@@ -38,6 +39,7 @@ public: // data
     static int mActivateReturnValue;
     static bool mActive;
     static int mDeactivateCount;
+    static QModelIndex mEmitActivatedIndex;
 };
 
 #endif /* VIDEOLISTWIDGETDATA_H */

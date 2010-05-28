@@ -280,14 +280,14 @@ public:
      * @param aObserver The db change observer.
      */
     static CVcxMyVideosMdsDb* NewL( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     /**
      * Two-phased constructor.
      * @param aObserver The db change observer.
      */
     static CVcxMyVideosMdsDb* NewLC( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
 
     /**
@@ -434,7 +434,7 @@ private:
      * @param aFs      Session to file server.
      */
     CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     void ConstructL();
 

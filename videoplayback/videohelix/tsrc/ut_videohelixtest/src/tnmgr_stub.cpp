@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 #include <fbs.h>
 #include "tnmgr_stub.h"
@@ -42,7 +42,7 @@ CThumbnailManager::CThumbnailManager( MThumbnailManagerObserver&  aObserver )
     MPX_ENTER_EXIT(_L("CThumbnailManager::CThumbnailManager() - stub impl"));
 }
 
-TThumbnailRequestId CThumbnailManager::SetThumbnailL( CThumbnailObjectSource& aObjectSource )
+TThumbnailRequestId CThumbnailManager::SetThumbnailL( CThumbnailObjectSource& /* aObjectSource */ )
 {   
     MPX_ENTER_EXIT(_L("CThumbnailManager::SetThumbnailL() - stub impl"));
     return 0;
@@ -63,7 +63,7 @@ CThumbnailObjectSource* CThumbnailObjectSource::NewL( CFbsBitmap*  aBitmap, cons
     return self;
 }
 
-CThumbnailObjectSource::CThumbnailObjectSource( CFbsBitmap*  aBitmap, const TDesC& aUri )
+CThumbnailObjectSource::CThumbnailObjectSource( CFbsBitmap*  /* aBitmap */ , const TDesC& /* aUri */ )
 {
 }
 

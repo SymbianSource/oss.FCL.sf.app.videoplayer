@@ -14,7 +14,7 @@
 * Description:   Video list cache. Contains cached data from MDS.*
 */
 
-// Version : %version: TB101_58 %
+
 
 
 // INCLUDE FILES
@@ -344,18 +344,8 @@ CMPXMedia* CVcxMyVideosVideoCache::CreateVideoListByOriginL( TUint8 aOrigin )
         {
         media = (*allVideosArray)[i];
 
-        TUint8 mediaOrigin = EVcxMyVideosOriginOther;
-
-        if ( media->IsSupported( KVcxMediaMyVideosOrigin ) )
-            {
-            mediaOrigin = *(media->Value<TUint8>( KVcxMediaMyVideosOrigin ));
-            
-            if ( mediaOrigin == EVcxMyVideosOriginSideLoaded )
-                {
-                mediaOrigin = EVcxMyVideosOriginOther;
-                }
-            }
-            
+        TUint8 mediaOrigin = TVcxMyVideosCollectionUtil::OriginL( *media );
+                    
         if ( mediaOrigin == aOrigin )
             {
             filteredVideosArray->AppendL( *media );
@@ -749,7 +739,7 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
     
     TVcxMyVideosSortingOrder sortingOrder = SortingOrderL();
         
-    if ( IsFetchingVideoList
+    if ( iIsFetchingVideoList
             && sortingOrder == iLastSortingOrder && !aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList creation is already ongoing, skipping");
@@ -760,11 +750,11 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList was partial or in wrong order or aForce was ETrue, recreating");
 
-        if ( IsFetchingVideoList )
+        if ( iIsFetchingVideoList )
             {
             MPX_DEBUG1("CVcxMyVideosVideoCache:: video list fetching is ongoing, canceling it");
             iCollection.iMyVideosMdsDb->Cancel( CVcxMyVideosMdsDb::EGetVideoList );
-            IsFetchingVideoList = EFalse;
+            iIsFetchingVideoList = EFalse;
             }
         
         ResetVideoListL();
@@ -790,7 +780,7 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
                 EFalse /* brief list */,
                 iVideoList /* use existing */ );
 
-        IsFetchingVideoList = ETrue;
+        iIsFetchingVideoList = ETrue;
         iLastSortingOrder   = sortingOrder;
         SetComplete( EFalse );
         }
@@ -947,14 +937,18 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
                 TBool modified = EFalse;
                 iCollection.CategoriesL().UpdateCategoryNewVideoNameAndDateL(
                         *videoInCache, modified );
-    
+
+                TUint8 origin = TVcxMyVideosCollectionUtil::OriginL( *videoInCache );
+                
                 iCollection.CategoriesL().NewVideoFlagChangedL(
                         oldFlags, newFlags,
-                        videoInCache->ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ),
+                        origin,
                         modified );
 
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
                 iCollection.AlbumsL().NewVideoFlagChangedL(
                         TVcxMyVideosCollectionUtil::IdL( *videoInCache ).iId1 );
+#endif
                 }
             changed = ETrue;
             }
@@ -1146,7 +1140,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
             }
         }
     
-    // 22
+    // 23
     if ( aVideo.IsSupported( KMPXMediaVideoHeight ) )
         {
         TUint16 height = aVideo.ValueTObjectL<TUint16>( KMPXMediaVideoHeight ); 
@@ -1196,8 +1190,10 @@ void CVcxMyVideosVideoCache::HandleVideoTitleModifiedL( CMPXMedia*& aVideoInCach
     iCollection.CategoriesL().UpdateCategoryNewVideoNameAndDateL(
             *aVideoInCache, modified );
 
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
     iCollection.AlbumsL().VideoTitleChangedL(
             TVcxMyVideosCollectionUtil::IdL( *aVideoInCache ).iId1 );
+#endif
     
     TVcxMyVideosSortingOrder sortingOrder = SortingOrderL();
     if ( sortingOrder == EVcxMyVideosSortingName )
@@ -1443,17 +1439,18 @@ TInt CVcxMyVideosVideoCache::CompareL( CMPXMedia& aNewVideo, CMPXMedia& aVideoIn
 //    
 TVcxMyVideosSortingOrder CVcxMyVideosVideoCache::SortingOrderL()
     {
-    TUid uid;
-    uid.iUid = KVcxMyVideosCollectionCenrepUid;
-    CRepository* cenRep = CRepository::NewL( uid );
-    CleanupStack::PushL( cenRep ); // 1->
+
+    if( !iCenRep ) 
+        {
+        TUid uid;
+        uid.iUid = KVcxMyVideosCollectionCenrepUid;
+		iCenRep = CRepository::NewL( uid );
+        }
     
     TInt sortingOrderInCenrep;
 
-    TInt cenRepError = cenRep->Get( KVcxMyVideosCollectionCenrepKeySortingOrder,
+    TInt cenRepError = iCenRep->Get( KVcxMyVideosCollectionCenrepKeySortingOrder,
             sortingOrderInCenrep );
-
-    CleanupStack::PopAndDestroy( cenRep ); // <-1
     
     TVcxMyVideosSortingOrder sortingOrder;
     
@@ -1504,7 +1501,9 @@ TInt CVcxMyVideosVideoCache::AddToCorrectPlaceL( CMPXMedia& aVideo,
     if ( aUpdateCategories )
         {
         iCollection.CategoriesL().VideoAddedL( aVideo );
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
         iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( aVideo );
+#endif
         }
 
     return KErrNone;
@@ -1557,14 +1556,14 @@ TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
         MPX_DEBUG1("CVcxMyVideosVideoCache:: RemoveL failed since the item wasn't on cache");
         return KErrNotFound;
         }
-
-    TUint32 flags = TVcxMyVideosCollectionUtil::FlagsL( *video );
     
     if ( aUpdateCategories &&
             pos != KErrNotFound /* no need to update if item is on iPartialVideoList*/ )
         {
         iCollection.CategoriesL().VideoRemovedL( *video );
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
         iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( *video );
+#endif
         }
         
     if ( pos != KErrNotFound )
@@ -1611,8 +1610,7 @@ void CVcxMyVideosVideoCache::ResetVideoListL()
     {
     MPX_FUNC("CVcxMyVideosVideoCache::ResetVideoListL");
 
-    //TODO: when should we cancel...
-    //iCollection.iMyVideosMdsDb->Cancel();
+    iCollection.iMyVideosMdsDb->Cancel( CVcxMyVideosMdsDb::EGetVideoList );
 
     CMPXMediaArray* mediaArray =
             iVideoList->ValueCObjectL<CMPXMediaArray>( KMPXMediaArrayContents );

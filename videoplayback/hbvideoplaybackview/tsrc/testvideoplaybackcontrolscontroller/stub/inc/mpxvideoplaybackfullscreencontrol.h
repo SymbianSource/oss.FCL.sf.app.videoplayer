@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
@@ -114,7 +114,6 @@ class QMPXVideoPlaybackFullScreenControl : public QObject
         TMPXPlaybackState         mState;
         TMPXPlaybackState         mVisibilityState;
         
-    protected:
         QMPXVideoPlaybackControlsController* mController;
         HbWidget                 *mControl;
         TMPXVideoPlaybackControls mControlIndex;

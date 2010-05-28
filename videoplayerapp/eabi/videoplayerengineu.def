@@ -51,4 +51,6 @@ EXPORTS
 	_ZN18QVideoPlayerEngine14setCurrentViewEv @ 50 NONAME
 	_ZNK13VideoServices8sortRoleEv @ 51 NONAME
 	_ZN18QVideoPlayerEngine20isPlayServiceInvokedEv @ 52 NONAME
+	_ZN18QVideoPlayerEngine10shouldExitEv @ 53 NONAME
+	_ZN18QVideoPlayerEngine28shouldActivateCollectionViewEv @ 54 NONAME
 

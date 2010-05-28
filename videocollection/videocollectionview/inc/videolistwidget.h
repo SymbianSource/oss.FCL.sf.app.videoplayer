@@ -23,6 +23,7 @@
 #include <hblistview.h>
 #include <qmap.h>
 #include <mpxitemid.h>
+#include "videoservices.h"
 #include "videocollectioncommon.h"
 
 class VideoSortFilterProxyModel;
@@ -67,9 +68,13 @@ public:
      * layout and activates correct view based on the current orientation
      * 
      * @param model Model for this list view.
+     * @param videoservices
+     * @param level presetted level for the widget
      * @return int 0 initialization ok, < 0 if fails.
      */
-    int initialize(VideoSortFilterProxyModel &model, VideoServices* videoServices  = 0);
+    int initialize(VideoSortFilterProxyModel &model, 
+                   VideoServices* videoServices  = 0,
+                   VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid);
 
     /**
      * Method enables and displays current active view
@@ -165,6 +170,12 @@ public slots:
      * Signaled by HbMessageBox when it's closed.
      */
     void removeCollectionDialogFinished(HbAction *action);
+    
+    /**
+     * called or signaled when delayed initialization is reauired for the widget
+     *
+     */
+    void doDelayedsSlot();
 
 protected slots:
     
@@ -226,12 +237,6 @@ private slots:
      */
     void playItemSlot();
 
-    /**
-     * slot is connected to view's doDelayeds -signal
-     *
-     */
-    void doDelayedsSlot();
-    
     /**
      * Signaled when stepping back from collection in collection view
      *
@@ -403,6 +408,11 @@ private:
      * ui loade object, not owned
      */
     VideoCollectionUiLoader     *mUiLoader;
+    
+    /**
+     * Service being provided
+     */
+    VideoServices::TVideoService mService;
 };
 
 #endif // VIDEOLISTWIDGET_H

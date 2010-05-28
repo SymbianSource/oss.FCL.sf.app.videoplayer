@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -41,7 +41,6 @@ QMPXVideoPlaybackControlConfiguration::QMPXVideoPlaybackControlConfiguration(
         QMPXVideoPlaybackControlsController* controller)
     : mControlsController( controller )
 {
-    createControlList();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -64,17 +63,11 @@ void QMPXVideoPlaybackControlConfiguration::createControlList()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::createControlList()"));
 
-    QMPXVideoPlaybackViewFileDetails* fileDetails = mControlsController->fileDetails();
-
-    if ( fileDetails->mPlaybackMode != EMPXVideoLocal )
-    {
-        //
-        // if it's not local mode, add branding animation control to show while initializing
-        //
-        addControlToList( EMPXBufferingAnimation );
-    }
-
+    addControlToList( EMPXBufferingAnimation );
     addControlToList( EMPXStatusPane );
+    addControlToList( EMPXRealLogoBitmap );
+
+    emit controlListUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -112,8 +105,8 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
     {
         mState = KControlListUpdated;    
     }
-    
-    
+
+    emit controlListUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------

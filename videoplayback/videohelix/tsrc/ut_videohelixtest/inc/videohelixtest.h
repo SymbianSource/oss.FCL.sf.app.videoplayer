@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 14 %
+// Version : %version: e003sa33#15 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -172,6 +172,8 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt InitializeWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeLinkWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeHandleWithPositionL( CStifItemParser& aItem );
+        virtual TInt InitializeStreamingWithSdpFileHandleL( CStifItemParser& aItem  );
+        virtual TInt RetrieveFileNameAndModeL( CStifItemParser& aItem );
 
         // ---------------------------------------------------------------------
         //  Helper Functions

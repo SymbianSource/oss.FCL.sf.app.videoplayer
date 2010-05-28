@@ -24,6 +24,7 @@ QString HbInputDialog::mLastHeading = "";
 QString HbInputDialog::mLastText = "";
 QVariant HbInputDialog::mValueReturnValue = QVariant();
 int HbInputDialog::mValueCallCount = 0;
+int HbInputDialog::mOpenCallCount = 0;
 
 HbInputDialog::HbInputDialog(QGraphicsItem *parent) : HbWidget(parent) 
 {
@@ -42,6 +43,14 @@ HbInputDialog::~HbInputDialog()
         delete mActions.takeFirst();
     }
 }   
+
+void HbInputDialog::open( QObject* receiver, const char* member )
+{
+    Q_UNUSED(receiver);
+    Q_UNUSED(member);
+    
+    mOpenCallCount++;
+}
 
 void HbInputDialog::getText(const QString &heading
         ,QObject *receiver
@@ -72,5 +81,23 @@ void HbInputDialog::emitDialogFinished( QObject* receiver, const char* member, i
 void HbInputDialog::setAttribute(int attribute)
 {
     HbInputDialog::mAttribute = attribute;
+}
+
+void HbInputDialog::setPromptText(const QString &text, int row)
+{
+    while(mSetPromptTexts.count() < row+1)
+    {
+        mSetPromptTexts.append("");
+    }
+    mSetPromptTexts[row] = text;
+}
+
+void HbInputDialog::setValue(const QVariant &value, int row)
+{
+    while(mSetValues.count() < row+1)
+    {
+        mSetValues.append("");
+    }
+    mSetValues[row] = value;
 }
 

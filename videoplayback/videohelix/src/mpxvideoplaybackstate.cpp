@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 43 %
+// Version : %version: 44 %
 
 
 //
@@ -1795,7 +1795,7 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
 
     if ( aError == KErrNone )
     {
-        if ( iVideoPlaybackCtlr->iAppInForeground )
+        if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
         {
             iVideoPlaybackCtlr->ChangeState( EMPXVideoPlaying );
 

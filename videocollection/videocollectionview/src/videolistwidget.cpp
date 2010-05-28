@@ -18,6 +18,7 @@
 #include "videocollectiontrace.h"
 #include "videolistwidget.h"
 
+#include <xqserviceutil.h>
 #include <qcoreapplication.h>
 #include <qtimer.h>
 #include <hbscrollbar.h>
@@ -34,7 +35,6 @@
 #include "videocollectionviewutils.h"
 #include "videocollectionuiloader.h"
 #include "videolistselectiondialog.h"
-#include "videoservices.h"
 #include "videothumbnaildata.h"
 #include "videosortfilterproxymodel.h"
 #include "videocollectioncommon.h"
@@ -75,7 +75,8 @@ mNavKeyAction(0),
 mContextMenu(0),
 mSelectionMode(HbAbstractItemView::NoSelection),
 mScrollPositionTimer(0),
-mUiLoader(uiLoader)
+mUiLoader(uiLoader),
+mService(VideoServices::ENoService)
 {
 	FUNC_LOG_ADDR(this);
 }
@@ -101,16 +102,27 @@ VideoListWidget::~VideoListWidget()
 // initialize
 // ---------------------------------------------------------------------------
 //
-int VideoListWidget::initialize(VideoSortFilterProxyModel &model, VideoServices* videoServices)
+int VideoListWidget::initialize(VideoSortFilterProxyModel &model, 
+                                VideoServices* videoServices,
+                                VideoCollectionCommon::TCollectionLevels level)
 {
 	FUNC_LOG_ADDR(this);
-    mModel = &model;
-
+    mModel = &model;    
 	mVideoServices = videoServices;
+	mCurrentLevel = level;
 
 	if(mVideoServices)
 	{
 		mIsService = true;
+	
+    	if(XQServiceUtil::interfaceName().contains("IVideoFetch"))
+    	{
+    		mService = VideoServices::EUriFetcher;
+    	}
+    	else if (XQServiceUtil::interfaceName().contains("IVideoBrowse"))
+    	{
+    		mService = VideoServices::EBrowse;
+    	}
 	}
 
     // init list view
@@ -324,7 +336,7 @@ bool VideoListWidget::isBrowsingService() const
     
     if (mIsService &&
         mVideoServices &&
-        mVideoServices->currentService() == VideoServices::EBrowse)
+        mService == VideoServices::EBrowse)
     {
         isBrowsingService = true;
     }
@@ -439,14 +451,7 @@ void VideoListWidget::createContextMenu()
     mContextMenu->setDismissPolicy(HbPopup::TapAnywhere);
     mContextMenu->setObjectName(LIST_WIDGET_OBJECT_NAME_CONTEXT_MENU);
 
-    VideoServices::TVideoService service = VideoServices::ENoService;
-    if (mIsService &&
-        mVideoServices)
-    {
-        service = mVideoServices->currentService();
-    }
-    
-    if (service == VideoServices::EUriFetcher)
+    if (mService == VideoServices::EUriFetcher)
     {
         mContextMenuActions[EActionAttach] = 
                 mContextMenu->addAction(hbTrId("txt_videos_menu_attach"), this, SLOT(openItemSlot()));
@@ -460,7 +465,7 @@ void VideoListWidget::createContextMenu()
                 mContextMenu->addAction(hbTrId("txt_common_menu_details"), this, SLOT(openDetailsSlot()));
         mContextMenuActions[EActionDetails]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_DETAILS);
     }
-    else if (service == VideoServices::EBrowse)
+    else if (mService == VideoServices::EBrowse)
     {
         mContextMenuActions[EActionPlay]    = 
                 mContextMenu->addAction(hbTrId("txt_videos_menu_play"), this, SLOT(playItemSlot()));
@@ -561,7 +566,9 @@ void VideoListWidget::setContextMenu()
     	{
 			mContextMenuActions[EActionAddToCollection]->setVisible(true);
     		mContextMenuActions[EActionDelete]->setVisible(true);
-    	} else {
+    	} 
+    	else 
+    	{
             mContextMenuActions[EActionAttach]->setVisible(true);
     	}
     	mContextMenuActions[EActionPlay]->setVisible(true);
@@ -648,7 +655,7 @@ void VideoListWidget::doEmitActivated (const QModelIndex &index)
 {
     if(mIsService &&
        mVideoServices &&
-       mVideoServices->currentService() == VideoServices::EUriFetcher &&
+       mService == VideoServices::EUriFetcher &&
        mCurrentLevel != VideoCollectionCommon::ELevelCategory)
     {
         QVariant variant = mModel->data(index, VideoCollectionCommon::KeyFilePath);

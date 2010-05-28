@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 #define __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
@@ -116,6 +116,10 @@ private slots:
     // test private slot handleOrientationChanged()
     //
     void testslot_handleOrientationChanged();
+
+    void testslot_handleRNLogoVisibleChanged();
+    void testslot_handleRNLogoTimeout();
+    void testIsRNLogoBitmapVisible();
   
 signals:
     void commandSignal();
@@ -134,6 +138,4 @@ private:
 #endif  // __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 
 // End of file
-    
-
 

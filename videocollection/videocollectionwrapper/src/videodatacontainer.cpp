@@ -14,7 +14,7 @@
 * Description:   VideoDataContainer class declaration*
 */
 
-// Version : %version: %
+// Version : %version: 14 %
 
 // INCLUDE FILES
 #include <mpxmediageneraldefs.h>
@@ -119,6 +119,7 @@ void VideoDataContainer::append(CMPXMedia *media)
     // if item exist, do not add into container
     if(iter != mMediaData.end())
     {
+        delete media;
         return;
     }      
     mMediaIds.append(mediaId);

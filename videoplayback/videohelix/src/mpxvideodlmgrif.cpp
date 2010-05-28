@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: 25 %
 
 
 #include <MMFROPCustomCommandConstants.h>
@@ -95,7 +95,6 @@ CMPXVideoDlMgrIf::~CMPXVideoDlMgrIf()
     }
 }
 
-
 void CMPXVideoDlMgrIf::ConnectToDownloadL( CMPXCommand& aCmd )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoDlMgrIf::ConnectToDownloadL()"));
@@ -120,13 +119,14 @@ void CMPXVideoDlMgrIf::ConnectToDownloadL( CMPXCommand& aCmd )
     //
     //  A new download id has been sent.  Reset member variables
     //
-    iMoveNeeded    = EFalse;
-    iCurrentDl     = NULL;
-    iDlId          = downloadId;
-    iPlayerOpened  = EFalse;
-    iDlTotalSize   = 0;
+    iMoveNeeded       = EFalse;
+    iCurrentDl        = NULL;
+    iDownloadState    = EPbDlStateDownloadCompleted;
+    iDlId             = downloadId;
+    iPlayerOpened     = EFalse;
+    iDlTotalSize      = 0;
     iDownloadProgress = 0;
-    iCodDownload   = EFalse;
+    iCodDownload      = EFalse;
 
     if ( iDlMgrConnected )
     {
@@ -414,11 +414,6 @@ CMPXVideoDlMgrIf::DoHandleOpenComplete()
                 //
                 error = HandleCustomCommand( EMMFROPControllerSetDownloadSize, iDownloadProgress );
             }
-
-            //
-            //  Update download size for DRM protected clips
-            //
-            MPX_TRAPD( updateError, UpdateDownloadSizeL() );
         }
     }
 }
@@ -658,9 +653,19 @@ void CMPXVideoDlMgrIf::HandleClose()
 //
 TReal CMPXVideoDlMgrIf::GetDownloadRatio()
 {
-    TReal downloadRatio = (TReal)iDownloadProgress / (TReal)iDlTotalSize;
+    TReal downloadRatio = 0.0;
+    
+    if ( iDownloadState == EPbDlStateDownloadCompleted )
+    {
+        downloadRatio = 100.0;
+    }
+    else
+    {
+        downloadRatio = (TReal)iDownloadProgress / (TReal)iDlTotalSize;
+    }
+    
     MPX_DEBUG(_L("CMPXVideoDlMgrIf::GetDownloadRatio(%f)"), downloadRatio);
-
+    
     return downloadRatio;
 }
 
@@ -671,9 +676,7 @@ TReal CMPXVideoDlMgrIf::GetDownloadRatio()
 TBool CMPXVideoDlMgrIf::IsDownloadPaused()
 {
     TBool paused = ( iDownloadState == EPbDlStateDownloadPaused );
-
-    MPX_DEBUG(_L("CMPXVideoDlMgrIf::GetDownloadRatio(%d)"), paused);
-
+    MPX_DEBUG(_L("CMPXVideoDlMgrIf::IsDownloadPaused(%d)"), paused);
     return paused;
 }
 

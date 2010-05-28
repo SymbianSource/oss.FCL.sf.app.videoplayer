@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -176,6 +176,16 @@ QGraphicsWidget *QMPXVideoPlaybackDocumentLoader::createWidget( const QString &n
         object->setObjectName( name );
         
         MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[HbRatingSlider] to object list") );                        
+        mWidgets.append( object );
+    }
+    else if ( name == "rnLogoBitmap" )
+    {
+        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::creating rnLogoBitmap") );
+        
+        object = new HbWidget();
+        object->setObjectName( name );
+
+        MPX_DEBUG(_L("QMPXVideoPlaybackDocumentLoader::appending[rnLogoBitmap] to object list") );                        
         mWidgets.append( object );
     }
 

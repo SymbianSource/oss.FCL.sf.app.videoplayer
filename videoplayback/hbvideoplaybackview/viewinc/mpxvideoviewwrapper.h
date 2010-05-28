@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#12 %
+// Version : %version:  da1mmcf#14 %
 
 
 
@@ -35,7 +35,12 @@
 
 #include "mpxvideoplaybackcontrol.hrh"
 
-//  Constants
+enum TMPXMediaRequestStatus
+{
+    MediaNotRequested,
+    MediaRequested,
+    MediaDelivered
+};
 
 //  Forward Declarations
 class MMPXPlaybackUtility;
@@ -167,7 +172,7 @@ class CMPXVideoViewWrapper : public CBase,
         
         void RequestMediaL();  
         
-        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd );
+        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync = ETrue );
         
         TBool IsAppInFrontL();
         
@@ -190,9 +195,6 @@ class CMPXVideoViewWrapper : public CBase,
         void ClosePlaybackViewL();
 
         void HandleBufferingStateL();
-
-        void IssuePlayCommandL();
-
 
         /*
          *  Provides the static function for the callback to close the player
@@ -252,6 +254,8 @@ class CMPXVideoViewWrapper : public CBase,
 
         void HandleShortPressBackwardL();
 
+        void IssuePlayCommandL();
+
     protected: // data
         MMPXPlaybackUtility*                 iPlaybackUtility;
         MMPXCollectionUtility*               iCollectionUtility;
@@ -265,8 +269,8 @@ class CMPXVideoViewWrapper : public CBase,
         CMPXVideoPlaybackUserInputHandler*   iUserInputHandler;
         QMPXVideoPlaybackControlsController* iControlsController;
         
-        TBool                                iMediaRequested;
-        TBool                                iPlaylistView;        
+        TMPXMediaRequestStatus               iMediaRequestStatus;
+        TBool                                iPlaylistView;
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

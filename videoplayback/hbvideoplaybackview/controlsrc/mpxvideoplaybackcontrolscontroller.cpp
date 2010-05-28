@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#39 %
+// Version : %version: da1mmcf#40 %
 
 
 
@@ -67,6 +67,7 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController(
     , mControlsPolicy( NULL )
     , mControlsConfig( NULL )
     , mControlsTimer( NULL )
+    , mRNLogoTimer( NULL )
     , mLoader( NULL )
     , mVolumeControl( NULL )
     , mThumbnailManager( NULL )
@@ -126,6 +127,8 @@ void QMPXVideoPlaybackControlsController::initializeController()
         mLoader = NULL;
     }
 
+    mFileDetails->mRNFormat = realFormat( mFileDetails->mClipName );
+
     mControlsTimer = new QTimer( this );
     mControlsTimer->setInterval( KMPXControlsTimeOut );
     mControlsTimer->setSingleShot( false );
@@ -139,6 +142,9 @@ void QMPXVideoPlaybackControlsController::initializeController()
     connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
     mControlsConfig->createControlList();
 
+    //
+    // Create volume popup control
+    //
     mVolumeControl = new HbVolumeSliderPopup();
     mVolumeControl->setVisible( false );
     mVolumeControl->setTimeout( KMPXControlsTimeOut );
@@ -175,7 +181,6 @@ void QMPXVideoPlaybackControlsController::initializeController()
             }
         }
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -200,6 +205,14 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     {
         delete mControlsTimer;
         mControlsTimer = NULL;
+    }
+
+    if ( mRNLogoTimer )
+    {
+        disconnect( mRNLogoTimer, SIGNAL( timeout() ), this, SLOT( handleRNLogoTimeout() ) );        
+
+        delete mRNLogoTimer;
+        mRNLogoTimer = NULL;
     }
 
     if ( mControlsPolicy )
@@ -249,7 +262,6 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     	mVideoServices->decreaseReferenceCount();
     	mVideoServices = 0;
     }
-    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -262,8 +274,6 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::addFileDetails"));
 
     mFileDetails = details;
-
-    mFileDetails->mRNFormat = realFormat( mFileDetails->mClipName );
 
     mControlsConfig->updateControlsWithFileDetails();
 
@@ -480,7 +490,7 @@ void QMPXVideoPlaybackControlsController::controlsListUpdated()
             //  Control exists in new list.
             //
             myList.removeAt( index );
-            i++;            
+            i++;
         }
     }
 
@@ -519,11 +529,27 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
         case EMPXBufferingAnimation:
         {
             //
+            // Load animation icons
+            //
+            QString animationName = ":/hbvideoplaybackview/animations/";
+
+            if ( mFileDetails->mRNFormat )
+            {
+                animationName.append( "rn_preroll_anim.axml" );
+            }
+            else
+            {
+                animationName.append( "generic_preroll_anim.axml" );
+            }
+
+            HbIconAnimationManager* manager = HbIconAnimationManager::global();
+            bool ok = manager->addDefinitionFile( animationName );
+
+            MPX_DEBUG(_L("    EMPXBufferingAnimation add animation definition ok = %d"), ok);
+
+            //
             // Buffering animation icon
             //
-            HbIconAnimationManager* manager = HbIconAnimationManager::global();
-            manager->addDefinitionFile(":/hbvideoplaybackview/animation.axml");
-			
             QGraphicsWidget *widget = mLoader->findWidget( QString( "bufferingIcon" ) );
             HbLabel *bufferingAnim = qobject_cast<HbLabel*>( widget );
 
@@ -591,6 +617,22 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
                                                               bitmapWidget,
                                                               properties );
             mControls.append( control );
+
+            break;
+        }
+        case EMPXRealLogoBitmap:
+        {
+            QGraphicsWidget *widget = mLoader->findWidget( QString( "rnLogoBitmap" ) );
+            HbWidget *bitmapWidget = qobject_cast<HbWidget*>( widget );
+
+            control = new QMPXVideoPlaybackFullScreenControl( this,
+                                                              controlIndex,
+                                                              bitmapWidget,
+                                                              properties );
+            mControls.append( control );
+
+            connect( bitmapWidget, SIGNAL( visibleChanged() ),
+                     this, SLOT( handleRNLogoVisibleChanged() ) );
 
             break;
         }
@@ -1038,7 +1080,7 @@ void QMPXVideoPlaybackControlsController::handleErrors()
 //   QMPXVideoPlaybackControlsController::isSoftKeyVisible()
 // -------------------------------------------------------------------------------------------------
 //
-bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
+bool QMPXVideoPlaybackControlsController::isSoftKeyVisible()
 {
     bool visible = false;
 
@@ -1378,6 +1420,79 @@ void QMPXVideoPlaybackControlsController::sendVideo()
     QStringList fileList;
     fileList.append( mFileDetails->mClipName );
     dlg.send( fileList, true );   
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()"));
+
+    QGraphicsWidget *widget = mLoader->findWidget( QString( "rnLogoBitmap" ) );
+
+    if ( widget->isVisible() )
+    {
+        if ( mRNLogoTimer )
+        {
+            delete mRNLogoTimer;
+            mRNLogoTimer = NULL;
+        }
+
+        mRNLogoTimer = new QTimer( this );
+        mRNLogoTimer->setInterval( KMPXRNLogoTimeOut );
+        mRNLogoTimer->setSingleShot( true );
+        connect( mRNLogoTimer, SIGNAL( timeout() ), this, SLOT( handleRNLogoTimeout() ) );        
+
+        mRNLogoTimer->start();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleRNLogoTimeout()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleRNLogoTimeout()
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleRNLogoTimeout()"));
+
+    if ( mRNLogoTimer->isActive() )
+    {
+        mRNLogoTimer->stop();
+    }
+
+    //
+    // Remove RN logo from the controls list and issue play command if needed
+    //
+    mControlsConfig->updateControlList( EMPXControlCmdRemoveRNLogo );
+    handleCommand( EMPXPbvCmdRealOneBitmapTimeout );
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList()
+// -------------------------------------------------------------------------------------------------
+//
+bool QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList()
+{
+    bool exist = false;
+
+    //
+    // If we have a rn logo in the list, we are supposed to show the logo all the time
+    // unless we are in the middle of orientation transition
+    //
+    for ( int i = 0 ; i < mControls.count() ; i++ )
+    {
+        if ( mControls[i]->controlIndex() == EMPXRealLogoBitmap )
+        {
+            exist = true;
+            break;
+        }
+    }
+
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList() [%d]"), exist);
+
+    return exist;
 }
 
 // -------------------------------------------------------------------------------------------------

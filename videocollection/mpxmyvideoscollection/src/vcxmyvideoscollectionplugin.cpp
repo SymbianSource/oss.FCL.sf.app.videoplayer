@@ -100,8 +100,11 @@ void CVcxMyVideosCollectionPlugin::ConstructL ()
     MPX_FUNC("CVcxMyVideosCollectionPlugin::ConstructL");
     
     User::LeaveIfError( iFs.Connect() );
-        
-    iMyVideosMdsDb = CVcxMyVideosMdsDb::NewL( this, &AlbumsL(), iFs );    
+#ifdef VIDEO_COLLECTION_PLUGIN_TB92        
+    iMyVideosMdsDb = CVcxMyVideosMdsDb::NewL( this, iFs );    
+#else
+    iMyVideosMdsDb = CVcxMyVideosMdsDb::NewL( this, iFs, &AlbumsL() );
+#endif
     iActiveTask    = CVcxMyVideosActiveTask::NewL( *this );
     iCache         = CVcxMyVideosVideoCache::NewL( *this );
     iMessageList   = CVcxMyVideosMessageList::NewL( *this );
@@ -432,7 +435,9 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() --------------------------------------------'");
                         
             iCache->RemoveL( aId );
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
             AlbumsL().RemoveAlbumsL( aId );
+#endif
             }
             break;
         
@@ -457,11 +462,13 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             // to not be videos are added to nonVideoIds.
             iCache->AddVideosFromMdsL( aId, videoListFetchingWasCancelled, &nonVideoIds );
 
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
 #if 0 //TODO: do this if we want to support albums which are being added by someone else than My Videos Collection
             
             //After the call nonVideoIds will contain only items which were actually added
             //to albums.
             AlbumsL().AddAlbumsFromMdsL( nonVideoIds );
+#endif
 #endif
             
             if ( videoListFetchingWasCancelled )
@@ -478,7 +485,9 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() Items modified in MDS, updating cache |");
             MPX_DEBUG1("CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL() --------------------------------------'");
             CMPXMedia* video;
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
             CMPXMedia* album;
+#endif
             TInt count = aId.Count();
             for ( TInt i = count - 1; i >= 0; i-- )
                 {
@@ -492,6 +501,10 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                     }
                 else
                     {
+#ifdef VIDEO_COLLECTION_PLUGIN_TB92
+                    MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: couldn't find the modified item from MDS");
+                    aId.Remove( i );
+#else
                     MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: item was not found from videos, checking albums");
                     album = iMyVideosMdsDb->iAlbums->GetAlbumL( aId[i] );
                     
@@ -506,6 +519,7 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                         MPX_DEBUG1("CVcxMyVideosCollectionPlugin:: couldn't find the modified item from MDS");
                         }
                     aId.Remove( i );
+#endif
                     }
                 }
             
@@ -531,6 +545,7 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                 }
             }
 
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
     //nonVideoIds are albums
     count = nonVideoIds.Count();
     for ( TInt i = 0; i < count; i++ )
@@ -539,11 +554,11 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                 TMPXItemId( nonVideoIds[i], KVcxMvcMediaTypeAlbum ), aEvent ) );
         }
 
-    CleanupStack::PopAndDestroy( &nonVideoIds );
-    
     iAlbums->UpdateChangedAlbumsL();
-    
-    iMessageList->SendL();
+#endif
+
+    CleanupStack::PopAndDestroy( &nonVideoIds );
+	iMessageList->SendL();
     }
     
 // ----------------------------------------------------------------------------
@@ -905,35 +920,6 @@ void CVcxMyVideosCollectionPlugin::SetVideoL( CMPXMedia& aVideo )
 		User::Leave( leave );
 		}
     }
-
-#if 0
-// ----------------------------------------------------------------------------
-// CVcxMyVideosCollectionPlugin::NotifyDownloadCompletedL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosCollectionPlugin::NotifyDownloadCompletedL( CMPXMedia& aVideo )
-    {
-    const TInt KMediaExtSize( 8 );
-    
-    HBufC8* buffer = HBufC8::NewL( KMediaExtSize );
-    CleanupStack::PushL( buffer );
-    TPtr8 des = buffer->Des();
-    
-    RDesWriteStream stream;
-    CleanupClosePushL( stream );
-    stream.Open( des );
-    
-    aVideo.ExternalizeL( stream );
-    
-    stream.CommitL();
-    
-    CleanupStack::PopAndDestroy( &stream );    
-    
-    DownloadUtilL().NotifyDownloadCompleted( *buffer );
-    
-    CleanupStack::PopAndDestroy( buffer );
-    }
-#endif
 
 // ----------------------------------------------------------------------------
 // CVcxMyVideosCollectionPlugin::NotifyNewVideosCountDecreasedL

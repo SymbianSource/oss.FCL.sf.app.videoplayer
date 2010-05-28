@@ -3,7 +3,7 @@
     <widget name="content" type="HbWidget">
         <widget name="bufferingIcon" type="HbLabel">
             <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <icon iconName="frame_anim_looping" name="icon"/>
+            <icon iconName="preroll_anim" name="icon"/>
             <real name="z" value="6"/>
             <sizehint height="70" type="PREFERRED" width="70"/>
             <bool name="visible" value="FALSE"/>
@@ -149,6 +149,12 @@
                 <linearitem itemname="attachShareButton"/>
             </layout>
         </widget>
+        <widget name="rnLogoBitmap" type="HbLabel">
+            <real name="z" value="7"/>
+            <sizehint height="200" type="PREFERRED" width="200"/>
+            <icon iconName="qtg_large_realplayer" name="icon"/>
+            <bool name="visible" value="FALSE"/>
+        </widget>
         <size height="360" name="size" width="640"/>
         <real name="z" value="1"/>
         <rect height="360" name="geometry" width="640" x="0" y="0"/>
@@ -180,6 +186,8 @@
             <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0" src="titleLayout" srcEdge="BOTTOM"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0" src="" srcEdge="BOTTOM"/>
+            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERH" spacing="0" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERV" spacing="0" src="" srcEdge="CENTERV"/>
         </layout>
     </widget>
     <metadata activeUIState="Common ui state" display="NHD landscape" unit="px">

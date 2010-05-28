@@ -14,10 +14,10 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 4 %
+# Version : %version: 5 %
 
 
 TEMPLATE   = subdirs
 CONFIG    += ordered
 SUBDIRS   += videoplayerengine \
-             hbvideoplayer
+             videoplayer

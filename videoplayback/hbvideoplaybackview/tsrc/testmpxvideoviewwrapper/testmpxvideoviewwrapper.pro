@@ -14,7 +14,7 @@
 # Description: Project file for building testmpxvideoviewwrapper
 #
 #
-# Version : %version: 5 %
+# Version : %version: 6 %
 
 
 TEMPLATE = app
@@ -23,12 +23,11 @@ CONFIG += qtestlib hb qt
 
 DEPENDPATH += inc src stub/src stub/inc
 
-INCLUDEPATH += ../inc \
-               ../../inc \   
-               ../../../inc \            
-               ../../../../inc \                                          
-               ../../controlinc \ 
-               ../../viewinc \ 
+INCLUDEPATH += stub/inc \
+               ../inc \
+               ../../inc \
+               ../../../inc \
+               ../../../../inc \
                $$MW_LAYER_SYSTEMINCLUDE                                            
 
 LIBS += -lmpxcommon.dll \
@@ -43,7 +42,7 @@ HEADERS += testmpxvideoviewwrapper.h \
            mpxvideoplaybackuserinputhandler.h \
            mpxvideoplaybackcontrolscontroller.h \           
            mpxvideoplaybackviewfiledetails.h \
-           mpxplaybackutilityimpl.h \
+           mpxplaybackutility.h \
            ../../viewinc/mpxvideoviewwrapper.h
 					                
 SOURCES += testmpxvideoviewwrapper.cpp \
@@ -52,6 +51,5 @@ SOURCES += testmpxvideoviewwrapper.cpp \
             mpxvideoplaybackviewfiledetails.cpp \
             mpxvideoplaybackcontrolscontroller.cpp \
             mpxplaybackutility.cpp \
-            mpxplaybackutilityimpl.cpp \
             mpxvideoplaybackuserinputhandler.cpp \
             ../../viewsrc/mpxvideoviewwrapper.cpp

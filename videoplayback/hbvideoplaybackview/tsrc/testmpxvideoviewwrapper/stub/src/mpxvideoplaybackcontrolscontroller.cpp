@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -39,18 +39,9 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController(
         QMPXVideoPlaybackViewFileDetails *details )
     : mView( view )
     , mViewWrapper( viewWrapper )
-    , mFileDetails( details )   
+    , mFileDetails( details ) 
+    , mFileDetailsAdded( false )
 {
-    initializeController();
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::initializeController()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::initializeController()
-{
-    connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -61,6 +52,8 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
     QMPXVideoPlaybackViewFileDetails* details )
 {
     Q_UNUSED( details );
+
+    mFileDetailsAdded = true;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -70,9 +63,6 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
 QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController"));
-
-    disconnect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -82,51 +72,8 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 void QMPXVideoPlaybackControlsController::handleEvent(
     TMPXVideoPlaybackControlCommandIds event, int value )
 {
-    switch ( event )
-    {
-        case EMPXControlCmdTvOutConnected:
-        {
-            handleTvOutEvent( true, event, value );
-            break;
-        }
-        case EMPXControlCmdTvOutDisconnected:
-        {
-            handleTvOutEvent( false, event, value );
-            break;
-        }
-        case EMPXControlCmdSetVolume:
-        {
-            mFileDetails->mAudioEnabled = false;
-            break;
-        }
-        case EMPXControlCmdSetDuration:
-        {
-            mFileDetails->mDuration = value;
-            break;
-        }
-        case EMPXControlCmdShowVolumeControls:
-        {
-            mFileDetails->mAudioEnabled = true;   
-            break;
-        }
-        case EMPXControlCmdSetPosition:
-        {
-            mFileDetails->mSeekable = true;
-            break;    
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::handleTvOutEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlsController::handleTvOutEvent(
-        bool connected, TMPXVideoPlaybackControlCommandIds event, int value )
-{
-    Q_UNUSED( event );
-    Q_UNUSED( value );
-    mFileDetails->mTvOutConnected = connected;
+    mReceivedEvent = event;
+    mValue = value;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -135,16 +82,15 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
 //
 void QMPXVideoPlaybackControlsController::updateVideoRectDone()
 {
-    mViewTransitionIsGoingOn = false;
 }
 
 // -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::handleTappedOnScreen()
+// QMPXVideoPlaybackControlsController::isRNLogoBitmapVisible()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackControlsController::handleTappedOnScreen()
-
+bool QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList()
 {
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleTappedOnScreen"));
+    return mRNLogoVisible;
 }
+
 // End of File

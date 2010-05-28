@@ -159,15 +159,17 @@ void CVcxMdsShutdownMonitor::DoCancel()
     }
 
 // ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::CVcxMyVideosMdsDb
 // ---------------------------------------------------------------------------
 //
 CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
-        MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs )
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
 : iFs( aFs ), iMdsDbObserver(aObserver), iAlbumsObserver(aAlbumsObserver) 
     {
     }
 
 // ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::ConstructL
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosMdsDb::ConstructL()
@@ -274,10 +276,10 @@ void CVcxMyVideosMdsDb::HandleObjectPresentNotification( CMdESession& /*aSession
 // ---------------------------------------------------------------------------
 //
 CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewL( MVcxMyVideosMdsDbObserver* aObserver,
-        MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs )
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
     {
     CVcxMyVideosMdsDb* self =
-            CVcxMyVideosMdsDb::NewLC( aObserver, aAlbumsObserver, aFs );
+            CVcxMyVideosMdsDb::NewLC( aObserver, aFs, aAlbumsObserver );
     CleanupStack::Pop( self );
     return self;
     }
@@ -287,9 +289,9 @@ CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewL( MVcxMyVideosMdsDbObserver* aObserver
 // ---------------------------------------------------------------------------
 //
 CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewLC( MVcxMyVideosMdsDbObserver* aObserver,
-        MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs )
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
     {
-    CVcxMyVideosMdsDb* self = new( ELeave ) CVcxMyVideosMdsDb( aObserver, aAlbumsObserver, aFs );
+    CVcxMyVideosMdsDb* self = new( ELeave ) CVcxMyVideosMdsDb( aObserver, aFs, aAlbumsObserver );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
@@ -1023,8 +1025,22 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     //16. ORIGIN, KVcxMediaMyVideosOrigin
     if ( aObject.Property( *iOriginPropertyDef, property, 0 ) != KErrNotFound )
         {
-        aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin,
-                static_cast<CMdEUint8Property*>(property)->Value() );
+        TUint8 origin = static_cast<CMdEUint8Property*>(property)->Value();
+#ifdef VIDEO_COLLECTION_PLUGIN_TB92
+        if( origin != EVcxMyVideosOriginCapturedWithCamera )
+            {
+            origin = EVcxMyVideosOriginOther;
+            }           
+#else
+        if ( origin != EVcxMyVideosOriginCapturedWithCamera &&
+				 origin != EVcxMyVideosOriginDownloaded
+				)
+            {
+            origin = EVcxMyVideosOriginOther;
+            }
+
+#endif
+        aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, origin );
         }
 
     //17. DURATION, (KMPXMediaGeneralDuration can't be used since it is TInt
@@ -1573,11 +1589,6 @@ void CVcxMyVideosMdsDb::GetSchemaDefinitionsL()
 
     iAudioLanguagePropertyDef = &(iVideoObjectDef->GetPropertyDefL(
             KVcxAudioLanguagePropertyName )); //14
-
-#if 0
-    iDownloadIdPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
-            KVcxDownloadIdPropertyName )); //18
-#endif
     
     }
 

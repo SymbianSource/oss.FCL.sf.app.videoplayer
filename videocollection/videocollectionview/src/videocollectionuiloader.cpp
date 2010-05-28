@@ -381,7 +381,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                     {
                         videoServices = VideoServices::instance();
                     }
-                    videoList->initialize(*model, videoServices);
+                    videoList->initialize(*model, videoServices, VideoCollectionCommon::ELevelVideos);
                 }
             }
         }
@@ -404,7 +404,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                     {
                         videoServices = VideoServices::instance();
                     }
-                    videoList->initialize(*model, videoServices);
+                    videoList->initialize(*model, videoServices, VideoCollectionCommon::ELevelCategory);
                 }
             }
         }
@@ -427,6 +427,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                     {
                         videoServices = VideoServices::instance();
                     }
+                    // cannot set level at this point yet: it can be either default or user defined collection
                     videoList->initialize(*model, videoServices);
                 }
             }

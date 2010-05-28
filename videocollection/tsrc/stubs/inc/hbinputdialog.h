@@ -33,11 +33,9 @@ public:
     ~HbInputDialog();
 
     /**
-     * Returns string in parameter text if mGetTextReturnValue is null QString.
+    * Create new HbMessageBox and call emitDialogFinished after this one to finish the sequence.
      */
-    /*
-    static QString getText(const QString &label,const QString &text = QString(),
-            bool *ok = 0, QGraphicsScene *scene = 0, QGraphicsItem *parent = 0);*/
+    void open( QObject* receiver = 0, const char* member = 0 );
     
     /**
      * Create new HbInputDialog after call to this and call emitDialogFinished to finish the sequence.
@@ -52,6 +50,10 @@ public:
     void emitDialogFinished( QObject* receiver, const char* member, int actionNum );
     
     void setAttribute(int attribute);
+    
+    void setPromptText(const QString &text, int row = 0);
+    
+    void setValue(const QVariant &value, int row = 0);
     
     QList<HbAction*> actions() const
     {
@@ -68,10 +70,14 @@ public:
 
     QList<HbAction*> mActions;
     
+    QList<QString> mSetPromptTexts;
+    QList<QVariant> mSetValues;
+    
     static QString mLastHeading;
     static QString mLastText;
     static int mGetTextCallCount;
     static int mAttribute;
+    static int mOpenCallCount;
     
     static QVariant mValueReturnValue;
     static int mValueCallCount;

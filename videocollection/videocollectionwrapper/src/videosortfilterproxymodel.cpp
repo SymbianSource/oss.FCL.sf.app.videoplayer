@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 65 %
+// Version : %version: 66 %
 
 // INCLUDE FILES
 #include <qstringlist.h>
@@ -525,11 +525,14 @@ bool VideoSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelInd
 //
 TMPXItemId VideoSortFilterProxyModel::getMediaIdAtIndex(const QModelIndex &index) const
 {
-    QModelIndex sourceIndex = mapToSource(index);
     TMPXItemId mpxId = TMPXItemId::InvalidId();
-    if(mModel && sourceIndex.isValid())
+    if(index.isValid())
     {
-        mpxId = mModel->mediaIdAtIndex(sourceIndex.row());
+        QModelIndex sourceIndex = mapToSource(index);
+        if(mModel && sourceIndex.isValid())
+        {
+            mpxId = mModel->mediaIdAtIndex(sourceIndex.row());
+        }
     }
     return mpxId;
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#10 %
+// Version : %version:  da1mmcf#11 %
 
 
 
@@ -44,6 +44,7 @@ HbVideoPlaybackView::HbVideoPlaybackView()
     MPX_ENTER_EXIT(_L("HbVideoPlaybackView::HbVideoPlaybackView()"));
 
     initializeVideoPlaybackView();
+    mSyncClose = false;
 }
 
 // -------------------------------------------------------------------------------------------------

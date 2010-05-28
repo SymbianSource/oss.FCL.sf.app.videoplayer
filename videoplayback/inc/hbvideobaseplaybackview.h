@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#15 %
+// Version : %version:  da1mmcf#16 %
 
 
 
@@ -108,6 +108,7 @@ class HbVideoBasePlaybackView : public HbView
         QTimer                              *mTimerForClosingView;
 
         bool                                 mActivated;
+        bool                                 mSyncClose;
 
     public:
         friend class CMPXVideoViewWrapper;

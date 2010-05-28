@@ -15,10 +15,11 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 #include <hbapplication.h>
 
+#include "xqserviceproviderstub.h"
 #include "videoservices.h"
 #include "videoservicebrowse.h"
 #include "mpxhbvideocommondefs.h"
