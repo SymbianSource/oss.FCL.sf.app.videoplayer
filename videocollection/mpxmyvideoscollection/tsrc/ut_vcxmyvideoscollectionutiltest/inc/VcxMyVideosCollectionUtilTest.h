@@ -142,6 +142,8 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionUtilTest) : public CScriptBase
         virtual TInt CreateEmptyMessageListL( CStifItemParser& aItem );        
 
         virtual TInt CopyFromListToListL( CStifItemParser& aItem );
+        
+        virtual TInt CopyFromListToListL2( CStifItemParser& aItem );
 
         virtual TInt DriveLetter2DriveNumberL( CStifItemParser& aItem );
 

@@ -24,33 +24,18 @@ PRJ_PLATFORMS
 PRJ_TESTEXPORTS
 // NOTE: If using ARS requirements all export operations should be done under this.
 // 'abld test export'
-
-PRJ_EXPORTS
 ../conf/vcxmyvideoscollectionutiltest.cfg       /epoc32/winscw/c/testframework/vcxmyvideoscollectionutiltest.cfg
 ../init/testframework.ini                       /epoc32/winscw/c/testframework/testframework.ini
 
 ../data/mmc/file.txt                            /epoc32/winscw/c/data/vcxmyvideoscollectionutiltest_file.txt
+../data/mmc/file.txt                            /epoc32/winscw/c/data/vcxmyvideoscollectionutiltest_file2
+
+PRJ_EXPORTS
 
 PRJ_TESTMMPFILES
-
-
+VcxMyVideosCollectionUtilTest.mmp
 
 PRJ_MMPFILES
-
-	VcxMyVideosCollectionUtilTest.mmp
 	
-// Specify the .mmp files required for building the important component
-// releasables.
-//
-// Specify "tidy" if the component you need to build doesn't need to be
-// released. Specify "ignore" if the MMP file exists but should be
-// ignored.
-// Example:
-/*
-\agnmodel\group\agnmodel.mmp
-#if defined(MARM)
-\agnmodel\group\agsvexe.mmp
-#endif
-*/
 
 //  End of File

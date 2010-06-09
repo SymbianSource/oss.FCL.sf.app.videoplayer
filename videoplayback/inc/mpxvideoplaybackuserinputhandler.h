@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 
 #ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
@@ -44,13 +44,12 @@ class CMPXVideoPlaybackContainer;
 class CMPXVideoPlaybackUserInputHandler : public CBase,
                                           public MRemConCoreApiTargetObserver
 {
-
     public: // Constructors and destructor
 
         /**
         * Two-phased constructor.
         */
-        IMPORT_C static CMPXVideoPlaybackUserInputHandler* NewL(CMPXVideoPlaybackContainer* iContainer );
+        IMPORT_C static CMPXVideoPlaybackUserInputHandler* NewL( CMPXVideoPlaybackContainer* iContainer );
 
         /**
         * Destructor.
@@ -62,7 +61,7 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         /**
         * C++ default constructor.
         */
-        CMPXVideoPlaybackUserInputHandler(CMPXVideoPlaybackContainer* iContainer);
+        CMPXVideoPlaybackUserInputHandler( CMPXVideoPlaybackContainer* iContainer );
 
         /**
         * Symbian 2nd phase constructor.
@@ -77,11 +76,11 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
 
         void ProcessKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType );
 
-	    void ProcessMediaKey(TRemConCoreApiOperationId aOperationId,
-                             TRemConCoreApiButtonAction aButtonAct);
+        void ProcessMediaKey( TRemConCoreApiOperationId aOperationId,
+                              TRemConCoreApiButtonAction aButtonAct );
 
-	    void DoHandleMediaKey(TRemConCoreApiOperationId aOperationId,
-                               TRemConCoreApiButtonAction aButtonAct);
+        void DoHandleMediaKey( TRemConCoreApiOperationId aOperationId,
+                               TRemConCoreApiButtonAction aButtonAct );
 
         // From MRemConCoreApiTargetObserver
         /**
@@ -91,20 +90,26 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         */
         virtual void MrccatoPlay(
                 TRemConCoreApiPlaybackSpeed aSpeed,
-                TRemConCoreApiButtonAction aButtonAct);
+                TRemConCoreApiButtonAction aButtonAct );
 
         virtual void MrccatoCommand(
                 TRemConCoreApiOperationId aOperationId,
-                TRemConCoreApiButtonAction aButtonAct);
+                TRemConCoreApiButtonAction aButtonAct );
 
         /**
         * Setter method for iForeground
         * @param aForeground - the value to be set
         * @return void
         */
-        void SetForeground(TBool aForeground);
+        void SetForeground( TBool aForeground );
 
-	private:
+        /*
+         *  Function will block all user inputs until the new PDL command is received
+         *  @param aBlockInputs - the value to be set
+         */
+        void BlockPdlUserInputs( TBool aBlockInputs );
+
+    private:
         /**
         * Handles volume repeat timer timout
         * @return TInt
@@ -117,33 +122,36 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
         */
         void HandleVolumeRepeatL();
 
-        void HandleFastForward(TRemConCoreApiButtonAction aButtonAct);
+        void HandleFastForward( TRemConCoreApiButtonAction aButtonAct );
 
-        void HandleRewind(TRemConCoreApiButtonAction aButtonAct);
+        void HandleRewind( TRemConCoreApiButtonAction aButtonAct );
 
-        void HandleVolumeUp(TRemConCoreApiButtonAction aButtonAct);
+        void HandleVolumeUp( TRemConCoreApiButtonAction aButtonAct );
 
-        void HandleVolumeDown(TRemConCoreApiButtonAction aButtonAct);
+        void HandleVolumeDown( TRemConCoreApiButtonAction aButtonAct );
 
-        void ReRoutePointerEventL(CCoeControl* aControl,
-                                  const TPointerEvent& aPointerEvent,
-                                  TMPXVideoControlType aMPXControl);
+        void ReRoutePointerEventL( CCoeControl* aControl,
+                                   const TPointerEvent& aPointerEvent,
+                                   TMPXVideoControlType aMPXControl );
+
+        TBool IsUserInputAllowed();
 
     private:
 
-        TMPXVideoUserInputType                  iProcessingInputType; 	// the type of input being processed
+        TMPXVideoUserInputType                  iProcessingInputType;     // the type of input being processed
         TUint                                   iLastPressedKeyCode;     // keycode of last key that sent EEventKeyDown
         TInt                                    iLastPressedKeyScanCode; // scancode of last key that sent EEventKeyDown
         TRemConCoreApiOperationId               iLastMediaKeyPressed;    // Id of last mediakey thats sent a button-press
 
-        CRemConInterfaceSelector*               iInterfaceSelector; 		// Side volume key, owned
+        CRemConInterfaceSelector*               iInterfaceSelector;         // Side volume key, owned
         CRemConCoreApiTarget*                   iCoreTarget;            // Owned by CRemConInterfaceSelector
 
         CPeriodic*                              iVolumeRepeatTimer;     // owned
         TBool                                   iVolumeRepeatUp;
         TBool                                   iForeground;
+        TBool                                   iBlockPdlInputs;
 
-        CMPXVideoPlaybackContainer*             iContainer;	        // not owned
+        CMPXVideoPlaybackContainer*             iContainer;            // not owned
         CCoeControl*                            iActiveControlPtr;  // not owned
         TMPXVideoControlType                    iActiveControlType;
 };

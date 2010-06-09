@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 45 %
+// Version : %version: 46 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -57,6 +57,10 @@ const TUid KBrowserAppUid       = { 0x10008D39 };
 const TInt KVcxHgMyVideosUrlMaxLen = 1024;
 
 _LIT( KBrowserProtocol, "4 " );
+
+// URL to Ovi Store videos. If Ovi Store Launcher is not installed, this
+// address will be opened to web browser.
+_LIT( KOviVideoStoreURL, "http://lr.ovi.mobi/store/video" );
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -862,4 +866,37 @@ void CVcxHgMyVideosMainView::LaunchBrowserL( const TDesC& aUrl )
     LaunchAppL( KBrowserAppUid, *param );
     
     CleanupStack::PopAndDestroy( param );
+    }
+
+// ------------------------------------------------------------------------------
+// CVcxHgMyVideosMainView::LaunchOviStoreL()
+// ------------------------------------------------------------------------------
+//
+void CVcxHgMyVideosMainView::LaunchOviStoreL( const TUid aAppUid, const TDesC& aArgs )
+    {
+    IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosMainView::LaunchOviStoreL() enter" );
+    RApaLsSession appArcSession;
+    User::LeaveIfError( appArcSession.Connect() );
+    CleanupClosePushL<RApaLsSession>( appArcSession );
+
+    TApaAppInfo appInfo;
+    TInt err = appArcSession.GetAppInfo( appInfo, aAppUid );
+    IPTVLOGSTRING2_LOW_LEVEL( "CVcxHgMyVideosMainView::LaunchOviStoreL() GetAppInfo() error = %d", err );
+
+    if ( KErrNone == err )
+        {
+        IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosMainView::LaunchOviStoreL() launch '%S' with arguments '%S'", &appInfo.iFullName, &aArgs );
+        RProcess process;
+        User::LeaveIfError( process.Create( appInfo.iFullName, aArgs ) );
+        process.Resume();
+        process.Close();
+        }
+    else
+        {
+        // Launcher not found, use browser until launcher is available
+        IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosMainView::LaunchOviStoreL() launcher not found, launch browser" );
+        LaunchBrowserL( KOviVideoStoreURL );
+        }
+
+    CleanupStack::PopAndDestroy( &appArcSession );
     }

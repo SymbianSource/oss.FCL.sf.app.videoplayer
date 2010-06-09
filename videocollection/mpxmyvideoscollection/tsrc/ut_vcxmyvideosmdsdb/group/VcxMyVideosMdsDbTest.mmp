@@ -17,7 +17,7 @@
 *
 */
 
-// %version: 1 %
+// %version: 2 %
 
 #include <platform_paths.hrh>
 
@@ -60,6 +60,8 @@ SOURCE          mdeobjectquery.cpp
 SOURCE          mdeitem.cpp
 SOURCE          mdeinstanceitem.cpp
 SOURCE          mdeorderrule.cpp
+SOURCE          vcxmyvideosmdscmdqueue.cpp
+SOURCE          vcxmyvideosmdsalbums.cpp
 
 SOURCEPATH      ../../../src
 SOURCE          vcxmyvideosmdsdb.cpp

@@ -27,10 +27,6 @@
 #include <mpxcollectionmessagedefs.h>
 #include <vcxmyvideosdefs.h>
 
-//#include "mpxdbactivetask.h" // change to <> when moved to s60 dir and remove temp .h-file
-
-#include "vcxmyvideosdownloadutil.h"
-
 // FORWARD DECLARATIONS
 class CVcxMyVideosCollectionPlugin;
 class CVcxMyVideosAsyncFileCopy;
@@ -84,17 +80,18 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         /**
         * Performs one Move or Copy operation. Called by HandleStep.
         *
-        * @return ETrue if operation was the last one, EFalse othewise.
+        * @return MVcxMyVideosActiveTaskObserver::EDone if was last operation,
+        *         MVcxMyVideosActiveTaskObserver::EMoreToCome otherwise.
         */
-        TBool HandleMoveOrCopyStepL();
+        MVcxMyVideosActiveTaskObserver::TStepResult HandleMoveOrCopyStepL();
 
         /**
         * Moves or copies video to another drive.
         *
         * @param aMdsId        MDS id of the item to be moved.
-        * @param aTargetDrive  Target drive.
+        * @param aMove         If ETrue, the source file is deleted.
         */
-        void MoveOrCopyVideoL( TUint32 aMdsId, TInt aTargetDrive );
+        void MoveOrCopyVideoL( TUint32 aMdsId );
                        
         /**
         * Generates and sends resp message for Move,Copy and Delete operations.
@@ -110,9 +107,10 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         /**
         * Performs one Delete operation. Called by HandleStep.
         *
-        * @return ETrue if operation was the last one, EFalse otherwise.
+        * @return MVcxMyVideosActiveTaskObserver::EDone if was last operation,
+        *         MVcxMyVideosActiveTaskObserver::EMoreToCome otherwise.
         */
-        TBool HandleDeleteStepL();
+        MVcxMyVideosActiveTaskObserver::TStepResult HandleDeleteStepL();
 
     private:
         
@@ -162,9 +160,8 @@ NONSHARABLE_CLASS(CVcxMyVideosAsyncFileOperations) :
         * Does some sanity checks also.
         *
         * @param aMdsId        MDS ID of the video being moved/copied.
-        * @param aTargetDrive  Target drive.
         */
-        void InitSingleMoveOrCopyL( TUint32 aMdsId, TInt aTargetDrive );
+        void InitSingleMoveOrCopyL( TUint32 aMdsId );
 
     public:
 

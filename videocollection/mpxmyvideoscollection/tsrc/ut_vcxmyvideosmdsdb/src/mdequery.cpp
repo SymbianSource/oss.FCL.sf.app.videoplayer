@@ -17,11 +17,12 @@
 
 
 #include "mdequery.h"
-
 #include "mdeorderrule.h"
 #include "mdeinstanceitem.h"
 #include "mdelogiccondition.h"
 #include "mdenamespacedef.h"
+
+#include "VcxMyVideosMdsDbTest.h"
 
 
 CMdEQuery::CMdEQuery(TQueryType aType, CMdESession& aSession, CMdENamespaceDef& aNamespaceDef)
@@ -114,6 +115,7 @@ EXPORT_C TInt CMdEQuery::Error() const
 
 EXPORT_C TInt CMdEQuery::Count() const
     {
+    return test->querycountresult;
     }
 
 EXPORT_C CMdEItem& CMdEQuery::ResultItem(TInt aIndex) const

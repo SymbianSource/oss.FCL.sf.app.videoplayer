@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    MPX My Videos collection plugin's MDS database class*
+* Description:   MPX My Videos collection plugin's MDS database class*
 */
-
 
 
 
@@ -29,9 +28,11 @@
 #include <mpxmediageneralextdefs.h>
 #include <mpxmediaarray.h>
 #include <mpxmediavideodefs.h>
-#include <centralrepository.h>
 #include "vcxmyvideosmdsdb.h"
 #include "vcxmyvideoscollectionutil.h"
+#include "vcxmyvideosmdsalbums.h"
+#include "vcxmyvideoscollectionutil.h"
+#include "vcxmyvideosmdscmdqueue.h"
 
 _LIT( KVcxVideoObjectName, "Video" );
                                                               //1 (ID)
@@ -55,7 +56,6 @@ _LIT( KVcxAuthorPropertyName, "Author" );                     //15
 _LIT( KVcxOriginPropertyName, "Origin" );                     //16
 _LIT( KVcxDurationPropertyName, "Duration" );                 //17
 _LIT( KVcxLastPlayPositionPropertyName, "LastPlayPosition" ); //10
-_LIT( KVcxDownloadIdPropertyName, "DownloadID" );             //18
 _LIT( KVcxRatingPropertyName, "Rating" );                     //19
 _LIT( KVcxBitratePropertyName, "Bitrate" );                   //20
 _LIT( KVcxAudioFourCcPropertyName, "AudioFourCC" );           //21
@@ -162,8 +162,9 @@ void CVcxMdsShutdownMonitor::DoCancel()
 // CVcxMyVideosMdsDb::CVcxMyVideosMdsDb
 // ---------------------------------------------------------------------------
 //
-CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs )
-: iFs( aFs ), iMdsDbObserver(aObserver) 
+CVcxMyVideosMdsDb::CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
+: iFs( aFs ), iMdsDbObserver(aObserver), iAlbumsObserver(aAlbumsObserver) 
     {
     }
 
@@ -175,13 +176,22 @@ void CVcxMyVideosMdsDb::ConstructL()
     {
     MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL start" );
 
+    iCmdQueue = CVcxMyVideosMdsCmdQueue::NewL( *this );
+
     iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait;
     
     OpenMdsSessionL();
 
+        
+    iAlbums = CVcxMyVideosMdsAlbums::NewL( *this, iAlbumsObserver );
+    
+    TCallBack callBack( AsyncHandleQueryCompleted, this );    
+    iAsyncHandleQueryCompleteCaller = new (ELeave) CAsyncCallBack( callBack,
+            CActive::EPriorityStandard );
+
     iMdsShutdownMonitor = CVcxMdsShutdownMonitor::NewL(
             *this, KHarvesterPSShutdown, KMdSShutdown, EFalse );
-        
+
     MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL exit" );
     }
 
@@ -198,7 +208,6 @@ void CVcxMyVideosMdsDb::OpenMdsSessionL()
     delete iMdsSession;
     iMdsSession = NULL;
     iMdsSession = CMdESession::NewL( *this );
-    
     if ( !iMdsSession )
         {
         User::Leave( KErrGeneral );
@@ -222,6 +231,12 @@ void CVcxMyVideosMdsDb::OpenMdsSessionL()
         iMdsSession->AddObjectPresentObserverL( *this );
         
         GetSchemaDefinitionsL();
+        
+        if ( iAlbums )
+            {
+            iAlbums->GetSchemaDefinitionsL();
+            iAlbums->SetObservingL();
+            }
         }
     else
         {
@@ -243,7 +258,6 @@ void CVcxMyVideosMdsDb::HandleObjectPresentNotification( CMdESession& /*aSession
     MPX_DEBUG1( "CVcxMyVideosMdsDb::--------------------------------------------------------------." );
     MPX_DEBUG3( "CVcxMyVideosMdsDb::HandleObjectPresentNotification( aPresent = %1d, count = %3d) |", aPresent, aObjectIdArray.Count() );
     MPX_DEBUG1( "CVcxMyVideosMdsDb::--------------------------------------------------------------'" );
-    //iMdsDbObserver->HandleObjectPresentNotification();
 
     TObserverNotificationType type;
     if ( aPresent )
@@ -261,10 +275,11 @@ void CVcxMyVideosMdsDb::HandleObjectPresentNotification( CMdESession& /*aSession
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewL( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs )
+CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewL( MVcxMyVideosMdsDbObserver* aObserver,
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
     {
     CVcxMyVideosMdsDb* self =
-            CVcxMyVideosMdsDb::NewLC( aObserver, aFs );
+            CVcxMyVideosMdsDb::NewLC( aObserver, aFs, aAlbumsObserver );
     CleanupStack::Pop( self );
     return self;
     }
@@ -273,10 +288,10 @@ CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewL( MVcxMyVideosMdsDbObserver* aObserver
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewLC(
-        MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs )
+CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewLC( MVcxMyVideosMdsDbObserver* aObserver,
+        RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver )
     {
-    CVcxMyVideosMdsDb* self = new( ELeave ) CVcxMyVideosMdsDb( aObserver, aFs );
+    CVcxMyVideosMdsDb* self = new( ELeave ) CVcxMyVideosMdsDb( aObserver, aFs, aAlbumsObserver );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
@@ -290,13 +305,15 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
     {
     MPX_DEBUG1( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb() start" );
 
-    Cancel();
+    Cancel( EGetVideoList );
+
+    delete iAlbums;
+    delete iCmdQueue;
     delete iVideoQuery;
     delete iMdsSession;
     delete iActiveSchedulerWait;
-    delete iRepository;
+    delete iAsyncHandleQueryCompleteCaller;
     delete iMdsShutdownMonitor;
-
     MPX_DEBUG1( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb() exit" );
     }
 
@@ -304,16 +321,26 @@ CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
 // CVcxMyVideosMdsDb::Cancel
 // ---------------------------------------------------------------------------
 //
-void CVcxMyVideosMdsDb::Cancel()
+void CVcxMyVideosMdsDb::Cancel( TRequestType aType )
     {
     MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() start");
     
-    if ( iVideoQuery )
+    iCmdQueue->Cancel( aType );
+    
+    if ( aType == EAll || aType == EGetVideoList )
         {
-        iVideoQuery->Cancel();
+        if ( iVideoQuery )
+            {
+            iVideoQuery->Cancel();
+            }
+        iVideoListFetchingIsOngoing = EFalse;
         }
-    iVideoListFetchingIsOngoing = EFalse;
 
+    if ( aType != EGetVideoList )
+        {
+        iAlbums->CancelQueries( aType );
+        }
+    
     MPX_DEBUG1("CVcxMyVideosMdsDb::Cancel() exit");
     }
     
@@ -335,7 +362,7 @@ void CVcxMyVideosMdsDb::AddVideoL(
     
     object->AddUint8PropertyL( *iOriginPropertyDef,
             aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin ) );
-
+    
     CMdEProperty* property;
 
     //  Type can not be modified normally, so set it here
@@ -410,7 +437,7 @@ TInt CVcxMyVideosMdsDb::RemoveVideo( TUint32 aMdsId )
         MPX_DEBUG2( "CVcxMyVideosMdsDb:: MdsSessionL().RemoveObjectL left: %d", err );
         retValue = err;        
         }
-
+        
     MPX_DEBUG1( "CVcxMyVideosMdsDb::RemoveVideoL() exit" );        
     return retValue;
     }
@@ -429,7 +456,7 @@ void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
     
     CMdEObject* object =
             MdsSessionL().OpenObjectL( mpxId.iId1, *iVideoObjectDef );
-    if ( object == NULL )
+    if ( !object )
         {
         // No object with this ID was found!
         MPX_DEBUG1("CVcxMyVideosMdsDb::UpdateVideoL no object found");
@@ -457,7 +484,6 @@ void CVcxMyVideosMdsDb::UpdateVideoL( CMPXMedia& aVideo )
             User::Leave( KErrInUse );
             }
         }
-
     MPX_DEBUG1( "CVcxMyVideosMdsDb::UpdateVideoL() exit" );
     }
 
@@ -469,6 +495,27 @@ void CVcxMyVideosMdsDb::CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder
         TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList )
     {
     MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoListL() start" );
+    
+    CVcxMyVideosMdsCmdGetVideoList* cmd = new (ELeave) CVcxMyVideosMdsCmdGetVideoList;
+    CleanupStack::PushL( cmd ); // 1->
+    cmd->iCmdType      = CVcxMyVideosMdsDb::EGetVideoList;
+    cmd->iSortingOrder = aSortingOrder;
+    cmd->iAscending    = aAscending;
+    cmd->iFullDetails  = aFullDetails;
+    cmd->iVideoList    = &aVideoList;
+
+    iCmdQueue->ExecuteCmdL( cmd ); //ownership moves
+    CleanupStack::Pop( cmd ); // <-1
+    }
+    
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::DoCreateVideoListL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsDb::DoCreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder,
+        TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList )
+    {
+    MPX_FUNC( "CVcxMyVideosMdsDb::DoCreateVideoListL" );
         
     if ( iVideoListFetchingIsOngoing )
         {
@@ -553,14 +600,13 @@ void CVcxMyVideosMdsDb::CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder
 
     iFullDetails = aFullDetails;
     
-    iVideoQuery->FindL(KMdEQueryDefaultMaxCount, 500);
+    const TInt maxItemsInQueryResult = 500;
+    iVideoQuery->FindL( KMdEQueryDefaultMaxCount, maxItemsInQueryResult );
 
     aVideoList->SetTObjectValueL<TMPXGeneralType>( KMPXMediaGeneralType, EMPXGroup );            
     aVideoList->SetTObjectValueL( KMPXMediaArrayCount, mediaArray->Count() );
 
     iVideoList = aVideoList; // lets store the pointer, ownership stays at observer
-
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoListL() exit" );
     }
 
 // ---------------------------------------------------------------------------
@@ -624,7 +670,6 @@ void CVcxMyVideosMdsDb::DoHandleQueryNewResultsL(
     
     iMdsDbObserver->HandleCreateVideoListResp( iVideoList, aFirstNewItemIndex,
             EFalse /* not complete yet */);
-
     MPX_DEBUG1("CVcxMyVideosMdsDb::HandleQueryNewResults() exit");
     }
 
@@ -635,40 +680,48 @@ void CVcxMyVideosMdsDb::DoHandleQueryNewResultsL(
 // ---------------------------------------------------------------------------
 //
 void CVcxMyVideosMdsDb::HandleQueryCompleted(
-#if _DEBUG
-        CMdEQuery& aQuery,
-#else
         CMdEQuery& /*aQuery*/,
-#endif
         TInt /*aError*/)
     {
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::HandleQueryCompleted() start" );
+    iAsyncHandleQueryCompleteCaller->CallBack();
+    }
 
-    if ( !iVideoList )
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::AsyncHandleQueryCompleted
+// ---------------------------------------------------------------------------
+//
+TInt CVcxMyVideosMdsDb::AsyncHandleQueryCompleted( TAny* aThis )
+    {
+    MPX_FUNC( "CVcxMyVideosMdsDb::AsyncHandleQueryCompleted" );
+
+    CVcxMyVideosMdsDb* thisObj = static_cast<CVcxMyVideosMdsDb*>( aThis );
+    
+    if ( !thisObj->iVideoList )
         {
         MPX_DEBUG1("CVcxMyVideosMdsDb:: iVideoList is NULL, should never happen");
-        return;
+        return KErrNone;
         }
 
 #ifdef _DEBUG
-    CMPXMediaArray* array = iVideoList->Value<CMPXMediaArray>( KMPXMediaArrayContents );
+    CMPXMediaArray* array = thisObj->iVideoList->Value<CMPXMediaArray>( KMPXMediaArrayContents );
 #endif
 
-    MPX_DEBUG2("CVcxMyVideosMdsDb:: query contains %d items", aQuery.Count());
+    MPX_DEBUG2("CVcxMyVideosMdsDb:: query contains %d items", thisObj->iVideoQuery->Count());
     MPX_DEBUG2("CVcxMyVideosMdsDb:: iVideoList contains %d items", array->Count());
     
-    if (iActiveSchedulerWait->IsStarted())
+    if ( thisObj->iActiveSchedulerWait->IsStarted() )
         {
-        iActiveSchedulerWait->AsyncStop();
+        thisObj->iActiveSchedulerWait->AsyncStop();
         }
     
-    iVideoListFetchingIsOngoing = EFalse;
-    iMdsDbObserver->HandleCreateVideoListResp( iVideoList, KErrNotFound /* KErrNotFound = no new items */,
+    thisObj->iVideoListFetchingIsOngoing = EFalse;
+    thisObj->iMdsDbObserver->HandleCreateVideoListResp( thisObj->iVideoList, KErrNotFound /* KErrNotFound = no new items */,
             ETrue /* complete */);
-
-    MPX_DEBUG1( "CVcxMyVideosMdsDb::HandleQueryCompleted() exit" );
     
-    iVideoList = NULL; // not owned by us -> just clear
+    thisObj->iVideoList = NULL; // not owned by us -> just clear
+    
+    thisObj->iCmdQueue->CmdFinished();
+    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -681,21 +734,21 @@ CMPXMedia* CVcxMyVideosMdsDb::CreateVideoL( TUint32 aId, TBool aFullDetails )
 
     CMdEObject* object = ObjectL( aId );
 
-    CMPXMedia* video = NULL;
-
-    if ( object )
+    if ( !object )
         {
-        CleanupStack::PushL( object ); // 1->
-
-        video = CMPXMedia::NewL( );
-        CleanupStack::PushL( video ); // 2->
-
-        Object2MediaL( *object, *video, aFullDetails );
-
-        CleanupStack::Pop( video );            // <-2
-        CleanupStack::PopAndDestroy( object ); // <-1
+        MPX_DEBUG2("CVcxMyVideosMdsDb:: mds id %d not found from mds", aId);
+        return NULL;
         }
+        
+    CleanupStack::PushL( object ); // 1->
 
+    CMPXMedia* video = CMPXMedia::NewL( );
+    CleanupStack::PushL( video ); // 2->
+
+    Object2MediaL( *object, *video, aFullDetails );
+
+    CleanupStack::Pop( video );            // <-2
+    CleanupStack::PopAndDestroy( object ); // <-1
     MPX_DEBUG1( "CVcxMyVideosMdsDb::CreateVideoL() exit" );
 
     return video;
@@ -719,7 +772,6 @@ void CVcxMyVideosMdsDb::HandleSessionOpened(
 
         iMdsSessionError = aError;
         }
-        
     MPX_DEBUG1("CVcxMyVideosMdsDb::HandleSessionOpened() exit" );
     }
 
@@ -770,10 +822,9 @@ void CVcxMyVideosMdsDb::HandleObjectNotification(
 // CVcxMyVideosMdsDb::ObjectL
 // ---------------------------------------------------------------------------
 //
-CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
+CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId, TBool aIsVideo )
     {
     MPX_DEBUG1("CVcxMyVideosMdsDb::ObjectL start");
-
     //  If the id is not valid, just return NULL, because
     //  MdsSessionL().GetObjectL leaves in that case
     if ( aId == KNoId )
@@ -781,9 +832,16 @@ CMdEObject* CVcxMyVideosMdsDb::ObjectL( const TItemId aId )
         return NULL;
         }
 
-    CMdEObject* object = NULL;
-    object = MdsSessionL().GetObjectL( aId, *iVideoObjectDef );
-
+    CMdEObject* object;
+    if ( aIsVideo )
+        {
+        object = MdsSessionL().GetObjectL( aId, *iVideoObjectDef );
+        }
+    else
+        {
+        object = MdsSessionL().GetObjectL( aId, *iAlbums->iAlbumObjectDef );
+        }
+    
     if ( object )
         {
         MPX_DEBUG2( "CVcxMyVideosMdsDb::ObjectL found, id: %d", aId );
@@ -968,10 +1026,20 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     if ( aObject.Property( *iOriginPropertyDef, property, 0 ) != KErrNotFound )
         {
         TUint8 origin = static_cast<CMdEUint8Property*>(property)->Value();
+#ifdef VIDEO_COLLECTION_PLUGIN_TB92
         if( origin != EVcxMyVideosOriginCapturedWithCamera )
             {
             origin = EVcxMyVideosOriginOther;
             }           
+#else
+        if ( origin != EVcxMyVideosOriginCapturedWithCamera &&
+				 origin != EVcxMyVideosOriginDownloaded
+				)
+            {
+            origin = EVcxMyVideosOriginOther;
+            }
+
+#endif
         aVideo.SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, origin );
         }
 
@@ -992,18 +1060,7 @@ void CVcxMyVideosMdsDb::Object2MediaL(
         
         aVideo.SetTObjectValueL<TInt>( KMPXMediaGeneralLastPlaybackPosition, pos );
         }
-
-    //18. DOWNLOAD ID (BRIEF)
-    if ( aObject.Property( *iDownloadIdPropertyDef, property, 0 ) != KErrNotFound )
-        {
-        aVideo.SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId,
-                static_cast<CMdEUint32Property*>(property)->Value() );
-        }
-    else
-        {
-        aVideo.SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, 0 );
-        }
-
+    
     //19. RATING (FULL)
     if ( aObject.Property( *iRatingPropertyDef, property, 0 ) != KErrNotFound
             && aFullDetails )
@@ -1136,10 +1193,8 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
         }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-#if 1
     // 6. KMPXMediaGeneralDate ( creation date )
     SetCreationDateToObjectL( aVideo, aObject );
-#endif
     
     // 7. KMPXMediaGeneralFlags (including DRM flag)
     if ( aVideo.IsSupported( KMPXMediaGeneralFlags ) )
@@ -1336,6 +1391,7 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             
             static_cast<CMdEUint32Property*>(property)->SetValueL( flags );
             }
+        
         if ( aObject.Property( *iLastPlayPositionPropertyDef, property, 0 ) != KErrNotFound )
             {
             static_cast<CMdEReal32Property*>(property)->SetValueL( lastPlaybackPos );
@@ -1346,21 +1402,6 @@ void CVcxMyVideosMdsDb::Media2ObjectL(
             }
         }
     
-    // 18. DOWNLOAD ID
-    if ( aVideo.IsSupported( KVcxMediaMyVideosDownloadId ) )
-        {
-        TUint32 dlId = aVideo.ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId );
-        
-        if ( aObject.Property( *iDownloadIdPropertyDef, property, 0 ) != KErrNotFound )
-            {
-            static_cast<CMdEUint32Property*>(property)->SetValueL( dlId );
-            }
-        else
-            {
-            aObject.AddUint32PropertyL( *iDownloadIdPropertyDef, dlId );
-            }
-        }
-
     // 19. RATING
     if ( aVideo.IsSupported( KVcxMediaMyVideosRating ) )
         {
@@ -1526,9 +1567,9 @@ void CVcxMyVideosMdsDb::GetSchemaDefinitionsL()
     iRatingPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
             KVcxRatingPropertyName )); //19
     iBitratePropertyDef = &(iVideoObjectDef->GetPropertyDefL(
-            KVcxBitratePropertyName )); //20
+                KVcxBitratePropertyName )); //20
     iAudioFourCcPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
-            KVcxAudioFourCcPropertyName )); //21
+                KVcxAudioFourCcPropertyName )); //21
     iWidthPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
             KVcxWidthPropertyName )); //22
     iHeightPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
@@ -1548,10 +1589,7 @@ void CVcxMyVideosMdsDb::GetSchemaDefinitionsL()
 
     iAudioLanguagePropertyDef = &(iVideoObjectDef->GetPropertyDefL(
             KVcxAudioLanguagePropertyName )); //14
-
-    iDownloadIdPropertyDef = &(iVideoObjectDef->GetPropertyDefL(
-            KVcxDownloadIdPropertyName )); //18
-
+    
     }
 
 // ---------------------------------------------------------------------------

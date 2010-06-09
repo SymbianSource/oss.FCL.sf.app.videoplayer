@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -374,6 +374,7 @@ class CMPXVideoPlaybackControlsController : public CBase
         TFileName                               iBitmapFileName;
 
         TBool                                   iTvOutConnected;
+        TBool                                   iShowControls;
         TBool                                   iRNFormat;
 
 #ifdef RD_TACTILE_FEEDBACK

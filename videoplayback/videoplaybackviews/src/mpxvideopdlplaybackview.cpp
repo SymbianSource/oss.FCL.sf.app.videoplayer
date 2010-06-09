@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 24 %
+// Version : %version: 25 %
 
 
 //  Include Files
@@ -34,6 +34,7 @@
 #include "mpxvideopdlplaybackview.h"
 #include "mpxvideoplaybackcontainer.h"
 #include "mpxvideoplaybackviewfiledetails.h"
+#include "mpxvideoplaybackuserinputhandler.h"
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideo_debug.h"
 
@@ -208,7 +209,7 @@ void CMPXVideoPdlPlaybackView::RetrievePdlInformationL()
         //  The download size and downloaded bytes will be set to 100 so
         //  the download progress bar will show 100%
         //
-        if ( iPdlState == EPbDlStateNotDownloading )
+        if ( iPdlState == EPbDlStateNotDownloading || iPdlState == EPbDlStateDownloadCompleted )
         {
             iDownloadSize   = 100;
             downloadedBytes = 100;
@@ -449,6 +450,49 @@ void CMPXVideoPdlPlaybackView::HandleInitializingStateL( TMPXPlaybackState aLast
     //  For PDL view, reset the container and controls for new download
     //
     DoHandleInitializingStateL( aLastState );
+    
+    //
+    //  User inputs should not be blocked since the new download is initializing
+    //
+    iUserInputsBlocked = EFalse;
+    iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::SendWindowCommandL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCmd )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::SendWindowCommandL()"),
+                   _L("aCmd = %d"), aCmd );
+
+    CMPXVideoBasePlaybackView::SendWindowCommandL( aCmd );
+
+    if ( aCmd == EPbCmdHandleBackground && ! IsAppInFrontL() )
+    {
+        //
+        //  Block all inputs when PDL view is sent to full background
+        //  Commands will be enabled when new command is received from LWP
+        //
+        iUserInputsBlocked = ETrue;
+        iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()"));
+    
+    //
+    //  User inputs should not be blocked since the new PDL command is complete
+    //
+    iUserInputsBlocked = EFalse;
+    iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
 }
 
 // EOF

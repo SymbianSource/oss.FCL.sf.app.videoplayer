@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 
@@ -82,5 +82,6 @@ LIBRARY             touchfeedback.lib
 LIBRARY             bmpanim.lib
 LIBRARY             flogger.lib
 LIBRARY             playbackhelper.lib
+LIBRARY             centralrepository.lib // For display backlight timeout value
 
 //End of file

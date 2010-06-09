@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 79 %
+// Version : %version: 80 %
 
 
 //  Include Files
@@ -366,6 +366,11 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         {
             iPdlReloading = ETrue;
             iMediaRequested = EFalse;
+            break;
+        }
+        case KMpxVideoPlaybackPdlReloadComplete:
+        {
+            HandlePdlReloadComplete();
             break;
         }
         case EMPXPbvCmdRealOneBitmapTimeout:
@@ -2280,6 +2285,15 @@ void CMPXVideoBasePlaybackView::DoHandleInitializingStateL( TMPXPlaybackState aL
             }
         }
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::HandlePdlReloadComplete()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::HandlePdlReloadComplete()
+{
+    MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandlePdlReloadComplete()"));
 }
 
 // EOF

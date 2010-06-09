@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: e92_71 %
+
+// Version : %version: da1mmcf#72 %
 
 
 #include <eikon.hrh>
@@ -907,7 +908,7 @@ void CMpxVideoPlayerAppUiEngine::HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCate
 
 
 // -----------------------------------------------------------------------------
-// 
+//
 // -----------------------------------------------------------------------------
 //
 void CMpxVideoPlayerAppUiEngine::HandleSoftKeyBackL()
@@ -930,7 +931,7 @@ void CMpxVideoPlayerAppUiEngine::HandleSoftKeyBackL()
 }
 
 // -----------------------------------------------------------------------------
-// 
+//
 // -----------------------------------------------------------------------------
 //
 TBool CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL( TApaCommand aCommand,
@@ -964,7 +965,7 @@ TBool CMpxVideoPlayerAppUiEngine::ProcessCommandParametersL( TApaCommand aComman
 }
 
 // -----------------------------------------------------------------------------
-// 
+//
 // -----------------------------------------------------------------------------
 //
 void CMpxVideoPlayerAppUiEngine::ActivateExitActiveObject()
@@ -1119,19 +1120,19 @@ void CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL()
+//   CMpxVideoPlayerAppUiEngine::SendMessageToPdlViewL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL()
+void CMpxVideoPlayerAppUiEngine::SendMessageToPdlViewL( TInt aMsg )
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL"));
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SendMessageToPdlViewL"));
 
     if ( iViewUtility->ActiveViewType() == TUid::Uid( KMpxPlaybackPluginTypeUid ) )
     {
         //
         //  The display window must be removed before closing the playback plugin
         //
-        iAppUi->View()->HandleCommandL( KMpxVideoPlaybackPdlReloading );
+        iAppUi->View()->HandleCommandL( aMsg );
     }
 }
 
@@ -1142,13 +1143,13 @@ void CMpxVideoPlayerAppUiEngine::SignalViewPdlReloadingL()
 void CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL()"));
-	
+
     if ( !iConstructTimer )
     {
         const TTimeIntervalMicroSeconds32 timeout  = 250000; // 250 ms
-    
+
         TCallBack callback ( CMpxVideoPlayerAppUiEngine::LateConstructCallback, this );
-    
+
         iConstructTimer = CPeriodic::NewL( CActive::EPriorityIdle );
 
         iConstructTimer->Start( timeout, 0, callback );
@@ -1162,9 +1163,9 @@ void CMpxVideoPlayerAppUiEngine::ActivateLateConstructTimerL()
 TInt CMpxVideoPlayerAppUiEngine::LateConstructCallback( TAny* aPtr )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::LateConstructCallback()"));
-    
+
     TRAP_IGNORE( static_cast<CMpxVideoPlayerAppUiEngine*>(aPtr)->DoLateConstructL() );
-    
+
     return KErrNone;
 }
 
@@ -1176,8 +1177,8 @@ void CMpxVideoPlayerAppUiEngine::DoLateConstructL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::DoLateConstructL()"));
 
-    iConstructTimer->Cancel(); 
-        
+    iConstructTimer->Cancel();
+
     PlaybackUtilityL();
 }
 

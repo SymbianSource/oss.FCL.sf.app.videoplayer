@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version:  ou1cpsw#14 %
+// Version : %version:  15 %
 
 
 #include <mpxcommand.h>
@@ -33,6 +33,7 @@
 #include "mpxvideoembeddedpdlhandler.h"
 #include "mpxvideoplayerappuiengine.h"
 #include "mpxvideoplayerconstants.h"
+#include "mpxvideoplayercustomviewmsgconsts.h"
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideo_debug.h"
 
@@ -100,6 +101,7 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
         if ( ( aDlId == iDownloadId ) && ( ! aFileName.Compare( *iDownloadFileName ) ) )
         {
             iAppUiEngine->PlaybackUtilityL().CommandL( EPbCmdPlay );
+            iAppUiEngine->SendMessageToPdlViewL( KMpxVideoPlaybackPdlReloadComplete );
         }
         else
         {
@@ -107,9 +109,7 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
             //  New download received, close old playback plugin
             //
             iAppUiEngine->ClosePlaybackPluginL();
-
-            iAppUiEngine->SignalViewPdlReloadingL();
-
+            iAppUiEngine->SendMessageToPdlViewL( KMpxVideoPlaybackPdlReloading );
             StartNewDownloadL( aDlId, aFileName );
         }
     }

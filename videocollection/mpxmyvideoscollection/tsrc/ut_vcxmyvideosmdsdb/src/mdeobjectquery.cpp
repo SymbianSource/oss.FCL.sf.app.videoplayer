@@ -39,10 +39,18 @@ void CMdEObjectQuery::ObjectQueryConstructL()
 
 CMdEObjectQuery::~CMdEObjectQuery()
 	{
+    delete iCMdEObject;
 	}
 
 EXPORT_C CMdEObject& CMdEObjectQuery::Result(TInt aIndex) const
     {
+    if ( !iCMdEObject ) 
+        {
+        const TPtrC ptr = KNullDesC();
+        iCMdEObject = CMdEObject::NewL( * ( CMdEObjectDef*  )NULL,ptr, 0 );
+        }
+    
+    return *iCMdEObject;
     }
 
 EXPORT_C CMdEObjectDef& CMdEObjectQuery::ObjectDef() const

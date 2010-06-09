@@ -106,7 +106,7 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
     MPX_DEBUG1("CVcxMyVideosMessageList:: ----------------------------------------------'" );
 #endif
     
-    if ( AlreadyInMessageListL( aId, aChange, aExtraInfo ) )
+    if ( aChange == EMPXItemModified && AlreadyInMessageListL( aId, aChange, aExtraInfo ) )
         {
         MPX_DEBUG1("CVcxMyVideosMessageList:: already in message list, skipping add");
         return;
@@ -130,7 +130,7 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
         {
         message->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value, aExtraInfo );
         }
-        
+    
     MPX_DEBUG1("CVcxMyVideosMessageList:: appending to message array");
     
     iMessageArray->AppendL( message ); // ownership moves
@@ -189,6 +189,24 @@ TBool CVcxMyVideosMessageList::AlreadyInMessageListL( const TMPXItemId& aId,
                     {
                     extraInfo = media->ValueTObjectL<TInt32>( KVcxMediaMyVideosInt32Value );
                     }
+                    
+                if ( extraInfo == EVcxMyVideosVideoListOrderChanged &&
+                        aExtraInfo == 0 )
+                    {
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: found similar message with EVcxMyVideosVideoListOrderChanged flag set, discarding this msg");
+                    return ETrue;
+                    }
+                
+                if ( aExtraInfo == EVcxMyVideosVideoListOrderChanged &&
+                       extraInfo == 0 )
+                    {
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: Turning the EVcxMyVideosVideoListOrderChanged flag on to the previous message");
+                    MPX_DEBUG1("CVcxMyVideosMessageList:: and discarding this.");
+                    media->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value,
+                            EVcxMyVideosVideoListOrderChanged );
+                    return ETrue;
+                    }
+                     
                 if ( aExtraInfo == extraInfo )
                     {
                     return ETrue;
@@ -271,7 +289,7 @@ void CVcxMyVideosMessageList::AddL( CMPXMessage* aMessage )
 //
 void CVcxMyVideosMessageList::SendL()
     {
-    MPX_FUNC("CVcxMyVideosMessageList::SendL()");
+    MPX_DEBUG1("CVcxMyVideosMessageList::SendL");
     
     if ( iMessageCount == 0 || !iMessageList )
         {
@@ -299,9 +317,7 @@ void CVcxMyVideosMessageList::CreateMessageListL()
 
         iMessageList->SetTObjectValueL<TMPXMessageId>(KMPXMessageGeneralId, KVcxCommandIdMyVideos);
         iMessageList->SetTObjectValueL<TInt>(KVcxMediaMyVideosCommandId, KVcxMessageMyVideosMessageArray );
-        iMessageList->SetTObjectValueL<TUid>(KMPXMessageCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));        
-        //iMessageList->SetTObjectValueL<TMPXChangeEventType>(KMPXMessageChangeEventType, aChange);        
-        //iMessageList->SetTObjectValueL<TMPXItemId>(KMPXMessageMediaGeneralId, TMPXItemId(0, 0) );
+        iMessageList->SetTObjectValueL<TUid>(KMPXMessageCollectionId, TUid::Uid(KVcxUidMyVideosMpxCollection));
         iMessageCount = 0;
         }
     }

@@ -23,6 +23,8 @@
 #include <mdenamespacedef.h>
 #include <mdesession.h>
 
+#include "VcxMyVideosMdsDbTest.h"
+
 //////////////////////////////
 //                          //
 //        TMdEObject        //
@@ -173,12 +175,19 @@ EXPORT_C TInt CMdEObject::PropertyCount(const CMdEPropertyDef& aDef) const
 
 EXPORT_C TInt CMdEObject::Property(const CMdEPropertyDef& aDef, CMdEProperty*& aProperty, TInt aStartAt) const
     {
+    if ( test->propertynotdefined )
+        {
+        return KErrNotFound;
+        }
     if( !iProperty )
         {
         iProperty = new CMdEProperty();
         }
     
-    aProperty = iProperty;
+    if ( test->propertyisnull )
+        {
+        aProperty = NULL;
+        }
     }
     
 EXPORT_C CMdEProperty& CMdEObject::AddBoolPropertyL(CMdEPropertyDef& aDef, TBool aValue)
@@ -296,6 +305,14 @@ void CMdEObject::AutoLockL() const
 
 EXPORT_C TBool CMdEObject::OpenForModifications() const
 	{
+    if ( test->mdeobjectopenresult )
+        {
+        return EFalse;
+        }
+    else
+        {
+        return ETrue;
+        }
 	}
 
 void CMdEObject::ClearObject( TBool aClearFlags )

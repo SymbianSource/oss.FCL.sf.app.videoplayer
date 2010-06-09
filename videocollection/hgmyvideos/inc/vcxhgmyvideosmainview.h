@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 #ifndef VCXHGMYVIDEOSMAINVIEW_H
 #define VCXHGMYVIDEOSMAINVIEW_H
@@ -167,6 +167,14 @@ class CVcxHgMyVideosMainView : public CAknView
          */
         void LaunchBrowserL( const TDesC& aUrl );        
         
+        /**
+         * Launches Ovi store.
+         *
+         * @param aAppUid Ovi Store Launcher application UID
+         * @param aMsg    command line arguments
+         */
+        void LaunchOviStoreL( const TUid aAppUid, const TDesC& aArgs = KNullDesC() );
+
     private: // Constructors
 
         /**

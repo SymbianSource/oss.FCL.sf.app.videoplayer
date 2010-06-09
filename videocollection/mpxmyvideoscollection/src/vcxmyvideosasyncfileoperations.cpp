@@ -34,7 +34,6 @@
 #include "vcxmyvideoscollectionplugin.h"
 #include "vcxmyvideoscollection.hrh"
 #include "vcxmyvideoscollectionutil.h"
-#include "vcxmyvideosdownloadutil.h"
 #include "vcxmyvideosvideocache.h"
 #include "vcxmyvideoscategories.h"
 #include "vcxmyvideosmessagelist.h"
@@ -63,7 +62,7 @@ CVcxMyVideosAsyncFileOperations* CVcxMyVideosAsyncFileOperations::NewL(
 // ----------------------------------------------------------------------------
 //
 CVcxMyVideosAsyncFileOperations::~CVcxMyVideosAsyncFileOperations()
-    {        
+    {
     iOperationIdArray.Close();
     iOperationResult.Close();
     delete iFileCopier;
@@ -220,7 +219,8 @@ void CVcxMyVideosAsyncFileOperations::DeleteVideoL( TUint32 aMdsId, TBool aForce
 // CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
+MVcxMyVideosActiveTaskObserver::TStepResult
+        CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     {
     // Reset inactivity timer. This will prevent ThumbAGDaemon start running while
     // Move/copy is ongoing and failing the operation due to locked file handle.
@@ -228,20 +228,19 @@ TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     
     CMPXMedia& cmd = iCollection.iActiveTask->GetCommand();
     
-    TBool done;
-            
+    MVcxMyVideosActiveTaskObserver::TStepResult stepResult;
+        
     if ( iCurrentOperationIndex == 0 && !iFileCopier->CopyIsOngoing() )
         {
         InitMoveOrCopyOperationsL( cmd );        
         }
 
-    TRAPD( err, MoveOrCopyVideoL( iOperationIdArray[iCurrentOperationIndex],
-            iTargetDrive ));
+    TRAPD( err, MoveOrCopyVideoL( iOperationIdArray[iCurrentOperationIndex] ) );
 
     if ( iFileCopier->CopyIsOngoing() && err == KErrNone )
         {
         // copy didnt finish yet, lets do some more steps before jumping to next file
-        return EFalse;
+        return MVcxMyVideosActiveTaskObserver::EMoreToCome;
         }
         
     iOperationResult.AppendL( err );
@@ -252,7 +251,7 @@ TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
     if ( iCurrentOperationIndex > (iOperationIdArray.Count() - 1) )
         {
         iCurrentOperationIndex = 0;
-        done                   = ETrue;
+        stepResult             = MVcxMyVideosActiveTaskObserver::EDone;
         if ( iIsMoveOperation )
             {
             SendOperationRespL( KVcxMessageMyVideosMoveResp );
@@ -264,10 +263,10 @@ TBool CVcxMyVideosAsyncFileOperations::HandleMoveOrCopyStepL()
         }
     else
         {
-        done = EFalse;
+        stepResult = MVcxMyVideosActiveTaskObserver::EMoreToCome;
         }
         
-    return done;
+    return stepResult;
     }
 
 // ----------------------------------------------------------------------------
@@ -329,7 +328,7 @@ void CVcxMyVideosAsyncFileOperations::InitMoveOrCopyOperationsL( CMPXMedia& aCmd
 // ----------------------------------------------------------------------------
 //
 void CVcxMyVideosAsyncFileOperations::CancelOperationL( TInt aErr )
-    {    
+    {
     if ( iCollection.iActiveTask->IsActive() )
         {
         TInt mvCmdId = -1;
@@ -440,7 +439,7 @@ void CVcxMyVideosAsyncFileOperations::SendOperationRespL( TInt aCmdId )
 // CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL
 // ----------------------------------------------------------------------------
 //
-void CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL( TUint32 aMdsId, TInt aTargetDrive )
+void CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL( TUint32 aMdsId )
     {
     if ( iFileCopier->CopyIsOngoing() )
         {
@@ -453,7 +452,7 @@ void CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL( TUint32 aMdsId, TInt aTa
         }
         
     //New file copy starts -> do sanity checks and mds and collection preparations
-    InitSingleMoveOrCopyL( aMdsId, aTargetDrive );
+    InitSingleMoveOrCopyL( aMdsId );
             
     MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: copying: %S", &iSourcePath);
     MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: to     : %S", &iTargetPath);
@@ -471,7 +470,7 @@ void CVcxMyVideosAsyncFileOperations::MoveOrCopyVideoL( TUint32 aMdsId, TInt aTa
 // CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL
 // ----------------------------------------------------------------------------
 //
-void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId, TInt aTargetDrive )
+void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId )
     {
     //get media from cache or mds
     TInt pos;
@@ -497,7 +496,7 @@ void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId, TIn
     CleanupStack::PushL( video ); // 1->
     
     // sanity checks
-    if ( video->ValueTObjectL<TUint32>( KVcxMediaMyVideosDownloadId ) != 0 )
+    if ( TVcxMyVideosCollectionUtil::DownloadIdL( *video ) != 0 )
         {
         MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: file is being downloaded, fail, leaving with KErrInUse code.");
         User::Leave( KErrInUse );
@@ -505,7 +504,7 @@ void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId, TIn
 
     iSourcePath = video->ValueText( KMPXMediaGeneralUri );
             
-    if ( !DriveHasEnoughFreeSpaceL( iSourcePath, aTargetDrive ) )
+    if ( !DriveHasEnoughFreeSpaceL( iSourcePath, iTargetDrive ) )
         {
         MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: target drive full -> skipping");
         User::Leave( KErrDiskFull );
@@ -522,14 +521,14 @@ void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId, TIn
     TInt sourceDrive;
     User::LeaveIfError( iCollection.iFs.CharToDrive( iSourcePath[0], sourceDrive ) );
 
-    if ( sourceDrive == aTargetDrive )
+    if ( sourceDrive == iTargetDrive )
         {
         MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: source and target drives are the same, leaving with KErrAlreadyExists.");
         CleanupStack::PopAndDestroy( video ); // <-1
         User::Leave( KErrAlreadyExists );
         }
     
-    GenerateTargetPathForMoveOrCopyL( iSourcePath, iTargetPath, aTargetDrive );
+    GenerateTargetPathForMoveOrCopyL( iSourcePath, iTargetPath, iTargetDrive );
 
     MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: target path = %S", &iTargetPath );
     
@@ -682,18 +681,24 @@ void CVcxMyVideosAsyncFileOperations::GenerateTargetPathForMoveOrCopyL(
     if ( sourceDrive == systemDrive )
         {
         //remove *:\data\* from the path
-        TPtrC pathData( aSourcePath.Mid(3,4) );
+        const TInt dataWordStartPos = 3;
+        const TInt dataWordLength   = 4;
+        
+        TPtrC pathData( aSourcePath.Mid( dataWordStartPos, dataWordLength ) );
         MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: sourcePath.Mid(3,4)= %S", &pathData);
 
-        if ( aSourcePath.Mid(3,4) == KDataDes )
+        if ( pathData == KDataDes )
             {
             MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: source drive is system drive and 'data' exists in sourcePath");
             MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: not copying 'data' to the target path");
-            aTargetPath.Append( aSourcePath.Mid( 7 ) );
+            
+            const TInt skipDataWordPos = 7;
+            aTargetPath.Append( aSourcePath.Mid( skipDataWordPos ) );
             }
         else
             {
-            aTargetPath.Append( aSourcePath.Mid( 2 ) );
+            const TInt dontSkipDataWordPos = 2;
+            aTargetPath.Append( aSourcePath.Mid( dontSkipDataWordPos ) );
             }
         }    
     else if ( aTargetDrive == systemDrive )
@@ -718,7 +723,7 @@ void CVcxMyVideosAsyncFileOperations::GenerateTargetPathForMoveOrCopyL(
 // CVcxMyVideosAsyncFileOperations::HandleDeleteStepL
 // ----------------------------------------------------------------------------
 //
-TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
+MVcxMyVideosActiveTaskObserver::TStepResult CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     {
     // Reset inactivity timer. This will prevent ThumbAGDaemon start running while
     // delete is ongoing and failing the operation due to locked file handle.
@@ -728,7 +733,7 @@ TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     
     //no sanity checks for array items, since we want to generate all events, even if there is nothing to delete
     
-    TBool done;
+    MVcxMyVideosActiveTaskObserver::TStepResult stepResult;
     
     TUint32 cmdId = cmd.ValueTObjectL<TUint32>( KVcxMediaMyVideosCommandId );    
         
@@ -774,16 +779,15 @@ TBool CVcxMyVideosAsyncFileOperations::HandleDeleteStepL()
     if ( iCurrentOperationIndex > (iOperationIdArray.Count() - 1) )
         {
         iCurrentOperationIndex = 0;
-        done                   = ETrue;
-
+        stepResult = MVcxMyVideosActiveTaskObserver::EDone;
         SendOperationRespL( KVcxMessageMyVideosDeleteResp );
         }
     else
         {
-        done = EFalse;
+        stepResult = MVcxMyVideosActiveTaskObserver::EMoreToCome;
         }
         
-    return done;
+    return stepResult;
     }
 
 

@@ -182,6 +182,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
     CleanupClosePushL( newVideosIncrements ); // 2->
 
     TInt i;
+    videosIncrements.ReserveL( categoryCount );
+    newVideosIncrements.ReserveL( categoryCount );
     for ( i = 0; i < categoryCount; i++ )
         {
         videosIncrements.AppendL( 0 );
@@ -277,18 +279,20 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             {
             category = aCategoryArray.AtL( i );
 
-            UpdateVideosCountL( *category, aVideosIncrements[i], KVcxMediaMyVideosCategoryItemCount,
-                    EVcxMyVideosListNoInfo );
+            //codescanner warning: aVideosIncrements count is same as aCategoryArray count, so the range is checked
+            UpdateVideosCountL( *category, aVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
 
+        //codescanner warning: aNewVideosIncrements count is same as aCategoryArray count, so the range is checked
         if ( aNewVideosIncrements[i] != 0 )
             {
             category = aCategoryArray.AtL( i );
 
-            UpdateVideosCountL( *category, aNewVideosIncrements[i], KVcxMediaMyVideosCategoryNewItemCount,
-                    EVcxMyVideosListNoInfo );
+            UpdateVideosCountL( *category, aNewVideosIncrements[i],
+                    KVcxMediaMyVideosCategoryNewItemCount, EVcxMyVideosListNoInfo );
 
             modified = ETrue;
             }
@@ -444,16 +448,8 @@ void CVcxMyVideosCategories::UpdateCategoryL( CMPXMedia& aCategory, TInt aCatego
         MPX_DEBUG1("CVcxMyVideosCategories:: video added");
         if ( TVcxMyVideosCollectionUtil::FlagsL( aVideo ) & EVcxMyVideosVideoNew )
             {
-            TInt64 newItemsDate( 0 );
-            if ( aVideo.IsSupported( KMPXMediaGeneralDate ) )
-                {
-                newItemsDate = aVideo.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-                }
-            TInt64 prevNewDate( 0 );
-            if ( aCategory.IsSupported( KMPXMediaGeneralDate ) )
-                {
-                prevNewDate = aCategory.ValueTObjectL<TInt64>( KMPXMediaGeneralDate );
-                }
+            TInt64 newItemsDate = TVcxMyVideosCollectionUtil::CreationDateL( aVideo );
+            TInt64 prevNewDate  = TVcxMyVideosCollectionUtil::CreationDateL( aCategory );
 
             if ( static_cast<TInt64>(newItemsDate) > static_cast<TInt64>(prevNewDate) )
                 {                    
@@ -550,11 +546,14 @@ TInt CVcxMyVideosCategories::CategoryIndex( TInt aOrigin )
         {
         case -1:
             return KVcxMyVideosAllVideosCategoryIndex;
-            
+                        
         case EVcxMyVideosOriginCapturedWithCamera:
             return KVcxMyVideosCapturedCategoryIndex;
                             
         case EVcxMyVideosOriginDownloaded:
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+            return KVcxMyVideosDownloadsCategoryIndex;
+#endif
         case EVcxMyVideosOriginTvRecording:
         case EVcxMyVideosOriginSideLoaded:                
         case EVcxMyVideosOriginOther:
@@ -680,7 +679,8 @@ void CVcxMyVideosCategories::UpdateCategoryNewVideoNameAndDateL( TInt aOrigin, T
     prevNewVideoName.Set( iListArray->AtL( categoryIndex )->ValueText(
             KVcxMediaMyVideosCategoryNewItemName ) );
     CMPXMedia* newVideo;
-    currentNewVideoName.Set( CalculateNewVideoNameL( *videoList, aOrigin, aIgnoredIds, newVideo ) );
+    currentNewVideoName.Set( CalculateNewVideoNameL(
+            *videoList, aOrigin, aIgnoredIds, newVideo ) );
     if ( currentNewVideoName.CompareF( prevNewVideoName ) != 0 )
         {
         iListArray->AtL( categoryIndex )->SetTextValueL(

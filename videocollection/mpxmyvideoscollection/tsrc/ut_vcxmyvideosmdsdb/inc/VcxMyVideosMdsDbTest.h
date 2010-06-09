@@ -32,8 +32,22 @@
 #include <vcxmyvideosdefs.h>
 
 //#include <mpxmedia.h>
+
+
+#include <mdesession.h>
+#include <mdequery.h>
+#include <harvesterclient.h>
+#include <mpxcollectionmessagedefs.h>
+#include <vcxmyvideosdefs.h>
+#include <e32property.h>
+#include "vcxmyvideosalbum.h"
+
+#define protected public
+#define private public
 #include "vcxmyvideosmdsdb.h"
-#include "vcxmyvideosactivetask.h"
+#undef private
+#undef protected
+
 
 
 // MACROS
@@ -95,7 +109,7 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDbTest) : public CScriptBase, public MVcxMyVide
         * @param aEvent Event type.
         * @param aId    Array of IDs in database.
         */
-        void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId ){};
+        void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId );
 
         /**
         * Handler function for list fetching events. This callback is called as a response
@@ -108,7 +122,7 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDbTest) : public CScriptBase, public MVcxMyVide
         *                            EFalse if there are more to come.
         */
         void HandleCreateVideoListResp( CMPXMedia* aVideoList,
-                TInt aNewItemsStartIndex, TBool aComplete ){};
+                TInt aNewItemsStartIndex, TBool aComplete );
 
         /**
         * Handler function for media remove/insert events. This is called every time
@@ -188,8 +202,25 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDbTest) : public CScriptBase, public MVcxMyVide
         virtual TInt UpdateVideoL( CStifItemParser& aItem );
 
         virtual TInt CreateVideoListL( CStifItemParser& aItem );
+        
+        virtual TInt DoCreateVideoListL( CStifItemParser& aItem );
 
         virtual TInt CreateVideoL( CStifItemParser& aItem );
+        
+        virtual TInt HandleQueryNewResultsL( CStifItemParser& aItem );
+
+        virtual TInt HandleQueryCompletedL( CStifItemParser& aItem );
+        
+        virtual TInt AsyncHandleQueryCompletedL( CStifItemParser& aItem );
+        
+        virtual TInt HandleSessionErrorL( CStifItemParser& aItem );
+        
+        virtual TInt HandleObjectNotificationL( CStifItemParser& aItem );
+
+        virtual TInt HandleObjectPresentNotification( CStifItemParser& aItem );
+
+        virtual TInt ShutdownNotificationL( CStifItemParser& aItem );        
+        
         
         /**
          * Method used to log version of test class
@@ -207,7 +238,11 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDbTest) : public CScriptBase, public MVcxMyVide
     public:
     
         TInt mdssessionerror,  mdssessionasyncerror,
-        mdsoperationleaves, mdsoperationreturns ;
+        mdsoperationleaves, mdsoperationreturns, mdeobjectopenresult,
+        querycountresult, propertynotdefined, propertyisnull, handledbeventleave ;
+        
+        
+        CMPXMedia* iVideoList;
         
     };
 

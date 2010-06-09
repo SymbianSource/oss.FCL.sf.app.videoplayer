@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: e92_33 %
+
+// Version : %version: da1mmcf#34 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -225,10 +226,10 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
 
         void ClosePlaybackPluginL();
 
-        void SignalViewPdlReloadingL();
-        
+        void SendMessageToPdlViewL( TInt aMsg );
+
         /*
-         *  Activates an active object to finish the 
+         *  Activates an active object to finish the
          *  initialization of the standalone application
          */
         void ActivateLateConstructTimerL();
@@ -299,16 +300,16 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
        void InitializePlaylistL( const CMPXCollectionPlaylist& aPlaylist, TBool aPlay );
 
         /*
-         *  Provides the static function for the callback to 
+         *  Provides the static function for the callback to
          *  finish the standalone application construction
          *  Called by CPeriodic iConstructTimer
          *  @param aPtr Pointer to callback class
          *  @return KErrNone
          */
         static TInt LateConstructCallback( TAny* aPtr );
-        
+
         /*
-         *  Called to finalize the standalone 
+         *  Called to finalize the standalone
          *  application initialization.
          */
         virtual void DoLateConstructL();

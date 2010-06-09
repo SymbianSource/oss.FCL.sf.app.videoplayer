@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    MPX My Videos collection plugins' MDS database class*
+* Description:   MPX My Videos collection plugins' MDS database class*
 */
-
 
 
 
@@ -25,7 +24,13 @@
 #include <mdequery.h>
 #include <harvesterclient.h>
 #include <mpxcollectionmessagedefs.h>
+#include <vcxmyvideosdefs.h>
 #include <e32property.h>
+#include "vcxmyvideosalbum.h"
+
+class CVcxMyVideosMdsAlbums;
+class CMPXMedia;
+class CVcxMyVideosMdsCmdQueue;
 
 const TUid KHarvesterPSShutdown = { 0x200009F5 } ;
 const TInt KMdSShutdown = 0x00000002; // values 1 = shutdown, 0 = restart, normal state
@@ -33,7 +38,144 @@ const TInt KMdSShutdown = 0x00000002; // values 1 = shutdown, 0 = restart, norma
 static _LIT_SECURITY_POLICY_PASS(KAllowAllPolicy);
 static _LIT_SECURITY_POLICY_C1(KPowerMgmtPolicy,ECapabilityPowerMgmt);
 
-class CRepository;
+/**
+ *  MPX My Videos collection MDS database observer class.
+ *  Part of ECOM Plugin.
+ */
+NONSHARABLE_CLASS(MVcxMyVideosMdsDbObserver)
+    {        
+    public:
+    
+        /* 
+        
+        Defined in mpxcollectionmessagedefs.h:  
+        
+        enum TMPXChangeEventType
+            {
+            EMPXItemDeleted,      // item/playlist deleted
+            EMPXItemInserted,     // item/playlist added
+            EMPXItemModified      // item/playlist/artist/album/genre/composer modified
+            };
+        */
+        
+        /**
+        * Handler function for database events.
+        *
+        * @param aEvent Event type.
+        * @param aId    Array of IDs in database.
+        */
+        virtual void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId ) = 0;
+
+        /**
+        * Handler function for video list fetching events. This callback is called as a response
+        * to CreateVideoList( aSync = EFalse ).
+        *
+        * @param aVideoList          List of videos fetched from MDS.
+        * @param aNewItemsStartIndex Start position for the new items added. If -1, then no new
+        *                            items were added.
+        * @param aComplete           ETrue if list is complete and no more items are expected,
+        *                            EFalse if there are more to come.
+        */
+        virtual void HandleCreateVideoListResp( CMPXMedia* aVideoList,
+                TInt aNewItemsStartIndex, TBool aComplete ) = 0;
+
+        /**
+        * Handler function for media remove/insert events. This is called every time
+        * media is removed or inserted (objects become present or non present).
+        */
+        virtual void HandleObjectPresentNotification() = 0;
+    };
+
+
+/**
+ *  MPX My Videos collection MDS albums related functionality observer class.
+ *  Part of ECOM Plugin.
+ */
+NONSHARABLE_CLASS(MVcxMyVideosMdsAlbumsObserver)
+    {        
+    public:
+            
+        /**
+        * This callback is called as a response to GetAlbumsL.
+        *
+        * @param aAlbumList List of albums fetched from MDS.
+        */
+        virtual void HandleGetAlbumsResp( CMPXMedia* aAlbumList ) = 0;
+
+        /**
+        * This callback is called as a response to GetAlbumContentIdsL.
+        *
+        * @param aAlbumId      Album ID which was fetched.
+        * @param aContentArray Array containing MDS object IDs. This array is the same which
+        *                      was given in GetAlbumContentIdsL call.
+        */
+        virtual void HandleGetAlbumContentIdsResp( TUint32 aAlbumId,
+                RArray<TVcxMyVideosAlbumVideo>& aContentArray ) = 0;
+
+        /**
+         * Called as a response to GetAlbumContentVideosL.
+         * 
+         * @param aAlbumId           ID of the album containing the result videos.
+         * @param aVideoList         Media containing array of videos.
+         * @param aError             Error code in case of failure.
+         * @param aFirstNewItemIndex Index of the first new item.
+         * @param aNewItemCount      How many new items in the query since the last results.
+         * @param aComplete          ETrue if query is complete, EFalse if there is more to come.
+         */
+        virtual void HandleGetAlbumContentVideosResp( TUint32 aAlbumId, CMPXMedia& aVideoList,
+                TInt aError, TInt aFirstNewItemIndex, TInt aNewItemCount, TBool aComplete ) = 0;
+
+        /**
+         * Called as a response to AddVideosToAlbumL. Results are written from aItemArray
+         * to aCmd (KVcxMediaMyVideosInt32Value attribute). KErrNone if operation was successful,
+         * KErrGeneral otherwise.
+         * 
+         * @param aCmd        Pointer to same object which was given in AddVideosToAlbumL function call.
+         * @param aItemArray  Array of relation items that were added to MDS.
+         */
+        virtual void HandleAddVideosToAlbumResp( CMPXMedia* aCmd,
+                RPointerArray<CMdEInstanceItem>& aItemArray ) = 0;
+
+        /**
+         * Called as a response to RemoveRelationsL.
+         * 
+         * @param aRelationIds  Relations which were tried to be removed.
+         * @param aResults      Result codes, in sync with aRelationIds. KErrNone if successful,
+         *                      KErrGeneral if failed.
+         */
+        virtual void HandleRemoveRelationsResp( RArray<TUint32>& aRelationIds,
+                RArray<TUint32>& aResults ) = 0;
+
+        /**
+         * Called as a response to RemoveAlbumsL.
+         * 
+         * @param aCmd      Cmd which was given in RemoveAlbumsL call.
+         * @param aResults  Result IDs.
+         */
+        virtual void HandleRemoveAlbumsResp( CMPXMedia* aCmd,
+                RArray<TUint32>& aResultIds ) = 0;
+
+        /**
+         * Event handler function for relation delete events.
+         * 
+         * @param aType           Event type
+         * @param aRelationArray  Array containing relations.
+         */
+        virtual void HandleRelationEvent( TObserverNotificationType aType,
+                const RArray<TMdERelation>& aRelationArray ) = 0;
+
+#if 0
+        /**
+         * Event handler function for relation add events.
+         * 
+         * @param aType           Event type
+         * @param aRelationArray  Array containing relations.
+         */
+        virtual void HandleRelationIdEvent( TObserverNotificationType aType,
+                const RArray<TUint32>& aRelationIdArray ) = 0;
+#endif
+        
+    };
 
 /**
  * PSCW Listener Observer interface for signaling that MDS has Shutdown/restarted
@@ -105,57 +247,7 @@ private:
 };
 
 /**
- *  MPX My Videos collection MDS database observer class.
- *  Part of ECOM Plugin.
- */
-NONSHARABLE_CLASS(MVcxMyVideosMdsDbObserver)
-    {
-
-    public:
-    
-        /* 
-        
-        Defined in mpxcollectionmessagedefs.h:  
-        
-        enum TMPXChangeEventType
-            {
-            EMPXItemDeleted,      // item/playlist deleted
-            EMPXItemInserted,     // item/playlist added
-            EMPXItemModified      // item/playlist/artist/album/genre/composer modified
-            };
-        */
-        
-        /**
-        * Handler function for database events.
-        *
-        * @param aEvent Event type.
-        * @param aId    Array of IDs in database.
-        */
-        virtual void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId ) = 0;
-
-        /**
-        * Handler function for list fetching events. This callback is called as a response
-        * to CreateVideoList( aSync = EFalse ).
-        *
-        * @param aVideoList          List of videos fetched from MDS.
-        * @param aNewItemsStartIndex Start position for the new items added. If -1, then no new
-        *                            items were added.
-        * @param aComplete           ETrue if list is complete and no more items are expected,
-        *                            EFalse if there are more to come.
-        */
-        virtual void HandleCreateVideoListResp( CMPXMedia* aVideoList,
-                TInt aNewItemsStartIndex, TBool aComplete ) = 0;
-
-        /**
-        * Handler function for media remove/insert events. This is called every time
-        * media is removed or inserted (objects become present or non present).
-        */
-        virtual void HandleObjectPresentNotification() = 0;
-    };
-
-
-/**
- *  MPX My Videos collection ECOM plugins' MDS database class.
+ *  MPX My Videos collection ECOM plugin's MDS database class.
  */
 NONSHARABLE_CLASS(CVcxMyVideosMdsDb) :
                                 public CBase,
@@ -168,17 +260,34 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDb) :
         
 public:
 
+    friend class CVcxMyVideosMdsAlbums;
+    friend class CVcxMyVideosMdsCmdQueue;
+
+    enum TRequestType
+        {
+        EAll,
+        EGetVideoList,
+        EGetAlbums,
+        EGetAlbumContentIds,
+        EGetAlbumContentVideos,
+        EAddVideosToAlbum,
+        ERemoveRelations,
+        ERemoveAlbums
+        };
+    
     /**
      * Two-phased constructor.
      * @param aObserver The db change observer.
      */
-    static CVcxMyVideosMdsDb* NewL( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs );
+    static CVcxMyVideosMdsDb* NewL( MVcxMyVideosMdsDbObserver* aObserver,
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     /**
      * Two-phased constructor.
      * @param aObserver The db change observer.
      */
-    static CVcxMyVideosMdsDb* NewLC( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs );
+    static CVcxMyVideosMdsDb* NewLC( MVcxMyVideosMdsDbObserver* aObserver,
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
 
     /**
@@ -187,9 +296,30 @@ public:
     virtual ~CVcxMyVideosMdsDb();
 
     /**
-    * Cancels possible ongoing asynchronous operation. 
+    * Cancels possible ongoing asynchronous operations.
+    * 
+    * @param aType What kind of requests are cancelled. 
     */
-    void Cancel();
+    void Cancel( TRequestType aType = EAll );
+
+    /**
+     * Creates list of videos from MDS. This function utilizes CVcxMyVideosMdsQueue, ie
+     * commands are put in queue if there are other commands pending.
+     *
+     * @param aSortingOrder Sorting order, see values from TSortingOrder.
+     * @param aAscending    Sort direction, if ETrue then ascending, else descending.
+     * @param aFullDetails  If ETrue, then all details will be filled to media objects,
+     *                      if EFalse, then only subset.
+     * @param aVideoList    Reference to pointer variable. Container type CMPXMedia class, contains
+     *                      CMPXMediaArray filled with CMPXMedia objects. If aVideoList
+     *                      pointer variable is NULL, then new medialist is created.
+     *                      If pointer variable already contains value, then the given medialist
+     *                      should have empty media array. New items are appended to it.
+     *                      Caller naturally owns the data.
+     *                      
+     */
+    void CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder,
+            TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList );
 
     /**
      * Add new video.
@@ -216,34 +346,17 @@ public:
     void UpdateVideoL( CMPXMedia& aVideo );
 
     /**
-     * Create list of videos from MDS.
-     *
-     * @param aSortingOrder Sorting order, see values from TSortingOrder.
-     * @param aAscending    Sort direction, if ETrue then ascending, else descending.
-     * @param aFullDetails  If ETrue, then all details will be filled to media objects,
-     *                      if EFalse, then only subset.
-     * @param aVideoList    Reference to pointer variable. Container type CMPXMedia class, contains
-     *                      CMPXMediaArray filled with CMPXMedia objects. If aVideoList
-     *                      pointer variable is NULL, then new medialist is created.
-     *                      If pointer variable already contains value, then the given medialist
-     *                      should have empty media array. New items are appended to it.
-     *                      Caller naturally owns the data.
-     *                      
-     */
-    void CreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder,
-            TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList );
-
-    /**
      * Get one video item from MDS and create a new media
      * object from it.
      *
      * @param aId          Video identifier in MDS database.
      * @param aFullDetails If ETrue, then all details are fetched, othewise only subset.
-     * @return             Pointer to media object, ownership moves.
+     * @return             Pointer to media object, ownership moves. NULL if
+     *                     not found.
      */
     CMPXMedia* CreateVideoL( TUint32 aId, TBool aFullDetails = ETrue );
 
-protected: // from base classes
+protected:
     
 // from MMdESessionObserver
 
@@ -301,6 +414,7 @@ protected: // from base classes
 
 
 // from MMdEObjectObserver
+
     void HandleObjectNotification( CMdESession& aSession,
             TObserverNotificationType aType,
             const RArray<TItemId>& aObjectIdArray);
@@ -308,10 +422,10 @@ protected: // from base classes
 // from MMdEObjectPresentObserver
     void HandleObjectPresentNotification(CMdESession& aSession, 
 			TBool aPresent, const RArray<TItemId>& aObjectIdArray);
-
+			
 // from MVcxMdsShutdownMonitorObserver
     void ShutdownNotification( TInt aShutdownState );
-    
+
 private:
 
     /**
@@ -319,17 +433,20 @@ private:
      * @param aObserver The db change observer.
      * @param aFs      Session to file server.
      */
-    CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver, RFs& aFs );
+    CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     void ConstructL();
 
     /**
      * Gets object from MDS.
      *
-     * @param aId   The ID of the object to get.
-     * @return      The object if found, NULL otherwise.
+     * @param aId      The ID of the object to get.
+     * @param aIsVideo Set to ETrue if the object to be fetched is video. If set to
+     *                 EFalse, then the object is assumed to be album.
+     * @return         The object if found, NULL otherwise.
      */
-    CMdEObject* ObjectL( const TItemId aId );
+    CMdEObject* ObjectL( const TItemId aId, TBool aIsVideo = ETrue );
 
     /**
      * Read the video details from the given object to the media class.
@@ -383,6 +500,29 @@ private:
             TInt aFirstNewItemIndex, TInt aNewItemCount);
 
     /**
+     * Creates list of videos from MDS.
+     *
+     * @param aSortingOrder Sorting order, see values from TSortingOrder.
+     * @param aAscending    Sort direction, if ETrue then ascending, else descending.
+     * @param aFullDetails  If ETrue, then all details will be filled to media objects,
+     *                      if EFalse, then only subset.
+     * @param aVideoList    Reference to pointer variable. Container type CMPXMedia class, contains
+     *                      CMPXMediaArray filled with CMPXMedia objects. If aVideoList
+     *                      pointer variable is NULL, then new medialist is created.
+     *                      If pointer variable already contains value, then the given medialist
+     *                      should have empty media array. New items are appended to it.
+     *                      Caller naturally owns the data.
+     *                      
+     */
+    void DoCreateVideoListL( TVcxMyVideosSortingOrder aSortingOrder,
+            TBool aAscending, TBool aFullDetails, CMPXMedia*& aVideoList );
+
+    /**
+     * Handles query complete events asynchronously.
+     */
+    static TInt AsyncHandleQueryCompleted( TAny* aPtr );
+
+    /**
      * Sets Creation Date and Modified properties to object. Uses current date
      * value.
      * 
@@ -397,17 +537,17 @@ private:
      * @param aObject Creation date is written here.
      */
     void SetCreationDateToObjectL( const CMPXMedia& aVideo, CMdEObject& aObject );
-    
+
     /**
      * Opens MDS session.
      */
     void OpenMdsSessionL();
-    
+
     /**
     * @return MDS session.
     */
     CMdESession& MdsSessionL();
-
+    
 public:
 
     /**
@@ -416,7 +556,17 @@ public:
     */
     TBool iVideoListFetchingIsOngoing;
 
+    /**
+    * Album related functionality.
+    */
+    CVcxMyVideosMdsAlbums* iAlbums;
+        
 private: // data
+
+    /**
+    * Command queue. Own.
+    */
+    CVcxMyVideosMdsCmdQueue* iCmdQueue;
 
     /**
      * The MDS session object. Own.
@@ -424,7 +574,7 @@ private: // data
     CMdESession* iMdsSession;
 
     /**
-     * The error code of last iMDSSession operation. 
+     * The sessions error state.
      */
     TInt iMdsSessionError;
 
@@ -445,8 +595,8 @@ private: // data
     TBool iFullDetails;
     
     /**
-     * The default namespace definition. Not own.
-     */
+    * The default namespace definition. Not own.
+    */
     CMdENamespaceDef* iNamespaceDef;
 
     /**
@@ -544,13 +694,7 @@ private: // data
      * The Last Play Point property definition. Not own.
      */
     CMdEPropertyDef* iLastPlayPositionPropertyDef;
-
-    /**
-     * 17.
-     * The Download ID property definition. Not own.
-     */
-    CMdEPropertyDef* iDownloadIdPropertyDef;
-
+    
     /**
     * 18.
     * Rating property definition, not own.
@@ -605,17 +749,24 @@ private: // data
     * The observer for db changes. Not own.
     */
     MVcxMyVideosMdsDbObserver* iMdsDbObserver;
-
-    /**
-     * Cenrep session.
-     */
-    CRepository* iRepository;
     
+    /**
+     * The observer for albums related database events. Not own.
+     */
+    MVcxMyVideosMdsAlbumsObserver* iAlbumsObserver;
+    
+    /**
+     * Used to handle complete events asynchronously.
+     * This avoids problems like deleting query objects in the
+     * handler or starting new query from the handler.
+     */
+    CAsyncCallBack* iAsyncHandleQueryCompleteCaller;
+
     /**
     * Monitors Mds server shutdown states.
     */
     CVcxMdsShutdownMonitor* iMdsShutdownMonitor;
-    
+
     };
 
 #endif // VCXMYVIDEOSMDSDB_H

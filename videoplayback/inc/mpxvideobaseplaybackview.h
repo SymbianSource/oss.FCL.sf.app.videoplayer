@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 22 %
+// Version : %version: 23 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -287,6 +287,10 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         TBool IsMultiItemPlaylist();
 
+        virtual void SendWindowCommandL( TMPXVideoPlaybackCommand aCmd );
+
+        virtual void HandlePdlReloadComplete();
+
     private:
 
         /**
@@ -351,8 +355,6 @@ class CMPXVideoBasePlaybackView : public CAknView,
         void LaunchDRMDetailsL();
 
         void HandleRealOneBitmapTimeoutL();
-
-        void SendWindowCommandL( TMPXVideoPlaybackCommand aCmd );
 
         TBool IsInMemoryPlugin();
 

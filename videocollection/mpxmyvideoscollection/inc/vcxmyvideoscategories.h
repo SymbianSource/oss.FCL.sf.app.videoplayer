@@ -231,8 +231,8 @@ NONSHARABLE_CLASS(CVcxMyVideosCategories) : CBase
         * @param aEventInfo      This is written to generated event's extra info attribute.
         * 
         */
-        void UpdateVideosCountL( CMPXMedia& aCategory, TInt aIncrement, TMPXAttributeData aCountAttribute,
-                TInt aEventInfo );
+        void UpdateVideosCountL( CMPXMedia& aCategory, TInt aIncrement,
+                TMPXAttributeData aCountAttribute, TInt aEventInfo );
 
         /**
         * aVideo is added(or removed) to aCategory. Updates category variables accordingly. 
@@ -277,7 +277,8 @@ NONSHARABLE_CLASS(CVcxMyVideosCategories) : CBase
         *                    Usefull if items are being deleted but are still on the
         *                    video list.
         */
-        void UpdateCategoryNewVideoNameAndDateL( TInt aOrigin, TBool& aModified, RArray<TUint32>& aIgnoredIds );
+        void UpdateCategoryNewVideoNameAndDateL( TInt aOrigin, TBool& aModified,
+                RArray<TUint32>& aIgnoredIds );
         
         /**
         * Goes through aVideoList and checks all videos which have new video

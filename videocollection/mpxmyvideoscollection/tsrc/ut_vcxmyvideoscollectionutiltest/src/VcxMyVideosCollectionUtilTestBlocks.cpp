@@ -22,6 +22,8 @@
 #include <vcxmyvideosdefs.h>
 #include <mpxmedia.h>
 #include <mpxattribute.h>
+#include <mpxmediaarray.h>
+#include <mpxmediacontainerdefs.h>
 #include <mpxmediageneraldefs.h>
 #include <mpxmediavideodefs.h>
 #include "VcxMyVideosCollectionUtilTest.h"
@@ -53,28 +55,7 @@
 // FORWARD DECLARATIONS
 //class ?FORWARD_CLASSNAME;
 
-// ============================= LOCAL FUNCTIONS ===============================
-
-// -----------------------------------------------------------------------------
-// ?function_name ?description.
-// ?description
-// Returns: ?value_1: ?description
-//          ?value_n: ?description_line1
-//                    ?description_line2
-// -----------------------------------------------------------------------------
-//
-/*
-?type ?function_name(
-    ?arg_type arg,  // ?description
-    ?arg_type arg)  // ?description
-    {
-
-    ?code  // ?comment
-
-    // ?comment
-    ?code
-    }
-*/
+const TMPXAttributeData KMPXMediaFail={0xC0FFEE,0xBADBEEF};
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -106,6 +87,7 @@ TInt CVcxMyVideosCollectionUtilTest::RunMethodL(
         ENTRY( "CreateEmptyMediaList", CVcxMyVideosCollectionUtilTest::CreateEmptyMediaListL ),
         ENTRY( "CreateEmptyMessageList", CVcxMyVideosCollectionUtilTest::CreateEmptyMessageListL ),
         ENTRY( "CopyFromListToList", CVcxMyVideosCollectionUtilTest::CopyFromListToListL ),
+        ENTRY( "CopyFromListToList2", CVcxMyVideosCollectionUtilTest::CopyFromListToListL2 ),
         ENTRY( "DriveLetter2DriveNumber", CVcxMyVideosCollectionUtilTest::DriveLetter2DriveNumberL ),
         ENTRY( "MakeUniqueFileName", CVcxMyVideosCollectionUtilTest::MakeUniqueFileNameL ),
         ENTRY( "Origin", CVcxMyVideosCollectionUtilTest::OriginL ),
@@ -142,6 +124,9 @@ TInt CVcxMyVideosCollectionUtilTest::CreateEmptyMediaListL( CStifItemParser& /*a
     {
     CMPXMedia* media = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
     delete media;
+    
+    // Only thing that can fail here is method call leaves. If we reach the end
+    // everyting has worked fine and we can return ok.
     return KErrNone;
     }
 
@@ -153,6 +138,9 @@ TInt CVcxMyVideosCollectionUtilTest::CreateEmptyMessageListL( CStifItemParser& /
     {
     CMPXMedia* media = TVcxMyVideosCollectionUtil::CreateEmptyMessageListL();
     delete media;
+    
+    // Only thing that can fail here is method call leaves. If we reach the end
+    // everyting has worked fine and we can return ok.    
     return KErrNone;
     }
 
@@ -164,7 +152,13 @@ TInt CVcxMyVideosCollectionUtilTest::CopyFromListToListL( CStifItemParser& aItem
     {
     CMPXMedia* from = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
     CMPXMedia* to = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
+    CMPXMedia* failList = CMPXMedia::NewL();
+    CMPXMedia* media( NULL );
+    TInt itemsToCopy( 0 );
+    TInt itemsCopied( 0 );
     RArray<TUint32> ids;
+    TMPXItemId idGet;
+    TInt retVal( KErrGeneral );
     
     TInt numberOfMedia;
     TInt wantedId;
@@ -175,26 +169,198 @@ TInt CVcxMyVideosCollectionUtilTest::CopyFromListToListL( CStifItemParser& aItem
     ids.Append( wantedId );
     
     // add stuff to be copied to "from" -list
+    CleanupStack::PushL( from );
+    CleanupStack::PushL( to );
+    CMPXMediaArray* fromMessageArray = from->Value<CMPXMediaArray>(
+            KMPXMediaArrayContents );
+    CleanupStack::PushL( fromMessageArray );
     
+    TVcxMyVideosCollectionUtil::CopyFromListToListL( *from, *to, ids );
+    
+    for(TInt i = 0; i < numberOfMedia; i++ )
+        {
+        media = CMPXMedia::NewL();
+        CleanupStack::PushL( media );
+        media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId,
+                TMPXItemId( i, i) );
+        media->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value,
+                42 );        
+        fromMessageArray->AppendL( media );
+        if( i == wantedId )
+            {
+            itemsToCopy++;
+            }
+        CleanupStack::Pop( media );
+        }
+    
+    TRAPD( err, TVcxMyVideosCollectionUtil::CopyFromListToListL( *from, *failList, ids ) );    
+    if( err != KErrArgument )    
+        {
+        CleanupStack::Pop( fromMessageArray );
+        CleanupStack::Pop( to );
+        CleanupStack::Pop( from );        
+        fromMessageArray->Reset();
+        delete failList;
+        delete from;
+        delete to; 
+        return retVal;
+        }
     
     TVcxMyVideosCollectionUtil::CopyFromListToListL( *from, *to, ids );
     
     // check that the "to" -list have the items it should have
+    CMPXMediaArray* toMessageArray = to->Value<CMPXMediaArray>(
+                KMPXMediaArrayContents );
+    CleanupStack::PushL( toMessageArray );
     
+    for( TInt i = 0; i < toMessageArray->Count(); i++ )
+        {        
+        idGet = TVcxMyVideosCollectionUtil::IdL( *(toMessageArray->operator[](i)) );
+        if( idGet.iId1 == wantedId )
+            {
+            itemsCopied++;
+            }
+        }    
+    
+    if( itemsCopied == itemsToCopy )
+        {
+        retVal = KErrNone;  
+        }
+    
+    CleanupStack::Pop( toMessageArray );
+    CleanupStack::Pop( fromMessageArray );
+    CleanupStack::Pop( to );
+    CleanupStack::Pop( from );
+    
+    toMessageArray->Reset();
+    fromMessageArray->Reset();
+    
+    delete failList;
     delete from;
-    delete to;
+    delete to;    
+    return retVal;
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosCollectionUtilTest::CopyFromListToListL2
+// ---------------------------------------------------------------------------
+//
+TInt CVcxMyVideosCollectionUtilTest::CopyFromListToListL2( CStifItemParser& aItem )
+    {
+    RArray<CMPXMedia*> fromArray;
+    CMPXMedia* to = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
+    CMPXMedia* failList = CMPXMedia::NewL();
+    CMPXMedia* media( NULL );        
+    TInt itemsToCopy( 0 );
+    TInt itemsCopied( 0 );
+    RArray<TUint32> ids;
+    TMPXItemId idGet;
+    TInt retVal( KErrGeneral );
     
-    return KErrNone;
+    TInt numberOfMedia;
+    TInt wantedId;
+    
+    aItem.GetNextInt( numberOfMedia );
+    aItem.GetNextInt( wantedId );
+    
+    ids.Append( wantedId );
+    
+    // add stuff to be copied to "from" -list    
+    CleanupStack::PushL( to );    
+    
+    TVcxMyVideosCollectionUtil::CopyFromListToListL( fromArray, *to, ids );
+    
+    for(TInt i = 0; i < numberOfMedia; i++ )
+        {
+        media = CMPXMedia::NewL();
+        CleanupStack::PushL( media );
+        media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId,
+                TMPXItemId( i, i) );
+        media->SetTObjectValueL<TInt32>( KVcxMediaMyVideosInt32Value,
+                42 );        
+        fromArray.AppendL( media );
+        if( i == wantedId )
+            {
+            itemsToCopy++;
+            }
+        CleanupStack::Pop( media );
+        }    
+    
+    TRAPD(err, TVcxMyVideosCollectionUtil::CopyFromListToListL( fromArray, *failList, ids ));
+    if( err != KErrArgument )    
+        {        
+        CleanupStack::Pop( to );
+        fromArray.Reset();
+        delete failList;
+        delete to; 
+        return retVal;
+        }
+    
+    TVcxMyVideosCollectionUtil::CopyFromListToListL( fromArray, *to, ids );
+    
+    // check that the "to" -list have the items it should have
+    CMPXMediaArray* toMessageArray = to->Value<CMPXMediaArray>(
+                KMPXMediaArrayContents );
+    CleanupStack::PushL( toMessageArray );
+    
+    for( TInt i = 0; i < toMessageArray->Count(); i++ )
+        {        
+        idGet = TVcxMyVideosCollectionUtil::IdL( *(toMessageArray->operator[](i)) );
+        if( idGet.iId1 == wantedId )
+            {
+            itemsCopied++;
+            }
+        }    
+    
+    if( itemsCopied == itemsToCopy )
+        {
+        retVal = KErrNone;  
+        }
+    
+    CleanupStack::Pop( toMessageArray );    
+    CleanupStack::Pop( to );
+        
+    toMessageArray->Reset();
+    
+    for( TInt i = 0; i < fromArray.Count(); i++ )
+        {
+        CMPXMedia* arrayMedia = fromArray[i];
+        delete arrayMedia;        
+        }
+    fromArray.Reset();    
+    delete failList;
+    delete to;    
+    return retVal;
     }
     
 // ---------------------------------------------------------------------------
 // This helper function converts drive letter to drive number
 // ---------------------------------------------------------------------------
 //
-TInt CVcxMyVideosCollectionUtilTest::DriveLetter2DriveNumberL( CStifItemParser& /*aItem*/ )
+TInt CVcxMyVideosCollectionUtilTest::DriveLetter2DriveNumberL( CStifItemParser& aItem )
     {
-    TVcxMyVideosCollectionUtil::DriveLetter2DriveNumber( _L("E:") );
-    return KErrNone;
+    TInt retVal( KErrNone ); 
+    TPtrC string;
+    TInt expectedValue( -1 );
+    
+    aItem.SetParsingType( CStifItemParser::EQuoteStyleParsing );
+    
+    User::LeaveIfError( aItem.GetNextString( string ) );
+    User::LeaveIfError( aItem.GetNextInt( expectedValue ) );
+    
+    _LIT( KNullDescString, "KNullDesC" );
+    if ( string.Compare( KNullDescString ) == 0 )
+        {
+        string.Set( KNullDesC );
+        }
+  
+    TInt driveNumber = TVcxMyVideosCollectionUtil::DriveLetter2DriveNumber( string );
+    if (  driveNumber != expectedValue )
+        {
+        retVal = KErrGeneral;
+        }
+
+    return retVal;
     }
 
 // ---------------------------------------------------------------------------
@@ -203,12 +369,41 @@ TInt CVcxMyVideosCollectionUtilTest::DriveLetter2DriveNumberL( CStifItemParser& 
 //
 TInt CVcxMyVideosCollectionUtilTest::MakeUniqueFileNameL( CStifItemParser& /*aItem*/ )
     {
+    TInt retVal( KErrNone );
     RFs fs;
     fs.Connect();
     TBuf<KMaxPath> path;
-    TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( fs, _L("c://testframework//testframework.ini"), path );
+    _LIT( KFileName1,   "c:\\data\\vcxmyvideoscollectionutiltest_file.txt" );
+    _LIT( KFileName2,   "c:\\data\\vcxmyvideoscollectionutiltest_file2" );
+    _LIT( KInvalidFile, "c:\\data\\vcxmyvideoscollectionutiltest_DoesNotExist" );
+    
+    // File with filename extension 
+    TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( fs, KFileName1, path );
+    if ( path.Length() <= KFileName1().Length() )
+        {
+        retVal = KErrGeneral;
+        }    
+    
+    // File without filename extension
+    TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( fs, KFileName2, path );
+    if ( ( path.Find( KFileName2 ) == KErrNotFound ) ||
+         ( path.Length() <= KFileName2().Length() ) ) 
+        {
+        retVal = KErrGeneral;
+        }  
+    
+    // Non-existent file
+    TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( fs, KInvalidFile, path );
+    if ( path.Compare( KInvalidFile ) != 0 )
+        {
+        retVal = KErrGeneral;
+        }
+
+    // Null descriptor
+    TVcxMyVideosCollectionUtil::MakeUniqueFileNameL( fs, KNullDesC, path );
+    
     fs.Close();
-    return KErrNone;
+    return retVal;
     }
 
 // ----------------------------------------------------------------------------
@@ -219,9 +414,17 @@ TInt CVcxMyVideosCollectionUtilTest::OriginL( CStifItemParser& /*aItem*/ )
     {
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
+    TUint8 valueGet = TVcxMyVideosCollectionUtil::OriginL( *media );
+    valueGet = TVcxMyVideosCollectionUtil::OriginL( *media );
+    if( EVcxMyVideosOriginOther != valueGet )
+        {
+        retVal = KErrGeneral;
+        delete media;
+        return retVal;
+        }
     TUint8 valueSet = EVcxMyVideosOriginCapturedWithCamera;
     media->SetTObjectValueL<TUint8>( KVcxMediaMyVideosOrigin, valueSet );
-    TUint8 valueGet = TVcxMyVideosCollectionUtil::OriginL( *media );
+    valueGet = TVcxMyVideosCollectionUtil::OriginL( *media );
     if( valueSet != valueGet )
         {
         retVal = KErrGeneral;
@@ -246,10 +449,17 @@ TInt CVcxMyVideosCollectionUtilTest::OriginL( CStifItemParser& /*aItem*/ )
 TInt CVcxMyVideosCollectionUtilTest::FlagsL( CStifItemParser& /*aItem*/ )
     {
     CMPXMedia* media = CMPXMedia::NewL();
-    TInt retVal( KErrNone );
+    TInt retVal( KErrNone );    
     TUint32 flagsSet( 0xBEEF );
-    media->SetTObjectValueL<TUint32>( KMPXMediaGeneralFlags, flagsSet );
     TUint32 flagsGet( TVcxMyVideosCollectionUtil::FlagsL( *media ) );
+    if( flagsGet != 0 )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    media->SetTObjectValueL<TUint32>( KMPXMediaGeneralFlags, flagsSet );
+    flagsGet= TVcxMyVideosCollectionUtil::FlagsL( *media );
     if( flagsSet != flagsGet )
         {
         retVal = KErrGeneral;
@@ -267,8 +477,15 @@ TInt CVcxMyVideosCollectionUtilTest::DownloadIdL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     TUint32 idSet( 0xBEEF );
-    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, idSet );
     TUint32 idGet( TVcxMyVideosCollectionUtil::DownloadIdL( *media ) );
+    if( 0 != idGet )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId, idSet );
+    idGet = TVcxMyVideosCollectionUtil::DownloadIdL( *media );
     if( idSet != idGet )
         {
         retVal = KErrGeneral;
@@ -286,8 +503,15 @@ TInt CVcxMyVideosCollectionUtilTest::DownloadStateL( CStifItemParser& /*aItem*/ 
     CMPXMedia* media = CMPXMedia::NewL();    
     TInt retVal( KErrNone );
     TVcxMyVideosDownloadState stateSet = EVcxMyVideosDlStateFailed;
-    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadState, stateSet );
     TVcxMyVideosDownloadState stateGet = TVcxMyVideosCollectionUtil::DownloadStateL( *media );    
+    if( EVcxMyVideosDlStateNone != stateGet )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadState, stateSet );
+    stateGet = TVcxMyVideosCollectionUtil::DownloadStateL( *media );    
     if( stateSet != stateGet )
         {
         retVal = KErrGeneral;
@@ -305,8 +529,15 @@ TInt CVcxMyVideosCollectionUtilTest::IdL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     TMPXItemId idSet( 2, 7 );
+    TMPXItemId idGet = TVcxMyVideosCollectionUtil::IdL( *media );
+    if( (idGet.iId1 != 0) || (idGet.iId2 != 0) )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
     media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, idSet );
-    TMPXItemId idGet = TVcxMyVideosCollectionUtil::IdL( *media );;
+    idGet = TVcxMyVideosCollectionUtil::IdL( *media );
     if( idSet != idGet )
         {
         retVal = KErrGeneral;
@@ -324,8 +555,15 @@ TInt CVcxMyVideosCollectionUtilTest::DurationL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     TReal32 durationSet( 150 );
+    TReal32 durationGet = TVcxMyVideosCollectionUtil::DurationL( *media );
+    if( -1 != durationGet )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
     media->SetTObjectValueL<TReal32>( KVcxMediaMyVideosDuration, durationSet );
-    TReal32 durationGet = TVcxMyVideosCollectionUtil::DurationL( *media );;
+    durationGet = TVcxMyVideosCollectionUtil::DurationL( *media );
     if( durationSet != durationGet )
         {
         retVal = KErrGeneral;
@@ -343,8 +581,17 @@ TInt CVcxMyVideosCollectionUtilTest::TitleL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     _LIT( valueSet, "TeamNinja" );
-    media->SetTextValueL( KMPXMediaGeneralTitle, valueSet );
     HBufC* valueGet = TVcxMyVideosCollectionUtil::Title( *media ).AllocL();
+    if( valueGet->Size() != 0  )
+        {
+        delete media;
+        delete valueGet;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    delete valueGet;
+    media->SetTextValueL( KMPXMediaGeneralTitle, valueSet );
+    valueGet = TVcxMyVideosCollectionUtil::Title( *media ).AllocL();
     if( valueGet->CompareF( valueSet ) )
         {
         retVal = KErrGeneral;
@@ -363,8 +610,15 @@ TInt CVcxMyVideosCollectionUtilTest::RatingL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     TUint8 valueSet( 21 );
-    media->SetTObjectValueL<TUint8>( KVcxMediaMyVideosRating, valueSet );
     TUint8 valueGet = TVcxMyVideosCollectionUtil::RatingL( *media );;
+    if( 0 != valueGet )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    media->SetTObjectValueL<TUint8>( KVcxMediaMyVideosRating, valueSet );
+    valueGet = TVcxMyVideosCollectionUtil::RatingL( *media );;
     if( valueSet != valueGet )
         {
         retVal = KErrGeneral;
@@ -382,8 +636,15 @@ TInt CVcxMyVideosCollectionUtilTest::AudioFourCcL( CStifItemParser& /*aItem*/ )
     CMPXMedia* media = CMPXMedia::NewL();
     TInt retVal( KErrNone );
     TUint32 valueSet( 21 );
-    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosAudioFourCc, valueSet );
     TUint32 valueGet = TVcxMyVideosCollectionUtil::AudioFourCcL( *media );;
+    if( 0 != valueGet )
+        {
+        delete media;
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    media->SetTObjectValueL<TUint32>( KVcxMediaMyVideosAudioFourCc, valueSet );
+    valueGet = TVcxMyVideosCollectionUtil::AudioFourCcL( *media );;
     if( valueSet != valueGet )
         {
         retVal = KErrGeneral;
@@ -401,8 +662,14 @@ TInt CVcxMyVideosCollectionUtilTest::AreSupportedL( CStifItemParser& /*aItem*/ )
     TInt retVal( KErrNone );
     CMPXMedia* media = CMPXMedia::NewL();
     RArray<TMPXAttribute> attrs;
-    attrs.Append( KMPXMediaGeneralMimeType );
     TBool inMds( EFalse );
+    TVcxMyVideosCollectionUtil::AreSupported( *media, attrs.Array(), inMds );        
+    attrs.Append( KMPXMediaFail );
+    TVcxMyVideosCollectionUtil::AreSupported( *media, attrs.Array(), inMds );
+    attrs.Append( KMPXMediaVideoBitRate );
+    inMds = ETrue;    
+    TVcxMyVideosCollectionUtil::AreSupported( *media, attrs.Array(), inMds );
+    media->SetTObjectValueL<TUint16>( KMPXMediaVideoBitRate, 47 );
     TVcxMyVideosCollectionUtil::AreSupported( *media, attrs.Array(), inMds );
     delete media;
     return retVal;
@@ -415,8 +682,7 @@ TInt CVcxMyVideosCollectionUtilTest::AreSupportedL( CStifItemParser& /*aItem*/ )
 TInt CVcxMyVideosCollectionUtilTest::AttrBelongsToFullSetL( CStifItemParser& /*aItem*/ )
     {
     TInt retVal( KErrNone );
-    // TMPXAttribute attr;
-    // attr = KMPXMediaGeneralMimeType;
+
     if ( !( TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaGeneralComment ) &&
          TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaGeneralCopyright ) &&
          TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaGeneralMimeType ) &&
@@ -428,6 +694,12 @@ TInt CVcxMyVideosCollectionUtilTest::AttrBelongsToFullSetL( CStifItemParser& /*a
          TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaVideoHeight ) &&
          TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaVideoWidth ) &&
          TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaVideoArtist ) ) )
+        {
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    
+    if( TVcxMyVideosCollectionUtil::AttrBelongsToFullSet( KMPXMediaFail ) )
         {
         retVal = KErrGeneral;
         }
@@ -453,6 +725,12 @@ TInt CVcxMyVideosCollectionUtilTest::Origin( CStifItemParser& /*aItem*/ )
             != EVcxMyVideosOriginOther ) ||
          ( TVcxMyVideosCollectionUtil::Origin( KVcxMvcCategoryIdAll ) 
             != KErrNotFound ) )
+        {
+        retVal = KErrGeneral;
+        return retVal;
+        }
+    
+    if( TVcxMyVideosCollectionUtil::Origin( KCategoryIdExtraItem3 ) != KErrNotFound )
         {
         retVal = KErrGeneral;
         }
@@ -512,22 +790,6 @@ TInt CVcxMyVideosCollectionUtilTest::GetProcessNameL( CStifItemParser& aItem )
 #endif // _DEBUG    
     return retVal;
     }
-
-// -----------------------------------------------------------------------------
-// CVcxMyVideosCollectionUtilTest::?member_function
-// ?implementation_description
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-/*
-TInt CVcxMyVideosCollectionUtilTest::?member_function(
-   CItemParser& aItem )
-   {
-
-   ?code
-
-   }
-*/
 
 // ========================== OTHER EXPORTED FUNCTIONS =========================
 // None

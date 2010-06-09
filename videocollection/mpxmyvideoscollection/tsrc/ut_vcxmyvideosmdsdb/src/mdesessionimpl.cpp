@@ -41,31 +41,31 @@
 // for CleanupResetAndDestroyPushL
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 
-CMdESessionAsyncHandler* CMdESessionAsyncHandler::NewL(MMdESessionObserver& aObserver)
+CMdeSessionStartTimer* CMdeSessionStartTimer::NewL(MMdESessionObserver& aObserver)
     {
-    CMdESessionAsyncHandler* self = new CMdESessionAsyncHandler( aObserver );
+    CMdeSessionStartTimer* self = new CMdeSessionStartTimer( aObserver );
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     return self;
     }
 
-void CMdESessionAsyncHandler::ConstructL()
+void CMdeSessionStartTimer::ConstructL()
     {
     CTimer::ConstructL();
     }   
 
-CMdESessionAsyncHandler::~CMdESessionAsyncHandler()
+CMdeSessionStartTimer::~CMdeSessionStartTimer()
 	{
 	Cancel();
 	}		
 
-void CMdESessionAsyncHandler::RunL()
+void CMdeSessionStartTimer::RunL()
 	{
 	iObserver.HandleSessionOpened(*(CMdESession*) 0  ,test->mdssessionasyncerror);
 	}
 
-CMdESessionAsyncHandler::CMdESessionAsyncHandler(MMdESessionObserver& aObserver)
+CMdeSessionStartTimer::CMdeSessionStartTimer(MMdESessionObserver& aObserver)
 	: CTimer( CActive::EPriorityStandard ), iObserver( aObserver )
 	{
 	CActiveScheduler::Add(this);
@@ -75,7 +75,7 @@ CMdESessionImpl::CMdESessionImpl(MMdESessionObserver& aObserver)
 	: iSessionStartupAO( NULL ), iSessionObserver(&aObserver), 
 	  iSchemaBuffer( NULL ), iNextQueryId( 0 )
 	{
-    iTimer = CMdESessionAsyncHandler::NewL( aObserver );
+    iTimer = CMdeSessionStartTimer::NewL( aObserver );
     
     iTimer->After( 1000 );
 	}

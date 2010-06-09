@@ -11,9 +11,8 @@
 *
 * Contributors:
 *
-* Description:    Contains cached MDS media items*
+* Description:   Contains cached MDS media items*
 */
-
 
 
 
@@ -26,12 +25,145 @@
 // FORWARD DECLARATIONS
 class CVcxMyVideosCollectionPlugin;
 class CMPXMedia;
-class CVcxMyVideosDownloadCache;
 class CRepository;
 
 // CONSTANTS
 
 // CLASS DECLARATION
+
+/**
+ * Contains information about video.
+ * These are stored to CVcxMyVideosVideoListIndex::iVideoArray.
+ */
+NONSHARABLE_CLASS(TVcxMyVideosVideo)
+    {
+    public:
+
+        /**
+         * Constructor.
+         */        
+        TVcxMyVideosVideo();
+        
+        /**
+        * = operator.
+        */        
+        TVcxMyVideosVideo& operator=( const TVcxMyVideosVideo& aVideo );
+    public:
+        
+        /**
+        * Set values.
+        * 
+        * @param aMdsId  MDS ID
+        * @param aPos    Position in CVcxMyVideosVideoCache::iVideoList
+        * @param aVideo  Pointer to CVcxMyVideosVideoCache::iVideoList item,
+        *                ownership does not move.
+        */
+        void Set( TUint32 aMdsId, TInt aPos, CMPXMedia* aVideo );
+
+    public:
+        TUint32    iMdsId; // Video object ID in MDS.
+        CMPXMedia* iVideo; // Pointer to CVcxMyVideosVideoCache::iVideoList item
+        TInt       iPos;   // Items position in CVcxMyVideosVideoCache::iVideoList
+    };
+
+/**
+* Used for keeping videos in MDS ID order for fast access.
+* (Indexes CVcxMyVideosVideoCache::iVideoList).
+*
+* @lib mpxmyvideoscollectionplugin.lib
+*/
+NONSHARABLE_CLASS(CVcxMyVideosVideoListIndex) : public CBase
+    {    
+public: // Constructors and destructor
+
+    /**
+    * Two-phased constructor
+    * @return Object constructed
+    */
+    static CVcxMyVideosVideoListIndex* NewL();
+    
+    /**
+    * Destructor
+    */
+    virtual ~CVcxMyVideosVideoListIndex();
+
+public:
+    
+    /**
+     * Sets up iVideoArray from aVideoList. Sorting is also done.
+     * 
+     * @param aVideoList  Video list to use for constructing iVideoArray. 
+     */
+    void SetL( const CMPXMedia& aVideoList );
+    
+    /**
+     * Finds video by MDS ID from the index. Uses bisection method.
+     * 
+     * @param aVideo  The found video data is written here.
+     * @return        KErrNotFound if not found, index of the item in iVideoArray
+     *                otherwise.
+     */
+    TInt Find( TUint32 aMdsId, TVcxMyVideosVideo& aVideo );
+    
+    /**
+     * Removes video from index.
+     * 
+     * @param aMdsId     ID if the item to be removed.
+     * @param aCompress  If ETrue, compresses the video array.
+     * @return           KErrNotFound if not found, index of the removed item otherwise.
+     */
+    TInt Remove( TUint32 aMdsId, TBool aCompress = ETrue );
+    
+    /**
+     * Adds video to index. Keeps sorting order.
+     * 
+     * @param aVideo  Video to be added, ownership does not move.
+     * @param aPos    aVideo's position in CVcxMyVideosVideoCache::iVideoList.
+     */
+    void AddL( CMPXMedia* aVideo, TInt aPos );
+
+#ifdef _DEBUG
+    /**
+     * Returns reference to video array.
+     */
+    const RArray<TVcxMyVideosVideo>& VideoArray();
+#endif
+    
+private:
+    /**
+    * Constructor
+    */
+    CVcxMyVideosVideoListIndex();
+    
+    /**
+    * Symbian 2nd phase constructor.
+    */
+    void ConstructL ();
+
+    /**
+     * Sorts iVideoArray by MDS ID.
+     */
+    void Sort();
+    
+    /**
+     * Used for keeping RArray<TVcxMyVideosVideo> in integer order by
+     * TVcxMyVideosVideo::iMdsId.
+     * 
+     * @param aVideo1 Video to compare
+     * @param aVideo2 Video to compare
+     * @return -1 if aVideo1 is smaller than aVideo2, 1 if aVideo1 is larger than
+     *         aVideo2.
+     */
+    static TInt CompareVideosByMdsId( const TVcxMyVideosVideo& aVideo1,
+            const TVcxMyVideosVideo& aVideo2 );
+
+private:
+    
+    /**
+     * Video array which is kept in order by MDS ID.
+     */
+    RArray<TVcxMyVideosVideo> iVideoArray;
+    };
 
 /**
 * Used for storing MDS items to RAM for fast access.
@@ -55,6 +187,19 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         */
         virtual ~CVcxMyVideosVideoCache();
  
+    public:
+        
+        /**
+         * @return  ETrue if iVideoList is complete. (All items have
+         *          been fetched from MDS.)
+         */
+        TBool IsComplete();
+        
+        /**
+         * Set to ETrue when all items have been fetched from MDS.
+         */
+        void SetComplete( TBool aComplete );
+
     private:
         /**
         * Constructor
@@ -179,7 +324,14 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         * @return        Position, KErrNotFound if item is not in iVideoList.
         */
         TInt PosOnVideoListL( CMPXMedia& aVideo );
-                 
+
+#ifdef _DEBUG
+        /**
+         * Checks that iVideoListIndex is correctly formed.
+         */
+        void CheckVideoListIndexL();
+#endif
+        
     public:            
         /**
         * Creates filtered video list from iVideoList. This is used for
@@ -225,16 +377,6 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         CMPXMedia* FindVideoByMdsIdL( TUint32 aMdsId, TInt& aPos );
         
         /**
-        * Tries to find media with matching download ID from iVideoList and iPartialVideoList.
-        * If aDownloadId is 0, then NULL is returned.
-        *
-        * @param aDownloadId ID to compare
-        * @return            Contains pointer to media if match found, NULL otherwise.
-        *                    Pointer ownership is not moved to the caller.
-        */
-        CMPXMedia* FindVideoByDownloadIdL( TUint aDownloadId );
-
-        /**
         * Gets medias from iVideoList and iPartialVideoList.
         *
         * @param aMdsIds  IDs of the items to fetch.
@@ -242,7 +384,7 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         *                 attribute contains the media items. Ownership
         *                 moves to caller.
         */
-        CMPXMedia* GetVideosL( RArray<TUint32> aMdsIds );
+        CMPXMedia* GetVideosL( RArray<TUint32>& aMdsIds );
 
         /**
         * Removes video from iVideoList (or from iPartialVideoList).
@@ -268,16 +410,19 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         * @param aMdsIds                   Array containing MDS IDs of the videos to be added.
         * @param aListFetchingWasCanceled  This is set to EFalse if video list fetching from mds
         *                                  had to be cancelled. EFalse otherwise. 
+        * @param aNonVideoIds              If argument given then Ids which were detected to not be
+        *                                  videos are written here. Caller owns the array, ownership
+        *                                  does not move.
         */
-        void AddVideosFromMdsL( RArray<TUint32>& aMdsIds, TBool& aListFetchingWasCanceled );
+        void AddVideosFromMdsL( RArray<TUint32>& aMdsIds, TBool& aListFetchingWasCanceled,
+                RArray<TUint32>* aNonVideoIds = NULL );
 
         /**
         * Deletes old and creates new iVideoList. After the function call iVideoList exists,
         * but it might not contain any media items yet, only empty array.
         * Media items are added to the list asynchronoysly in
         * VcxMyVideosColletionPlugin::HandleCreateVideoListResp(), called by
-        * VcxMyVideosMdsDb. When new items are added, they are synchronized with
-        * Download Manager. Once iVideoList is complete, iVideoListIsPartial
+        * VcxMyVideosMdsDb. Once iVideoList is complete, iVideoListIsPartial
         * is set to EFalse. During the video list fetching
         * VcxMyVideosMdsDb::iVideoListFetchingIsOngoing is ETrue.
         * If there is video list creation already ongoing
@@ -337,32 +482,34 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         * is removed.
         */
         RArray<CMPXMedia*> iPartialVideoList;
-
-        /**
-        * If ETrue then iVideoList does not contain all items from MDS.
-        */
-        TBool iVideoListIsPartial;
                                 
         /**
         * Sorting order which was used last time when list was queryed from MDS.
         */
         TVcxMyVideosSortingOrder iLastSortingOrder;
         
-    private:
-        
         /**
-        * Circular buffer containing download id and media object pointer pairs.
-        * Media object pointers are owned by iVideoList.
-        * Used to speed up access to media objects which are used regularly during the
-        * download.
-        */
-        CVcxMyVideosDownloadCache* iDownloadCache;
+         * Set to ETrue when doing videolist fetching.
+         */
+        TBool iIsFetchingVideoList;
+    private:
 
+        /**
+        * If ETrue then iVideoList contains all items from MDS.
+        */
+        TBool iVideoListIsComplete;
+        
         /**
         * My Videos collection plugin, owner of this object.
         */
-        CVcxMyVideosCollectionPlugin& iCollection;        
-
+        CVcxMyVideosCollectionPlugin& iCollection;
+        
+        /**
+         * Index which keeps TVcxMyVidesVideo items indexed in MDS ID
+         * order for fast access.
+         */
+        CVcxMyVideosVideoListIndex* iVideoListIndex;
+        
         /**
         * Provides access to the sorting order key in cenrep. Own.
         */

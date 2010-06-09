@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
-
 
 
 
@@ -22,6 +21,7 @@
 #define VCXMYVIDEOSCOLLECTIONUTIL_H
 
 // INCLUDES
+#include <vcxmyvideosdefs.h>
 
 // FORWARD DECLARATIONS
 class CMPXMedia;
@@ -83,6 +83,15 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
                 RArray<TUint32>& aMdsIds );
 
         /**
+        * Appends all items from aFromList to aToList. New items will point to
+        * same shared memory.
+        *
+        * @param aToList   List in which items are appended to.
+        * @param aFromList List in which items are copied from.
+        */
+        static void AppendToListL( CMPXMedia& aToList, CMPXMedia& aFromList );
+
+        /**
         * Converts drive letter to drive number.
         *
         * @param aDrive drive letter
@@ -118,6 +127,14 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         static TUint32 FlagsL( CMPXMedia& aVideo );
 
         /**
+         * Gets KMPXMediaGeneralDate (creation date) of aVideo.
+         * 
+         * @param aVideo  Media object to fetch parameter from.
+         * @return        Creation date, works with TTime.
+         */
+        static TInt64 CreationDateL( CMPXMedia& aVideo );
+
+        /**
         * Gets KVcxMediaMyVideosDownloadId attribute of aVideo.
         *
         * @param aVideo  Media object to fetch parameter from.
@@ -139,7 +156,7 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         * @param aVideo  Media object to fetch parameter from.
         * @return        ID.
         */
-        static TMPXItemId IdL( CMPXMedia& aVideo );
+        static TMPXItemId IdL( const CMPXMedia& aVideo );
 
         /**
         * Gets KVcxMediaMyVideosDuration attribute of aVideo.
@@ -155,7 +172,7 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         * @return  KMPXMediaGeneralTitle value. If attribute is not supported,
         *          then KNullDesC is returned.
         */
-        static const TDesC& Title( CMPXMedia& aVideo );
+        static const TDesC& Title( const CMPXMedia& aVideo );
 
         /**
         * Gets KVcxMediaMyVideosRating attribute of the video.
@@ -206,6 +223,44 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         *                     returns also KErrNotFound.
         */
         static TInt Origin( TInt aCategoryId );
+
+        /**
+         * Gets KMPXMediaArrayContents attribute from aMedia. Leaves
+         * with KErrArgument is attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Pointer to media array.
+         */
+        static CMPXMediaArray* MediaArrayL( const CMPXMedia& aMedia );
+        
+        /**
+         * Gets KVcxMediaMyVideosInt32Value attribute from aMedia. Leaves
+         * with KErrArgument if attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Value of KVcxMediaMyVideosInt32Value attribute.
+         */
+        static TInt32 Int32ValueL( CMPXMedia& aMedia );
+
+        /**
+         * Gets KVcxMediaMyVideosUint32Value attribute from aMedia. Leaves
+         * with KErrArgument if attribute is not supported.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Value of KVcxMediaMyVideosUint32Value attribute.
+         */
+        static TUint32 Uint32ValueL( CMPXMedia& aMedia );
+        
+        /**
+         * Gets KMPXMediaGeneralId attributes from aMediaArray and
+         * puts them to aIdArray. aIdArray is reset before adding.
+         * 
+         * @param aMediaArray  Media array containing media items which
+         *                     have KMPXMediaGeneralId attribute set.
+         * @param aIdArray     Array where to the IDs are written to.
+         */
+        static void GetIdsFromMediaArrayL( CMPXMediaArray& aMediaArray,
+                RArray<TUint32>& aIdArray );
 
 #ifdef _DEBUG
         /**

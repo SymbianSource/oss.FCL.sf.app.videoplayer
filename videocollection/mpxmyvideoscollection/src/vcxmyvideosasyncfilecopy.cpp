@@ -127,7 +127,7 @@ TBool CVcxMyVideosAsyncFileCopy::CopyL( const TDesC& aSourceFileName,
     User::LeaveIfError( error );
     User::LeaveIfError( iSourceFile.Size( iDataRemaining ) );
     User::LeaveIfError( iTargetFile.SetSize( iDataRemaining ) );
-    
+
     TInt suggestBlockSize;
     if ( iDataRemaining > KBigBufSize )
         {

@@ -132,6 +132,8 @@ private:
 	 * Speed optimization to drop freetexts from results.
 	 */
 	TBool iFreetextsInResult;
+	
+	mutable CMdEObject* iCMdEObject;
     };
 
 #endif  // __MDEOBJECTQUERY_H__

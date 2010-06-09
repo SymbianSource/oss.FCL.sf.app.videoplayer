@@ -15,8 +15,10 @@
 *
 */
 
-// Version : %version: 9 %
 
+// Version : %version: 12 %
+
+#ifdef USE_S60_DOWNLOAD_MANAGER 
 
 #ifndef __MPXVIDEODLMGRIF_H__
 #define __MPXVIDEODLMGRIF_H__
@@ -135,6 +137,15 @@ class CMPXVideoDlMgrIf : public CBase,
          */
         TBool IsDownloadPaused();
 
+        /*
+         *  UpdateDownloadSizeL
+         *
+         *  For DRM protected clips, the download size will be updated using the file handle
+         *
+         *  @since S60 9.2
+         */
+        void UpdateDownloadSizeL();
+
     private:
         /*
          *  CMPDownloadMgrInterface
@@ -220,8 +231,6 @@ class CMPXVideoDlMgrIf : public CBase,
 
         void ConvertDMgrStatetoMpxState( TInt32 dmgrState );
 
-        void UpdateDownloadSizeL();
-
         //
         //  Private Members
         //  Not Owned Data
@@ -250,5 +259,7 @@ class CMPXVideoDlMgrIf : public CBase,
 };
 
 #endif __MPXVIDEODLMGRIF_H__
+
+#endif // USE_S60_DOWNLOAD_MANAGER 
 
 // End of file

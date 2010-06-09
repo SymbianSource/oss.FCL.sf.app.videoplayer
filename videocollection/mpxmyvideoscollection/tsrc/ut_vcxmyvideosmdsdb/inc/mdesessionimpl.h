@@ -26,11 +26,11 @@ class CMdENotifierAO;
 class CMdEDataBuffer;
 class CMdCSerializationBuffer;
 class CMdESessionStartupAO;
-class CMdESessionAsyncHandler;
+class CMdeSessionStartTimer;
 
 class RMdESessionAsyncRequest
 	{
-		friend class CMdESessionAsyncHandler;
+		friend class CMdeSessionStartTimer;
 	private:
 		enum TRequestType
 		{
@@ -53,13 +53,13 @@ class RMdESessionAsyncRequest
 		TRequestStatus* iRequestStatus;
 	};
 
-NONSHARABLE_CLASS(CMdESessionAsyncHandler) : public CTimer
+NONSHARABLE_CLASS(CMdeSessionStartTimer) : public CTimer
 {
 public:
 	
-	static CMdESessionAsyncHandler* NewL(MMdESessionObserver& aObserver);
+	static CMdeSessionStartTimer* NewL(MMdESessionObserver& aObserver);
 	
-	~CMdESessionAsyncHandler();
+	~CMdeSessionStartTimer();
 		
 private:
 	
@@ -67,7 +67,7 @@ private:
 
 	void ConstructL();
 	
-	CMdESessionAsyncHandler(MMdESessionObserver& aObserver);
+	CMdeSessionStartTimer(MMdESessionObserver& aObserver);
 
 private:
 	RArray<RMdESessionAsyncRequest> iRequests;
@@ -630,7 +630,7 @@ NONSHARABLE_CLASS(CMdESessionImpl) : public CMdESession
 		
 		RPointerArray<CMdENamespaceDef> iNamespaceDefs;
 		
-//		CMdESessionAsyncHandler* iAsyncHandler;
+//		CMdeSessionStartTimer* iAsyncHandler;
 
 		TUint32 iNextQueryId;
 		
@@ -644,7 +644,7 @@ NONSHARABLE_CLASS(CMdESessionImpl) : public CMdESession
 			};
 		TSessionState iSessionState;
 		
-		CMdESessionAsyncHandler* iTimer;
+		CMdeSessionStartTimer* iTimer;
 	};
 
 #endif  // __MDESESSIONIMPL_H__

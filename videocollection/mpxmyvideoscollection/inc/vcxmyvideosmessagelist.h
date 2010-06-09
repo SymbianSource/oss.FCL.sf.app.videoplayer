@@ -98,7 +98,8 @@ NONSHARABLE_CLASS(CVcxMyVideosMessageList) :
         *                   from vcxmyvideosdefs.h for values.
         * @param aVideo     Video object which is in cache already.
         */
-        void AddEventL(const TMPXItemId& aId, TMPXChangeEventType aChange, TInt32 aExtraInfo = 0, CMPXMedia* aVideo = NULL );
+        void AddEventL(const TMPXItemId& aId, TMPXChangeEventType aChange,
+                TInt32 aExtraInfo = 0, CMPXMedia* aVideo = NULL );
 
         /**
         * Creates My Videos custom event and appends it to iMessageList.

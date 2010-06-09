@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 18 %
+
+// Version : %version: 19 %
 
 
 // INCLUDE FILES
@@ -51,8 +52,6 @@
 #include "mpxvideo_debug.h"
 
 
-
-
 // ======== MEMBER FUNCTIONS =======================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -61,7 +60,10 @@
 //
 CMPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler(
         CMPXVideoPlaybackContainer* aContainer)
-   : iContainer(aContainer)
+   : iProcessingInputType(EMpxVideoNone),
+     iForeground(ETrue),
+     iBlockPdlInputs(EFalse),
+     iContainer(aContainer)
 {
 }
 
@@ -98,9 +100,6 @@ void CMPXVideoPlaybackUserInputHandler::ConstructL()
 
     // not detrimental if Media Keys dont work - so ignore any errors here
     TRAP_IGNORE( iInterfaceSelector->OpenTargetL() );
-
-    iProcessingInputType = EMpxVideoNone;
-    iForeground = ETrue;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -116,7 +115,6 @@ CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
         iVolumeRepeatTimer->Cancel();
         delete iVolumeRepeatTimer;
     }
-
 
     if ( iInterfaceSelector )
     {
@@ -238,7 +236,6 @@ void CMPXVideoPlaybackUserInputHandler::HandleFastForward( TRemConCoreApiButtonA
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackUserInputHandler::HandleRewind()
 // -------------------------------------------------------------------------------------------------
@@ -302,7 +299,6 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp( TRemConCoreApiButtonActi
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackUserInputHandler::HandleVolumeDown()
 // -------------------------------------------------------------------------------------------------
@@ -347,7 +343,6 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown( TRemConCoreApiButtonAc
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent()
 // -------------------------------------------------------------------------------------------------
@@ -365,7 +360,7 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
     {
         case EMpxVideoNone:
         {
-            if ( aPointerEvent.iType == TPointerEvent::EButton1Down && iForeground )
+            if ( aPointerEvent.iType == TPointerEvent::EButton1Down && IsUserInputAllowed() )
             {
                 iProcessingInputType = EMpxVideoTouch;
 
@@ -411,7 +406,7 @@ CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aControl,
                 if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
                 {
                     //
-                    //  Reroute button up event to active control and end current 
+                    //  Reroute button up event to active control and end current
                     //  control processing
                     //
                     ReRoutePointerEventL( iActiveControlPtr, aPointerEvent, iActiveControlType );
@@ -459,7 +454,7 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
     {
         case EMpxVideoNone:
         {
-            if ( aType == EEventKeyDown && iForeground )
+            if ( aType == EEventKeyDown && IsUserInputAllowed() )
             {
                 iProcessingInputType = EMpxVideoKeyboard;
                 iLastPressedKeyCode = aKeyEvent.iCode;
@@ -504,7 +499,7 @@ void CMPXVideoPlaybackUserInputHandler::ProcessMediaKey( TRemConCoreApiOperation
     {
         case EMpxVideoNone:
         {
-            if ( iForeground )
+            if ( IsUserInputAllowed() )
             {
                 if ( aButtonAct == ERemConCoreApiButtonPress )
                 {
@@ -598,5 +593,28 @@ void CMPXVideoPlaybackUserInputHandler::SetForeground( TBool aForeground )
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackUserInputHandler::BlockPdlUserInputs()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackUserInputHandler::BlockPdlUserInputs( TBool aBlockInputs )
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::BlockPdlUserInputs(%d)"), aBlockInputs);
+
+    iBlockPdlInputs = aBlockInputs;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackUserInputHandler::IsUserInputAllowed()
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackUserInputHandler::IsUserInputAllowed()
+{
+    TBool allowInput = ( iForeground && ! iBlockPdlInputs );
+
+    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::IsUserInputAllowed(%d)"), allowInput);
+
+    return allowInput;
+}
 
 // EOF

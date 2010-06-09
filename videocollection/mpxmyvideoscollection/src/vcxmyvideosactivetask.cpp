@@ -79,6 +79,7 @@ void CVcxMyVideosActiveTask::StartL( TMPXCommandId aTask, const CMPXCommand& aCo
 
     // Start the AO
     iStatus = KRequestPending;
+    MPX_DEBUG1("CVcxMyVideosActiveTask::StartL SetActive");
     SetActive();
     TRequestStatus* status = &iStatus;
     User::RequestComplete( status, KErrNone );
@@ -112,39 +113,98 @@ CMPXMedia& CVcxMyVideosActiveTask::GetCommand()
     }
 
 // ---------------------------------------------------------------------------
-// From CActive
+// Get the current media
 // ---------------------------------------------------------------------------
 //
-void CVcxMyVideosActiveTask::RunL()
+CMPXMedia* CVcxMyVideosActiveTask::Command()
     {
-    // ETrue is done, EFalse is more to do
-    //
-    if( iObserver.HandleStepL() )
-        {
-        iObserver.HandleOperationCompleted( KErrNone );
-        delete iCurCommand;
-        iCurCommand = NULL;
-        }
-    else
-        {
-        ++iCurStep;
-        iStatus = KRequestPending;
-        SetActive();
-        TRequestStatus* status = &iStatus;
-        User::RequestComplete( status, KErrNone );
-        }
+    return iCurCommand;
     }
 
 // ---------------------------------------------------------------------------
 // From CActive
 // ---------------------------------------------------------------------------
 //
+void CVcxMyVideosActiveTask::RunL()
+    {
+    MPX_DEBUG1("CVcxMyVideosActiveTask::RunL() start");
+
+    switch ( iObserver.HandleStepL() )
+        {
+        case MVcxMyVideosActiveTaskObserver::EDone:
+            Done();
+            break;
+
+        case MVcxMyVideosActiveTaskObserver::EMoreToCome:
+            ContinueStepping();
+            break;
+
+        //observer is responsible for calling Done, Cancel or ContinueStepping
+        case MVcxMyVideosActiveTaskObserver::EStopStepping:
+            MPX_DEBUG1("CVcxMyVideosActiveTask::RunL stopped stepping");
+            iStopped = ETrue;
+            break;
+        }
+    MPX_DEBUG1("CVcxMyVideosActiveTask::RunL() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosActiveTask::Done
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosActiveTask::Done()
+    {
+    MPX_DEBUG1("CVcxMyVideosActiveTask::Done() start");
+
+    iObserver.HandleOperationCompleted( KErrNone );
+    delete iCurCommand;
+    iCurCommand = NULL;
+    iStopped = EFalse;
+
+    MPX_DEBUG1("CVcxMyVideosActiveTask::Done() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosActiveTask::ContinueStepping
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosActiveTask::ContinueStepping()
+    {
+    ++iCurStep;
+    iStatus = KRequestPending;
+    MPX_DEBUG1("CVcxMyVideosActiveTask::ContinueStepping SetActive");
+    SetActive();
+    iStopped = EFalse;
+    TRequestStatus* status = &iStatus;
+    User::RequestComplete( status, KErrNone );
+    }
+
+void CVcxMyVideosActiveTask::Cancel()
+    {
+    if ( iStopped && !IsActive() )
+        {
+        MPX_DEBUG1("CVcxMyVideosActiveTask:: was paused, calling DoCancel()");
+        DoCancel();
+        }
+    else
+        {
+        MPX_DEBUG1("CVcxMyVideosActiveTask:: wasn't paused, calling CActive::Cancel() normally");
+        CActive::Cancel();
+        }
+    }
+// ---------------------------------------------------------------------------
+// From CActive
+// ---------------------------------------------------------------------------
+//
 void CVcxMyVideosActiveTask::DoCancel()
     {
+    MPX_DEBUG1("CVcxMyVideosActiveTask::DoCancel() start");
     // Callback and cleanup
     iObserver.HandleOperationCompleted( KErrCancel );
     delete iCurCommand;
     iCurCommand = NULL;
+    iStopped = EFalse;
+    MPX_DEBUG1("CVcxMyVideosActiveTask::DoCancel() exit");
     }
 
 // ---------------------------------------------------------------------------
@@ -153,11 +213,15 @@ void CVcxMyVideosActiveTask::DoCancel()
 //
 TInt CVcxMyVideosActiveTask::RunError( TInt aError )
     {
+    MPX_DEBUG1("CVcxMyVideosActiveTask::RunError() start");
+    
     // Callback and cleanup
     iObserver.HandleOperationCompleted( aError );
     delete iCurCommand;
     iCurCommand = NULL;
+    iStopped = EFalse;
 
+    MPX_DEBUG1("CVcxMyVideosActiveTask::RunError() exit");
     return KErrNone;
     }
 

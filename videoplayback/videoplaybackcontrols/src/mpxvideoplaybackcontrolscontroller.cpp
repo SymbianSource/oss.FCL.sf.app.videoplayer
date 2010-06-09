@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 41 %
+// Version : %version: 42 %
 
 
 // INCLUDE FILES
@@ -41,6 +41,8 @@
 
 #include <mpxvideoplaybackcontrols.rsg>
 #include <mpxvideoplaybackcontrols.mbg>
+
+#include <avkondomainpskeys.h>
 
 #ifdef RD_TACTILE_FEEDBACK
 #include <touchfeedback.h>
@@ -115,6 +117,7 @@ void CMPXVideoPlaybackControlsController::ConstructL( CMPXVideoPlaybackViewFileD
 
     iFileDetails = aDetails;
     iTvOutConnected = iFileDetails->iTvOutConnected;
+    iShowControls  = ETrue;
 
     iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
 
@@ -328,6 +331,15 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         {
             MPX_DEBUG(_L("    [EMPXControlCmdHandleBackgroundEvent]"));
 
+            TBool keylock( EFalse );
+            RProperty::Get( KPSUidAvkonDomain, KAknKeyguardStatus, keylock );
+
+            // Don't show controls when key is locked 
+            if ( keylock )
+            {
+                iShowControls = EFalse;
+            }
+
             ResetDisappearingTimers( EMPXTimerReset );
 
             for ( TInt i = 0 ; i < iControls.Count() ; i++ )
@@ -340,6 +352,7 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         case EMPXControlCmdHandleForegroundEvent:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdHandleForegroundEvent]"));
+            iShowControls = ETrue;
             UpdateControlsVisibility();
             break;
         }
@@ -1263,13 +1276,16 @@ void CMPXVideoPlaybackControlsController::ShowControls()
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowControls()"),
                    _L("iState = %d"), iState );
 
-    CloseMediaDetailsViewer();
-
-    ResetDisappearingTimers( EMPXTimerReset );
-
-    for ( TInt i = 0 ; i < iControls.Count() ; i++ )
+    if ( iShowControls )
     {
-        iControls[i]->SetVisibility( iState );
+        CloseMediaDetailsViewer();
+
+        ResetDisappearingTimers( EMPXTimerReset );
+
+        for ( TInt i = 0 ; i < iControls.Count() ; i++ )
+        {
+            iControls[i]->SetVisibility( iState );
+        }
     }
 }
 

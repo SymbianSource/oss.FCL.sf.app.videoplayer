@@ -126,7 +126,9 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * Handles "ExtraItem" list item selection.
 		 *
 		 * @param aCategoryId  Selected category id
-		 * @param aItemType    On return, item type
+		 * @param aItemType    On return, item type. If both UID and URL were found,
+		 *                     UID type will be returned.
+		 *
 		 * @param aUid         On return, UID if selected item contains UID 
 		 * @param aUrl         On return, URL string if selected item contains URL
          */

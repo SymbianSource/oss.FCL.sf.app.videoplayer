@@ -1125,22 +1125,20 @@ void CVcxHgMyVideosCategoryModelHandler::HandleExtraItemSelectionL(
     TBuf<KMyVideosTitleUrlMaxLength> urlString;
     TInt uidInt( 0 ) ;
     
-    // Try to get web link URL first.
+    // Try to get URL.
     TInt error = iModel.GetMyVideosCustomizationString( urlKey, urlString );
     if ( error == KErrNone && urlString.Size() > 0 )
         {
         aUrl = urlString;
         aItemType = TVcxHgMyVideosCategoryItemTypeUrl;
         }
-    else 
+
+    // Try to fetch application UID.
+    error = iModel.GetMyVideosCustomizationInt( uidKey, uidInt );
+    if ( error == KErrNone && uidInt != 0 )
         {
-        // If URL is not found try to fetch application UID.
-        error = iModel.GetMyVideosCustomizationInt( uidKey, uidInt );
-        if ( error == KErrNone && uidInt != 0 )
-            {
-            aUid = TUid::Uid( uidInt );
-            aItemType = TVcxHgMyVideosCategoryItemTypeUid;
-            }
+        aUid = TUid::Uid( uidInt );
+        aItemType = TVcxHgMyVideosCategoryItemTypeUid;
         }
     }
 

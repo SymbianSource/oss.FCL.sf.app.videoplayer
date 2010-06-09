@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:    Video list cache. Contains cached data from MDS.*
+* Description:   Video list cache. Contains cached data from MDS.*
 */
 
 
@@ -30,17 +30,228 @@
 #include <mpxmediavideodefs.h>
 #include "vcxmyvideosvideocache.h"
 #include "vcxmyvideoscollectionplugin.h"
-#include "vcxmyvideosdownloadutil.h"
 #include "vcxmyvideoscollectionutil.h"
 #include "vcxmyvideoscategories.h"
-#include "vcxmyvideosdownloadcache.h"
 #include "vcxmyvideosmessagelist.h"
 #include "vcxmyvideosopenhandler.h"
-
-//       If video list fetching is going on and at the same time add/delete events
-//       arrive from mds, what to do?
+#include "vcxmyvideosalbums.h"
 
 // ============================ MEMBER FUNCTIONS ==============================
+
+// ----------------------------------------------------------------------------
+// constructor.
+// ----------------------------------------------------------------------------
+//
+TVcxMyVideosVideo::TVcxMyVideosVideo()
+:iMdsId( 0 ), iVideo( NULL ), iPos( KErrNotFound )
+    {
+    }
+
+// ---------------------------------------------------------------------------
+// TVcxMyVideosVideo::operator=
+// ---------------------------------------------------------------------------
+//                
+TVcxMyVideosVideo& TVcxMyVideosVideo::operator=( const TVcxMyVideosVideo& aVideo )
+    {
+    Set( aVideo.iMdsId, aVideo.iPos, aVideo.iVideo );
+    return *this;
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosVideo::Set
+// ----------------------------------------------------------------------------
+//
+void TVcxMyVideosVideo::Set( TUint32 aMdsId, TInt aPos, CMPXMedia* aVideo )
+    {
+    iMdsId = aMdsId;
+    iPos   = aPos;
+    iVideo = aVideo;
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::NewL
+// ----------------------------------------------------------------------------
+//
+CVcxMyVideosVideoListIndex* CVcxMyVideosVideoListIndex::NewL()
+    {
+    CVcxMyVideosVideoListIndex* self = new (ELeave) CVcxMyVideosVideoListIndex();
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
+    return self;    
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::CVcxMyVideosVideoListIndex
+// ----------------------------------------------------------------------------
+//
+CVcxMyVideosVideoListIndex::CVcxMyVideosVideoListIndex()
+    {
+    
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::ConstructL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoListIndex::ConstructL ()
+    {
+    iVideoArray.Reset();
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::~CVcxMyVideosVideoListIndex
+// ----------------------------------------------------------------------------
+//
+CVcxMyVideosVideoListIndex::~CVcxMyVideosVideoListIndex()
+    {
+    iVideoArray.Close();
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::~CVcxMyVideosVideoListIndex
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoListIndex::SetL( const CMPXMedia& aVideoList )
+    {
+    CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( aVideoList );
+    TInt count = mediaArray->Count();
+    iVideoArray.Reset();
+    iVideoArray.ReserveL( count );
+    for ( TInt i = 0; i < count; i++ )
+        {
+        AddL( mediaArray->AtL( i ), i );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::Find
+// ----------------------------------------------------------------------------
+//
+TInt CVcxMyVideosVideoListIndex::Find( TUint32 aMdsId, TVcxMyVideosVideo& aVideo )
+    {
+    const TLinearOrder<TVcxMyVideosVideo> KOrderByMdsId(
+            CVcxMyVideosVideoListIndex::CompareVideosByMdsId );
+    
+    TInt index;
+    TVcxMyVideosVideo video;
+    video.iMdsId = aMdsId;
+    TInt err = iVideoArray.FindInOrder( video, index, KOrderByMdsId );
+    
+    if ( err != KErrNone )
+        {
+        return KErrNotFound;
+        }
+    
+    aVideo = iVideoArray[index];
+    return KErrNone;
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::Remove
+// ----------------------------------------------------------------------------
+//
+TInt CVcxMyVideosVideoListIndex::Remove( TUint32 aMdsId, TBool aCompress )
+    {
+    const TLinearOrder<TVcxMyVideosVideo> KOrderByMdsId(
+            CVcxMyVideosVideoListIndex::CompareVideosByMdsId );
+
+    TVcxMyVideosVideo video;
+    video.iMdsId = aMdsId;
+    TInt pos;
+    TInt posInVideoList;
+    TInt err = iVideoArray.FindInOrder( video, pos, KOrderByMdsId );
+    if ( err == KErrNone )
+        {
+        posInVideoList = iVideoArray[pos].iPos;
+        iVideoArray.Remove( pos );
+
+        // update all indexes which are bigger than posInVideoList
+        TInt count = iVideoArray.Count();
+        for ( TInt i = 0; i < count; i++ )
+            {
+            if ( iVideoArray[i].iPos > posInVideoList )
+                {
+                iVideoArray[i].iPos--;
+                }
+            }
+        }
+    
+    if ( aCompress )
+        {
+        iVideoArray.Compress();
+        }
+    
+    return err;
+    }
+    
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::AddL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoListIndex::AddL( CMPXMedia* aVideo, TInt aPos )
+    {
+    TVcxMyVideosVideo video;
+    video.Set( TVcxMyVideosCollectionUtil::IdL( *aVideo ).iId1, aPos, aVideo );
+
+    const TLinearOrder<TVcxMyVideosVideo> KOrderByMdsId(
+            CVcxMyVideosVideoListIndex::CompareVideosByMdsId );
+
+    // update indexes
+    TInt count = iVideoArray.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        if ( iVideoArray[i].iPos >= aPos )
+            {
+            iVideoArray[i].iPos++;
+            }
+        }
+
+    iVideoArray.InsertInOrderAllowRepeatsL( video, KOrderByMdsId );
+
+    }
+
+#ifdef _DEBUG
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::VideoArray
+// ----------------------------------------------------------------------------
+//
+const RArray<TVcxMyVideosVideo>& CVcxMyVideosVideoListIndex::VideoArray()
+    {
+    return iVideoArray;
+    }
+#endif
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::Sort
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoListIndex::Sort()
+    {
+    const TLinearOrder<TVcxMyVideosVideo> KOrderByMdsId(
+            CVcxMyVideosVideoListIndex::CompareVideosByMdsId );
+
+    iVideoArray.Sort( KOrderByMdsId );    
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoListIndex::CompareVideosByMdsId
+// ----------------------------------------------------------------------------
+//
+TInt CVcxMyVideosVideoListIndex::CompareVideosByMdsId( const TVcxMyVideosVideo& aVideo1,
+            const TVcxMyVideosVideo& aVideo2 )
+    {
+    if ( aVideo1.iMdsId == aVideo2.iMdsId )
+        {
+        return 0;
+        }
+
+    if ( aVideo1.iMdsId < aVideo2.iMdsId )
+        {
+        return -1;
+        }
+    return 1;    
+    }
 
 // ----------------------------------------------------------------------------
 // Two-phased constructor.
@@ -67,10 +278,8 @@ CVcxMyVideosVideoCache::~CVcxMyVideosVideoCache()
     MPX_FUNC("CVcxMyVideosVideoCache::~CVcxMyVideosVideoCache");
     
     delete iVideoList;
-    delete iDownloadCache;
-    delete iCenRep;
-    
     DeletePartialList();
+    delete iVideoListIndex;
     }
 
 // ----------------------------------------------------------------------------
@@ -93,10 +302,10 @@ void CVcxMyVideosVideoCache::ConstructL ()
     MPX_FUNC("CVcxMyVideosVideoCache::ConstructL");
 
     iVideoList          = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
-    iVideoListIsPartial = ETrue;
-
-    iDownloadCache = CVcxMyVideosDownloadCache::NewL();
+    SetComplete( EFalse );
+    
     iPartialVideoList.Reset();
+    iVideoListIndex = CVcxMyVideosVideoListIndex::NewL();
     }
 
 // ----------------------------------------------------------------------------------------------------------
@@ -219,7 +428,19 @@ CMPXMedia* CVcxMyVideosVideoCache::FindVideoByMdsIdL( TUint32 aMdsId, TInt& aPos
         {
         return NULL;
         }
-        
+    
+    if ( IsComplete() )
+        {
+        TVcxMyVideosVideo video;
+        TInt pos = iVideoListIndex->Find( aMdsId, video );
+        if ( pos != KErrNotFound )
+            {
+            aPos = video.iPos;
+            MPX_DEBUG2("CVcxMyVideosVideoCache::FindVideoByMdsIdL found %d from index", aMdsId );
+            return video.iVideo;
+            }
+        }
+    
     CMPXMediaArray* cachedVideoArray = iVideoList->Value<CMPXMediaArray>(
                                 KMPXMediaArrayContents);
    
@@ -260,76 +481,10 @@ CMPXMedia* CVcxMyVideosVideoCache::FindVideoByMdsIdL( TUint32 aMdsId, TInt& aPos
     }
 
 // ----------------------------------------------------------------------------
-// CVcxMyVideosVideoCache::FindVideoByDownloadIdL
-// ----------------------------------------------------------------------------
-//
-CMPXMedia* CVcxMyVideosVideoCache::FindVideoByDownloadIdL( TUint aDownloadId )
-    {
-    MPX_FUNC("CVcxMyVideosVideoCache::FindVideoByDownloadIdL()");
-    
-    MPX_DEBUG2("CVcxMyVideosVideoCache:: looking for MPX item  with download ID %d from cache", aDownloadId);
-        
-    if ( aDownloadId == 0 )
-        {
-        MPX_DEBUG1("CVcxMyVideosVideoCache:: dl id == 0 -> NOT FOUND");
-        return NULL;
-        }
-    
-    if ( !iVideoList )
-        {
-        MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList is NULL -> NOT FOUND");
-        return NULL;
-        }
-
-    CMPXMedia* video = iDownloadCache->Get( aDownloadId );
-    if ( video )
-        {
-        MPX_DEBUG1("CVcxMyVideosVideoCache:: found from Download Cache");
-        return video;
-        }
-
-    MPX_DEBUG1("CVcxMyVideosVideoCache:: not found from Download Cache");
-
-    CMPXMediaArray* cachedVideoArray = iVideoList->Value<CMPXMediaArray>(
-                                KMPXMediaArrayContents);
-              
-    TUint32 downloadId;
-    TInt count = cachedVideoArray->Count();
-    for ( TInt i = 0; i < count; i++ )
-        {
-        downloadId = TVcxMyVideosCollectionUtil::DownloadIdL( *cachedVideoArray->AtL( i ) );
-        if ( downloadId == aDownloadId )
-            {
-            MPX_DEBUG1("CVcxMyVideosVideoCache:: found from iVideoList");
-            MPX_DEBUG1("CVcxMyVideosVideoCache:: adding to iDownloadCache");
-            iDownloadCache->Add( downloadId, (*cachedVideoArray)[i] );
-            return (*cachedVideoArray)[i];
-            }
-        }
-    
-    count = iPartialVideoList.Count();  
-    for ( TInt i = 0; i < count; i++ )
-        {
-        downloadId = TVcxMyVideosCollectionUtil::DownloadIdL( *(iPartialVideoList[i]) );
-        if ( downloadId ==  aDownloadId )
-            {
-            MPX_DEBUG1("CVcxMyVideosVideoCache:: found from iPartialVideoList");
-            MPX_DEBUG1("CVcxMyVideosVideoCache:: adding to iDownloadCache");
-            iDownloadCache->Add( downloadId, iPartialVideoList[i] );
-            return iPartialVideoList[i];
-            }       
-        }
-        
-    MPX_DEBUG1("CVcxMyVideosVideoCache:: NOT FOUND");
-    return NULL;
-    }
-
-
-// ----------------------------------------------------------------------------
 // CVcxMyVideosVideoCache::GetVideosL
 // ----------------------------------------------------------------------------
 //
-CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32> aMdsIds )
+CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32>& aMdsIds )
     {
     CMPXMessage* videoList = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
     CleanupStack::PushL( videoList ); // 1->
@@ -350,14 +505,14 @@ CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32> aMdsIds )
 // CVcxMyVideosVideoCache::AddVideosFromMdsL
 // Called when item inserted events arrive from mds or from
 // KVcxCommandMyVideosGetMediasByMpxId cmd handler.
-// Synchronizing with downloads is not done here, caller must take care of it.
 // If mpx item is already in cache, or MDS does not contain the item (or was not video item),
 // then it is removed from aMdsIds. Ie after this function call aMdsIds contains
-// only IDs which are actually added to cache.
+// only IDs which are actually added to cache. aNonVideoIds will contain IDs
+// which were not video objects.
 // ----------------------------------------------------------------------------
 //    
 void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
-        TBool& aListFetchingWasCanceled )
+        TBool& aListFetchingWasCanceled, RArray<TUint32>* aNonVideoIds  )
     {
     MPX_FUNC("CVcxMyVideosVideoCache::AddVideosFromMdsL");
 
@@ -375,6 +530,8 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
             {
             MPX_DEBUG2("CVcxMyVideosVideoCache:: MDSID(%d) not found from cache, ok", aMdsIds[j]);
             
+            //TODO: This doesnt work with new mds cmd queue. Cancel must be done if there is _any_ async req going on.
+            //      Maybe the fetching could be changed to asynchronous...
             if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing )
                 {
                 // If list fetching is not canceled, CreateVideoObjectL will leave with KErrNotReady.
@@ -405,13 +562,17 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
                 }
             else
                 {
-                MPX_DEBUG2("CVcxMyVideosVideoCache:: video with %d ID not found from MDS -> skipping add to cache and deleting from id array", aMdsIds[j] );
+                MPX_DEBUG2("CVcxMyVideosVideoCache:: video with %d ID not found from MDS -> prob non video object, skipping add to cache", aMdsIds[j] );
+                if ( aNonVideoIds )
+                    {
+                    aNonVideoIds->AppendL( aMdsIds[j] );
+                    }
                 aMdsIds.Remove( j );
                 }
             }
         else
             {
-            MPX_DEBUG2("CVcxMyVideosVideoCache:: %d was already in cache -> skipping add, and deleting from id array", aMdsIds[j]);
+            MPX_DEBUG2("CVcxMyVideosVideoCache:: %d was already in cache -> skipping add", aMdsIds[j]);
             aMdsIds.Remove( j );
             }
         }
@@ -427,7 +588,7 @@ TInt CVcxMyVideosVideoCache::AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder a
     {
     MPX_FUNC("CVcxMyVideosVideoCache::AddL");
     
-    if ( iVideoListIsPartial )
+    if ( !IsComplete() )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList is partial, adding to iPartialVideoList");
         return AddToPartialListL( aVideo );
@@ -578,21 +739,22 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
     
     TVcxMyVideosSortingOrder sortingOrder = SortingOrderL();
         
-    if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing
+    if ( iIsFetchingVideoList
             && sortingOrder == iLastSortingOrder && !aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList creation is already ongoing, skipping");
         return;
         }
                    
-    if ( iVideoListIsPartial || (sortingOrder != iLastSortingOrder) || aForce )
+    if ( !IsComplete() || (sortingOrder != iLastSortingOrder) || aForce )
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList was partial or in wrong order or aForce was ETrue, recreating");
 
-        if ( iCollection.iMyVideosMdsDb->iVideoListFetchingIsOngoing )
+        if ( iIsFetchingVideoList )
             {
             MPX_DEBUG1("CVcxMyVideosVideoCache:: video list fetching is ongoing, canceling it");
-            iCollection.iMyVideosMdsDb->Cancel();
+            iCollection.iMyVideosMdsDb->Cancel( CVcxMyVideosMdsDb::EGetVideoList );
+            iIsFetchingVideoList = EFalse;
             }
         
         ResetVideoListL();
@@ -618,8 +780,9 @@ void CVcxMyVideosVideoCache::CreateVideoListL( TBool aForce )
                 EFalse /* brief list */,
                 iVideoList /* use existing */ );
 
+        iIsFetchingVideoList = ETrue;
         iLastSortingOrder   = sortingOrder;
-        iVideoListIsPartial = ETrue;
+        SetComplete( EFalse );
         }
     else
         {
@@ -648,7 +811,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
     TBool changed = EFalse;
         
     // 1 MPX ID cant be changed
-    // 2 
+    // 2
     if ( aVideo.IsSupported( KMPXMediaGeneralTitle ) )
         {
         if ( videoInCache->ValueText( KMPXMediaGeneralTitle ) !=
@@ -682,30 +845,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
 
         if ( videoInCache->ValueText( KMPXMediaGeneralUri ) !=
                aVideo.ValueText( KMPXMediaGeneralUri ) ) 
-            {
-#if 0 // this should be in mds, or mds should keep title empty if it is not set by client
-            TParse parse;
-            HBufC* oldTitle = HBufC::NewL( videoInCache->ValueText( KMPXMediaGeneralTitle ).Length() );
-            CleanupStack::PushL( oldTitle ); // 1->
-            oldTitle->Des() = videoInCache->ValueText( KMPXMediaGeneralTitle );
-            oldTitle->Des().LowerCase();
-            
-            parse.Set( videoInCache->ValueText( KMPXMediaGeneralUri ), NULL, NULL );
-            MPX_DEBUG2("CVcxMyVideosVideoCache:: title generated from old file name: %S", &parse.Name());
-            MPX_DEBUG2("CVcxMyVideosVideoCache:: old title (lower cased): %S", oldTitle);
-            if ( parse.Name() == *oldTitle )
-                {
-                // filename has been used as a title -> update title also to new filename
-                MPX_DEBUG1("CVcxMyVideosVideoCache:: filename has been used as a title -> changing title to new filename");
-                parse.Set( aVideo.ValueText( KMPXMediaGeneralUri ), NULL, NULL );
-                videoInCache->SetTextValueL( KMPXMediaGeneralTitle, parse.Name() );
-                
-                //updates sorting order and category attributes if necessarry
-                HandleVideoTitleModifiedL( videoInCache );
-                }
-            CleanupStack::PopAndDestroy( oldTitle ); // <-1
-#endif
-            
+            {            
             videoInCache->SetTextValueL( KMPXMediaGeneralUri,
                     aVideo.ValueText( KMPXMediaGeneralUri ) );
     
@@ -763,7 +903,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
                         KMPXMediaGeneralId ).iId1, pos );
 
                 iCollection.CategoriesL().GenerateCategoryModifiedEventL(
-                        *videoInCache, ETrue /* flush */, EVcxMyVideosVideoListOrderChanged );
+                        *videoInCache, EFalse /* dont flush */, EVcxMyVideosVideoListOrderChanged );
                 }
 
             changed = ETrue;
@@ -783,7 +923,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
         if ( aVideo.IsSupported( KMPXMediaGeneralLastPlaybackPosition ) )
             {
             newFlags &= ~EVcxMyVideosVideoNew;
-            MPX_DEBUG3("CVcxMyVideosVideoCache:: %x -> %x", oldFlags, newFlags);
+            MPX_DEBUG3("CVcxMyVideosVideoCache:: flags: %x -> %x", oldFlags, newFlags);
             }
 
         if ( oldFlags != newFlags )
@@ -804,13 +944,11 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
                         oldFlags, newFlags,
                         origin,
                         modified );
-                
-                if ( !(newFlags & EVcxMyVideosVideoNew) && 
-                        origin == EVcxMyVideosOriginDownloaded )
-                    {
-                    MPX_DEBUG1("CVcxMyVideosVideoCache::UpdateVideoL - Count of new videos in Downloaded origin has decreased, sending mediator event to notification launcher");                   
-                    iCollection.NotifyNewVideosCountDecreasedL( *videoInCache );
-                    }
+
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+                iCollection.AlbumsL().NewVideoFlagChangedL(
+                        TVcxMyVideosCollectionUtil::IdL( *videoInCache ).iId1 );
+#endif
                 }
             changed = ETrue;
             }
@@ -947,23 +1085,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
             changed = ETrue;
             }
         }
-    // 18
-    if ( aVideo.IsSupported( KVcxMediaMyVideosDownloadId ) )
-        {
-        TUint32 downloadIdInCache( TVcxMyVideosCollectionUtil::DownloadIdL( *videoInCache ) );
-        TUint32 downloadIdInNew( TVcxMyVideosCollectionUtil::DownloadIdL( aVideo ) );
-        if (  downloadIdInNew != downloadIdInCache )
-            {
-            videoInCache->SetTObjectValueL<TUint32>( KVcxMediaMyVideosDownloadId,
-                    downloadIdInNew );
 
-            if ( downloadIdInNew == 0 )
-                {
-                iDownloadCache->Delete( videoInCache );
-                }
-            changed = ETrue;
-            }
-        }
     // 19
     if ( aVideo.IsSupported( KVcxMediaMyVideosRating ) )
         {
@@ -1001,10 +1123,6 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
             videoInCache->SetTObjectValueL<TUint32>( KVcxMediaMyVideosAudioFourCc,
                     AudioFourCcInNew );
 
-            if ( AudioFourCcInNew == 0 )
-                {
-                iDownloadCache->Delete( videoInCache );
-                }
             changed = ETrue;
             }
         }
@@ -1047,7 +1165,12 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
             changed = ETrue;
             }
         }
-        
+    
+    if ( changed )
+        {
+        iCollection.iMessageList->SendL();
+        }
+    
     return changed;    
     }
 
@@ -1067,6 +1190,11 @@ void CVcxMyVideosVideoCache::HandleVideoTitleModifiedL( CMPXMedia*& aVideoInCach
     iCollection.CategoriesL().UpdateCategoryNewVideoNameAndDateL(
             *aVideoInCache, modified );
 
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+    iCollection.AlbumsL().VideoTitleChangedL(
+            TVcxMyVideosCollectionUtil::IdL( *aVideoInCache ).iId1 );
+#endif
+    
     TVcxMyVideosSortingOrder sortingOrder = SortingOrderL();
     if ( sortingOrder == EVcxMyVideosSortingName )
         {
@@ -1354,22 +1482,28 @@ TInt CVcxMyVideosVideoCache::AddToCorrectPlaceL( CMPXMedia& aVideo,
         
     TInt pos = FindCorrectPositionL( aVideo, aSortingOrder );
 
-    CMPXMediaArray* cachedVideoArray = NULL;            
-    cachedVideoArray = iVideoList->Value<CMPXMediaArray>(
+    CMPXMediaArray* cachedVideoArray = iVideoList->Value<CMPXMediaArray>(
             KMPXMediaArrayContents );
 
     if ( pos > (cachedVideoArray->Count() -1) )
         {
-        cachedVideoArray->AppendL( aVideo );                    
+        cachedVideoArray->AppendL( aVideo );
         }
     else
         {
         cachedVideoArray->InsertL( aVideo, pos );
         }
-        
+    iVideoListIndex->AddL( cachedVideoArray->AtL( pos ), pos );
+#ifdef _DEBUG
+    CheckVideoListIndexL();
+#endif
+    
     if ( aUpdateCategories )
         {
         iCollection.CategoriesL().VideoAddedL( aVideo );
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+        iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( aVideo );
+#endif
         }
 
     return KErrNone;
@@ -1407,6 +1541,7 @@ TInt CVcxMyVideosVideoCache::RemoveL( CMPXMedia& aVideo, TBool aUpdateCategories
 
 // ----------------------------------------------------------------------------
 // CVcxMyVideosVideoCache::RemoveL
+// All removes end up here (except ResetVideoListL).
 // ----------------------------------------------------------------------------
 //
 TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
@@ -1421,26 +1556,14 @@ TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
         MPX_DEBUG1("CVcxMyVideosVideoCache:: RemoveL failed since the item wasn't on cache");
         return KErrNotFound;
         }
-
-    iDownloadCache->Delete( video );
-
-    TUint32 flags( 0 );
-	if ( video->IsSupported( KMPXMediaGeneralFlags ) )
-	    {
-		flags = video->ValueTObjectL<TUint32>( KMPXMediaGeneralFlags );
-		}
-    
-    if ( ( flags & EVcxMyVideosVideoNew ) && 
-            TVcxMyVideosCollectionUtil::OriginL( *video ) == EVcxMyVideosOriginDownloaded )
-        {       
-        MPX_DEBUG1("CVcxMyVideosVideoCache::RemoveL - New video has been removed from Downloaded origin -> sending mediator event to notification launcher");
-        iCollection.NotifyNewVideosCountDecreasedL( *video );
-        }
     
     if ( aUpdateCategories &&
             pos != KErrNotFound /* no need to update if item is on iPartialVideoList*/ )
         {
         iCollection.CategoriesL().VideoRemovedL( *video );
+#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+        iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( *video );
+#endif
         }
         
     if ( pos != KErrNotFound )
@@ -1450,6 +1573,10 @@ TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
         
         MPX_DEBUG2("CVcxMyVideosVideoCache:: %d removed from iVideoList", aMdsId);
         cachedVideoArray->Remove( pos );
+        iVideoListIndex->Remove( aMdsId, ETrue /* compress */);
+#ifdef _DEBUG
+        CheckVideoListIndexL();
+#endif
         }
     else
         {
@@ -1483,7 +1610,7 @@ void CVcxMyVideosVideoCache::ResetVideoListL()
     {
     MPX_FUNC("CVcxMyVideosVideoCache::ResetVideoListL");
 
-    iCollection.iMyVideosMdsDb->Cancel();
+    iCollection.iMyVideosMdsDb->Cancel( CVcxMyVideosMdsDb::EGetVideoList );
 
     CMPXMediaArray* mediaArray =
             iVideoList->ValueCObjectL<CMPXMediaArray>( KMPXMediaArrayContents );
@@ -1521,11 +1648,7 @@ void CVcxMyVideosVideoCache::ResetVideoListL()
             }
         }
         
-    iVideoListIsPartial = ETrue;
-
-    delete iDownloadCache;
-    iDownloadCache = NULL;
-    iDownloadCache = CVcxMyVideosDownloadCache::NewL();
+    SetComplete( EFalse );
                 
     iCollection.CategoriesL().ResetVideoCountersL(); //this does not send events
     }
@@ -1563,11 +1686,92 @@ void CVcxMyVideosVideoCache::ReCreateVideoListL()
     delete iVideoList;
     iVideoList = NULL;
     iVideoList = newList;
+    
+    iVideoListIndex->SetL( *iVideoList );
+#ifdef _DEBUG
+    CheckVideoListIndexL();
+#endif
+    
     CleanupStack::Pop( newList ); // <-1
-
-    delete iDownloadCache;
-    iDownloadCache = NULL;
-    iDownloadCache = CVcxMyVideosDownloadCache::NewL();
     }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoCache::IsComplete
+// ----------------------------------------------------------------------------
+//
+TBool CVcxMyVideosVideoCache::IsComplete()
+    {
+    return iVideoListIsComplete;
+    }
+
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoCache::SetComplete
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoCache::SetComplete( TBool aComplete )
+    {
+    if ( !iVideoListIsComplete && aComplete )
+        {
+        MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList turned to complete, setting up iVideoListIndex");
+        iVideoListIndex->SetL( *iVideoList );
+#ifdef _DEBUG
+        CheckVideoListIndexL();
+#endif
+        }
+    iVideoListIsComplete = aComplete;
+    }
+
+#ifdef _DEBUG
+// ----------------------------------------------------------------------------
+// CVcxMyVideosVideoCache::SetComplete
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosVideoCache::CheckVideoListIndexL()
+    {
+    if ( !IsComplete() )
+        {
+        return;
+        }
+    
+    TInt pos;
+    TInt mdsId;
+    CMPXMedia* video;
+    CMPXMediaArray* mediaArray = TVcxMyVideosCollectionUtil::MediaArrayL( *iVideoList );
+    TInt count = iVideoListIndex->VideoArray().Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        pos   = iVideoListIndex->VideoArray()[i].iPos;
+        mdsId = iVideoListIndex->VideoArray()[i].iMdsId;
+        video = iVideoListIndex->VideoArray()[i].iVideo;
+        
+        if ( pos < 0 || pos > mediaArray->Count() -1 )
+            {
+            MPX_DEBUG3( "CVcxMyVideosVideoCache:: iVideoListIndex->iVideoArray[%d].iPos out of range -> Panic",
+                    i, pos );
+            _LIT( KVideoListIndexPosCorrupted, "iVideoListIndex pos");
+            User::Panic( KVideoListIndexPosCorrupted, KErrCorrupt ); 
+            }
+        
+        if ( mediaArray->AtL( pos ) != video )
+            {
+            MPX_DEBUG3( "CVcxMyVideosVideoCache:: iVideoListIndex->iVideoArray[%d].iVideo != mediaArray->AtL( %d ) -> Panic",
+                    i, pos );
+            _LIT( KVideoListIndexVideoCorrupted, "iVideoListIndex video pointer");
+            User::Panic( KVideoListIndexVideoCorrupted, KErrCorrupt );
+            }
+        
+        if ( TVcxMyVideosCollectionUtil::IdL( *mediaArray->AtL( pos ) ).iId1 != 
+                mdsId )
+            {
+            MPX_DEBUG3( "CVcxMyVideosVideoCache:: iVideoListIndex->iVideoArray[%d].iMdsId != MDSID in mediaArray->AtL( %d ) -> Panic",
+                    i, pos );
+            _LIT( KVideoListIndexMdsIdCorrupted, "iVideoListIndex MDS ID");
+            User::Panic( KVideoListIndexMdsIdCorrupted, KErrCorrupt );        
+            }
+        }
+    MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoListIndex check OK");
+    }
+#endif
+
 // End of file
 

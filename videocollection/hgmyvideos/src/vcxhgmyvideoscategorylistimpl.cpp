@@ -194,9 +194,14 @@ void CVcxHgMyVideosCategoryListImpl::HandleOpenL( TInt /*aIndex*/ )
                         
             iCategoryModel->HandleExtraItemSelectionL( categoryId, itemType, appUid, urlString );
             
-            if ( itemType == TVcxHgMyVideosCategoryItemTypeUid )
+            // ExtraItem1 is Ovi Store
+            if ( categoryId == KCategoryIdExtraItem1 )
                 {
-                iView.LaunchAppL( appUid );
+                iView.LaunchOviStoreL( appUid, urlString );
+                }
+            else if ( itemType == TVcxHgMyVideosCategoryItemTypeUid )
+                {
+                iView.LaunchAppL( appUid, urlString );
                 }
             else if ( itemType == TVcxHgMyVideosCategoryItemTypeUrl )
                 {

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 
@@ -84,5 +84,7 @@ LIBRARY  thumbnailmanager.lib
 LIBRARY accclient.lib
 LIBRARY accpolicy.lib
 #endif
+
+MACRO    USE_S60_DOWNLOAD_MANAGER
 
 // End of File

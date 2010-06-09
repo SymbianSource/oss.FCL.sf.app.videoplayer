@@ -94,6 +94,12 @@ void TVcxMyVideosCollectionUtil::CopyFromListToListL(
     }
     
 // ---------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::AppendToListL
+// New items in aToList will point to same shared memory as items in aFromList.
+// ---------------------------------------------------------------------------
+//
+void TVcxMyVideosCollectionUtil::AppendToListL( CMPXMedia& aToList, CMPXMedia& aFromList )
+    {}
 // This helper function converts drive letter to drive number
 // ---------------------------------------------------------------------------
 //
@@ -127,6 +133,11 @@ TUint32 TVcxMyVideosCollectionUtil::FlagsL( CMPXMedia& aVideo )
     }
 
 // ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::CreationDateL
+// ----------------------------------------------------------------------------
+//
+TInt64 TVcxMyVideosCollectionUtil::CreationDateL( CMPXMedia& aVideo )
+    {}
 // TVcxMyVideosCollectionUtil::DownloadIdL
 // ----------------------------------------------------------------------------
 //
@@ -146,7 +157,7 @@ TVcxMyVideosDownloadState TVcxMyVideosCollectionUtil::DownloadStateL( CMPXMedia&
 // TVcxMyVideosCollectionUtil::IdL
 // ----------------------------------------------------------------------------
 //
-TMPXItemId TVcxMyVideosCollectionUtil::IdL( CMPXMedia& aVideo )
+TMPXItemId TVcxMyVideosCollectionUtil::IdL( const CMPXMedia& aVideo )
     {
     }
 
@@ -165,7 +176,7 @@ TReal32 TVcxMyVideosCollectionUtil::DurationL( CMPXMedia& aVideo )
 // TVcxMyVideosCollectionUtil::Title
 // ----------------------------------------------------------------------------
 //
-const TDesC& TVcxMyVideosCollectionUtil::Title( CMPXMedia& aVideo )
+const TDesC& TVcxMyVideosCollectionUtil::Title( const CMPXMedia& aVideo )
     {                            
     }
 
@@ -211,6 +222,31 @@ TInt TVcxMyVideosCollectionUtil::Origin( TInt aCategoryId )
     {
     }
     
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::MediaArrayL
+// ----------------------------------------------------------------------------
+//
+CMPXMediaArray* TVcxMyVideosCollectionUtil::MediaArrayL( const CMPXMedia& aMedia )
+    {}
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::Int32ValueL
+// ----------------------------------------------------------------------------
+//
+TInt32 TVcxMyVideosCollectionUtil::Int32ValueL( CMPXMedia& aMedia )
+    {}
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::Uint32ValueL
+// ----------------------------------------------------------------------------
+//
+TUint32 TVcxMyVideosCollectionUtil::Uint32ValueL( CMPXMedia& aMedia )
+    {}
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::GetIdsFromMediaArrayL
+// ----------------------------------------------------------------------------
+//
+void TVcxMyVideosCollectionUtil::GetIdsFromMediaArrayL( CMPXMediaArray& aMediaArray,
+        RArray<TUint32>& aIdArray )
+    {}
 #ifdef _DEBUG
 // ----------------------------------------------------------------------------
 // TVcxMyVideosCollectionUtil::PrintOpenFileHandlesL

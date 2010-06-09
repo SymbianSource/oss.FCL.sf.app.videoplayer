@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 28 %
+// Version : %version: 29 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -290,7 +290,9 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         friend class CMPXProgressiveDLPlaybackMode;
 
         friend class CMPXVideoSeeker;
+#ifdef USE_S60_DOWNLOAD_MANAGER 
         friend class CMPXVideoDlMgrIf;
+#endif // USE_S60_DOWNLOAD_MANAGER 
         friend class CMPXVideoAccessoryObserver;
         friend class CMpxVideoPlayerUtility;
         friend class CMPXVideoPosterFrameSetter;
