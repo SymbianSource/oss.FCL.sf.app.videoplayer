@@ -14,6 +14,8 @@
 # Description: 
 #
 
+DEFINES += XQPLUGIN_H
+DEFINES += XQSERVICEABSTRACTSERVICE_H
 DEFINES += XQSERVICEUTIL_H
     
 CONFIG += qtestlib \
@@ -23,11 +25,15 @@ CONFIG += qtestlib \
 LIBS += -lestor.dll \
     -lfbscli.dll \
     -lbitgdi.dll \
-    -lxqplugins.dll \
     -lmpxviewframeworkqt.dll \
+    -lxqplugins.dll \
     -lxqservice.dll
 
 HEADERS_TEMP = \
+	inc/videoserviceurifetch.h \	
+	inc/videoservicebrowse.h \
+	inc/xqserviceutilstub.h \
+	inc/xqserviceproviderstub.h \
     inc/testobjectstore.h \
     inc/hbabstractitemview.h \
     inc/hbdocumentloader.h \
@@ -82,11 +88,10 @@ HEADERS_TEMP = \
     ../../videocollectionwrapper/inc/videolistdatamodel.h \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
-    ../../videocollectionwrapper/inc/videothumbnaildata.h \
-    ../../../videoplayerapp/videoplayerengine/inc/videoserviceurifetch.h \
-    ../../../videoplayerapp/videoplayerengine/inc/videoservicebrowse.h
+    ../../videocollectionwrapper/inc/videothumbnaildata.h
 
 SOURCES_TEMP = \
+    src/xqserviceprovider.cpp \
     src/testobjectstore.cpp \
     src/hbdocumentloader.cpp \
     src/hbaction.cpp \

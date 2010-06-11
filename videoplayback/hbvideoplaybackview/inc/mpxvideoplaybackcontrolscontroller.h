@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#18 %
+// Version : %version: da1mmcf#19 %
 
 
 
@@ -73,6 +73,7 @@ enum TPlaybackViewMode
 };
 
 const int KMPXControlsTimeOut = 4000;
+const int KMPXRNLogoTimeOut = 600;
 
 const QString KMPXPLAYBACKVIEW_XML = ":/hbvideoplaybackview/hbvideoplaybackview.docml";
 
@@ -147,6 +148,8 @@ class QMPXVideoPlaybackControlsController : public QObject
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
         inline bool isAttachOperation();
+
+        bool isRNLogoBitmapInControlList();
 
     private:
         /**
@@ -230,9 +233,9 @@ class QMPXVideoPlaybackControlsController : public QObject
         void handleErrors(); 
         
         /**
-		* Return ETrue if control is visible
+		* Return true if control is visible
 		*/
-		bool isSoftKeyVisible( int value );
+		bool isSoftKeyVisible();
 
         /**
         * Handle tvout connected/disconnected event
@@ -266,6 +269,8 @@ class QMPXVideoPlaybackControlsController : public QObject
         void controlsListUpdated();
         void attachVideo();
         void sendVideo();
+        void handleRNLogoVisibleChanged();
+        void handleRNLogoTimeout();
         void handleOrientationChanged( Qt::Orientation orientation );
 
     private:
@@ -279,6 +284,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         QMPXVideoPlaybackControlConfiguration     *mControlsConfig;
 
         QTimer                                    *mControlsTimer;
+        QTimer                                    *mRNLogoTimer;
 
         QMPXVideoPlaybackDocumentLoader           *mLoader;
         HbVolumeSliderPopup                       *mVolumeControl;

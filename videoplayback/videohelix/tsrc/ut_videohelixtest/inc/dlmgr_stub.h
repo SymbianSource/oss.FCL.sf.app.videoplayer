@@ -15,8 +15,9 @@
  *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
+#ifdef USE_S60_DOWNLOAD_MANAGER 
 
 #ifndef __RHTTPDOWNLOADMGRAPIEXT_H__
 #define __RHTTPDOWNLOADMGRAPIEXT_H__
@@ -188,3 +189,4 @@ class RHttpDownloadMgrApiExt : public RHttpDownloadMgr
 
 #endif // __RHTTPDOWNLOADMGRAPIEXT_H__
 
+#endif // USE_S60_DOWNLOAD_MANAGER 

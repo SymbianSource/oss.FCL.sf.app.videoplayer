@@ -865,9 +865,9 @@ void TestVideoCollectionUiLoader::handleObjectReady(QObject *object, const QStri
     {
         if (name == DOCML_NAME_VIEW)
         {
-            HbMainWindow *window = hbInstance->allMainWindows().at(0);
-            if (window)
+            if(hbInstance->allMainWindows().count())
             {
+                HbMainWindow *window = hbInstance->allMainWindows().at(0);
                 HbView *view = qobject_cast<HbView*>(object);
                 if (view)
                 {

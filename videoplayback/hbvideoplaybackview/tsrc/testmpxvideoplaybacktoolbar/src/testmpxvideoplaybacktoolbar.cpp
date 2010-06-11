@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #include <qdebug>
@@ -33,9 +33,9 @@
 #include "mpxvideoplaybacktoolbar.h"
 #undef private
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // main
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 int main(int argc, char *argv[])
 {
@@ -49,17 +49,16 @@ int main(int argc, char *argv[])
     char *pass[3];
     pass[0] = argv[0];
     pass[1] = "-o";
-    pass[2] = "c:\\data\\TestMPXVideoPlaybackToolBar.txt";
+    pass[2] = "c:\\data\\testmpxvideoplaybacktoolbar.txt";
     
     int res = QTest::qExec(&tv, 3, pass);
     
     return res;
 }
 
-
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // init
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::init( bool attachOperation )
 {
@@ -69,14 +68,15 @@ void TestMPXVideoPlaybackToolBar::init( bool attachOperation )
     mVideoToolBar = new QMPXVideoPlaybackToolBar( mController );
 
     mVideoToolBar->setVisible( true );
+
     connect( this, SIGNAL( commandSignal() ), mVideoToolBar, SLOT( retrieveButtons() ) );
     emit commandSignal();
     disconnect( this, SIGNAL( commandSignal() ), mVideoToolBar, SLOT( retrieveButtons() ) );
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // cleanup
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::cleanup()
 {
@@ -95,9 +95,9 @@ void TestMPXVideoPlaybackToolBar::cleanup()
     }
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testPlay
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testPlay()
 {
@@ -113,9 +113,9 @@ void TestMPXVideoPlaybackToolBar::testPlay()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testLongTapOnFF
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testLongTapOnFF()
 {
@@ -148,9 +148,9 @@ void TestMPXVideoPlaybackToolBar::testLongTapOnFF()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testLongTapOnRW
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testLongTapOnRW()
 {
@@ -183,9 +183,9 @@ void TestMPXVideoPlaybackToolBar::testLongTapOnRW()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testShortTapOnFF
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testShortTapOnFF()
 {
@@ -217,9 +217,9 @@ void TestMPXVideoPlaybackToolBar::testShortTapOnFF()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testShortTapOnRW
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testShortTapOnRW()
 {
@@ -250,9 +250,9 @@ void TestMPXVideoPlaybackToolBar::testShortTapOnRW()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testPause
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testPause()
 {
@@ -268,9 +268,9 @@ void TestMPXVideoPlaybackToolBar::testPause()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testChangeAspectRatio
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testChangeAspectRatio()
 {
@@ -308,9 +308,9 @@ void TestMPXVideoPlaybackToolBar::testChangeAspectRatio()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateState
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testUpdateState()
 {
@@ -345,9 +345,9 @@ void TestMPXVideoPlaybackToolBar::testUpdateState()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testAspectRatioChanged
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testAspectRatioChanged()
 {
@@ -379,9 +379,9 @@ void TestMPXVideoPlaybackToolBar::testAspectRatioChanged()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testHandleButtonPressed
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testHandleButtonPressed()
 {
@@ -396,9 +396,9 @@ void TestMPXVideoPlaybackToolBar::testHandleButtonPressed()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateWithFileDetails
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
 {
@@ -455,13 +455,13 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoWidth = 1;
     details->mTvOutConnected = true;
     details->mSeekable = false;
-    details->mPausableStream = false;
+    details->mPausableStream = true;
 
     mVideoToolBar->updateWithFileDetails( details );
 
     QVERIFY( mVideoToolBar->mButtons[EMPX1stButton]->isEnabled() == false );
     QVERIFY( mVideoToolBar->mButtons[EMPX2ndButton]->isEnabled() == false );
-    QVERIFY( mVideoToolBar->mButtons[EMPX3rdButton]->isEnabled() == false );
+    QVERIFY( mVideoToolBar->mButtons[EMPX3rdButton]->isEnabled() == true );
     QVERIFY( mVideoToolBar->mButtons[EMPX4thButton]->isEnabled() == false );
     QVERIFY( mVideoToolBar->mButtons[EMPX5thButton]->isEnabled() == false );
 
@@ -472,7 +472,7 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoHeight = 0;
     details->mVideoWidth = 1;
     details->mTvOutConnected = true;
-    details->mSeekable = false;
+    details->mSeekable = true;
     details->mPausableStream = false;
     mController->mViewMode = EAudioOnlyView;
 
@@ -490,6 +490,8 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     details->mVideoEnabled = false;
     details->mPlaybackMode = EMPXVideoStreaming;
     mController->mViewMode = EAudioOnlyView;
+    details->mSeekable = false;
+    details->mPausableStream = false;
 	
     mVideoToolBar->updateWithFileDetails( details );
 
@@ -527,9 +529,9 @@ void TestMPXVideoPlaybackToolBar::testUpdateWithFileDetails()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testOpenDetailsView
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testOpenDetailsView()
 {
@@ -554,9 +556,9 @@ void TestMPXVideoPlaybackToolBar::testOpenDetailsView()
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testAttach
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testAttach()
 {
@@ -604,9 +606,9 @@ void TestMPXVideoPlaybackToolBar::testAttach()
     
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testSend
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackToolBar::testSend()
 {

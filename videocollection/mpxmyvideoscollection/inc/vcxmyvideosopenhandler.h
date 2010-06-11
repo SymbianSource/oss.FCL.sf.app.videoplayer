@@ -24,15 +24,6 @@ class MMPXCollectionPluginObserver;
 class CVcxMyVideosMdsDb;
 
 #include "vcxmyvideosmdsdb.h"
-
-enum TVcxItemType
-    {
-    EVcxItemTypeNone,
-    EVcxItemTypeVideo,
-    EVcxItemTypeCategory,
-    EVcxItemTypeAlbum
-    };
-
 /**
  */
 NONSHARABLE_CLASS( CVcxMyVideosOpenHandler ) : public CBase, public MVcxMyVideosMdsAlbumsObserver

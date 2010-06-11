@@ -211,6 +211,8 @@ void TestVideoListSelectionDialog::testSetupContent()
 {
     VideoCollectionWrapperData::reset();
     VideoListWidgetData::reset();
+    cleanup();
+    init();
     
     QVERIFY(mInitOk == true);
     QVERIFY(mModel != 0);

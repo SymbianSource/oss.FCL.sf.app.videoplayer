@@ -15,8 +15,8 @@
 *
 */
 
-#ifndef TESTOBJECTSTORE.h
-#define TESTOBJECTSTORE.h
+#ifndef TESTOBJECTSTORE_H
+#define TESTOBJECTSTORE_H
 
 #include <qobject.h>
 #include <qpointer.h>

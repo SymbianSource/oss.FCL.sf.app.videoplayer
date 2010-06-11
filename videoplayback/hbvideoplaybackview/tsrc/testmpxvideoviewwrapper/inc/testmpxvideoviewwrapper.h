@@ -29,28 +29,23 @@ class TestMPXVideoViewWrapper : public QObject
 {
     Q_OBJECT
 
-public:
+    public:
 
-    /**
-     * will be called before each testfunction is executed.
-     *
-     */
-    void init(); 
+        /**
+         * will be called before each testfunction is executed.
+         *
+         */
+        void init(); 
     
-    /**
-     * will be called after every testfunction.
-     *
-     */
-    void cleanup();
+        /**
+         * will be called after every testfunction.
+         *
+         */
+        void cleanup();
     
-    // test functions for the test framework
-    
-         
-private slots:
-
+    private slots:
 		// the order in which these testXX methods are declared is important
 		// changing this order will affect the test results
-
 		void testRequestMedia();
 		void testIsLive();
 		void testIsPlaylist();
@@ -62,7 +57,6 @@ private slots:
 		void testRetrieveFileNameAndMode();
 		void testActivateClosePlayerActiveObject();
 		void testDoClosePlayer();
-		void testIssuePlayCommand();
 		void testSetAspectRatio();
 		void testIsAppInFront();
 		void testClosePlaybackView();
@@ -75,26 +69,17 @@ private slots:
 		void testUpdateVideoRectDone();
 		void testHandleBufferingState();
 		void testHandleVideoPlaybackMessage();
-		void testCreateGeneralPlaybackCommand();
 		void testHandlePlaybackCommandComplete();
 		void testHandleMedia();
-		
 
+    signals:
+        void commandSignal(int);
     
-signals:
-
-    void commandSignal(int);
-    
-private:
-    CMPXVideoViewWrapper*     mVideoViewWrapper;
-    HbVideoBasePlaybackView*  mBaseVideoView;
- 
+    private:
+        CMPXVideoViewWrapper    *mVideoViewWrapper;
+        HbVideoBasePlaybackView *mBaseVideoView; 
 };
-
 
 #endif  // __TESTMPXVIDEOVIEWWRAPPER_H__
 
 // End of file
-    
-
-

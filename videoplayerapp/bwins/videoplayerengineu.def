@@ -51,4 +51,6 @@ EXPORTS
 	?setCurrentView@QVideoPlayerEngine@@AAEXXZ @ 50 NONAME ; void QVideoPlayerEngine::setCurrentView(void)
 	?sortRole@VideoServices@@QBEHXZ @ 51 NONAME ; int VideoServices::sortRole(void) const
 	?isPlayServiceInvoked@QVideoPlayerEngine@@AAE_NXZ @ 52 NONAME ; bool QVideoPlayerEngine::isPlayServiceInvoked(void)
+	?shouldActivateCollectionView@QVideoPlayerEngine@@AAE_NXZ @ 53 NONAME ; bool QVideoPlayerEngine::shouldActivateCollectionView(void)
+	?shouldExit@QVideoPlayerEngine@@AAE_NXZ @ 54 NONAME ; bool QVideoPlayerEngine::shouldExit(void)
 

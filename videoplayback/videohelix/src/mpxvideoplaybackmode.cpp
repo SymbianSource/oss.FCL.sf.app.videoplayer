@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 29 %
+// Version : %version: 32 %
 
 
 //
@@ -70,7 +70,7 @@ CMPXVideoPlaybackMode::CMPXVideoPlaybackMode()
 CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()"));
-    
+
     if ( iPosterFrameSetter )
     {
         delete iPosterFrameSetter;
@@ -223,6 +223,12 @@ TBool CMPXVideoPlaybackMode::CanPlayNow()
             MPX_TRAPD( err,
                 iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ) );
         }
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() && 
+                  iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        {
+            // playback not allowed for the clip having video if keylock is true
+            // Let playAllowed remain false
+        }
         else
         {
             playAllowed = ETrue;
@@ -287,7 +293,7 @@ void CMPXVideoPlaybackMode::HandleSetPosterFrame()
 //  ------------------------------------------------------------------------------------------------
 void CMPXVideoPlaybackMode::HandleFrameReady(TInt /*aError*/)
 {
-    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));        
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));
 }
 //************************************************************************************************//
 //          CMPXLocalPlaybackMode
@@ -311,7 +317,7 @@ CMPXLocalPlaybackMode::~CMPXLocalPlaybackMode()
 void CMPXLocalPlaybackMode::HandleSetPosterFrame()
 {
     MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleSetPosterFrame()"));
-         
+
     // create poster frame setter if it does not already exist
     if ( ! iPosterFrameSetter )
     {
@@ -321,13 +327,13 @@ void CMPXLocalPlaybackMode::HandleSetPosterFrame()
     if ( iPosterFrameSetter )
     {
         iPosterFrameSetter->RequestPosterFrame();
-    }    
+    }
 }
 
 void CMPXLocalPlaybackMode::HandleFrameReady(TInt aError)
 {
-    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));      
-    
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));
+
     iPosterFrameSetter->HandlePosterFrameReady(aError);
 }
 
@@ -422,6 +428,12 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
         {
             MPX_TRAPD(err,
                       iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ));
+        }
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() && 
+                  iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        {
+            // playback not allowed for the clip having video if keylock is true
+            // Let playAllowed remain false
         }
         else
         {
@@ -557,22 +569,30 @@ void CMPXProgressiveDLPlaybackMode::ConstructL( CMPXVideoPlaybackController* aVi
 {
     iVideoPlaybackCtlr = aVideoPlaybackCtlr;
 
+#ifdef USE_S60_DOWNLOAD_MANAGER 
     //
     //  Create the Download Mgr Interface
     //
     iDlMgrIf = CMPXVideoDlMgrIf::NewL( iVideoPlaybackCtlr );
+#endif // USE_S60_DOWNLOAD_MANAGER 
+
 }
 
 CMPXProgressiveDLPlaybackMode::~CMPXProgressiveDLPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXProgressiveDLPlaybackMode::~CMPXProgressiveDLPlaybackMode()"));
 
+#ifdef USE_S60_DOWNLOAD_MANAGER 
     if ( iDlMgrIf )
     {
         delete iDlMgrIf;
         iDlMgrIf = NULL;
     }
+#endif // USE_S60_DOWNLOAD_MANAGER 
+
 }
+
+#ifdef USE_S60_DOWNLOAD_MANAGER 
 
 //  ------------------------------------------------------------------------------------------------
 //    CMPXProgressiveDLPlaybackMode::ConnectToDownloadL()
@@ -636,5 +656,31 @@ void CMPXProgressiveDLPlaybackMode::UpdateSeekPosition( TInt64& aPosition )
         aPosition / KPbMilliMultiplier,
         KErrNone );
 }
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXProgressiveDLPlaybackMode::OpenFileL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXProgressiveDLPlaybackMode::OpenFileL( const RFile& aMediaFile )
+{
+    MPX_ENTER_EXIT(_L("CMPXProgressiveDLPlaybackMode::OpenFileL()"));
+
+    iDlMgrIf->UpdateDownloadSizeL();
+    CMPXVideoPlaybackMode::OpenFileL( aMediaFile );
+}
+
+#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+//  ------------------------------------------------------------------------------------------------
+//    CMPXProgressiveDLPlaybackMode::OpenFile64L()
+//  ------------------------------------------------------------------------------------------------
+void CMPXProgressiveDLPlaybackMode::OpenFile64L( const RFile64& aMediaFile )
+{
+    MPX_ENTER_EXIT(_L("CMPXProgressiveDLPlaybackMode::OpenFile64L( RFile64 )"));
+
+    iDlMgrIf->UpdateDownloadSizeL();
+    CMPXVideoPlaybackMode::OpenFile64L( aMediaFile );
+}
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+
+#endif // USE_S60_DOWNLOAD_MANAGER
 
 // End of file

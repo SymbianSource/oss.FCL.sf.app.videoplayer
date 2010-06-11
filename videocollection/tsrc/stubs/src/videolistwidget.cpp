@@ -25,6 +25,7 @@ int VideoListWidgetData::mActivateCount = 0;
 int VideoListWidgetData::mActivateReturnValue = 0;
 bool VideoListWidgetData::mActive = false;
 int VideoListWidgetData::mDeactivateCount = 0;
+QModelIndex VideoListWidgetData::mEmitActivatedIndex = QModelIndex();
 
 VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *parent):
     HbListView(parent),
@@ -48,13 +49,13 @@ VideoListWidget::~VideoListWidget()
 }
 
 int VideoListWidget::initialize(VideoSortFilterProxyModel &model,
-    VideoServices *videoServices)
+    VideoServices *videoServices, VideoCollectionCommon::TCollectionLevels level)
 {
     Q_UNUSED(videoServices);
 
     VideoListWidgetData::mInitializeCount++;
     mModel = &model;
-    
+    mCurrentLevel = level;
     return VideoListWidgetData::mInitializeReturnValue;
 }
 
@@ -116,8 +117,7 @@ VideoSortFilterProxyModel& VideoListWidget::getModel()
 
 void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
 {
-    Q_UNUSED(modelIndex);
-    // not stubbed
+    VideoListWidgetData::mEmitActivatedIndex = modelIndex;
 }
 
 void VideoListWidget::setSelectionMode(int mode)

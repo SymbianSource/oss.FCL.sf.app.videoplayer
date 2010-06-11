@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 #include <qdebug>
@@ -252,20 +252,35 @@ void TestProgressBar::testUpdateWithFileDetails()
 
     setup();
 
-    // test for tv-out
-    mController->mFileDetails->mPlaybackMode = EMPXVideoLocal; 
-    mController->mFileDetails->mTvOutConnected = true;
-    mProgBar->updateWithFileDetails( mController->mFileDetails );
-    QVERIFY( mProgBar->mProgressSlider->isEnabled() );
-
-    // live streaming
-    mController->mFileDetails->mPlaybackMode = EMPXVideoLiveStreaming; 
+    //
+    // pausable + non seekable
+    //
+    mController->mFileDetails->mPausableStream = true;
+    mController->mFileDetails->mSeekable = false;
     mProgBar->updateWithFileDetails( mController->mFileDetails );
     QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
 
+    //
+    // non pausable + seekable
+    //
+    mController->mFileDetails->mPausableStream = false;
+    mController->mFileDetails->mSeekable = true;
+    mProgBar->updateWithFileDetails( mController->mFileDetails );
+    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
+
+    //
+    // non pausable + non seekable
+    //
+    mController->mFileDetails->mPausableStream = false;
+    mController->mFileDetails->mSeekable = false;
+    mProgBar->updateWithFileDetails( mController->mFileDetails );
+    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
+
+    //
     // other cases
-    mController->mFileDetails->mPlaybackMode = EMPXVideoLocal; 
-    mController->mFileDetails->mTvOutConnected = false;
+    //
+    mController->mFileDetails->mPausableStream = true;
+    mController->mFileDetails->mSeekable = true;
     mProgBar->updateWithFileDetails( mController->mFileDetails );
     QVERIFY( mProgBar->mProgressSlider->isEnabled() );
 

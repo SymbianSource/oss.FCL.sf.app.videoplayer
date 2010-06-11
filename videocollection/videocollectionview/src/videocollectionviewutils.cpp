@@ -18,6 +18,8 @@
 // Version : %version: 39 %
 
 // INCLUDE FILES
+#include <hbapplication.h>
+#include <hbactivitymanager.h>
 #include <hbglobal.h>
 #include <hblistview.h>
 #include <hbscrollbar.h>
@@ -48,6 +50,8 @@ const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
 const int KAddToCollectionDataCount(2);
 const int KAddToCollectionCountIndex(0);
 const int KAddToCollectionNameIndex(1);
+
+static const char* ACTIVITY_VIDEOS_MAINVIEW = "VideosMainView";
 
 // ---------------------------------------------------------------------------
 // instance
@@ -308,6 +312,53 @@ void VideoCollectionViewUtils::sortModel(
 
         model->doSorting(sortRole, sortOrder, async);
     }
+}
+
+// ---------------------------------------------------------------------------
+// saveWidgetLevel
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::saveWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+{
+    FUNC_LOG;
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+    if(!activityManager)
+    {
+        return;
+    }
+    // clean up any previous versions of this activity from the activity manager.
+   activityManager->removeActivity(ACTIVITY_VIDEOS_MAINVIEW);
+   
+   QVariant data = int(level);
+   
+   activityManager->addActivity(ACTIVITY_VIDEOS_MAINVIEW, data, QVariantHash());
+
+
+}
+  
+// ---------------------------------------------------------------------------
+// loadWidgetLevel
+// ---------------------------------------------------------------------------
+//
+VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtils::loadWidgetLevel()
+{
+    FUNC_LOG;
+    // all videos view is the default value to be returned in case nothing can be read
+    // from the activity manager
+    VideoCollectionCommon::TCollectionLevels level(VideoCollectionCommon::ELevelVideos);
+    
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+    if(!activityManager)
+    {
+        return level;
+    }
+    QVariant data =activityManager->activityData(ACTIVITY_VIDEOS_MAINVIEW);
+    if(data.toInt() == VideoCollectionCommon::ELevelCategory)
+    {
+        level = VideoCollectionCommon::ELevelCategory;
+    }
+    return level;
+
 }
 
 // ---------------------------------------------------------------------------

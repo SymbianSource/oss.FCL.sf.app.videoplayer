@@ -15,6 +15,7 @@
  *
  */
 
+#include "xqserviceproviderstub.h"
 #include "videoserviceurifetch.h"
 #include "videoservices.h"
 

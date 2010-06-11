@@ -11,19 +11,19 @@
 *
 * Contributors:
 *
-* Description:     hbvideoplayer.iby
+* Description: videoplayerresources.iby
 *
 */
 
 
-#ifndef __HBVIDEOPLAYER_IBY__
-#define __HBVIDEOPLAYER_IBY__
+#ifndef __VIDEOPLAYERRESOURCES_IBY__
+#define __VIDEOPLAYERRESOURCES_IBY__
 
 #include <bldvariant.hrh>
 #include <data_caging_paths_for_iby.hrh>
 
-S60_APP_EXE(videoplayer)
-data=DATAZ_/PRIVATE/10003A3F/import/APPS/videoplayer_reg.rsc    private/10003a3f/import/apps/videoplayer_reg.rsc
-data=DATAZ_\install\videoplayer_stub.sis                        system\install\videoplayer_stub.sis 
+S60_APP_RESOURCE(videoplayer)
 
-#endif  // __HBVIDEOPLAYER_IBY__
+data=DATAZ_\QT_TRANSLATIONS_DIR\videos.qm                       QT_TRANSLATIONS_DIR\videos.qm 
+
+#endif  // __VIDEOPLAYERRESOURCES_IBY__

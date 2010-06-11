@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#13 %
+// Version : %version: da1mmcf#14 %
 
 
 
@@ -127,6 +127,7 @@ QMPXVideoPlaybackControlPolicy::setControlProperties( TMPXVideoPlaybackControls 
         }
         case EMPXFileDetailsWidget:
         case EMPXIndicatorBitmap:
+        case EMPXRealLogoBitmap:
         case EMPXDetailsViewPlaybackWindow:
         {
             //

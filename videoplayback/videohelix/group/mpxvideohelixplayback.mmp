@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 15 %
+// Version : %version: 17 %
 
 
 
@@ -39,7 +39,6 @@ SOURCE          mpxvideoplaybackstate.cpp
 SOURCE          mpxvideoplaybackmode.cpp
 SOURCE          mpxvideofiledetails.cpp
 SOURCE          mpxvideoseeker.cpp
-SOURCE          mpxvideodlmgrif.cpp
 SOURCE          mpxvideoaccessoryobserver.cpp
 SOURCE          mpxvideoplayerutility.cpp
 SOURCE          mpxvideodrmhelper.cpp
@@ -67,7 +66,6 @@ LIBRARY  mpxcommon.lib
 LIBRARY  estor.lib
 LIBRARY  flogger.lib
 LIBRARY  playbackhelper.lib
-LIBRARY  downloadmgr.lib
 LIBRARY  platformenv.lib
 LIBRARY  etel.lib
 LIBRARY  etelmm.lib

@@ -275,6 +275,12 @@ public:
         Q_UNUSED(position);
         return mItem;
     }
+    
+    void setObjectName(const QString name)
+    {
+        Q_UNUSED(name);
+    }
+    
 public:
     
     /**

@@ -25,6 +25,7 @@
 // FORWARD DECLARATIONS
 class CVcxMyVideosCollectionPlugin;
 class CMPXMedia;
+class CRepository;
 
 // CONSTANTS
 
@@ -490,7 +491,7 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         /**
          * Set to ETrue when doing videolist fetching.
          */
-        TBool IsFetchingVideoList;
+        TBool iIsFetchingVideoList;
     private:
 
         /**
@@ -508,6 +509,12 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
          * order for fast access.
          */
         CVcxMyVideosVideoListIndex* iVideoListIndex;
+        
+        /**
+        * Provides access to the sorting order key in cenrep. Own.
+        */
+        CRepository* iCenRep;
+
     };
 
 #endif   // VCXMYVIDEOSVIDEOCACHE_H

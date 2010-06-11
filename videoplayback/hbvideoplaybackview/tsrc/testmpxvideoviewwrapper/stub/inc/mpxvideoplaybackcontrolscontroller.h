@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -72,30 +72,17 @@ class QMPXVideoPlaybackControlsController : public QObject
         //
         void updateVideoRectDone();
 
-    public:
-    	
-        /**
-        * Initialize controller
-        */
-        void initializeController();
-
-        /**
-        * Handle tvout connected/disconnected event
-        */
-        void handleTvOutEvent( bool connected, 
-		                           TMPXVideoPlaybackControlCommandIds event,
-		                           int value );
-
-    private slots:
-
-        void handleTappedOnScreen();
+        bool isRNLogoBitmapInControlList();
 
     public:
         HbVideoBasePlaybackView                   *mView;
         CMPXVideoViewWrapper                      *mViewWrapper;
         QMPXVideoPlaybackViewFileDetails          *mFileDetails;
+        TMPXVideoPlaybackControlCommandIds         mReceivedEvent;
 
-        bool                                       mViewTransitionIsGoingOn;
+        int   mValue;
+        bool  mRNLogoVisible;
+        bool  mFileDetailsAdded;
 };
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

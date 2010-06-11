@@ -40,6 +40,12 @@
 	</layer>  
 
 	<layer name="unit_test_layer">
+		<module name="videoplayback_tsrc">
+			<unit unitID="vado.videohelix_test" name="videohelix_tsrc" bldFile="&layer_real_source_path;/videoplayback/videohelix/tsrc/ut_videohelixtest/group" mrp=""/>
+		</module>
+		<module name="videocollection_tsrc">
+			<unit unitID="vado.mpxmyvideoscollection_test" name="mpxmyvideoscollection_tsrc" bldFile="&layer_real_source_path;/videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/group" mrp=""/>
+		</module>
 	</layer>  
 	
   </systemModel>

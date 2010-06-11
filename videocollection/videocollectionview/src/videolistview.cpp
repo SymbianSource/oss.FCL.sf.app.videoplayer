@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 106 %
+// Version : %version: 108 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -123,14 +123,30 @@ int VideoListView::initializeView()
         	connect(mVideoServices, SIGNAL(titleReady(const QString&)), this, SLOT(titleReadySlot(const QString&)));
         }
 	}
-    
-    // start loading objects and widgets
     QList<VideoCollectionUiLoaderParam> params;
+    int videoListPhase = VideoCollectionUiLoaderParam::LoadPhasePrimary;
+    int collectionListPhase = VideoCollectionUiLoaderParam::LoadPhaseSecondary;
+    
+    if(VideoCollectionViewUtils::loadWidgetLevel() == VideoCollectionCommon::ELevelCategory)
+    {
+        videoListPhase = VideoCollectionUiLoaderParam::LoadPhaseSecondary;
+        collectionListPhase = VideoCollectionUiLoaderParam::LoadPhasePrimary;
+       
+       
+    }
+    // start loading objects and widgets
     params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_VC_VIDEOLISTWIDGET,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhasePrimary));
+                   DOCML_NAME_VC_VIDEOLISTWIDGET,
+                   DOCML_VIDEOCOLLECTIONVIEW_FILE,
+                   true,
+                   videoListPhase));
+    params.append(VideoCollectionUiLoaderParam(
+                   DOCML_NAME_VC_COLLECTIONWIDGET,
+                   DOCML_VIDEOCOLLECTIONVIEW_FILE,
+                   DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
+                   true,
+                   collectionListPhase));
+        
     params.append(VideoCollectionUiLoaderParam(
         DOCML_NAME_OPTIONS_MENU,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
@@ -180,13 +196,7 @@ int VideoListView::initializeView()
         DOCML_NAME_SORT_BY_SIZE,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
         false,
-        VideoCollectionUiLoaderParam::LoadPhaseSecondary));
-    params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_VC_COLLECTIONWIDGET,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhaseSecondary));
+        VideoCollectionUiLoaderParam::LoadPhaseSecondary));   
     params.append(VideoCollectionUiLoaderParam(
         DOCML_NAME_VC_COLLECTIONCONTENTWIDGET,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
@@ -221,6 +231,17 @@ int VideoListView::initializeView()
         SLOT(objectReadySlot(QObject*, const QString&)));
     mUiLoader->loadPhase(VideoCollectionUiLoaderParam::LoadPhasePrimary);
     params.clear();
+    
+    if(videoListPhase == VideoCollectionUiLoaderParam::LoadPhasePrimary)
+    {
+        mCurrentList = mUiLoader->findWidget<VideoListWidget>(
+                                DOCML_NAME_VC_VIDEOLISTWIDGET);
+    }
+    else
+    {
+        mCurrentList = mUiLoader->findWidget<VideoListWidget>(
+                                    DOCML_NAME_VC_COLLECTIONWIDGET);
+    }
     
     return 0;
 }
@@ -294,7 +315,10 @@ void VideoListView::doDelayedsSlot()
 {
 	FUNC_LOG;
     mUiLoader->loadPhase(VideoCollectionUiLoaderParam::LoadPhaseSecondary);
-	emit doDelayeds();
+	if(mCurrentList)
+	{
+	    mCurrentList->doDelayedsSlot();
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -375,6 +399,8 @@ void VideoListView::deactivateView()
     
     if(mCurrentList)
     {
+        VideoCollectionCommon::TCollectionLevels level = mCurrentList->getLevel();
+        VideoCollectionViewUtils::saveWidgetLevel(level);
         mCurrentList->deactivate();
     }
 }
@@ -473,8 +499,14 @@ int VideoListView::createToolbar()
         	mToolbarActions[ETBActionServices]->setCheckable(false);
         }
 
-        // Allvideos is checked at creation phase
-        mToolbarActions[ETBActionAllVideos]->setChecked(true);
+        if(mCurrentList->getLevel() == VideoCollectionCommon::ELevelCategory)
+        {
+            mToolbarActions[ETBActionCollections]->setChecked(true);
+        }
+        else
+        {
+            mToolbarActions[ETBActionAllVideos]->setChecked(true);
+        }
 
         bar->addActions(mToolbarViewsActionGroup->actions());
     }
@@ -667,39 +699,26 @@ void VideoListView::showAction(bool show, const QString &name)
 int VideoListView::activateVideosView()
 {
     FUNC_LOG;
-    VideoListWidget *videoList =
-        mUiLoader->findWidget<VideoListWidget>(
-            DOCML_NAME_VC_VIDEOLISTWIDGET);
-    if (videoList)
+
+    if(!mCurrentList)
     {
-        VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
-        if (mCurrentList)
-        {
-            level = mCurrentList->getLevel();
-        }
-        else
-        {
-            mCurrentList = videoList;
-        }
-        
-        int result = mCurrentList->activate(level);
-        if(result < 0)
-        {
-            ERROR(result, "VideoListView::activateVideosView() failed to activate.");
-            // activate failed, deactivate view so we get rid of dangling connections.
-            deactivateView();
-            return -1;
-        }
-        
-        if (createToolbar() != 0)
-        {
-            ERROR(result, "VideoListView::activateVideosView() failed to create toolbar.");
-            deactivateView();
-            return -1;
-        }
+        return -1;
     }
-    else
+    VideoCollectionCommon::TCollectionLevels level = mCurrentList->getLevel(); 
+
+    int result = mCurrentList->activate(level);
+    if(result < 0)
     {
+        ERROR(result, "VideoListView::activateVideosView() failed to activate.");
+        // activate failed, deactivate view so we get rid of dangling connections.
+        deactivateView();
+        return -1;
+    }
+    
+    if (createToolbar() != 0)
+    {
+        ERROR(result, "VideoListView::activateVideosView() failed to create toolbar.");
+        deactivateView();
         return -1;
     }
     
@@ -858,9 +877,7 @@ void VideoListView::openCollectionViewSlot()
         
         // activate video collection widget
         mCurrentList = collectionWidget;
-        mCurrentList->activate(VideoCollectionCommon::ELevelCategory);
-        
-        VideoSortFilterProxyModel &model = mCurrentList->getModel(); 
+        mCurrentList->activate(VideoCollectionCommon::ELevelCategory);        
 
         // the collection view is not empty, so we should hide the hint in advance.
         showHint(false);
@@ -1425,15 +1442,24 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
     if (name.compare(DOCML_NAME_VC_VIDEOLISTWIDGET) == 0)
     {
         connect(object, SIGNAL(command(int)), this, SIGNAL(command(int)));
-        connect(this, SIGNAL(doDelayeds()), object, SLOT(doDelayedsSlot()));
+        if(mCurrentList != object)
+        {
+            // this widget not yet activated so it's has been created on the second phase
+            // safe to call doDelayed right away
+            qobject_cast<VideoListWidget*>(object)->doDelayedsSlot();
+        }
     }
     else if (name.compare(DOCML_NAME_VC_COLLECTIONWIDGET) == 0)
     {
         connect(
             object, SIGNAL(collectionOpened(bool, const QString&, const QModelIndex&)),
             this, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-            connect(this, SIGNAL(doDelayeds()), object, SLOT(doDelayedsSlot()));
-            emit(doDelayeds());
+        if(mCurrentList != object)
+        {
+            // this widget not yet activated so it's has been created on the second phase
+            // safe to call doDelayed right away
+            qobject_cast<VideoListWidget*>(object)->doDelayedsSlot();
+        }
     }
     else if (name.compare(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET) == 0)
     {
@@ -1441,8 +1467,12 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
         connect(
             object, SIGNAL(collectionOpened(bool, const QString&, const QModelIndex&)),
             this, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-            connect(this, SIGNAL(doDelayeds()), object, SLOT(doDelayedsSlot()));
-            emit(doDelayeds());
+        if(mCurrentList != object)
+        {
+            // this widget not yet activated so it's has been created on the second phase
+            // safe to call doDelayed right away
+            qobject_cast<VideoListWidget*>(object)->doDelayedsSlot();
+        }        
     }
     else if (name.compare(DOCML_NAME_OPTIONS_MENU) == 0)
     {

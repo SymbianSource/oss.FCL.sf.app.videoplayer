@@ -53,7 +53,7 @@ SOURCES += src/testvideocollectionviewutils.cpp \
     \ # sources needed in test
     ../../src/videocollectionviewutils.cpp
    
-TESTEDCLASS = videocollectionviewutils.cpp
+TESTEDCLASS = videocollectionviewutils
 include(../../../tsrc/stubs/stubs.pro)
     
            

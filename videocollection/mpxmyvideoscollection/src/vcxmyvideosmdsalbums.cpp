@@ -1042,7 +1042,10 @@ void CVcxMyVideosMdsAlbums::HandleRelationItemNotification(CMdESession& /*aSessi
         TObserverNotificationType aType,
         const RArray<TMdERelation>& aRelationArray)
     {
-    iObserver->HandleRelationEvent( aType, aRelationArray );
+    if ( iObserver )
+        {
+        iObserver->HandleRelationEvent( aType, aRelationArray );
+        }
     }
 
 #if 0
@@ -1059,7 +1062,10 @@ void CVcxMyVideosMdsAlbums::HandleRelationNotification(CMdESession& /*aSession*/
         {
         case ENotifyAdd:
             MPX_DEBUG1("CVcxMyVideosMdsAlbums:: relation ENotifyAdd");
-            iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
+            if ( iObserver )
+                {
+                iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
+                }
             break;
         case ENotifyModify:
             MPX_DEBUG1("CVcxMyVideosMdsAlbums:: ENotifyModify");

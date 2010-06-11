@@ -15,7 +15,8 @@
 */
 
 
-// Version : %version: da1mmcf#3 %
+// Version : %version: da1mmcf#4 %
+
 
 #ifndef __MPXVIDEOPLAYERCUSTOMVIEWMSGCONSTS_H__
 #define __MPXVIDEOPLAYERCUSTOMVIEWMSGCONSTS_H__
@@ -31,5 +32,6 @@ const TInt KVcxCustomViewMessagePtr = 0x200211F9;
 
 const TInt KMpxVideoPlaybackPdlReloading = 0x20024339;
 
+const TInt KMpxVideoPlaybackPdlReloadComplete = 0x2002433A;
 
 #endif // __MPXVIDEOPLAYERCUSTOMVIEWMSGCONSTS_H__

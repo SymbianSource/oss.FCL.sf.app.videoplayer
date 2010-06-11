@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 13 %
+// Version : %version: 14 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -81,7 +81,11 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         
         void setCurrentView();
         
-        bool isPlayServiceInvoked();        
+        bool isPlayServiceInvoked();  
+        
+        bool shouldExit();
+        
+        bool shouldActivateCollectionView();
 
     private:
         bool                      mIsService;

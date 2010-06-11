@@ -79,7 +79,11 @@ private slots:
      * verifies sortModel
      */
     void testSortModel();
-
+    
+    /**
+     * verifies saveWidgetLevel & loadWidgetLevel
+     */
+    void testSaveAndLoadWidgetLevel();
 };
 
 

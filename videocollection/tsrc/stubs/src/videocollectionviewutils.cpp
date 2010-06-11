@@ -28,6 +28,7 @@ Qt::SortOrder VideoCollectionViewUtilsData::mCollectionSortOrder = Qt::Ascending
 QString VideoCollectionViewUtilsData::mIconString = "";
 QString VideoCollectionViewUtilsData::mPressedString = "";
 QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
+VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelInvalid;
 
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
@@ -122,6 +123,17 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
 {
     Q_UNUSED(view);
     // not stubbed
+}
+
+void VideoCollectionViewUtils::saveWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+{
+    Q_UNUSED(level);
+    // not stubbed
+}
+  
+VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtils::loadWidgetLevel()
+{
+    return VideoCollectionViewUtilsData::mWidgetLevel;
 }
 
 void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,

@@ -20,6 +20,7 @@
 
 #include <qnamespace.h>
 #include <qvariant.h>
+#include "videocollectioncommon.h"
 
 class VideoCollectionViewUtilsData
 {
@@ -36,6 +37,7 @@ public: // methods
         mIconString = "";
         mPressedString = "";
         mLastStatusAdditional = QVariant();
+        mWidgetLevel = VideoCollectionCommon::ELevelInvalid;
     }   
     
 public: // data
@@ -49,6 +51,7 @@ public: // data
     static QString mIconString;
     static QString mPressedString;
     static QVariant mLastStatusAdditional;
+    static VideoCollectionCommon::TCollectionLevels mWidgetLevel;
 };
 
 #endif /* VIDEOCOLLECTIONVIEWUTILSDATA_H */

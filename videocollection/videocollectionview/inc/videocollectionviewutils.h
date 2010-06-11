@@ -83,6 +83,21 @@ public:
      * Initilizes model sort values.
      */
     static void sortModel(VideoSortFilterProxyModel *model, bool async, VideoCollectionCommon::TCollectionLevels target);
+    
+    /**
+     * Method saves the latest videolist widget level into activity manager db
+     * 
+     * @param level type of widget 
+     */
+    static void saveWidgetLevel(VideoCollectionCommon::TCollectionLevels &level);
+    
+    /**
+     * Method loads the latest videolist widget level from activity manager db.
+     * Possible values are ELevelCategory or ELevelVideos
+     * 
+     * @return VideoCollectionCommon::TCollectionLevels
+     */
+    static VideoCollectionCommon::TCollectionLevels loadWidgetLevel();
 
 public slots:
     

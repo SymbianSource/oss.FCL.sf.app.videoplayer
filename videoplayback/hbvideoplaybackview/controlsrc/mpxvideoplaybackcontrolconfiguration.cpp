@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#19 %
+// Version : %version: da1mmcf#20 %
 
 
 
@@ -64,6 +64,8 @@ void QMPXVideoPlaybackControlConfiguration::createControlList()
 
     QMPXVideoPlaybackViewFileDetails* fileDetails = mControlsController->fileDetails();
 
+    addControlToList( EMPXStatusPane );
+
     if ( fileDetails->mPlaybackMode == EMPXVideoStreaming ||
          fileDetails->mPlaybackMode == EMPXVideoLiveStreaming )
     {
@@ -72,8 +74,10 @@ void QMPXVideoPlaybackControlConfiguration::createControlList()
         //
         addControlToList( EMPXBufferingAnimation );
     }
-
-    addControlToList( EMPXStatusPane );
+    else if ( fileDetails->mRNFormat )
+    {
+        addControlToList( EMPXRealLogoBitmap );
+    }
 
     emit controlListUpdated();
 }
@@ -143,12 +147,12 @@ void QMPXVideoPlaybackControlConfiguration::updateControlList(
 
             break;
         }
-        case EMPXControlCmdTvOutDisconnected:
+        case EMPXControlCmdRemoveRNLogo:
         {
-            break;
-        }
-        default:
-        {
+            MPX_DEBUG(_L("QMPXVideoPlaybackControlConfiguration::updateControlList() RN Logo removed"));
+
+            deleteControlFromList( EMPXRealLogoBitmap );
+
             break;
         }
     }

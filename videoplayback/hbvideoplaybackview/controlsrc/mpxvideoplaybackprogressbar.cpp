@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#22 %
+// Version : %version: da1mmcf#23 %
 
 
 
@@ -127,7 +127,6 @@ void QMPXVideoPlaybackProgressBar::initialize()
         // Set the position to 0 until we get position information
         //
         positionChanged( 0 );
-
 
         //
         // Set framedrawer for semi transparent background
@@ -364,8 +363,8 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::updateControlsWithFileDetails()"));
 
-    if ( details->mPlaybackMode == EMPXVideoLiveStreaming )
-    {
+    if ( ! details->mPausableStream || ! details->mSeekable )
+    {    
         mProgressSlider->setEnabled( false );
     }
     else if ( ! mProgressSlider->isEnabled() )

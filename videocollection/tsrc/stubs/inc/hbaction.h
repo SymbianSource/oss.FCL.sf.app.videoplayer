@@ -26,13 +26,8 @@
 #include "hbicon.h"
 #include "hbmenu.h"
 
-class XQServiceUtil
-{
-public:
-    static void toBackground(bool value);
-    static bool isEmbedded(); 
-    static bool isService();
-};
+#include "xqserviceutilstub.h"
+#include "xqserviceproviderstub.h"
 
 class  HbAction : public QAction
 {

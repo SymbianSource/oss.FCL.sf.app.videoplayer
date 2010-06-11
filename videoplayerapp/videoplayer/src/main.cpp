@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 1 %
 
 
 #include <QObject>

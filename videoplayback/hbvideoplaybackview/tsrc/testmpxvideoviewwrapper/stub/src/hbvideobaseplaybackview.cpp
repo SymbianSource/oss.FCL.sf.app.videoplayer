@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  7 %
 
 
 
@@ -38,6 +38,7 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 {
     mCurrentError = KErrNone;
     mViewActive = false;
+    mSyncClose = false;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -196,6 +197,15 @@ RWindow *HbVideoBasePlaybackView::getWindow()
 //
 void HbVideoBasePlaybackView::handleClosePopupDialog()
 {
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::handleStoppedState()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::handleStoppedState()
+{
+    
 }
 
 // EOF

@@ -162,12 +162,21 @@ bool TestVideoThumbnailData_p::checkThumbnailReadyCount(QSignalSpy *spy, int cou
 //
 void TestVideoThumbnailData_p::testDestructor()
 {
-    mWrapper = 0;
+    init();
     
-    mTestObject = new VideoThumbnailDataTester();
-    delete mTestObject; mTestObject = 0;
+    mTestObject->getThumbnail(TMPXItemId(1, 0));
+    mTestObject->getThumbnail(TMPXItemId(0, 1));
+
+    QPointer<VideoThumbnailFetcher> thumbFetcher = mTestObject->mThumbnailFetcher;
+    QPointer<QTimer> reportTimer = mTestObject->mTbnReportTimer;
+    QPointer<QTimer> fetchTimer = mTestObject->mBgFetchTimer;
     
-    //TODO
+    cleanup();
+    
+    QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
+    QVERIFY(thumbFetcher == 0);
+    QVERIFY(reportTimer == 0);
+    QVERIFY(fetchTimer == 0);
 }
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#30 %
+// Version : %version: da1mmcf#31 %
 
 
 #include <QApplication>
@@ -249,57 +249,52 @@ void QVideoPlayerEngine::activateView( MpxHbVideoCommon::MpxHbVideoViewType view
         mCurrentViewPlugin = NULL;
     }
 
-    if ( viewType == MpxHbVideoCommon::CollectionView && mCollectionViewPlugin  ) 
+    switch ( viewType )
     {
-        if ( mIsService &&  
-             ( mVideoServices->currentService() == VideoServices::EPlayback ||
-               mVideoServices->currentService() == VideoServices::EView || 
-               mVideoServices->currentService() == VideoServices::EUriFetcher ) )
+        case MpxHbVideoCommon::CollectionView:
         {
-            if ( mVideoServices->currentService() == VideoServices::EUriFetcher )
-            {
-                if ( ! mVideoServices->mFetchSelected )    
-                {
-                    // 
-                    // view is in 'fetch' service but 'attach' operation has not been selected,
-                    // therefore, go back to collection view
-                    //
-                    mCurrentViewPlugin = mCollectionViewPlugin;
-                    setCurrentView();                    
-                }
-            }
-            else
+            if ( shouldExit() )
             {
                 qApp->quit();
-                XQServiceUtil::toBackground( false );
+                XQServiceUtil::toBackground( false );             
             }
+            else if ( shouldActivateCollectionView()  )
+            {
+                if ( ! mCollectionViewPlugin )
+                {
+                    loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );
+                }            
+                mCurrentViewPlugin = mCollectionViewPlugin;
+                setCurrentView();                    
+            }
+            
+            break;    
         }
-        else
+        case MpxHbVideoCommon::PlaybackView:
         {
-            mCurrentViewPlugin = mCollectionViewPlugin;
-            setCurrentView();
+            if ( ! mPlaybackViewPlugin )
+            {
+                loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
+            }
+            
+            mCurrentViewPlugin = mPlaybackViewPlugin;
+            setCurrentView();     
+            
+            break;    
         }
-    }
-    else if ( viewType == MpxHbVideoCommon::PlaybackView ) 
-    {
-        if ( ! mPlaybackViewPlugin )
-    	{
-            loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
-        }
-		
-        mCurrentViewPlugin = mPlaybackViewPlugin;
-        setCurrentView();
-    }
-    else if ( viewType == MpxHbVideoCommon::VideoDetailsView ) 
-    {
-        if ( ! mFileDetailsViewPlugin )
-    	{
-            loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );	
-    	}
-		
-        mCurrentViewPlugin = mFileDetailsViewPlugin;
-        setCurrentView();
-    }
+        case MpxHbVideoCommon::VideoDetailsView:
+        {
+            if ( ! mFileDetailsViewPlugin )
+            {
+                loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );  
+            }
+            
+            mCurrentViewPlugin = mFileDetailsViewPlugin;
+            setCurrentView();       
+            
+            break;    
+        }        
+    }    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -513,6 +508,49 @@ bool QVideoPlayerEngine::isPlayServiceInvoked()
             mIsPlayService = true;
         }
     }
+    
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------
+// shouldExit()
+// -------------------------------------------------------------------------------------------------
+//
+bool QVideoPlayerEngine::shouldExit()
+{            
+    bool result = false;
+    
+    if ( mIsPlayService )  // play or view service
+    {
+        result = true;               
+    }
+    
+    MPX_DEBUG(_L("QVideoPlayerEngine::shouldExit() return %d"), result);     
+    
+    return result;
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// shouldActivateCollectionView()
+// -------------------------------------------------------------------------------------------------
+//
+bool QVideoPlayerEngine::shouldActivateCollectionView()
+{            
+    bool result = true;  
+    
+    // the only case where collection view should NOT be activated is ...
+    // if we are in service and that service is fetch and if fetch is selected 
+    // in all other cases collection view should be activated
+    
+    if ( mIsService &&
+         mVideoServices->currentService() == VideoServices::EUriFetcher &&
+         mVideoServices->mFetchSelected  )
+    {
+        result = false;                    
+    }  
+        
+    MPX_DEBUG(_L("QVideoPlayerEngine::shouldActivateCollectionView() return %d"), result);     
     
     return result;
 }

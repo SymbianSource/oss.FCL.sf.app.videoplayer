@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  5 %
 
 
 
@@ -76,6 +76,8 @@ class HbVideoBasePlaybackView : public HbView
         
         virtual void doClosePlayer();
 
+        void handleStoppedState();
+
     signals:
         void tappedOnScreen();
 
@@ -85,6 +87,7 @@ class HbVideoBasePlaybackView : public HbView
     public:
         int mCurrentError;   // default = KErrNone 
         bool mViewActive;
+        bool mSyncClose;
         
         
     public:
