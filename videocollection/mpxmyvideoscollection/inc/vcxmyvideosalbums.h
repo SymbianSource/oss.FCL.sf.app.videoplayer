@@ -160,8 +160,13 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
 
         /**
          * Calculates and updates album media attributes.
+         * Adds events to iCollection.iMessageList if albums
+         * are modified. Does not send them.
+         * 
+         * @return  Returns ETrue if events were added to iCollection.iMessageList,
+         *          EFalse otherwise.
          */
-        void CalculateAttributesL();
+        TBool CalculateAttributesL();
         
         /**
          * Called when video's New Video flag changes. Calculates

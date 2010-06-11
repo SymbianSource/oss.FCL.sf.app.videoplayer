@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 29 %
+// Version : %version: 30 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -40,6 +40,7 @@
 // Object names.
 const char* const SELECTION_DIALOG_OBJECT_NAME_LIST_WIDGET    = "vc:SelectionDialogListWidget";
 const char* const SELECTION_DIALOG_OBJECT_NAME_NEW_COLLECTION = "vc:SelectionDialogNewCollection";
+const char* const LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION     = "vc::ListViewInputDialogCreateCollection";
 const char* const SELECTION_DIALOG_OBJECT_NAME_BUTTON_OK      = "vc:SelectionDialogButtonOk";
 const char* const SELECTION_DIALOG_OBJECT_NAME_BUTTON_CANCEL  = "vc:SelectionDialogButtonCancel";
 
@@ -51,6 +52,21 @@ inline uint qHash(TMPXItemId key)
     QPair<uint, uint> keyPair(key.iId1, key.iId2); 
 
     return qHash(keyPair);
+}
+
+/**
+ * Helper function for creating a new album name query dialog 
+ */
+HbInputDialog* gCreateNewAlbumNameDialog(const char* objectName)
+{
+    QString label(hbTrId("txt_videos_title_enter_name"));
+    QString text(hbTrId("txt_videos_dialog_entry_new_collection"));
+    HbInputDialog *dialog = new HbInputDialog();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setObjectName(objectName);
+    dialog->setPromptText(label);
+    dialog->setValue(text);
+    return dialog;
 }
 
 // ---------------------------------------------------------------------------
@@ -135,6 +151,7 @@ void VideoListSelectionDialog::setupContent(int type, TMPXItemId activeItem)
     mSelection.clear();
     mSelectedVideos.clear();
     mSelectedAlbumId = TMPXItemId::InvalidId();
+    mNewAlbumText = QString();
     
     // if provided "owner" is album or category    
     if(activeItem != TMPXItemId::InvalidId())
@@ -151,7 +168,9 @@ void VideoListSelectionDialog::setupContent(int type, TMPXItemId activeItem)
     }
     // set (or reset) generic id filter
     bool filterValue = true;
-    if(mTypeOfSelection == EAddToCollection || mTypeOfSelection == ESelectCollection)
+    if(mTypeOfSelection == EAddToCollection || 
+       mTypeOfSelection == ESelectCollection ||
+       mTypeOfSelection == ECreateCollection)
     {
         filterValue = false;
     }
@@ -250,10 +269,11 @@ bool VideoListSelectionDialog::initDialog()
 void VideoListSelectionDialog::activateSelection()
 {
 	FUNC_LOG;
-    // "add to collection" and "remove from collection -selections needs 
-    // additional functionality for primary key
+    // "add to collection", "remove from collection" and "create collection" -selections
+	// needs additional functionality for primary key
     if(mTypeOfSelection == EAddToCollection ||
-       mTypeOfSelection == ERemoveFromCollection)
+       mTypeOfSelection == ERemoveFromCollection ||
+       mTypeOfSelection == ECreateCollection)
     {
         mPrimaryAction->disconnect(SIGNAL(triggered()));
         connect(mPrimaryAction, SIGNAL(triggered()), this, SLOT(primaryActionTriggeredSlot()));
@@ -268,6 +288,9 @@ void VideoListSelectionDialog::activateSelection()
         break;
         case EAddToCollection:
             primaryTxt = hbTrId("txt_common_button_add");
+        break;
+        case ECreateCollection:
+            primaryTxt = hbTrId("txt_common_button_ok");
         break;
         case ERemoveFromCollection:
             primaryTxt = hbTrId("txt_common_button_remove");
@@ -298,8 +321,9 @@ void VideoListSelectionDialog::activateSelection()
         mCheckboxContainer->setVisible(true);
         mItemCount->setPlainText(tr("0/%1").arg(mModel->rowCount())); 
         mCheckBox->setChecked(false);
+        
         // Add button will be enabled when videos are selected from the list.
-        mPrimaryAction->setDisabled(true);
+        mPrimaryAction->setDisabled(mTypeOfSelection != ECreateCollection);
     }
     mHeading->setPlainText(headingTxt);         
     // sort to make sure dialog has correctly filtered content
@@ -321,13 +345,22 @@ void VideoListSelectionDialog::exec()
     
     // scroll list back to top
     mListWidget->scrollTo(mModel->index(0, 0));
-
+    
     if(mModel->rowCount())
     {
         connectSignals();
     
-        // show dialog
-        HbDialog::open();
+        if(mTypeOfSelection == ECreateCollection)
+        {
+            // note this does not leak memory as the dialog will destroy itself upon close.
+            HbInputDialog *dialog = gCreateNewAlbumNameDialog(LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION);
+            dialog->open(this, SLOT(newAlbumNameDialogFinished(HbAction *)));
+        }
+        else
+        {
+            // show dialog
+            HbDialog::open();
+        }
     }
     else
     {
@@ -350,18 +383,14 @@ void VideoListSelectionDialog::finishedSlot(HbAction *action)
         INFO("VideoListSelectionDialog::exec(): secondary action triggered.")
         return;
     }
-    QString albumName("");
+    
     if(mTypeOfSelection == ESelectCollection)
     {
         mTypeOfSelection = EAddToCollection;
         if(mSelectedAlbumId == TMPXItemId::InvalidId())
         {
-            QString label(hbTrId("txt_videos_title_enter_name"));
-            HbInputDialog *dialog = new HbInputDialog();
-            dialog->setObjectName(SELECTION_DIALOG_OBJECT_NAME_NEW_COLLECTION);
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
-            dialog->setPromptText(label);
-            dialog->setValue(hbTrId("txt_videos_dialog_entry_new_collection"));
+            // note this does not leak memory as the dialog will destroy itself upon close.
+            HbInputDialog *dialog = gCreateNewAlbumNameDialog(SELECTION_DIALOG_OBJECT_NAME_NEW_COLLECTION);
             dialog->open(this, SLOT(newAlbumNameDialogFinished(HbAction *)));
        }
        else
@@ -393,8 +422,17 @@ void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
         QString text = mModel->resolveAlbumName(variant.toString());
         if(text.length())
         {
-            mSelectedAlbumId = mModel->addNewAlbum(text);
-            finalize(text);
+            if(mSelectedVideos.count() == 0)
+            {
+                mNewAlbumText = text;
+                // show video selection dialog
+                HbDialog::open();
+            }
+            else
+            {
+                mSelectedAlbumId = mModel->addNewAlbum(text);
+                finalize(text);
+            }
         }
     }
 }
@@ -406,8 +444,15 @@ void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
 void VideoListSelectionDialog::finalize(QString albumName)
 {
     // Must be checked again if type was ESelectCollection
-    if(mTypeOfSelection == EAddToCollection)
-    {  
+    if(mTypeOfSelection == EAddToCollection ||
+       mTypeOfSelection == ECreateCollection)
+    {
+        if(mTypeOfSelection == ECreateCollection)
+        {
+            mSelectedAlbumId = mModel->addNewAlbum(mNewAlbumText);
+            albumName = mNewAlbumText;
+        }
+        
         if(mSelectedAlbumId != TMPXItemId::InvalidId() && mSelectedVideos.count())
         {
             if(mModel->addItemsInAlbum(mSelectedAlbumId, mSelectedVideos.toList()) == 0)
@@ -498,10 +543,20 @@ void VideoListSelectionDialog::selectionChangedSlot(const QItemSelection &select
     if(mSelection.indexes().count() > 0)
     {
         mPrimaryAction->setDisabled(false);
+        
+        if(mTypeOfSelection == ECreateCollection)
+        {
+            mPrimaryAction->setText(hbTrId("txt_common_button_add"));
+        }
     }
     else
     {
-        mPrimaryAction->setDisabled(true);
+        mPrimaryAction->setDisabled(mTypeOfSelection != ECreateCollection);
+        
+        if(mTypeOfSelection == ECreateCollection)
+        {
+            mPrimaryAction->setText(hbTrId("txt_common_button_ok"));
+        }
     }    
 
     updateCounterSlot();
@@ -595,7 +650,8 @@ void VideoListSelectionDialog::primaryActionTriggeredSlot()
         }
     }
     
-    if(mSelectedAlbumId != TMPXItemId::InvalidId())
+    if(mSelectedAlbumId != TMPXItemId::InvalidId() ||
+       mTypeOfSelection == ECreateCollection)
     {
         INFO("VideoListSelectionDialog::primaryActionTriggeredSlot(): closing dialog.")
         mPrimaryAction->trigger();

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 44 %
+// Version : %version: 46 %
 
 #define private public
 #include "videoservices.h"
@@ -848,13 +848,13 @@ void TestListView::testStartSortingSlot()
     sortMenu = mUiLoader->findWidget<HbMenu>(DOCML_NAME_SORT_MENU);
     sortMenuAction->setMenu(sortMenu);
     HbMenuData::mMenuAction = sortMenuAction;
-    VideoSortFilterProxyModel& model = mTestView->mCurrentList->getModel();
+    VideoSortFilterProxyModel* model = mTestView->mCurrentList->getModel();
 	QVERIFY(action != 0);
 	mUiLoader->findWidget<HbMenu>(DOCML_NAME_OPTIONS_MENU)->setActiveAction(sortMenuAction);
 	HbAction* sortAction = mUiLoader->findObject<HbAction>(DOCML_NAME_SORT_BY_NAME);
 	QVERIFY(sortAction != 0);
 	sortMenu->setActiveAction(sortAction);
-	model.setSortRole(1);
+	model->setSortRole(1);
 	connect(this, SIGNAL(testObjectReadySignal(QObject*, const QString)), mTestView, SLOT(objectReadySlot(QObject*, const QString)));
 	emit testObjectReadySignal(mUiLoader->findObject<QObject>(DOCML_NAME_SORT_BY_DATE), DOCML_NAME_SORT_BY_DATE);
     emit testObjectReadySignal(mUiLoader->findObject<QObject>(DOCML_NAME_SORT_BY_NAME), DOCML_NAME_SORT_BY_NAME);
@@ -885,7 +885,7 @@ void TestListView::testStartSortingSlot()
     QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
 
     // test that after changing the sort role, the order is also switched to ascending.
-    model.doSorting(model.sortRole(), Qt::DescendingOrder);
+    model->doSorting(model->sortRole(), Qt::DescendingOrder);
     sortAction = mUiLoader->findObject<HbAction>(DOCML_NAME_SORT_BY_DATE);
     QVERIFY(sortAction != 0);
     sortMenu->setActiveAction(sortAction);
@@ -966,15 +966,6 @@ void TestListView::testDeleteItemsSlot()
 {
     init();
     connect( this, SIGNAL(testSignal()), mTestView, SLOT(deleteItemsSlot()) );
-    ////////////
-    // no current list
-    ////////////
-    VideoListWidget *backup = mTestView->mCurrentList;
-    mTestView->mCurrentList = 0;
-    emit testSignal();
-    QCOMPARE(VideoListSelectionDialogData::mMultiSelectionLaunchCount, 0);
-    mTestView->mCurrentList = backup;
-    mTestView->activateView(TMPXItemId::InvalidId());
     
     ////////////
     // dialog loading fails
@@ -1119,7 +1110,7 @@ void TestListView::testAboutToShowMainMenuSlot()
 	init(true);
 	connect(this, SIGNAL(testSignal()), mTestView, SLOT(aboutToShowMainMenuSlot()));
     mTestView->activateView(TMPXItemId::InvalidId());
-    setRowCount(3, &mTestView->mCurrentList->getModel());
+    setRowCount(3, mTestView->mCurrentList->getModel());
     emit testSignal();
     QVERIFY(isActionVisible(DOCML_NAME_DELETE_MULTIPLE));
     QVERIFY(isActionVisible(DOCML_NAME_SORT_BY_DATE));
@@ -1470,41 +1461,6 @@ void TestListView::testDoDelayedsSlot()
 }
 
 // ---------------------------------------------------------------------------
-// testOpenNewAlbumSlot
-// ---------------------------------------------------------------------------
-//
-void TestListView::testOpenNewAlbumSlot()
-{
-    init(false);
-    
-    QVERIFY(connect(this, SIGNAL(testSignal(const QModelIndex &, int, int)), mTestView, SLOT(openNewAlbumSlot(const QModelIndex &, int, int))));
-
-    QModelIndex index;
-    
-    // Not initialized, no mCurrentList
-    emit testSignal(index, 0, 0);
-    // no verification needed, this tests that method does not crash if mCurrentList is not set.
-    
-    // Good case
-    QVERIFY(mTestView->initializeView() == 0);
-    mTestView->activateView(TMPXItemId::InvalidId());
-    setRowCount(1);
-    VideoListWidgetData::mEmitActivatedIndex = QModelIndex();
-    emit testSignal(index, 0, 0);
-    
-    QModelIndex expectedIndex = mTestView->mCurrentList->mModel->index(0,0);
-    QCOMPARE(VideoListWidgetData::mEmitActivatedIndex, expectedIndex);
-    
-    VideoListWidgetData::mEmitActivatedIndex = QModelIndex();
-    // Invalid index
-    emit testSignal(index, -1, 0);
-    QCOMPARE(VideoListWidgetData::mEmitActivatedIndex, QModelIndex());
-    
-    disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(doDelayedsSlot()));
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
 // testAboutToChangeOrientationSlot
 // ---------------------------------------------------------------------------
 //
@@ -1552,50 +1508,19 @@ void TestListView::testCreateCollectionSlot()
 {
     init(false);
     QVERIFY(connect(this, SIGNAL(testSignal()), mTestView, SLOT(createCollectionSlot())));
-
-    HbInputDialog *dialog = new HbInputDialog(); 
-    
-    // not initialized, no mCurrentList
+  
+    // dialog finding fails
+    VideoCollectionUiLoaderData::mFailDialogLoad = true;
     emit testSignal();
-    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "");
-
-    QVERIFY(mTestView->initializeView() == 0);
-    mTestView->activateView(TMPXItemId::InvalidId());
-    
-    // dialog canceled
-    HbInputDialog::mValueCallCount = 0;
-    HbInputDialog::mOpenCallCount = 0;
-    emit testSignal();
-    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 1);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "");
-    QCOMPARE(HbInputDialog::mValueCallCount, 1);
-    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
-    
-    // empty name
-    HbInputDialog::mValueCallCount = 0;
-    HbInputDialog::mValueReturnValue = "";
-    HbInputDialog::mOpenCallCount = 0;
-    emit testSignal();
-    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "");
-    QCOMPARE(HbInputDialog::mValueCallCount, 1);
-    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
-    
-    // Good case.
-    HbInputDialog::mValueCallCount = 0;
-    HbInputDialog::mValueReturnValue = "testAlbum";
-    HbInputDialog::mOpenCallCount = 0;
-    emit testSignal();
-    dialog->emitDialogFinished(mTestView, SLOT(createCollectionDialogFinished(HbAction *)), 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAddedAlbumName == "testAlbum");
-    QCOMPARE(HbInputDialog::mValueCallCount, 1);
-    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
-    
-    HbInputDialog::mValueCallCount = 0;
-    HbInputDialog::mValueReturnValue = "";
-    HbInputDialog::mOpenCallCount = 0;
-    VideoSortFilterProxyModelData::mLastAddedAlbumName = "";    
+    QCOMPARE(VideoListSelectionDialogData::mMultiSelectionLaunchCount, 0);
+	QCOMPARE(VideoListSelectionDialogData::mSelectionType, -1);
+    // dialog finding succeeds
+    VideoCollectionUiLoaderData::mFailDialogLoad = false;
+    emit testSignal();    
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == TMPXItemId::InvalidId());
+    QCOMPARE(VideoListSelectionDialogData::mSelectionType, (int)VideoListSelectionDialog::ECreateCollection);
+    QCOMPARE(VideoListSelectionDialogData::mMultiSelectionLaunchCount, 1);
+ 
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(createCollectionSlot()));
     cleanup();
 }

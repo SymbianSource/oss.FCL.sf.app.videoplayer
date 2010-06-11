@@ -264,7 +264,7 @@ void CVcxMyVideosAlbums::RemoveVideosFromAlbumL( CMPXMedia* aCmd )
 //
 void CVcxMyVideosAlbums::AddAlbumL( CMPXMedia& aCmd )
     {
-    if ( TVcxMyVideosCollectionUtil::Title( aCmd ).Length() > 255 )
+    if ( TVcxMyVideosCollectionUtil::Title( aCmd ).Length() > KVcxMvcMaxTitleLength )
         {
         User::Leave( KErrArgument );
         }
@@ -351,13 +351,23 @@ TBool CVcxMyVideosAlbums::RemoveAlbumL( TUint32 aMdsId, TBool aCompress )
 // CVcxMyVideosAlbums::CalculateAttributesL
 // ----------------------------------------------------------------------------
 //
-void CVcxMyVideosAlbums::CalculateAttributesL()
+TBool CVcxMyVideosAlbums::CalculateAttributesL()
     {
+    TBool eventsAdded = EFalse;
+    TBool modified    = EFalse;
     TInt count = iAlbums.Count();
     for ( TInt i = 0; i < count; i++ )
         {
-        iAlbums[i]->CalculateAttributesL();
+        modified = iAlbums[i]->CalculateAttributesL();
+        if ( modified )
+            {
+            iCollection.iMessageList->AddEventL(
+                    TMPXItemId( iAlbums[i]->iMdsId, KVcxMvcMediaTypeAlbum ),
+                    EMPXItemModified, 0 );
+            eventsAdded = ETrue;
+            }     
         }
+    return eventsAdded;
     }
 
 // ----------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#32 %
+// Version : %version: da1mmcf#33 %
 
 
 
@@ -90,7 +90,7 @@ void CMPXVideoViewWrapper::ConstructL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::ConstructL()"));
 
-    iPlaybackUtility = 
+    iPlaybackUtility =
         MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
     iPlaybackUtility->AddObserverL( *this );
     iPlaybackUtility->SetPrimaryClientL();
@@ -98,8 +98,8 @@ void CMPXVideoViewWrapper::ConstructL()
     //
     //  Create Active Object for closing player
     //
-    iCloseAO = CIdle::NewL( CActive::EPriorityStandard );   
-                
+    iCloseAO = CIdle::NewL( CActive::EPriorityStandard );
+
     //
     //  Create Video Playback Display Handler
     //
@@ -195,8 +195,8 @@ TBool CMPXVideoViewWrapper::IsPlaylist()
 void CMPXVideoViewWrapper::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()"),
-                   _L("aCmd = %d, aDoSync, = %d"), aCmd, aDoSync );    
-    
+                   _L("aCmd = %d, aDoSync, = %d"), aCmd, aDoSync );
+
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
 
@@ -237,7 +237,7 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdClose:
         {
             MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdClose"));
-            
+
             //
             // closing playback view occurs:
             //     - synchronously (mSyncClose=true) for PDL case (when PDL is supported)
@@ -267,7 +267,16 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdPlayPause:
         {
             MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdPause"));
-            iPlaybackUtility->CommandL( EPbCmdPlayPause );
+
+            if ( iPlaybackState == EPbStatePlaying )
+            {
+                CreateGeneralPlaybackCommandL( EPbCmdPause );
+            }
+            else if ( iPlaybackState == EPbStatePaused )
+            {
+                CreateGeneralPlaybackCommandL( EPbCmdPlay );
+            }
+
             break;
         }
         case EMPXPbvCmdStop:
@@ -330,30 +339,46 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         }
         case EMPXPbvCmdResetControls:
         {
+            MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdResetControls"));
+
             CreateControlsL();
             iView->retrievePdlInformation();
             break;
         }
         case EMPXPbvCmdNextListItem:
         {
+            MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdNextListItem"));
+
             if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
                 iPlaybackUtility->CommandL( EPbCmdNext );
             }
+            else
+            {
+                MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() ignore EMPXPbvCmdNextListItem"));
+            }
+
             break;
         }
-        case EMPXPbvCmdPreviousListItem:  
+        case EMPXPbvCmdPreviousListItem:
         {
+            MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdPreviousListItem"));
+
             if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
 			    //
 			    // the command is being sent twice on purpose
-                // one EMPXPbvCmdPreviousListItem command only sets the position to 0  
+                // one EMPXPbvCmdPreviousListItem command only sets the position to 0
                 // the second cmd actually goes to the previous item in the list
 				//
                 iPlaybackUtility->CommandL( EPbCmdPrevious );
                 iPlaybackUtility->CommandL( EPbCmdPrevious );
             }
+            else
+            {
+                MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() ignore EMPXPbvCmdNextListItem"));
+            }
+
             break;
         }
         case EMPXPbvCmdEndOfClip:
@@ -373,10 +398,10 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         }
         case EMPXPbvCmdRealOneBitmapTimeout:
         {
-            IssuePlayCommandL();                
+            IssuePlayCommandL();
 
             break;
-        }        
+        }
     }
 }
 
@@ -577,7 +602,7 @@ void CMPXVideoViewWrapper::HandleVideoPlaybackMessage( CMPXMessage* aMessage )
 
             if ( iUserInputHandler )
             {
-                TRAP_IGNORE(iUserInputHandler->HandleTVOutEventL( tvOutConnected ));     
+                TRAP_IGNORE(iUserInputHandler->HandleTVOutEventL( tvOutConnected ));
             }
 
             if ( iControlsController )
@@ -630,7 +655,7 @@ void CMPXVideoViewWrapper::DoHandleStateChangeL( TInt aNewState )
                         HandleCommandL( EMPXPbvCmdResetControls );
 
                         if ( iFileDetails )
-                        {    
+                        {
                             iFileDetails->clearFileDetails();
                         }
                     }
@@ -656,7 +681,7 @@ void CMPXVideoViewWrapper::DoHandleStateChangeL( TInt aNewState )
                 }
                 else
                 {
-                    iView->closePlaybackView();  
+                    iView->closePlaybackView();
                 }
 
                 break;
@@ -859,7 +884,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
     {
         iFileDetails->mDrmProtected = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoDrmProtected );
     }
-    
+
     //
     //  Description
     //
@@ -869,7 +894,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qDescription( (QChar*)description.Ptr(), description.Length() );
         iFileDetails->mDescription = qDescription;
     }
-    
+
     //
     //  Location
     //
@@ -879,7 +904,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qLocation( (QChar*)location.Ptr(), location.Length() );
         iFileDetails->mLocation = qLocation;
     }
-    
+
     //
     //  Copyright
     //
@@ -889,7 +914,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qCopyright( (QChar*)copyright.Ptr(), copyright.Length() );
         iFileDetails->mCopyright = qCopyright;
     }
-    
+
     //
     //  Language
     //
@@ -899,7 +924,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qLanguage( (QChar*)language.Ptr(), language.Length() );
         iFileDetails->mLanguage = qLanguage;
     }
-    
+
     //
     //  Keywords
     //
@@ -909,7 +934,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
         const QString qKeywords( (QChar*)keywords.Ptr(), keywords.Length() );
         iFileDetails->mKeywords = qKeywords;
     }
-    
+
     //
     //  Creation date/time
     //
@@ -917,7 +942,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
     {
         iFileDetails->mCreationTime = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoCreated );
     }
- 
+
     //
     //  Last Modified date/time
     //
@@ -925,7 +950,7 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
     {
         iFileDetails->mModificationTime = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoLastModified );
     }
-    
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -945,7 +970,7 @@ void CMPXVideoViewWrapper::DoHandleMediaL( const CMPXMessage& aMedia, TInt aErro
         if ( ! iFileDetails )
         {
             iFileDetails = new QMPXVideoPlaybackViewFileDetails();
-        }       
+        }
 
         //
         //  Read in the media data
@@ -1011,7 +1036,7 @@ void CMPXVideoViewWrapper::SetPropertyL( TMPXPlaybackProperty aProperty, TInt aV
 //   CMPXVideoViewWrapper::HandlePropertyL()
 // -------------------------------------------------------------------------------------------------
 //
-void 
+void
 CMPXVideoViewWrapper::HandlePropertyL( TMPXPlaybackProperty aProperty, TInt aValue, TInt aError )
 {
     MPX_DEBUG(_L("CMPXVideoViewWrapper::HandlePropertyL - Error(%d)"), aError );
@@ -1198,7 +1223,7 @@ TBool CMPXVideoViewWrapper::IsAppInFrontL()
         // check if our window is front or not
         if ( wsSession.WindowGroupList( 0, wgList ) == KErrNone )
         {
-            ret = ( CEikonEnv::Static()->RootWin().Identifier() == wgList->At(0) );			        
+            ret = ( CEikonEnv::Static()->RootWin().Identifier() == wgList->At(0) );
         }
         else
         {
@@ -1222,7 +1247,7 @@ TBool CMPXVideoViewWrapper::IsAppInFrontL()
 void CMPXVideoViewWrapper::ClosePlaybackViewL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::closePlaybackView()"));
-        
+
     iView->closePlaybackView();
 }
 
@@ -1337,7 +1362,7 @@ void CMPXVideoViewWrapper::CreateControlsL()
 
     iFileDetails = new QMPXVideoPlaybackViewFileDetails();
 
-    TPtrC fileName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );    
+    TPtrC fileName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );
     const QString qFilename( (QChar*)fileName.Ptr(), fileName.Length() );
     iFileDetails->mClipName = qFilename;
 
@@ -1345,14 +1370,14 @@ void CMPXVideoViewWrapper::CreateControlsL()
 
     iFileDetails->mTvOutConnected   = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutConnected );
 
-    TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );    
+    TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );
     const QString qMimeType( (QChar*)mimeType.Ptr(), mimeType.Length() );
     iFileDetails->mMimeType = qMimeType;
 
     //
     // get playlist information and set mMultiItemPlaylist flag
     //
-    TInt numItems = 1;    
+    TInt numItems = 1;
     MMPXSource* s = iPlaybackUtility->Source();
 
     if ( s )
@@ -1360,7 +1385,7 @@ void CMPXVideoViewWrapper::CreateControlsL()
         CMPXCollectionPlaylist* playlist = NULL;
 
         MPX_TRAPD( err, playlist = s->PlaylistL() );
-        
+
         if ( err == KErrNone && playlist )
         {
             iPlaylistView = ETrue;
@@ -1370,7 +1395,7 @@ void CMPXVideoViewWrapper::CreateControlsL()
     }
 
     iFileDetails->mMultiItemPlaylist = ( numItems > 1 );
-    
+
     CleanupStack::PopAndDestroy( cmd );
 
     if ( iControlsController )
@@ -1388,16 +1413,16 @@ void CMPXVideoViewWrapper::CreateControlsL()
 //
 TBool CMPXVideoViewWrapper::IsMultiItemPlaylist()
 {
-    
+
     bool multiLinks( false );
-    
+
     if ( iFileDetails )
     {
         multiLinks = iFileDetails->mMultiItemPlaylist;
     }
-    
+
     MPX_DEBUG(_L("CMPXVideoViewWrapper::IsMultiItemPlaylist() ret %d"), multiLinks );
-	
+
     return multiLinks;
 }
 
@@ -1405,7 +1430,7 @@ TBool CMPXVideoViewWrapper::IsMultiItemPlaylist()
 //   CMPXVideoViewWrapper::UpdateVideoRect()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoViewWrapper::UpdateVideoRect( 
+void CMPXVideoViewWrapper::UpdateVideoRect(
         TInt aX, TInt aY, TInt aWidth, TInt aHeight, TBool transitionEffect )
 {
     MPX_DEBUG(_L("CMPXVideoViewWrapper::UpdateVideoRect()"));
@@ -1441,7 +1466,7 @@ void CMPXVideoViewWrapper::IssuePlayCommandL()
         //
         if ( iControlsController )
         {
-            iControlsController->addFileDetails( iFileDetails );            
+            iControlsController->addFileDetails( iFileDetails );
         }
 
         if ( iFileDetails->mVideoEnabled )
@@ -1449,21 +1474,21 @@ void CMPXVideoViewWrapper::IssuePlayCommandL()
             //
             // get window size
             //
-            RWindow *window = iView->getWindow();            
+            RWindow *window = iView->getWindow();
             TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
-            
+
             //
             // get window aspect ratio
             //   if device is in landscape mode, width > height
             //   if device is in portrait mode, width < height
             //
             TReal32 width = (TReal32) displayRect.Width();
-            TReal32 height = (TReal32) displayRect.Height();            
+            TReal32 height = (TReal32) displayRect.Height();
             TReal32 displayAspectRatio = (width > height)? (width / height) : (height / width);
 
             //
             // get new aspect ratio
-            TInt newAspectRatio = 
+            TInt newAspectRatio =
                 iDisplayHandler->SetDefaultAspectRatioL( iFileDetails, displayAspectRatio );
 
             //

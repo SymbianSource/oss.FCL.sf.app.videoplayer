@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 16 %
+// Version : %version: 17 %
 
 
 
@@ -99,6 +99,8 @@ QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl()
 //
 void QMPXVideoPlaybackStatusPaneControl::setVisible( bool visible )
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::setVisible visible = %d"), visible);
+
     mVisible = visible;
 
     if ( mVisible )

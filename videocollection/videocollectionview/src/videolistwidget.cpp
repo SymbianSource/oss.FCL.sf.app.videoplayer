@@ -614,10 +614,10 @@ void VideoListWidget::setBrowsingServiceContextMenu()
 // getModel
 // ---------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel& VideoListWidget::getModel()
+VideoSortFilterProxyModel* VideoListWidget::getModel()
 { 
 	FUNC_LOG_ADDR(this);
-    return *mModel; 
+    return mModel; 
 }
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#16 %
+// Version : %version:  da1mmcf#17 %
 
 
 
@@ -42,12 +42,14 @@ class HbVideoBasePlaybackView : public HbView
     Q_OBJECT
 
     public:
-        HbVideoBasePlaybackView();        
+        HbVideoBasePlaybackView();
         virtual ~HbVideoBasePlaybackView();
 
     signals:
         void activatePreviousView();
         void tappedOnScreen();
+        void pannedToRight();
+        void pannedToLeft();
 
     public slots:
         virtual void closePlaybackView();
@@ -58,18 +60,18 @@ class HbVideoBasePlaybackView : public HbView
     public:
 
         virtual void retrievePdlInformation();
-        
+
         virtual void handleActivateView();
-        
+
         virtual void handleDeactivateView();
 
         virtual void handlePluginError( int aError );
-        
+
         /*
          *  Handle transition to the stopped state
          */
-        virtual void handleStoppedState() = 0; 
-        
+        virtual void handleStoppedState() = 0;
+
         virtual void doClosePlayer();
 
         //
@@ -81,14 +83,14 @@ class HbVideoBasePlaybackView : public HbView
          *  Handle Download State Change
          *  @param  aState  new state of the download
          */
-        virtual void handlePdlStateChange( int aState ) = 0;     
+        virtual void handlePdlStateChange( int aState ) = 0;
 
         virtual void handleBufferingState();
 
         virtual void issuePlayCommand();
 
         void initializeVideoPlaybackView();
-		
+
         void showDialog( const QString& qString, bool closeView = true );
 
         virtual void handleClosePlaybackView();
@@ -97,13 +99,10 @@ class HbVideoBasePlaybackView : public HbView
 
         bool eventFilter( QObject *object, QEvent *event );
 
-    protected:
-
-        void mousePressEvent( QGraphicsSceneMouseEvent *event );
-        void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+        void gestureEvent( QGestureEvent* event );
 
     protected: // data
-        CMPXVideoViewWrapper                *mVideoMpxWrapper;                
+        CMPXVideoViewWrapper                *mVideoMpxWrapper;
 
         QTimer                              *mTimerForClosingView;
 

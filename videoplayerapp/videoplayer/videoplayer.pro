@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 1 %
+# Version : %version: 2 %
 
 
 TARGET = videoplayer
@@ -27,11 +27,15 @@ symbian:
     TARGET.CAPABILITY = ALL -DRM -TCB
     TARGET.EPOCHEAPSIZE = 0x20000 0x1600000
     TARGET.UID3 = 0x200211FE
-	SKINICON = qtg_large_video_tv.svg 
+    SKINICON = qtg_large_video_tv 
 
     BLD_INF_RULES.prj_exports += "rom/videoplayer.iby          CORE_APP_LAYER_IBY_EXPORT_PATH(videoplayer.iby)" \
                                  "rom/videoplayerresources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(videoplayerresources.iby)" \
-                                 "sis/videoplayer_stub.sis     /epoc32/data/z/system/install/videoplayer_stub.sis"
+                                 "sis/videoplayer_stub.sis     /epoc32/data/z/system/install/videoplayer_stub.sis" \
+                                 "resources/videos.docml       /epoc32/release/winscw/udeb/z/resource/hb/splashml/videos.docml" \
+                                 "resources/videos.splashml    /epoc32/release/winscw/udeb/z/resource/hb/splashml/videos.splashml" \
+                                 "resources/videos.docml       /epoc32/data/z/resource/hb/splashml/videos.docml" \
+                                 "resources/videos.splashml    /epoc32/data/z/resource/hb/splashml/videos.splashml" \
 }
 
 # Service provider specific configuration.

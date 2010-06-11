@@ -199,13 +199,13 @@ NONSHARABLE_CLASS(CVcxMyVideosCollectionPlugin) :
         * From MVcxMyVideosMdsDbObserver.
         */
         void HandleMyVideosDbEvent( TMPXChangeEventType aEvent,
-                RArray<TUint32>& aId );
+                RArray<TUint32>& aId, TInt aEventsLeft );
 
         /**
         * Leaving version of HandleMyVideosDbEvent.
         */
         void DoHandleMyVideosDbEventL( TMPXChangeEventType aEvent,
-                RArray<TUint32>& aId );
+                RArray<TUint32>& aId, TInt aEventsLeft );
                 
         /**
         * From MVcxMyVideosMdsDbObserver.

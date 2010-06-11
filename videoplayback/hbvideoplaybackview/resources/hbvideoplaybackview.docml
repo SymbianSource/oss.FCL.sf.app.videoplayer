@@ -20,7 +20,7 @@
                 <string name="heading" value="Group Box"/>
             </widget>
             <real name="z" value="2"/>
-            <sizehint height="35" type="PREFERRED" width="640"/>
+            <sizehint height="33" type="PREFERRED" width="640"/>
             <bool name="visible" value="FALSE"/>
             <layout type="stacked">
                 <stackitem itemname="title"/>
@@ -67,7 +67,7 @@
             <bool name="visible" value="FALSE"/>
             <layout orientation="Vertical" type="linear">
                 <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
-                <linearitem itemname="fileDetails"/>
+                <linearitem itemname="fileDetails" spacing="0px"/>
             </layout>
         </widget>
         <widget name="bitmapLayout" type="HbWidget">
@@ -143,7 +143,7 @@
             </widget>
             <real name="z" value="4"/>
             <bool name="visible" value="FALSE"/>
-            <layout orientation="Vertical" spacing="3px" type="linear">
+            <layout orientation="Vertical" spacing="0px" type="linear">
                 <contentsmargins bottom="0px" left="0px" right="0px" top="0px"/>
                 <linearitem itemname="small_transparentWindow"/>
                 <linearitem itemname="attachShareButton"/>
@@ -165,7 +165,7 @@
             <anchoritem dst="titleLayout" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
             <anchoritem dst="titleLayout" dstEdge="TOP" spacing="62" src="" srcEdge="TOP"/>
             <anchoritem dst="titleLayout" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>
-            <anchoritem dst="titleLayout" dstEdge="BOTTOM" spacing="100" src="" srcEdge="TOP"/>
+            <anchoritem dst="titleLayout" dstEdge="BOTTOM" spacing="95" src="" srcEdge="TOP"/>
             <anchoritem dst="transparentWindow" dstEdge="LEFT" spacing="0" src="" srcEdge="LEFT"/>
             <anchoritem dst="transparentWindow" dstEdge="TOP" spacing="0" src="" srcEdge="TOP"/>
             <anchoritem dst="transparentWindow" dstEdge="RIGHT" spacing="0" src="" srcEdge="RIGHT"/>

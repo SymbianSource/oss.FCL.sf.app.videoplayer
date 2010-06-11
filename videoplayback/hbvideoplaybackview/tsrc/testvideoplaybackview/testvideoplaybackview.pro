@@ -14,36 +14,37 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 7 %
+# Version : %version: 8 %
 
 TEMPLATE = app
 TARGET = testvideoplaybackview
 CONFIG += qtestlib hb qt
 DEFINES += BUILD_VIDEOPLAYBACK_DLL
 
-DEPENDPATH += . \
-    inc \
-    src
+DEPENDPATH += . inc src stub/src stub/inc
 
-INCLUDEPATH += ../../inc \
-               ../../../inc \
+INCLUDEPATH += stub/inc \
+               ../../inc \
                ../../../../inc \                          
                ../../controlinc \
-               $$MW_LAYER_SYSTEMINCLUDE 
 
 LIBS += -lcone.dll \
         -lcommonengine.dll \
         -lflogger.dll
         
 # Input
-HEADERS += stub/inc/mpxvideoviewwrapper.h \					 
-           inc/testvideoplaybackview.h \
+HEADERS += mpxvideoviewwrapper.h \					 
+           testvideoplaybackview.h \
            ../../../inc/hbvideobaseplaybackview.h \
            ../../../inc/hbvideoplaybackview.h \
-           ../../inc/mpxvideoplaybackviewfiledetails.h
+           mpxvideoplaybackviewfiledetails.h \
+           hbtapgesture.h \
+           hbpangesture.h
 
-SOURCES += stub/src/mpxvideoviewwrapper.cpp \					 				 
-            src/testvideoplaybackview.cpp \
-            ../../viewsrc/hbvideobaseplaybackview.cpp \
-            ../../viewsrc/hbvideoplaybackview.cpp \
-            ../../viewsrc/mpxvideoplaybackviewfiledetails.cpp
+SOURCES += mpxvideoviewwrapper.cpp \					 				 
+           testvideoplaybackview.cpp \
+           ../../viewsrc/hbvideobaseplaybackview.cpp \
+           ../../viewsrc/hbvideoplaybackview.cpp \
+           ../../viewsrc/mpxvideoplaybackviewfiledetails.cpp \
+           hbtapgesture.cpp \
+           hbpangesture.cpp

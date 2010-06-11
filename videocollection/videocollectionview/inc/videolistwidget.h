@@ -22,6 +22,7 @@
 #include <hbview.h>
 #include <hblistview.h>
 #include <qmap.h>
+#include <qpointer.h>
 #include <mpxitemid.h>
 #include "videoservices.h"
 #include "videocollectioncommon.h"
@@ -108,7 +109,7 @@ public:
      * 
      * @return VideoSortFilterProxyModel*
      */
-    VideoSortFilterProxyModel& getModel();
+    VideoSortFilterProxyModel* getModel();
     
 public:
     
@@ -355,7 +356,7 @@ private:
      * Provided model
      * Not own.
      */
-    VideoSortFilterProxyModel *mModel;
+    QPointer<VideoSortFilterProxyModel> mModel;
 
     /**
      * pointer to videoservices instance

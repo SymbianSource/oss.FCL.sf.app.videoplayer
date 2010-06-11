@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  7 %
+// Version : %version:  8 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -189,10 +189,16 @@ void TestMPXVideoViewWrapper::testHandleCommand()
     //
     // Test 'PlayPause' command
     //
+    mVideoViewWrapper->iPlaybackState = EPbStatePlaying;
     TRAP( errHdlCmd, mVideoViewWrapper->HandleCommandL( EMPXPbvCmdPlayPause ) );    
     QVERIFY( errHdlCmd == KErrNone );
-    QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPlayPause );
-    
+    QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPause );
+
+    mVideoViewWrapper->iPlaybackState = EPbStatePaused;
+    TRAP( errHdlCmd, mVideoViewWrapper->HandleCommandL( EMPXPbvCmdPlayPause ) );    
+    QVERIFY( errHdlCmd == KErrNone );
+    QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPlay );
+
     //
     // Test 'Stop' command
     //

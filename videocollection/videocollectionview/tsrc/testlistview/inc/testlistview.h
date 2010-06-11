@@ -169,11 +169,6 @@ private slots:
     void testDoDelayedsSlot();
 
     /**
-     * Tests openNewAlbumSlot
-     */
-    void testOpenNewAlbumSlot();
-
-    /**
      * Tests aboutToChangeOrientationSlot
      */
     void testAboutToChangeOrientationSlot();

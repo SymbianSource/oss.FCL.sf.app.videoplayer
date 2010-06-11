@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: ou1cpsw#15 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -77,7 +77,9 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         
         void doDelayedLoad();
         
-        void createPlayAndDetailsViews();
+        void createMissingViews();
+        
+        void createPlaybackView();
         
         void setCurrentView();
         
