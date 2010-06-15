@@ -92,7 +92,7 @@
 */
 #define _PREFIX_TRACE( a ) TPtrC( (const TText*) L"#FuC# " L##a )
 #define _PREFIX_TRACE_2( a, b ) TPtrC( (const TText*) L"#FuC# " L##a L##b )
-#define _PREFIX_TRACE8( a ) (const char*)( "#FuC# " ##a )
+#define _PREFIX_TRACE8( a ) (const char*)( "#FuC# " a )
 
 /**
 * Prefix error trace
