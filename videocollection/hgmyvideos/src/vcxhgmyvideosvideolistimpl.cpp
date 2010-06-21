@@ -729,7 +729,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             // Send item
             if ( highlight >= 0 || videosMarked )
                 {
-                AddSendItemToMenuPaneL( aMenuPane, videosMarked );
+                AddSendItemToMenuPaneL( aMenuPane );
                 }
 
 #ifdef RD_VIDEO_AS_RINGING_TONE
@@ -743,9 +743,6 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
                 // Hide Assign (use as) menu item
                 aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
                 }
-#else
-            // Context sensitive Mark
-            aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkContext, IsMarking() );
 #endif
 
             // Marking submenu
@@ -787,7 +784,7 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             }
         CleanupStack::PopAndDestroy( &operationTargets );
         }
-#endif
+#endif    
     }
 
 // -----------------------------------------------------------------------------
@@ -1059,9 +1056,8 @@ void CVcxHgMyVideosVideoListImpl::OperationTargetsToMpxIdsL(
 // CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL()
 // ---------------------------------------------------------------------------
 //
-void CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL(
-        CEikMenuPane* aMenuPane,
-        TBool aAddToOptions )
+void CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL( 
+        CEikMenuPane* aMenuPane )
     {
     IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL() enter" );
     // Get total size of the videos that we're about to send
@@ -1101,17 +1097,6 @@ void CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL(
         // The Send item also needs to be flagged as a list query.
         CEikMenuPaneItem::SData& itemData = aMenuPane->ItemData( EVcxHgMyVideosCmdSend );
         itemData.iFlags |= EEikMenuItemSpecificListQuery;
-
-        // Add Send to Options menu
-        if ( aAddToOptions )
-            {
-            SendUiL()->AddSendMenuItemL(
-                    *aMenuPane,
-                    sendItemIndex,
-                    EVcxHgMyVideosCmdSendMarked,
-                    capabilities );
-            aMenuPane->SetItemSpecific( EVcxHgMyVideosCmdSendMarked, EFalse );
-            }
         }
     CleanupStack::PopAndDestroy( &operationTargets );
     IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosVideoListImpl::AddSendItemToMenuPaneL() return" );
@@ -1149,9 +1134,6 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneFileOperationsL(
     aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopy, !showCopy );
     aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMove, !showMove );
     aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDelete, !showDelete );
-    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopyMarked, !showCopy || !aItemsMarked );
-    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMoveMarked, !showMove || !aItemsMarked );
-    aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDeleteMarked, !showDelete || !aItemsMarked );
 
     CleanupStack::PopAndDestroy( &operationTargets );
     }

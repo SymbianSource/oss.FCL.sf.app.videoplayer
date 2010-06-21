@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKMODE_H_
@@ -29,7 +29,7 @@
 #include <e32base.h>
 
 #include "mpxhelixplaybackplugindefs.h"
-#ifdef USE_S60_DOWNLOAD_MANAGER 
+#ifdef USE_S60_DOWNLOAD_MANAGER
 #include "mpxvideodlmgrif.h"
 #endif
 #include "mpxvideo_debug.h"
@@ -76,6 +76,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
         virtual void OpenFileL( const RFile& aMediaFile );
         virtual void HandleSetPosterFrame();
         virtual void HandleFrameReady(TInt aError);
+        virtual TBool SendErrorToView( TInt aError );
+        virtual void HandlePauseToPlayTransitionL();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         virtual void OpenFile64L( const RFile64& aMediaFile );
@@ -152,7 +154,8 @@ class CMPXLiveStreamingPlaybackMode : public CMPXStreamingPlaybackMode
         // Methods where video plabkack behavior varies for live streaming media
         inline virtual TInt GetMode();
         virtual void HandlePause();
-        virtual void HandleBackground();
+        virtual TBool SendErrorToView( TInt aError );
+        virtual void HandlePauseToPlayTransitionL();
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +171,7 @@ class CMPXProgressiveDLPlaybackMode : public CMPXLocalPlaybackMode
         static CMPXVideoPlaybackMode* NewL( CMPXVideoPlaybackController* aVideoPlaybackCtlr );
         virtual ~CMPXProgressiveDLPlaybackMode();
 
-#ifdef USE_S60_DOWNLOAD_MANAGER 
+#ifdef USE_S60_DOWNLOAD_MANAGER
 
         inline virtual TInt GetMode();
         void ConnectToDownloadL( CMPXCommand& aCmd );
@@ -182,19 +185,19 @@ class CMPXProgressiveDLPlaybackMode : public CMPXLocalPlaybackMode
         void OpenFile64L( const RFile64& aMediaFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-#endif // USE_S60_DOWNLOAD_MANAGER 
+#endif // USE_S60_DOWNLOAD_MANAGER
 
     private:
         void ConstructL( CMPXVideoPlaybackController* aVideoPlaybackCtlr );
 
-#ifdef USE_S60_DOWNLOAD_MANAGER 
+#ifdef USE_S60_DOWNLOAD_MANAGER
     private:
-        CMPXVideoDlMgrIf*  iDlMgrIf;   // owned		
-#endif // USE_S60_DOWNLOAD_MANAGER 
+        CMPXVideoDlMgrIf*  iDlMgrIf;   // owned
+#endif // USE_S60_DOWNLOAD_MANAGER
 
 };
 
-#ifdef USE_S60_DOWNLOAD_MANAGER 
+#ifdef USE_S60_DOWNLOAD_MANAGER
 
 inline
 TInt CMPXProgressiveDLPlaybackMode::GetMode()
@@ -209,7 +212,7 @@ TBool CMPXProgressiveDLPlaybackMode::IsDownloadPaused()
     return iDlMgrIf->IsDownloadPaused();
 }
 
-#endif // USE_S60_DOWNLOAD_MANAGER 
+#endif // USE_S60_DOWNLOAD_MANAGER
 
 // INLINE METHODS
 

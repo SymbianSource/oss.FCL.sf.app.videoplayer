@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 27 %
 
 
 //  Include Files
@@ -83,6 +83,8 @@ void CMPXVideoPdlPlaybackView::ConstructL()
     MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::ConstructL()"));
 
     InitializeVideoPlaybackViewL();
+	
+    iSyncClose = ETrue;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -237,7 +239,7 @@ void CMPXVideoPdlPlaybackView::HandlePluginErrorL( TInt aError )
             //  For progressive download mode, this indicates that the file
             //  could not be played until the entire file is downloaded.
             //
-            DisplayErrorMessageL( R_MPX_VIDEO_PDL_WAIT_DL_COMPLETE_MSG );
+            DisplayInfoMessageL( R_MPX_VIDEO_PDL_WAIT_DL_COMPLETE_MSG );
             ClosePlaybackViewWithErrorL();
 
             break;

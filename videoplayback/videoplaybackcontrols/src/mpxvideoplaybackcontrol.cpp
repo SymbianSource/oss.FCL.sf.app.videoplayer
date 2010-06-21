@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 22 %
+// Version : %version: 23 %
 
 
 // INCLUDE FILES
@@ -71,6 +71,9 @@ void CMPXVideoPlaybackControl::ConstructL( TRect aRect )
     MPX_DEBUG(_L("CMPXVideoPlaybackControl::ConstructL()"));
 
     CreateWindowL();
+
+    Window().SetTransparencyAlphaChannel();
+
     EnableDragEvents();
 
     iEikonEnv->EikAppUi()->AddToStackL( this, ECoeStackPriorityDefault );

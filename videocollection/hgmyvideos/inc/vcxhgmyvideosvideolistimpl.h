@@ -388,14 +388,11 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoListImpl ) : public CVcxHgMyVideosListBase
                                         RArray<TInt>& operationTargetIds );
 
         /**
-         * Add "Send" menu item to menus
+         * Add "Send" menu item to menu.
          *
          * @param aMenuPane Add the menu item to this menu pane
-         * @param aAddToOptions If true, also add to Options menu. If false, only add to context menu.
          */
-        void AddSendItemToMenuPaneL(
-                CEikMenuPane* aMenuPane,
-                TBool aAddToOptions );
+        void AddSendItemToMenuPaneL( CEikMenuPane* aMenuPane );
 
         /**
          * Handles dynamic initialisation of Move, Copy and Delete menu items

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 // [INCLUDE FILES] - do not remove
 #include <e32svr.h>
@@ -472,7 +472,7 @@ void CVcxMyVideosMdsDbTest::PrepareMdsL(  CStifItemParser& aItem  )
     mdsoperationleaves  = NextIntOrZero( aItem );
     }
 
-void CVcxMyVideosMdsDbTest::HandleMyVideosDbEvent( TMPXChangeEventType , RArray<TUint32>&  )
+void CVcxMyVideosMdsDbTest::HandleMyVideosDbEvent( TMPXChangeEventType , RArray<TUint32>&, TInt )
     {
     if ( handledbeventleave )
         {

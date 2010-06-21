@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 80 %
+// Version : %version: 82 %
 
 
 //  Include Files
@@ -189,20 +189,20 @@ CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
 //   CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd )
+void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()"),
-                   _L("aCmd = %d"), aCmd );
+                   _L("aCmd = %d, aDoSync, = %d"), aCmd, aDoSync );
 
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
 
-    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+    cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, aDoSync );
     cmd->SetTObjectValueL<TBool>( KMPXCommandPlaybackGeneralNoBuffer, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXCommandIdPlaybackGeneral );
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, aCmd );
 
-    iPlaybackUtility->CommandL( *cmd );
+    iPlaybackUtility->CommandL( *cmd, this );
 
     CleanupStack::PopAndDestroy( cmd );
 }
@@ -825,7 +825,6 @@ void CMPXVideoBasePlaybackView::HandleGeneralPlaybackMessageL( CMPXMessage* aMes
         case TMPXPlaybackMessage::EStateChanged:
         {
             DoHandleStateChangeL( type );
-
             break;
         }
         case TMPXPlaybackMessage::EPropertyChanged:
@@ -1510,6 +1509,8 @@ void CMPXVideoBasePlaybackView::DisplayErrorMessageL( TInt aResourceId )
 //
 void CMPXVideoBasePlaybackView::RetrieveFileNameAndModeL( CMPXCommand* aCmd )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RetrieveFileNameAndModeL()"));
+
     //
     //  set attributes on the command
     //

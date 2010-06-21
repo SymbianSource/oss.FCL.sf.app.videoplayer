@@ -1061,7 +1061,9 @@ void CVcxHgMyVideosVideoModelHandler::NewVideoListL( CMPXMediaArray& aVideoList 
         }
     else
         {
+        ResizeScrollerL( videoCount );
         iVideoListImpl.SetEmptyListTextByResourceL( R_VCXHGMYVIDEOS_NO_VIDEOS );
+        iScroller.Reset();
         iScroller.DrawDeferred();
         }        
     iView.DynInitMskL();

@@ -109,7 +109,7 @@ NONSHARABLE_CLASS(CVcxMyVideosMdsDbTest) : public CScriptBase, public MVcxMyVide
         * @param aEvent Event type.
         * @param aId    Array of IDs in database.
         */
-        void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId );
+        void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId, TInt aEventsLeft  );
 
         /**
         * Handler function for list fetching events. This callback is called as a response

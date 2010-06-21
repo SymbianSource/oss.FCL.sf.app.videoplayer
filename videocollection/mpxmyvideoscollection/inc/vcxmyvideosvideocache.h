@@ -295,10 +295,12 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         *
         * @param aVideo             Video to add.
         * @param aSortingOrder      Sorting order.
+        * @param aUpdateCategores   If ETrue, then category and album attributes are updated.
         * @return                   KErrNone if added, KErrAlreadyExists if already exists and
         *                           was not added.
         */
-        TInt AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder aSortingOrder );
+        TInt AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder aSortingOrder,
+                TBool aUpdateCategories = ETrue );
         
         /**
         * Adds video to iPartialVideoList. Ownership moves.
@@ -413,9 +415,10 @@ NONSHARABLE_CLASS(CVcxMyVideosVideoCache) : public CBase
         * @param aNonVideoIds              If argument given then Ids which were detected to not be
         *                                  videos are written here. Caller owns the array, ownership
         *                                  does not move.
+        * @param aUpdateCategories         If ETrue, then category/album attributes are updated.
         */
         void AddVideosFromMdsL( RArray<TUint32>& aMdsIds, TBool& aListFetchingWasCanceled,
-                RArray<TUint32>* aNonVideoIds = NULL );
+                RArray<TUint32>* aNonVideoIds = NULL, TBool aUpdateCategories = ETrue );
 
         /**
         * Deletes old and creates new iVideoList. After the function call iVideoList exists,

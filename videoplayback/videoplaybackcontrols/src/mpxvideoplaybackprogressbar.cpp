@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: e003sa33#24 %
 
 
 // INCLUDE FILES
@@ -242,7 +242,7 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     iPositionLabel = new (ELeave) CEikLabel;
     AknLayoutUtils::LayoutLabel( iPositionLabel,
                                  progressRect,
-                                 mp4_progress_pane_t1().LayoutLine() ) ;
+                                 mp4_progress_pane_t1( 1 ).LayoutLine() ) ;
 
     iPositionLabel->SetContainerWindowL( *this );
     iPositionLabel->SetTextL( KNullDesC );
@@ -258,7 +258,7 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
 
     AknLayoutUtils::LayoutLabel( iDurationLabel,
                                  progressRect,
-                                 mp4_progress_pane_t2().LayoutLine() );
+                                 mp4_progress_pane_t2( 1 ).LayoutLine() );
 
     iDurationLabel->SetContainerWindowL( *this );
     iDurationLabel->SetTextL( KNullDesC );

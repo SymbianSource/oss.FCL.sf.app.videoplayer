@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#14 %
+// Version : %version: 15 %
 
 
 // INCLUDE FILES
@@ -96,7 +96,8 @@ void CMPXVideoPlaybackControlConfiguration::CreateControlListL()
 
     CMPXVideoPlaybackViewFileDetails* fileDetails = iControlsController->FileDetails();
 
-    if ( fileDetails->iPlaybackMode == EMPXVideoStreaming )
+    if ( fileDetails->iPlaybackMode == EMPXVideoStreaming ||
+         fileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
     {
         //
         //  streaming mode, add branding animation control to show while initializing
@@ -216,10 +217,6 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
                 DeleteControlFromList( EMPXBrandingAnimation );
             }
 
-            break;
-        }
-        default:
-        {
             break;
         }
     }

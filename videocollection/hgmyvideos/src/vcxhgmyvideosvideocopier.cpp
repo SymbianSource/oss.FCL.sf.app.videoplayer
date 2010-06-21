@@ -181,7 +181,7 @@ TBool CVcxHgMyVideosVideoCopier::QueryTargetDriveL( TBool aCopy, TInt& aTargetDr
         }
     if ( iModel.DriveMonitorL().MemoryCardDrive() != KErrNotFound )
         {
-        includedMedias |= AknCommonDialogsDynMem::EMemoryTypeMMCExternal;
+        includedMedias |= AknCommonDialogsDynMem::EMemoryTypeMMCExternalInDevice;
         }
     if ( iModel.DriveMonitorL().FixedDrive( EFalse ) == EDriveC )
         {

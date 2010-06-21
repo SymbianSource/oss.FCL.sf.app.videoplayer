@@ -191,6 +191,8 @@ void CVcxMyVideosMdsDb::ConstructL()
 
     iMdsShutdownMonitor = CVcxMdsShutdownMonitor::NewL(
             *this, KHarvesterPSShutdown, KMdSShutdown, EFalse );
+    
+    iEvents.Reset();
 
     MPX_DEBUG1( "CVcxMyVideosMdsDb::ConstructL exit" );
     }
@@ -256,7 +258,7 @@ void CVcxMyVideosMdsDb::HandleObjectPresentNotification( CMdESession& /*aSession
         TBool aPresent, const RArray<TItemId>& aObjectIdArray)
     {
     MPX_DEBUG1( "CVcxMyVideosMdsDb::--------------------------------------------------------------." );
-    MPX_DEBUG3( "CVcxMyVideosMdsDb::HandleObjectPresentNotification( aPresent = %1d, count = %3d) |", aPresent, aObjectIdArray.Count() );
+    MPX_DEBUG3( "CVcxMyVideosMdsDb::HandleObjectPresentNotification( aPresent = %1d, count = %4d) |", aPresent, aObjectIdArray.Count() );
     MPX_DEBUG1( "CVcxMyVideosMdsDb::--------------------------------------------------------------'" );
 
     TObserverNotificationType type;
@@ -304,6 +306,9 @@ CVcxMyVideosMdsDb* CVcxMyVideosMdsDb::NewLC( MVcxMyVideosMdsDbObserver* aObserve
 CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb()
     {
     MPX_DEBUG1( "CVcxMyVideosMdsDb::~CVcxMyVideosMdsDb() start" );
+
+    delete iEventProcessor;
+    iEvents.Close();
 
     Cancel( EGetVideoList );
 
@@ -1026,7 +1031,7 @@ void CVcxMyVideosMdsDb::Object2MediaL(
     if ( aObject.Property( *iOriginPropertyDef, property, 0 ) != KErrNotFound )
         {
         TUint8 origin = static_cast<CMdEUint8Property*>(property)->Value();
-#ifdef VIDEO_COLLECTION_PLUGIN_TB92
+#ifndef VCX_DOWNLOADS_CATEGORY
         if( origin != EVcxMyVideosOriginCapturedWithCamera )
             {
             origin = EVcxMyVideosOriginOther;
@@ -1604,30 +1609,116 @@ void CVcxMyVideosMdsDb::DoHandleObjectNotificationL(
 
     if ( iMdsDbObserver )
         {
-        RArray<TUint32> idArray;
-        CleanupClosePushL( idArray ); // 1->
-
-        for ( TInt i = 0; i < aObjectIdArray.Count(); i++ )
+        // Let delete events bypass buffer only if it empty.
+        // This assures that event arriving order stays the same.
+        if ( aType & ENotifyRemove && iEvents.Count() == 0 )
             {
-            idArray.Append( aObjectIdArray[i] );
+            // Delete handling is so fast that we dont buffer them at all.
+            // Modify and add require fetch from mds -> they are slow.
+            RArray<TUint32> idArray;
+            CleanupClosePushL( idArray ); // 1->
+    
+            for ( TInt i = 0; i < aObjectIdArray.Count(); i++ )
+                {
+                idArray.Append( aObjectIdArray[i] );
+                }
+                 
+            iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemDeleted, idArray, iEvents.Count() );
+    
+            CleanupStack::PopAndDestroy( &idArray ); // <-1
             }
-            
-        if ( aType & ENotifyAdd )
+        else
             {
-            iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemInserted, idArray );
-            }        
-	    else if ( aType & ENotifyModify )
-	        {
-            iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemModified, idArray );
-	        }	    
-	    else if ( aType & ENotifyRemove )
-	        {
-            iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemDeleted, idArray );
-	        }
-
-        CleanupStack::PopAndDestroy( &idArray ); // <-1
-        }
+            // Buffer modify & add events, since their handling is slow.
+            // Process them on background.
+            TInt count = aObjectIdArray.Count();
             
+            if ( iEvents.Count() == 0 )
+                {
+                iEvents.ReserveL( count );
+                }
+            
+            TEvent event;
+            for ( TInt i = 0; i < count; i++ )
+                {
+                event.iMdsId     = aObjectIdArray[i];
+                event.iEventType = aType;
+                iEvents.AppendL( event );
+                }
+        
+            if ( !iEventProcessor )
+                {
+                iEventProcessor = CIdle::NewL( CActive::EPriorityIdle );
+                }
+        
+            if ( !iEventProcessor->IsActive() )
+                {
+                iEventProcessor->Start( TCallBack( ProcessEvents, this ));
+                }
+            }
+        }    
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::ProcessEvents
+// ---------------------------------------------------------------------------
+//
+TInt CVcxMyVideosMdsDb::ProcessEvents( TAny* aPtr )
+    {
+    return static_cast<CVcxMyVideosMdsDb*>(aPtr)->DoProcessEvents();
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsDb::DoProcessEvents
+// ---------------------------------------------------------------------------
+//
+TInt CVcxMyVideosMdsDb::DoProcessEvents()
+    {
+    TInt sent             = 0;
+    TInt currentEventType = -1;
+    const TInt sendAtOnce = 10;
+
+    RArray<TUint32> idArray;
+    CleanupClosePushL( idArray ); // 1->
+
+    idArray.Reserve( sendAtOnce ); // may fail, it's ok
+    
+    while ( sent < sendAtOnce )
+        {
+        if ( iEvents.Count() == 0 )
+            {
+            break;
+            }
+        
+        if ( iEvents[0].iEventType != currentEventType &&
+                currentEventType != -1 )
+            {
+            break;
+            }
+        currentEventType = iEvents[0].iEventType;
+        idArray.Append( iEvents[0].iMdsId ); // this may fail, it is ok, we can't do anything for it
+        iEvents.Remove( 0 );
+        sent++;           
+        }
+
+    iEvents.Compress();
+    
+    if ( currentEventType & ENotifyAdd )
+        {
+        iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemInserted, idArray, iEvents.Count() );
+        }        
+    else if ( currentEventType & ENotifyModify )
+        {
+        iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemModified, idArray, iEvents.Count() );
+        }       
+    else if ( currentEventType & ENotifyRemove )
+        {
+        iMdsDbObserver->HandleMyVideosDbEvent( EMPXItemDeleted, idArray, iEvents.Count() );
+        }
+
+    CleanupStack::PopAndDestroy( &idArray ); // <-1
+    
+    return iEvents.Count();
     }
 
 // ---------------------------------------------------------------------------

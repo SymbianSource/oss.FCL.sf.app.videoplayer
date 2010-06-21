@@ -351,13 +351,23 @@ TBool CVcxMyVideosAlbums::RemoveAlbumL( TUint32 aMdsId, TBool aCompress )
 // CVcxMyVideosAlbums::CalculateAttributesL
 // ----------------------------------------------------------------------------
 //
-void CVcxMyVideosAlbums::CalculateAttributesL()
+TBool CVcxMyVideosAlbums::CalculateAttributesL()
     {
+    TBool eventsAdded = EFalse;
+    TBool modified    = EFalse;
     TInt count = iAlbums.Count();
     for ( TInt i = 0; i < count; i++ )
         {
-        iAlbums[i]->CalculateAttributesL();
+        modified = iAlbums[i]->CalculateAttributesL();
+        if ( modified )
+            {
+            iCollection.iMessageList->AddEventL(
+                    TMPXItemId( iAlbums[i]->iMdsId, KVcxMvcMediaTypeAlbum ),
+                    EMPXItemModified, 0 );
+            eventsAdded = ETrue;
+            }     
         }
+    return eventsAdded;
     }
 
 // ----------------------------------------------------------------------------

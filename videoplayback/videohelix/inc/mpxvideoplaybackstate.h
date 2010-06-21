@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -120,6 +120,10 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
         virtual void OpenFile64L( const RFile64& aMediaFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
+        void IssuePlayCommand( TMPXVideoPlaybackState aState,
+                               MMPXPlaybackPluginObserver::TEvent aEvent,
+                               TBool aSendEvent = ETrue );
+
     protected:
         /*
          *  C++ default constructor
@@ -131,10 +135,6 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
          *  that can leave
          */
         void ConstructL(CMPXVideoPlaybackController* aVideoPlaybackCtlr);
-
-        void IssuePlayCommand( TMPXVideoPlaybackState aState,
-                               MMPXPlaybackPluginObserver::TEvent aEvent,
-                               TBool aSendEvent = ETrue );
 
     protected:
         //
@@ -313,9 +313,10 @@ class CMPXPausedState : public CMPXVideoPlaybackState
         virtual void HandleStop();
         virtual void HandleStartSeekL( TBool aForward );
         virtual void HandlePlayPause();
-        virtual void HandleSetPosterFrame();        
+        virtual void HandleSetPosterFrame();
         virtual void HandleForeground();
         virtual void HandleCustomPlay();
+        virtual void HandleUnexpectedError( TInt aError );
 
         // general method
         virtual void HandleSetPositionL( TInt aPosition );
@@ -365,6 +366,7 @@ class CMPXStoppedState : public CMPXVideoPlaybackState
         // general method
         virtual void HandleSetPositionL(TInt aPosition);
         virtual void ResolveTimeoutError( TInt aError );
+        virtual void HandleUnexpectedError( TInt aError );
 
         inline virtual TMPXVideoPlaybackState GetState();
 };

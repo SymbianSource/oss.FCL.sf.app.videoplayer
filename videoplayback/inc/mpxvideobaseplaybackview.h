@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: 24 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -309,7 +309,7 @@ class CMPXVideoBasePlaybackView : public CAknView,
 
         void SetDisplayWindowL();
 
-        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd );
+        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync = ETrue );
 
         void SetVideoRectL();
 
@@ -387,6 +387,8 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iKeyboardInFocus;
 
         HBufC*                              iClipName;
+        
+        TBool                               iSyncClose;
 };
 
 #endif  // __VIDEOBASEPLAYBACKVIEW_H__

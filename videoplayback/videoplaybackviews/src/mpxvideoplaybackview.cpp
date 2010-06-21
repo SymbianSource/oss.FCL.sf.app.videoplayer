@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 20 %
+// Version : %version: 22 %
 
 
 //  Include Files
@@ -80,6 +80,8 @@ void CMPXVideoPlaybackView::ConstructL()
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackView::ConstructL()"));
 
     InitializeVideoPlaybackViewL();
+
+    iSyncClose = EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -149,7 +151,6 @@ void CMPXVideoPlaybackView::HandlePluginErrorL( TInt aError )
             HandleClosePlaybackViewL();
             break;
         }
-
         case KErrMMInvalidProtocol:
         case KErrMMInvalidURL:
         case KErrArgument:
@@ -158,13 +159,9 @@ void CMPXVideoPlaybackView::HandlePluginErrorL( TInt aError )
             HandleClosePlaybackViewL();
             break;
         }
-
         case KErrSessionClosed:
         {
-            if ( iFileDetails->iPlaybackMode != EMPXVideoLiveStreaming )
-            {
-                DisplayErrorMessageL( R_MPX_RESOURCE_LOST );
-            }
+            DisplayErrorMessageL( R_MPX_RESOURCE_LOST );
             HandleClosePlaybackViewL();
             break;
         }
@@ -197,7 +194,6 @@ void CMPXVideoPlaybackView::HandlePluginErrorL( TInt aError )
         default:
         {
             CMPXVideoBasePlaybackView::HandlePluginErrorL( aError );
-
             break;
         }
     }
@@ -235,14 +231,7 @@ void CMPXVideoPlaybackView::HandleInitializingStateL( TMPXPlaybackState aLastSta
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackView::HandleInitializingStateL()"),
                    _L("aLastState = %d"), aLastState );
 
-    //
-    //  For multi item playlists, reset the container and controls for next
-    //  item in playlist
-    //
-    if ( IsMultiItemPlaylist() )
-    {
-        DoHandleInitializingStateL( aLastState );
-    }
+    DoHandleInitializingStateL( aLastState );
 }
 
 // EOF

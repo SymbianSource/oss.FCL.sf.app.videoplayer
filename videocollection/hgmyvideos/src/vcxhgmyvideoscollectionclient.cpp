@@ -195,6 +195,7 @@ void CVcxHgMyVideosCollectionClient::GetCategoryListL()
         if ( iCollectionLevel == KVcxMpxLevelVideos )
             {
             iCollectionUtility->Collection().BackL();
+            iCollectionLevel = KErrNotFound;
             }
         }
     }
@@ -215,6 +216,7 @@ void CVcxHgMyVideosCollectionClient::GetVideoListL( TInt aIndex )
     if ( iCollectionLevel == KVcxMpxLevelCategories )
         {    
         iCollectionUtility->Collection().OpenL( aIndex );
+        iCollectionLevel = KErrNotFound;
         }
     else if ( iCollectionLevel == KVcxMpxLevelVideos )
         {

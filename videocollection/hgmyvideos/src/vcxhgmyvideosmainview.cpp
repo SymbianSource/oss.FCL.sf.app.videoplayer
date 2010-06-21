@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 46 %
+// Version : %version: 47 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -380,8 +380,7 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
                 }
             }
             break;
-        case EVcxHgMyVideosCmdDelete: // Fall through
-        case EVcxHgMyVideosCmdDeleteMarked:
+        case EVcxHgMyVideosCmdDelete:
             {
             if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
                 {
@@ -427,20 +426,16 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
             }
             break;
         case EVcxHgMyVideosCmdCopy:
-        case EVcxHgMyVideosCmdMove: // Fall through
-        case EVcxHgMyVideosCmdCopyMarked: // Fall through
-        case EVcxHgMyVideosCmdMoveMarked: // Fall through
+        case EVcxHgMyVideosCmdMove:
             {
             if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
                 {
-                VideoListL()->HandleMoveOrCopyCommandL(
-                        aCommand == EVcxHgMyVideosCmdCopy || aCommand == EVcxHgMyVideosCmdCopyMarked ?
-                        ETrue : EFalse );
+                VideoListL()->HandleMoveOrCopyCommandL( aCommand == EVcxHgMyVideosCmdCopy ?
+                                                        ETrue : EFalse );
                 }
             }
             break;
-        case EVcxHgMyVideosCmdSend: // Fall through
-        case EVcxHgMyVideosCmdSendMarked:
+        case EVcxHgMyVideosCmdSend:
             {
             Cba()->DrawDeferred();
             VideoListL()->HandleSendL();
@@ -596,26 +591,22 @@ void CVcxHgMyVideosMainView::UpdateLayout()
 void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
                                                CEikMenuPane* aMenuPane )
     {
+  
     if ( aResourceId == R_VCXHGMYVIDEOS_MAINVIEW_MENU )
         {
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDelete, ETrue );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdDeleteMarked, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdSortSubMenu, ETrue );        
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdVideoDetails, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdStopShowViaHomenet, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdShowViaHomenet, ETrue );
 #ifdef RD_VIDEO_AS_RINGING_TONE
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdAiwAssign, ETrue );
-#else
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkContext, ETrue );
 #endif
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdOpen, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMemoryStatus, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopy, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMove, ETrue );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdCopyMarked, ETrue );
-        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMoveMarked, ETrue );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkUnmarkSubMenu, ETrue);
                 
         if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryIdle )
@@ -700,6 +691,9 @@ void CVcxHgMyVideosMainView::DynInitMenuPaneL( TInt aResourceId,
                 showMarkAll,
                 showUnmarkAll );
 
+#ifndef RD_VIDEO_AS_RINGING_TONE
+        aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkContext, ! showStartMarking  );
+#endif
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdToggleMultipleMarking, ! showStartMarking );        
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdMarkAll, ! showMarkAll );
         aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdUnmarkAll, ! showUnmarkAll );

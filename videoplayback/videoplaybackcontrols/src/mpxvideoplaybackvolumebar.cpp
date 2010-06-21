@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: 24 %
 
 
 // INCLUDE FILES
@@ -47,6 +47,8 @@ const TInt KMPXSliderHeight = 30;
 const TInt KMPXSliderWidth = 18;
 const TInt KMPXVolumeDragEventTimeOut = 100000;
 const TInt KMPXPtrEventRepeatRequestTime = 200000;
+const TInt KDynamicSliderFeedbackTimeOut = 100000;
+const TInt KDynamicSliderFeedbackIntensity = 100;
 
 using namespace AknLayoutScalable_Apps;
 using namespace AknLayoutScalable_Avkon;
@@ -70,7 +72,7 @@ CMPXVideoPlaybackVolumeBar::CMPXVideoPlaybackVolumeBar(
 //
 void CMPXVideoPlaybackVolumeBar::ConstructL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::ConstructL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::ConstructL()"));
 
     SetLayout();
     SkinChangeL();
@@ -90,8 +92,6 @@ void CMPXVideoPlaybackVolumeBar::ConstructL()
 CMPXVideoPlaybackVolumeBar* CMPXVideoPlaybackVolumeBar::NewL(
     CMPXVideoPlaybackControlsController* aController, TRect aRect )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::NewL()"));
-
     CMPXVideoPlaybackVolumeBar* self =
         new ( ELeave ) CMPXVideoPlaybackVolumeBar( aController, aRect );
 
@@ -108,7 +108,7 @@ CMPXVideoPlaybackVolumeBar* CMPXVideoPlaybackVolumeBar::NewL(
 //
 CMPXVideoPlaybackVolumeBar::~CMPXVideoPlaybackVolumeBar()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::~CMPXVideoPlaybackVolumeBar()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::~CMPXVideoPlaybackVolumeBar()"));
 
     if ( iDraggingHandlerTimer )
     {
@@ -178,12 +178,11 @@ CMPXVideoPlaybackVolumeBar::~CMPXVideoPlaybackVolumeBar()
     }
 
 #ifdef RD_TACTILE_FEEDBACK
-    if (iFeedback)
+    if ( iFeedback )
     {
         iFeedback->RemoveFeedbackForControl(this);
     }
 #endif //RD_TACTILE_FEEDBACK
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -192,7 +191,8 @@ CMPXVideoPlaybackVolumeBar::~CMPXVideoPlaybackVolumeBar()
 //
 void CMPXVideoPlaybackVolumeBar::HandleResourceChange( TInt aType )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::HandleResourceChange(0x%X)"), aType);
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleResourceChange()"),
+                   _L("aType = 0x%X"), aType);
 
     if ( aType == KAknsMessageSkinChange )
     {
@@ -208,7 +208,7 @@ void CMPXVideoPlaybackVolumeBar::HandleResourceChange( TInt aType )
 //
 void CMPXVideoPlaybackVolumeBar::SetLayout()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::SetLayout()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::SetLayout()"));
 
     TAknLayoutRect tmpLayoutRect;
 
@@ -273,7 +273,7 @@ void CMPXVideoPlaybackVolumeBar::SetLayout()
 //
 void CMPXVideoPlaybackVolumeBar::SkinChangeL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackVolumeBar::SkinChangeL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::SkinChangeL()"));
 
     //
     // Create icons
@@ -287,10 +287,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iSpeakerIcon = NULL;
     iSpeakerIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiNsliderUnmuted,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_unmuted,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_unmuted_mask );
+            KAknsIIDQgnIndiNsliderUnmuted,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_unmuted,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_unmuted_mask );
 
     if ( iSpeakerIcon )
     {
@@ -303,10 +303,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iSpeakerMuteIcon = NULL;
     iSpeakerMuteIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiNsliderMuted,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_muted,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_muted_mask );
+            KAknsIIDQgnIndiNsliderMuted,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_muted,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_muted_mask );
 
 
     if ( iSpeakerMuteIcon )
@@ -337,10 +337,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iSliderIcon = NULL;
     iSliderIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnGrafNsliderVerticalMarker,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_mask );
+            KAknsIIDQgnGrafNsliderVerticalMarker,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_mask );
 
     if ( iSliderIcon )
     {
@@ -353,10 +353,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iSliderSelectedIcon = NULL;
     iSliderSelectedIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnGrafNsliderVerticalMarkerSelected,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected_mask );
+            KAknsIIDQgnGrafNsliderVerticalMarkerSelected,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected_mask );
 
     if ( iSliderSelectedIcon )
     {
@@ -369,10 +369,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iVolumeUpIcon = NULL;
     iVolumeUpIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiCam4ZoomMax,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_increase,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_increase_mask );
+            KAknsIIDQgnIndiCam4ZoomMax,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_increase,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_increase_mask );
 
     if ( iVolumeUpIcon )
     {
@@ -385,10 +385,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iVolumeDownIcon = NULL;
     iVolumeDownIcon = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiCam4ZoomMin,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_decrease,
-		    EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_decrease_mask );
+            KAknsIIDQgnIndiCam4ZoomMin,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_decrease,
+            EMbmMpxvideoplaybackcontrolsQgn_indi_nslider_level_decrease_mask );
 
     if ( iVolumeDownIcon )
     {
@@ -401,10 +401,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iVolumeFrameIconTop = NULL;
     iVolumeFrameIconTop = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiCam4ZoomTop,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_top,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_top_mask );
+            KAknsIIDQgnIndiCam4ZoomTop,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_top,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_top_mask );
 
     if ( iVolumeFrameIconTop )
     {
@@ -417,10 +417,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iVolumeFrameIconMiddle = NULL;
     iVolumeFrameIconMiddle = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiCam4ZoomMiddle,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_middle,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_middle_mask );
+            KAknsIIDQgnIndiCam4ZoomMiddle,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_middle,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_middle_mask );
 
     if ( iVolumeFrameIconMiddle )
     {
@@ -433,10 +433,10 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     iVolumeFrameIconBottom = NULL;
     iVolumeFrameIconBottom = AknsUtils::CreateGulIconL(
             skin,
-		    KAknsIIDQgnIndiCam4ZoomBottom,
-		    iconsPath,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_bottom,
-		    EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_bottom_mask );
+            KAknsIIDQgnIndiCam4ZoomBottom,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_bottom,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_bottom_mask );
 
     if ( iVolumeFrameIconBottom )
     {
@@ -448,6 +448,7 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     // Calculate the X coordinate to center the icon of sliderbar
     TRect volumeBarRectPart;
     CGulIcon* volumeFrameIconPart = NULL;
+
     if ( iVolumeFrameIconTop )
     {
         volumeFrameIconPart = iVolumeFrameIconTop;
@@ -478,7 +479,8 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
 //
 void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPointerEvent )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType);
 
     switch ( aPointerEvent.iType )
     {
@@ -509,7 +511,6 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
         case TPointerEvent::EDrag:
         {
             iDragging = EVolumeIncreaseDragging;
-
             break;
         }
         case TPointerEvent::EButton1Up:
@@ -540,7 +541,8 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
 //
 void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPointerEvent )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType);
 
     switch ( aPointerEvent.iType )
     {
@@ -601,7 +603,8 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
 //
 void CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType);
 
     switch ( aPointerEvent.iType )
     {
@@ -652,9 +655,15 @@ void CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL( const TPointerEvent
 //
 void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPointerEvent )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL()"),
+                   _L("aPointerEvent.iType = %d"), aPointerEvent.iType);
 
     TInt vol = 0;
+
+    //
+    //  Dynamic Slider Feedback should only be given when the slider is not at the top or bottom
+    //
+    TBool giveDynamicSliderFeedback = EFalse;
 
     if ( aPointerEvent.iPosition.iY < iVolumeBarRect.iTl.iY + KMPXSliderHeight / 2 )
     {
@@ -666,6 +675,8 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
     }
     else
     {
+        giveDynamicSliderFeedback = ETrue;
+
         vol = ( iVolumeBarRect.iBr.iY - KMPXSliderHeight / 2 - aPointerEvent.iPosition.iY ) /
               iOneVolumeIncrementHeight;
     }
@@ -677,11 +688,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
 #ifdef RD_TACTILE_FEEDBACK
             if ( iFeedback )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -700,13 +707,13 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
         case TPointerEvent::EDrag:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && giveDynamicSliderFeedback )
             {
-#ifdef SYMBIAN_BUILD_GCE
-                iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE
+                iFeedback->StartFeedback( this,
+                                          ETouchDynamicSlider,
+                                          &aPointerEvent,
+                                          KDynamicSliderFeedbackIntensity,
+                                          KDynamicSliderFeedbackTimeOut );
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -984,7 +991,7 @@ void CMPXVideoPlaybackVolumeBar::VolumeChanged( TInt aVolume )
 //
 void CMPXVideoPlaybackVolumeBar::Reset()
 {
-	MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::Reset()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::Reset()"));
 
     if ( iDragging != EVolumeNotDragging )
     {

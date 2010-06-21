@@ -631,6 +631,7 @@ void CVcxHgMyVideosCategoryModelHandler::CategoryModifiedL( TMPXChangeEventType 
             if (  ret == KErrNone &&
                   id1 == aMpxItemId.iId1 )
                 {
+                ClearLastWatchedIconL();
                 UpdateCategoryListItemL( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
 				iScroller.RefreshScreen( ResolveCategoryArrayIndexById( KCategoryIdLastWatched ) );
 				}
