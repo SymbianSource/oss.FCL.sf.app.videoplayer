@@ -512,7 +512,7 @@ CMPXMedia* CVcxMyVideosVideoCache::GetVideosL( RArray<TUint32>& aMdsIds )
 // ----------------------------------------------------------------------------
 //    
 void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
-        TBool& aListFetchingWasCanceled, RArray<TUint32>* aNonVideoIds  )
+        TBool& aListFetchingWasCanceled, RArray<TUint32>* aNonVideoIds, TBool aUpdateCategories  )
     {
     MPX_FUNC("CVcxMyVideosVideoCache::AddVideosFromMdsL");
 
@@ -547,7 +547,7 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
                 {
                 CleanupStack::PushL( videoToCache ); // 1->
 
-                TInt err = AddL( videoToCache, sortingOrder );
+                TInt err = AddL( videoToCache, sortingOrder, aUpdateCategories );
                 
                 if ( err == KErrNone )
                     {
@@ -584,7 +584,8 @@ void CVcxMyVideosVideoCache::AddVideosFromMdsL( RArray<TUint32>& aMdsIds,
 // This is for single adds, video list fetching does not call this.
 // ----------------------------------------------------------------------------
 //
-TInt CVcxMyVideosVideoCache::AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder aSortingOrder )
+TInt CVcxMyVideosVideoCache::AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder aSortingOrder,
+        TBool aUpdateCategories )
     {
     MPX_FUNC("CVcxMyVideosVideoCache::AddL");
     
@@ -596,7 +597,7 @@ TInt CVcxMyVideosVideoCache::AddL( CMPXMedia* aVideo, TVcxMyVideosSortingOrder a
     else
         {
         MPX_DEBUG1("CVcxMyVideosVideoCache:: iVideoList is complete, adding to iVideoList");
-        return AddToCorrectPlaceL( *aVideo, aSortingOrder );
+        return AddToCorrectPlaceL( *aVideo, aSortingOrder, aUpdateCategories );
         }
     }
 
@@ -945,7 +946,7 @@ TBool CVcxMyVideosVideoCache::UpdateVideoL( CMPXMedia& aVideo )
                         origin,
                         modified );
 
-#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+#ifdef VCX_ALBUMS
                 iCollection.AlbumsL().NewVideoFlagChangedL(
                         TVcxMyVideosCollectionUtil::IdL( *videoInCache ).iId1 );
 #endif
@@ -1190,7 +1191,7 @@ void CVcxMyVideosVideoCache::HandleVideoTitleModifiedL( CMPXMedia*& aVideoInCach
     iCollection.CategoriesL().UpdateCategoryNewVideoNameAndDateL(
             *aVideoInCache, modified );
 
-#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+#ifdef VCX_ALBUMS 
     iCollection.AlbumsL().VideoTitleChangedL(
             TVcxMyVideosCollectionUtil::IdL( *aVideoInCache ).iId1 );
 #endif
@@ -1501,7 +1502,7 @@ TInt CVcxMyVideosVideoCache::AddToCorrectPlaceL( CMPXMedia& aVideo,
     if ( aUpdateCategories )
         {
         iCollection.CategoriesL().VideoAddedL( aVideo );
-#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+#ifdef VCX_ALBUMS
         iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( aVideo );
 #endif
         }
@@ -1561,7 +1562,7 @@ TInt CVcxMyVideosVideoCache::RemoveL( TUint32 aMdsId, TBool aUpdateCategories )
             pos != KErrNotFound /* no need to update if item is on iPartialVideoList*/ )
         {
         iCollection.CategoriesL().VideoRemovedL( *video );
-#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+#ifdef VCX_ALBUMS
         iCollection.AlbumsL().VideoAddedOrRemovedFromCacheL( *video );
 #endif
         }

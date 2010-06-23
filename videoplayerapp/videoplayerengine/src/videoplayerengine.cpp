@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#31 %
+// Version : %version: 33 %
 
 
 #include <QApplication>
@@ -25,8 +25,11 @@
 #include <xqplugininfo.h>
 #include <xqserviceutil.h>
 #include <hbview.h>
+#include <hbapplication.h>
+#include <hbactivitymanager.h>
 
 #include "videoplayerengine.h"
+#include "videoactivitystate.h"
 #include "mpxvideoplaybackwrapper.h"
 #include "videoservices.h"
 #include "mpxvideo_debug.h"
@@ -67,16 +70,22 @@ QVideoPlayerEngine::~QVideoPlayerEngine()
     if ( mCollectionViewPlugin ) 
     {
         mCollectionViewPlugin->destroyView();
+		delete mCollectionViewPlugin;
+		mCollectionViewPlugin = 0;
     }
 
     if ( mPlaybackViewPlugin ) 
     {
         mPlaybackViewPlugin->destroyView();
+		delete mPlaybackViewPlugin;
+		mPlaybackViewPlugin = 0;
     }
 
     if ( mFileDetailsViewPlugin ) 
     {
         mFileDetailsViewPlugin->destroyView();
+		delete mFileDetailsViewPlugin;
+		mFileDetailsViewPlugin = 0;
     }
 
     delete mPlaybackWrapper;
@@ -110,31 +119,44 @@ void QVideoPlayerEngine::initialize()
                  SLOT( handleCommand( int ) ) );
     }
 
-    //
-    // Get VideoServices instance
-    //
-    if ( mIsService && ! mVideoServices )
-    {
-        mVideoServices = VideoServices::instance(this);
-        connect( mVideoServices, SIGNAL(activated(int)), this, SLOT(handleCommand(int)));
-    }
-
     QList<XQPluginInfo> impls;
     XQPluginLoader::listImplementations("org.nokia.mmdt.MpxViewPlugin/1.0", impls);
-        
-    if ( isPlayServiceInvoked() )
+    
+    if ( mIsService )
     {
-        createPlayAndDetailsViews(); 
+        if(!mVideoServices)
+        {
+            mVideoServices = VideoServices::instance(this);
+            connect( mVideoServices, SIGNAL(activated(int)), this, SLOT(handleCommand(int)));
+        }
+        if ( isPlayServiceInvoked() )
+        {
+            createPlaybackView(); 
+        }
+        else
+        {
+            loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );  
+            
+            // Browse service will activate view once the category to be opened is informed from highway
+            // since the category is not known at this point, we do not activate view for it here
+            if(!(XQServiceUtil::interfaceName().contains("IVideoBrowse")))
+            {
+                activateView( MpxHbVideoCommon::CollectionView );   
+            }
+        }
     }
     else
     {
-        loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );   
-
-        if((mIsService && !(XQServiceUtil::interfaceName().contains("IVideoBrowse"))) || !mIsService)
+        // check latest plugin type from activity manager data and create + activate it 
+        // CollectionView (default) and playbackview are the ones that are accepted
+        MpxHbVideoCommon::MpxHbVideoViewType viewType = MpxHbVideoCommon::CollectionView;
+        int typeGotten = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_VIEWPLUGIN_TYPE).toInt();
+        if(typeGotten == MpxHbVideoCommon::CollectionView || typeGotten == MpxHbVideoCommon::PlaybackView)
         {
-        	//Browse service will activate view once the category to be opened is informed from highway
-        	activateView( MpxHbVideoCommon::CollectionView );
+            viewType = MpxHbVideoCommon::MpxHbVideoViewType(typeGotten);
         }
+        loadPluginAndCreateView( viewType );  
+        activateView( viewType );
     }
             
 }
@@ -198,35 +220,46 @@ void QVideoPlayerEngine::doDelayedLoad()
 {
     MPX_ENTER_EXIT(_L("QVideoPlayerEngine::doDelayedLoad()"));
 	
-    createPlayAndDetailsViews();
+    createMissingViews();
 	
     mDelayedLoadDone = true;
 }
 
 // -------------------------------------------------------------------------------------------------
-// createPlayAndDetailsViews()
+// createPlaybackView()
 // -------------------------------------------------------------------------------------------------
 //
-void QVideoPlayerEngine::createPlayAndDetailsViews()
+void QVideoPlayerEngine::createPlaybackView()
 {
-    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::createPlayAndDetailsViews()"));
+    mPlaybackWrapper->lateInit();
+       
+    if ( ! mPlaybackViewPlugin )
+    {
+       loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// createMissingViews()
+// -------------------------------------------------------------------------------------------------
+//
+void QVideoPlayerEngine::createMissingViews()
+{
+    MPX_ENTER_EXIT(_L("QVideoPlayerEngine::createMissingViews()"));
     
     //
     // delayed initialization of some uiengine member variables
     // to help application startup time & improve playback start time
     //
-    mPlaybackWrapper->lateInit();
-    
-    if ( ! mPlaybackViewPlugin )
-    {
-        loadPluginAndCreateView( MpxHbVideoCommon::PlaybackView );
-    }
+    createPlaybackView();
 
-    // details view need not be created for playback via serviceFW
-    if ( ! mIsPlayService && 
-         ! mFileDetailsViewPlugin )
+    if(!mFileDetailsViewPlugin)
     {
         loadPluginAndCreateView( MpxHbVideoCommon::VideoDetailsView );
+    }
+    if(!mCollectionViewPlugin)
+    {
+        loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );
     }
 }
 
@@ -420,7 +453,38 @@ void QVideoPlayerEngine::disconnectView()
 void QVideoPlayerEngine::handleQuit()
 {
     MPX_ENTER_EXIT(_L("QVideoPlayerEngine::handleQuit()"));
-	  
+	
+    if(!mIsService)
+    {
+        VideoActivityState &localActivity(VideoActivityState::instance());
+            
+        QVariant data = QVariant();
+        HbActivityManager *actManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+        
+        //
+        // get and save recent view type: either playback or collection view plugins are currently used.
+        // activity will not be saved from the details plugin
+        //
+        int viewType = MpxHbVideoCommon::CollectionView;
+        if(mCurrentViewPlugin == mPlaybackViewPlugin)
+        {
+            viewType = MpxHbVideoCommon::PlaybackView;
+        }
+        data = viewType;
+        localActivity.setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
+        
+        //
+        // deactivate is the final point for current plugin to save it's activity data into 
+        // VideoActivityState before they are saved to to activity manager
+        //
+        mCurrentViewPlugin->deactivateView();
+        
+        // save data to activity manager
+        actManager->addActivity(ACTIVITY_VIDEOPLAYER_MAINVIEW, 
+                                localActivity.getActivityData(),
+                                QVariantHash());                
+    }
+    
     delete this;
 }
 

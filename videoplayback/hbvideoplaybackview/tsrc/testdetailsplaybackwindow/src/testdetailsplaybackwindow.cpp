@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 #include <qdebug>
@@ -110,51 +110,6 @@ void TestDetailsPlaybackWindow::testUpdateState()
     state = EPbStatePaused;
     mWindow->updateState( state );
     QVERIFY( mWindow->mPlayButton->isVisible() == true );
-
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
-// testMousePressEvent
-// ---------------------------------------------------------------------------
-//
-void TestDetailsPlaybackWindow::testMousePressEvent()
-{
-    MPX_ENTER_EXIT(
-            _L("TestDetailsPlaybackWindow::testMousePressEvent()"));
-
-    init();
-
-    QGraphicsSceneMouseEvent* event = 
-            new QGraphicsSceneMouseEvent( QEvent::GraphicsSceneMousePress );
-    event->setAccepted( false );
-
-    mWindow->mousePressEvent( event );
-
-    QVERIFY( event->isAccepted() );
-
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
-// testMouseReleaseEvent
-// ---------------------------------------------------------------------------
-//
-void TestDetailsPlaybackWindow::testMouseReleaseEvent()
-{
-    MPX_ENTER_EXIT(
-            _L("TestDetailsPlaybackWindow::testMouseReleaseEvent()"));
-
-    init();
-
-    QGraphicsSceneMouseEvent* event = 
-            new QGraphicsSceneMouseEvent( QEvent::GraphicsSceneMouseRelease );
-
-    mWindow->mouseReleaseEvent( event );
-    QVERIFY( mController->mCommand == EMPXPbvCmdPlayPause );
-
-    delete event;
-    event = NULL;
 
     cleanup();
 }

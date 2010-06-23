@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  16 %
+// Version : %version:  17 %
 
 
 
@@ -34,7 +34,7 @@
 // QMPXVideoPlaybackDetailsPlaybackWindow::QMPXVideoPlaybackDetailsPlaybackWindow
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackDetailsPlaybackWindow::QMPXVideoPlaybackDetailsPlaybackWindow( 
+QMPXVideoPlaybackDetailsPlaybackWindow::QMPXVideoPlaybackDetailsPlaybackWindow(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
     , mInitialized( false )
@@ -107,7 +107,7 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         QGraphicsWidget *detailsShareWidget = loader->findWidget( QString( "detailsShareButton" ) );
         HbPushButton *shareButton = qobject_cast<HbPushButton*>( detailsShareWidget );
         connect( shareButton, SIGNAL( released() ), mController, SLOT( sendVideo() ) );
-        
+
         //
         // by default in xml layout, attachButton is not visible while shareButton is visible.
         // if it's an 'attach' operation, reverse the visibility order
@@ -116,9 +116,9 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
         {
             attachButton->setVisible( true );
             shareButton->setVisible( false );
-        }    
+        }
         else
-        {            
+        {
             //
             // dim "share" button for streaming
             //
@@ -165,30 +165,6 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::playPause()
     MPX_DEBUG(_L("QMPXVideoPlaybackDetailsPlaybackWindow::playPause"));
 
     mController->handleCommand( EMPXPbvCmdPlayPause );
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent( QGraphicsSceneMouseEvent *event )
-{
-    MPX_DEBUG(_L("QMPXVideoPlaybackDetailsPlaybackWindow::mousePressEvent"));
-
-    event->accept();
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
-{
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackDetailsPlaybackWindow::mouseReleaseEvent"));
-
-    playPause();
-
-    event->accept();
 }
 
 //End of file

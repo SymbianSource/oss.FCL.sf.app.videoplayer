@@ -139,6 +139,11 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
 
     iMessageCount++;
     iMessageList->SetTObjectValueL<TInt>( KMPXMessageArrayCount, iMessageCount );
+    
+    if ( iMessageArray->Count() > 100 )
+        {
+        SendL();
+        }
     }
 
 // ----------------------------------------------------------------------------------------------------------
@@ -277,10 +282,9 @@ void CVcxMyVideosMessageList::AddL( CMPXMessage* aMessage )
 #endif
 
     CreateMessageListL(); //does nothing if already created
-    iMessageArray->AppendL( aMessage ); // ownership moves
     iMessageCount++;
     iMessageList->SetTObjectValueL<TInt>( KMPXMessageArrayCount, iMessageCount );
-
+    iMessageArray->AppendL( aMessage ); // ownership moves
     }
 
 // ----------------------------------------------------------------------------------------------------------

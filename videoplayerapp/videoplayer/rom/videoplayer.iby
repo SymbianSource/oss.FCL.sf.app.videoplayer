@@ -23,7 +23,9 @@
 #include <data_caging_paths_for_iby.hrh>
 
 S60_APP_EXE(videoplayer)
-data=DATAZ_/PRIVATE/10003A3F/import/APPS/videoplayer_reg.rsc    private/10003a3f/import/apps/videoplayer_reg.rsc
-data=DATAZ_\install\videoplayer_stub.sis                        system\install\videoplayer_stub.sis 
+data=ZPRIVATE\10003A3F\import\APPS\videoplayer_reg.rsc          private\10003a3f\import\apps\videoplayer_reg.rsc
+data=ZSYSTEM\install\videoplayer_stub.sis                       system\install\videoplayer_stub.sis 
+data=ZRESOURCE\hb\splashml\videos.splashml                      RESOURCE_FILES_DIR\hb\splashml\videos.splashml
+data=ZRESOURCE\hb\splashml\videos.docml                         RESOURCE_FILES_DIR\hb\splashml\videos.docml
 
 #endif  // __VIDEOPLAYER_IBY__

@@ -24,6 +24,7 @@ HbDialog *HbDialog::currentInstance = 0;
 bool HbDialog::execReturnPrimary = true;
 bool HbDialog::primaryReturnNull = false;
 bool HbDialog::secondaryReturnNull = false;
+int HbDialog::openAmount = 0;
 
 HbDialog::HbDialog(QGraphicsItem *parent) :
 HbWidget(parent),
@@ -50,6 +51,7 @@ HbDialog::~HbDialog()
 
 void HbDialog::open( QObject* receiver, const char* member)
 {
+    openAmount++;
     if(receiver && member)
     {
         connect(this, SIGNAL(finished(HbAction*)), receiver, SLOT(member));

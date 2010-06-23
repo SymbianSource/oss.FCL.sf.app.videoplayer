@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -43,8 +43,6 @@ class HbVideoBasePlaybackView : public HbView
     public:
         HbVideoBasePlaybackView();
         virtual ~HbVideoBasePlaybackView();
-        
-        void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
     signals:
         void tappedOnScreen();

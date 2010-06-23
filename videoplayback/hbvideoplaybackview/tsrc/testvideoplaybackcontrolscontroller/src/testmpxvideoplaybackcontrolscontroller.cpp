@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in Video Playback Controls Controller
-* 
+*
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\TestMPXVideoPlaybackControlsController.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
-    
+
     return res;
 }
 
@@ -72,19 +72,19 @@ int main(int argc, char *argv[])
 // ---------------------------------------------------------------------------
 //
 void TestMPXVideoPlaybackControlsController::init()
-{	  
+{
     MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackControlsController::init()"));
-    
+
     mBaseVideoView = new HbVideoBasePlaybackView();
 
     if ( ! mFileDetails )
     {
-        mFileDetails   = new QMPXVideoPlaybackViewFileDetails();        
+        mFileDetails   = new QMPXVideoPlaybackViewFileDetails();
     }
-    mViewWrapper   = CMPXVideoViewWrapper::NewL( mBaseVideoView );	  
+    mViewWrapper   = CMPXVideoViewWrapper::NewL( mBaseVideoView );
     mController    = new QMPXVideoPlaybackControlsController( mBaseVideoView,
                                                               mViewWrapper,
-                                                              mFileDetails );       
+                                                              mFileDetails );
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ void TestMPXVideoPlaybackControlsController::init()
 void TestMPXVideoPlaybackControlsController::cleanup()
 {
     MPX_ENTER_EXIT(_L("TestMPXVideoPlaybackControlsController::cleanup()"));
-    
+
     delete mController;
     mController = NULL;
 
@@ -103,7 +103,7 @@ void TestMPXVideoPlaybackControlsController::cleanup()
 
     delete mViewWrapper;
     mViewWrapper = NULL;
-    
+
     delete mBaseVideoView;
     mBaseVideoView = NULL;
 }
@@ -125,14 +125,14 @@ void TestMPXVideoPlaybackControlsController::testAddFileDetails()
 
     init();
 
-    mController->addFileDetails( mFileDetails );    
-    
+    mController->addFileDetails( mFileDetails );
+
     QVERIFY( mController->mFileDetails->mRNFormat == true );
     QVERIFY( mController->mViewMode == EAudioOnlyView );
     QVERIFY( mController->mControlsConfig->mUpdateControlsWithFileDetails == true );
     QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdTvOutConnected );
 
-    cleanup();    
+    cleanup();
 
     //
     // local 3GPP media with video-only
@@ -149,11 +149,11 @@ void TestMPXVideoPlaybackControlsController::testAddFileDetails()
     mController->mViewMode = EFullScreenView;
     QFileInfo videoOnlyFile( mFileDetails->mClipName );
 
-    mController->addFileDetails( mFileDetails );    
-    
+    mController->addFileDetails( mFileDetails );
+
     QVERIFY( mController->mFileDetails->mRNFormat == false );
-    QVERIFY( mController->mControlsConfig->mUpdateControlsWithFileDetails == true ); 
-    
+    QVERIFY( mController->mControlsConfig->mUpdateControlsWithFileDetails == true );
+
     //
     // validate 'TvOutConnected'
     //
@@ -162,22 +162,22 @@ void TestMPXVideoPlaybackControlsController::testAddFileDetails()
     //
     // video-only, validate volume control is dimmed
     //
-    QVERIFY( mController->mVolumeControl->mValue == 0 ); 
-    QVERIFY( mController->mVolumeControl->isEnabled() == false ); 
-    
+    QVERIFY( mController->mVolumeControl->mValue == 0 );
+    QVERIFY( mController->mVolumeControl->isEnabled() == false );
+
     //
     // verify 'title' (via mClipName) is set properly
     //
     for ( int i=0 ; i < mController->mLoader->mWidgets.count() ; i++ )
-    {        
+    {
         if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "title" ) )
-        {        
-            HbLabel *titleLabel = qobject_cast<HbLabel*>( mController->mLoader->mWidgets[i] );        
-            QVERIFY( titleLabel->plainText() == videoOnlyFile.baseName() ); 
+        {
+            HbLabel *titleLabel = qobject_cast<HbLabel*>( mController->mLoader->mWidgets[i] );
+            QVERIFY( titleLabel->plainText() == videoOnlyFile.baseName() );
             break;
         }
-    }    
-    cleanup();    
+    }
+    cleanup();
 
     //
     // non-local audio-video media, TvOut is not connected
@@ -192,25 +192,25 @@ void TestMPXVideoPlaybackControlsController::testAddFileDetails()
 
     init();
 
-    mController->addFileDetails( mFileDetails );    
-    
+    mController->addFileDetails( mFileDetails );
+
     QVERIFY( mController->mFileDetails->mRNFormat == true );
-    QVERIFY( mController->mControlsConfig->mUpdateControlsWithFileDetails == true ); 
-    
+    QVERIFY( mController->mControlsConfig->mUpdateControlsWithFileDetails == true );
+
     //
     // verify 'title' (via mTitle) is set properly
     //
     for ( int i=0 ; i < mController->mLoader->mWidgets.count() ; i++ )
-    {        
+    {
         if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "title" ) )
-        {        
-            HbLabel *titleLabel = qobject_cast<HbLabel*>( mController->mLoader->mWidgets[i] );        
-            QVERIFY( titleLabel->plainText() == mFileDetails->mTitle ); 
+        {
+            HbLabel *titleLabel = qobject_cast<HbLabel*>( mController->mLoader->mWidgets[i] );
+            QVERIFY( titleLabel->plainText() == mFileDetails->mTitle );
             break;
         }
-    }    
-    
-    cleanup();    
+    }
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -219,16 +219,16 @@ void TestMPXVideoPlaybackControlsController::testAddFileDetails()
 //
 void TestMPXVideoPlaybackControlsController::testHandleEventSetPosition()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetPosition()"));  
-    
-    init();    
-    int value = 20000;    
-    
-    mController->handleEvent( EMPXControlCmdSetPosition, value );  
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetPosition()"));
+
+    init();
+    int value = 20000;
+
+    mController->handleEvent( EMPXControlCmdSetPosition, value );
 
     QVERIFY( mController->mControls[0]->mPosition == ( value / KPbMilliMultiplier ) );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -237,16 +237,16 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetPosition()
 //
 void TestMPXVideoPlaybackControlsController::testHandleEventSetDuration()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetDuration()"));  
-    
-    init();    
-    int value = 30000;    
-    
-    mController->handleEvent( EMPXControlCmdSetDuration, value );  
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetDuration()"));
+
+    init();
+    int value = 30000;
+
+    mController->handleEvent( EMPXControlCmdSetDuration, value );
 
     QVERIFY( mController->mControls[0]->mDuration == ( value / KPbMilliMultiplier ) );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -255,90 +255,90 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetDuration()
 //
 void TestMPXVideoPlaybackControlsController::testHandleEventStateChanged()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventStateChanged()"));  
-    
-    init();    
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventStateChanged()"));
+
+    init();
     TMPXVideoPlaybackControlCommandIds event = EMPXControlCmdStateChanged;
     mController->mOrientation = Qt::Horizontal;
 
     //
     // state change (EPbStateInitialising)
     //
-    int value = EPbStateInitialising;    
-    mController->handleEvent( event, value );    
+    int value = EPbStateInitialising;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-        
+
     //
     // state change (EPbStateBuffering)
     //
-    value = EPbStateBuffering;    
-    mController->handleEvent( event, value );    
+    value = EPbStateBuffering;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStatePlaying)
     //
-    value = EPbStatePlaying;    
-    mController->handleEvent( event, value );    
+    value = EPbStatePlaying;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStatePaused)
     //
-    value = EPbStatePaused;    
-    mController->handleEvent( event, value );    
+    value = EPbStatePaused;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
 
     //
     // state change (EPbStateNotInitialised)
     //
-    value = EPbStateNotInitialised;    
-    mController->handleEvent( event, value );    
+    value = EPbStateNotInitialised;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
 
     //
     // state change (EPbStateStopped)
     //
-    value = EPbStateStopped;    
-    mController->handleEvent( event, value );    
+    value = EPbStateStopped;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
 
     //
     // state change (EPbStateSeekingForward)
     //
-    value = EPbStateSeekingForward;    
-    mController->handleEvent( event, value );    
+    value = EPbStateSeekingForward;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStateSeekingBackward)
     //
-    value = EPbStateSeekingBackward;    
-    mController->handleEvent( event, value );    
+    value = EPbStateSeekingBackward;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStateShuttingDown)
     //
-    value = EPbStateShuttingDown;    
-    mController->handleEvent( event, value );    
+    value = EPbStateShuttingDown;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStateDownloading)
     //
-    value = EPbStateDownloading;    
-    mController->handleEvent( event, value );    
+    value = EPbStateDownloading;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
+
     //
     // state change (EPbStatePluginSeeking)
     //
-    value = EPbStatePluginSeeking;    
-    mController->handleEvent( event, value );    
+    value = EPbStatePluginSeeking;
+    mController->handleEvent( event, value );
     verifyHandleEventStateChangedResult( value );
-    
-    cleanup();        
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -347,29 +347,29 @@ void TestMPXVideoPlaybackControlsController::testHandleEventStateChanged()
 //
 void TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult( int value )
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult()"));  
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult()"));
 
     mController->mOrientation = Qt::Horizontal;
 
-    if ( value == EPbStateInitialised && 
+    if ( value == EPbStateInitialised &&
             ( mController->mFileDetails->mPlaybackMode == EMPXVideoStreaming ||
               mController->mFileDetails->mPlaybackMode == EMPXVideoLiveStreaming ) )
     {
-        QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdPluginInitialized );                    
+        QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdPluginInitialized );
     }
-    else if ( value == EPbStatePlaying || value == EPbStateInitialising || 
-              value == EPbStateBuffering || value == EPbStatePaused || 
+    else if ( value == EPbStatePlaying || value == EPbStateInitialising ||
+              value == EPbStateBuffering || value == EPbStatePaused ||
               value == EPbStateNotInitialised )
     {
         for ( int i = 0 ; i < mController->mControls.count() ; i++ )
         {
-            QVERIFY( mController->mControls[i]->mState == value );    
-            QVERIFY( mController->mControls[i]->mVisibilityState == value );    
+            QVERIFY( mController->mControls[i]->mState == value );
+            QVERIFY( mController->mControls[i]->mVisibilityState == value );
         }
     }
     else
     {
-        QVERIFY( mController->mState == value );                
+        QVERIFY( mController->mState == value );
     }
 }
 
@@ -379,15 +379,15 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventStateChangedResult
 //
 void TestMPXVideoPlaybackControlsController::testHandleEventSetVolume()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetVolume()"));  
-    
-    init();    
-    int value = 40;    
-    
-    mController->handleEvent( EMPXControlCmdSetVolume, value );    
-    QVERIFY( mController->mVolumeControl->mValue == value );  
-    
-    cleanup();    
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetVolume()"));
+
+    init();
+    int value = 40;
+
+    mController->handleEvent( EMPXControlCmdSetVolume, value );
+    QVERIFY( mController->mVolumeControl->mValue == value );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -396,19 +396,19 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetVolume()
 //
 void TestMPXVideoPlaybackControlsController::testHandleEventSetAspectRatio()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetAspectRatio()"));  
-    
-    init();    
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetAspectRatio()"));
+
+    init();
     int numScalingType = 5;
-    
+
     for ( int i = 0; i < numScalingType; i++ )
-    {    
-        mController->handleEvent( EMPXControlCmdSetAspectRatio, i );   
-    
-        QVERIFY( mController->mControls[0]->mAspectRatio == i );  
+    {
+        mController->handleEvent( EMPXControlCmdSetAspectRatio, i );
+
+        QVERIFY( mController->mControls[0]->mAspectRatio == i );
     }
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -418,15 +418,15 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetAspectRatio()
 void TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadSize()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadSize()") );
-    
-    init();    
-    int value = 50;    
-    
-    mController->handleEvent( EMPXControlCmdSetDownloadSize, value );    
-    
-    QVERIFY( mController->mControls[0]->mDownloadSize == value );  
-    
-    cleanup();    
+
+    init();
+    int value = 50;
+
+    mController->handleEvent( EMPXControlCmdSetDownloadSize, value );
+
+    QVERIFY( mController->mControls[0]->mDownloadSize == value );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -436,15 +436,15 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadSize()
 void TestMPXVideoPlaybackControlsController::testHandleEventDownloadUpdated()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventDownloadUpdated()") );
-    
-    init();    
-    int value = 55;
-    
-    mController->handleEvent( EMPXControlCmdDownloadUpdated, value );    
 
-    QVERIFY( mController->mControls[0]->mDownloadPosition == value );  
-    
-    cleanup();    
+    init();
+    int value = 55;
+
+    mController->handleEvent( EMPXControlCmdDownloadUpdated, value );
+
+    QVERIFY( mController->mControls[0]->mDownloadPosition == value );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -454,15 +454,15 @@ void TestMPXVideoPlaybackControlsController::testHandleEventDownloadUpdated()
 void TestMPXVideoPlaybackControlsController::testHandleEventDownloadComplete()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventDownloadComplete()") );
-    
-    init();    
-    int value = 60;
-    
-    mController->handleEvent( EMPXControlCmdDownloadComplete, value );    
 
-    QVERIFY( mController->mControls[0]->mDownloadPosition == value );  
-    
-    cleanup();    
+    init();
+    int value = 60;
+
+    mController->handleEvent( EMPXControlCmdDownloadComplete, value );
+
+    QVERIFY( mController->mControls[0]->mDownloadPosition == value );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -472,15 +472,15 @@ void TestMPXVideoPlaybackControlsController::testHandleEventDownloadComplete()
 void TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadPaused()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadPaused()") );
-    
-    init();    
+
+    init();
     int value = 0;
-    
-    mController->handleEvent( EMPXControlCmdSetDownloadPaused, value );    
-    
-    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );                    
-    
-    cleanup();    
+
+    mController->handleEvent( EMPXControlCmdSetDownloadPaused, value );
+
+    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -490,15 +490,15 @@ void TestMPXVideoPlaybackControlsController::testHandleEventSetDownloadPaused()
 void TestMPXVideoPlaybackControlsController::testHandleEventClearDownloadPaused()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventClearDownloadPaused()") );
-    
-    init();    
+
+    init();
     int value = 0;
-    
-    mController->handleEvent( EMPXControlCmdClearDownloadPaused, value );    
-    
-    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );                    
-    
-    cleanup();    
+
+    mController->handleEvent( EMPXControlCmdClearDownloadPaused, value );
+
+    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -508,29 +508,29 @@ void TestMPXVideoPlaybackControlsController::testHandleEventClearDownloadPaused(
 void TestMPXVideoPlaybackControlsController::testHandleEventTvOutConnected()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventTvOutConnected()") );
-    
-    init();    
-    
+
+    init();
+
     //
     // TV-Out Connected, value = true, EMPXVideoLocal
     //
-    mController->handleEvent( EMPXControlCmdTvOutConnected, true );    
+    mController->handleEvent( EMPXControlCmdTvOutConnected, true );
     verifyHandleEventTvOutResult( true, true );
-        
+
     //
     // TV-Out Connected, value = false, EMPXVideoLocal
     //
-    mController->handleEvent( EMPXControlCmdTvOutConnected, false );    
+    mController->handleEvent( EMPXControlCmdTvOutConnected, false );
     verifyHandleEventTvOutResult( true, false );
-        
+
     //
     // TV-Out Connected, value = false, non-EMPXVideoLocal
     //
     mController->mFileDetails->mPlaybackMode = EMPXVideoStreaming;
-    mController->handleEvent( EMPXControlCmdTvOutConnected, false );    
+    mController->handleEvent( EMPXControlCmdTvOutConnected, false );
     verifyHandleEventTvOutResult( true, false );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -541,58 +541,58 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventTvOutResult( bool 
         bool value )
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::verifyHandleEventTvOutResult(%d,%d)"),
-            tvOutConnected, value ); 
-    
-    QVERIFY( mController->mFileDetails->mTvOutConnected == tvOutConnected );   
-    
+            tvOutConnected, value );
+
+    QVERIFY( mController->mFileDetails->mTvOutConnected == tvOutConnected );
+
     //
     // validate setDefaultBitmap()
     //
     for ( int i=0 ; i < mController->mLoader->mWidgets.count() ; i++ )
-    {        
+    {
         bool val = mController->mLoader->isVisible(i);
-        
+
         if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "tvOutBitmap" ) )
         {
-            QVERIFY( tvOutConnected? val == true : val == false ); 
+            QVERIFY( tvOutConnected? val == true : val == false );
         }
         else if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "realAudioOnlyBitmap" )  )
         {
-            QVERIFY( mFileDetails->mRNFormat? val == true : val == false ); 
+            QVERIFY( mFileDetails->mRNFormat? val == true : val == false );
         }
         else if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "partialAudioOnlyBitmap" )  )
         {
-            QVERIFY( mFileDetails->mPartialPlayback? val == true : val == false ); 
+            QVERIFY( mFileDetails->mPartialPlayback? val == true : val == false );
         }
         else if( mController->mLoader->mWidgets[i]->objectName() ==  QString( "audioOnlyBitmap" )  )
         {
-            QVERIFY( tvOutConnected? val == false : val == true ); 
+            QVERIFY( tvOutConnected? val == false : val == true );
         }
     }
-        
+
     //
     // validate generateThumbNail()
     //
     if ( tvOutConnected )
     {
-        QVERIFY( ( mController->mFileDetails->mPlaybackMode == EMPXVideoLocal )? 
-                   mController->mThumbNailState == EThumbNailRequsted : 
-                   mController->mThumbNailState == EThumbNailNotAvailable ); 
-        QVERIFY( mController->mViewMode == EAudioOnlyView );          
-        QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdTvOutConnected );          
-        QVERIFY( mController->mThumbnailManager->mThumbSize == ThumbnailManager::ThumbnailLarge );          
-        QVERIFY( mController->mThumbnailManager->mQuality == ThumbnailManager::OptimizeForPerformance );          
-        QVERIFY( mController->mViewTransitionIsGoingOn == false );          
+        QVERIFY( ( mController->mFileDetails->mPlaybackMode == EMPXVideoLocal )?
+                   mController->mThumbNailState == EThumbNailRequsted :
+                   mController->mThumbNailState == EThumbNailNotAvailable );
+        QVERIFY( mController->mViewMode == EAudioOnlyView );
+        QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdTvOutConnected );
+        QVERIFY( mController->mThumbnailManager->mThumbSize == ThumbnailManager::ThumbnailLarge );
+        QVERIFY( mController->mThumbnailManager->mQuality == ThumbnailManager::OptimizeForPerformance );
+        QVERIFY( mController->mViewTransitionIsGoingOn == false );
     }
     else if ( mController->mFileDetails->mVideoEnabled )
     {
-        QVERIFY( mController->mViewTransitionIsGoingOn == true );          
-        QVERIFY( mController->mViewMode == EFullScreenView );          
+        QVERIFY( mController->mViewTransitionIsGoingOn == true );
+        QVERIFY( mController->mViewMode == EFullScreenView );
     }
     else if ( ! mController->mFileDetails->mVideoEnabled )
     {
-        QVERIFY( mController->mViewTransitionIsGoingOn == false );          
-        QVERIFY( mController->mViewMode == EAudioOnlyView );          
+        QVERIFY( mController->mViewTransitionIsGoingOn == false );
+        QVERIFY( mController->mViewMode == EAudioOnlyView );
     }
 
 }
@@ -604,22 +604,22 @@ void TestMPXVideoPlaybackControlsController::verifyHandleEventTvOutResult( bool 
 void TestMPXVideoPlaybackControlsController::testHandleEventTvOutDisconnected()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventTvOutDisconnected()") );
-    
-    init();    
-    
+
+    init();
+
     //
     // TV-Out Disconnected, value = true
     //
-    mController->handleEvent( EMPXControlCmdTvOutDisconnected, true );    
+    mController->handleEvent( EMPXControlCmdTvOutDisconnected, true );
     verifyHandleEventTvOutResult( false, true );
-        
+
     //
     // TV-Out Disconnected, value = false
     //
-    mController->handleEvent( EMPXControlCmdTvOutDisconnected, false );    
+    mController->handleEvent( EMPXControlCmdTvOutDisconnected, false );
     verifyHandleEventTvOutResult( false, false );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -629,19 +629,19 @@ void TestMPXVideoPlaybackControlsController::testHandleEventTvOutDisconnected()
 void TestMPXVideoPlaybackControlsController::testHandleEventHandleErrors()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventHandleErrors()") );
-    
-    init();    
-    
+
+    init();
+
     //
     // handle error
     //
-    mController->handleEvent( EMPXControlCmdHandleErrors, 0 );    
-    
-    QVERIFY( mController->mThumbNailState == EThumbNailEmpty );          
-    QVERIFY( mController->mState == EPbStateNotInitialised );      
-    QVERIFY( mController->mViewMode == EFullScreenView );          
-    
-    cleanup();    
+    mController->handleEvent( EMPXControlCmdHandleErrors, 0 );
+
+    QVERIFY( mController->mThumbNailState == EThumbNailEmpty );
+    QVERIFY( mController->mState == EPbStateNotInitialised );
+    QVERIFY( mController->mViewMode == EFullScreenView );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -651,14 +651,14 @@ void TestMPXVideoPlaybackControlsController::testHandleEventHandleErrors()
 void TestMPXVideoPlaybackControlsController::testHandleEventShowVolumeControls()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleEventShowVolumeControls()") );
-    
-    init();    
-    
-    mController->handleEvent( EMPXControlCmdShowVolumeControls, 0 );    
-    
-    QVERIFY( mController->mVolumeControl->mVisible == true );          
-    
-    cleanup();    
+
+    init();
+
+    mController->handleEvent( EMPXControlCmdShowVolumeControls, 0 );
+
+    QVERIFY( mController->mVolumeControl->mVisible == true );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -668,106 +668,106 @@ void TestMPXVideoPlaybackControlsController::testHandleEventShowVolumeControls()
 void TestMPXVideoPlaybackControlsController::testHandleCommand()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleCommand()") );
-    
-    init();    
-    
-    mController->handleCommand( EMPXPbvCmdSetPosition, 0 );    
-    QVERIFY( mViewWrapper->mProperty == EPbPropertyPosition );          
-    
-    mController->handleCommand( EMPXPbvCmdSetVolume, 0 );    
-    QVERIFY( mViewWrapper->mProperty == EPbPropertyVolume );          
-    
-    mController->handleCommand( EMPXPbvCmdPlay, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPlay );          
-    
-    mController->handleCommand( EMPXPbvCmdPause, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause );          
-    
-    mController->handleCommand( EMPXPbvCmdPlayPause, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPlayPause );          
-    
-    mController->handleCommand( EMPXPbvCmdStop, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdStop );          
-    
-    mController->handleCommand( EMPXPbvCmdClose, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdClose );          
-    
-    mController->handleCommand( EMPXPbvCmdMute, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdMute );          
-    
-    mController->handleCommand( EMPXPbvCmdUnMute, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdUnMute );          
-    
-    mController->handleCommand( EMPXPbvCmdChangeAspectRatio, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdChangeAspectRatio );          
-    
-    mController->handleCommand( EMPXPbvCmdNaturalAspectRatio, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNaturalAspectRatio );          
-    
-    mController->handleCommand( EMPXPbvCmdZoomAspectRatio, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdZoomAspectRatio );          
-    
-    mController->handleCommand( EMPXPbvCmdStretchAspectRatio, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdStretchAspectRatio );          
-    
-    mController->handleCommand( EMPXPbvCmdSeekForward, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSeekForward );          
-    
-    mController->handleCommand( EMPXPbvCmdSeekBackward, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSeekBackward );          
-    
-    mController->handleCommand( EMPXPbvCmdEndSeek, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdEndSeek );          
-    
-    mController->handleCommand( EMPXPbvCmdNextListItem, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNextListItem );          
-    
-    mController->handleCommand( EMPXPbvCmdPreviousListItem, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPreviousListItem );          
-    
-    mController->handleCommand( EMPXPbvCmdDecreaseVolume, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdDecreaseVolume );          
-    
-    mController->handleCommand( EMPXPbvCmdIncreaseVolume, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdIncreaseVolume );          
-    
-    mController->handleCommand( EMPXPbvCmdPosition, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPosition );          
-    
-    mController->handleCommand( EMPXPbvCmdSave, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSave );          
-    
-    mController->handleCommand( EMPXPbvCmdResetControls, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdResetControls );          
-    
-    mController->handleCommand( EMPXPbvCmdShortPressForward, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShortPressForward );          
-    
-    mController->handleCommand( EMPXPbvCmdShortPressBackward, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShortPressBackward );          
-    
-    mController->handleCommand( EMPXPbvCmdShowFileDetails, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShowFileDetails );          
-    
-    mController->handleCommand( EMPXPbvCmdEndOfClip, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdEndOfClip );          
-    
-    mController->handleCommand( EMPXPbvCmdCustomPause, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdCustomPause );          
-    
-    mController->handleCommand( EMPXPbvCmdCustomPlay, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdCustomPlay );          
-    
-    mController->handleCommand( EMPXPbvCmdExit, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdExit );          
-    
-    mController->handleCommand( EMPXPbvLaunchDRMDetails, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvLaunchDRMDetails );          
-    
-    mController->handleCommand( EMPXPbvSurfaceCreated, 0 );    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvSurfaceCreated );          
-        
-    cleanup();    
+
+    init();
+
+    mController->handleCommand( EMPXPbvCmdSetPosition, 0 );
+    QVERIFY( mViewWrapper->mProperty == EPbPropertyPosition );
+
+    mController->handleCommand( EMPXPbvCmdSetVolume, 0 );
+    QVERIFY( mViewWrapper->mProperty == EPbPropertyVolume );
+
+    mController->handleCommand( EMPXPbvCmdPlay, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPlay );
+
+    mController->handleCommand( EMPXPbvCmdPause, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause );
+
+    mController->handleCommand( EMPXPbvCmdPlayPause, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPlayPause );
+
+    mController->handleCommand( EMPXPbvCmdStop, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdStop );
+
+    mController->handleCommand( EMPXPbvCmdClose, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdClose );
+
+    mController->handleCommand( EMPXPbvCmdMute, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdMute );
+
+    mController->handleCommand( EMPXPbvCmdUnMute, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdUnMute );
+
+    mController->handleCommand( EMPXPbvCmdChangeAspectRatio, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdChangeAspectRatio );
+
+    mController->handleCommand( EMPXPbvCmdNaturalAspectRatio, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNaturalAspectRatio );
+
+    mController->handleCommand( EMPXPbvCmdZoomAspectRatio, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdZoomAspectRatio );
+
+    mController->handleCommand( EMPXPbvCmdStretchAspectRatio, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdStretchAspectRatio );
+
+    mController->handleCommand( EMPXPbvCmdSeekForward, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSeekForward );
+
+    mController->handleCommand( EMPXPbvCmdSeekBackward, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSeekBackward );
+
+    mController->handleCommand( EMPXPbvCmdEndSeek, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdEndSeek );
+
+    mController->handleCommand( EMPXPbvCmdNextListItem, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNextListItem );
+
+    mController->handleCommand( EMPXPbvCmdPreviousListItem, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPreviousListItem );
+
+    mController->handleCommand( EMPXPbvCmdDecreaseVolume, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdDecreaseVolume );
+
+    mController->handleCommand( EMPXPbvCmdIncreaseVolume, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdIncreaseVolume );
+
+    mController->handleCommand( EMPXPbvCmdPosition, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPosition );
+
+    mController->handleCommand( EMPXPbvCmdSave, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdSave );
+
+    mController->handleCommand( EMPXPbvCmdResetControls, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdResetControls );
+
+    mController->handleCommand( EMPXPbvCmdShortPressForward, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShortPressForward );
+
+    mController->handleCommand( EMPXPbvCmdShortPressBackward, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShortPressBackward );
+
+    mController->handleCommand( EMPXPbvCmdShowFileDetails, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdShowFileDetails );
+
+    mController->handleCommand( EMPXPbvCmdEndOfClip, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdEndOfClip );
+
+    mController->handleCommand( EMPXPbvCmdCustomPause, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdCustomPause );
+
+    mController->handleCommand( EMPXPbvCmdCustomPlay, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdCustomPlay );
+
+    mController->handleCommand( EMPXPbvCmdExit, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdExit );
+
+    mController->handleCommand( EMPXPbvLaunchDRMDetails, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvLaunchDRMDetails );
+
+    mController->handleCommand( EMPXPbvSurfaceCreated, 0 );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvSurfaceCreated );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -777,39 +777,51 @@ void TestMPXVideoPlaybackControlsController::testHandleCommand()
 void TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()") );
-    
-    init();    
+
+    init();
     mController->mOrientation = Qt::Horizontal;
+    connect( this, SIGNAL( commandSignal() ), mController, SLOT( handleTappedOnScreen() ) );
 
     //
-    // preset variables
+    // 1. Test full screen view
     //
-    mFileDetails->mVideoEnabled = true;
     mController->mViewMode = EFullScreenView;
-    
+
     //
     // playing state
     //
     mController->mState = EPbStatePlaying;
-    mBaseVideoView->mouseReleaseEvent(0);
+    emit commandSignal();
+
     QVERIFY( mController->mControlsTimer->isActive() == true );
     for ( int i = 0 ; i < mController->mControls.count() ; i++ )
     {
         QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );
     }
-    
+
     //
     // pause state
     //
     mController->mState = EPbStatePaused;
-    mBaseVideoView->mouseReleaseEvent(0);
+    emit commandSignal();
+
     QVERIFY( mController->mControlsTimer->isActive() == false );
     for ( int i = 0 ; i < mController->mControls.count() ; i++ )
     {
-        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );    
+        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );
     }
-    
-    cleanup();    
+
+
+    //
+    // 2. Test details screen view
+    //
+    mController->mViewMode = EDetailsView;
+
+    emit commandSignal();
+    QVERIFY( mController->mViewWrapper->mCommandId == EMPXPbvCmdPlayPause );
+
+    disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( handleTappedOnScreen() ) );
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -819,26 +831,26 @@ void TestMPXVideoPlaybackControlsController::testHandleTappedOnScreen()
 void TestMPXVideoPlaybackControlsController::testUpdateVideoRectDone()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testUpdateVideoRectDone()") );
-    
-    init();    
-    
-    mController->updateVideoRectDone();    
-    
+
+    init();
+
+    mController->updateVideoRectDone();
+
     //
     // default is full-screen
     //
-    QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdFullScreenViewOpened );                    
-    
+    QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdFullScreenViewOpened );
+
     //
     // validate Details view
     //
     mController->mViewMode = EDetailsView;
-    
-    mController->updateVideoRectDone(); 
-    
-    QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdDetailsViewOpened );                    
-            
-    cleanup();    
+
+    mController->updateVideoRectDone();
+
+    QVERIFY( mController->mControlsConfig->mState == EMPXControlCmdDetailsViewOpened );
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -848,9 +860,9 @@ void TestMPXVideoPlaybackControlsController::testUpdateVideoRectDone()
 void TestMPXVideoPlaybackControlsController::testIsAttachOperation()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testIsAttachOperation()") );
-    
+
     //
-    // get access to XQServiceUtilXtra stub 
+    // get access to XQServiceUtilXtra stub
     //
     XQServiceUtilXtra* extraUtil = XQServiceUtilXtra::instance();
 
@@ -858,47 +870,46 @@ void TestMPXVideoPlaybackControlsController::testIsAttachOperation()
     // set service enable
     //
     extraUtil->setCurrentService( true );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-             
+    init();
+
     //
     // verify 'mIsAttachOperation' flag is enabled
     //
-    QVERIFY( mController->mIsAttachOperation == true ); 
-        
+    QVERIFY( mController->mIsAttachOperation == true );
+
     //
     // clean up
     //
-    cleanup();    
-    
+    cleanup();
+
     //
     // set service disable
     //
     extraUtil->setCurrentService( false );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-             
+    init();
+
     //
     // verify 'mIsAttachOperation' flag is disabled
     //
-    QVERIFY( mController->mIsAttachOperation == false ); 
-            
+    QVERIFY( mController->mIsAttachOperation == false );
+
     //
     // clean up
     //
-    cleanup();    
-    
+    cleanup();
+
     //
     // dereference extraUtil count
     //
     extraUtil->decreaseReferenceCount();
-    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -909,17 +920,32 @@ void TestMPXVideoPlaybackControlsController::testslot_skipToNextVideoItem()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_skipToNextVideoItem()") );
 
-    init();    
-    
+    init();
+
     connect( this, SIGNAL( commandSignal() ), mController, SLOT( skipToNextVideoItem() ) );
-    
-    emit commandSignal();     
-    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNextListItem ); 
-    
+
+    //
+    // If we are not in full screen view, ignore
+    //
+    mViewWrapper->mCommandId = EMPXPbvCmdPosition;
+    mController->mViewMode = EDetailsView;
+
+    emit commandSignal();
+
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPosition );
+
+    //
+    // If we are in full screen view, issue EMPXPbvCmdNextListItem;
+    //
+    mController->mViewMode = EFullScreenView;
+
+    emit commandSignal();
+
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdNextListItem );
+
     disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( skipToNextVideoItem() ) );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -930,17 +956,32 @@ void TestMPXVideoPlaybackControlsController::testslot_skipToPreviousVideoItem()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_skipToPreviousVideoItem()") );
 
-    init();    
-    
+    init();
+
     connect( this, SIGNAL( commandSignal() ), mController, SLOT( skipToPreviousVideoItem() ) );
-    
-    emit commandSignal();     
-    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPreviousListItem ); 
-    
+
+    //
+    // If we are not in full screen view, ignore
+    //
+    mViewWrapper->mCommandId = EMPXPbvCmdPosition;
+    mController->mViewMode = EDetailsView;
+
+    emit commandSignal();
+
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPosition );
+
+    //
+    // If we are in full screen view, issue EMPXPbvCmdPreviousListItem
+    //
+    mController->mViewMode = EFullScreenView;
+
+    emit commandSignal();
+
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPreviousListItem );
+
     disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( skipToPreviousVideoItem() ) );
-    
-    cleanup();    
+
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -952,7 +993,7 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_attachVideo()") );
 
     //
-    // get access to XQServiceUtilXtra stub to enable XQServiceUtil::isService() method 
+    // get access to XQServiceUtilXtra stub to enable XQServiceUtil::isService() method
     //
     XQServiceUtilXtra* extraUtil = XQServiceUtilXtra::instance();
 
@@ -960,52 +1001,52 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
     // set service enable
     //
     extraUtil->setCurrentService( true );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-        
+    init();
+
     //
     // verify view closePlaybackView() slot is not yet called
     //
-    QVERIFY( mController->mView->mViewClosed == false ); 
+    QVERIFY( mController->mView->mViewClosed == false );
 
     //
     // connect signal with controller attachVideo() slot
     //
     bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( attachVideo() ) );
-    
+
     //
     // emit signal, this will in turns invoke videoservices itemSelected() slot
     //
-    emit commandSignal();     
-    
+    emit commandSignal();
+
     //
     // verify view closePlaybackView() slot is called
     //
-    QVERIFY( mController->mView->mViewClosed == true ); 
+    QVERIFY( mController->mView->mViewClosed == true );
 
     //
     // verify videoservices itemSelected() slot is called
     //
-    QVERIFY( mController->mVideoServices->mItemSelected == true ); 
-    
+    QVERIFY( mController->mVideoServices->mItemSelected == true );
+
     //
     // disconnect signal
     //
     disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( attachVideo() ) );
-    
+
     //
     // clean up
     //
-    cleanup();  
-    
+    cleanup();
+
     //
     // dereference extraUtil count
     //
     extraUtil->decreaseReferenceCount();
-    
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1015,36 +1056,36 @@ void TestMPXVideoPlaybackControlsController::testslot_attachVideo()
 void TestMPXVideoPlaybackControlsController::testslot_sendVideo()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_sendVideo()") );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-        
+    init();
+
     //
     // connect signal with controller sendVideoo() slot
     //
     bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
-    
+
     //
     // emit signal, this will in turns invoke mController sendVideo() slot
     //
-    emit commandSignal();     
-    
+    emit commandSignal();
+
     //
     // verify command EMPXPbvCmdClose has been issued
     //
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause ); 
-        
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause );
+
     //
     // disconnect signal
     //
     disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
-    
+
     //
     // clean up
     //
-    cleanup();      
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1054,43 +1095,43 @@ void TestMPXVideoPlaybackControlsController::testslot_sendVideo()
 void TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged()") );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-        
+    init();
+
     //
     // connect signal with controller handleOrientationChanged() slot
     //
     bool res = connect( this, SIGNAL( commandSignal( Qt::Orientation ) ),
                         mController, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
-    
+
     //
     // emit signal, this will in turns invoke mController handleOrientationChanged() slot
     //
     mController->mOrientation = Qt::Vertical;
-    mController->mState = EPbStatePlaying;                
+    mController->mState = EPbStatePlaying;
 
-    emit commandSignal( Qt::Horizontal );     
+    emit commandSignal( Qt::Horizontal );
 
-    QVERIFY( mController->mOrientation == Qt::Horizontal ); 
+    QVERIFY( mController->mOrientation == Qt::Horizontal );
 
     for ( int i = 0 ; i < mController->mControls.count() ; i++ )
     {
-        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );    
+        QVERIFY( mController->mControls[i]->mVisibilityState == mController->mState );
     }
 
     //
     // disconnect signal
     //
-    disconnect( this, SIGNAL( commandSignal( Qt::Orientation ) ), 
+    disconnect( this, SIGNAL( commandSignal( Qt::Orientation ) ),
                 mController, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
-    
+
     //
     // clean up
     //
-    cleanup();      
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1100,36 +1141,36 @@ void TestMPXVideoPlaybackControlsController::testslot_handleOrientationChanged()
 void TestMPXVideoPlaybackControlsController::testslot_handleRNLogoVisibleChanged()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_handleRNLogoVisibleChanged()") );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
-        
+    init();
+
     //
     // connect signal with controller handleRNLogoVisibleChanged() slot
     //
     bool res = connect( this, SIGNAL( commandSignal() ),
                         mController, SLOT( handleRNLogoVisibleChanged() ) );
-    
+
     //
     // emit signal, this will in turns invoke mController handleRNLogoVisibleChanged() slot
     //
-    emit commandSignal();     
+    emit commandSignal();
 
-    QVERIFY( mController->mRNLogoTimer->isActive() ); 
-    QVERIFY( mController->mRNLogoTimer->interval() == KMPXRNLogoTimeOut ); 
+    QVERIFY( mController->mRNLogoTimer->isActive() );
+    QVERIFY( mController->mRNLogoTimer->interval() == KMPXRNLogoTimeOut );
 
     //
     // disconnect signal
     //
-    disconnect( this, SIGNAL( commandSignal() ), 
+    disconnect( this, SIGNAL( commandSignal() ),
                 mController, SLOT( handleRNLogoVisibleChanged() ) );
-    
+
     //
     // clean up
     //
-    cleanup();      
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1139,11 +1180,11 @@ void TestMPXVideoPlaybackControlsController::testslot_handleRNLogoVisibleChanged
 void TestMPXVideoPlaybackControlsController::testslot_handleRNLogoTimeout()
 {
     MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testslot_handleRNLogoTimeout()") );
-        
+
     //
     // initialize controlscontroller
     //
-    init();    
+    init();
 
     if ( ! mController->mRNLogoTimer )
     {
@@ -1155,26 +1196,26 @@ void TestMPXVideoPlaybackControlsController::testslot_handleRNLogoTimeout()
     //
     bool res = connect( this, SIGNAL( commandSignal() ),
                         mController, SLOT( handleRNLogoTimeout() ) );
-    
+
     //
     // emit signal, this will in turns invoke mController handleRNLogoTimeout() slot
     //
-    emit commandSignal();     
+    emit commandSignal();
 
-    QVERIFY( ! mController->mRNLogoTimer->isActive() ); 
-    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );                    
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdRealOneBitmapTimeout ); 
+    QVERIFY( ! mController->mRNLogoTimer->isActive() );
+    QVERIFY( mController->mControlsConfig->mState == KControlListsUpdated );
+    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdRealOneBitmapTimeout );
 
     //
     // disconnect signal
     //
-    disconnect( this, SIGNAL( commandSignal() ), 
+    disconnect( this, SIGNAL( commandSignal() ),
                 mController, SLOT( handleRNLogoTimeout() ) );
-    
+
     //
     // clean up
     //
-    cleanup();      
+    cleanup();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1183,7 +1224,7 @@ void TestMPXVideoPlaybackControlsController::testslot_handleRNLogoTimeout()
 //
 void TestMPXVideoPlaybackControlsController::testIsRNLogoBitmapVisible()
 {
-    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testIsRNLogoBitmapVisible()"));  
+    MPX_DEBUG(_L("TestMPXVideoPlaybackControlsController::testIsRNLogoBitmapVisible()"));
 
     init();
 
@@ -1202,7 +1243,7 @@ void TestMPXVideoPlaybackControlsController::testIsRNLogoBitmapVisible()
 
     QVERIFY( ! mController->isRNLogoBitmapInControlList() );
 
-    cleanup();    
+    cleanup();
 }
 
 // End of file

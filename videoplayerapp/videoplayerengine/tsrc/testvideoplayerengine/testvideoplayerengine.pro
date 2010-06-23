@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#11 %
+# Version : %version: da1mmcf#13 %
 
 
 TEMPLATE = app
@@ -24,7 +24,6 @@ DEFINES += BUILD_VIDEOPLAYERAPP_DLL
 DEPENDPATH += inc src stub/src stub/inc
 
 INCLUDEPATH +=stub/inc \
-              $$MW_LAYER_SYSTEMINCLUDE \
               ../../../../inc
 
 CONFIG += qtestlib hb qt
@@ -34,6 +33,7 @@ LIBS += -lxqserviceutil.dll
 
 # Input
 HEADERS += mpxvideoplaybackwrapper.h \
+           xqserviceutil.h \
            mpxviewpluginqt.h \
            testviewplugin.h \
            xqpluginloader.h \
@@ -45,9 +45,11 @@ HEADERS += mpxvideoplaybackwrapper.h \
            videoserviceplay.h \
            videoserviceview.h \
            hbview.h \
+           videoactivitystate.h \
            ../../../../inc/videoplayerengine.h
 
 SOURCES += mpxvideoplaybackwrapper.cpp \
+           xqserviceutil.cpp \
            testviewplugin.cpp \
            xqpluginloader.cpp \
            hbinstance.cpp \
@@ -56,4 +58,5 @@ SOURCES += mpxvideoplaybackwrapper.cpp \
            videoserviceurifetch.cpp \
            videoserviceplay.cpp \
            videoserviceview.cpp \
+           videoactivitystate.cpp \
            ../../src/videoplayerengine.cpp

@@ -551,7 +551,7 @@ TInt CVcxMyVideosCategories::CategoryIndex( TInt aOrigin )
             return KVcxMyVideosCapturedCategoryIndex;
                             
         case EVcxMyVideosOriginDownloaded:
-#ifndef VIDEO_COLLECTION_PLUGIN_TB92
+#ifdef VCX_DOWNLOADS_CATEGORY
             return KVcxMyVideosDownloadsCategoryIndex;
 #endif
         case EVcxMyVideosOriginTvRecording:

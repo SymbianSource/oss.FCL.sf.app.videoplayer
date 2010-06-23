@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 51 %
+// Version : %version: 52 %
 
 #include <qmap.h>
 #include <vcxmyvideosdefs.h>
@@ -368,13 +368,13 @@ void TestListWidget::testGetModel()
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
-    QVERIFY(&(mTestWidget->getModel()) == 0);
+    QVERIFY(mTestWidget->getModel() == 0);
     
     HbListView::mVScrollBarIsNull = false;
     HbListView::mReturnNullPrototype = false;
     mTestWidget->initialize(*model);
     
-    QVERIFY(&(mTestWidget->getModel()) == model);
+    QVERIFY(mTestWidget->getModel() == model);
 }
  
 // ---------------------------------------------------------------------------

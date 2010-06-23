@@ -177,11 +177,9 @@ public:
      * Calculates KVcxMediaMyVideosCategoryItemCount, KVcxMediaMyVideosCategoryNewItemCount,
      * KVcxMediaMyVideosCategoryNewItemName and KMPXMediaGeneralDate attributes to iMedia.
      * 
-     * @param aStartIndex  Start position of the calculations in iVideoList.
-     *                     Can be used to update values when items are appended
-     *                     to old list, without calculating everything from scratch.
+     * @return Returns ETrue if album attributes were modified, EFalse otherwise.
      */
-    void CalculateAttributesL( TInt aStartIndex = 0 );
+    TBool CalculateAttributesL();
     
 private:
 

@@ -146,16 +146,6 @@ void VideoListView::openCollectionViewSlot()
     // not stubbed
 }
 
-void VideoListView::openNewAlbumSlot(const QModelIndex &parent,
-    int start,
-    int end)
-{
-    Q_UNUSED(parent);
-    Q_UNUSED(start);
-    Q_UNUSED(end);
-    // not stubbed
-}
-
 void VideoListView::openServicesViewSlot()
 {
     // not stubbed
@@ -243,12 +233,6 @@ void VideoListView::doDelayedsSlot()
 
 void VideoListView::debugNotImplementedYet()
 {
-    // not stubbed
-}
-
-void VideoListView::createCollectionDialogFinished(HbAction *action)
-{
-    Q_UNUSED(action);
     // not stubbed
 }
 

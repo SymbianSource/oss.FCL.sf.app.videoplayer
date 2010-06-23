@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 3 %
 
 
 #include <QObject>
@@ -24,12 +24,14 @@
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <xqserviceutil.h>
+#include <hbactivitymanager.h>
 
 #include "videoplayerengine.h"
+#include "videoactivitystate.h"
 
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv);
+    HbApplication app(argc, argv, Hb::SplashFixedVertical);
 
     // Load the translation file.
     QString lang = QLocale::system().name();
@@ -68,6 +70,12 @@ int main(int argc, char *argv[])
      if (!isService)
      {
         app.setApplicationName(hbTrId("txt_videos_title_videos"));
+        
+        HbActivityManager *actManager = app.activityManager();
+        // save activity data locally
+        VideoActivityState::instance().setActivityData(actManager->activityData(ACTIVITY_VIDEOPLAYER_MAINVIEW));
+        // remove from activitymanager
+        actManager->removeActivity(ACTIVITY_VIDEOPLAYER_MAINVIEW);
      }
 
     HbMainWindow mainWindow( 0, Hb::WindowFlagTransparent );

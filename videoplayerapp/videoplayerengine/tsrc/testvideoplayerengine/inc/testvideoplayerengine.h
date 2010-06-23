@@ -23,7 +23,7 @@
 //      - how to setup construction to fail for testing purposes
 
 
-// Version : %version: %
+// Version : %version: 8 %
 
 #ifndef __TESTVIDEOPLAYERENGINE_H__
 #define __TESTVIDEOPLAYERENGINE_H__
@@ -31,6 +31,7 @@
 
 // INCLUDES
 #include <QtTest/QtTest>
+#include <qpointer.h>
 
 class MpxViewPlugin;
 class QMpxVideoPlaybackWrapper;
@@ -80,6 +81,9 @@ private slots:
     
     void testPlayMedia();
     void testSetEmbedded();
+    
+    void testInitWithActivityData();
+    void testHandleQuitWihtActivityData();
 
     // called after last test case executed
     void cleanupTestCase();
@@ -91,7 +95,7 @@ signals:
 
 private:
 
-	QVideoPlayerEngine*       mTestObject;
+    QPointer<QVideoPlayerEngine>  mTestObject;
 
     MpxViewPlugin*            mCurrentViewPlugin;
     MpxViewPlugin*            mPlaybackViewPlugin;

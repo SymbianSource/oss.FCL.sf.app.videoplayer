@@ -174,6 +174,12 @@ public:
      * if true, secondaryAction() -method returns null
      */
     static bool secondaryReturnNull;
+    
+    /**
+     * the amount how many times the open has been called.
+     */
+    static int openAmount;
+    
 };
 
 #endif

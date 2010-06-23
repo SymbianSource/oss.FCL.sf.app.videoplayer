@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 31 %
 
 // INCLUDE FILES
 #include <qabstractitemmodel.h>
@@ -55,7 +55,7 @@ VideoCollectionWrapper::VideoCollectionWrapper() :
 VideoCollectionWrapper::~VideoCollectionWrapper()
 {
 	FUNC_LOG;
-    // NOP
+    delete d;    
 }
 
 // -----------------------------------------------------------------------------

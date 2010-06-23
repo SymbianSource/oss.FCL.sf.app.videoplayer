@@ -119,13 +119,6 @@ signals:
      */
     void viewReady();
 
-public slots:
-
-    /**
-     * Signaled by HbInputDialog when it's closed. 
-     */
-    void createCollectionDialogFinished(HbAction *action);
-    
 private slots:
 
     /**
@@ -169,12 +162,6 @@ private slots:
      */
     void openCollectionViewSlot();
     
-    /**
-     * Slot is connected to model's about to insert rows signal.
-     * Opens the new album which was created. 
-     */
-    void openNewAlbumSlot(const QModelIndex &parent, int start, int end);
-
     /**
      * Slot is connected into toolbar's Service tab's
      * triggered signal.

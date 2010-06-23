@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 44 %
+// Version : %version: 45 %
 
 
 //
@@ -1371,7 +1371,6 @@ void CMPXPlayingState::HandlePlayPause()
     HandlePause();
 }
 
-
 //  ------------------------------------------------------------------------------------------------
 //    CMPXPlayingState::HandleSetPosterFrame()
 //  ------------------------------------------------------------------------------------------------
@@ -1525,7 +1524,7 @@ void CMPXPausedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
+        MPX_TRAPD( error, iVideoPlaybackCtlr->iPlaybackMode->HandlePauseToPlayTransitionL() );
     }
 }
 
@@ -1641,6 +1640,21 @@ void CMPXPausedState::HandleCustomPlay()
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXPausedState::HandleUnexpectedError
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXPausedState::HandleUnexpectedError( TInt aError )
+{
+    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleUnexpectedError()"),
+                   _L("aError = %d"), aError );
+
+    if ( iVideoPlaybackCtlr->iPlaybackMode->SendErrorToView( aError ) )
+    {
+        MPX_TRAPD( err, SendErrorToViewL( aError ) );
+    }
+}
+
 // *************************************************************************************************
 //
 //                          CMPXStoppedState
@@ -1726,6 +1740,21 @@ void CMPXStoppedState::ResolveTimeoutError( TInt aError )
                    _L("aError = %d"), aError );
 
     // Don't handle the error. Already in the stopped state
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXStoppedState::HandleUnexpectedError
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXStoppedState::HandleUnexpectedError( TInt aError )
+{
+    MPX_ENTER_EXIT(_L("CMPXStoppedState::HandleUnexpectedError()"),
+                   _L("aError = %d"), aError );
+
+    if ( iVideoPlaybackCtlr->iPlaybackMode->SendErrorToView( aError ) )
+    {
+        MPX_TRAPD( err, SendErrorToViewL( aError ) );
+    }
 }
 
 // *************************************************************************************************

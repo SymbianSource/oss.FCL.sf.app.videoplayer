@@ -110,9 +110,9 @@ VideoCollectionCommon::TCollectionLevels VideoListWidget::getLevel()
     return mCurrentLevel;
 }
 
-VideoSortFilterProxyModel& VideoListWidget::getModel()
+VideoSortFilterProxyModel* VideoListWidget::getModel()
 { 
-    return *mModel;
+    return mModel;
 }
 
 void VideoListWidget::emitActivated (const QModelIndex &modelIndex)

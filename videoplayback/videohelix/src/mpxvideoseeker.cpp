@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 // INCLUDE FILES
@@ -37,6 +37,7 @@ const TInt KDurationA(90000000);          // 90 sec
 const TInt KDurationB(180000000);         // 180 sec
 const TInt64 KSpeedAIncrements(2000000);  // 2 sec
 const TInt64 KSpeedBIncrements(4000000);  // 4 sec
+const TInt64 KSpeedOffset(3000000);       // 3 sec
 #endif
 
 // ============================ MEMBER FUNCTIONS ===================================================
@@ -311,7 +312,7 @@ void CMPXVideoSeeker::ConvertToSeeking()
         }
         else
         {
-            iIncrements = (TInt)( iDuration / 200 ) + 3;
+            iIncrements = (TInt)( iDuration / 200 ) + KSpeedOffset;
         }
     }
 

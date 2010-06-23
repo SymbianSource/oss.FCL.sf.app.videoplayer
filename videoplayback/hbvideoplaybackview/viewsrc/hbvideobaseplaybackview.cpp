@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#40 %
+// Version : %version: da1mmcf#41 %
 
 
 
@@ -31,6 +31,8 @@
 #include <hbinstance.h>
 #include <hbnotificationdialog.h>
 #include <hblabel.h>
+#include <hbtapgesture.h>
+#include <hbpangesture.h>
 
 #include <textresolver.h>
 #include <mmf/common/mmferrors.h>
@@ -66,8 +68,8 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 //
 void HbVideoBasePlaybackView::initializeVideoPlaybackView()
 {
-    MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::initializeVideoPlaybackView()"));  
-      
+    MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::initializeVideoPlaybackView()"));
+
     //
     // Need to set to control full screen including status pane area
     //
@@ -88,9 +90,9 @@ HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
     MPX_DEBUG(_L("HbVideoBasePlaybackView::~HbVideoBasePlaybackView()"));
 
     if ( mTimerForClosingView )
-    {        
+    {
         disconnect( mTimerForClosingView, SIGNAL( timeout() ), this, SIGNAL( activatePreviousView() ) );
-        
+
         if ( mTimerForClosingView->isActive() )
         {
             mTimerForClosingView->stop();
@@ -117,25 +119,25 @@ void HbVideoBasePlaybackView::handleActivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleActivateView()"));
 
-    TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) ); 
+    TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
 
     QCoreApplication::instance()->installEventFilter( this );
 
     //
     //  Request the needed Media from the Playback Plugin
     //
-    TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() ); 
-    
+    TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() );
+
     menu()->close();
 
     //
     // Landscape orientation
-    // Workaround: Disable orientation transition effect 
+    // Workaround: Disable orientation transition effect
 	// since orbit couldn't emit the orientationChanged signal with transition effect
-	// 
-    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal, false );  
+	//
+    hbInstance->allMainWindows()[0]->setOrientation( Qt::Horizontal, false );
 
-    mActivated = true;   
+    mActivated = true;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -146,11 +148,11 @@ void HbVideoBasePlaybackView::handleDeactivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleDeactivateView()"));
 
-    QCoreApplication::instance()->removeEventFilter( this );
-
     mActivated = false;
 
-    // 
+    QCoreApplication::instance()->removeEventFilter( this );
+
+    //
     //  Close the playback plugin to release all references to previous clip
     //
     MPX_TRAPD( err, mVideoMpxWrapper->HandleCommandL( EMPXPbvCmdClose ) );
@@ -216,24 +218,24 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
         }
         default:
         {
-            TRAP_IGNORE(  
+            TRAP_IGNORE(
 
                 //
                 //  TextResolver instance for error resolving.
                 //
                 CTextResolver* textresolver = CTextResolver::NewLC();
-                
+
                 //
                 //  Resolve the error text
                 //
                 TPtrC text;
                 text.Set( textresolver->ResolveErrorString( aError ) );
-    
+
                 //
                 // convert to QString
                 //
                 const QString qString( (QChar*)text.Ptr(), text.Length() );
-                
+
                 //
                 // clean up textresolver
                 //
@@ -243,7 +245,6 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
                 // display error and close playback view
                 //
                 showDialog( qString );
-    
             );
         }
     }
@@ -256,39 +257,39 @@ void HbVideoBasePlaybackView::handlePluginError( int aError )
 void HbVideoBasePlaybackView::showDialog( const QString& qString, bool closeView )
 {
     MPX_DEBUG(_L("HbVideoBasePlaybackView::showDialog( %s, %d )"), qString.data(), closeView );
-        
+
     //
-    // create pop-up dialog for error notes, 
+    // create pop-up dialog for error notes,
     //     set its position to the middle of the screen
     //     and make sure pop-up dialog gets deleted on close.
     //
     QRectF screenRect = hbInstance->allMainWindows()[0]->rect();
-    HbNotificationDialog* dlg = new HbNotificationDialog();    
+    HbNotificationDialog* dlg = new HbNotificationDialog();
     dlg->setAttribute( Qt::WA_DeleteOnClose );
-    dlg->setMinimumSize( QSizeF(200, 100) );    
-    dlg->setPreferredPos( QPointF( screenRect.height()/2, screenRect.width()/2 ), 
+    dlg->setMinimumSize( QSizeF(200, 100) );
+    dlg->setPreferredPos( QPointF( screenRect.height()/2, screenRect.width()/2 ),
                           HbPopup::Center );
-    
+
 	if ( closeView )
 	{
         //
         // connect aboutToClose() signal to handleClosePopupDialog() slot so that
         // when pop-up dialog is closed, playback view is closed also
         //
-        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( handleClosePopupDialog() ) );        
+        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( handleClosePopupDialog() ) );
     }
-	
+
     //
     // convert string to label so text alignment can be set
     //
     HbLabel *label = new HbLabel( qString );
     label->setAlignment( Qt::AlignCenter );
-    
+
     //
     // set label as content widget and show pop-up dialog
     //
     dlg->setContentWidget( label );
-    dlg->show();    
+    dlg->show();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -345,7 +346,7 @@ void HbVideoBasePlaybackView::closePlaybackView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::closePlaybackView()"));
 
-    mTimerForClosingView->start( 0 );    
+    mTimerForClosingView->start( 0 );
 }
 
 // ---------------------------------------------------------------------------
@@ -391,31 +392,6 @@ RWindow *HbVideoBasePlaybackView::getWindow()
 }
 
 // -------------------------------------------------------------------------------------------------
-// HbVideoBasePlaybackView::mousePress
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::mousePressEvent( QGraphicsSceneMouseEvent *event )
-{
-    //
-    // Needed for gesture framework
-    //
-    event->accept();
-}
-
-// -------------------------------------------------------------------------------------------------
-// HbVideoBasePlaybackView::mouseReleaseEvent
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
-{
-    MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::mouseReleaseEvent"));
-
-    Q_UNUSED( event );
-
-    emit tappedOnScreen();
-}
-
-// -------------------------------------------------------------------------------------------------
 //   HbVideoBasePlaybackView::handleClosePopupDialog()
 // -------------------------------------------------------------------------------------------------
 //
@@ -424,6 +400,43 @@ void HbVideoBasePlaybackView::handleClosePopupDialog()
     MPX_DEBUG(_L("HbVideoBasePlaybackView::handleClosePopupDialog()") );
 
     handleClosePlaybackView();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::gestureEvent()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::gestureEvent( QGestureEvent* event )
+{
+    if ( HbTapGesture * gesture = static_cast<HbTapGesture *>( event->gesture( Qt::TapGesture ) ) )
+    {
+        if ( gesture->state() == Qt::GestureFinished && mActivated )
+        {
+            MPX_DEBUG(_L("HbVideoBasePlaybackView::gestureEvent() tapGesture finished") );
+
+            emit tappedOnScreen();
+        }
+    }
+    else if ( HbPanGesture* gesture = static_cast<HbPanGesture*>( event->gesture( Qt::PanGesture ) ) )
+    {
+        if ( gesture->state() == Qt::GestureFinished && mActivated )
+        {
+            QPointF delta( gesture->sceneDelta() );
+
+            if ( delta.x() > 0 )
+            {
+                MPX_DEBUG(_L("HbVideoBasePlaybackView::gestureEvent() right") );
+
+                emit pannedToRight();
+            }
+            else
+            {
+                MPX_DEBUG(_L("HbVideoBasePlaybackView::gestureEvent() left") );
+
+                emit pannedToLeft();
+            }
+        }
+    }
 }
 
 // EOF
