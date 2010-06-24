@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestMPXVideoPlaybackButtonBar
-* 
+*
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 #include <qdebug>
@@ -50,9 +50,9 @@ int main(int argc, char *argv[])
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\testprogressbar.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
-    
+
     return res;
 }
 
@@ -74,7 +74,7 @@ void TestProgressBar::setup()
 {
     MPX_ENTER_EXIT(_L("TestProgressBar::setup()"));
 
-    mController = new QMPXVideoPlaybackControlsController();   
+    mController = new QMPXVideoPlaybackControlsController();
     mProgBar = new QMPXVideoPlaybackProgressBar( mController );
 
     mProgBar->initialize();
@@ -114,7 +114,7 @@ void TestProgressBar::testHandleSliderPressed()
     //
     // If it is playing state
     //
-    mController->mState = EPbStatePlaying;        
+    mController->mState = EPbStatePlaying;
 
     emit mProgBar->mProgressSlider->press();
 
@@ -126,8 +126,8 @@ void TestProgressBar::testHandleSliderPressed()
     //
     // If it is pause state
     //
-    mController->mState = EPbStatePaused;        
-    mController->mCommand = EMPXPbvCmdStop;        
+    mController->mState = EPbStatePaused;
+    mController->mCommand = EMPXPbvCmdStop;
 
     emit mProgBar->mProgressSlider->press();
 
@@ -155,7 +155,7 @@ void TestProgressBar::testHandleSliderReleased()
     mProgBar->mDuration = 120;
     mProgBar->mProgressSlider->mSliderValue = 130;
     mController->mTimerAction = EMPXTimerCancel;
-    mController->mCommand = EMPXPbvCmdStop;        
+    mController->mCommand = EMPXPbvCmdStop;
 
     emit mProgBar->mProgressSlider->release();
     QVERIFY( mController->mTimerAction == EMPXTimerReset );
@@ -167,21 +167,21 @@ void TestProgressBar::testHandleSliderReleased()
     //
     mProgBar->mProgressSlider->mSliderValue = -1;
     mController->mTimerAction = EMPXTimerCancel;
-    mController->mCommand = EMPXPbvCmdStop;        
-    mController->mValue = 100;        
+    mController->mCommand = EMPXPbvCmdStop;
+    mController->mValue = 100;
 
     emit mProgBar->mProgressSlider->release();
     QVERIFY( mController->mTimerAction == EMPXTimerReset );
     QVERIFY( ! mProgBar->mSliderDragging );
     QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
     QVERIFY( mController->mValue == 0 );
-    
+
     //
     // 0 <= moved position < duration
     //
     mProgBar->mProgressSlider->mSliderValue = 60;
     mController->mTimerAction = EMPXTimerCancel;
-    mController->mCommand = EMPXPbvCmdStop;        
+    mController->mCommand = EMPXPbvCmdStop;
 
     emit mProgBar->mProgressSlider->release();
     QVERIFY( mController->mTimerAction == EMPXTimerReset );
@@ -299,11 +299,11 @@ void TestProgressBar::testUpdateState()
 
     // test for 1st block of cases
     mProgBar->updateState( EPbStatePlaying );
-    QVERIFY( mProgBar->isEnabled() );
+    QVERIFY( mProgBar->mProgressSlider->isEnabled() );
 
     // test for 2nd block of cases
     mProgBar->updateState( EPbStateBuffering );
-    QVERIFY( ! mProgBar->isEnabled() );
+    QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );
 
     cleanup();
 }
@@ -399,7 +399,7 @@ void TestProgressBar::testHandleSeekingTimeout()
 
     setup();
 
-    mProgBar->mDraggingPosition = 10; 
+    mProgBar->mDraggingPosition = 10;
     mProgBar->mDuration = 30;
     mProgBar->mSetPosition = 0;
 

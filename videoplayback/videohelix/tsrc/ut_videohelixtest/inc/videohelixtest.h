@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: e003sa33#15 %
+// Version : %version: 16 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -35,10 +35,10 @@
 #include <ctsydomainpskeys.h>
 #include <mmf/common/mmferrors.h>
 
-#include <accessoryserver.h>
-#include <accessorycontrol.h>
-#include <accpolgidheader.h>
-#include <accpolgenericid.h>
+#include <AccessoryServer.h>
+#include <AccessoryControl.h>
+#include <AccPolGIDHeader.h>
+#include <AccPolGenericID.h>
 
 #include <mpxvideoplaybackdefs.h>
 #include "timeoutController.h"

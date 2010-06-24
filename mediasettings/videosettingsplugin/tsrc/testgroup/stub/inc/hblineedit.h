@@ -34,10 +34,14 @@ public:
     virtual ~HbLineEdit();
 
     void setValidator(HbValidator *validator);
+    
+    void setMaxLength(int max);
 
 public:
     
     HbValidator* mValidator;
+    
+    int mMaxLength;
     
 };
 

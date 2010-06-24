@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#23 %
+# Version : %version: 24 %
 
 
 TEMPLATE = lib
@@ -30,6 +30,13 @@ symbian:
     INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \
                    $$APP_LAYER_SYSTEMINCLUDE SYSTEMINCLUDE
     BLD_INF_RULES.prj_exports += "rom/hbvideoplaybackview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(hbvideoplaybackview.iby)"
+    defBlock = \      
+        "$${LITERAL_HASH}if defined(EABI)" \
+        "DEFFILE ../eabi/hbvideoplaybackview.def" \
+        "$${LITERAL_HASH}else" \
+        "DEFFILE ../bwins/hbvideoplaybackview.def" \
+        "$${LITERAL_HASH}endif"
+    MMP_RULES += defBlock
 }
 
 INCLUDEPATH += ../../inc \

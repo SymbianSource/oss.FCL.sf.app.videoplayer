@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 23 %
+// Version : %version: 24 %
 
 // INCLUDE FILES
 #include <xqplugin.h>
@@ -41,7 +41,7 @@ VideoCollectionViewPlugin::VideoCollectionViewPlugin()
     : mUiLoader( 0 )
     , mView( 0 )
     , mActivated( false )
-    , mIsService( false )
+    , mVideoServices( 0 )
 {
 	FUNC_LOG;
 }
@@ -72,14 +72,8 @@ void VideoCollectionViewPlugin::createView()
         }
 
         mUiLoader->reset();
-
-        if (XQServiceUtil::isService())
-        {
-        	INFO("VideoCollectionViewPlugin::createView() service flag set to true.");
-            mIsService = true;
-        }
         
-        mUiLoader->setIsService(mIsService);
+        mUiLoader->setIsService(XQServiceUtil::isService());
 
 		bool ok(false);
 
@@ -145,6 +139,12 @@ void VideoCollectionViewPlugin::destroyView()
     mView = 0;
     delete mUiLoader;
     mUiLoader = 0;
+    
+    if(mVideoServices)
+    {
+        mVideoServices->decreaseReferenceCount();
+        mVideoServices = 0;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -163,17 +163,18 @@ void VideoCollectionViewPlugin::activateView()
             bool isService = XQServiceUtil::isService();
             if (isService)
             {
-                VideoServices *videoServices = VideoServices::instance();
-                if (videoServices)
+                if(!mVideoServices)
                 {
-                    VideoServices::TVideoService serviceType =
-                        videoServices->currentService();
-                    if (serviceType == VideoServices::EBrowse)
-                    {
-                        // activate browsing service
-                        itemId.iId1 = videoServices->getBrowseCategory();
-                        itemId.iId2 = KVcxMvcMediaTypeCategory;
-                    }
+                    mVideoServices = VideoServices::instance();
+                }
+
+                VideoServices::TVideoService serviceType =
+                        mVideoServices->currentService();
+                if (serviceType == VideoServices::EBrowse)
+                {
+                    // activate browsing service
+                    itemId.iId1 = mVideoServices->getBrowseCategory();
+                    itemId.iId2 = KVcxMvcMediaTypeCategory;
                 }
             }
             int err = mView->activateView(itemId);

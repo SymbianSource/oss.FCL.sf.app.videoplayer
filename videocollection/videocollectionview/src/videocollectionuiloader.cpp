@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 22 %
+// Version : %version: 24 %
 
 // INCLUDE FILES
 #include <qgraphicswidget.h>
@@ -34,7 +34,6 @@
 #include "videocollectionwrapper.h"
 #include "videosortfilterproxymodel.h"
 #include "videocollectionviewutils.h"
-#include "videoservices.h"
 #include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
@@ -376,12 +375,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                 	VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelVideos);
                 	
                     // init widget
-                    VideoServices *videoServices = 0;
-                    if (mIsService)
-                    {
-                        videoServices = VideoServices::instance();
-                    }
-                    videoList->initialize(*model, videoServices, VideoCollectionCommon::ELevelVideos);
+                    videoList->initialize(*model, mIsService, VideoCollectionCommon::ELevelVideos);
                 }
             }
         }
@@ -399,12 +393,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                 if (videoList)
                 {
                     // init widget
-                    VideoServices *videoServices = 0;
-                    if (mIsService)
-                    {
-                        videoServices = VideoServices::instance();
-                    }
-                    videoList->initialize(*model, videoServices, VideoCollectionCommon::ELevelCategory);
+                    videoList->initialize(*model, mIsService, VideoCollectionCommon::ELevelCategory);
                 }
             }
         }
@@ -422,13 +411,8 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                 if (videoList)
                 {
                     // init widget
-                    VideoServices *videoServices = 0;
-                    if (mIsService)
-                    {
-                        videoServices = VideoServices::instance();
-                    }
                     // cannot set level at this point yet: it can be either default or user defined collection
-                    videoList->initialize(*model, videoServices);
+                    videoList->initialize(*model, mIsService);
                 }
             }
         }

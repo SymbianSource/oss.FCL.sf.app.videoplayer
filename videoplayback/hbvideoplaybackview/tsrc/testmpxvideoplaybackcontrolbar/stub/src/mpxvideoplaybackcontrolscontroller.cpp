@@ -15,14 +15,13 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
 // INCLUDE FILES
 
 
-#include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 
 // ================= MEMBER FUNCTIONS ==============================================================
@@ -36,7 +35,6 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController()"));
 
-    mLoader = new QMPXVideoPlaybackDocumentLoader( this );
     mFileDetails = new QMPXVideoPlaybackViewFileDetails();
 }
 

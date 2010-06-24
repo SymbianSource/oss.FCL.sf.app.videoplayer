@@ -37,7 +37,9 @@ public: // methods
         mIconString = "";
         mPressedString = "";
         mLastStatusAdditional = QVariant();
-        mWidgetLevel = VideoCollectionCommon::ELevelInvalid;
+        mWidgetLevel = VideoCollectionCommon::ELevelVideos;
+        mActivityCollectionId = TMPXItemId::InvalidId();
+        mActivityCollectionName = "";
     }   
     
 public: // data
@@ -52,6 +54,8 @@ public: // data
     static QString mPressedString;
     static QVariant mLastStatusAdditional;
     static VideoCollectionCommon::TCollectionLevels mWidgetLevel;
+    static TMPXItemId mActivityCollectionId;
+    static QString mActivityCollectionName;
 };
 
 #endif /* VIDEOCOLLECTIONVIEWUTILSDATA_H */

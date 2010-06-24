@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 38 %
+// Version : %version: 38.1.1 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -361,18 +361,20 @@ void VideoListDataModelPrivate::appendDataToContainerL(
     unsigned int startIndex)
 {
 	FUNC_LOG;
-	INFO_2("VideoListDataModelPrivate::appendDataToContainerL() array count: %d, start index: %d", videoArray->Count(), startIndex);
 	
-    int count = videoArray->Count();
     if (!videoArray ||
-        startIndex >= count)
+        startIndex >= videoArray->Count())
     {
         return;
     }
     
+    INFO_2("VideoListDataModelPrivate::appendDataToContainerL() array count: %d, start index: %d", videoArray->Count(), startIndex);
+    
     CMPXMedia *newMedia = 0;
     CMPXMedia *mediaFromArray = 0;
     TMPXItemId itemId = TMPXItemId::InvalidId();
+    int count = videoArray->Count();
+    
     for(int i = startIndex; i < count; ++i)
     {
         mediaFromArray = videoArray->AtL(i);

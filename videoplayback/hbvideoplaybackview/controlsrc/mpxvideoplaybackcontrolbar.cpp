@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 
@@ -24,7 +24,6 @@
 #include "mpxvideoplaybackcontrolbar.h"
 #include "mpxvideoplaybackprogressbar.h"
 #include "mpxcommonvideoplaybackview.hrh"
-#include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
 
 
@@ -32,17 +31,21 @@
 // QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar()
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar( 
+QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
-    , mProgressBar( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar"));
 
     //
-    // button bar
+    // create toolbar handler
     //
     mToolBar = new QMPXVideoPlaybackToolBar( mController );
+
+    //
+    // create progressbar handler
+    //
+    mProgressBar = new QMPXVideoPlaybackProgressBar( mController );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -52,6 +55,12 @@ QMPXVideoPlaybackControlBar::QMPXVideoPlaybackControlBar(
 QMPXVideoPlaybackControlBar::~QMPXVideoPlaybackControlBar()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::~QMPXVideoPlaybackControlBar()"));
+
+    if ( mProgressBar )
+    {
+        delete mProgressBar;
+        mProgressBar = NULL;
+    }
 
     if ( mToolBar )
     {
@@ -68,23 +77,9 @@ void QMPXVideoPlaybackControlBar::initialize()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlBar::initialize()"));
 
-    QMPXVideoPlaybackDocumentLoader *loader = mController->layoutLoader();
-
-    //
-    // Don't need to initialize buttons once it gets initialized
-    //
-    if ( mProgressBar == NULL )
+    if ( mProgressBar )
     {
-        //
-        // progress bar
-        //
-        QGraphicsWidget *widget = loader->findWidget( QString( "progressBarLayout" ) );
-        mProgressBar = qobject_cast<QMPXVideoPlaybackProgressBar*>( widget );
-
-        if ( mProgressBar )
-        {
-            mProgressBar->initialize();
-        }
+        mProgressBar->initialize();
     }
 }
 
@@ -157,43 +152,6 @@ void QMPXVideoPlaybackControlBar::setVisibleToControlBar( bool visible )
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlBar::appeared()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlBar::appeared( const HbEffect::EffectStatus &status )
-{
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::appeared()"));
-
-    if ( status.reason == Hb::EffectFinished )
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::appeared() successful"));
-    }
-    else
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::appeared() NOT successful"));
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlBar::disappeared()
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackControlBar::disappeared( const HbEffect::EffectStatus &status )
-{
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::disappeared()"));
-
-    if ( status.reason == Hb::EffectFinished )
-    {
-        setVisible( false );
-
-        MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::disappeared() successful"));
-    }
-    else
-    {
-        MPX_DEBUG(_L("QMPXVideoPlaybackControlBar::disappeared() NOT successful"));
-    }
-}
 
 // -------------------------------------------------------------------------------------------------
 // QMPXVideoPlaybackControlBar::durationChanged()
@@ -226,7 +184,7 @@ void QMPXVideoPlaybackControlBar::positionChanged( int position )
     {
         mProgressBar->positionChanged( position );
     }
-    
+
     if ( mToolBar )
     {
         mToolBar->positionChanged( position );

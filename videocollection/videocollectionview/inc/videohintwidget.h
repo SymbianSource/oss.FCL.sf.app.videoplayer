@@ -123,12 +123,7 @@ private:
      * Service icon.
      */
     HbIcon                      *mServiceIcon;
-    
-    /**
-     * Add videos icon.
-     */
-    HbIcon                       *mAddVideosIcon;
-    
+
     /**
      * Current hint level.
      */

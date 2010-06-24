@@ -2970,7 +2970,48 @@ void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CVCXMyVideosTestUtils::
     TInt err( KErrNone );
 
     iLastReceivedMessage = -1;
+    
+    if(aDoSync)
+    {
+        // Disable automatic refresh.
+        iTester->SetAutomaticRefresh( EFalse );
+    }
+    
+    RArray<TInt> messages;
+    
+    for(int i =  0; i < aVideoCount; i++)
+    {
+        // Create the video.
+        TRAP( err, iTestUtils->CreateVideoFileL( aType, *path, aSize, ETrue ) );
+        if(err != KErrNone)
+            {
+            VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: CreateVideoFileL returned error: %d:", err);
+            }
 
+        if( aDoSync && iTester->GetCurrentLevel() == 3 )
+            {
+            // Wait for insertion event.
+            messages.Append( KVCXMYVideosTestMessageMpxVideoInserted );
+            WaitForMessagesL( ETrue, messages, 60, ETrue );
+            messages.Reset();
+            }
+    }
+
+    if( aDoSync )
+    {
+        // Refresh.
+        messages.Reset();
+        iTester->RefreshContentsL();
+        messages.Append( KVCXMYVideosTestMessageCollectionOpened );
+        CleanupClosePushL( messages );
+        WaitForMessagesL( ETrue, messages, 30, ETrue );
+        CleanupStack::PopAndDestroy( &messages );
+        iTester->SetAutomaticRefresh( ETrue );
+    }
+
+    CleanupStack::PopAndDestroy( path );
+    
+#if 0
     if( aVideoCount == 1 )
         {
         // Save the path for later use.
@@ -3035,6 +3076,7 @@ void CVCXMyVideosCollectionPluginTest::CreateVideoFileL( CVCXMyVideosTestUtils::
                 }
             }
         }
+#endif
     }
 
 // -----------------------------------------------------------------------------

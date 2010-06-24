@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 33 %
+// Version : %version: da1mmcf#35 %
 
 
 #include <QApplication>
@@ -150,13 +150,20 @@ void QVideoPlayerEngine::initialize()
         // check latest plugin type from activity manager data and create + activate it 
         // CollectionView (default) and playbackview are the ones that are accepted
         MpxHbVideoCommon::MpxHbVideoViewType viewType = MpxHbVideoCommon::CollectionView;
-        int typeGotten = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_VIEWPLUGIN_TYPE).toInt();
-        if(typeGotten == MpxHbVideoCommon::CollectionView || typeGotten == MpxHbVideoCommon::PlaybackView)
+        int typeGotten = VideoActivityState::instance().getActivityData(KEY_VIEWPLUGIN_TYPE).toInt();
+        
+        if ( typeGotten == MpxHbVideoCommon::PlaybackView )  
         {
+            createPlaybackView(); 
             viewType = MpxHbVideoCommon::MpxHbVideoViewType(typeGotten);
+            QVariant data = VideoActivityState::instance().getActivityData(KEY_LAST_PLAYED_CLIP);
+            playMedia( data.toString() );
         }
-        loadPluginAndCreateView( viewType );  
-        activateView( viewType );
+        else
+        {
+            loadPluginAndCreateView( viewType );  
+            activateView( viewType );        
+        }
     }
             
 }
@@ -462,22 +469,31 @@ void QVideoPlayerEngine::handleQuit()
         HbActivityManager *actManager = qobject_cast<HbApplication*>(qApp)->activityManager();
         
         //
+        // deactivate is the final point for current plugin to save it's activity data into 
+        // VideoActivityState before they are saved to to activity manager
+        //
+        mCurrentViewPlugin->deactivateView();        
+        
+        //
         // get and save recent view type: either playback or collection view plugins are currently used.
         // activity will not be saved from the details plugin
         //
         int viewType = MpxHbVideoCommon::CollectionView;
         if(mCurrentViewPlugin == mPlaybackViewPlugin)
         {
-            viewType = MpxHbVideoCommon::PlaybackView;
+            // for playback view, the state preservation and restoration should only be done
+            // for loacl clips (non-streaming) - so set KEY_VIEWPLUGIN_TYPE to PlaybackView only
+            // for local clips. Otherwise the default value CollectionView should be set.
+            //
+            QVariant playdata = VideoActivityState::instance().getActivityData(KEY_LAST_LOCAL_PLAYBACK);
+            if  ( playdata.toBool() )
+            {
+                viewType = MpxHbVideoCommon::PlaybackView;
+            }            
         }
-        data = viewType;
-        localActivity.setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
         
-        //
-        // deactivate is the final point for current plugin to save it's activity data into 
-        // VideoActivityState before they are saved to to activity manager
-        //
-        mCurrentViewPlugin->deactivateView();
+        data = viewType;
+        localActivity.setActivityData(data, KEY_VIEWPLUGIN_TYPE);
         
         // save data to activity manager
         actManager->addActivity(ACTIVITY_VIDEOPLAYER_MAINVIEW, 

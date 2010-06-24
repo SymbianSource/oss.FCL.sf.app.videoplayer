@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 45 %
+// Version : %version: 47 %
 
 
 //
@@ -1275,6 +1275,16 @@ void CMPXInitialisedState::HandleForeground()
     CommandHandleForeground();
 }
 
+//  ------------------------------------------------------------------------------------------------
+//  CMPXInitialisedState::HandlePause()
+//  ------------------------------------------------------------------------------------------------
+void CMPXInitialisedState::HandlePause()
+{
+    MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandlePause()"));
+
+    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+}
+
 // *************************************************************************************************
 //
 //                          CMPXPlayingState
@@ -1637,6 +1647,14 @@ void CMPXPausedState::HandleCustomPlay()
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
         IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying, EFalse );
+    }
+    else
+    {
+        // As the custom play command could not resume the playback. Send a pause event to 
+        // the view though the MPX FW to get the view state in sync playback plugin. 
+        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
+                                                              0,
+                                                              KErrNone );
     }
 }
 

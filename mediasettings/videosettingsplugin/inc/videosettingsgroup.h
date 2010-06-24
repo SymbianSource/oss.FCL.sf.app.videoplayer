@@ -19,6 +19,7 @@
 
 #include <cpsettingformitemdata.h>
 #include <qabstractitemmodel.h>
+#include <qtranslator.h>
 
 class CpItemDataHelper;
 class CMPSettingsModel;
@@ -104,6 +105,11 @@ private:
      * Item data helper given by the CP framework.
      */
     CpItemDataHelper& mItemDataHelper;
+    
+    /**
+     * Holds videos translation file. It's needed to localize texts in this plugin.
+     */
+    QTranslator mTranslator;
     
     /**
      * The settings model where settings are loaded and saved.

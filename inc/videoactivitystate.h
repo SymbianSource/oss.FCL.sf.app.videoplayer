@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  da1mmcf#3 %
 
 #ifndef __VIDEOACTIVITYSTATE_H__
 #define __VIDEOACTIVITYSTATE_H__
@@ -27,36 +27,18 @@
 // videoplayer activity id
 static const QString ACTIVITY_VIDEOPLAYER_MAINVIEW = "VideosMainView";
 
+// last position of the last played media clip (int)
+static const QString KEY_LAST_PLAY_POSITION_ID   = "_VideoActivity_last_play_position_id_";
 
-namespace VideoActivityData
-{        
-    // consts to be used as key values    
-    // plugin type (int): collectionplugin or videoplaybackplugin 
-    static const QString KEY_VIEWPLUGIN_TYPE = "_VideoActivity_viewplugin_type_";
-    
-    // type of collectionview plugin's widget level(int): 
-    // all videos, collections or collection video list
-    static const QString KEY_WIDGET_LEVEL    = "_VideoActivity_widget_level_";
-    
-    // id of the collection whose videolist is to be shown (int).
-    static const QString KEY_WIDGET_ID       = "_VideoActivity_view_item_id_";
+// name of the media clip last played (QString)
+static const QString KEY_LAST_PLAYED_CLIP = "_VideoActivity_last_played_clip_";
 
-    // for playback plugin: view to activate either play or details
-    static const QString KEY_PLAYB_VIEW      = "_VideoActivity_playb_view_type_";
-          
-    // for playback plugin: video path
-    static const QString KEY_VIDEO_PATH      = "_VideoActivity_video_path_";
-    
-    // for playback plugin: video playback position
-    static const QString KEY_VIDEO_POS       = "_VideoActivity_video_pos_";
-    
-    // for playback plugin: video playback state
-    static const QString KEY_PLAYB_STATE     = "_VideoActivity_playb_state_";
-    
-    // for playback plugin: video playback volume
-    static const QString KEY_PLAYB_VOLUME    = "_VideoActivity_playb_volume_";
-            
-}
+// Key for plugin type in activity manager
+static const QString KEY_VIEWPLUGIN_TYPE = "_VideoActivity_viewplugin_type_";
+
+// was the last played media clip a local clip (not streaming or prog. download)
+static const QString KEY_LAST_LOCAL_PLAYBACK   = "_VideoActivity_last_local_playback_";
+
 
 /**
  * Class is used as a static activity data container for videoplayer application

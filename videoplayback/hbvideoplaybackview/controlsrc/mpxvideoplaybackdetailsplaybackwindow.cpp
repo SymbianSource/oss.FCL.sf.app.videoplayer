@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  17 %
+// Version : %version:  18 %
 
 
 
@@ -122,11 +122,11 @@ void QMPXVideoPlaybackDetailsPlaybackWindow::initialize()
             //
             // dim "share" button for streaming
             //
-            if ( mController->fileDetails()->mPlaybackMode == EMPXVideoStreaming ||
-                 mController->fileDetails()->mPlaybackMode == EMPXVideoLiveStreaming )
+            if ( details->mPlaybackMode == EMPXVideoStreaming ||
+                 details->mPlaybackMode == EMPXVideoLiveStreaming )
             {
-                shareButton->setEnabled( false );                  
-            }            
+                shareButton->setEnabled( false );
+            }
         }
     }
 

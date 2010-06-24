@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#23 %
+// Version : %version: da1mmcf#24 %
 
 
 
@@ -41,10 +41,9 @@ const int KSeekingTimeOut = 250;
 // QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar( 
+QMPXVideoPlaybackProgressBar::QMPXVideoPlaybackProgressBar(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
-    , mDuration( -1 )
     , mDraggingPosition( 0 )
     , mSetPosition( -1 )
     , mNeedToResumeAfterSetPosition( false )
@@ -68,7 +67,7 @@ QMPXVideoPlaybackProgressBar::~QMPXVideoPlaybackProgressBar()
     if ( mSeekingTimer )
     {
         disconnect( mSeekingTimer, SIGNAL( timeout() ), this, SLOT( handleSeekingTimeout() ) );
-        
+
         if ( mSeekingTimer->isActive() )
         {
             mSeekingTimer->stop();
@@ -95,11 +94,11 @@ void QMPXVideoPlaybackProgressBar::initialize()
     if ( loader && ! mInitialized )
     {
         mInitialized = true;
-        mLiveStreaming = 
+        mLiveStreaming =
                 ( mController->fileDetails()->mPlaybackMode == EMPXVideoLiveStreaming )? true:false;
 
         //
-        // Create a timer for seeking. 
+        // Create a timer for seeking.
         // We will issue SetPosition every KSeekingTimeOut msec to show the current frame to user
         //
         mSeekingTimer = new QTimer();
@@ -119,7 +118,7 @@ void QMPXVideoPlaybackProgressBar::initialize()
 
         //
         // If we init the progress bar after pp sends the duration informatin
-        // we need to set the duration manually 
+        // we need to set the duration manually
         //
         durationChanged( (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier );
 
@@ -135,7 +134,7 @@ void QMPXVideoPlaybackProgressBar::initialize()
         frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
         frameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
         frameItem->frameDrawer().setFillWholeRect( true );
-        setBackgroundItem( frameItem );
+        mProgressSlider->setBackgroundItem( frameItem );
     }
 }
 
@@ -149,6 +148,7 @@ void QMPXVideoPlaybackProgressBar::durationChanged( int duration )
 
     if ( mLiveStreaming )
     {
+        mDuration = 0;
         mProgressSlider->setMaxText( "Live" );
     }
     else
@@ -251,7 +251,7 @@ QString QMPXVideoPlaybackProgressBar::valueToReadableFormat( int value )
 // QMPXVideoPlaybackProgressBar::handleSliderPressed
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackProgressBar::handleSliderPressed() 
+void QMPXVideoPlaybackProgressBar::handleSliderPressed()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackProgressBar::handleSliderPressed()"));
 
@@ -265,7 +265,7 @@ void QMPXVideoPlaybackProgressBar::handleSliderPressed()
     if( mController->state() == EPbStatePlaying )
     {
         mNeedToResumeAfterSetPosition = true;
-        mController->handleCommand( EMPXPbvCmdCustomPause );   
+        mController->handleCommand( EMPXPbvCmdCustomPause );
     }
 }
 
@@ -273,7 +273,7 @@ void QMPXVideoPlaybackProgressBar::handleSliderPressed()
 // QMPXVideoPlaybackProgressBar::handleSliderMoved
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackProgressBar::handleSliderMoved( int value ) 
+void QMPXVideoPlaybackProgressBar::handleSliderMoved( int value )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::handleSliderMoved() position = %d"), value);
 
@@ -324,7 +324,7 @@ void QMPXVideoPlaybackProgressBar::handleSliderReleased()
     {
         mSeekingTimer->stop();
     }
-    
+
     mController->resetDisappearingTimers( EMPXTimerReset );
     int value = mProgressSlider->sliderValue();
 
@@ -364,7 +364,7 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
     MPX_DEBUG(_L("QMPXVideoPlaybackProgressBar::updateControlsWithFileDetails()"));
 
     if ( ! details->mPausableStream || ! details->mSeekable )
-    {    
+    {
         mProgressSlider->setEnabled( false );
     }
     else if ( ! mProgressSlider->isEnabled() )
@@ -372,7 +372,8 @@ void QMPXVideoPlaybackProgressBar::updateWithFileDetails(
         mProgressSlider->setEnabled( true );
     }
 
-    backgroundItem()->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
+    mProgressSlider->backgroundItem()->setVisible(
+            ( mController->viewMode() == EFullScreenView )? ETrue:EFalse );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -388,18 +389,18 @@ void QMPXVideoPlaybackProgressBar::updateState( TMPXPlaybackState state )
         case EPbStatePlaying:
         case EPbStatePaused:
         {
-            if ( ! isEnabled() )
+            if ( ! mProgressSlider->isEnabled() )
             {
-                setEnabled( true );
+                mProgressSlider->setEnabled( true );
             }
 
             break;
         }
         default:
         {
-            if ( isEnabled() )
+            if ( mProgressSlider->isEnabled() )
             {
-                setEnabled( false );
+                mProgressSlider->setEnabled( false );
             }
             break;
         }

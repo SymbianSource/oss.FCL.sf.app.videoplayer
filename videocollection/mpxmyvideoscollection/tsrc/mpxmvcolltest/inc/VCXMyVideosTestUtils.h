@@ -83,7 +83,7 @@ class CVCXMyVideosTestUtils : public CBase
         /*
          * Creates a video file to the system.
          */
-        void CreateVideoFileL( TVcxTestVideoType aVideoType, TDesC& aFileName, TInt aSize );
+        void CreateVideoFileL( TVcxTestVideoType aVideoType, TDesC& aFileName, TInt aSize, TBool aUniqueName = false );
 
         /*
          * Creates video files to the system.

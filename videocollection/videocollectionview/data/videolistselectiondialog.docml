@@ -57,7 +57,7 @@
         </widget>
         <widget name="mListContainer" role="HbDialog:contentWidget" type="HbStackedWidget"/>
         <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
-        <sizehint height="95.22388un" type="PREFERRED" width="53.58209un"/>
+        <sizehint height="var(hb-param-screen-height)" type="PREFERRED" width="var(hb-param-screen-width)"/>
     </widget>
     <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
