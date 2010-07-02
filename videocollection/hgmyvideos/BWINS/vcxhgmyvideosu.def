@@ -1,5 +1,0 @@
-EXPORTS
-	??1CVcxHgMyVideosMainView@@UAE@XZ @ 1 NONAME ; CVcxHgMyVideosMainView::~CVcxHgMyVideosMainView(void)
-	?NewL@CVcxHgMyVideosMainView@@SAPAV1@XZ @ 2 NONAME ; class CVcxHgMyVideosMainView * CVcxHgMyVideosMainView::NewL(void)
-	?NewLC@CVcxHgMyVideosMainView@@SAPAV1@XZ @ 3 NONAME ; class CVcxHgMyVideosMainView * CVcxHgMyVideosMainView::NewLC(void)
-

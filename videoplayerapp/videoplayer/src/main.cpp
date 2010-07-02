@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 3.2 %
 
 
 #include <QObject>
@@ -79,7 +79,6 @@ int main(int argc, char *argv[])
      }
 
     HbMainWindow mainWindow( 0, Hb::WindowFlagTransparent );
-    mainWindow.setAttribute( Qt::WA_OpaquePaintEvent );
 
     QVideoPlayerEngine *engine = new QVideoPlayerEngine(isService);
     engine->initialize();

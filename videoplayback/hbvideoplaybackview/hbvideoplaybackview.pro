@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 24 %
+# Version : %version: 25 %
 
 
 TEMPLATE = lib
@@ -39,8 +39,7 @@ symbian:
     MMP_RULES += defBlock
 }
 
-INCLUDEPATH += ../../inc \
-               /epoc32/include/platform/mw/alf
+INCLUDEPATH += ../../inc 
 
 LIBS += -lmpxplaybackutility.dll \
         -lmpxcommon.dll \
@@ -54,7 +53,6 @@ LIBS += -lmpxplaybackutility.dll \
         -lcentralrepository.dll \
         -lthumbnailmanagerqt.dll \
         -lmediaclientvideodisplay.dll \
-        -lalfdecoderserverclient.dll \
         -lxqserviceutil.dll \
         -lvideoplayerengine.dll \
         -lcone.dll \

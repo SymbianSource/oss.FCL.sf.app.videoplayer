@@ -1,6 +1,0 @@
-EXPORTS
-      	?LibEntryL@@YAPAVCScriptBase@@AAVCTestModuleIf@@@Z @ 1 NONAME ; class CScriptBase * LibEntryL(class CTestModuleIf &)
-	??1CMPXVideoPlaybackUserInputHandler@@UAE@XZ @ 2 NONAME ; CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler(void)
-	?NewL@CMPXVideoPlaybackUserInputHandler@@SAPAV1@PAVCMPXVideoPlaybackContainer@@H@Z @ 3 NONAME ; class CMPXVideoPlaybackUserInputHandler * CMPXVideoPlaybackUserInputHandler::NewL(class CMPXVideoPlaybackContainer *, int)
-	?ProcessPointerEventL@CMPXVideoPlaybackUserInputHandler@@QAEXPAVCCoeControl@@ABUTPointerEvent@@W4TMPXVideoControlType@@@Z @ 4 NONAME ; void CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL(class CCoeControl *, struct TPointerEvent const &, enum TMPXVideoControlType)
-

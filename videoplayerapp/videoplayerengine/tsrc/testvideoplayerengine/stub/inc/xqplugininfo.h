@@ -2,7 +2,7 @@
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of the License "Eclipse Public License v1.0"
+* under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
 * at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
@@ -11,21 +11,30 @@
 *
 * Contributors:
 *
-* Description:  Main build file for platform APIs*
+* Description:   XQPluginInfo stub
+*
 */
 
+#ifndef XQPLUGININFO_H_
+#define XQPLUGININFO_H_
 
+#include <QObject>
 
-#include "../videoplayer_startup_api/group/bld.inf"
-#include "../videocollection_api/group/bld.inf"
+class XQPluginInfo : public QObject
 
-PRJ_PLATFORMS
-DEFAULT
+{
+    Q_OBJECT
 
-PRJ_EXPORTS
+public:
+    XQPluginInfo() 
+    {
+    
+    }
+    
+    ~XQPluginInfo()
+    {
+        
+    }
+};
 
-PRJ_MMPFILES
-
-PRJ_TESTMMPFILES
-
-PRJ_TESTEXPORTS
+#endif
