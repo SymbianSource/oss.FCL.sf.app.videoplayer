@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
@@ -31,7 +31,6 @@
 #include "mpxvideoplaybackviewfiledetails.h"
 
 // FORWARD DECLARATIONS
-class QMPXVideoPlaybackDocumentLoader;
 class QMPXVideoPlaybackControlsController ;
 
 // DATA TYPES
@@ -90,15 +89,12 @@ class QMPXVideoPlaybackControlsController : public QObject
         */
         inline QMPXVideoPlaybackViewFileDetails* fileDetails();
 
-        inline QMPXVideoPlaybackDocumentLoader* layoutLoader();
-
         TPlaybackViewMode viewMode();
 
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
     public:
         QMPXVideoPlaybackViewFileDetails          *mFileDetails;
-        QMPXVideoPlaybackDocumentLoader           *mLoader;
 
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
@@ -126,16 +122,6 @@ inline
 QMPXVideoPlaybackViewFileDetails* QMPXVideoPlaybackControlsController::fileDetails()
 {
     return mFileDetails;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   QMPXVideoPlaybackControlsController::layoutLoader
-// -------------------------------------------------------------------------------------------------
-//
-inline
-QMPXVideoPlaybackDocumentLoader* QMPXVideoPlaybackControlsController::layoutLoader()
-{
-    return mLoader;
 }
 
 // -------------------------------------------------------------------------------------------------

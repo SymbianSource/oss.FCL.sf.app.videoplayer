@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#41 %
+// Version : %version: da1mmcf#43 %
 
 
 
@@ -40,11 +40,14 @@
 
 #include <mpxvideoplaybackdefs.h>
 #include <mpxplaybackcommanddefs.h>
+#include <mpxhbvideocommondefs.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoviewwrapper.h"
 #include "mpxvideoplaybackuids.hrh"
 #include "hbvideobaseplaybackview.h"
+#include "videoactivitystate.h"   
+#include "mpxvideoplaybackviewfiledetails.h"  
 #include "mpxcommonvideoplaybackview.hrh"
 
 
@@ -58,6 +61,7 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
     : mVideoMpxWrapper( NULL )
     , mTimerForClosingView( NULL )
     , mActivated( false )
+    , mStayPaused ( false )
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::HbVideoBasePlaybackView()"));
 }
@@ -79,6 +83,23 @@ void HbVideoBasePlaybackView::initializeVideoPlaybackView()
     mTimerForClosingView->setSingleShot( true );
     mTimerForClosingView->setInterval( 10 );
     connect( mTimerForClosingView, SIGNAL( timeout() ), this, SIGNAL( activatePreviousView() ) );
+    
+    //
+    // Read activity data ...
+    // If last playback was forced to terminate due to low memory (GOOM, etc.)
+    // then the clip needs to be restored to the last played position 
+    // and the state needs to be paused, since forced termination can only occur for
+    // background apps - so if this happened Video Player must have been in background
+    // which implies paused state
+    //    
+    int lastViewType = VideoActivityState::instance().getActivityData(KEY_VIEWPLUGIN_TYPE).toInt();    
+    if ( lastViewType == MpxHbVideoCommon::PlaybackView ) 
+    {
+        QVariant data = VideoActivityState::instance().getActivityData(KEY_LAST_PLAY_POSITION_ID);
+        mLastPlayPosition = data.toInt();   
+        
+        mStayPaused = true;
+    }     
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -119,14 +140,14 @@ void HbVideoBasePlaybackView::handleActivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleActivateView()"));
 
-    TRAP_IGNORE( mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
+    MPX_TRAPD( err, mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
 
     QCoreApplication::instance()->installEventFilter( this );
 
     //
     //  Request the needed Media from the Playback Plugin
     //
-    TRAP_IGNORE( mVideoMpxWrapper->RequestMediaL() );
+    MPX_TRAP( err, mVideoMpxWrapper->RequestMediaL() );
 
     menu()->close();
 
@@ -148,6 +169,8 @@ void HbVideoBasePlaybackView::handleDeactivateView()
 {
     MPX_ENTER_EXIT(_L("HbVideoBasePlaybackView::handleDeactivateView()"));
 
+    saveActivityData();
+    
     mActivated = false;
 
     QCoreApplication::instance()->removeEventFilter( this );
@@ -167,6 +190,25 @@ void HbVideoBasePlaybackView::handleDeactivateView()
     // go back to device orientation
     //
     //hbInstance->allMainWindows()[0]->unsetOrientation();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   HbVideoBasePlaybackView::saveActivityData()
+// -------------------------------------------------------------------------------------------------
+//
+void HbVideoBasePlaybackView::saveActivityData()
+{
+    MPX_DEBUG( _L("HbVideoBasePlaybackView::saveActivityData()") );  
+    
+    // save the activity data
+    QVariant data = QString( mVideoMpxWrapper->iFileDetails->mClipName );
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_CLIP); 
+    
+    data = int( mVideoMpxWrapper->iPlayPosition );
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAY_POSITION_ID);
+    
+    data = bool( mVideoMpxWrapper->iFileDetails->mPlaybackMode == EMPXVideoLocal );
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_LOCAL_PLAYBACK);     
 }
 
 // -------------------------------------------------------------------------------------------------

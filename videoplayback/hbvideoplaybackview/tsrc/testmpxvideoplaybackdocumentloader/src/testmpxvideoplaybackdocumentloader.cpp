@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestMPXVideoPlaybackDocumentLoader
-* 
+*
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 #include <qdebug>
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\testmpxvideoplaybackdocumentloader.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
-    
+
     return res;
 }
 
@@ -101,9 +101,6 @@ void TestMPXVideoPlaybackDocumentLoader::testCreateObject()
 
     QObject *object = mLoader->createObject( "", "controlBarLayout" );
     QVERIFY( object->objectName() == "controlBarLayout" );
-
-    object = mLoader->createObject( "", "progressBarLayout" );
-    QVERIFY( object->objectName() == "progressBarLayout" );
 
     object = mLoader->createObject( "", "fileDetailsLayout" );
     QVERIFY( object->objectName() == "fileDetailsLayout" );

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  21 %
+// Version : %version:  ou1cpsw#26 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -23,7 +23,6 @@
 #include <mpxcommandgeneraldefs.h>
 #include <mpxplaybackutility.h>
 #include <mpxvideoplaybackdefs.h>
-#include <alfcompositionutility.h>
 
 #include "mpxvideocontainer.h"
 #include "mpxvideoviewwrapper.h"
@@ -69,7 +68,7 @@ CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
     if ( iVideoDisplay )
     {
         SurfaceRemoved();
-    	
+
         delete iVideoDisplay;
         iVideoDisplay = NULL;
     }
@@ -102,7 +101,7 @@ CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
 //
 void CMPXVideoPlaybackDisplayHandler::ConstructL()
 {
-    iResizingTimer = CPeriodic::NewL( CActive::EPriorityStandard );    
+    iResizingTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     LoadAspectRatioL();
 }
 
@@ -118,12 +117,14 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()"));
 
-    //
-    // Workaround start for PREQ-2669
-    //
-    iVideoContainer = new ( ELeave ) CMPXVideoContainer();
-    iVideoContainer->ConstructL();
-    iVideoContainer->SetRect( aDisplayRect );
+    if ( ! iVideoContainer )
+    {
+        iVideoContainer = new ( ELeave ) CMPXVideoContainer();
+        iVideoContainer->ConstructL();
+        iVideoContainer->SetRect( aDisplayRect );
+    }
+
+    aWin.SetSurfaceTransparency( ETrue );
 
     RWindowBase *videoWindow = iVideoContainer->DrawableWindow();
     videoWindow->SetOrdinalPosition( -1 );
@@ -131,25 +132,6 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 
     MPX_DEBUG(_L("VideoWindow ordinal position is: %d"), videoWindow->OrdinalPosition());
     MPX_DEBUG(_L("UiWindow ordinal position is: %d"), (&aWin)->OrdinalPosition());
-
-    int status = KErrNone;
-
-    TRAP
-    ( status,
-        {
-            CAlfCompositionSource* me = CAlfCompositionSource::NewL( aWin );
-            me->EnableAlpha();
-            delete me;
-            me = NULL;
-        }
-    );
-
-    MPX_DEBUG(
-        _L("CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL() status : %d"), status);
-
-    //
-    // Workaround end
-    //
 
     AddDisplayWindowL( aScreenDevice, *videoWindow, (RWindow*)videoWindow );
 }
@@ -168,7 +150,7 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
         delete iVideoDisplay;
         iVideoDisplay = NULL;
     }
-	
+
     if ( iVideoContainer )
     {
         delete iVideoContainer;
@@ -243,8 +225,7 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 // -------------------------------------------------------------------------------------------------
 //
 TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
-                                          QMPXVideoPlaybackViewFileDetails* aFileDetails,
-                                          TReal32 aDisplayAspectRatio )
+        QMPXVideoPlaybackViewFileDetails* aFileDetails, TReal32 aDisplayAspectRatio )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
 
@@ -276,17 +257,21 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         //
         //  if can't find out match aspect ratio in dat file,
         //  choose the scaling type through the rule
-        //      videoAspectRatio - aDisplayAspectRatio > 0.1 ==> zoom
-        //      videoAspectRatio - aDisplayAspectRatio < 0.1 ==> stretch
-        //      videoAspectRatio = aDisplayAspectRatio ==> natural
+        //      aspectRatioDiff =  videoAspectRatio - aDisplayAspectRatio
+        //      aspectRatioDiff ==  0        ==> natural
+        //      aspectRatioDiff > 0.1        ==> zoom
+        //      aspectRatioDiff < - 0.3      ==> natural
+        //      aspectRatioDiff >= - 0.3 and <= 0.1   ==> stretch
         //
+
         if ( i == cnt )
         {
             if ( videoAspectRatio - aDisplayAspectRatio > 0.1 )
             {
                 scalingType = EMMFZoom;
             }
-            else if ( videoAspectRatio != aDisplayAspectRatio )
+            else if ( ( videoAspectRatio != aDisplayAspectRatio ) &&
+                      ( videoAspectRatio - aDisplayAspectRatio > (- 0.3) ) )
             {
                 scalingType = EMMFStretch;
             }
@@ -430,10 +415,10 @@ void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool t
             iResizingTimer->Cancel();
         }
 
-        iResizingTimer->Start( 
+        iResizingTimer->Start(
                 0,
                 KVIDEORESIZINGREPEATRATE,
-                TCallBack( CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL, this ) );                
+                TCallBack( CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL, this ) );
     }
     else
     {
@@ -466,8 +451,8 @@ void CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
 {
     iTransitionEffectCnt++;
 
-    TRect windowRect( (TInt)( (TReal32)iWindowRect.iTl.iX - iTlXDiff * (TReal32)iTransitionEffectCnt ), 
-                      (TInt)( (TReal32)iWindowRect.iTl.iY - iTlYDiff * (TReal32)iTransitionEffectCnt ), 
+    TRect windowRect( (TInt)( (TReal32)iWindowRect.iTl.iX - iTlXDiff * (TReal32)iTransitionEffectCnt ),
+                      (TInt)( (TReal32)iWindowRect.iTl.iY - iTlYDiff * (TReal32)iTransitionEffectCnt ),
                       (TInt)( (TReal32)iWindowRect.iBr.iX - iBrXDiff * (TReal32)iTransitionEffectCnt ),
                       (TInt)( (TReal32)iWindowRect.iBr.iY - iBrYDiff * (TReal32)iTransitionEffectCnt ) );
 
@@ -502,7 +487,7 @@ void CMPXVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
 
     if ( iVideoDisplay )
     {
-        iVideoDisplay->SetVideoExtentL( *iWindowBase, aRect, TRect( iWindowBase->Size() ) );        
+        iVideoDisplay->SetVideoExtentL( *iWindowBase, aRect, TRect( iWindowBase->Size() ) );
     }
 }
 
@@ -537,9 +522,9 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
     {
         iRotation = EVideoRotationClockwise90;
     }
-    
+
     iWindowRect = cropRect;
-    
+
     MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() cropRect (%d, %d), (%d, %d)"),
         cropRect.iTl.iX, cropRect.iTl.iY, cropRect.iBr.iX, cropRect.iBr.iY);
 
@@ -578,7 +563,7 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()"));
 
     TSurfaceId oldSurfaceId = iSurfaceId;
-    
+
     //
     //  Extract the surface parameters from the message
     //

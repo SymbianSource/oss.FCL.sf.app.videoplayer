@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/xml" >
-        <file alias="videofiledetails.docml">videofiledetails.xml</file>
+        <file alias="videofiledetails.docml">videofiledetails.docml</file>
     </qresource>
 </RCC>

@@ -214,6 +214,9 @@ void VideoServicesTestAppView::fetchVideo()
         mErrorEdit->setText("Failed to send REQ");
         qDebug() <<  "VideoServicesTestAppView::fetchVideo: XQAiwRequest::send returned false";
     }
+    // req no longer needed, remove it
+    delete mReq;
+    mReq = 0;
 
     qDebug() <<  "VideoServicesTestAppView::fetchVideo END";
 }
@@ -285,6 +288,9 @@ void VideoServicesTestAppView::browseCapturedVideosFinished(HbAction *action)
             mErrorEdit->setText("Failed to send REQ");
             qDebug() <<  "VideoServicesTestAppView::browseCapturedVideosFinished: XQAiwRequest::send returned false";
         }
+        // req no longer needed, remove it
+        delete mReq;
+        mReq = 0;
     }
 }
 
@@ -324,6 +330,9 @@ void VideoServicesTestAppView::fetchVideoDeprecatedOldService()
         mErrorEdit->setText("Failed to send REQ");
         qDebug() <<  "VideoServicesTestAppView::fetchVideo: XQAiwRequest::send returned false";
     }
+    // req no longer needed, remove it
+    delete mReq;
+    mReq = 0;
 
     qDebug() <<  "VideoServicesTestAppView::fetchVideo END";
 }
@@ -364,7 +373,9 @@ void VideoServicesTestAppView::fetchVideoDeprecatedNewService()
         mErrorEdit->setText("Failed to send REQ");
         qDebug() <<  "VideoServicesTestAppView::fetchVideo: XQAiwRequest::send returned false";
     }
-
+    // req no longer needed, remove it
+    delete mReq;
+    mReq = 0;
     qDebug() <<  "VideoServicesTestAppView::fetchVideo END";
 }
 
@@ -432,6 +443,9 @@ void VideoServicesTestAppView::browseCapturedVideosDeprecatedOldServiceFinished(
             mErrorEdit->setText("Failed to send REQ");
             qDebug() <<  "VideoServicesTestAppView::browseCapturedVideosFinished: XQAiwRequest::send returned false";
         }
+        // req no longer needed, remove it
+        delete mReq;
+        mReq = 0;
     }
 }
 
@@ -498,6 +512,9 @@ void VideoServicesTestAppView::browseCapturedVideosDeprecatedNewServiceFinished(
             mErrorEdit->setText("Failed to send REQ");
             qDebug() <<  "VideoServicesTestAppView::browseCapturedVideosFinished: XQAiwRequest::send returned false";
         }
+        // req no longer needed, remove it
+        delete mReq;
+        mReq = 0;
     }
 }
 

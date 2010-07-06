@@ -15,13 +15,12 @@
 *
 */
 
-// Version : %version: 13 %
+// Version : %version: 14 %
 
 
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackcontrolbar.h"
-#include "mpxvideoplaybackprogressbar.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "mpxvideoplaybackfiledetailswidget.h"
 #include "mpxvideoplaybackcontrolscontroller.h"
@@ -64,11 +63,6 @@ QObject *QMPXVideoPlaybackDocumentLoader::createObject( const QString& type, con
     if ( name == "controlBarLayout" )
     {
         object = new QMPXVideoPlaybackControlBar( mController );
-        object->setObjectName( name );
-    }
-    else if ( name == "progressBarLayout" )
-    {
-        object = new QMPXVideoPlaybackProgressBar( mController );
         object->setObjectName( name );
     }
     else if ( name == "fileDetailsLayout" )

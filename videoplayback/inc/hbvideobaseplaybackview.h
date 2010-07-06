@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#17 %
+// Version : %version:  da1mmcf#18 %
 
 
 
@@ -101,6 +101,10 @@ class HbVideoBasePlaybackView : public HbView
 
         void gestureEvent( QGestureEvent* event );
 
+    private:
+        
+        void saveActivityData();
+
     protected: // data
         CMPXVideoViewWrapper                *mVideoMpxWrapper;
 
@@ -108,6 +112,8 @@ class HbVideoBasePlaybackView : public HbView
 
         bool                                 mActivated;
         bool                                 mSyncClose;
+        int                                  mLastPlayPosition;
+        bool                                 mStayPaused;
 
     public:
         friend class CMPXVideoViewWrapper;

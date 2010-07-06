@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 41 %
+// Version : %version: 43 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -26,29 +26,32 @@
 #include <hbmessagebox.h>
 #include <hbnotificationdialog.h>
 #include <centralrepository.h>
+#include <vcxmyvideosdefs.h>
 
 #include "videocollectioncommon.h"
 #include "videocollectionviewutils.h"
 #include "videosortfilterproxymodel.h"
 #include "videoactivitystate.h"
+#include "videocollectioncenrepdefs.h"
 #include "videocollectiontrace.h"
 
 // Object names.
 const char* const VIEW_UTILS_OBJECT_NAME_STATUS_MSG          = "vc:ViewUtilsStatusMessage";
 const char* const VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING = "vc:ViewUtilsMessageBoxWarning";
 
-// Cenrep constants.
-const int KVideoCollectionViewCenrepUid(0x2002BC63);
-const int KVideoCollectionViewCenrepServiceIconKey(0x2);
-const int KVideoCollectionViewCenrepServiceIconPressedKey(0x3);
-const int KVideoCollectionViewCenrepVideoSortingRoleKey(0x5);
-const int KVideoCollectionViewCenrepVideoSortingOrderKey(0x6);
-const int KVideoCollectionViewCenrepCollectionsSortingRoleKey(0x7);
-const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
-
 const int KAddToCollectionDataCount(2);
 const int KAddToCollectionCountIndex(0);
 const int KAddToCollectionNameIndex(1);
+
+// type of collectionview plugin's widget level(int): 
+// all videos, collections or collection video list
+static const QString KEY_WIDGET_LEVEL    = "_VideoActivity_widget_level_";
+
+// id of the collection whose videolist is to be shown (int).
+static const QString KEY_COLLECTION_ID   = "_VideoActivity_collection_id_";
+
+// name of the collection whose videolist is to be shown (QString)
+static const QString KEY_COLLECTION_NAME = "_VideoActivity_collection_name_";
 
 
 // ---------------------------------------------------------------------------
@@ -207,10 +210,10 @@ int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
     {
         TBuf<255> iconValue;
         TBuf<255> pressedValue;
-        status = cenRep->Get(KVideoCollectionViewCenrepServiceIconKey, iconValue);
+        status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1IconPath, iconValue);
         if(status == KErrNone)
         {
-            status = cenRep->Get(KVideoCollectionViewCenrepServiceIconPressedKey, pressedValue);
+            status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1PressedIconPath, pressedValue);
             if(status == KErrNone)
             {
                 QString iconTemp((QChar*)iconValue.Ptr(),iconValue.Length());
@@ -238,7 +241,7 @@ QString VideoCollectionViewUtils::getServiceUriString()
     if(cenRep)
     {
         TBuf<255> uriValue;
-        if(cenRep->Get(KVideoCollectionViewCenrepServiceIconKey, uriValue) == KErrNone)
+        if(cenRep->Get(KVideoCollectionViewCenrepServiceItem1Url, uriValue) == KErrNone)
         {
             QString uriTemp((QChar*)uriValue.Ptr(),uriValue.Length());
             uri = uriTemp;
@@ -313,33 +316,93 @@ void VideoCollectionViewUtils::sortModel(
 }
 
 // ---------------------------------------------------------------------------
-// saveWidgetLevel
+// setWidgetActivityLevel
 // ---------------------------------------------------------------------------
 //
-void VideoCollectionViewUtils::saveWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+void VideoCollectionViewUtils::setWidgetActivityLevel(
+        const VideoCollectionCommon::TCollectionLevels &level)
 {
     FUNC_LOG; 
     QVariant data = int(level);
-    VideoActivityState::instance().setActivityData(data, VideoActivityData::KEY_WIDGET_LEVEL);
+    VideoActivityState::instance().setActivityData(data, KEY_WIDGET_LEVEL);
+
+    if(level != VideoCollectionCommon::ELevelDefaultColl && 
+       level != VideoCollectionCommon::ELevelAlbum)
+    {
+        // no need to save collection related data, clear them
+        data.clear();
+        VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_ID);    
+        VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_NAME);   
+    }
 }
-  
+
 // ---------------------------------------------------------------------------
-// loadWidgetLevel
+// getActivityWidgetLevel
 // ---------------------------------------------------------------------------
 //
-VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtils::loadWidgetLevel()
+void VideoCollectionViewUtils::getActivityWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
 {
     FUNC_LOG;
-    // all videos view is the default value to be returned in case nothing can be read
-    // from the activity manager
-    VideoCollectionCommon::TCollectionLevels level(VideoCollectionCommon::ELevelVideos);
-    QVariant data = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_WIDGET_LEVEL);
-    if(data.toInt() == VideoCollectionCommon::ELevelCategory)
+    // default value is all videos list level
+    level = VideoCollectionCommon::ELevelVideos;
+    QVariant data = VideoActivityState::instance().getActivityData(KEY_WIDGET_LEVEL);
+    
+    int value = data.toInt();
+    if(value == VideoCollectionCommon::ELevelCategory)
     {
         level = VideoCollectionCommon::ELevelCategory;
     }
-    return level;
+    else if(value == VideoCollectionCommon::ELevelDefaultColl)
+    {
+        level = VideoCollectionCommon::ELevelDefaultColl;
+    }
+    else if(value == VideoCollectionCommon::ELevelAlbum)
+    {
+        level = VideoCollectionCommon::ELevelAlbum;
+    }
+}
+ 
+// ---------------------------------------------------------------------------
+// setCollectionActivityData
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::setCollectionActivityData(const TMPXItemId &id, const QString &name)
+{
+    FUNC_LOG;
+    QVariant data = int(id.iId1);
+    VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_ID);
+    data.clear();
+    data = name;
+    VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_NAME);
+}
 
+// ---------------------------------------------------------------------------
+// getCollectionActivityData
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::getCollectionActivityData(TMPXItemId &id, QString &name)
+{
+    FUNC_LOG;
+    id = TMPXItemId::InvalidId();
+    name = "";
+    VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
+    getActivityWidgetLevel(level); 
+    
+    if(level == VideoCollectionCommon::ELevelDefaultColl)
+    {
+        id.iId2 = KVcxMvcMediaTypeCategory; 
+    }
+    else if(level == VideoCollectionCommon::ELevelAlbum)
+    {
+        id.iId2 = KVcxMvcMediaTypeAlbum;
+    }
+    if(id.iId2 != KMaxTUint32)
+    {
+        QVariant data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+        id.iId1 = data.toInt();
+        data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+        name = data.toString();
+    }
 }
 
 // ---------------------------------------------------------------------------

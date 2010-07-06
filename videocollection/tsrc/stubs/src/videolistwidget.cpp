@@ -33,7 +33,6 @@ VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *pare
     mVideoServices(0),
     mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
     mSignalsConnected(false),
-    mIsService(false),
     mNavKeyAction(0),
     mContextMenu(0),
     mSelectionMode(HbAbstractItemView::NoSelection),
@@ -49,9 +48,9 @@ VideoListWidget::~VideoListWidget()
 }
 
 int VideoListWidget::initialize(VideoSortFilterProxyModel &model,
-    VideoServices *videoServices, VideoCollectionCommon::TCollectionLevels level)
+    bool isService, VideoCollectionCommon::TCollectionLevels level)
 {
-    Q_UNUSED(videoServices);
+    Q_UNUSED(isService);
 
     VideoListWidgetData::mInitializeCount++;
     mModel = &model;
@@ -174,6 +173,11 @@ void VideoListWidget::removeFromCollectionSlot()
 }
 
 void VideoListWidget::back()
+{
+    // not stubbed
+}
+
+void VideoListWidget::endVideoFecthingSlot()
 {
     // not stubbed
 }

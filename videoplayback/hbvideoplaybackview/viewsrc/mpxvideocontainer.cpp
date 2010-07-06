@@ -11,40 +11,35 @@
 *
 * Contributors:
 *
-* Description:
+* Description: CCoeControl to provide RWindow for videoplayback
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 
 #include "mpxvideocontainer.h"
-
+#include "mpxvideo_debug.h"
 
 CMPXVideoContainer::CMPXVideoContainer()
 {
+    MPX_ENTER_EXIT( _L("CMPXVideoContainer::CMPXVideoContainer()") );
 }
 
 CMPXVideoContainer::~CMPXVideoContainer()
 {
+    MPX_ENTER_EXIT( _L("CMPXVideoContainer::~CMPXVideoContainer()") );
+
     CloseWindow();
 }
 
 void CMPXVideoContainer::ConstructL()
 {
+    MPX_ENTER_EXIT( _L("CMPXVideoContainer::ConstructL()") );
+
     CreateWindowL();
     ActivateL();
-}
-
-void CMPXVideoContainer::Draw( const TRect& /*aRect*/ ) const
-{
-    CWindowGc& gc = SystemGc();
-    gc.SetPenStyle( CGraphicsContext::ENullPen );
-    gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-    gc.SetBrushColor( TRgb::Color16MA( 0 ) );
-    gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-    gc.DrawRect( Rect() );
 }
 
 // End of file

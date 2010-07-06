@@ -51,3 +51,12 @@ void HbLineEdit::setValidator(HbValidator *validator)
 {
     mValidator = validator;
 }
+
+// ---------------------------------------------------------------------------
+// setValidator
+// ---------------------------------------------------------------------------
+//
+void HbLineEdit::setMaxLength(int max)
+{
+    mMaxLength = max;
+}

@@ -16,12 +16,14 @@
 */
 
 #include <qapplication.h>
+#include <vcxmyvideosdefs.h>
 #include "centralrepository.h"
 #include "testvideocollectionviewutils.h"
 #include "hblabel.h"
 #include "hbaction.h"
 #include "videocollectionwrapper.h"
 #include "videosortfilterproxymodeldata.h"
+#include "videoactivitystate.h"
 #include "videocollectioncommon.h"
 #include "centralrepository.h"
 #include "hbmessageboxdata.h"
@@ -35,10 +37,17 @@
 #undef private
 
 // following consts are copied from videocollectionviewutils.cpp
-const int KVideoSortingRoleKey(0x5);
-const int KVideoSortingOrderKey(0x6);
-const int KCollectionsSortingRoleKey(0x7);
-const int KCollectionsSortingOrderKey(0x8);
+const int KVideoSortingRoleKey(0x1);
+const int KVideoSortingOrderKey(0x2);
+const int KCollectionsSortingRoleKey(0x3);
+const int KCollectionsSortingOrderKey(0x4);
+static const QString KEY_WIDGET_LEVEL    = "_VideoActivity_widget_level_";
+
+// id of the collection whose videolist is to be shown (int).
+static const QString KEY_COLLECTION_ID   = "_VideoActivity_collection_id_";
+
+// name of the collection whose videolist is to be shown (QString)
+static const QString KEY_COLLECTION_NAME = "_VideoActivity_collection_name_";
 
 // ---------------------------------------------------------------------------
 // main
@@ -626,6 +635,10 @@ void TestVideoVideoCollectionViewUtils::testInitListView()
 
 }
 
+// -----------------------------------------------------------------------------
+// testSortModel
+// -----------------------------------------------------------------------------
+//
 void TestVideoVideoCollectionViewUtils::testSortModel()
 {
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
@@ -697,7 +710,11 @@ void TestVideoVideoCollectionViewUtils::testSortModel()
     QVERIFY(testObject.mCollectionsSortOrder == Qt::DescendingOrder);
 }
 
-void TestVideoVideoCollectionViewUtils::testSaveAndLoadWidgetLevel()
+// -----------------------------------------------------------------------------
+// testSetAndGetWidgetLevel
+// -----------------------------------------------------------------------------
+//
+void TestVideoVideoCollectionViewUtils::testSetAndGetWidgetLevel()
 {
     static const char* ACTIVITY_VIDEOS_MAINVIEW = "VideosMainView";
     
@@ -705,15 +722,78 @@ void TestVideoVideoCollectionViewUtils::testSaveAndLoadWidgetLevel()
     
     // Invalid level
     level = VideoCollectionCommon::ELevelInvalid;
-    VideoCollectionViewUtils::saveWidgetLevel(level);
-    level = VideoCollectionViewUtils::loadWidgetLevel();
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+    VideoCollectionViewUtils::getActivityWidgetLevel( level);
     QVERIFY(level == VideoCollectionCommon::ELevelVideos);
     
     // Category level.
     level = VideoCollectionCommon::ELevelCategory;
-    VideoCollectionViewUtils::saveWidgetLevel(level);
-    level = VideoCollectionViewUtils::loadWidgetLevel();
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+    VideoCollectionViewUtils::getActivityWidgetLevel( level);
     QVERIFY(level == VideoCollectionCommon::ELevelCategory);
+    
+    // make sure unneeded data is cleared
+    TMPXItemId id = TMPXItemId(1,1);
+    QString name = "name";
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    level = VideoCollectionCommon::ELevelVideos;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+
+    QVERIFY(level == VideoCollectionCommon::ELevelVideos);
+    QVariant data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+    QVERIFY(data.toInt() == 0);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+    QVERIFY(data.toString().isEmpty());
+    
+    id = TMPXItemId(1,1);
+    name = "name";
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    level = VideoCollectionCommon::ELevelAlbum;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+
+    QVERIFY(level == VideoCollectionCommon::ELevelAlbum);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+    QVERIFY(data.toInt() == 1);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+    QVERIFY(data.toString() == "name");
+
+}
+
+void TestVideoVideoCollectionViewUtils::testSetAndGetCollectionActivityData()
+{
+    TMPXItemId id = TMPXItemId(1,1);
+    QString name = "name";   
+    
+    // no default collection nor user defined collection
+    VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+    QVERIFY(id == TMPXItemId::InvalidId());
+    QVERIFY(name.isEmpty());
+    
+    // default collection
+    level = VideoCollectionCommon::ELevelDefaultColl;
+    id = TMPXItemId(1,1);
+    name = "name"; 
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+   
+    QVERIFY(id == TMPXItemId(1, KVcxMvcMediaTypeCategory));
+    QVERIFY(name == "name");
+   
+    // user defined collection
+    level = VideoCollectionCommon::ELevelAlbum;
+    id = TMPXItemId(1,1);
+    name = "name"; 
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+    
+    QVERIFY(id == TMPXItemId(1, KVcxMvcMediaTypeAlbum));
+    QVERIFY(name == "name");
+   
 }
 
 // End of file

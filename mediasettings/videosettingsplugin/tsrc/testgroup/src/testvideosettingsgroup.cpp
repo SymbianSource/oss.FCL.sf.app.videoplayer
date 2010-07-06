@@ -119,6 +119,9 @@ void TestVideoSettingsGroup::testSettingsConstruction()
     QCOMPARE( mItemHelper->mFormConnection.signal, SIGNAL(itemShown(const QModelIndex)) );
     QVERIFY( mItemHelper->mFormConnection.receiver == mTestObject );
     QCOMPARE( mItemHelper->mFormConnection.method, SLOT(itemShown(const QModelIndex)) );
+    
+    // and that group has correct label
+    QCOMPARE( mTestObject->label(), hbTrId("txt_videos_subhead_video_streaming_settings") );
 }
 
 // ---------------------------------------------------------------------------
@@ -250,13 +253,30 @@ void TestVideoSettingsGroup::testGetAccessPointId()
 //
 void TestVideoSettingsGroup::testSetAccessPointId()
 {
+    QString string("test");
     CMPSettingsModel::mApId = -1;
+    mTestObject->mUseProxyItem->setContentWidgetData(QString("checked"), true);
+    mTestObject->mProxyServerItem->setContentWidgetData(QString("text"), string);
+    CMPSettingsModel::mHostName = string;
     
+    // given ap id is different from the one that is saved in settingsmodel.
     uint ap = 3;
-    
     mTestObject->setAccessPointId(ap);
-    
     QCOMPARE( CMPSettingsModel::mApId, (int)ap );
+    QVERIFY( mTestObject->mUseProxyItem->contentWidgetData(QString("checked")).toBool() == false );
+    QCOMPARE( mTestObject->mProxyServerItem->contentWidgetData(QString("text")).toString(), string );
+    QCOMPARE( CMPSettingsModel::mHostName, string );
+    
+    mTestObject->mUseProxyItem->setContentWidgetData(QString("checked"), true);
+    mTestObject->mProxyServerItem->setContentWidgetData(QString("text"), string);
+    CMPSettingsModel::mHostName = string;
+    
+    // given ap id is the same than the one that is saved in settingsmodel.
+    mTestObject->setAccessPointId(ap);
+    QCOMPARE( CMPSettingsModel::mApId, (int)ap );
+    QVERIFY( mTestObject->mUseProxyItem->contentWidgetData(QString("checked")).toBool() );
+    QCOMPARE( mTestObject->mProxyServerItem->contentWidgetData(QString("text")).toString(), string );
+    QCOMPARE( CMPSettingsModel::mHostName, string );
 }
 
 // ---------------------------------------------------------------------------
@@ -268,30 +288,61 @@ void TestVideoSettingsGroup::testLowestUdpPortEditingFinished()
     connect(this, SIGNAL(testTextSignal()),
         mTestObject, SLOT(lowestUdpPortEditingFinished()));
     
-    QString highText("12345");
+    // normal case where min port is less than max port and both are in acceptable range.
+    QString highText("10000");
     mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), highText);
     
-    QString testString("1234");
+    QString testString("1024");
     mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), testString);
     
     emit testTextSignal();
     
     QCOMPARE( CMPSettingsModel::mMinUdpPort, testString.toInt() );
     
+    // min port greater than max port, both are in acceptable range.
     CMPSettingsModel::mMinUdpPort = 0;
-    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString("12346"));
+    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString("10001"));
     
     emit testTextSignal();
     
     QCOMPARE( CMPSettingsModel::mMinUdpPort, highText.toInt() );
     
+    // min port same as max port and in acceptable range.
     CMPSettingsModel::mMinUdpPort = 0;
-    testString = "12345";
+    testString = "10000";
     mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), testString);
     
     emit testTextSignal();
     
-    QCOMPARE( CMPSettingsModel::mMinUdpPort, testString.toInt() );    
+    QCOMPARE( CMPSettingsModel::mMinUdpPort, testString.toInt() );
+    
+    // min port less than 1024
+    CMPSettingsModel::mMinUdpPort = 0;
+    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString("1023"));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMinUdpPort, 1024 );
+    QCOMPARE( mTestObject->mLowestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("1024") );
+    
+    // min port greater than 65535
+    CMPSettingsModel::mMinUdpPort = 0;
+    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString("65536"));
+    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString("65536"));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMinUdpPort, 65535 );
+    QCOMPARE( mTestObject->mLowestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("65535") );
+    
+    // min port field empty
+    CMPSettingsModel::mMinUdpPort = 0;
+    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString(""));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMinUdpPort, 1024 );
+    QCOMPARE( mTestObject->mLowestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("1024") );
 }
 
 // ---------------------------------------------------------------------------
@@ -303,30 +354,61 @@ void TestVideoSettingsGroup::testHighestUdpPortEditingFinished()
     connect(this, SIGNAL(testTextSignal()),
         mTestObject, SLOT(highestUdpPortEditingFinished()));
     
-    QString lowText("1234");
+    // normal case where min port is less than max port and both are in acceptable range.
+    QString lowText("2000");
     mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), lowText);
     
-    QString testString("12345");
+    QString testString("65535");
     mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), testString);
     
     emit testTextSignal();
     
     QCOMPARE( CMPSettingsModel::mMaxUdpPort, testString.toInt() );
     
+    // max port less than min port, both in acceptable range.
     CMPSettingsModel::mMaxUdpPort = 0;
-    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString("1233"));
+    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString("1999"));
     
     emit testTextSignal();
     
     QCOMPARE( CMPSettingsModel::mMaxUdpPort, lowText.toInt() );
     
+    // max port same as min port and in acceptable range.
     CMPSettingsModel::mMaxUdpPort = 0;
-    testString = "1234";
+    testString = "2000";
     mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), testString);
     
     emit testTextSignal();
     
     QCOMPARE( CMPSettingsModel::mMaxUdpPort, testString.toInt() );
+
+    // max port less than 1024
+    CMPSettingsModel::mMaxUdpPort = 0;
+    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString("1023"));
+    mTestObject->mLowestUDPPortItem->setContentWidgetData(QString("text"), QString("1023"));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMaxUdpPort, 1024 );
+    QCOMPARE( mTestObject->mHighestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("1024") );
+    
+    // max port greater than 65535
+    CMPSettingsModel::mMaxUdpPort = 0;
+    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString("65536"));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMaxUdpPort, 65535 );
+    QCOMPARE( mTestObject->mHighestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("65535") );
+    
+    // max port field empty
+    CMPSettingsModel::mMaxUdpPort = 0;
+    mTestObject->mHighestUDPPortItem->setContentWidgetData(QString("text"), QString(""));
+    
+    emit testTextSignal();
+    
+    QCOMPARE( CMPSettingsModel::mMaxUdpPort, 1024 );
+    QCOMPARE( mTestObject->mHighestUDPPortItem->contentWidgetData(QString("text")).toString(), QString("1024") );
 }
 
 // ---------------------------------------------------------------------------
@@ -376,11 +458,40 @@ void TestVideoSettingsGroup::testProxyPortEditingFinished()
     connect(this, SIGNAL(testTextSignal()),
         mTestObject, SLOT(proxyPortEditingFinished()));
     
-    QString testString("1234");
+    // proxy port at lowest accepted range.
+    QString testString("1");
     mTestObject->mProxyPortItem->setContentWidgetData(QString("text"), testString);
     
     emit testTextSignal();
     QCOMPARE( CMPSettingsModel::mProxyPort, testString.toInt() );
+    
+    // proxy port at highest accepted range.
+    testString = "65535";
+    mTestObject->mProxyPortItem->setContentWidgetData(QString("text"), testString);
+    
+    emit testTextSignal();
+    QCOMPARE( CMPSettingsModel::mProxyPort, testString.toInt() );
+    
+    // proxy port 0
+    mTestObject->mProxyPortItem->setContentWidgetData(QString("text"), QString("0"));
+    
+    emit testTextSignal();
+    QCOMPARE( CMPSettingsModel::mProxyPort, 1 );
+    QCOMPARE( mTestObject->mProxyPortItem->contentWidgetData(QString("text")).toString(), QString("1") );
+    
+    // proxy port higher than accepted.
+    mTestObject->mProxyPortItem->setContentWidgetData(QString("text"), QString("65536"));
+    
+    emit testTextSignal();
+    QCOMPARE( CMPSettingsModel::mProxyPort, 65535 );
+    QCOMPARE( mTestObject->mProxyPortItem->contentWidgetData(QString("text")).toString(), QString("65535") );
+    
+    // proxy port empty
+    mTestObject->mProxyPortItem->setContentWidgetData(QString("text"), QString(""));
+    
+    emit testTextSignal();
+    QCOMPARE( CMPSettingsModel::mProxyPort, 1 );
+    QCOMPARE( mTestObject->mProxyPortItem->contentWidgetData(QString("text")).toString(), QString("1") );
 }
 
 // ---------------------------------------------------------------------------
@@ -397,34 +508,23 @@ void TestVideoSettingsGroup::testItemShown()
     HbLineEdit* editor = new HbLineEdit();
     mItemHelper->mWidgetReturnValue = editor;
     
-    QIntValidator* val;
-    
     mItemHelper->mModelItemReturnValue = mTestObject->mLowestUDPPortItem;
     HbEditorInterface::mFilter = 0;
     emit testShownSignal(index);
     QVERIFY( HbEditorInterface::mFilter == HbDigitsOnlyFilter::instance() );
-    QCOMPARE( editor->mValidator->mValidators.count(), 1 );
-    val = static_cast<QIntValidator*>(editor->mValidator->mValidators.at(0));
-    QCOMPARE( val->bottom(), 1024 );
-    QCOMPARE( val->top(), 65535 );
+    QCOMPARE( editor->mMaxLength, 5 );
 
     mItemHelper->mModelItemReturnValue = mTestObject->mProxyPortItem;
     HbEditorInterface::mFilter = 0;
     emit testShownSignal(index);
     QVERIFY( HbEditorInterface::mFilter == HbDigitsOnlyFilter::instance() );
-    QCOMPARE( editor->mValidator->mValidators.count(), 1 );
-    val = static_cast<QIntValidator*>(editor->mValidator->mValidators.at(0));
-    QCOMPARE( val->bottom(), 1 );
-    QCOMPARE( val->top(), 65535 );
+    QCOMPARE( editor->mMaxLength, 5 );
     
     mItemHelper->mModelItemReturnValue = mTestObject->mHighestUDPPortItem;
     HbEditorInterface::mFilter = 0;
     emit testShownSignal(index);
     QVERIFY( HbEditorInterface::mFilter == HbDigitsOnlyFilter::instance() );
-    QCOMPARE( editor->mValidator->mValidators.count(), 1 );
-    val = static_cast<QIntValidator*>(editor->mValidator->mValidators.at(0));
-    QCOMPARE( val->bottom(), 1024 );
-    QCOMPARE( val->top(), 65535 );
+    QCOMPARE( editor->mMaxLength, 5 );
     
     mItemHelper->mModelItemReturnValue = mTestObject->mProxyServerItem;
     HbEditorInterface::mFilter = 0;

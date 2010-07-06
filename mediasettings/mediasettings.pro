@@ -20,6 +20,6 @@ CONFIG += ordered
 symbian: {
 BLD_INF_RULES.prj_mmpfiles += $$LITERAL_HASH"include \"group/bld.inf\""
 
-#SUBDIRS += videosettingsplugin
+SUBDIRS += videosettingsplugin
 }
                      

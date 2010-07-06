@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 76 %
+// Version : %version: 76.1.1 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -326,6 +326,14 @@ void VideoFileDetailsViewPlugin::activateView()
 		    return;
 		}
 				
+	    // Fix the size of the thumbnail, as that needs to be in 16:9
+	    qreal width = button->size().width();
+	    qreal height = width * 9 / 16;
+	    
+	    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+	    thumbWidget->setPreferredWidth(width);
+	    thumbWidget->setPreferredHeight(height);
+	    
 		if (service == VideoServices::EUriFetcher)
 		{
             button->setText(hbTrId("txt_videos_button_attach"));

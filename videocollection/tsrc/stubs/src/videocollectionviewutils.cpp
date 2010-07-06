@@ -28,7 +28,9 @@ Qt::SortOrder VideoCollectionViewUtilsData::mCollectionSortOrder = Qt::Ascending
 QString VideoCollectionViewUtilsData::mIconString = "";
 QString VideoCollectionViewUtilsData::mPressedString = "";
 QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
-VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelInvalid;
+VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelVideos;
+TMPXItemId VideoCollectionViewUtilsData::mActivityCollectionId = TMPXItemId::InvalidId();
+QString VideoCollectionViewUtilsData::mActivityCollectionName = "";
 
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
@@ -125,16 +127,28 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
     // not stubbed
 }
 
-void VideoCollectionViewUtils::saveWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+void VideoCollectionViewUtils::setWidgetActivityLevel(const VideoCollectionCommon::TCollectionLevels &level)
 {
-    Q_UNUSED(level);
-    // not stubbed
+    VideoCollectionViewUtilsData::mWidgetLevel = level;
 }
   
-VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtils::loadWidgetLevel()
+void VideoCollectionViewUtils::getActivityWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
 {
-    return VideoCollectionViewUtilsData::mWidgetLevel;
+    level = VideoCollectionViewUtilsData::mWidgetLevel;
 }
+
+void VideoCollectionViewUtils::setCollectionActivityData(const TMPXItemId &id, const QString &name)
+{
+    VideoCollectionViewUtilsData::mActivityCollectionId = id;
+    VideoCollectionViewUtilsData::mActivityCollectionName = name;
+}
+    
+void VideoCollectionViewUtils::getCollectionActivityData(TMPXItemId &id, QString &name)
+{
+    id = VideoCollectionViewUtilsData::mActivityCollectionId;
+    name = VideoCollectionViewUtilsData::mActivityCollectionName;
+}
+
 
 void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,
     bool async, VideoCollectionCommon::TCollectionLevels target)

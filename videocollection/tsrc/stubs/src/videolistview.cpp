@@ -32,7 +32,6 @@ HbView(parent),
 mUiUtils(VideoCollectionViewUtils::instance()),
 mWrapper(VideoCollectionWrapper::instance()),
 mUiLoader(uiLoader),
-mIsService(false),
 mModelReady(false),
 mVideoServices(0),
 mCurrentList(0),
@@ -61,7 +60,7 @@ void VideoListView::titleReadySlot(const QString& title)
     // not stubbed
 }
 
-int VideoListView::activateView(const TMPXItemId &itemId)
+int VideoListView::activateView(TMPXItemId &itemId)
 {
     Q_UNUSED(itemId);
     
@@ -206,11 +205,11 @@ void VideoListView::handleAsyncStatusSlot(int statusCode, QVariant &additional)
 
 void VideoListView::collectionOpenedSlot(bool collectionOpened,
     const QString& collection,
-    const QModelIndex &index)
+    const TMPXItemId &id)
 {
     Q_UNUSED(collectionOpened);
     Q_UNUSED(collection);
-    Q_UNUSED(index);
+    Q_UNUSED(id);
     // not stubbed
 }
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#33 %
+// Version : %version: da1mmcf#37 %
 
 
 
@@ -266,7 +266,7 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
         }
         case EMPXPbvCmdPlayPause:
         {
-            MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdPause"));
+            MPX_DEBUG(_L("CMPXVideoViewWrapper::HandleCommandL() EMPXPbvCmdPlayPause"));
 
             if ( iPlaybackState == EPbStatePlaying )
             {
@@ -351,7 +351,7 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 
             if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
-                iPlaybackUtility->CommandL( EPbCmdNext );
+                CreateGeneralPlaybackCommandL( EPbCmdNext );
             }
             else
             {
@@ -366,13 +366,11 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 
             if ( iPlaylistView && iFileDetails->mMultiItemPlaylist )
             {
-			    //
-			    // the command is being sent twice on purpose
-                // one EMPXPbvCmdPreviousListItem command only sets the position to 0
-                // the second cmd actually goes to the previous item in the list
+                //
+				// Need to send sync message to go back to a previous clip
+                // regardless of current positoin
 				//
-                iPlaybackUtility->CommandL( EPbCmdPrevious );
-                iPlaybackUtility->CommandL( EPbCmdPrevious );
+                CreateGeneralPlaybackCommandL( EPbCmdPrevious );
             }
             else
             {
@@ -1053,7 +1051,9 @@ CMPXVideoViewWrapper::HandlePropertyL( TMPXPlaybackProperty aProperty, TInt aVal
                 {
                     iControlsController->handleEvent( EMPXControlCmdSetPosition, aValue );
                 }
-
+                
+                iPlayPosition = aValue;   
+                
                 break;
             }
             case EPbPropertyDuration:
@@ -1105,6 +1105,8 @@ CMPXVideoViewWrapper::HandlePropertyL( TMPXPlaybackProperty aProperty, TInt aVal
 //
 void CMPXVideoViewWrapper::RetrieveFileNameAndModeL( CMPXCommand* aCmd )
 {
+    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::RetrieveFileNameAndModeL()"));
+    
     //
     //  set attributes on the command
     //
@@ -1128,29 +1130,29 @@ void CMPXVideoViewWrapper::ActivateClosePlayerActiveObject()
 
     if ( ! iCloseAO->IsActive() )
     {
-        iCloseAO->Start( TCallBack( CMPXVideoViewWrapper::ClosePlayerL, this ) );
+        iCloseAO->Start( TCallBack( CMPXVideoViewWrapper::ClosePlayer, this ) );
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoViewWrapper::ClosePlayerL
+//   CMPXVideoViewWrapper::ClosePlayer
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoViewWrapper::ClosePlayerL( TAny* aPtr )
+TInt CMPXVideoViewWrapper::ClosePlayer( TAny* aPtr )
 {
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::ClosePlayerL()"));
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::ClosePlayer()"));
 
-    static_cast<CMPXVideoViewWrapper*>(aPtr)->DoClosePlayerL();
+    static_cast<CMPXVideoViewWrapper*>(aPtr)->DoClosePlayer();
     return KErrNone;
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoViewWrapper::DoClosePlayerL
+//   CMPXVideoViewWrapper::DoClosePlayer
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoViewWrapper::DoClosePlayerL()
+void CMPXVideoViewWrapper::DoClosePlayer()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::DoClosePlayerL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::DoClosePlayer()"));
 
     iView->doClosePlayer();
 }
@@ -1505,7 +1507,21 @@ void CMPXVideoViewWrapper::IssuePlayCommandL()
             }
         }
 
-        CreateGeneralPlaybackCommandL( EPbCmdPlay );
+        // if coming back after a forced termination, the playback position must
+        // be restored and state be set to paused, as forced termination can only
+        // happen when app is on background, in which case Video Player is paused
+        // by default
+        if ( iView->mStayPaused )
+        {            
+            CreateGeneralPlaybackCommandL( EPbCmdPause );      
+            SetPropertyL( EPbPropertyPosition, iView->mLastPlayPosition );    
+            iView->mStayPaused = false;
+        }
+        else
+        {
+            CreateGeneralPlaybackCommandL( EPbCmdPlay );
+        }
+        
     }
 }
 

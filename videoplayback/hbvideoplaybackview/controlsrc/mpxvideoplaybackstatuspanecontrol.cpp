@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: 19 %
 
 
 
@@ -42,10 +42,10 @@
 // QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl()
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl( 
-        QMPXVideoPlaybackControlsController* controller, 
-        TMPXVideoPlaybackControls index, 
-        HbWidget* widget, 
+QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
+        QMPXVideoPlaybackControlsController* controller,
+        TMPXVideoPlaybackControls index,
+        HbWidget* widget,
         TUint controlproperties )
     : QMPXVideoPlaybackFullScreenControl( controller, index, widget, controlproperties )
     , mActionBack( NULL )
@@ -181,7 +181,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
         if ( title.count() == 0 )
         {
             QFileInfo fileInfo( mController->fileDetails()->mClipName );
-            title = fileInfo.baseName ();
+            title = fileInfo.completeBaseName();
         }
 
         QGraphicsWidget *qWidget = mController->layoutLoader()->findWidget( QString( "title" ) );
@@ -210,12 +210,13 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
         {
             //
             // Set TitleBar transparent and go back to preview view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 
-            mController->view()->setViewFlags( 
-                    HbView::HbViewFlags( HbView::ViewTitleBarTransparent | HbView::ViewStatusBarTransparent ) );
+            mController->view()->setViewFlags( mController->view()->viewFlags() |
+                                               HbView::ViewTitleBarTransparent |
+                                               HbView::ViewStatusBarTransparent );
 
             mTitleLabel->setVisible( true );
             mTitleGroupBox->setVisible( false );
@@ -226,7 +227,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
         {
             //
             // Set TitleBar opaque and go back to full screen view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
             connect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
 
@@ -241,7 +242,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
         {
             //
             // Set TitleBar opaque and go back to preview view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 

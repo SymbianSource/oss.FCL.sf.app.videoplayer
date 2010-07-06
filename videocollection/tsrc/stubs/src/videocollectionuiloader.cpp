@@ -144,7 +144,17 @@ void VideoCollectionUiLoader::initObject(QObject *object,
         }
         VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
         VideoSortFilterProxyModel *model = wrapper.getModel(type);
-        videoList->initialize(*model, 0);
+        
+        VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid;
+        if(name == DOCML_NAME_VC_VIDEOLISTWIDGET )
+        {
+            level = VideoCollectionCommon::ELevelVideos;
+        }
+        else if(name == DOCML_NAME_VC_COLLECTIONWIDGET)
+        {
+            level = VideoCollectionCommon::ELevelCategory;
+        }
+        videoList->initialize(*model, 0, level);
     }
     else if (name == DOCML_NAME_DIALOG)
     {

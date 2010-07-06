@@ -97,115 +97,138 @@ TInt CVCXMyVideosTestUtils::EnsureFileIsNotInUse( const TPtrC& aFileName )
 
 
 // -----------------------------------------------------------------------------
-// CVCXMyVideosTestUtils::CreateVideoFilesL
+// CVCXMyVideosTestUtils::CreateVideoFileL
 // -----------------------------------------------------------------------------
 //
-void CVCXMyVideosTestUtils::CreateVideoFileL( TVcxTestVideoType aVideoType, TDesC& aFileName, TInt aSize )
+void CVCXMyVideosTestUtils::CreateVideoFileL( TVcxTestVideoType aVideoType, TDesC& aFileName, TInt aSize, TBool aUniqueName )
     {
     VCXLOGLO1(">>>CVcxTestVideoCreator::CreateVideoL");
 
-        // Resolve source filename
-        TBuf<256> srcFileName;
+    // Resolve source filename
+    TBuf<256> srcFileName;
 
-        GetVideoFile( srcFileName, aVideoType, _L("C") );
+    GetVideoFile( srcFileName, aVideoType, _L("C") );
+    if( !BaflUtils::FileExists(iFs, srcFileName) )
+        {
+        VCXLOGLO2("CVcxTestVideoCreator:: %S does not exist.", &srcFileName);
+        GetVideoFile( srcFileName, aVideoType, _L("E") );
         if( !BaflUtils::FileExists(iFs, srcFileName) )
             {
             VCXLOGLO2("CVcxTestVideoCreator:: %S does not exist.", &srcFileName);
-            GetVideoFile( srcFileName, aVideoType, _L("E") );
-            if( !BaflUtils::FileExists(iFs, srcFileName) )
-                {
-                VCXLOGLO2("CVcxTestVideoCreator:: %S does not exist.", &srcFileName);
-                VCXLOGLO2("CVcxTestVideoCreator:: test video file %S missing! PANIC.", &srcFileName);
-                User::Panic(_L("Video files missing!"), KErrNotFound);
-                }
+            VCXLOGLO2("CVcxTestVideoCreator:: test video file %S missing! PANIC.", &srcFileName);
+            User::Panic(_L("Video files missing!"), KErrNotFound);
             }
-        
-        BaflUtils::EnsurePathExistsL( iFs, aFileName.Left( aFileName.LocateReverse('\\') ) );
+        }
+    
+    BaflUtils::EnsurePathExistsL( iFs, aFileName.Left( aFileName.LocateReverse('\\') ) );
 
+    HBufC* newFileName = HBufC::NewL( 256 );
+    CleanupStack::PushL( newFileName );
+    
+    if(!aUniqueName)
+    {
+        newFileName->Des().Copy( aFileName );
         BaflUtils::DeleteFile( iFs, aFileName );
-        
-        VCXLOGLO2("CVcxTestVideoCreator:: aSize = %d", aSize);
-        
-        TInt64 wantedSize( 0 );
-        
-        // Check the size
-        if( aSize == KVcxTestLargeFile3GB ) {
-            wantedSize = 1024*1024*1024 * 3;
+    }
+    else
+    {
+        newFileName->Des().Copy( aFileName );
+        TInt dotPos = aFileName.LocateReverse('.');
+        int count = 0;
+        while( BaflUtils::FileExists( iFs, *newFileName ) )
+        {
+            newFileName->Des().Copy( aFileName.Left( aFileName.LocateReverse('\\') ) );
+            newFileName->Des().Copy( aFileName.Left( dotPos ) );
+            newFileName->Des().Append( _L("_") );
+            newFileName->Des().AppendNum( count++ );
+            newFileName->Des().Append( aFileName.Right( aFileName.Length() - dotPos ) );
         }
-        else {
-            wantedSize = aSize;
-        }
-        
-        //wantedSize = wantedSize == 0 ? wantedSize -1 : wantedSize;
-        
-        VCXLOGLO2("CVcxTestVideoCreator:: Wanted file size: %Ld", wantedSize);
+    }
+    
+    VCXLOGLO2("CVcxTestVideoCreator:: aSize = %d", aSize);
+    
+    TInt64 wantedSize( 0 );
+    
+    // Check the size
+    if( aSize == KVcxTestLargeFile3GB ) {
+        wantedSize = 1024*1024*1024 * 3;
+    }
+    else {
+        wantedSize = aSize;
+    }
+    
+    //wantedSize = wantedSize == 0 ? wantedSize -1 : wantedSize;
+    
+    VCXLOGLO2("CVcxTestVideoCreator:: Wanted file size: %Ld", wantedSize);
 
-        // Read source file into memory, won't work on huge files.
-        RFile64 srcFile;
-        VCXLOGLO2("CVcxTestVideoCreator:: Opening %S", &srcFileName);
-        User::LeaveIfError( srcFile.Open( iFs, srcFileName, EFileRead ) );
-        CleanupClosePushL( srcFile );
+    // Read source file into memory, won't work on huge files.
+    RFile64 srcFile;
+    VCXLOGLO2("CVcxTestVideoCreator:: Opening %S", &srcFileName);
+    User::LeaveIfError( srcFile.Open( iFs, srcFileName, EFileRead ) );
+    CleanupClosePushL( srcFile );
 
-        TInt64 srcSize(0);
-        VCXLOGLO2("CVcxTestVideoCreator:: Getting size of %S", &srcFileName);
-        User::LeaveIfError( srcFile.Size( srcSize ) );
+    TInt64 srcSize(0);
+    VCXLOGLO2("CVcxTestVideoCreator:: Getting size of %S", &srcFileName);
+    User::LeaveIfError( srcFile.Size( srcSize ) );
 
-        HBufC8* data = HBufC8::NewL( srcSize );
-        TPtr8 ptr( data->Des() );
-        srcFile.Read( ptr, srcSize );
-        CleanupStack::PopAndDestroy( &srcFile );
+    HBufC8* data = HBufC8::NewL( srcSize );
+    TPtr8 ptr( data->Des() );
+    srcFile.Read( ptr, srcSize );
+    CleanupStack::PopAndDestroy( &srcFile );
 
-        CleanupStack::PushL( data );
+    CleanupStack::PushL( data );
 
-        // Write new file.
-        RFile64 dstFile;
-        VCXLOGLO1("CVcxTestVideoCreator:: Replace");
-        User::LeaveIfError( dstFile.Replace( iFs, aFileName, EFileWrite ) );
-        CleanupClosePushL(dstFile);
+    // Write new file.
+    RFile64 dstFile;
+    VCXLOGLO1("CVcxTestVideoCreator:: Replace");
+    User::LeaveIfError( dstFile.Replace( iFs, *newFileName, EFileWrite ) );
+    CleanupClosePushL(dstFile);
 
-        if( wantedSize <= srcSize )
-            {
-            if( wantedSize == -1 )
-                {
-                VCXLOGLO2("CVcxTestVideoCreator:: Writing %Ld", srcSize);
-                User::LeaveIfError( dstFile.Write( *data, srcSize ) );
-                }
-            else
-                {
-                VCXLOGLO2("CVcxTestVideoCreator:: Writing %Ld", wantedSize);
-                User::LeaveIfError( dstFile.Write( *data, wantedSize ) );
-                }
-            }
-        else
+    if( wantedSize <= srcSize )
+        {
+        if( wantedSize == -1 )
             {
             VCXLOGLO2("CVcxTestVideoCreator:: Writing %Ld", srcSize);
             User::LeaveIfError( dstFile.Write( *data, srcSize ) );
-
-            const TInt KVcxTest200Kilos = 1024*200;
-            HBufC8* buff = HBufC8::NewL( KVcxTest200Kilos );
-            buff->Des().SetLength( KVcxTest200Kilos );
-            CleanupStack::PushL( buff );
-            TInt64 bytesToWrite = wantedSize - srcSize;
-            while( bytesToWrite > 0 )
-                {
-                if( bytesToWrite >= KVcxTest200Kilos )
-                    {
-                    bytesToWrite -= KVcxTest200Kilos;
-                    User::LeaveIfError( dstFile.Write( *buff ) );
-                    }
-                else
-                    {
-                    User::LeaveIfError( dstFile.Write( *buff, bytesToWrite ) );
-                    bytesToWrite = 0;
-                    }
-                }
-            CleanupStack::PopAndDestroy( buff );
             }
+        else
+            {
+            VCXLOGLO2("CVcxTestVideoCreator:: Writing %Ld", wantedSize);
+            User::LeaveIfError( dstFile.Write( *data, wantedSize ) );
+            }
+        }
+    else
+        {
+        VCXLOGLO2("CVcxTestVideoCreator:: Writing %Ld", srcSize);
+        User::LeaveIfError( dstFile.Write( *data, srcSize ) );
 
-        CleanupStack::PopAndDestroy( &dstFile );
-        CleanupStack::PopAndDestroy( data );
+        const TInt KVcxTest200Kilos = 1024*200;
+        HBufC8* buff = HBufC8::NewL( KVcxTest200Kilos );
+        buff->Des().SetLength( KVcxTest200Kilos );
+        CleanupStack::PushL( buff );
+        TInt64 bytesToWrite = wantedSize - srcSize;
+        while( bytesToWrite > 0 )
+            {
+            if( bytesToWrite >= KVcxTest200Kilos )
+                {
+                bytesToWrite -= KVcxTest200Kilos;
+                User::LeaveIfError( dstFile.Write( *buff ) );
+                }
+            else
+                {
+                User::LeaveIfError( dstFile.Write( *buff, bytesToWrite ) );
+                bytesToWrite = 0;
+                }
+            }
+        CleanupStack::PopAndDestroy( buff );
+        }
 
-        VCXLOGLO1("<<<CVcxTestVideoCreator::CreateVideoL");
+    CleanupStack::PopAndDestroy( &dstFile );
+    CleanupStack::PopAndDestroy( data );
+    
+    CleanupStack::PopAndDestroy( newFileName );
+
+    VCXLOGLO1("<<<CVcxTestVideoCreator::CreateVideoL");
     }
 
 
