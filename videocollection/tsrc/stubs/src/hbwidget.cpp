@@ -18,7 +18,3 @@
 #include "hbwidget.h"
 
 int HbWidget::initializeCount = 0;
-
-
-
-

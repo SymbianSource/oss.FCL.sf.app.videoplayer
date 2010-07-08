@@ -25,8 +25,6 @@ VideoHintWidget::VideoHintWidget(VideoCollectionUiLoader *uiLoader,
     QGraphicsItem *parent):
     HbWidget(parent),
     mUiLoader(uiLoader),
-    mServiceIcon(0),
-    mAddVideosIcon(0),
     mCurrentLevel(AllVideos)
 {
     // NOP
@@ -37,10 +35,10 @@ VideoHintWidget::~VideoHintWidget()
     // nop
 }
 
-int VideoHintWidget::initialize()
+void VideoHintWidget::initialize()
 {
     // not stubbed
-    return 0;
+    return;
 }
 
 void VideoHintWidget::setLevel(HintLevel level)

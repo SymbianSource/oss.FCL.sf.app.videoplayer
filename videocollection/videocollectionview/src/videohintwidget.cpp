@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 // INCLUDE FILES
 #include <hbpushbutton.h>
@@ -26,6 +26,7 @@
 #include "videohintwidget.h"
 #include "videocollectionuiloader.h"
 #include "videocollectionviewutils.h"
+#include "videocollectioncenrepdefs.h"
 #include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
@@ -35,7 +36,6 @@
 VideoHintWidget::VideoHintWidget( VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent ) 
     : HbWidget( parent )
     , mUiLoader( uiLoader )
-    , mServiceIcon( 0 )
     , mCurrentLevel( AllVideos )
     , mButtonShown( false )
     , mActivated( false )
@@ -51,18 +51,22 @@ VideoHintWidget::VideoHintWidget( VideoCollectionUiLoader *uiLoader, QGraphicsIt
 VideoHintWidget::~VideoHintWidget()
 {
     FUNC_LOG;
-    delete mServiceIcon;
 }
 
 // ---------------------------------------------------------------------------
 // initialize
 // ---------------------------------------------------------------------------
 //
-int VideoHintWidget::initialize()
+void VideoHintWidget::initialize()
 {
     FUNC_LOG;
     VideoCollectionViewUtils& utils = VideoCollectionViewUtils::instance();
-    return utils.getServiceIconStrings(mServiceIconString, mServiceIconPressedString);
+    
+    QString textId = utils.getCenRepStringValue(KVideoCollectionViewCenrepServiceItem1Text);
+    if(!textId.isEmpty())
+    {
+        mHintText = hbTrId(textId.toLatin1().constData());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -118,15 +122,6 @@ void VideoHintWidget::activate()
             mainWnd, SIGNAL(orientationChanged(Qt::Orientation)),
             this, SLOT(orientationChangedSlot(Qt::Orientation)));
         
-        if(!mServiceIconString.isEmpty())
-        {
-            mServiceIcon = new HbIcon(mServiceIconString);
-        }
-        if(mServiceIcon && !mServiceIconPressedString.isEmpty())
-        {
-            mServiceIcon->setIconName(mServiceIconPressedString, QIcon::Normal, QIcon::On);
-        }
-        
         updateUiComponents();
         
         setVisible(true);
@@ -152,17 +147,6 @@ void VideoHintWidget::deactivate()
         disconnect(
             mainWnd, SIGNAL(orientationChanged(Qt::Orientation)),
             this, SLOT(orientationChangedSlot(Qt::Orientation)));
-        
-        HbPushButton *serviceButton =
-            mUiLoader->findWidget<HbPushButton>(
-                DOCML_NAME_HINT_BUTTON);
-        if (serviceButton)
-        {
-            serviceButton->setIcon(HbIcon());
-        }
-
-        delete mServiceIcon;
-        mServiceIcon = 0;
     }
 }
 
@@ -176,28 +160,24 @@ void VideoHintWidget::updateUiComponents()
     HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
     if (mainWnd)
     {
-        HbPushButton *serviceButton =
+        HbPushButton *hintButton =
             mUiLoader->findWidget<HbPushButton>(
                 DOCML_NAME_HINT_BUTTON);
-        HbLabel *hintLabel =
-            mUiLoader->findWidget<HbLabel>(
-                DOCML_NAME_HINT_LABEL);
         HbLabel *noVideosLabel =
             mUiLoader->findWidget<HbLabel>(
                 DOCML_NAME_NO_VIDEOS_LABEL);
-        if (serviceButton && hintLabel && noVideosLabel)
+        if (hintButton && noVideosLabel)
         {
             noVideosLabel->setVisible(true);
-            if (mServiceIcon && mCurrentLevel == AllVideos)
+
+            if (mCurrentLevel == AllVideos && !mHintText.isEmpty())
             {
-                hintLabel->setVisible(true);
-                serviceButton->setIcon(*mServiceIcon);
-                serviceButton->setVisible(mButtonShown);
+                hintButton->setText(mHintText);
+                hintButton->setVisible(mButtonShown);
             }
             else
             {
-                hintLabel->setVisible(false);
-                serviceButton->setVisible(false);
+                hintButton->setVisible(false);
             }
         }
     }

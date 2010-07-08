@@ -36,7 +36,9 @@ mModelReady(false),
 mVideoServices(0),
 mCurrentList(0),
 mToolbarViewsActionGroup(0),
-mToolbarCollectionActionGroup(0)
+mToolbarCollectionActionGroup(0),
+mToolbarServiceExtension(0)
+
 {
     // not stubbed
 }
@@ -100,6 +102,20 @@ int VideoListView::createToolbar()
     return 0;
 }
 
+void VideoListView::createOperatorServicesToolbar()
+{
+    // not stubbed
+}
+
+void VideoListView::loadOperatorService(int titleKey, int iconKey, int uriKey, int uidKey)
+{
+    // not stubbed
+    Q_UNUSED(titleKey);
+    Q_UNUSED(iconKey);
+    Q_UNUSED(uriKey);
+    Q_UNUSED(uidKey);
+}
+
 HbAction* VideoListView::createAction(QString icon,
     QActionGroup* actionGroup,
     const char *slot)
@@ -145,7 +161,7 @@ void VideoListView::openCollectionViewSlot()
     // not stubbed
 }
 
-void VideoListView::openServicesViewSlot()
+void VideoListView::openOperatorServiceSlot()
 {
     // not stubbed
 }

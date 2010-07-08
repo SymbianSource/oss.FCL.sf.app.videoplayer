@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 2 %
+# Version : %version: 3 %
 
 
 TEMPLATE = app
@@ -35,7 +35,7 @@ LIBS += -lmpxcollectionhelper.dll \
         -lcharconv.dll
 
 # Input
-HEADERS += mpxvideoplaybackwrapper.h \
+HEADERS += videoplaybackwrapper.h \
            testvideoappuiengine.h \
            mpxcollectionutilityimp_stub.h \
            mpxplaybackutilityimp_stub.h \
@@ -46,7 +46,7 @@ HEADERS += mpxvideoplaybackwrapper.h \
            videoplaylistutility.h \
            ../../inc/mpxvideoplayerappuiengine.h
 
-SOURCES += mpxvideoplaybackwrapper.cpp \
+SOURCES += videoplaybackwrapper.cpp \
            coneutils_stub.cpp \
            mpxcollectionutility_stub.cpp \
            mpxcollectionutilityimp_stub.cpp \

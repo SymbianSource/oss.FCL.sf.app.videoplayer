@@ -29,7 +29,6 @@ public: // methods
     {
         mLastError = 0;
         mLoadSortingValuesFails = false;
-        mGetServiceIconStringsFails = false;
         mVideoSortRole = -1;
         mCollectionSortRole = -1;
         mVideoSortOrder = Qt::AscendingOrder;
@@ -40,12 +39,13 @@ public: // methods
         mWidgetLevel = VideoCollectionCommon::ELevelVideos;
         mActivityCollectionId = TMPXItemId::InvalidId();
         mActivityCollectionName = "";
+        mCenRepStringValues.clear();
+        mCenRepIntValues.clear();
     }   
     
 public: // data
     static int mLastError;
     static bool mLoadSortingValuesFails;
-    static bool mGetServiceIconStringsFails;
     static int mVideoSortRole;
     static int mCollectionSortRole;
     static Qt::SortOrder mVideoSortOrder;
@@ -56,6 +56,8 @@ public: // data
     static VideoCollectionCommon::TCollectionLevels mWidgetLevel;
     static TMPXItemId mActivityCollectionId;
     static QString mActivityCollectionName;
+    static QList<QString> mCenRepStringValues;
+    static QList<int> mCenRepIntValues;
 };
 
 #endif /* VIDEOCOLLECTIONVIEWUTILSDATA_H */

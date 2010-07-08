@@ -23,7 +23,7 @@
 //      - how to setup construction to fail for testing purposes
 
 
-// Version : %version: 8 %
+// Version : %version: da1mmcf#9 %
 
 #ifndef __TESTVIDEOPLAYERENGINE_H__
 #define __TESTVIDEOPLAYERENGINE_H__
@@ -34,77 +34,77 @@
 #include <qpointer.h>
 
 class MpxViewPlugin;
-class QMpxVideoPlaybackWrapper;
-class QVideoPlayerEngine;
+class VideoPlaybackWrapper;
+class VideoPlayerEngine;
 class VideoServices;
 
 class TestVideoPlayerEngine : public QObject
-	{
+{
 
     Q_OBJECT
 
-public: // Constructor / destructor
+    public: 
 
-    /**
-     * Contructor.
-     *
-     */
-	TestVideoPlayerEngine();
+        /**
+         * Contructor.
+         *
+         */
+        TestVideoPlayerEngine();
 
-    /**
-     * Destructor.
-     *
-     */
-    virtual ~TestVideoPlayerEngine();
+        /**
+         * Destructor.
+         *
+         */
+        virtual ~TestVideoPlayerEngine();
 
-private slots:
+    private slots:
 
-    void init(bool isService = false);
-    void cleanup();
+        void init(bool isService = false);
+        void cleanup();
 
-    void testCreateDelete();
-    void testCreateDeleteService();
+        void testCreateDelete();
+        void testCreateDeleteService();
 
-    void testInitialize();
-    void testInitializeService();
+        void testInitialize();
+        void testInitializeService();
     
-    void testMultipleInitialize();
-    void testMultipleInitializeService();
+        void testMultipleInitialize();
+        void testMultipleInitializeService();
 
-    void testHandleCommandPreInit();
-    void testHandleCommandPostInit();
-    void testHandleCommandPreAndPostInit();
+        void testHandleCommandPreInit();
+        void testHandleCommandPostInit();
+        void testHandleCommandPreAndPostInit();
 
-    void testHandleCommandPluginFail();
-    void testHandleCommandPluginFail1();
-    void testHandleCommandPluginFail2();
+        void testHandleCommandPluginFail();
+        void testHandleCommandPluginFail1();
+        void testHandleCommandPluginFail2();
     
-    void testPlayMedia();
-    void testSetEmbedded();
+        void testPlayMedia();
+        void testSetEmbedded();
     
-    void testInitWithActivityData();
-    void testHandleQuitWihtActivityData();
+        void testInitWithActivityData();
+        void testHandleQuitWihtActivityData();
 
-    // called after last test case executed
-    void cleanupTestCase();
+        // called after last test case executed
+        void cleanupTestCase();
 
-signals:
+    signals:
 
-    void aboutToQuit();
-    void command( int );
+        void aboutToQuit();
+        void command( int );
 
-private:
+    private:
 
-    QPointer<QVideoPlayerEngine>  mTestObject;
+        QPointer<VideoPlayerEngine>  mTestObject;
 
-    MpxViewPlugin*            mCurrentViewPlugin;
-    MpxViewPlugin*            mPlaybackViewPlugin;
-    MpxViewPlugin*            mCollectionViewPlugin;
-    MpxViewPlugin*            mFileDetailsViewPlugin;
+        MpxViewPlugin*            mCurrentViewPlugin;
+        MpxViewPlugin*            mPlaybackViewPlugin;
+        MpxViewPlugin*            mCollectionViewPlugin;
+        MpxViewPlugin*            mFileDetailsViewPlugin;
 
-    VideoServices*            mVideoServices;
+        VideoServices*            mVideoServices;
     
-    QMpxVideoPlaybackWrapper *mPlaybackWrapper;
+        VideoPlaybackWrapper      *mPlaybackWrapper;
 
 };
 

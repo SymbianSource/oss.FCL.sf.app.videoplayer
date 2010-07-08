@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 43 %
+// Version : %version: 45 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -25,6 +25,8 @@
 #include <hbdialog.h>
 #include <hbmessagebox.h>
 #include <hbnotificationdialog.h>
+#include <hbparameterlengthlimiter.h>
+#include <xqsettingsmanager.h>
 #include <centralrepository.h>
 #include <vcxmyvideosdefs.h>
 
@@ -196,59 +198,34 @@ int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order,
 }
 
 // ---------------------------------------------------------------------------
-// getServiceIconStrings
+// getCenrepStringValue
 // ---------------------------------------------------------------------------
 //
-int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
-        QString& iconPressed)
+QString VideoCollectionViewUtils::getCenRepStringValue(int key)
 {
-	FUNC_LOG;
-    int status = -1;
-    CRepository *cenRep = 0;
-    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-    if(cenRep)
-    {
-        TBuf<255> iconValue;
-        TBuf<255> pressedValue;
-        status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1IconPath, iconValue);
-        if(status == KErrNone)
-        {
-            status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1PressedIconPath, pressedValue);
-            if(status == KErrNone)
-            {
-                QString iconTemp((QChar*)iconValue.Ptr(),iconValue.Length());
-                QString pressedTemp((QChar*)pressedValue.Ptr(),pressedValue.Length());
-
-                icon = iconTemp;
-                iconPressed = pressedTemp;
-            }
-        }
-        delete cenRep;
-    }
-    return status;
+    FUNC_LOG;
+    XQCentralRepositorySettingsKey crKey(KVideoCollectionViewCenrepUid, key);
+    XQSettingsManager mgr;
+    QVariant value = mgr.readItemValue(crKey, XQSettingsManager::TypeString);
+    return value.toString();
 }
 
 // ---------------------------------------------------------------------------
-// getServiceUriString
+// getCenRepIntValue
 // ---------------------------------------------------------------------------
 //
-QString VideoCollectionViewUtils::getServiceUriString()
+int VideoCollectionViewUtils::getCenRepIntValue(int key)
 {
-	FUNC_LOG;
-    QString uri;
-    CRepository *cenRep = 0;
-    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-    if(cenRep)
+    FUNC_LOG;
+    XQCentralRepositorySettingsKey crKey(KVideoCollectionViewCenrepUid, key);
+    XQSettingsManager mgr;
+    QVariant value = mgr.readItemValue(crKey, XQSettingsManager::TypeInt);
+    int uid = -1;
+    if(value.isValid())
     {
-        TBuf<255> uriValue;
-        if(cenRep->Get(KVideoCollectionViewCenrepServiceItem1Url, uriValue) == KErrNone)
-        {
-            QString uriTemp((QChar*)uriValue.Ptr(),uriValue.Length());
-            uri = uriTemp;
-        }
-        delete cenRep;
+        uid = value.toInt();
     }
-    return uri;
+    return uid;
 }
 
 // ---------------------------------------------------------------------------
@@ -421,7 +398,7 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             format = hbTrId("txt_videos_info_unable_to_delete_1_it_is_current");
             if(additional.isValid())
             {
-                msg = format.arg(additional.toString());
+                msg = HbParameterLengthLimiter(format).arg(additional.toString());
             }
         break;
         case VideoCollectionCommon::statusMultipleDeleteFail:

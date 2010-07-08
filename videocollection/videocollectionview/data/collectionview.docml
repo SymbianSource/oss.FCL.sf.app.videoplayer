@@ -76,19 +76,11 @@
                             <bool name="visible" value="FALSE"/>
                             <string locid="txt_videos_info_no_videos" name="plainText" value="(No videos)"/>
                         </widget>
-                        <widget name="vc:mHintTextLabel" type="HbLabel">
-                            <enums name="textWrapping" value="TextWordWrap"/>
-                            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                            <sizehint height="6un" type="PREFERRED"/>
-                            <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
-                            <bool name="visible" value="FALSE"/>
-                            <string locid="txt_videos_info_to_get_videos_visit_ovi_store" name="plainText" value="To get videos, visit OVI store"/>
-                        </widget>
                         <widget name="vc:mHintButtonLayout" type="HbWidget">
                             <widget name="vc:mHintButton" type="HbPushButton">
                                 <real name="z" value="1"/>
-                                <sizehint type="PREFERRED" width="12un"/>
-                                <sizehint height="6un" type="MAXIMUM" width="12un"/>
+                                <sizehint type="PREFERRED"/>
+                                <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
                                 <bool name="visible" value="FALSE"/>
                                 <string name="state" value="normal"/>
                             </widget>
@@ -106,7 +98,6 @@
                         <layout orientation="Vertical" type="linear">
                             <stretchitem stretchfactor="1"/>
                             <linearitem itemname="vc:mNoVideosLabel"/>
-                            <linearitem itemname="vc:mHintTextLabel"/>
                             <linearitem itemname="vc:mHintButtonLayout"/>
                             <stretchitem stretchfactor="1"/>
                         </layout>

@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/layout" >
-        <file alias="collectionview.docml">collectionview.docml</file>
+        <file alias="collectionview.docml">collectionview.docml.bin</file>
         <file alias="videolistselectiondialog.docml">videolistselectiondialog.docml</file>
     </qresource>
     <qresource prefix="/style" >

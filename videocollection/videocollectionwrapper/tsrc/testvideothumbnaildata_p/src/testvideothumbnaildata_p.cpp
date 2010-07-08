@@ -788,35 +788,6 @@ void TestVideoThumbnailData_p::testRemoveThumbnail()
 }
 
 // ---------------------------------------------------------------------------
-// testModelChangedSlot
-// ---------------------------------------------------------------------------
-//
-void TestVideoThumbnailData_p::testModelChangedSlot()
-{
-    // Empty list.
-    init();
-    mTestObject->emitModelChanged();
-    QVERIFY(mTestObject->mCurrentFetchIndex == 0);
-    QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
-    QVERIFY(mTestObject->mCurrentBackgroundFetchCount == 0);
-    QVERIFY(mTestObject->mBgFetchTimer->isActive() == false);
-    cleanup();
-
-    // THUMBNAIL_BACKGROUND_FETCH_AMOUNT items in model and fetch index at 0
-    init();
-    for(int i = 0; i < THUMBNAIL_BACKGROUND_FETCH_AMOUNT; i++)
-    {
-        mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
-    }
-    mTestObject->emitModelChanged();
-    QVERIFY(mTestObject->mCurrentFetchIndex == 0);
-    QCOMPARE(VideoThumbnailFetcher::mRequests.count(), THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2);
-    QVERIFY(mTestObject->mCurrentBackgroundFetchCount == THUMBNAIL_BACKGROUND_FETCH_AMOUNT);
-    QVERIFY(mTestObject->mBgFetchTimer->isActive() == false);
-    cleanup();
-}
-
-// ---------------------------------------------------------------------------
 // testStartBackgroundFetching
 // ---------------------------------------------------------------------------
 //

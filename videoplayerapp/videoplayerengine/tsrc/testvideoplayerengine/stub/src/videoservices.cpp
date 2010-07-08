@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#4 %
+// Version : %version: da1mmcf#5 %
 
 #include "videoplayerengine.h"
 #include "videoservices.h"
@@ -32,7 +32,7 @@ int  VideoServices::mReferenceCount = 0;
 // VideoServices::instance()
 // -----------------------------------------------------------------------------
 //
-VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
+VideoServices* VideoServices::instance( VideoPlayerEngine* engine )
 {
     MPX_ENTER_EXIT(_L("VideoServices::instance()"));
     
@@ -67,15 +67,15 @@ void VideoServices::decreaseReferenceCount()
 // VideoServices()
 // ----------------------------------------------------------------------------
 //
-VideoServices::VideoServices(QVideoPlayerEngine* engine) 
+VideoServices::VideoServices( VideoPlayerEngine* engine ) 
     : mCurrentService(VideoServices::ENoService)
     , mFetchSelected( false )
 {
     MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
     
-    mServiceUriFetch = new VideoServiceUriFetch(this);
-    mServicePlay     = new VideoServicePlay(this, engine);
-    mServiceView     = new VideoServiceView(this, engine);
+    mServiceUriFetch = new VideoServiceUriFetch( this );
+    mServicePlay     = new VideoServicePlay( this, engine );
+    mServiceView     = new VideoServiceView( this, engine );
 }
 
 // ----------------------------------------------------------------------------
@@ -86,9 +86,9 @@ VideoServices::~VideoServices()
 {
     MPX_ENTER_EXIT(_L("VideoServices::~VideoServices()"));
     
-	delete mServiceUriFetch;
-	delete mServicePlay;
-	delete mServiceView;
+    delete mServiceUriFetch;
+    delete mServicePlay;
+    delete mServiceView;
 }
 
 
@@ -99,7 +99,7 @@ VideoServices::~VideoServices()
 VideoServices::TVideoService VideoServices::currentService()
 {
     MPX_DEBUG(_L("VideoServices::currentService() ret %d"), mCurrentService);
-	return mCurrentService;
+    return mCurrentService;
 }
 
 
@@ -110,6 +110,6 @@ VideoServices::TVideoService VideoServices::currentService()
 void VideoServices::setCurrentService( VideoServices::TVideoService service )
 {
     MPX_DEBUG(_L("VideoServices::setCurrentService(%d)"), service);
-	mCurrentService = service;
+    mCurrentService = service;
 }
 

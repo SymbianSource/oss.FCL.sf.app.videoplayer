@@ -31,6 +31,7 @@
 #include <hbapplication.h>
 #include <hbmarqueeitem.h>
 #include <hbstackedwidget.h>
+#include <hbparameterlengthlimiter.h>
 
 #include "videodetailslabel.h"
 #include "hbmessagebox.h"
@@ -623,14 +624,14 @@ void TestVideoFileDetails::testDeleteVideoSlot()
     QString expectedText = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
             display.first());
     deleteAction->trigger();
-    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 0); // Yes selected
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(int)), HbMessageBox::Yes); // Yes selected
     QCOMPARE( mDummyModel->dataAccessCount(), 3 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), expected.row() );
     QCOMPARE( HbMessageBox::mLatestTxt, expectedText );
     
     deleteAction->trigger();
-    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 1); // No selected
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(int)), HbMessageBox::No); // No selected
     QCOMPARE( mDummyModel->dataAccessCount(), 4 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), expected.row() );
@@ -639,7 +640,7 @@ void TestVideoFileDetails::testDeleteVideoSlot()
 
     mDummyModel->reset();
     deleteAction->trigger();
-    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(HbAction *)), 1); // No selected
+    msgBox->emitDialogFinished(mPlugin, SLOT(deleteVideoDialogFinished(int)), HbMessageBox::No); // No selected
     QCOMPARE( mDummyModel->dataAccessCount(), 1 );
     QVERIFY( mDummyModel->lastIndex() == expected );
     QCOMPARE( mDummyModel->deleteFileIndex(), -1 ); // verify that no file was deleted.
@@ -720,7 +721,8 @@ void TestVideoFileDetails::testHandleErrorSlot()
     QString txt = "testdata";
     additional = txt;
     emit testErrorSignal( VideoCollectionCommon::statusSingleDeleteFail , additional);
-    QCOMPARE(HbMessageBox::mLatestTxt, hbTrId("txt_videos_info_unable_to_delete_1_it_is_current").arg(txt));
+    QString expected = HbParameterLengthLimiter(hbTrId("txt_videos_info_unable_to_delete_1_it_is_current")).arg(txt);
+    QCOMPARE(HbMessageBox::mLatestTxt, expected);
     
     HbMessageBox::mLatestTxt = "";
     // VideoCollectionCommon::statusMultipleDeleteFail
@@ -731,7 +733,6 @@ void TestVideoFileDetails::testHandleErrorSlot()
     
     cleanup();
 }
-
 
 // ---------------------------------------------------------------------------
 // Slot: test for the testThumbnailReadySlot

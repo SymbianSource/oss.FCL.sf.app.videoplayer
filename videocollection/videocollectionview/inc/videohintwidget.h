@@ -59,9 +59,8 @@ public:
      * Method creates colleciton wrapper, grid and list views,
      * layout and activates correct view based on the current orientation
      *
-     * @return int 0 initialization ok, < 0 if fails.
      */
-    int initialize();
+    void initialize();
     
     /**
      * Sets the level where the hint is correctly. Hint displays differently in
@@ -108,21 +107,6 @@ private:
      * Pointer to the XML UI (DocML) loader, not owned
      */
     VideoCollectionUiLoader     *mUiLoader;
-    
-    /**
-     * Service icon resource string.
-     */
-    QString                     mServiceIconString;
-    
-    /**
-     * Service icon pressed resource string.
-     */
-    QString                     mServiceIconPressedString;
-    
-    /**
-     * Service icon.
-     */
-    HbIcon                      *mServiceIcon;
 
     /**
      * Current hint level.
@@ -138,7 +122,11 @@ private:
      * true if widget has been activated.
      */
     bool mActivated;
-
+    
+    /**
+     * Localized text for the service button. 
+     */
+    QString mHintText;
 };
 
 #endif // VIDEOHINTWIDGET_H

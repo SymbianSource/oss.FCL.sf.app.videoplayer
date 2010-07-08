@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 
 
@@ -42,7 +42,7 @@
 
 #include "mpxvideoplayerappuiengine.h"
 #include "mpxvideoplayerconstants.h"
-#include "mpxvideoplaybackwrapper.h"
+#include "videoplaybackwrapper.h"
 #include "mpxhbvideocommondefs.h"
 
 #include "mpxvideo_debug.h"
@@ -51,7 +51,7 @@
 //   CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine
 // -------------------------------------------------------------------------------------------------
 //
-CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine( QMpxVideoPlaybackWrapper* aWrapper )
+CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine( VideoPlaybackWrapper* aWrapper )
     : iPlaybackUtility( NULL ),
       iCollectionUtility( NULL ),
       iRecognizer( NULL ),
@@ -67,7 +67,7 @@ CMpxVideoPlayerAppUiEngine::CMpxVideoPlayerAppUiEngine( QMpxVideoPlaybackWrapper
 //   CMpxVideoPlayerAppUiEngine::NewL
 // -------------------------------------------------------------------------------------------------
 //
-CMpxVideoPlayerAppUiEngine* CMpxVideoPlayerAppUiEngine::NewL( QMpxVideoPlaybackWrapper* aWrapper )
+CMpxVideoPlayerAppUiEngine* CMpxVideoPlayerAppUiEngine::NewL( VideoPlaybackWrapper* aWrapper )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::NewL()"));
 

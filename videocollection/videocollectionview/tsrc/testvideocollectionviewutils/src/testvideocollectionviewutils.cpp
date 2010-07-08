@@ -16,6 +16,7 @@
 */
 
 #include <qapplication.h>
+#include "xqsettingsmanagerstub.h"
 #include <vcxmyvideosdefs.h>
 #include "centralrepository.h"
 #include "testvideocollectionviewutils.h"
@@ -518,60 +519,21 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
 }
 
 // -----------------------------------------------------------------------------
-// testGetServiceIconStrings
+// testGetCenRepStringValue
 // -----------------------------------------------------------------------------
 //
-void TestVideoVideoCollectionViewUtils::testGetServiceIconStrings()
-{
-    VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
-    CRepository::setNewLLeave(true);
-    _LIT(KExpectedTDesValue, "expected");
-    CRepository::setTDesValue(KExpectedTDesValue());
-    QString expected((QChar*)KExpectedTDesValue().Ptr(),KExpectedTDesValue().Length());
+void TestVideoVideoCollectionViewUtils::testGetCenRepStringValue()
+{  
     
-    QString icon;
-    QString pressed;
-    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
-    QVERIFY(icon.isNull());
-    QVERIFY(pressed.isNull());
-    
-    CRepository::setNewLLeave(false);
-    CRepository::setGetFail(0);
-    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
-    QVERIFY(icon.isNull());
-    QVERIFY(pressed.isNull());
-    
-    CRepository::setGetFail(1);
-    QVERIFY(testObject.getServiceIconStrings(icon, pressed) < 0);
-    QVERIFY(icon.isNull());
-    QVERIFY(pressed.isNull());
-    
-    CRepository::setGetFail(255);
-    QVERIFY(testObject.getServiceIconStrings(icon, pressed) == 0);
-    QCOMPARE(icon, expected);
-    QCOMPARE(pressed, expected);
 }
 
 // -----------------------------------------------------------------------------
-// testGetServiceIconStrings
+// testGetCenRepIntValue
 // -----------------------------------------------------------------------------
 //
-void TestVideoVideoCollectionViewUtils::testGetServiceUriString()
-{
-     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
-    CRepository::setNewLLeave(true);
-    _LIT(KExpectedTDesValue, "expected");
-    CRepository::setTDesValue(KExpectedTDesValue());
-    QString expected((QChar*)KExpectedTDesValue().Ptr(),KExpectedTDesValue().Length());
+void TestVideoVideoCollectionViewUtils::testGetCenRepIntValue()
+{   
     
-    QVERIFY(testObject.getServiceUriString().isNull());
-    
-    CRepository::setNewLLeave(false);
-    CRepository::setGetFail(0);
-    QVERIFY(testObject.getServiceUriString().isNull());
-    
-    CRepository::setGetFail(255);
-    QCOMPARE(testObject.getServiceUriString(), expected);
 }
 
 // -----------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 56 %
+// Version : %version: 58 %
 
 #include <qmap.h>
 #include <vcxmyvideosdefs.h>
@@ -86,6 +86,17 @@ public:
     {
         VideoListWidget::longPressedSlot(item, point);
     }
+    
+    void callRowsInserted(const QModelIndex &parent, int start, int end)
+    {
+        VideoListWidget::rowsInserted(parent, start, end);
+    }
+
+    
+    void callRowsRemoved(const QModelIndex &parent, int start, int end)
+    {
+        VideoListWidget::rowsRemoved(parent, start, end);
+    }    
 };
 
 // ---------------------------------------------------------------------------
@@ -966,7 +977,7 @@ void TestListWidget::testDeleteItemSlot()
     // messagebox question returns false
     HbMessageBoxData::mQuestionReturnValue = false;
     emit testSignal();
-    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(HbAction *)), 1);
+    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(int)), HbMessageBox::No);
     QVERIFY(VideoListDataModelData::dataAccessCount() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     QVERIFY(!VideoSortFilterProxyModelData::mLastIndex.isValid());
@@ -980,7 +991,7 @@ void TestListWidget::testDeleteItemSlot()
     VideoSortFilterProxyModelData::mDeleteItemsFails = false;
     HbMessageBoxData::mQuestionReturnValue = true;
     emit testSignal();
-    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(HbAction *)), 0);
+    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(int)), HbMessageBox::Yes);
     QVERIFY(VideoListDataModelData::dataAccessCount() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.row() == 0);
@@ -1314,7 +1325,7 @@ void TestListWidget::testRemoveCollectionSlot()
     // valid data 
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, "test");
     emit testSignal();
-    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(HbAction *)), 0);
+    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(int)), HbMessageBox::Yes);
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.isValid());
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.row() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
@@ -1324,7 +1335,7 @@ void TestListWidget::testRemoveCollectionSlot()
     HbMessageBoxData::mLatestTxt = "";
     HbMessageBoxData::mQuestionReturnValue = false;
     emit testSignal();
-    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(HbAction *)), 1);
+    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(int)), HbMessageBox::No);
     QVERIFY(!VideoSortFilterProxyModelData::mLastIndex.isValid());
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     
@@ -1434,7 +1445,8 @@ void TestListWidget::testScrollingEndedSlot()
     // no visible items
     HbListView::mVisibleItems.clear();
     emit testSignal();
-    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 0);
+    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);
+    QVERIFY(VideoThumbnailTestData::mFetchIndex == 0);
     QVERIFY(!mTestWidget->mScrollPositionTimer->isActive());
     
     // setup few "visible" items and make sure item count match at thumbnail data
@@ -1450,7 +1462,7 @@ void TestListWidget::testScrollingEndedSlot()
     
     // Test
     emit testSignal();
-    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);
+    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 2);
     QVERIFY(!mTestWidget->mScrollPositionTimer->isActive());
 
     // Test again when timer is null.
@@ -1501,7 +1513,56 @@ void TestListWidget::testScrollPositionTimerSlot()
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollPositionTimerSlot()));
     emit testSignal();
     disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollPositionTimerSlot()));
-        
+}
+
+void TestListWidget::testRowsInsertedSlot()
+{
+    VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
+    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+
+    mTestWidget->initialize(*model);
+    
+    // setup few "visible" items to trigger the fetch
+    int count = 10;
+    setRowCount(count);
+    HbAbstractViewItem *item = 0;
+    for(int i = 0; i < count; ++i)
+    {
+        item = new HbAbstractViewItem();
+        item->mModelIndex = model->index(i, 0, QModelIndex());
+        HbListView::mVisibleItems.append(item);
+    }
+    
+    // Test
+    QModelIndex parent;
+    mTestWidget->callRowsInserted(parent, 0, 0);
+    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);
+    QVERIFY(!mTestWidget->mScrollPositionTimer->isActive());
+}
+
+void TestListWidget::testRowsRemovedSlot()
+{
+    VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
+    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+
+    mTestWidget->initialize(*model);
+    
+    // setup few "visible" items to trigger the fetch
+    int count = 10;
+    setRowCount(count);
+    HbAbstractViewItem *item = 0;
+    for(int i = 0; i < count; ++i)
+    {
+        item = new HbAbstractViewItem();
+        item->mModelIndex = model->index(i, 0, QModelIndex());
+        HbListView::mVisibleItems.append(item);
+    }
+    
+    // Test
+    QModelIndex parent;
+    mTestWidget->callRowsRemoved(parent, 0, 0);
+    QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);
+    QVERIFY(!mTestWidget->mScrollPositionTimer->isActive());
 }
 
 // end of file

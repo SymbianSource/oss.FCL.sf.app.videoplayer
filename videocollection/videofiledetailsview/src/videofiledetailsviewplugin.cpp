@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 76.1.1 %
+// Version : %version: 76.1.5 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -32,6 +32,7 @@
 #include <hblistwidget.h>
 #include <hblistwidgetitem.h>
 #include <hblistviewitem.h>
+#include <hbparameterlengthlimiter.h>
 #include <cmath>
 #include <thumbnailmanager_qt.h>
 #include <shareui.h>
@@ -113,10 +114,10 @@ void VideoFileDetailsViewPlugin::createView()
 	mActivated = false;
 
 	bool ok = false;
-	
+
 	//Load the details view docml first
 	mLoader.load(VIDEO_DETAILS_DOCML, &ok);
-	
+
 	if(!ok)
 	{
 	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load docml.");
@@ -125,7 +126,7 @@ void VideoFileDetailsViewPlugin::createView()
 
 	//Load portrait section by default as only vertical orientation is currently supported by videoplayer
 	mLoader.load(VIDEO_DETAILS_DOCML, VIDEO_DETAILS_PORTRAIT, &ok);
-	
+
 	if(!ok)
 	{
 	    ERROR(-1, "VideoFileDetailsViewPlugin::createView() failed to load portrait view.");
@@ -176,7 +177,7 @@ void VideoFileDetailsViewPlugin::createView()
 	mThumbLabel = new VideoDetailsLabel;
 	mThumbLabel->setAlignment(Qt::AlignCenter);
 	mThumbLabel->setObjectName(VIDEO_DETAILS_OBJECT_NAME_THUMBLABEL);
-	
+
 	connect(mThumbLabel, SIGNAL(clicked(bool)), this, SLOT(startPlaybackSlot()));
 
 	thumbWidget->addWidget(mThumbLabel);
@@ -211,7 +212,7 @@ void VideoFileDetailsViewPlugin::createView()
 	// Create navigation keys.
 	mNavKeyBackAction = new HbAction(Hb::BackNaviAction);
 	mNavKeyBackAction->setObjectName(VIDEO_DETAILS_OBJECT_NAME_NAVKEY_BACK);
-	
+
 	if (!mThumbnailManager)
 	{
 		mThumbnailManager = new ThumbnailManager();
@@ -219,14 +220,14 @@ void VideoFileDetailsViewPlugin::createView()
 
 	connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap,void*,int,int)),
 			this, SLOT(thumbnailReadySlot(QPixmap,void*,int,int)));
-	
+
     HbListWidget* list = findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET);
     if(!list)
     {
         ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details list widget.");
         return;
     }
-    
+
     list->setEnabledAnimations(HbAbstractItemView::None);
 }
 
@@ -250,10 +251,10 @@ void VideoFileDetailsViewPlugin::destroyView()
 
     delete mNavKeyBackAction;
     mNavKeyBackAction = 0;
-    
+
     delete mThumbnailManager;
     mThumbnailManager = 0;
-    
+
     disconnect();
     mLoader.reset();
 }
@@ -314,7 +315,7 @@ void VideoFileDetailsViewPlugin::activateView()
 		if (mIsService && mVideoServices)
 		{
 		    service = mVideoServices->currentService();
-		    
+
             HbMainWindow *mainWnd = hbInstance->allMainWindows().value(0);
             mainWnd->currentView()->setTitle(mVideoServices->contextTitle());
 		}
@@ -325,18 +326,19 @@ void VideoFileDetailsViewPlugin::activateView()
 		    ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details button.");
 		    return;
 		}
-				
+
 	    // Fix the size of the thumbnail, as that needs to be in 16:9
 	    qreal width = button->size().width();
 	    qreal height = width * 9 / 16;
-	    
+
 	    HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
 	    thumbWidget->setPreferredWidth(width);
 	    thumbWidget->setPreferredHeight(height);
-	    
+
 		if (service == VideoServices::EUriFetcher)
 		{
-            button->setText(hbTrId("txt_videos_button_attach"));
+			HbIcon icon = HbIcon("qtg_mono_attach");
+			button->setIcon(icon);
 
             connect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
             connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
@@ -344,7 +346,9 @@ void VideoFileDetailsViewPlugin::activateView()
 		else
 		{
 			connect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()));
-			button->setText(hbTrId("txt_videos_opt_share"));
+
+			HbIcon icon = HbIcon("qtg_mono_share");
+			button->setIcon(icon);
     	}
 
         connect(mainWnd,
@@ -494,14 +498,14 @@ void VideoFileDetailsViewPlugin::fullDetailsReadySlot(QVariant& variant)
     int detailCount = sizeof(VideoDetailLabelKeys) / sizeof(int);
 
     QMap<QString, QVariant> metadata = variant.toMap();
-    
+
     HbListWidget* list = findWidget<HbListWidget>(VIDEO_DETAILS_LISTWIDGET);
     if(!list)
     {
         ERROR(-1, "VideoFileDetailsViewPlugin::activateView() failed to load details list widget.");
         return;
     }
-    
+
     if(list->count())
     {
         list->clear();
@@ -565,7 +569,7 @@ void VideoFileDetailsViewPlugin::sendVideoSlot()
 {
 	FUNC_LOG;
 //	HbMessageBox::information(tr("Not implemented yet"));
-	
+
     if(mVideoId != TMPXItemId::InvalidId())
     {
         ShareUi dialog;
@@ -594,13 +598,14 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
 
         if (variant.isValid())
         {
-            QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
-			   variant.toString());
+        	QString text = HbParameterLengthLimiter(hbTrId("txt_videos_info_do_you_want_to_delete_1")).
+        			arg(variant.toString());
 
             HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
             messageBox->setAttribute(Qt::WA_DeleteOnClose);
+            messageBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
             messageBox->setObjectName(VIDEO_DETAILS_OBJECT_NAME_DELETE_VIDEO);
-            messageBox->open(this, SLOT(deleteVideoDialogFinished(HbAction *)));
+            messageBox->open(this, SLOT(deleteVideoDialogFinished(int)));
         }
     }
 }
@@ -609,12 +614,11 @@ void VideoFileDetailsViewPlugin::deleteVideoSlot()
 // deleteVideoDialogFinished
 // ---------------------------------------------------------------------------
 //
-void VideoFileDetailsViewPlugin::deleteVideoDialogFinished(HbAction *action)
+void VideoFileDetailsViewPlugin::deleteVideoDialogFinished(int action)
 {
     FUNC_LOG;
-    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
     QModelIndex modelIndex = mModel->indexOfId(mVideoId);
-    if(action == dlg->actions().at(0) && modelIndex.isValid()) 
+    if(action == HbMessageBox::Yes && modelIndex.isValid())
     {
         deleteItem(modelIndex);
     }
@@ -666,7 +670,7 @@ void VideoFileDetailsViewPlugin::handleErrorSlot(int errorCode, QVariant &additi
         QString format = hbTrId("txt_videos_info_unable_to_delete_1_it_is_current");
         if(additional.isValid())
         {
-           msg = format.arg(additional.toString());
+           msg = HbParameterLengthLimiter(format).arg(additional.toString());
         }
     }
     if(msg.count() > 0)
@@ -690,7 +694,14 @@ void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
     Q_UNUSED(clientData);
     Q_UNUSED(id);
 
-	QSize size(mThumbLabel->size().toSize());
+	HbStackedWidget* thumbWidget = findWidget<HbStackedWidget>(VIDEO_DETAILS_THUMBNAIL);
+	if(!thumbWidget)
+	{
+	    ERROR(-1, "VideoFileDetailsViewPlugin::thumbnailReadySlot() failed to load thumbnail widget.");
+	    return;
+	}
+
+	QSize size(thumbWidget->size().toSize());
 
 	if (!errorCode)
 	{
@@ -709,7 +720,7 @@ void VideoFileDetailsViewPlugin::thumbnailReadySlot(QPixmap pixmap,
 		}
 
 		int difference(0);
-		QRect rect = mThumbLabel->rect().toRect();
+		QRect rect = thumbWidget->rect().toRect();
 
 		if(sourceImage.width() > size.width())
 		{
@@ -787,7 +798,7 @@ const QPixmap &VideoFileDetailsViewPlugin::playIcon()
     {
         return mPlayIcon;
     }
-    
+
     // Compose the icon.
     HbIcon play =        HbIcon("qtg_mono_play");
     HbIcon topLeft =     HbIcon("qtg_fr_popup_trans_tl");
@@ -802,54 +813,54 @@ const QPixmap &VideoFileDetailsViewPlugin::playIcon()
 
     int width = topLeft.width() + top.width() + topRight.width();
     int height = topLeft.height() + center.height() + bottomLeft.height();
-    
+
     mPlayIcon = QPixmap(width, height);
-    
+
     QPainter painter(&mPlayIcon);
     painter.fillRect(mPlayIcon.rect(), Qt::white);
-    
+
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    
+
     int x = 0;
     int y = 0;
 
     // Draw top
     painter.drawPixmap(QPoint(x, y), topLeft.pixmap());
     x += left.width();
-    
+
     painter.drawPixmap(QPoint(x, y), top.pixmap());
     x += top.width();
 
     painter.drawPixmap(QPoint(x, y), topRight.pixmap());
     y += top.height();
-    
+
     // Draw center
     x = 0;
     painter.drawPixmap(QPoint(x, y), left.pixmap());
     x += left.width();
-    
+
     painter.drawPixmap(QPoint(x, y), center.pixmap());
     x += center.width();
 
     painter.drawPixmap(QPoint(x, y), right.pixmap());
     y += center.height();
-    
+
     // Draw bottom
     x = 0;
     painter.drawPixmap(QPoint(x, y), bottomLeft.pixmap());
     x += left.width();
-    
+
     painter.drawPixmap(QPoint(x, y), bottom.pixmap());
     x += top.width();
-    
+
     painter.drawPixmap(QPoint(x, y), bottomRight.pixmap());
-    
+
     // Draw play icon
     play.setSize(mPlayIcon.size());
     play.setColor(Qt::white);
     painter.drawPixmap(mPlayIcon.rect(), play.pixmap());
     painter.end();
-    
+
     return mPlayIcon;
 }
 

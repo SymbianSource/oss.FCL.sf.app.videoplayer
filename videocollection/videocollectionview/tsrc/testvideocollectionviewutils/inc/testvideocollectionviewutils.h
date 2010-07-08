@@ -61,15 +61,15 @@ private slots:
     void testLoadSortingValues();
     
     /**
-     * verifies getServiceIconStrings
+     * verifies getCenRepStringValue
      */
-    void testGetServiceIconStrings();
-    
+    void testGetCenRepStringValue();
+
     /**
-     * verifies getServiceUriString
+     * verifies getCenRepIntValue
      */
-    void testGetServiceUriString();
-    
+    void testGetCenRepIntValue();
+
     /**
      * Verifies initListView
      */

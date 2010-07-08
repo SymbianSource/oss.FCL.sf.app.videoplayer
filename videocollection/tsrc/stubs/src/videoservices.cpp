@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: %
+
 #include <qobject.h>
 #include "videoplayerappexport.h"
 #include "videoservices.h"
@@ -24,27 +26,29 @@
 
 VideoServices* g_Instance = 0;
 
-VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
+VideoServices* VideoServices::instance( VideoPlayerEngine* engine )
 {
     static VideoServices* g_Instance = 0;
     
-    if(!g_Instance)
+    if ( ! g_Instance )
     {
-        g_Instance = new VideoServices(engine);
+        g_Instance = new VideoServices( engine );
     }
-    else if(engine && !g_Instance->engine())
+    else if ( engine && !g_Instance->engine() )
     {
-    	g_Instance->setEngine(engine);
+    	g_Instance->setEngine( engine );
     }
+    
     g_Instance->mReferenceCount++;
+    
     return g_Instance;
 }
 
 void VideoServices::decreaseReferenceCount()
 {
-    if(g_Instance)
+    if ( g_Instance )
     {
-        if(--g_Instance->mReferenceCount == 0)
+        if ( --g_Instance->mReferenceCount == 0 )
         {
             delete g_Instance;
             g_Instance = NULL;
@@ -52,26 +56,26 @@ void VideoServices::decreaseReferenceCount()
     }
 }
 
-void VideoServices::setEngine(QVideoPlayerEngine* engine)
+void VideoServices::setEngine( VideoPlayerEngine* engine )
 {
     Q_UNUSED(engine);
     // not stubbed
 }
 
-QVideoPlayerEngine* VideoServices::engine()
+VideoPlayerEngine* VideoServices::engine()
 {
     // not stubbed
     return 0;
 }
 
-VideoServices::VideoServices(QVideoPlayerEngine* engine):
-    mReferenceCount(0),
-    mEngine(engine),
-    mCurrentService(VideoServices::ENoService),
-    mSortRole(0)
+VideoServices::VideoServices( VideoPlayerEngine* engine )
+    : mReferenceCount( 0 )
+    , mEngine( engine )
+    , mCurrentService( VideoServices::ENoService )
+    , mSortRole( 0 )
 {
-    mServiceUriFetch = new VideoServiceUriFetch(this, QLatin1String("TestListView"));
-    mServiceBrowse = new VideoServiceBrowse(this, QLatin1String("TestListView"));
+    mServiceUriFetch = new VideoServiceUriFetch( this, QLatin1String("TestListView") );
+    mServiceBrowse = new VideoServiceBrowse( this, QLatin1String("TestListView") );
 }
 
 VideoServices::~VideoServices()
@@ -89,7 +93,7 @@ int VideoServices::getBrowseCategory() const
 {
     int category = 0;
     
-    if (mServiceBrowse)
+    if ( mServiceBrowse )
     {
         category = mServiceBrowse->getBrowseCategory();
     }
@@ -97,7 +101,7 @@ int VideoServices::getBrowseCategory() const
     return category;
 }
 
-void VideoServices::setCurrentService(VideoServices::TVideoService service)
+void VideoServices::setCurrentService( VideoServices::TVideoService service )
 {
 	mCurrentService = service;
 }
@@ -114,7 +118,7 @@ int VideoServices::sortRole() const
     return mSortRole;
 }
 
-void VideoServices::itemSelected(const QString& item)
+void VideoServices::itemSelected( const QString& item )
 {
     Q_UNUSED(item);
     // not stubbed

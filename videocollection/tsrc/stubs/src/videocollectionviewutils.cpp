@@ -20,7 +20,6 @@
 
 int VideoCollectionViewUtilsData::mLastError = 0;
 bool VideoCollectionViewUtilsData::mLoadSortingValuesFails = false;
-bool VideoCollectionViewUtilsData::mGetServiceIconStringsFails = false;
 int VideoCollectionViewUtilsData::mVideoSortRole = -1;
 int VideoCollectionViewUtilsData::mCollectionSortRole = -1;
 Qt::SortOrder VideoCollectionViewUtilsData::mVideoSortOrder = Qt::AscendingOrder;
@@ -31,6 +30,8 @@ QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
 VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelVideos;
 TMPXItemId VideoCollectionViewUtilsData::mActivityCollectionId = TMPXItemId::InvalidId();
 QString VideoCollectionViewUtilsData::mActivityCollectionName = "";
+QList<QString> VideoCollectionViewUtilsData::mCenRepStringValues;
+QList<int> VideoCollectionViewUtilsData::mCenRepIntValues;
 
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
@@ -101,24 +102,24 @@ int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order,
     return 0;
 }
 
-int VideoCollectionViewUtils::getServiceIconStrings(QString& icon, 
-    QString& iconPressed)
+QString VideoCollectionViewUtils::getCenRepStringValue(int key)
 {
-    if (VideoCollectionViewUtilsData::mGetServiceIconStringsFails)
+    Q_UNUSED(key);
+    if(VideoCollectionViewUtilsData::mCenRepStringValues.count() > 0)
     {
-        return -1;
+        return VideoCollectionViewUtilsData::mCenRepStringValues.takeFirst();;    
     }
-    
-    icon = VideoCollectionViewUtilsData::mIconString;
-    iconPressed = VideoCollectionViewUtilsData::mPressedString;
-    
-    return 0;
+    return -1;
 }
 
-QString VideoCollectionViewUtils::getServiceUriString()
+int VideoCollectionViewUtils::getCenRepIntValue(int key)
 {
-    // not stubbed
-    return QString();
+    Q_UNUSED(key);
+    if(VideoCollectionViewUtilsData::mCenRepIntValues.count() > 0)
+    {
+        return VideoCollectionViewUtilsData::mCenRepIntValues.takeFirst();;    
+    }
+    return -1;
 }
 
 void VideoCollectionViewUtils::initListView(HbListView *view)

@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description:  Videoplayerengine test class implementation.
+* Description:  VideoAppUiEngine test class implementation.
 *
 */
 
-// Version : %version:  %
+// Version : %version:  3 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -35,7 +35,7 @@
 #include "stub/inc/hbinstance.h"
 #include "mpxhbvideocommondefs.h"
 #include "testvideoappuiengine.h"
-#include "../stub/inc/mpxvideoplaybackwrapper.h"
+#include "../stub/inc/videoplaybackwrapper.h"
 #define private public
 #include "mpxvideoplayerappuiengine.h"
 #undef private
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 
 TestVideoAppUiEngine::TestVideoAppUiEngine()
-	: mTestObject(0)
+    : mTestObject( 0 )
 {          
     MPX_DEBUG(_L("TestVideoAppUiEngine::TestVideoAppUiEngine()"));  
 }
@@ -77,8 +77,7 @@ TestVideoAppUiEngine::~TestVideoAppUiEngine()
     mTestObject = 0;
     
     delete mPlaybackWrapper;
-    mPlaybackWrapper = 0;
-        
+    mPlaybackWrapper = 0;        
     
     TestUtilities* utility = reinterpret_cast<TestUtilities*>( UserSvr::DllTls(12345678) ); 
     utility->iPlaybackUtility->RemoveTestObserverL();
@@ -92,17 +91,17 @@ void TestVideoAppUiEngine::init()
     
     mTestResult = false;    
         
-    mPlaybackWrapper = new QMpxVideoPlaybackWrapper();
+    mPlaybackWrapper = new VideoPlaybackWrapper();
         
     TRAPD( createErr, mTestObject = CMpxVideoPlayerAppUiEngine::NewL( mPlaybackWrapper ) );
     
-    QVERIFY( !createErr );
+    QVERIFY( ! createErr );
     
     QVERIFY( mTestObject->iCollectionUtility );
     
     TRAPD( initErr, mTestObject->LateInitL() );
     
-    QVERIFY( !initErr );       
+    QVERIFY( ! initErr );       
     
     TestUtilities* utility = reinterpret_cast<TestUtilities*>( UserSvr::DllTls(12345678) );   
     
@@ -120,6 +119,7 @@ void TestVideoAppUiEngine::cleanup()
     mPlaybackWrapper = 0;
     
     TestUtilities* utility = reinterpret_cast<TestUtilities*>( UserSvr::DllTls(12345678) ); 
+
     if ( utility )
     {
         utility->iPlaybackUtility->RemoveTestObserverL();
@@ -152,21 +152,21 @@ void TestVideoAppUiEngine::testOpenFile()
     mExpectedEvent = new (ELeave) TCallbackEvent;
     mExpectedEvent->iEvent = EPlaybackUtilityInitFileName;                    
     TRAPD( openFileErr, mTestObject->OpenFileL( KTestLocalFilename ) ); 
-    QVERIFY( !openFileErr );
+    QVERIFY( ! openFileErr );
     QVERIFY( mTestResult );
     
     // Test for streaming link  
     mExpectedEvent = new (ELeave) TCallbackEvent;
     mExpectedEvent->iEvent = EPlaybackUtilityInitStreamingUrl;                    
     TRAPD( openRamFileErr, mTestObject->OpenFileL( KTestRamFilename ) );  
-    QVERIFY( !openRamFileErr );
+    QVERIFY( ! openRamFileErr );
     QVERIFY( mTestResult );  
     
     // Test for a url
     mExpectedEvent = new (ELeave) TCallbackEvent;
     mExpectedEvent->iEvent = EPlaybackUtilityInitStreamingUrl;                    
     TRAPD( openUrlErr, mTestObject->OpenFileL( KTestRtspUrl ) );  
-    QVERIFY( !openUrlErr );
+    QVERIFY( ! openUrlErr );
     QVERIFY( mTestResult );     
         
 }
@@ -186,7 +186,7 @@ void TestVideoAppUiEngine::testOpenMedia()
     mExpectedEvent->iEvent = EPlaybackUtilityInitPlaylist;
     
     TRAPD( err, mTestObject->OpenMediaL( *media ) ); 
-    QVERIFY( !err );
+    QVERIFY( ! err );
     QVERIFY( mTestResult );        
   
 }
@@ -198,13 +198,13 @@ void TestVideoAppUiEngine::testDoHandlePlaybackMessage()
     init();    
        
     QSignalSpy spy( mPlaybackWrapper, SIGNAL(handlePlaybackView(int)) );      
-    QCOMPARE(spy.count(), 0);     
+    QCOMPARE( spy.count(), 0 );     
         
     CMPXMessage* msg = CreateMpxMessageLC(TMPXPlaybackMessage::EPlayerChanged, 0, 0);    
-    TRAPD(err, mTestObject->DoHandlePlaybackMessageL( *msg ));
-    QVERIFY( !err );
+    TRAPD( err, mTestObject->DoHandlePlaybackMessageL( *msg ));
+    QVERIFY( ! err );
     
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE( spy.count(), 1 );
     spy.clear();        
     
 }
@@ -217,7 +217,7 @@ void TestVideoAppUiEngine::testPrepareCloseMpx()
     
     TRAPD( err, mTestObject->PrepareCloseMpxL() ); 
     
-    QVERIFY( !err );
+    QVERIFY( ! err );
         
 }
 
@@ -236,7 +236,7 @@ void TestVideoAppUiEngine::testDoHandleCollectionMedia()
     mExpectedEvent->iEvent = EPlaybackUtilityInitPlaylist;
     
     TRAPD( err, mTestObject->DoHandelCollectionMediaL( *media ) ); 
-    QVERIFY( !err );
+    QVERIFY( ! err );
     QVERIFY( mTestResult ); 
     
 }
@@ -248,14 +248,14 @@ void TestVideoAppUiEngine::testHandlePlaybackMessage()
     init();    
        
     QSignalSpy spy( mPlaybackWrapper, SIGNAL(handlePlaybackView(int)) );      
-    QCOMPARE(spy.count(), 0);    
+    QCOMPARE( spy.count(), 0 );    
     
     mTestObject->iUpdateSeekInfo = ETrue;
         
     CMPXMessage* msg = CreateMpxMessageLC(TMPXPlaybackMessage::EPlayerChanged, 0, 0);    
     mTestObject->HandlePlaybackMessage( msg, KErrNone );    
     
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE( spy.count(), 1 );
     spy.clear();     
     
     QVERIFY( ! mTestObject->iUpdateSeekInfo );
@@ -282,7 +282,7 @@ void TestVideoAppUiEngine::testHandleCollectionMessage()
     
     delete msg;
     msg = NULL;
-    msg = CreateMpxMessageLC(4, EMcPathChangedByOpen, EMcContainerOpened);
+    msg = CreateMpxMessageLC( 4, EMcPathChangedByOpen, EMcContainerOpened );
     mTestObject->HandleCollectionMessage( msg, KErrNone ); 
     
     QVERIFY( mTestResult );      
@@ -304,7 +304,7 @@ void TestVideoAppUiEngine::testHandleCollectionMedia()
     mExpectedEvent->iEvent = EPlaybackUtilityInitPlaylist;
     
     TRAPD( err, mTestObject->HandleCollectionMediaL( *media, KErrNone ) ); 
-    QVERIFY( !err );
+    QVERIFY( ! err );
     QVERIFY( mTestResult );     
     
 }

@@ -79,11 +79,17 @@ void HbMessageBox::open( QObject* receiver, const char* member )
 
 void HbMessageBox::emitDialogFinished( QObject* receiver, const char* member, int actionNum )
 {
-    if(connect(this, SIGNAL(finished(HbAction *)), receiver, member))
+    if(connect(this, SIGNAL(finished(int)), receiver, member))
     {
-        emit finished(mActions.value(actionNum));
-        disconnect(this, SIGNAL(finished(HbAction *)), receiver, member);
+        emit finished(actionNum);
+        disconnect(this, SIGNAL(finished(int)), receiver, member);
     }
+}
+
+void HbMessageBox::setStandardButtons(StandardButtons buttons)
+{
+    Q_UNUSED(buttons);
+	//NOP
 }
 
 void HbMessageBox::information(const QString &informationText,

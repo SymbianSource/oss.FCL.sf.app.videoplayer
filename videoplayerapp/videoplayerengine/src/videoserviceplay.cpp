@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#5 %
+// Version : %version: da1mmcf#6 %
 
 #include "videoservices.h"
 #include "videoserviceplay.h"
@@ -28,7 +28,7 @@
 // -------------------------------------------------------------------------------------------------
 // 
 VideoServicePlay::VideoServicePlay( VideoServices* parent, 
-                                    QVideoPlayerEngine* engine, 
+                                    VideoPlayerEngine* engine, 
                                     QLatin1String service )
     : XQServiceProvider( service, parent )
     , mEngine( engine )
@@ -51,7 +51,7 @@ VideoServicePlay::~VideoServicePlay()
 // setEngine()
 // -------------------------------------------------------------------------------------------------
 // 
-void VideoServicePlay::setEngine( QVideoPlayerEngine* engine )
+void VideoServicePlay::setEngine( VideoPlayerEngine* engine )
 {
     MPX_DEBUG(_L("VideoServicePlay::setEngine()"));
     mEngine = engine;

@@ -54,6 +54,11 @@ HbMessageBox::~HbMessageBox()
     }
 }
 
+void HbMessageBox::setStandardButtons(StandardButtons buttons)
+{
+	//NOP
+}
+
 void HbMessageBox::show()
 {
     HbMessageBox::mShowCallCount++;
@@ -68,10 +73,10 @@ void HbMessageBox::open( QObject* receiver, const char* member )
 
 void HbMessageBox::emitDialogFinished( QObject* receiver, const char* member, int actionNum )
 {
-    if(connect(this, SIGNAL(finished(HbAction *)), receiver, member))
+    if(connect(this, SIGNAL(finished(int)), receiver, member))
     {
-        emit finished(mActions.value(actionNum));
-        disconnect(this, SIGNAL(finished(HbAction *)), receiver, member);
+        emit finished(actionNum);
+        disconnect(this, SIGNAL(finished(int)), receiver, member);
     }
 }
 

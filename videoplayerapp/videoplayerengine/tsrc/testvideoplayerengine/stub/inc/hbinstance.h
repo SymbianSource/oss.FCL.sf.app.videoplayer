@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version:  %
+
 #ifndef _HBINSTANCE_H
 #define _HBINSTANCE_H
 

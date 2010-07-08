@@ -105,9 +105,12 @@ void TestHintWidget::init(bool callInitialize)
         mTestObject = new VideoHintWidget(mUiLoader);
     }
     
+    mTestObject->mHintText = "Go get some!";
+    
     if (callInitialize)
     {
-        QVERIFY(mTestObject->initialize() == 0);
+        mTestObject->mHintText = "";
+        mTestObject->initialize();
     }
 }
 
@@ -135,34 +138,26 @@ void TestHintWidget::cleanup()
     VideoCollectionViewUtilsData::reset();
     VideoCollectionUiLoaderData::reset();    
 }
- 
+
 // ---------------------------------------------------------------------------
 // testInitialize
 // ---------------------------------------------------------------------------
 //
 void TestHintWidget::testInitialize()
 {
-    // getServiceIconStrings fails and returns -1;
     init(false);
-    VideoCollectionViewUtilsData::mGetServiceIconStringsFails = true;
-    QCOMPARE(mTestObject->initialize(), -1);
-    cleanup();
+
+    // Fail
+    mTestObject->mHintText = "";
+    VideoCollectionViewUtilsData::mCenRepStringValues.append(""); 
+    mTestObject->initialize();
+    QVERIFY(mTestObject->mHintText.isEmpty());
+
+    // Succeed
+    VideoCollectionViewUtilsData::mCenRepStringValues.append("test"); 
+    mTestObject->initialize();
+    QVERIFY(!mTestObject->mHintText.isEmpty());
     
-    // succeed
-    init(false);
-    VideoCollectionViewUtilsData::mGetServiceIconStringsFails = false;
-    VideoCollectionViewUtilsData::mIconString = "test";
-    VideoCollectionViewUtilsData::mPressedString = "test2";
-    QCOMPARE(mTestObject->initialize(), 0);
-    QCOMPARE(mTestObject->mServiceIconString, VideoCollectionViewUtilsData::mIconString);
-    QCOMPARE(mTestObject->mServiceIconPressedString, VideoCollectionViewUtilsData::mPressedString);
-    
-    // second call to initialize.
-    VideoCollectionViewUtilsData::mIconString = "test3";
-    VideoCollectionViewUtilsData::mPressedString = "test4";
-    QCOMPARE(mTestObject->initialize(), 0);
-    QCOMPARE(mTestObject->mServiceIconString, VideoCollectionViewUtilsData::mIconString);
-    QCOMPARE(mTestObject->mServiceIconPressedString, VideoCollectionViewUtilsData::mPressedString);
     cleanup();
 }
 
@@ -172,7 +167,7 @@ void TestHintWidget::testInitialize()
 //
 void TestHintWidget::testSetLevel()
 {
-    init(true);
+    init(false);
     mTestObject->setVisible(false);
     
     mTestObject->setLevel(VideoHintWidget::Collection);
@@ -195,29 +190,12 @@ void TestHintWidget::testSetLevel()
 //
 void TestHintWidget::testActivate()
 {
-    init(true);
+    init(false);
 
     mTestObject->setVisible(false);
     
-    // mServiceIconString empty.
-    mTestObject->mServiceIconString = QString();
-    mTestObject->activate();
-    QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->isVisible() == true);
-    QVERIFY(mTestObject->mActivated == true);
-    
-    // mServiceIconPressedString empty.
-    mTestObject->mServiceIconString = "test";
-    mTestObject->mServiceIconPressedString = QString();
-    mTestObject->activate();
-    QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->isVisible() == true);
-    QVERIFY(mTestObject->mActivated == true);
-    
     // successful case.
     mTestObject->mActivated = false;
-    mTestObject->mServiceIconString = "qtg_mono_ovistore";
-    mTestObject->mServiceIconPressedString = "qtg_mono_ovistore";
 
     HbLabel *noVideosLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_NO_VIDEOS_LABEL);
     QVERIFY(noVideosLabel);
@@ -225,11 +203,14 @@ void TestHintWidget::testActivate()
     
     mTestObject->activate();
     QVERIFY(mTestObject->isVisible());
-    QVERIFY(mTestObject->mServiceIcon != 0);
-    QCOMPARE(mTestObject->mServiceIcon->iconName(), mTestObject->mServiceIconString);
-    QCOMPARE(mTestObject->mServiceIcon->iconName(QIcon::Normal, QIcon::On), 
-                mTestObject->mServiceIconPressedString);
     QVERIFY(noVideosLabel->isVisible()); // checks that updateUiComponents() has been called.
+    QVERIFY(mTestObject->mActivated == true);
+    
+    // second call
+    noVideosLabel->setVisible(false);
+    mTestObject->activate();
+    QVERIFY(mTestObject->isVisible());    
+    QVERIFY(!noVideosLabel->isVisible()); // shouldn't call updateUiComponents() again.
     QVERIFY(mTestObject->mActivated == true);
     
     cleanup();
@@ -241,42 +222,30 @@ void TestHintWidget::testActivate()
 //
 void TestHintWidget::testDeactivate()
 {
-    init(true);
+    init(false);
     
     mTestObject->setVisible(true);
     mTestObject->mActivated = true;
     
     // when serviceButton does not exist
-    mTestObject->mServiceIcon = 0;
     HbDocumentLoader::mFindWidgetFails = true;
     mTestObject->deactivate();
     QVERIFY(mTestObject->mActivated == false);
     QVERIFY(mTestObject->isVisible() == false);
     
-    // when icons are null, but servicebutton has non-null icon.
-    mTestObject->mActivated = true;
+    // service button exists
     mTestObject->setVisible(true);
+    mTestObject->mActivated = true;
     HbDocumentLoader::mFindWidgetFails = false;
-    HbPushButton *serviceButton = mUiLoader->findWidget<HbPushButton>(DOCML_NAME_HINT_BUTTON);
-    QVERIFY(serviceButton);
-    serviceButton->setIcon(HbIcon(QIcon(QPixmap(QSize(100,100)))));
-    QVERIFY(serviceButton->icon().isNull() == false); // make sure test is valid.
     mTestObject->deactivate();
-    QVERIFY(serviceButton->icon().isNull());
+    QVERIFY(mTestObject->mActivated == false);
     QVERIFY(mTestObject->isVisible() == false);
     
-    // when icons are non-null, but widget is not activated.
+    // second call. widget is not active.
     mTestObject->setVisible(true);
-    mTestObject->mServiceIcon = new HbIcon;
     mTestObject->deactivate();
-    QVERIFY(mTestObject->mServiceIcon != 0);
-    QVERIFY(mTestObject->isVisible() == true);
-    
-    // when icons are non-null and widget is activated.
-    mTestObject->mActivated = true;
-    mTestObject->deactivate();
-    QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->isVisible() == false);
+    QVERIFY(mTestObject->mActivated == false);
+    QVERIFY(mTestObject->isVisible());
     
     cleanup();
 }
@@ -288,40 +257,39 @@ void TestHintWidget::testDeactivate()
 void TestHintWidget::testUpdateUiComponents()
 {
     HbMainWindow *mainWnd = hbInstance->allMainWindows()[0];
-    mainWnd->setOrientation(Qt::Horizontal);
     
-    init(true);
+    init(false);
     
-    mTestObject->mServiceIcon = new HbIcon(QIcon(QPixmap(QSize(100,100))));
-    mTestObject->mActivated = true;
-    
-    HbDocumentLoader::mFindWidgetFails = true;
     // when a widget cannot be found.
+    mTestObject->mActivated = true;
+    mTestObject->mButtonShown = true;
+    HbDocumentLoader::mFindWidgetFails = true;
     mTestObject->setLevel(VideoHintWidget::AllVideos);
-    // no verification possible except that it doesn't crash?
+    // no verification possible except that it doesn't crash
     
     HbDocumentLoader::mFindWidgetFails = false;
-    HbLabel *hintLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_HINT_LABEL);
+    HbLabel *hintLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_NO_VIDEOS_LABEL);
     QVERIFY(hintLabel);
     HbPushButton *serviceButton = mUiLoader->findWidget<HbPushButton>(DOCML_NAME_HINT_BUTTON);
     QVERIFY(serviceButton);
     
-    mainWnd->setOrientation(Qt::Vertical);
+    // current level is all videos
+    serviceButton->setVisible(false);
     mTestObject->setLevel(VideoHintWidget::AllVideos);
-    QVERIFY(serviceButton->isVisible() == false);
-    QVERIFY(serviceButton->icon().isNull() == false);
-    QVERIFY(serviceButton->icon().qicon().cacheKey() == mTestObject->mServiceIcon->qicon().cacheKey());
     QVERIFY(hintLabel->isVisible());
+    QVERIFY(serviceButton->isVisible());
     
-    mainWnd->setOrientation(Qt::Horizontal);
-    mTestObject->mButtonShown = true;
+    // current level is not all videos
+    serviceButton->setVisible(true);
     mTestObject->setLevel(VideoHintWidget::Collection);
-    QVERIFY(!serviceButton->isVisible());
-    QVERIFY(serviceButton->icon().isNull() == false);
-    QVERIFY(hintLabel->isVisible() == false);
-    
-    mTestObject->mButtonShown = false;
-    mTestObject->setLevel(VideoHintWidget::Collection);
+    QVERIFY(hintLabel->isVisible());
+    QVERIFY(serviceButton->isVisible() == false);
+
+    // no hint text
+    serviceButton->setVisible(true);
+    mTestObject->mHintText = "";
+    mTestObject->setLevel(VideoHintWidget::AllVideos);
+    QVERIFY(hintLabel->isVisible());
     QVERIFY(serviceButton->isVisible() == false);
     
     cleanup();
@@ -340,14 +308,11 @@ void TestHintWidget::testOrientationChangedSlot()
     mainWnd->setOrientation(Qt::Horizontal);
     connect(this, SIGNAL(testSignal(Qt::Orientation)), mainWnd, SIGNAL(orientationChanged(Qt::Orientation)));
     
-    init(true);
+    init(false);
     
     HbLabel *noVideosLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_NO_VIDEOS_LABEL);
     QVERIFY(noVideosLabel);
 
-    mTestObject->mServiceIconString = "dummy";
-    mTestObject->mServiceIconPressedString = "dummy2";
-    
     // test that updateUiComponents is not called when only initialize has been called,
     // ie that no activate calls have been made yet.
     // mTestObject->setVisible is needed because othervise childs cannot be set visible, ie the 

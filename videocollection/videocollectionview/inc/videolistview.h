@@ -39,6 +39,8 @@ class VideoListSelectionDialog;
 class HbMenu;
 class VideoServices;
 class TMPXItemId;
+class HbToolBarExtension;
+class VideoOperatorService;
 
 /**
  * Class acts as an container for widgets that are used to display different
@@ -163,13 +165,12 @@ private slots:
     void openCollectionViewSlot();
     
     /**
-     * Slot is connected into toolbar's Service tab's
-     * triggered signal.
+     * Slot is connected into hint widget's button's clicked signal.
      *
-     * Activates Service widget by calling changeWidget.
+     * Activates first operator service. 
      *
      */
-    void openServicesViewSlot();
+    void openOperatorServiceSlot();
 
      /**
      * Slot is connected into main menus sort -items
@@ -285,6 +286,21 @@ private:
     int createToolbar();
 
     /**
+     * Loads video services from central respository and creates toolbar buttons for them.  
+     */
+    void createOperatorServicesToolbar();
+    
+    /**
+     * Loads video service from Central Repository and stores it into member array.
+     * 
+     * @param titleKey CenRep key for service title.
+     * @param iconKey CenRep key for icon resource.
+     * @param uriKey CenRep key for service URI.
+     * @param uidKey CenRep key for service application UID.
+     */
+    void loadOperatorService(int titleKey, int iconKey, int uriKey, int uidKey);
+    
+    /**
      * Creates action with given parameters. createActionGroup() must be called successfully
      * before using this method.
      *
@@ -339,7 +355,7 @@ private:
 private:
 
     /**
-     * actions ids used in main menu and tool bar
+     * Actions ids used in main menu and tool bar
      */
     enum TViewActionIds
     {
@@ -351,12 +367,12 @@ private:
     };
 
     /**
-     * reference to video collection view utils
+     * Reference to video collection view utils
      */
     VideoCollectionViewUtils &mUiUtils;
 
     /**
-     * pointer to videocollectionwrapper
+     * Reference to videocollectionwrapper
      */
     VideoCollectionWrapper &mWrapper;
 
@@ -381,7 +397,7 @@ private:
     VideoHintWidget::HintLevel mHintLevel;
 
     /**
-     * pointer to videoservices instance
+     * Pointer to videoservices instance
      * if exists, app has started as service
      */
     VideoServices* mVideoServices;
@@ -402,12 +418,12 @@ private:
     QActionGroup* mToolbarCollectionActionGroup;
 
     /**
-     * map containing toolbar actions
+     * Map containing toolbar actions
      */
     QMap<TViewActionIds, HbAction*> mToolbarActions;
 
     /**
-     * Soring roles mapped to appropriate actions.
+     * Sorting roles mapped to appropriate actions.
      */
     QMap<HbAction*, int> mSortingRoles;
 
@@ -415,7 +431,17 @@ private:
      * String containing the name of the currently open collection
      */
     QString mCollectionName;
+    
+    /**
+     * Toolbar extension for operator services when there's more than
+     * one of them.
+     */
+    HbToolBarExtension *mToolbarServiceExtension;
+    
+    /**
+     * List of operator services.
+     */
+    QList<VideoOperatorService *> mVideoOperatorServices;
 };
 
 #endif // VIDEOLISTVIEW_H
-

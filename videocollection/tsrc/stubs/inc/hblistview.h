@@ -281,6 +281,26 @@ public:
         Q_UNUSED(name);
     }
     
+    /**
+     * dummy method
+     */
+    void rowsInserted(const QModelIndex &parent, int start, int end)
+    {
+        Q_UNUSED(parent);
+        Q_UNUSED(start);
+        Q_UNUSED(end);
+    }
+
+    /**
+     * dummy method
+     */
+    void rowsRemoved(const QModelIndex &parent, int start, int end)
+    {
+        Q_UNUSED(parent);
+        Q_UNUSED(start);
+        Q_UNUSED(end);
+    }
+    
 public:
     
     /**

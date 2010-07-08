@@ -15,7 +15,10 @@
 #
 
 TEMPLATE = lib
+CONFIG += hb qt dll
 TARGET = 
+DEFINES += BUILD_VIDEOCOLLECTION_DLL
+
 symbian: { 
     TARGET.UID2 = 0x1000008D
     TARGET.UID3 = 0x200211FD
@@ -28,10 +31,8 @@ symbian: {
         "$${LITERAL_HASH}else" \
         "DEFFILE ../bwins/videocollectionwrapper.def" \
         "$${LITERAL_HASH}endif"
-    MMP_RULES += defBlock
+    MMP_RULES += defBlock SMPSAFE
 }
-CONFIG      += hb qt dll
-DEFINES     += BUILD_VIDEOCOLLECTION_DLL
 
 DEPENDPATH += . inc src
 

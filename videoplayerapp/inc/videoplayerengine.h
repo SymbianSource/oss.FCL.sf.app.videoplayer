@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QVideoPlayerEngine
+* Description:  Implementation of VideoPlayerEngine
 *
 */
 
-// Version : %version: ou1cpsw#15 %
+// Version : %version: 16 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -32,13 +32,13 @@
 
 class MpxViewPlugin;
 class VideoServices;
-class QMpxVideoPlaybackWrapper;
+class VideoPlaybackWrapper;
 
 /**
- *  QVideoPlayerEngine
+ *  VideoPlayerEngine
  * 
  */
-class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
+class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
 {
     Q_OBJECT
 
@@ -46,12 +46,12 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         /**
          * Constructor
          */
-        QVideoPlayerEngine(bool isService = false);
+        VideoPlayerEngine( bool isService = false );
 
         /**
         * Destructor.
         */
-        virtual ~QVideoPlayerEngine();
+        virtual ~VideoPlayerEngine();
     
     public:
         void initialize();
@@ -92,7 +92,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
     private:
         bool                      mIsService;
         bool                      mEmbedded;
-        bool					  mDelayedLoadDone;
+        bool                      mDelayedLoadDone;
         bool                      mIsPlayService;
 
         MpxViewPlugin*            mCurrentViewPlugin;
@@ -101,7 +101,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT QVideoPlayerEngine: public QObject
         MpxViewPlugin*            mFileDetailsViewPlugin;
         
 
-        QMpxVideoPlaybackWrapper *mPlaybackWrapper;
+        VideoPlaybackWrapper      *mPlaybackWrapper;
 
         VideoServices*            mVideoServices;
 

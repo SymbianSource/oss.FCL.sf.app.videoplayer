@@ -15,10 +15,16 @@
 #
 
 TEMPLATE = lib
+CONFIG += hb plugin
 TARGET = videosettingsplugin
 
-CONFIG += hb \
-          plugin
+symbian: { 
+    TARGET.EPOCALLOWDLLDATA = 1
+    TARGET.UID3 = 0x2002BC69
+    TARGET.CAPABILITY = CAP_GENERAL_DLL
+    BLD_INF_RULES.prj_exports += "rom/videosettingsplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(videosettingsplugin.iby)"
+    MMP_RULES += SMPSAFE
+}
 
 LIBS += -lcpframework \
         -lMPSettEngine.dll \
@@ -36,15 +42,6 @@ HEADERS += inc/videosettingsplugin.h \
 SOURCES += src/videosettingsplugin.cpp \
            src/videosettingsgroup.cpp \
            src/videosettingsaccesspointentry.cpp
-
-symbian: { 
-    TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.UID3 = 0x2002BC69
-    
-    BLD_INF_RULES.prj_exports += "rom/videosettingsplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(videosettingsplugin.iby)"
-}
-
-TARGET.CAPABILITY = CAP_GENERAL_DLL
 
 deploy.path = C:
 qtplugins.path = /resource/qt/plugins/controlpanel

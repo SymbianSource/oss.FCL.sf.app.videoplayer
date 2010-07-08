@@ -121,7 +121,7 @@ public slots: // from QViewPlugin
     /**
      * Signaled by HbMessageBox when it's closed.
      */
-    void deleteVideoDialogFinished(HbAction *action);
+    void deleteVideoDialogFinished(int action);
 
 private slots:
 

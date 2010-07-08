@@ -129,9 +129,9 @@ private slots:
     void testOpenCollectionViewSlot();
     
     /**
-     * Tests openServicesViewSlot.
+     * Tests openOperatorServiceSlot.
      */
-    void testOpenServicesViewSlot();
+    void testOpenOperatorServiceSlot();
     
     /**
      * Tests startSortingSlot.

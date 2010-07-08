@@ -22,6 +22,7 @@
 //      missing test functions:
 //      - how to setup construction to fail for testing purposes
 
+// Version : %version:  %
 
 #ifndef __TESTVIDEOAPPUIENGINE_H__
 #define __TESTVIDEOAPPUIENGINE_H__
@@ -32,13 +33,6 @@
 #include <e32base.h>
 #include <e32def.h>
 #include <mpxmessage2.h>
-
-//typedef struct
-//{
-//    TInt  iEvent;
-//    TInt  iData;
-//    TInt  iError;
-//} TCallbackEvent;
 
 enum TActivationCommands
 {
@@ -102,81 +96,76 @@ _LIT(KTestRtspUrl, "rtsp://testserver/test.3gp");
 class MAppUiEngineUnitTestObserver 
 {
     public:
-        virtual void HandleUtilityEvent( TCallbackEvent* aEvent ) = 0;
+    virtual void HandleUtilityEvent( TCallbackEvent* aEvent ) = 0;
 };
 
 
-class QMpxVideoPlaybackWrapper;
+class VideoPlaybackWrapper;
 class CMpxVideoPlayerAppUiEngine;
 class MMPXPlaybackUtility;
 class CMPXCollectionUtility;
 
 class TestVideoAppUiEngine : public QObject,
                              public MAppUiEngineUnitTestObserver
-	{
+{
 
     Q_OBJECT
 
-public: // Constructor / destructor
+    public: 
 
-    /**
-     * Contructor.
-     *
-     */
-	TestVideoAppUiEngine();
+        //
+        //  Constructor
+        //
+        TestVideoAppUiEngine();
 
-    /**
-     * Destructor.
-     *
-     */
-    virtual ~TestVideoAppUiEngine();       
+        //
+        //  Destructor
+        //
+        virtual ~TestVideoAppUiEngine();       
     
-    //
-    //  MAppUiEngineStifTestObserver Implementation
-    //
-    void HandleUtilityEvent( TCallbackEvent* aEvent );
+        //
+        //  MAppUiEngineStifTestObserver Implementation
+        //
+        void HandleUtilityEvent( TCallbackEvent* aEvent );
     
-    CMPXMessage* CreateMpxMessageLC( int aEvent, int aType, int aData );
+        //
+        //  CreateMpxMessageLC Implementation
+        //
+        CMPXMessage* CreateMpxMessageLC( int aEvent, int aType, int aData );
     
       
-private slots:
+    private slots:
 
-    void init();
-    void cleanup();
+        void init();
+        void cleanup();
     
-    void testPlaybackUtility();
-    void testOpenFile();
-    void testOpenMedia();
-    void testDoHandlePlaybackMessage();
-    void testPrepareCloseMpx();
-    void testDoHandleCollectionMedia();
-    void testHandlePlaybackMessage();
-    void testHandleCollectionMessage();
-    void testHandleCollectionMedia();
+        void testPlaybackUtility();
+        void testOpenFile();
+        void testOpenMedia();
+        void testDoHandlePlaybackMessage();
+        void testPrepareCloseMpx();
+        void testDoHandleCollectionMedia();
+        void testHandlePlaybackMessage();
+        void testHandleCollectionMessage();
+        void testHandleCollectionMedia();
 
-    // called after last test case executed
-    void cleanupTestCase();
+        // called after last test case executed
+        void cleanupTestCase();
 
-signals:
+    signals:
 
-	void aboutToQuit();
+        void aboutToQuit();
 
-private:
+    private:
 
-	  CMpxVideoPlayerAppUiEngine*       mTestObject;
-    
-      QMpxVideoPlaybackWrapper*         mPlaybackWrapper;
-      
-      //CCallbackEventArray*              mExpectedEventArray;
-      
-      int                               mError;
-      
-      TCallbackEvent*                   mExpectedEvent;
-      
-      bool                              mTestResult;
-      
-      MMPXPlaybackUtility*              mPlaybackUtility;
-      CMPXCollectionUtility*            mCollectionUtility;
+        CMpxVideoPlayerAppUiEngine*       mTestObject;    
+        VideoPlaybackWrapper*             mPlaybackWrapper;
+        MMPXPlaybackUtility*              mPlaybackUtility;
+        CMPXCollectionUtility*            mCollectionUtility;
+            
+        int                               mError;      
+        TCallbackEvent*                   mExpectedEvent;      
+        bool                              mTestResult;      
 
 };
 

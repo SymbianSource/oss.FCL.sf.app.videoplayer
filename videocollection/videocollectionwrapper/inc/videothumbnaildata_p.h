@@ -220,12 +220,6 @@ private slots:
     void thumbnailReadySlot(QPixmap tnData, const TMPXItemId &mediaId, int error);
 
     /**
-     * VideoListDataModel signals this slot when the model has been changed.
-     *
-     */
-    void modelChangedSlot();
-
-    /**
      * Fetches thumbnails around of mCurrentFetchIndex in batches of THUMBNAIL_BACKGROUND_FETCH_AMOUNT.
      * The fetch index is set by startFetchingThumbnails which also resets
      * mCurrentBackgroundFetchCount. Maximum of THUMBNAIL_MAX_BACKGROUND_FETCH thumbnails are

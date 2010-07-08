@@ -22,6 +22,7 @@
 #include <qgraphicsitem.h>
 #include <qvariant.h>
 #include <qrect.h>
+#include <qvariant.h>
 
 class HbEffect : public QObject
 {

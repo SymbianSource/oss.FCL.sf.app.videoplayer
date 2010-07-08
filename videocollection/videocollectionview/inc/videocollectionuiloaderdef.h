@@ -46,7 +46,6 @@ static const char* DOCML_NAME_DELETE_MULTIPLE             = "vc:mDeleteMultiple"
 
 // Videocollection hint widget
 static const char* DOCML_NAME_HINT_BUTTON                 = "vc:mHintButton";
-static const char* DOCML_NAME_HINT_LABEL                  = "vc:mHintTextLabel";
 static const char* DOCML_NAME_NO_VIDEOS_LABEL             = "vc:mNoVideosLabel";
 
 // video multiselection dialog

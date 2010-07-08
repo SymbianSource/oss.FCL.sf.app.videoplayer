@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -28,221 +28,210 @@ class VideoServiceUriFetch;
 class VideoServicePlay;
 class VideoServiceView;
 class VideoServiceBrowse;
-class QVideoPlayerEngine;
+class VideoPlayerEngine;
 
 class VIDEOPLAYERAPP_DLL_EXPORT VideoServices : public QObject
 {
     Q_OBJECT
 
-public:
-
-    /**
-     * Returns singleton instance for this class.
-     *
-     * WARNING! Not safe to call this from destructor of another function scope static object!
-     *
-     * @return The singleton instance.
-     */
-    static VideoServices *instance(QVideoPlayerEngine* engine = 0);
-
-    /**
-     * Decreases the reference count, when count reaches zero cleanup is done.
-     *
-     */
-    void decreaseReferenceCount();
-
-    /**
-     * Returns the context title set by service requestee
-     *
-     * @return QString the title
-     *
-     */
-    QString contextTitle() const;
+    public:
     
-    /**
-     * Returns sort type defined by the service client.
-     * 
-     * @param None.
-     * @return int.
-     */
-    int sortRole() const;
-
-	/*
-	 * Enum reflecting the services provided 
-	 */
-    enum TVideoService
-    {
-        ENoService,
-        EUriFetcher,
-        EPlayback,
-		EView,
-        EBrowse
-    };
-
-    /**
-     * Returns service active status
-     *
-     * @return bool true if active, false if not active
-     *
-     */
-    VideoServices::TVideoService currentService();
-
-    /**
-     * Returns browsing category.
-     * 
-     * @return see vcxmyvideosdef.h for default categories.
-     */
-    int getBrowseCategory() const;
-
-public slots:
-    void itemSelected(const QString& item);
-    void browsingEnded();
-
-signals:
-	/*
-	 * Emitted when service user has set the title
-	 */    
-	void titleReady(const QString& title);
-
-	/*
-	 * Emitted to acticate requested plugin
-	 */
-	void activated(int command);
-
-private:
-
-    /**
-     * Constructor
-     */
-    VideoServices();
-
-    /**
-     * Constructor
-     */
-    VideoServices(QVideoPlayerEngine* engine);
-
-    /**
-     * Destructor.
-     */
-    virtual ~VideoServices();
-
-    void setEngine(QVideoPlayerEngine* engine);
-
-    /**
-     * Sets the active service
-     *
-     * @param service
-     *
-     */
-    void setCurrentService(VideoServices::TVideoService service);
-
-    /**
-     * Returns the current engine
-     *
-     * @return engine
-     *
-     */
-    QVideoPlayerEngine* engine();
-
-    Q_DISABLE_COPY(VideoServices)
-
-private:
-
-    /**
-     * Reference count.
-     */
-    int mReferenceCount;
-
-    /**
-     * Singleton instance.
-     */
-    static VideoServices* mInstance;
-
-    /**
-     * VideoServiceUriFetch service instance.
-     */
-    VideoServiceUriFetch* mServiceUriFetch;
-
-    /**
-     * Deprecated VideoServiceUriFetch service instance.
-     */
-    VideoServiceUriFetch* mServiceUriFetchDeprecatedNewService;
+        /**
+         * Returns singleton instance for this class.
+         * WARNING! Not safe to call this from destructor of another function scope static object!
+         * @return The singleton instance.
+         */
+        static VideoServices *instance( VideoPlayerEngine* engine = 0 );
     
-    /**
-     * Deprecated VideoServiceUriFetch service instance.
-     */
-    VideoServiceUriFetch* mServiceUriFetchDeprecatedOldService;
-
-    /**
-     * VideoServicePlay service instance.
-     */
-    VideoServicePlay* mServicePlay;
+        /**
+         * Decreases the reference count, when count reaches zero cleanup is done.
+         */
+        void decreaseReferenceCount();
     
-    /**
-     * VideoServicePlay service instance.
-     */
-    VideoServicePlay* mServicePlayDeprecatedNewService;
+        /**
+         * Returns the context title set by service requestee
+         * @return QString the title
+         */
+        QString contextTitle() const;
+        
+        /**
+         * Returns sort type defined by the service client.
+         * @param None.
+         * @return int.
+         */
+        int sortRole() const;
     
-    /**
-     * VideoServicePlay service instance.
-     */
-    VideoServicePlay* mServicePlayDeprecatedOldService;    
+        /*
+         * Enum reflecting the services provided 
+         */
+        enum TVideoService
+        {
+            ENoService,
+            EUriFetcher,
+            EPlayback,
+            EView,
+            EBrowse
+        };
     
-    /**
-     * VideoServiceView service instance.
-     */    
-    VideoServiceView* mServiceView; 
+        /**
+         * Returns service active status
+         * @return bool true if active, false if not active
+         */
+        VideoServices::TVideoService currentService();
     
-    /**
-     * VideoServiceView service instance.
-     */    
-    VideoServiceView* mServiceViewDeprecatedNewService; 
+        /**
+         * Returns browsing category.
+         * @return see vcxmyvideosdef.h for default categories.
+         */
+        int getBrowseCategory() const;
     
-    /**
-     * VideoServiceView service instance.
-     */    
-    VideoServiceView* mServiceViewDeprecatedOldService;     
+    public slots:
+        void itemSelected(const QString& item);
+        void browsingEnded();
     
-    /**
-     * VideoServiceBrowse service instance.
-     */
-    VideoServiceBrowse *mServiceBrowse;
-
-    /**
-     * Deprecated VideoServiceBrowse service instance.
-     */
-    VideoServiceBrowse *mServiceBrowseDeprecatedNewService;
+    signals:
     
-    /**
-     * Deprecated VideoServiceBrowse service instance.
-     */
-    VideoServiceBrowse *mServiceBrowseDeprecatedOldService;
-
-    /**
-     * Pointer of QVideoPlayerEngine.
-     */
-    QVideoPlayerEngine* mEngine;
-
-	/*
-	 * Current service
-	 */
-    VideoServices::TVideoService mCurrentService;
-
-    friend class VideoServiceUriFetch;
-
-    friend class VideoServicePlay;
-	
-	friend class VideoServiceView;
+        /*
+         * Emitted when service user has set the title
+         */    
+        void titleReady(const QString& title);
     
-    friend class VideoServiceBrowse;
+        /*
+         * Emitted to acticate requested plugin
+         */
+        void activated(int command);
     
-public:
+    private:
     
-    /*
-     * indicate fetch service and attach operation has been selected
-     */
-    bool         mFetchSelected;
+        /**
+         * Constructor
+         */
+        VideoServices();
     
-    };
+        /**
+         * Constructor
+         */
+        VideoServices( VideoPlayerEngine* engine );
+    
+        /**
+         * Destructor.
+         */
+        virtual ~VideoServices();
+    
+        void setEngine( VideoPlayerEngine* engine );
+    
+        /**
+         * Sets the active service
+         *
+         * @param service
+         *
+         */
+        void setCurrentService(VideoServices::TVideoService service);
+    
+        /**
+         * Returns the current engine
+         *
+         * @return engine
+         *
+         */
+        VideoPlayerEngine* engine();
+    
+        Q_DISABLE_COPY( VideoServices )
+    
+    private:
+    
+        /**
+         * Reference count.
+         */
+        int mReferenceCount;
+    
+        /**
+         * Singleton instance.
+         */
+        static VideoServices* mInstance;
+    
+        /**
+         * VideoServiceUriFetch service instance.
+         */
+        VideoServiceUriFetch* mServiceUriFetch;
+    
+        /**
+         * Deprecated VideoServiceUriFetch service instance.
+         */
+        VideoServiceUriFetch* mServiceUriFetchDeprecatedNewService;
+        
+        /**
+         * Deprecated VideoServiceUriFetch service instance.
+         */
+        VideoServiceUriFetch* mServiceUriFetchDeprecatedOldService;
+    
+        /**
+         * VideoServicePlay service instance.
+         */
+        VideoServicePlay* mServicePlay;
+        
+        /**
+         * VideoServicePlay service instance.
+         */
+        VideoServicePlay* mServicePlayDeprecatedNewService;
+        
+        /**
+         * VideoServicePlay service instance.
+         */
+        VideoServicePlay* mServicePlayDeprecatedOldService;    
+        
+        /**
+         * VideoServiceView service instance.
+         */    
+        VideoServiceView* mServiceView; 
+        
+        /**
+         * VideoServiceView service instance.
+         */    
+        VideoServiceView* mServiceViewDeprecatedNewService; 
+        
+        /**
+         * VideoServiceView service instance.
+         */    
+        VideoServiceView* mServiceViewDeprecatedOldService;     
+        
+        /**
+         * VideoServiceBrowse service instance.
+         */
+        VideoServiceBrowse *mServiceBrowse;
+    
+        /**
+         * Deprecated VideoServiceBrowse service instance.
+         */
+        VideoServiceBrowse *mServiceBrowseDeprecatedNewService;
+        
+        /**
+         * Deprecated VideoServiceBrowse service instance.
+         */
+        VideoServiceBrowse *mServiceBrowseDeprecatedOldService;
+    
+        /**
+         * Pointer of VideoPlayerEngine.
+         */
+        VideoPlayerEngine* mEngine;
+    
+        /*
+         * Current service
+         */
+        VideoServices::TVideoService mCurrentService;
+    
+        friend class VideoServiceUriFetch;    
+        friend class VideoServicePlay;        
+        friend class VideoServiceView;        
+        friend class VideoServiceBrowse;
+        
+    public:
+        
+        /*
+         * indicate fetch service and attach operation has been selected
+         */
+        bool mFetchSelected;
+        
+};
 
 #endif //__VIDEOSERVICES_H__

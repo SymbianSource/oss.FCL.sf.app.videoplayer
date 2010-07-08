@@ -14,12 +14,12 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 27 %
+# Version : %version: 29 %
 
 
 TEMPLATE = lib
-TARGET = videoplayerengine
 CONFIG += hb qt dll
+TARGET = videoplayerengine
 DEFINES += BUILD_VIDEOPLAYERAPP_DLL
 
 symbian: 
@@ -37,7 +37,7 @@ symbian:
         "$${LITERAL_HASH}else" \
         "DEFFILE ../bwins/videoplayerengine.def" \
         "$${LITERAL_HASH}endif"
-    MMP_RULES += defBlock
+    MMP_RULES += defBlock SMPSAFE
 }
 
 INCLUDEPATH += ../../inc \
@@ -61,17 +61,17 @@ DEPENDPATH += ../../inc ../inc inc
 VPATH += src
 
 HEADERS += videoplayerengine.h \
-          mpxvideoplaybackwrapper.h \
-          mpxvideoplayerappuiengine.h \
-          videoservices.h \
-          videoserviceplay.h \
-          videoserviceurifetch.h \
-          videoserviceview.h \
-          videoservicebrowse.h \
-          videoactivitystate.h
+           videoplaybackwrapper.h \
+           mpxvideoplayerappuiengine.h \
+           videoservices.h \
+           videoserviceplay.h \
+           videoserviceurifetch.h \
+           videoserviceview.h \
+           videoservicebrowse.h \
+           videoactivitystate.h
 
 SOURCES += videoplayerengine.cpp \
-           mpxvideoplaybackwrapper.cpp \
+           videoplaybackwrapper.cpp \
            mpxvideoplayerappuiengine.cpp \
            videoservices.cpp \
            videoserviceplay.cpp \

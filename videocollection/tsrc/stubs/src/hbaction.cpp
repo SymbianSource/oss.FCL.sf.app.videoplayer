@@ -19,4 +19,3 @@
 
 int HbAction::initializeCount = 0;
 Hb::NavigationAction HbAction::mNavAction = Hb::QuitNaviAction;
-

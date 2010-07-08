@@ -15,20 +15,15 @@
 #
 
 TEMPLATE = lib
-CONFIG += hb \
-    qt \
-    ecomplugin
+CONFIG += hb qt ecomplugin
 
-
-symbian: { 
+symbian: {
    TARGET.UID2 = 0x10009D8D
    TARGET.UID3 = 0x200211FF
-
    BLD_INF_RULES.prj_exports += "rom/videofiledetailsview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videofiledetailsview.iby)"
-   
    TARGET.CAPABILITY = ALL -TCB -DRM
-   
    TARGET.EPOCALLOWDLLDATA = 1
+   MMP_RULES += SMPSAFE
 }
 
 # mpx view plugin definitions:
@@ -58,7 +53,11 @@ HEADERS += inc/videofiledetailsviewplugin.h \
 
 SOURCES += src/videofiledetailsviewplugin.cpp \
            src/videodetailslabel.cpp
+
+DOCML += data/videofiledetails.docml
    
+RESOURCES += data/videofiledetails.qrc
+
 LIBS += -lmpxviewframeworkqt.dll \
         -lvideocollectionwrapper.dll \
         -lthumbnailmanagerqt.dll \
@@ -68,4 +67,3 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lshareui.dll \
         -lflogger.dll
 
-RESOURCES += data/videofiledetails.qrc

@@ -684,12 +684,6 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
         true,
         VideoCollectionUiLoaderParam::LoadPhasePrimary));
     params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_HINT_LABEL,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhasePrimary));
-    params.append(VideoCollectionUiLoaderParam(
         DOCML_NAME_NO_VIDEOS_LABEL,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
         DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,

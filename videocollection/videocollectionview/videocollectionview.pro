@@ -15,11 +15,9 @@
 #
 
 TEMPLATE = lib
-CONFIG += hb \
-    qt \
-    ecomplugin
-
+CONFIG += hb qt ecomplugin mobility
 TARGET = 
+
 symbian: { 
     TARGET.UID2 = 0x10009D8D
     TARGET.UID3 = 0x200211FB
@@ -62,7 +60,8 @@ HEADERS += inc/videocollectionviewplugin.h \
            inc/videocollectionviewutils.h \
            inc/videocollectionuiloader.h \
            inc/videolistselectiondialog.h \
-           inc/videocollectioncenrepdefs.h
+           inc/videocollectioncenrepdefs.h \
+           inc/videooperatorservice.h
 
 SOURCES += src/videocollectionviewplugin.cpp \
            src/videolistview.cpp \
@@ -70,8 +69,11 @@ SOURCES += src/videocollectionviewplugin.cpp \
            src/videohintwidget.cpp \
            src/videocollectionviewutils.cpp \
            src/videocollectionuiloader.cpp \
-           src/videolistselectiondialog.cpp
-    
+           src/videolistselectiondialog.cpp \
+           src/videooperatorservice.cpp
+
+DOCML += data/collectionview.docml
+
 RESOURCES += data/videocollectionview.qrc
 
 LIBS += -lmpxviewframeworkqt.dll \
@@ -79,10 +81,17 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lcentralrepository.dll \
         -lxqserviceutil.dll \
         -lvideoplayerengine.dll \
-        -lflogger.dll
-            
-# Seems to be no way to get these on top of file
-mmpBlock = "$${LITERAL_HASH}include <platform_paths.hrh>" \
-    "$${LITERAL_HASH}include <data_caging_paths.hrh>" \
-    "$${LITERAL_HASH}include <bldvariant.hrh>"
-MMP_RULES += mmpBlock
+        -lflogger.dll \
+        -lxqsettingsmanager.dll \
+        -lws32 \
+        -lapparc \
+        -lapgrfx \
+        -lcone
+
+symbian: {
+    # Seems to be no way to get these on top of file
+    mmpBlock = "$${LITERAL_HASH}include <platform_paths.hrh>" \
+        "$${LITERAL_HASH}include <data_caging_paths.hrh>" \
+        "$${LITERAL_HASH}include <bldvariant.hrh>"
+    MMP_RULES += mmpBlock SMPSAFE
+}

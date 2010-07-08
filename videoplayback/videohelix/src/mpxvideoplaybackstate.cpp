@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 47 %
+// Version : %version: 48 %
 
 
 //
@@ -177,7 +177,7 @@ void CMPXVideoPlaybackState::HandleStopSeekL()
 //  ------------------------------------------------------------------------------------------------
 void CMPXVideoPlaybackState::HandleSetPosterFrame()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleSetPosterFrame()"));    
+    MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleSetPosterFrame()"));
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -239,10 +239,10 @@ void CMPXVideoPlaybackState::HandlePlaybackComplete( TInt aError )
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::HandlePlaybackComplete()"),
                    _L("error = %d"), aError );
 
+    iVideoPlaybackCtlr->ChangeState( EMPXVideoStopped );
+
     if ( aError == KErrNone )
     {
-        iVideoPlaybackCtlr->ChangeState( EMPXVideoStopped );
-
         iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent(
             MMPXPlaybackPluginObserver::EPPlayComplete,
             0,
@@ -1387,8 +1387,8 @@ void CMPXPlayingState::HandlePlayPause()
 void CMPXPlayingState::HandleSetPosterFrame()
 {
     MPX_DEBUG(_L("CMPXPlayingState::HandleSetPosterFrame()"));
-    
-    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();    
+
+    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();
 }
 
 
@@ -1552,8 +1552,8 @@ void CMPXPausedState::HandlePlayPause()
 //  ------------------------------------------------------------------------------------------------
 void CMPXPausedState::HandleSetPosterFrame()
 {
-    MPX_DEBUG(_L("CMPXPausedState::HandleSetPosterFrame()"));    
-    
+    MPX_DEBUG(_L("CMPXPausedState::HandleSetPosterFrame()"));
+
     iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();
 }
 
@@ -1650,8 +1650,8 @@ void CMPXPausedState::HandleCustomPlay()
     }
     else
     {
-        // As the custom play command could not resume the playback. Send a pause event to 
-        // the view though the MPX FW to get the view state in sync playback plugin. 
+        // As the custom play command could not resume the playback. Send a pause event to
+        // the view though the MPX FW to get the view state in sync playback plugin.
         iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
                                                               0,
                                                               KErrNone );

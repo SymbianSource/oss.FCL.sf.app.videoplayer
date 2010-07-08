@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  da1mmcf#2 %
 
 #ifndef __VIDEOACTIVITYSTATE_H__
 #define __VIDEOACTIVITYSTATE_H__
@@ -27,14 +27,17 @@
 // videoplayer activity id
 static const QString ACTIVITY_VIDEOPLAYER_MAINVIEW = "VideosMainView";
 
+// last position of the last played media clip (int)
+static const QString KEY_LAST_PLAY_POSITION_ID   = "_VideoActivity_last_play_position_id_";
 
-namespace VideoActivityData
-{        
-    // consts to be used as key values    
-    // plugin type (int): collectionplugin or videoplaybackplugin 
-    static const QString KEY_VIEWPLUGIN_TYPE = "_VideoActivity_viewplugin_type_";
-          
-}
+// name of the media clip last played (QString)
+static const QString KEY_LAST_PLAYED_CLIP = "_VideoActivity_last_played_clip_";
+
+// Key for plugin type in activity manager
+static const QString KEY_VIEWPLUGIN_TYPE = "_VideoActivity_viewplugin_type_";
+
+// was the last played media clip a local clip (not streaming or prog. download)
+static const QString KEY_LAST_LOCAL_PLAYBACK   = "_VideoActivity_last_local_playback_";
 
 /**
  * Class is used as a stub for testing activity saving from videoplayerengine

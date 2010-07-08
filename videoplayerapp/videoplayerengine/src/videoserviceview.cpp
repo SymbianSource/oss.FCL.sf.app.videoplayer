@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 #include "videoservices.h"
 #include "videoserviceview.h"
@@ -27,7 +27,7 @@
 // -------------------------------------------------------------------------------------------------
 // 
 VideoServiceView::VideoServiceView( VideoServices* parent, 
-                                    QVideoPlayerEngine* engine, 
+                                    VideoPlayerEngine* engine, 
                                     QLatin1String service )
     : XQServiceProvider( service, parent )
     , mEngine( engine )
@@ -50,10 +50,10 @@ VideoServiceView::~VideoServiceView()
 // setEngine()
 // -------------------------------------------------------------------------------------------------
 // 
-void VideoServiceView::setEngine( QVideoPlayerEngine* engine )
+void VideoServiceView::setEngine( VideoPlayerEngine* engine )
 {
     MPX_ENTER_EXIT(_L("VideoServiceView::setEngine()"));
-	mEngine = engine;
+    mEngine = engine;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -65,9 +65,9 @@ bool VideoServiceView::view( QString file )
     MPX_ENTER_EXIT(_L("VideoServiceView::view( QString ) "),
                    _L("file = %s"), file.data() );
     
-    if(mEngine)
+    if ( mEngine )
     {
-    	mServiceApp->setCurrentService(VideoServices::EView);
+    	mServiceApp->setCurrentService( VideoServices::EView );
     	mEngine->playMedia( file );
     }
     
@@ -85,7 +85,7 @@ bool VideoServiceView::view( XQSharableFile file  )
     RFile rFile;
     bool handleOK = file.getHandle( rFile );
 
-    mServiceApp->setCurrentService(VideoServices::EView);
+    mServiceApp->setCurrentService( VideoServices::EView );
     
     if ( mEngine)
     {
@@ -99,7 +99,7 @@ bool VideoServiceView::view( XQSharableFile file  )
         }
     }
        
-	return true;
+    return true;
 }
 
 

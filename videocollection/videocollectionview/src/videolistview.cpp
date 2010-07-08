@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 113 %
+// Version : %version: 113.1.1 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -32,6 +32,8 @@
 #include <hbgroupbox.h>
 #include <hbpushbutton.h>
 #include <hbinputdialog.h>
+#include <hbparameterlengthlimiter.h>
+#include <hbtoolbarextension.h>
 #include <vcxmyvideosdefs.h>
 
 #include "videoservices.h"
@@ -45,10 +47,13 @@
 #include "videosortfilterproxymodel.h"
 #include "videocollectionuiloader.h"
 #include "mpxhbvideocommondefs.h"
+#include "videooperatorservice.h"
+#include "videocollectioncenrepdefs.h"
 #include "videocollectiontrace.h"
 
 // Object names.
 const char* const LIST_VIEW_OBJECT_NAME_OPTIONS_MENU      = "vc::ListViewOptionsMenu";
+const char* const LIST_VIEW_OBJECT_NAME_TOOLBAR_EXTENSION = "vc::ListViewToolbarExtension";
 
 // ---------------------------------------------------------------------------
 // Constructor
@@ -66,6 +71,7 @@ VideoListView::VideoListView( VideoCollectionUiLoader *uiLoader, QGraphicsItem *
     , mCurrentList( 0 )
     , mToolbarViewsActionGroup( 0 )
     , mToolbarCollectionActionGroup( 0 )
+    , mToolbarServiceExtension( 0 )
 {
 	FUNC_LOG;
 }
@@ -83,11 +89,22 @@ VideoListView::~VideoListView()
     mToolbarActions.clear();
     mSortingRoles.clear();
 
+    delete mToolbarServiceExtension;
+    mToolbarServiceExtension = 0;
+    
     if(mVideoServices)
     {
     	mVideoServices->decreaseReferenceCount();
     	mVideoServices = 0;
     }
+    
+    QList<VideoOperatorService *>::const_iterator iter = mVideoOperatorServices.constBegin();
+    while(iter != mVideoOperatorServices.constEnd())
+    {
+        delete *iter;
+        iter++;
+    }
+    mVideoOperatorServices.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -500,9 +517,10 @@ int VideoListView::createToolbar()
 
         if (!mVideoServices)
         {
-			// Services tab
-			mToolbarActions[ETBActionServices] = createAction("qtg_mono_ovistore",
-					mToolbarViewsActionGroup, SLOT(openServicesViewSlot()));
+			// Create services button or toolbar extension depending how many operator 
+            // services are configured.
+            createOperatorServicesToolbar();
+			
 			// Add Videos tab
 			mToolbarActions[ETBActionAddVideos] = 
 			        createAction("qtg_mono_add_to_video_collection",
@@ -519,14 +537,12 @@ int VideoListView::createToolbar()
         if(   !bar
 		   || !mToolbarActions[ETBActionAllVideos]
            || !mToolbarActions[ETBActionCollections]
-           || ( !mVideoServices && (!mToolbarActions[ETBActionServices] 
-              || !mToolbarActions[ETBActionAddVideos]
-              || !mToolbarActions[ETBActionRemoveVideos])))
+           || ( !mVideoServices && (!mToolbarActions[ETBActionAddVideos] 
+                                 || !mToolbarActions[ETBActionRemoveVideos])))
         {
             ERROR(-1, "VideoListView::createToolbar() failed to create all actions or the toolbar.");
         	delete mToolbarActions[ETBActionAllVideos];
             delete mToolbarActions[ETBActionCollections];
-            delete mToolbarActions[ETBActionServices];
             delete mToolbarActions[ETBActionAddVideos];
             delete mToolbarActions[ETBActionRemoveVideos];
         	return -1;
@@ -536,7 +552,7 @@ int VideoListView::createToolbar()
         mToolbarActions[ETBActionAllVideos]->setCheckable(true);
         mToolbarActions[ETBActionCollections]->setCheckable(true);
 
-        if (!mVideoServices)
+        if(!mVideoServices && mToolbarActions[ETBActionServices])
         {
         	mToolbarActions[ETBActionServices]->setCheckable(false);
         }
@@ -559,10 +575,95 @@ int VideoListView::createToolbar()
         {
             bar->addActions(mToolbarCollectionActionGroup->actions());
         }
-        
+
+        if(mToolbarServiceExtension && (level == VideoCollectionCommon::ELevelCategory 
+           || level == VideoCollectionCommon::ELevelVideos))
+        {
+            HbAction *action = bar->addExtension(mToolbarServiceExtension);
+            HbIcon icon("qtg_mono_video_services");
+            action->setIcon(icon);
+        }
     }
 
     return 0;
+}
+
+// ---------------------------------------------------------------------------
+// createOperatorServicesToolbar()
+// ---------------------------------------------------------------------------
+//
+void VideoListView::createOperatorServicesToolbar()
+{
+    FUNC_LOG;
+    if(mVideoOperatorServices.count() > 0)
+    {
+        return;
+    }
+    
+    // Load services.
+    
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem1Title, KVideoCollectionViewCenrepServiceItem1ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem1Url, KVideoCollectionViewCenrepServiceItem1Uid);
+    
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem2Title, KVideoCollectionViewCenrepServiceItem2ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem2Url, KVideoCollectionViewCenrepServiceItem2Uid);
+
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem3Title, KVideoCollectionViewCenrepServiceItem3ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem3Url, KVideoCollectionViewCenrepServiceItem3Uid);
+
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem4Title, KVideoCollectionViewCenrepServiceItem4ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem4Url, KVideoCollectionViewCenrepServiceItem4Uid);
+
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem5Title, KVideoCollectionViewCenrepServiceItem5ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem5Url, KVideoCollectionViewCenrepServiceItem5Uid);
+
+    loadOperatorService(KVideoCollectionViewCenrepServiceItem6Title, KVideoCollectionViewCenrepServiceItem6ToolbarIconPath, 
+            KVideoCollectionViewCenrepServiceItem6Url, KVideoCollectionViewCenrepServiceItem6Uid);
+    
+    // Create toolbar extension when there's multiple services.
+    if(mVideoOperatorServices.count() > 1 && !mToolbarServiceExtension)
+    {
+        mToolbarServiceExtension = new HbToolBarExtension();
+        mToolbarServiceExtension->setObjectName(LIST_VIEW_OBJECT_NAME_TOOLBAR_EXTENSION);
+        
+        QList<VideoOperatorService *>::const_iterator iter = mVideoOperatorServices.constBegin();
+        while(iter != mVideoOperatorServices.constEnd())
+        {
+            HbIcon icon((*iter)->iconResource());
+            HbAction *action = mToolbarServiceExtension->addAction(icon, (*iter)->title(), 
+                    (*iter), SLOT(launchService()));
+            action->setObjectName((*iter)->title());
+            iter++;
+        }
+    }
+    
+    // Add toolbar button when there's only one service.
+    if(mVideoOperatorServices.count() == 1)
+    {
+        VideoOperatorService *service = mVideoOperatorServices[0];
+        mToolbarActions[ETBActionServices] = createAction(service->iconResource(),
+                mToolbarViewsActionGroup, 0 /*do not connect to any slot*/);
+        connect(mToolbarActions[ETBActionServices], SIGNAL(triggered()), service, SLOT(launchService()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// loadOperatorService()
+// ---------------------------------------------------------------------------
+//
+void VideoListView::loadOperatorService(int titleKey, int iconKey, int uriKey, int uidKey)
+{
+    FUNC_LOG;
+    VideoOperatorService *service = new VideoOperatorService();
+    if(service->load(titleKey, iconKey, uriKey, uidKey))
+    {
+        mVideoOperatorServices.append(service);
+    }
+    else
+    {
+        // Load failed, delete service data.
+        delete service;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -578,13 +679,16 @@ HbAction* VideoListView::createAction(QString icon,
     HbIcon hbIcon(icon);
     action->setIcon(hbIcon);
 
-    if(!connect(action, SIGNAL(triggered()), this, slot)) {
-        // actiongroup deletion deletes this also.
-        // return 0 tells that there was a problem in creation to caller.
-        delete action;
-        return 0;
+    if(slot)
+    {
+        if(!connect(action, SIGNAL(triggered()), this, slot)) {
+            // actiongroup deletion deletes this also.
+            // return 0 tells that there was a problem in creation to caller.
+            delete action;
+            return 0;
+        }
     }
-
+    
     return action;
 }
 
@@ -712,7 +816,8 @@ void VideoListView::updateSubLabel()
 			}
 			else
 			{
-				subLabel->setHeading(hbTrId("txt_videos_subtitle_1_l2").arg(mCollectionName).arg(itemCount));
+				QString text = HbParameterLengthLimiter(hbTrId("txt_videos_subtitle_1_l2")).arg(mCollectionName).arg(itemCount);
+				subLabel->setHeading(text);
 			}
         }
     }
@@ -904,13 +1009,17 @@ void VideoListView::openCollectionViewSlot()
 }
 
 // ---------------------------------------------------------------------------
-// openservicesViewSlot()
+// openOperatorServiceSlot()
 // ---------------------------------------------------------------------------
 //
-void VideoListView::openServicesViewSlot()
+void VideoListView::openOperatorServiceSlot()
 {
 	FUNC_LOG;
-    debugNotImplementedYet();
+    
+	if(mVideoOperatorServices.count() > 0)
+	{
+	    mVideoOperatorServices[0]->launchService();
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -1394,6 +1503,13 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
         {
             toolBar()->addActions(mToolbarViewsActionGroup->actions());
             mToolbarActions[ETBActionCollections]->setChecked(true);
+            
+            if(mToolbarServiceExtension)
+            {
+                HbAction *action = toolBar()->addExtension(mToolbarServiceExtension);
+                HbIcon icon("qtg_mono_video_services");
+                action->setIcon(icon);
+            }
         }
     }
 	// restore animations for collection content widget
@@ -1454,7 +1570,7 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
     }
     else if (name.compare(DOCML_NAME_HINT_BUTTON) == 0)
     {
-        connect(object, SIGNAL(clicked(bool)), this, SLOT(openServicesViewSlot()));
+        connect(object, SIGNAL(clicked(bool)), this, SLOT(openOperatorServiceSlot()));
     }
     else if (name.compare(DOCML_NAME_SORT_BY_DATE) == 0)
     {

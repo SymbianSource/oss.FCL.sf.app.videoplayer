@@ -22,6 +22,7 @@
 //      missing test functions:
 //      - how to setup construction to fail for testing purposes
 
+// Version : %version: %
 
 #ifndef __TESTVIDEOSERVICES_H__
 #define __TESTVIDEOSERVICES_H__
@@ -31,67 +32,68 @@
 #include <QtTest/QtTest>
 
 class VideoServices;
-class QVideoPlayerEngine;
+class VideoPlayerEngine;
 
 class TestVideoServices : public QObject
-	{
+{
 
     Q_OBJECT
 
-public: // Constructor / destructor
+    public: 
 
-    /**
-     * Contructor.
-     *
-     */
-	TestVideoServices();
+        /**
+         * Contructor.
+         *
+         */
+        TestVideoServices();
 
-    /**
-     * Destructor.
-     *
-     */
-    virtual ~TestVideoServices();
+        /**
+         * Destructor.
+         *
+         */
+        virtual ~TestVideoServices();
 
-private slots:
+    private slots:
 
-    void init();
-    void cleanup();
+        void init();
+        void cleanup();
 
-    void testCreateDelete();
+        void testCreateDelete();
     
-    void testCreateDeleteEngine();
+        void testCreateDeleteEngine();
     
-    void testCurrentService();
+        void testCurrentService();
 
 #if 0
-    void testInitialize();
-    void testInitializeService();
+        void testInitialize();
+        void testInitializeService();
 
-    void testMultipleInitialize();
-    void testMultipleInitializeService();
+        void testMultipleInitialize();
+        void testMultipleInitializeService();
 
-    void testHandleCommandPreInit();
-    void testHandleCommandPostInit();
-    void testHandleCommandPreAndPostInit();
+        void testHandleCommandPreInit();
+        void testHandleCommandPostInit();
+        void testHandleCommandPreAndPostInit();
 
-    void testHandleCommandPluginFail();
-    void testHandleCommandPluginFail1();
-    void testHandleCommandPluginFail2();
+        void testHandleCommandPluginFail();
+        void testHandleCommandPluginFail1();
+        void testHandleCommandPluginFail2();
 
-    void testPlayMedia();
-    void testSetEmbedded();
+        void testPlayMedia();
+        void testSetEmbedded();
 #endif
-    // called after last test case executed
-    void cleanupTestCase();
 
-signals:
+        // called after last test case executed
+        void cleanupTestCase();
 
-	void aboutToQuit();
+    signals:
 
-private:
+	    void aboutToQuit();
 
-	VideoServices*       mTestObject;
-	QVideoPlayerEngine*  mEngine;
+    private:
+
+	    VideoServices*       mTestObject;
+	    VideoPlayerEngine*   mEngine;
 };
 
 #endif  // __TESTVIDEOSERVICES_H__

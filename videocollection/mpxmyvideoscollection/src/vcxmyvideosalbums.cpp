@@ -779,6 +779,29 @@ void CVcxMyVideosAlbums::VideoTitleChangedL( TUint32 aMdsId )
     }
 
 // ----------------------------------------------------------------------------
+// CVcxMyVideosAlbums::VideosAddedOrRemovedFromCacheL
+// ----------------------------------------------------------------------------
+//
+void CVcxMyVideosAlbums::VideosAddedOrRemovedFromCacheL( RArray<TUint32> aMdsIds )
+    {
+    TInt albumCount = iAlbums.Count();
+    TInt videoCount = aMdsIds.Count();
+    for ( TInt i = 0; i < albumCount; i++ )
+        {
+        for ( TInt j = 0; j < videoCount; j++ )
+            {
+            if ( iAlbums[i]->BelongsToAlbum( aMdsIds[j] ) )
+                {
+                if ( iChangedAlbums.Find( i ) == KErrNotFound )
+                    {
+                    iChangedAlbums.AppendL( i );
+                    }
+                }
+            }
+        }    
+    }
+
+// ----------------------------------------------------------------------------
 // CVcxMyVideosAlbums::VideoAddedOrRemovedFromCacheL
 // ----------------------------------------------------------------------------
 //

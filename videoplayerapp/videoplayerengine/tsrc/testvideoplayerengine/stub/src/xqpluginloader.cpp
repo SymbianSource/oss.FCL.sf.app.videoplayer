@@ -15,6 +15,8 @@
 *
 */
 
+// Version : %version: %
+
 #include "stub/inc/xqpluginloader.h"
 #include "stub/inc/xqplugininfo.h"
 #include "testviewplugin.h"
@@ -23,26 +25,47 @@
 QHash<int, MpxViewPlugin*> XQPluginLoader::mPluginList;
 int XQPluginLoader::mFailToLoadPluginUid = -1;
 
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::XQPluginLoader()
+// -------------------------------------------------------------------------------------------------
+//
 XQPluginLoader::XQPluginLoader( int uid, QObject* parent )
 {
     MPX_DEBUG(_L("XQPluginLoader::XQPluginLoader()"));  
     
     Q_UNUSED( parent );    
+    
     mUid = uid;
 }
 
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::~XQPluginLoader()
+// -------------------------------------------------------------------------------------------------
+//
 XQPluginLoader::~XQPluginLoader()
 {
     MPX_DEBUG(_L("XQPluginLoader::~XQPluginLoader()"));      
 }
 
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::listImplementations()
+// -------------------------------------------------------------------------------------------------
+//
 bool XQPluginLoader::listImplementations( const QString &interfaceName, 
                                           QList<XQPluginInfo > &impls )
 {
     MPX_DEBUG(_L("XQPluginLoader::listImplementations()"));  
+    
+    Q_UNUSED( interfaceName );
+    Q_UNUSED( impls );
+    
     return true;
 }
 
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::instance()
+// -------------------------------------------------------------------------------------------------
+//
 QObject* XQPluginLoader::instance()
 {
     MPX_ENTER_EXIT(_L("XQPluginLoader::instance()"));
@@ -60,6 +83,10 @@ QObject* XQPluginLoader::instance()
     return mPluginList[mUid];
 }
 
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::cleanup()
+// -------------------------------------------------------------------------------------------------
+//
 void XQPluginLoader::cleanup()
 {
     MPX_ENTER_EXIT(_L("XQPluginLoader::cleanup()"));
@@ -75,11 +102,13 @@ void XQPluginLoader::cleanup()
     }
 }
 
-/**
- * Sets plugin load to fail.
- */
+// -------------------------------------------------------------------------------------------------
+// XQPluginLoader::setPluginLoadFailure()
+// -------------------------------------------------------------------------------------------------
+//
 void XQPluginLoader::setPluginLoadFailure( int uid )
 {
     MPX_DEBUG(_L("XQPluginLoader::setPluginLoadFailure()"));
+    
     mFailToLoadPluginUid = uid;
 }

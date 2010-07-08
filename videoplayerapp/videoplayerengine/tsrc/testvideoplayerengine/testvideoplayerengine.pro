@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#13 %
+# Version : %version: da1mmcf#14 %
 
 
 TEMPLATE = app
@@ -32,7 +32,7 @@ LIBS += -lxqserviceutil.dll
 
 
 # Input
-HEADERS += mpxvideoplaybackwrapper.h \
+HEADERS += videoplaybackwrapper.h \
            xqserviceutil.h \
            mpxviewpluginqt.h \
            testviewplugin.h \
@@ -48,7 +48,7 @@ HEADERS += mpxvideoplaybackwrapper.h \
            videoactivitystate.h \
            ../../../../inc/videoplayerengine.h
 
-SOURCES += mpxvideoplaybackwrapper.cpp \
+SOURCES += videoplaybackwrapper.cpp \
            xqserviceutil.cpp \
            testviewplugin.cpp \
            xqpluginloader.cpp \

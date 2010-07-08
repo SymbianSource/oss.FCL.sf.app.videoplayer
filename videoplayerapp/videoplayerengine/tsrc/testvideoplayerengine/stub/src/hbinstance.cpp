@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  %
+// Version : %version:  da1mmcf#7 %
 
 #include <hbmainwindow.h>
 
@@ -26,53 +26,87 @@ bool initialised = false;
 HbInstance* mInstance = 0;
 QList<HbInstance *> mInstances;
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::HbInstance()
+// -------------------------------------------------------------------------------------------------
+//
 HbInstance::HbInstance()
 {
     MPX_DEBUG(_L("HbInstance::HbInstance()"));
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::~HbInstance()
+// -------------------------------------------------------------------------------------------------
+//
 HbInstance::~HbInstance()
 {
     MPX_DEBUG(_L("HbInstance::~HbInstance()"));
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::instance()
+// -------------------------------------------------------------------------------------------------
+//
 HbInstance* HbInstance::instance()
 {
     MPX_ENTER_EXIT(_L("TestVideoServices::instance()"));
     
-    if (!initialised)
+    if ( ! initialised )
     {
     	mInstance = new HbInstance();  
     	initialised = true;
     	mInstances.append(mInstance);
     }
+	
     return mInstance;
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::primaryWindow()
+// -------------------------------------------------------------------------------------------------
+//
 HbInstance* HbInstance::primaryWindow() const
 {
     MPX_DEBUG(_L("HbInstance::primaryWindow()"));
 	return mInstance;
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::allMainWindows()
+// -------------------------------------------------------------------------------------------------
+//
 QList<HbInstance *> HbInstance::allMainWindows() const
 {
     MPX_DEBUG(_L("HbInstance::allMainWindows()"));
 	return mInstances;
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::removeView()
+// -------------------------------------------------------------------------------------------------
+//
 void HbInstance::removeView( QGraphicsWidget* )
 {
     MPX_DEBUG(_L("HbInstance::removeView()"));
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::addView()
+// -------------------------------------------------------------------------------------------------
+//
 void HbInstance::addView( QGraphicsWidget* )
 {
     MPX_DEBUG(_L("HbInstance::addView()"));
 }
 
+// -------------------------------------------------------------------------------------------------
+// HbInstance::setCurrentView()
+// -------------------------------------------------------------------------------------------------
+//
 void HbInstance::setCurrentView( HbView*, bool animation )
 {
     MPX_DEBUG(_L("HbInstance::setCurrentView()"));
+    Q_UNUSED( animation );
 }
-		
+

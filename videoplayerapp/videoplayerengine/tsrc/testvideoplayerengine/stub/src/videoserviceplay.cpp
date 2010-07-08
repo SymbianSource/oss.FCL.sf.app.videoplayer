@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#2 %
+// Version : %version: da1mmcf#3 %
 
 
 #include "videoservices.h"
@@ -24,7 +24,7 @@
 #include "mpxvideo_debug.h"
 
 
-VideoServicePlay::VideoServicePlay( VideoServices* parent, QVideoPlayerEngine* engine )
+VideoServicePlay::VideoServicePlay( VideoServices* parent, VideoPlayerEngine* engine )
 {
     MPX_DEBUG(_L("VideoServicePlay::VideoServicePlay()")); 
     

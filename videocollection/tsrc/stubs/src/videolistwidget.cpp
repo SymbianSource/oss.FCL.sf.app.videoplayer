@@ -219,16 +219,31 @@ void VideoListWidget::renameDialogFinished(HbAction *action)
     // not stubbed
 }
 
-void VideoListWidget::deleteItemDialogFinished(HbAction *action)
+void VideoListWidget::deleteItemDialogFinished(int action)
 {
     Q_UNUSED(action);
     // not stubbed
 }
 
-void VideoListWidget::removeCollectionDialogFinished(HbAction *action)
+void VideoListWidget::removeCollectionDialogFinished(int action)
 {
     Q_UNUSED(action);
     // not stubbed
 }
 
+void VideoListWidget::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+    Q_UNUSED(parent);
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+    // not stubbed
+}
+
+void VideoListWidget::rowsRemoved(const QModelIndex &parent, int start, int end)
+{    
+    Q_UNUSED(parent);
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+    // not stubbed
+}
 // end of file

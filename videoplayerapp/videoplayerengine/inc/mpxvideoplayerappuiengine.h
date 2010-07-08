@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -37,7 +37,7 @@
 class CMPXCommonUiHelper;
 class MMPXCollectionUiHelper;
 class CVideoPlaylistUtility;
-class QMpxVideoPlaybackWrapper;
+class VideoPlaybackWrapper;
 
 /**
 *  Application UI class.
@@ -52,7 +52,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
                                    public MMPXCHelperEmbeddedOpenObserver
 {
     public:        // Constructors and destructor
-        static CMpxVideoPlayerAppUiEngine* NewL( QMpxVideoPlaybackWrapper* aWrapper );
+        static CMpxVideoPlayerAppUiEngine* NewL( VideoPlaybackWrapper* aWrapper );
 
         /**
         * Destructor.
@@ -205,7 +205,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         /**
          * Constructor
          */
-        CMpxVideoPlayerAppUiEngine( QMpxVideoPlaybackWrapper* aWrapper );
+        CMpxVideoPlayerAppUiEngine( VideoPlaybackWrapper* aWrapper );
 
         /**
          * By default Symbian 2nd phase constructor is private.
@@ -257,16 +257,16 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         MMPXCollectionUtility*   iCollectionUtility;
         MMPXCollectionUiHelper*  iCollectionUiHelper;  // own
 
-        TUid iVideoCollectionId;
+        TUid                     iVideoCollectionId;
 
-        CMediaRecognizer*             iRecognizer;       // own
+        CMediaRecognizer*        iRecognizer;       // own
 
         TInt                     iAccessPointId;
         TBool                    iMultilinkPlaylist;
         TBool                    iSeekable;
         TBool                    iUpdateSeekInfo;
 
-        QMpxVideoPlaybackWrapper* iPlaybackWrapper;
+        VideoPlaybackWrapper*    iPlaybackWrapper;
 };
 
 //

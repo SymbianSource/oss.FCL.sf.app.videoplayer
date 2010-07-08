@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24 %
+// Version : %version: 24.1.1 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -163,13 +163,6 @@ void VideoThumbnailDataPrivate::disconnectSignals()
 	FUNC_LOG;
     if(mSignalsConnected)
     {
-        VideoSortFilterProxyModel *model = 
-                VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeAllVideos);
-        if(model)
-            {
-            disconnect(model->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelChangedSlot()));
-            disconnect(model->sourceModel(), SIGNAL(modelChanged()), this, SLOT(modelChangedSlot()));
-            }
 		disconnect(mThumbnailFetcher, SIGNAL(thumbnailReady(QPixmap , const TMPXItemId &, int )),
                     this, SLOT(thumbnailReadySlot(QPixmap , const TMPXItemId &, int )));
         disconnect(mThumbnailFetcher, SIGNAL(allThumbnailsFetched()),
@@ -197,8 +190,6 @@ int VideoThumbnailDataPrivate::connectSignals()
                     this, SLOT(thumbnailReadySlot( QPixmap , const TMPXItemId &, int))) ||
             !connect(mThumbnailFetcher, SIGNAL(allThumbnailsFetched()),
                      this, SLOT(allThumbnailsFetchedSlot())) ||
-           !connect(model->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelChangedSlot())) ||
-           !connect(model->sourceModel(), SIGNAL(modelChanged()), this, SLOT(modelChangedSlot())) ||
            !connect(mBgFetchTimer, SIGNAL(timeout()), this, SLOT(doBackgroundFetching())) ||
            !connect(mTbnReportTimer, SIGNAL(timeout()), this, SLOT(reportThumbnailsReadySlot())))
         {
@@ -299,11 +290,13 @@ int VideoThumbnailDataPrivate::startFetchingThumbnail(TMPXItemId mediaId, int pr
 void VideoThumbnailDataPrivate::doBackgroundFetching()
 {
 	FUNC_LOG;
+	INFO_1("VideoThumbnailDataPrivate::doBackgroundFetching() bg fetch count: %d", mCurrentBackgroundFetchCount);
+	
     if(!mCurrentModel || !mThumbnailFetcher)
     {
         return;
     }
-
+    
     if(mCurrentBackgroundFetchCount >= THUMBNAIL_CACHE_SIZE)
     {
         return;
@@ -351,6 +344,8 @@ void VideoThumbnailDataPrivate::doBackgroundFetching()
 void VideoThumbnailDataPrivate::getModelIndexes(QList<QModelIndex> &indexes, int startIndex, int endIndex)
 {
 	FUNC_LOG;
+    INFO_2("VideoThumbnailDataPrivate::getModelIndexes() from %d to %d", startIndex, endIndex);
+	
     QModelIndex index;
     for(int i = startIndex; i < endIndex; i++)
     {
@@ -407,16 +402,6 @@ void VideoThumbnailDataPrivate::allThumbnailsFetchedSlot()
 {
 	FUNC_LOG;
     continueBackgroundFetch();
-}
-
-// -----------------------------------------------------------------------------
-// VideoThumbnailDataPrivate::modelChangedSlot()
-// -----------------------------------------------------------------------------
-//
-void VideoThumbnailDataPrivate::modelChangedSlot()
-{
-	FUNC_LOG;
-    startBackgroundFetching(mCurrentModel, mCurrentFetchIndex);
 }
 
 // -----------------------------------------------------------------------------
@@ -622,7 +607,12 @@ void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyMode
         INFO("VideoThumbnailDataPrivate::startBackgroundFetching() fetching is disabled.");
         return;
     }
-    
+
+    if(mBgFetchTimer)
+    {
+        mBgFetchTimer->stop();
+    }
+	
     doBackgroundFetching();
 }
 

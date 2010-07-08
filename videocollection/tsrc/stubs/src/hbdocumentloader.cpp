@@ -273,10 +273,6 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     {
         obj = new HbPushButton();
     }
-    else if(name == DOCML_NAME_HINT_LABEL)
-    {
-        obj = new HbLabel();
-    }
     else if(name == DOCML_NAME_NO_VIDEOS_LABEL)
     {
         obj = new HbLabel();

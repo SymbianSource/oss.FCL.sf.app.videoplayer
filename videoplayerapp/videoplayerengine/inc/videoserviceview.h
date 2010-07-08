@@ -15,7 +15,7 @@
 * 
 */ 
       
-// Version : %version: 2 % 
+// Version : %version: 3 % 
       
 #ifndef __VIDEOSERVICEVIEW_H__ 
 #define __VIDEOSERVICEVIEW_H__ 
@@ -26,31 +26,33 @@
       
 // FORWARD DECLARATIONS 
 class VideoServices; 
-class QVideoPlayerEngine; 
+class VideoPlayerEngine; 
 class QFile; 
 class QLatin1String;
     
 class VideoServiceView : public XQServiceProvider 
-    { 
-      
+{       
     Q_OBJECT 
       
     public: 
-        VideoServiceView( VideoServices *parent, QVideoPlayerEngine* engine, QLatin1String service ); 
+    
+        VideoServiceView( VideoServices *parent, 
+                          VideoPlayerEngine* engine, 
+                          QLatin1String service ); 
+        
         virtual ~VideoServiceView(); 
      
-        void setEngine( QVideoPlayerEngine* engine ); 
+        void setEngine( VideoPlayerEngine* engine ); 
       
     public slots: 
         bool view( QString file ); 
         bool view (XQSharableFile file); 
             
     private: 
-        QVideoPlayerEngine* mEngine; 
+        VideoPlayerEngine* mEngine; 
         VideoServices* mServiceApp; 
-      
-      
-    }; 
+            
+}; 
       
 #endif //__VIDEOSERVICEVIEW_H__ 
 

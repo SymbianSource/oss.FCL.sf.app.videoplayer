@@ -131,6 +131,26 @@ public:
      * @param mode 
 	 */
     void setSelectionMode(int mode);
+    
+protected:
+    
+    /**
+     * Derived from HbListView. Starts fetching thumbnails when rows are inserted.
+     * 
+     * @param parent
+     * @param start
+     * @param end
+     */
+    void rowsInserted(const QModelIndex &parent, int start, int end);
+
+    /**
+     * Derived from HbListView. Starts fetching thumbnails when rows are removed.
+     * 
+     * @param parent
+     * @param start
+     * @param end
+     */
+    void rowsRemoved(const QModelIndex &parent, int start, int end);
 
 signals:
 
@@ -165,12 +185,12 @@ public slots:
     /**
      * Signaled by HbMessageBox when it's closed.
      */
-    void deleteItemDialogFinished(HbAction *action);
+    void deleteItemDialogFinished(int action);
     
     /**
      * Signaled by HbMessageBox when it's closed.
      */
-    void removeCollectionDialogFinished(HbAction *action);
+    void removeCollectionDialogFinished(int action);
     
     /**
      * called or signaled when delayed initialization is reauired for the widget

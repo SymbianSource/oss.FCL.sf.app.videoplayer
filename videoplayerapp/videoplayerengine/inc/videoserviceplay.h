@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#2 %
+// Version : %version: da1mmcf#3 %
 
 #ifndef __VIDEOSERVICEPLAY_H__
 #define __VIDEOSERVICEPLAY_H__
@@ -25,19 +25,22 @@
 
 // FORWARD DECLARATIONS
 class VideoServices;
-class QVideoPlayerEngine;
+class VideoPlayerEngine;
 class QLatin1String;
 
 class VideoServicePlay : public XQServiceProvider
-    {
-
+{
     Q_OBJECT
 
     public:
-        VideoServicePlay( VideoServices *parent, QVideoPlayerEngine* engine, QLatin1String service );
+    
+        VideoServicePlay( VideoServices *parent, 
+                          VideoPlayerEngine* engine, 
+                          QLatin1String service );
+        
         virtual ~VideoServicePlay();
 
-        void setEngine( QVideoPlayerEngine* engine );
+        void setEngine( VideoPlayerEngine* engine );
 
     public slots:
         void playMedia( QString filePath );
@@ -45,10 +48,9 @@ class VideoServicePlay : public XQServiceProvider
         void closePlayer();
 
     private:
-        QVideoPlayerEngine* mEngine;
+        VideoPlayerEngine* mEngine;
         VideoServices* mServiceApp;
 
+};
 
-    };
-
-    #endif //__VIDEOSERVICEPLAY_H__
+#endif //__VIDEOSERVICEPLAY_H__

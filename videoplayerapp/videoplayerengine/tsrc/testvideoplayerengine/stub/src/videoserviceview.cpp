@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 #include "videoservices.h"
@@ -24,12 +24,12 @@
 #include "mpxvideo_debug.h"
 
 
-VideoServiceView::VideoServiceView( VideoServices* parent, QVideoPlayerEngine* engine )
+VideoServiceView::VideoServiceView( VideoServices* parent, VideoPlayerEngine* engine )
 {
     MPX_DEBUG(_L("VideoServiceView::VideoServiceView()"));
     
     Q_UNUSED( engine );    
-	mServiceApp = parent;
+    mServiceApp = parent;
 }
 
 VideoServiceView::~VideoServiceView()
@@ -42,5 +42,5 @@ void VideoServiceView::view( QString filePath )
     MPX_DEBUG(_L("VideoServiceView::view()"));
     
     Q_UNUSED( filePath );    
-   	mServiceApp->setCurrentService( VideoServices::EView );
+    mServiceApp->setCurrentService( VideoServices::EView );
 }

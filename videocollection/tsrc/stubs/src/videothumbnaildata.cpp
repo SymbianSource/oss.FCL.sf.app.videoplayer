@@ -23,6 +23,7 @@ int VideoThumbnailTestData::mInstanceCallCount = 0;
 int VideoThumbnailTestData::mFreeThumbnailDataCallCount = 0;
 int VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = 0;
 int VideoThumbnailTestData::mStartBackgroundFetchingCallCount = 0;
+int VideoThumbnailTestData::mFetchIndex = -1;
 
 VideoThumbnailData &VideoThumbnailData::instance()
 {
@@ -62,9 +63,8 @@ const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
 void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
 {
     Q_UNUSED(model);
-    Q_UNUSED(fetchIndex);
-    
     VideoThumbnailTestData::mStartBackgroundFetchingCallCount++;
+    VideoThumbnailTestData::mFetchIndex = fetchIndex;
 }
 
 void VideoThumbnailData::enableBackgroundFetching(bool enable)

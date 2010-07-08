@@ -14,12 +14,12 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 2 %
+# Version : %version: 3 %
 
 
-TARGET = videoplayer
-CONFIG += hb service
 TEMPLATE = app
+CONFIG += hb service
+TARGET = videoplayer
 TRANSLATIONS += videos.ts
 
 symbian: 
@@ -35,7 +35,8 @@ symbian:
                                  "resources/videos.docml       /epoc32/release/winscw/udeb/z/resource/hb/splashml/videos.docml" \
                                  "resources/videos.splashml    /epoc32/release/winscw/udeb/z/resource/hb/splashml/videos.splashml" \
                                  "resources/videos.docml       /epoc32/data/z/resource/hb/splashml/videos.docml" \
-                                 "resources/videos.splashml    /epoc32/data/z/resource/hb/splashml/videos.splashml" \
+                                 "resources/videos.splashml    /epoc32/data/z/resource/hb/splashml/videos.splashml"
+    MMP_RULES += SMPSAFE
 }
 
 # Service provider specific configuration.
@@ -59,7 +60,7 @@ SOURCES += main.cpp
 RSS_RULES += \
 "    datatype_list =                                                                              " \
 "        {                                                                                        " \
-"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/avi\"; }, 											" \
+"        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/avi\"; },                      " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/msvideo\"; },                  " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/x-msvideo\"; },          " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/x-pn-realvideo\"; },           " \
@@ -69,14 +70,14 @@ RSS_RULES += \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"application/x-pn-realmedia\"; },     " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"audio/x-pn-realaudio-plugin\"; },    " \
 "        DATATYPE { priority=EDataTypePrioritySystem; type=\"video/x-matroska\"; },               " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-wmv\"; },                   " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-ms-asf\"; },                   " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gp\"; },                        " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gpp2\"; },                      " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/3gpp\"; },                       " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/mp4\"; },                        " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/x-m4v\"; },                      " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"video/mpeg4\"; },                      " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"application/ram\"; },                  " \
-"        DATATYPE { priority=EDataTypePriorityHigh; type=\"application/sdp\"; }                   " \
-"        };                                                                                       " \          
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/x-ms-wmv\"; },                 " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/x-ms-asf\"; },                 " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/3gp\"; },                      " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/3gpp2\"; },                    " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/3gpp\"; },                     " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/mp4\"; },                      " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/x-m4v\"; },                    " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"video/mpeg4\"; },                    " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"application/ram\"; },                " \
+"        DATATYPE { priority=EDataTypePriorityHigh;   type=\"application/sdp\"; }                 " \
+"        };                                                                                       "

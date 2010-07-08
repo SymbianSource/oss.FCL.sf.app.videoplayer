@@ -27,6 +27,7 @@ public: // methods
         mFreeThumbnailDataCallCount = 0;
         mBackgroundThumbnailFetchingEnabled = 0;
         mStartBackgroundFetchingCallCount = 0;
+        mFetchIndex = -1;
     }
     
 public: // data
@@ -34,6 +35,7 @@ public: // data
     static int mFreeThumbnailDataCallCount;
     static int mBackgroundThumbnailFetchingEnabled;
     static int mStartBackgroundFetchingCallCount;
+    static int mFetchIndex;
 };
 
 #endif /* VIDEOTHUMBNAILTESTDATA_H */

@@ -19,6 +19,7 @@
 #define __VIDEOCOLLECTIONVIEWUTILS_H__
 
 #include <qobject.h>
+#include <qvariant.h>
 #include "videocollectioncommon.h"
 
 class HbListView;
@@ -57,21 +58,22 @@ public:
     int loadSortingValues(int& role, Qt::SortOrder& order, VideoCollectionCommon::TCollectionLevels target);
     
     /**
-     * Get service icon resource strings from cenrep.
+     * Get string value for a key from central repository.
      * 
-     * @param icon On return contains the resource string for icon image.
-     * @param iconPressed On return contains the resource string for pressed icon image.
-     * @return Zero if operation succeeded, less than zero in error cases. 
+     * @param key Video collection central repository key.
+     * @return String stored in central repository. Empty string in error cases.
      */
-    int getServiceIconStrings(QString& icon, QString& iconPressed);
+    QString getCenRepStringValue(int key);
     
     /**
-     * Get service URI string.
+     * Get int value for a key from central repository.
      * 
-     * @return Service URI string. Invalid string in error cases.
+     * @param key Video collection central repository key.
+     * @param value Contains the read integer from cenrep at return.  
+     * @return Application UID if operation succeeded, less than zero in error cases.
      */
-    QString getServiceUriString();
-    
+    int getCenRepIntValue(int key);
+
 public:
     /**
      * Initializes list view for collection and selection dialog with common

@@ -63,6 +63,7 @@
 #include "videocollectionuiloaderdata.h"
 #include "videolistdatamodeldata.h"
 #include "xqserviceutilxtra.h"
+#include "videooperatorservicedata.h"
 
 // ---------------------------------------------------------------------------
 // main
@@ -97,7 +98,7 @@ int	main(int argc, char	*argv[])
 // init
 // ---------------------------------------------------------------------------
 //
-void TestListView::init(bool initTestView )
+void TestListView::init(bool initTestView)
 {
     XQServiceUtilXtra::service = false;
 	mUiLoader = new VideoCollectionUiLoader();
@@ -114,6 +115,8 @@ void TestListView::init(bool initTestView )
     QVERIFY(mTestView);
     if(initTestView)
     {
+        VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore");
+        VideoOperatorServiceData::mUris.append("testuri");
         QVERIFY(mTestView->initializeView() == 0);
     }
     
@@ -293,6 +296,7 @@ void TestListView::testInitializeView()
 void TestListView::testMenus()
 {
     init();
+    
     TMPXItemId tmpId = TMPXItemId::InvalidId();
     mTestView->activateView(tmpId);
 
@@ -300,7 +304,7 @@ void TestListView::testMenus()
     QList<QAction*> tbActions = mTestView->toolBar()->actions();
     QList<QAction*>	tbGroupActions;
     QList<QAction*>	tbGroupActions2;
-
+    
     // All videos is open for default, verify.
     QVERIFY( mTestView->mToolbarViewsActionGroup != 0 );
     QVERIFY( mTestView->mToolbarCollectionActionGroup != 0 );
@@ -311,6 +315,7 @@ void TestListView::testMenus()
     QCOMPARE( tbGroupActions.count(), 3 );
     QCOMPARE( tbGroupActions2.count(), 2 );
     QVERIFY( tbGroupActions.at(0)->isChecked() ); // First is checked.
+    QCOMPARE( VideoOperatorServiceData::mLoadCallCount, 6);
 
     // Verify checkable	and	visible	toolbar	actions.
     HbAction* allVideosAction =	mTestView->mToolbarActions[VideoListView::ETBActionAllVideos];
@@ -788,12 +793,28 @@ void TestListView::testOpenCollectionViewSlot()
 	cleanup();
 }
 // ---------------------------------------------------------------------------
-// Slot: test open services	view slot
+// Slot: test open operator service slot
 // ---------------------------------------------------------------------------
 //
-void TestListView::testOpenServicesViewSlot()
+void TestListView::testOpenOperatorServiceSlot()
 {
-    QFAIL("Feature not yet implemented!");
+    init();
+
+    TMPXItemId tmpId = TMPXItemId::InvalidId();
+    mTestView->activateView(tmpId);
+    
+    VideoOperatorServiceData::mLaunchServiceCallCount = 0;
+    connect(this, SIGNAL(testSignal2()), mTestView, SLOT(openOperatorServiceSlot()));
+    emit testSignal2();
+    QCOMPARE(VideoOperatorServiceData::mLaunchServiceCallCount, 1);
+    cleanup();
+
+    init();
+    VideoOperatorServiceData::mLaunchServiceCallCount = 0;
+    connect(this, SIGNAL(testSignal2()), mTestView, SLOT(openOperatorServiceSlot()));
+    emit testSignal2();
+    QCOMPARE(VideoOperatorServiceData::mLaunchServiceCallCount, 0);
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------

@@ -19,22 +19,26 @@
 #define HBTOOLBAR_H
 
 #include <hbwidget.h>
+#include "hbtoolbarextension.h"
+#include <hbaction.h>
 
 class HbToolBar : public HbWidget
 {
     Q_OBJECT
 
 public:
-    HbToolBar( QGraphicsItem *parent = 0 ) : HbWidget(parent) {};
-    virtual ~HbToolBar() {};
+    HbToolBar( QGraphicsItem *parent = 0 );
+    virtual ~HbToolBar();
 
     using HbWidget::addAction;
+    
 /*    HbAction *addAction( const QString &text );
     HbAction *addAction( const HbIcon &icon, const QString &text );
     HbAction *addAction( const QString &text, const QObject *receiver, const char *member );
     HbAction *addAction( const HbIcon &icon, const QString &text, const QObject *receiver, const char *member );
-
+*/
     HbAction *addExtension( HbToolBarExtension *extension );
+    /*
     HbAction *insertExtension( HbAction *before, HbToolBarExtension *extension );
 
     Qt::Orientation orientation() const;
@@ -65,6 +69,10 @@ private:
     Q_PRIVATE_SLOT(d_func(), void _q_delayedHide(HbEffect::EffectStatus status))
     //Q_PRIVATE_SLOT(d_func(), void _q_delayedShow(HbEffect::EffectStatus status))
 #endif // HB_EFFECTS*/
+    
+    static int mAddExtensionCallCount;
+    
+    HbAction *mToolBarExtensionAction;
 };
 
 #endif // HBTOOLBAR_H

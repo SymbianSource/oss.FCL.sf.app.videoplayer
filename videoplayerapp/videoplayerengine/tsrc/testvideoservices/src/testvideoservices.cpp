@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  %
+// Version : %version:  da1mmcf#4 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 TestVideoServices::TestVideoServices()
     : mTestObject( 0 )
-	, mEngine( 0 )
+    , mEngine( 0 )
 {
     MPX_DEBUG(_L("TestVideoServices::TestVideoServices()"));
 }
@@ -80,41 +80,43 @@ void TestVideoServices::cleanup()
     delete mEngine;
     mEngine = 0;
 	
-    QCOMPARE(mTestObject->mReferenceCount, 1);
-	if(mTestObject)
-	{
-		mTestObject->decreaseReferenceCount();
-	}
-	mTestObject = 0;
+    QCOMPARE( mTestObject->mReferenceCount, 1 );
+
+    if ( mTestObject)
+    {
+        mTestObject->decreaseReferenceCount();
+    }
+
+    mTestObject = 0;
 }
 
 void TestVideoServices::testCreateDelete()
 {
     MPX_DEBUG(_L("TestVideoServices::testCreateDelete()"));
     
-	mTestObject = VideoServices::instance();
+    mTestObject = VideoServices::instance();
 
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mServicePlay);
-    QVERIFY(mTestObject->mServiceUriFetch);
-    QVERIFY(mTestObject->mServiceView);
-    QVERIFY(mTestObject->mEngine == 0);
-    QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mServicePlay );
+    QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mEngine == 0 );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 }
 
 void TestVideoServices::testCreateDeleteEngine()
 {
     MPX_DEBUG(_L("TestVideoServices::testCreateDeleteEngine()"));
     
-	mEngine = new QVideoPlayerEngine();
-	mTestObject = VideoServices::instance(mEngine);
+    mEngine = new VideoPlayerEngine();
+    mTestObject = VideoServices::instance(mEngine);
 
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mServicePlay);
-    QVERIFY(mTestObject->mServiceUriFetch);
-    QVERIFY(mTestObject->mServiceView);
-    QVERIFY(mTestObject->mEngine == mEngine);
-    QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mServicePlay );
+    QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mEngine == mEngine );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 }
 
 
@@ -122,41 +124,41 @@ void TestVideoServices::testCurrentService()
 {
     MPX_DEBUG(_L("TestVideoServices::testCurrentService()"));
     
-	mTestObject = VideoServices::instance();
+    mTestObject = VideoServices::instance();
 
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mServicePlay);
-    QVERIFY(mTestObject->mServiceUriFetch);
-    QVERIFY(mTestObject->mServiceView);
-    QVERIFY(mTestObject->mEngine == 0);
-    QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mServicePlay );
+    QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mEngine == 0 );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
-    mTestObject->mServicePlay->playMedia(QString());
-    QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
+    mTestObject->mServicePlay->playMedia( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
-    mTestObject->mServiceUriFetch->fetch(QString());
-    QVERIFY(mTestObject->mCurrentService == VideoServices::EUriFetcher);
+    mTestObject->mServiceUriFetch->fetch( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
     
-    mTestObject->mServicePlay->playMedia(QString());
-    QVERIFY(mTestObject->mCurrentService == VideoServices::EUriFetcher);
+    mTestObject->mServicePlay->playMedia( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
     
-	cleanup();
+    cleanup();
 
-	mEngine = new QVideoPlayerEngine();
-	mTestObject = VideoServices::instance(mEngine);
+    mEngine = new VideoPlayerEngine();
+    mTestObject = VideoServices::instance(mEngine);
 
-	QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mServicePlay);
-    QVERIFY(mTestObject->mServiceUriFetch);
-    QVERIFY(mTestObject->mServiceView);
-    QVERIFY(mTestObject->mEngine == mEngine);
-    QVERIFY(mTestObject->mCurrentService == VideoServices::ENoService);
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mServicePlay );
+    QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mEngine == mEngine );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
-    mTestObject->mServiceUriFetch->fetch(QString());
-    QVERIFY(mTestObject->mCurrentService == VideoServices::EUriFetcher);
+    mTestObject->mServiceUriFetch->fetch( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
     
-    mTestObject->mServicePlay->playMedia(QString());
-    QVERIFY(mTestObject->mCurrentService == VideoServices::EPlayback);
+    mTestObject->mServicePlay->playMedia( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EPlayback );
 }
 
 void TestVideoServices::cleanupTestCase()

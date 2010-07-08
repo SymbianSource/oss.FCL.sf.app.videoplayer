@@ -16,7 +16,7 @@
 
 
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -53,6 +53,7 @@ SYSTEMINCLUDE   /epoc32/include/ecom
 SYSTEMINCLUDE   /epoc32/include/mmf
 SYSTEMINCLUDE   /epoc32/include/mmf/common
 
+SMPSAFE
 
 LIBRARY         euser.lib
 LIBRARY         mmfcontrollerframework.lib

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: da1mmcf#9 %
 
 #include "videoplayerengine.h"
 #include "videoservices.h"
@@ -29,11 +29,11 @@
 
 VideoServices *VideoServices::mInstance = 0;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // VideoServices::instance()
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
-VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
+VideoServices* VideoServices::instance( VideoPlayerEngine* engine )
 {
     MPX_ENTER_EXIT(_L("VideoServices::instance()"));
     
@@ -50,9 +50,9 @@ VideoServices* VideoServices::instance(QVideoPlayerEngine* engine)
     return mInstance;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // VideoServices::decreaseReferenceCount()
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void VideoServices::decreaseReferenceCount()
 {
@@ -60,7 +60,7 @@ void VideoServices::decreaseReferenceCount()
     
     if ( mInstance )
     {
-        if( --mInstance->mReferenceCount == 0 )
+        if ( --mInstance->mReferenceCount == 0 )
         {
             delete mInstance;
             mInstance = NULL;
@@ -68,11 +68,11 @@ void VideoServices::decreaseReferenceCount()
     }
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // setEngine()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
-void VideoServices::setEngine(QVideoPlayerEngine* engine)
+void VideoServices::setEngine( VideoPlayerEngine* engine )
 {
     MPX_ENTER_EXIT(_L("VideoServices::setEngine()"));
     
@@ -90,22 +90,22 @@ void VideoServices::setEngine(QVideoPlayerEngine* engine)
     		
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // engine()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
-QVideoPlayerEngine* VideoServices::engine()
+VideoPlayerEngine* VideoServices::engine()
 {
     MPX_DEBUG(_L("VideoServices::engine"));
 	
     return mEngine;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // VideoServices()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
-VideoServices::VideoServices( QVideoPlayerEngine* engine ) 
+VideoServices::VideoServices( VideoPlayerEngine* engine ) 
     : mReferenceCount( 0 )
     , mEngine( engine )
     , mCurrentService( VideoServices::ENoService )
@@ -113,27 +113,58 @@ VideoServices::VideoServices( QVideoPlayerEngine* engine )
 {
     MPX_ENTER_EXIT(_L("VideoServices::VideoServices()"));
    
-    mServicePlay     = new VideoServicePlay(this, engine, QLatin1String("videoplayer.com.nokia.symbian.IVideoView"));  //New service, new interface
-    mServiceView     = new VideoServiceView(this, engine, QLatin1String("videoplayer.com.nokia.symbian.IFileView"));   //New service, new interface        
-    mServiceUriFetch = new VideoServiceUriFetch(this, QLatin1String("videoplayer.com.nokia.symbian.IVideoFetch")); //New service, new interface
-    mServiceBrowse   = new VideoServiceBrowse(  this, QLatin1String("videoplayer.com.nokia.symbian.IVideoBrowse")); //New service, new interface
+    // New service, new interface
+    mServicePlay = new VideoServicePlay( this, engine, 
+                                 QLatin1String("videoplayer.com.nokia.symbian.IVideoView") );  
 
-    mServicePlayDeprecatedNewService = new VideoServicePlay(this, engine, QLatin1String("videoplayer.IVideoView")); //New service, old interface
-    mServicePlayDeprecatedOldService = new VideoServicePlay(this, engine, QLatin1String("com.nokia.Videos.IVideoView")); //Old service, old interface   
-    
-    mServiceViewDeprecatedNewService = new VideoServiceView(this, engine, QLatin1String("videoplayer.IFileView")); //New service, old interface
-    mServiceViewDeprecatedOldService = new VideoServiceView(this, engine, QLatin1String("com.nokia.Videos.IFileView")); //Old service, old interface     
-    
-    mServiceUriFetchDeprecatedNewService = new VideoServiceUriFetch(this, QLatin1String("videoplayer.IVideoFetch")); //New service, old interface
-    mServiceUriFetchDeprecatedOldService = new VideoServiceUriFetch(this, QLatin1String("com.nokia.Videos.IVideoFetch")); //Old service, old interface    
+    // New service, new interface
+    mServiceView = new VideoServiceView( this, engine, 
+                                 QLatin1String("videoplayer.com.nokia.symbian.IFileView") ); 
+          
+    // New service, new interface
+    mServiceUriFetch = new VideoServiceUriFetch( this, 
+                                 QLatin1String("videoplayer.com.nokia.symbian.IVideoFetch") ); 
 
-    mServiceBrowseDeprecatedNewService   = new VideoServiceBrowse(this, QLatin1String("videoplayer.IVideoBrowse")); //New service, old interface
-    mServiceBrowseDeprecatedOldService   = new VideoServiceBrowse(this, QLatin1String("com.nokia.Videos.IVideoBrowse")); //Old service, old interface
+    // New service, new interface
+    mServiceBrowse = new VideoServiceBrowse( this, 
+                                 QLatin1String("videoplayer.com.nokia.symbian.IVideoBrowse") ); 
+
+    // New service, old interface
+    mServicePlayDeprecatedNewService = new VideoServicePlay( this, engine, 
+                                                      QLatin1String("videoplayer.IVideoView") ); 
+
+    // Old service, old interface
+    mServicePlayDeprecatedOldService = new VideoServicePlay( this, engine, 
+                                                      QLatin1String("com.nokia.Videos.IVideoView") );    
+    
+    // New service, old interface
+    mServiceViewDeprecatedNewService = new VideoServiceView( this, engine, 
+                                                      QLatin1String("videoplayer.IFileView") ); 
+
+    // Old service, old interface 
+    mServiceViewDeprecatedOldService = new VideoServiceView( this, engine, 
+                                                      QLatin1String("com.nokia.Videos.IFileView") );     
+    
+    // New service, old interface
+    mServiceUriFetchDeprecatedNewService = new VideoServiceUriFetch( this, 
+                                                      QLatin1String("videoplayer.IVideoFetch") ); 
+
+    // Old service, old interface
+    mServiceUriFetchDeprecatedOldService = new VideoServiceUriFetch( this, 
+                                                      QLatin1String("com.nokia.Videos.IVideoFetch") );     
+
+    // New service, old interface
+    mServiceBrowseDeprecatedNewService = new VideoServiceBrowse( this, 
+                                                      QLatin1String("videoplayer.IVideoBrowse")) ; 
+
+    // Old service, old interface
+    mServiceBrowseDeprecatedOldService = new VideoServiceBrowse( this, 
+                                                      QLatin1String("com.nokia.Videos.IVideoBrowse") ); 
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // ~VideoServices()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 VideoServices::~VideoServices()
 {
@@ -153,9 +184,9 @@ VideoServices::~VideoServices()
     delete mServiceUriFetchDeprecatedOldService;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // currentService()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 VideoServices::TVideoService VideoServices::currentService()
 {
@@ -164,9 +195,9 @@ VideoServices::TVideoService VideoServices::currentService()
     return mCurrentService;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // getBrowseCategory()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 int VideoServices::getBrowseCategory() const
 {
@@ -174,28 +205,30 @@ int VideoServices::getBrowseCategory() const
 	
     int category = 0;
 
-    if ( mServiceBrowse && (XQServiceUtil::interfaceName().contains("symbian")))
+    if ( mServiceBrowse && ( XQServiceUtil::interfaceName().contains("symbian") ) )
     {
         category = mServiceBrowse->getBrowseCategory();
     }
-    else if ( mServiceBrowseDeprecatedNewService && mServiceBrowseDeprecatedOldService && !(XQServiceUtil::interfaceName().contains("symbian")))
+    else if ( mServiceBrowseDeprecatedNewService && 
+              mServiceBrowseDeprecatedOldService && 
+              ! ( XQServiceUtil::interfaceName().contains("symbian") ) )
     {
-    	if (mServiceBrowseDeprecatedNewService->isActive())
+    	if ( mServiceBrowseDeprecatedNewService->isActive() )
     	{
-    		category = mServiceBrowseDeprecatedNewService->getBrowseCategory();
+            category = mServiceBrowseDeprecatedNewService->getBrowseCategory();
     	}
     	else
     	{
-    		category = mServiceBrowseDeprecatedOldService->getBrowseCategory();
+            category = mServiceBrowseDeprecatedOldService->getBrowseCategory();
     	}
     }
 
     return category;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // setCurrentService()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void VideoServices::setCurrentService(VideoServices::TVideoService service)
 {
@@ -204,9 +237,9 @@ void VideoServices::setCurrentService(VideoServices::TVideoService service)
     mCurrentService = service;	
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // contextTitle()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 QString VideoServices::contextTitle() const
 {
@@ -214,49 +247,54 @@ QString VideoServices::contextTitle() const
 	
     QString title;
 
-    if (mCurrentService == VideoServices::EUriFetcher)
+    if ( mCurrentService == VideoServices::EUriFetcher )
     {
-    	if(mServiceUriFetch && (XQServiceUtil::interfaceName().contains("symbian")))
+    	if ( mServiceUriFetch && ( XQServiceUtil::interfaceName().contains("symbian") ) )
     	{
-    		title = mServiceUriFetch->contextTitle();
+            title = mServiceUriFetch->contextTitle();
     	}
-    	else if (mServiceUriFetchDeprecatedNewService && mServiceUriFetchDeprecatedOldService && !(XQServiceUtil::interfaceName().contains("symbian")))
+    	else if ( mServiceUriFetchDeprecatedNewService && 
+                  mServiceUriFetchDeprecatedOldService && 
+                  ! ( XQServiceUtil::interfaceName().contains("symbian") ) )
     	{
-    		if(mServiceUriFetchDeprecatedNewService->isActive())
-    		{
-    			title = mServiceUriFetchDeprecatedNewService->contextTitle();
-    		}
-    		else
-    		{
-    			title = mServiceUriFetchDeprecatedOldService->contextTitle();
-    		}
+
+            if ( mServiceUriFetchDeprecatedNewService->isActive() )
+    	    {
+    	        title = mServiceUriFetchDeprecatedNewService->contextTitle();
+            }
+    	    else
+    	    {
+    	        title = mServiceUriFetchDeprecatedOldService->contextTitle();
+    	    }
     	}
     }
-    else if (mCurrentService == VideoServices::EBrowse)
+    else if ( mCurrentService == VideoServices::EBrowse )
     {
-    	if ( mServiceBrowse && (XQServiceUtil::interfaceName().contains("symbian")))
-		{
-			title = mServiceBrowse->contextTitle();
-		}
-    	else if ( mServiceBrowseDeprecatedNewService && mServiceBrowseDeprecatedOldService && !(XQServiceUtil::interfaceName().contains("symbian")))
-		{
-        	if (mServiceBrowseDeprecatedNewService->isActive())
-        	{
-    			title = mServiceBrowseDeprecatedNewService->contextTitle();
-        	}
-        	else
-        	{
-    			title = mServiceBrowseDeprecatedOldService->contextTitle();
-        	}
-		}
+    	if ( mServiceBrowse && ( XQServiceUtil::interfaceName().contains("symbian") ) )
+        {
+            title = mServiceBrowse->contextTitle();
+        }
+    	else if ( mServiceBrowseDeprecatedNewService && 
+                  mServiceBrowseDeprecatedOldService && 
+                  ! ( XQServiceUtil::interfaceName().contains("symbian") ) )
+        {
+            if ( mServiceBrowseDeprecatedNewService->isActive() )
+            {
+                title = mServiceBrowseDeprecatedNewService->contextTitle();
+            }
+            else
+            {
+                title = mServiceBrowseDeprecatedOldService->contextTitle();
+            }
+        }
     }
     
     return title;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // sortRole()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 int VideoServices::sortRole() const
 {
@@ -264,31 +302,33 @@ int VideoServices::sortRole() const
     
     int sortRole = 0;
 
-    if (mCurrentService == EBrowse)
+    if ( mCurrentService == EBrowse )
     {
-    	if ( mServiceBrowse && (XQServiceUtil::interfaceName().contains("symbian")))
-		{
-			sortRole = mServiceBrowse->sortRole();
-		}
-    	else if ( mServiceBrowseDeprecatedNewService && mServiceBrowseDeprecatedOldService && !(XQServiceUtil::interfaceName().contains("symbian")))
-		{
-        	if (mServiceBrowseDeprecatedNewService->isActive())
-        	{
-        		sortRole = mServiceBrowseDeprecatedNewService->sortRole();
-        	}
-        	else
-        	{
-        		sortRole = mServiceBrowseDeprecatedOldService->sortRole();
-        	}
-		}
+    	if ( mServiceBrowse && ( XQServiceUtil::interfaceName().contains("symbian") ) )
+        {
+            sortRole = mServiceBrowse->sortRole();
+        }
+    	else if ( mServiceBrowseDeprecatedNewService && 
+                  mServiceBrowseDeprecatedOldService && 
+                  ! ( XQServiceUtil::interfaceName().contains("symbian") ) )
+        {
+            if ( mServiceBrowseDeprecatedNewService->isActive() )
+            {
+                sortRole = mServiceBrowseDeprecatedNewService->sortRole();
+            }
+            else
+            {
+                sortRole = mServiceBrowseDeprecatedOldService->sortRole();
+            }
+        }
     }
     
     return sortRole;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // itemSelected()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void VideoServices::itemSelected(const QString& item)
 {
@@ -298,47 +338,50 @@ void VideoServices::itemSelected(const QString& item)
     QStringList list;
     list.append( item );
 
-    if(mServiceUriFetch && (XQServiceUtil::interfaceName().contains("symbian")))
+    if( mServiceUriFetch && ( XQServiceUtil::interfaceName().contains("symbian") ) )
     {
     	mServiceUriFetch->complete( list );
     }
-    else if (mServiceUriFetchDeprecatedNewService && mServiceUriFetchDeprecatedOldService)
+    else if ( mServiceUriFetchDeprecatedNewService && mServiceUriFetchDeprecatedOldService )
     {
-    	if (mServiceUriFetchDeprecatedNewService->isActive())
+    	if ( mServiceUriFetchDeprecatedNewService->isActive() )
     	{
-        	mServiceUriFetchDeprecatedNewService->complete( list );
+            mServiceUriFetchDeprecatedNewService->complete( list );
     	}
     	else
     	{
-        	mServiceUriFetchDeprecatedOldService->complete( list );
+            mServiceUriFetchDeprecatedOldService->complete( list );
     	}
     }
+
     mFetchSelected = true;
 }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // browsingEnded()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void VideoServices::browsingEnded()
 {
     MPX_ENTER_EXIT(_L("VideoServices::browsingEnded()"));
 
-	if ( mServiceBrowse && (XQServiceUtil::interfaceName().contains("symbian")))
-	{
-		mServiceBrowse->complete();
-	}
-	else if ( mServiceBrowseDeprecatedNewService && mServiceBrowseDeprecatedOldService && !(XQServiceUtil::interfaceName().contains("symbian")))
-	{
-    	if (mServiceBrowseDeprecatedNewService->isActive())
+    if ( mServiceBrowse && ( XQServiceUtil::interfaceName().contains("symbian") ) )
+    {
+        mServiceBrowse->complete();
+    }
+    else if ( mServiceBrowseDeprecatedNewService && 
+              mServiceBrowseDeprecatedOldService && 
+              ! ( XQServiceUtil::interfaceName().contains("symbian") ) )
+    {
+        if ( mServiceBrowseDeprecatedNewService->isActive() )
     	{
-    		mServiceBrowseDeprecatedNewService->complete();
+            mServiceBrowseDeprecatedNewService->complete();
     	}
     	else
     	{
-    		mServiceBrowseDeprecatedOldService->complete();
+            mServiceBrowseDeprecatedOldService->complete();
     	}
-	}
+    }
 }
 
 // End of file

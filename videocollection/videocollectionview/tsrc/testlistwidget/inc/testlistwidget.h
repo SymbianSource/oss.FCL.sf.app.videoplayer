@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 26 %
+// Version : %version: 27 %
 
 #ifndef __TESTLISTWIDGET_H__
 #define __TESTLISTWIDGET_H__
@@ -179,6 +179,16 @@ private slots:
      * verifies scrollPositionTimerSlot()
      */
     void testScrollPositionTimerSlot();
+    
+    /**
+     * verifies testRowsInsertedSlot()
+     */
+    void testRowsInsertedSlot();
+    
+    /**
+     * verifies testRowsRemovedSlot()
+     */
+    void testRowsRemovedSlot();
 
 signals:
     

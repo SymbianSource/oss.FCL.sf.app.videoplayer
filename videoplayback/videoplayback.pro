@@ -14,11 +14,11 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#4 %
+# Version : %version: da1mmcf#5 %
 
 
 TEMPLATE  = subdirs
 CONFIG   += ordered
-SUBDIRS  += hbvideoplaybackview \
-            hbvideoplaybackviewplugin
+SUBDIRS  += videoplaybackview \
+            videoplaybackviewplugin
 BLD_INF_RULES.prj_mmpfiles += $$LITERAL_HASH"include \"videohelix/group/bld.inf\""

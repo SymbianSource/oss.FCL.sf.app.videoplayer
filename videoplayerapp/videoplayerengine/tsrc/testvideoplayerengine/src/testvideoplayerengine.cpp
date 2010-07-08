@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: da1mmcf#15 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -37,7 +37,7 @@
 #include "stub/inc/videoservices.h"
 #include "stub/inc/xqpluginloader.h"
 #include "stub/inc/videoactivitystate.h"
-#include "../stub/inc/mpxvideoplaybackwrapper.h"
+#include "../stub/inc/videoplaybackwrapper.h"
 #include "mpxvideo_debug.h"
 
 #define private public
@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
 
 
 TestVideoPlayerEngine::TestVideoPlayerEngine()
-	: mTestObject(0)
-	, mVideoServices(0)
-    , mCurrentViewPlugin(0)
-    , mPlaybackViewPlugin(0)
-    , mCollectionViewPlugin(0)
-    , mFileDetailsViewPlugin(0)
+    : mTestObject( 0 )
+    , mVideoServices( 0 )
+    , mCurrentViewPlugin( 0 )
+    , mPlaybackViewPlugin( 0 )
+    , mCollectionViewPlugin( 0 )
+    , mFileDetailsViewPlugin( 0 )
 {
     MPX_DEBUG(_L("TestVideoPlayerEngine::TestVideoPlayerEngine()"));
 }
@@ -80,7 +80,7 @@ TestVideoPlayerEngine::~TestVideoPlayerEngine()
     
     XQPluginLoader::cleanup();
     
-    if(!mTestObject.isNull())
+    if ( ! mTestObject.isNull() )
     {
         delete mTestObject;
     }
@@ -89,7 +89,8 @@ TestVideoPlayerEngine::~TestVideoPlayerEngine()
 
 void TestVideoPlayerEngine::init( bool isService )
 {
-    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::init()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::init() "), 
+                   _L("isService = %d"), isService );
     
     XQPluginLoader::mFailToLoadPluginUid  = -1; 
     
@@ -99,7 +100,7 @@ void TestVideoPlayerEngine::init( bool isService )
     mFileDetailsViewPlugin = 0;
     mVideoServices         = 0;
 
-    mTestObject = new QVideoPlayerEngine(isService);
+    mTestObject = new VideoPlayerEngine( isService );
     
     if ( isService )
     {
@@ -119,7 +120,7 @@ void TestVideoPlayerEngine::cleanup()
     mFileDetailsViewPlugin = 0;
     mVideoServices         = 0;
 
-    if(!mTestObject.isNull())
+    if ( ! mTestObject.isNull() )
     {
         delete mTestObject;
     }
@@ -128,144 +129,144 @@ void TestVideoPlayerEngine::cleanup()
 
 void TestVideoPlayerEngine::testCreateDelete()
 {
-    MPX_DEBUG(_L("TestVideoServices::testCreateDelete()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testCreateDelete()"));
     
     //Test object creation and deletion
-	init();
+    init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper == 0);    
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper == 0 );    
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 
 void TestVideoPlayerEngine::testCreateDeleteService()
 {
-    MPX_DEBUG(_L("TestVideoServices::testCreateDeleteService()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testCreateDeleteService()"));
     
     //Test object creation and deletion
-	init(true);
+    init( true );
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper == 0);    
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == true);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper == 0 );    
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == true );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
     
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testInitialize()
 {
-    MPX_DEBUG(_L("TestVideoServices::testInitialize()"));
+    MPX_ENTER_EXIT(_L("TestVideoServices::testInitialize()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper == 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( ! mTestObject.isNull() );
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper == 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper != 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper != 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCollectionViewPlugin != mTestObject->mPlaybackViewPlugin);
-    QVERIFY(mTestObject->mCollectionViewPlugin != mTestObject->mFileDetailsViewPlugin);
+    QVERIFY( mTestObject->mCollectionViewPlugin != mTestObject->mPlaybackViewPlugin );
+    QVERIFY( mTestObject->mCollectionViewPlugin != mTestObject->mFileDetailsViewPlugin );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testInitializeService()
 {
-    MPX_DEBUG(_L("TestVideoServices::testInitializeService()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testInitializeService()"));
     
-    init(true);
+    init( true );
 
-    QVERIFY(!mTestObject.isNull());
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper == 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == true);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( ! mTestObject.isNull() );
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper == 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == true );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper != 0);
-    QVERIFY(mTestObject->mVideoServices != 0);
-    QVERIFY(mTestObject->mIsService == true);
-    QVERIFY(VideoServices::mReferenceCount == 1);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper != 0 );
+    QVERIFY( mTestObject->mVideoServices != 0 );
+    QVERIFY( mTestObject->mIsService == true );
+    QVERIFY( VideoServices::mReferenceCount == 1 );
 
-    QVERIFY(mTestObject->mCollectionViewPlugin != mTestObject->mPlaybackViewPlugin);
+    QVERIFY( mTestObject->mCollectionViewPlugin != mTestObject->mPlaybackViewPlugin );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testMultipleInitialize()
 {
-    MPX_DEBUG(_L("TestVideoServices::testMultipleInitialize()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testMultipleInitialize()"));
     
-	init();
+    init();
 
-    QVERIFY(!mTestObject.isNull());
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( ! mTestObject.isNull() );
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mCurrentViewPlugin = mTestObject->mCurrentViewPlugin;
     mPlaybackViewPlugin = mTestObject->mPlaybackViewPlugin;
@@ -274,41 +275,42 @@ void TestVideoPlayerEngine::testMultipleInitialize()
 
     mTestObject->initialize();
 
-    QVERIFY(mCurrentViewPlugin == mTestObject->mCurrentViewPlugin);
-    QVERIFY(mPlaybackViewPlugin == mTestObject->mPlaybackViewPlugin);
-    QVERIFY(mCollectionViewPlugin == mTestObject->mCollectionViewPlugin);
-    QVERIFY(mFileDetailsViewPlugin == mTestObject->mFileDetailsViewPlugin);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mCurrentViewPlugin == mTestObject->mCurrentViewPlugin );
+    QVERIFY( mPlaybackViewPlugin == mTestObject->mPlaybackViewPlugin );
+    QVERIFY( mCollectionViewPlugin == mTestObject->mCollectionViewPlugin );
+    QVERIFY( mFileDetailsViewPlugin == mTestObject->mFileDetailsViewPlugin );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
+
 
 void TestVideoPlayerEngine::testMultipleInitializeService()
 {
-    MPX_DEBUG(_L("TestVideoServices::testMultipleInitializeService()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testMultipleInitializeService()"));
     
-	init(true);
+    init(true);
 
-    QVERIFY(!mTestObject.isNull());
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mVideoServices == 0);
-    QVERIFY(mTestObject->mIsService == true);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( ! mTestObject.isNull() );
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mVideoServices == 0 );
+    QVERIFY( mTestObject->mIsService == true );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mVideoServices != 0);
-    QVERIFY(mTestObject->mIsService == true);
-    QVERIFY(VideoServices::mReferenceCount == 1);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mVideoServices != 0);
+    QVERIFY( mTestObject->mIsService == true );
+    QVERIFY( VideoServices::mReferenceCount == 1 );
 
     mCurrentViewPlugin = mTestObject->mCurrentViewPlugin;
     mPlaybackViewPlugin = mTestObject->mPlaybackViewPlugin;
@@ -318,523 +320,524 @@ void TestVideoPlayerEngine::testMultipleInitializeService()
 
     mTestObject->initialize();
 
-    QVERIFY(mCurrentViewPlugin == mTestObject->mCurrentViewPlugin);
-    QVERIFY(mPlaybackViewPlugin == mTestObject->mPlaybackViewPlugin);
-    QVERIFY(mCollectionViewPlugin == mTestObject->mCollectionViewPlugin);
-    QVERIFY(mFileDetailsViewPlugin == mTestObject->mFileDetailsViewPlugin);
-    QVERIFY(mVideoServices == mTestObject->mVideoServices);
-    QVERIFY(VideoServices::mReferenceCount == 1);
+    QVERIFY( mCurrentViewPlugin == mTestObject->mCurrentViewPlugin );
+    QVERIFY( mPlaybackViewPlugin == mTestObject->mPlaybackViewPlugin );
+    QVERIFY( mCollectionViewPlugin == mTestObject->mCollectionViewPlugin );
+    QVERIFY( mFileDetailsViewPlugin == mTestObject->mFileDetailsViewPlugin );
+    QVERIFY( mVideoServices == mTestObject->mVideoServices );
+    QVERIFY( VideoServices::mReferenceCount == 1 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 ); 
 }
 
 
 void TestVideoPlayerEngine::testHandleCommandPreInit()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPreInit()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPreInit()"));
     
-	init();
+    init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateCollectionView );
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivatePlaybackView );
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
     
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testHandleCommandPostInit()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPostInit()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPostInit()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
-    mTestObject->handleCommand(MpxHbVideoCommon::DoDelayedLoad);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
+    mTestObject->handleCommand( MpxHbVideoCommon::DoDelayedLoad );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
 
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated());
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
     
     mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView-1111);
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testHandleCommandPreAndPostInit()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPreAndPostInit()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPreAndPostInit()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateCollectionView );
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivatePlaybackView );
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
     
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     mTestObject->initialize();
 
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
-    mTestObject->handleCommand(MpxHbVideoCommon::DoDelayedLoad);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
+    mTestObject->handleCommand( MpxHbVideoCommon::DoDelayedLoad );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
 
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated());
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPluginFail()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     XQPluginLoader::mFailToLoadPluginUid = MpxHbVideoCommon::KMpxVideoPluginDllFileDetailsUid;
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
-    mTestObject->handleCommand(MpxHbVideoCommon::DoDelayedLoad);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
+    mTestObject->handleCommand( MpxHbVideoCommon::DoDelayedLoad );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
 
-	QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivatePlaybackView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0);
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0);
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0);
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0);
+    QVERIFY( mTestObject->mIsService == false);
+    QVERIFY( VideoServices::mReferenceCount == 0);
 
     mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0);
 
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false);
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0);
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail1()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail1()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPluginFail1()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     XQPluginLoader::mFailToLoadPluginUid = MpxHbVideoCommon::KMpxVideoPluginDllCollectionUid;
 
     mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
-    mTestObject->handleCommand(MpxHbVideoCommon::DoDelayedLoad);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
+    mTestObject->handleCommand( MpxHbVideoCommon::DoDelayedLoad );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
     
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivatePlaybackView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mPlaybackViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
 
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated()  == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated());
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated()  == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin != 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin != 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0);
 }
 
 void TestVideoPlayerEngine::testHandleCommandPluginFail2()
 {
-    MPX_DEBUG(_L("TestVideoServices::testHandleCommandPluginFail2()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleCommandPluginFail2()"));
     
     init();
 
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     XQPluginLoader::mFailToLoadPluginUid = MpxHbVideoCommon::KMpxVideoPluginDllPlaybackUid;
     
- 	mTestObject->initialize();
+    mTestObject->initialize();
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
-    mTestObject->handleCommand(MpxHbVideoCommon::DoDelayedLoad);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
+    mTestObject->handleCommand( MpxHbVideoCommon::DoDelayedLoad );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-	QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivatePlaybackView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
 
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView);
+    mTestObject->handleCommand(MpxHbVideoCommon::ActivateCollectionView );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin);
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mCollectionViewPlugin );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated() == false);
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() == false );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
-	mTestObject->handleCommand(MpxHbVideoCommon::ActivateVideoDetailsView);
+    mTestObject->handleCommand( MpxHbVideoCommon::ActivateVideoDetailsView );
 
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin);
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mCurrentViewPlugin == mTestObject->mFileDetailsViewPlugin );
 
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated() == false);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin->activated());
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() == false );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin->activated() );
 
-    QVERIFY(mTestObject->mCurrentViewPlugin != 0);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin != 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin != 0);
-    QVERIFY(mTestObject->mIsService == false);
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( mTestObject->mCurrentViewPlugin != 0 );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin != 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin != 0 );
+    QVERIFY( mTestObject->mIsService == false );
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 
     cleanup();
 
-    QVERIFY(VideoServices::mReferenceCount == 0);
+    QVERIFY( VideoServices::mReferenceCount == 0 );
 }
 
 void TestVideoPlayerEngine::testPlayMedia()
 {
-    MPX_DEBUG(_L("TestVideoServices::testPlayMedia()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testPlayMedia()"));
     
-	  // 1. test with a string
+    // 1. test with a string
     init();    
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
     
-    mTestObject->playMedia( QString("c:\\data\\videos\\test.3gp"));
-    QVERIFY(mTestObject);
+    mTestObject->playMedia( QString("c:\\data\\videos\\test.3gp") );
+    QVERIFY( mTestObject );
     cleanup();
     
     // 2. test with a file handle
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
     
     XQSharableFile sf;
+
     if ( sf.open("C:\\data\\videos\\test.3gp") )
     {
         RFile rFile;
@@ -844,29 +847,30 @@ void TestVideoPlayerEngine::testPlayMedia()
             mTestObject->playMedia( rFile );
         }    
          
-        QVERIFY(mTestObject);
+        QVERIFY( mTestObject);
         
         sf.close();
     }
+
     cleanup();
 
     // 3. test with a filename
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( ! mTestObject.isNull() );
     
     QFile qfile("C:\\data\\videos\\test.3gp");
     mTestObject->playMedia( qfile.fileName() );
-    QVERIFY(mTestObject);
+    QVERIFY( mTestObject );
     cleanup();
     
 }
 
 void TestVideoPlayerEngine::testSetEmbedded()
 {
-    MPX_DEBUG(_L("TestVideoServices::testSetEmbedded()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testSetEmbedded()"));
     
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
     mTestObject->setEmbedded();
     QVERIFY( mTestObject->mEmbedded == true );
     cleanup();
@@ -874,57 +878,57 @@ void TestVideoPlayerEngine::testSetEmbedded()
 
 void TestVideoPlayerEngine::testInitWithActivityData()
 {
-    MPX_DEBUG(_L("TestVideoServices::testInitialize()"));
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testInitialize()"));
        
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
     
     mTestObject->initialize();
     
     // by default, colleciton view plugin is activated
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mCurrentViewPlugin);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper);
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mCurrentViewPlugin );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper );
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
     
     cleanup();
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
     
-    QVariant data = int(MpxHbVideoCommon::PlaybackView);
+    QVariant data = int( MpxHbVideoCommon::PlaybackView );
     // playback plugin 
-    VideoActivityState::instance().setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
+    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
     mTestObject->initialize();
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mCurrentViewPlugin);
-    QVERIFY(mTestObject->mPlaybackViewPlugin);
-    QVERIFY(mTestObject->mCollectionViewPlugin == 0);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper);
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mPlaybackViewPlugin->activated());
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mCurrentViewPlugin );
+    QVERIFY( mTestObject->mPlaybackViewPlugin );
+    QVERIFY( mTestObject->mCollectionViewPlugin == 0 );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper );
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
     
     cleanup();
     init();
-    QVERIFY(!mTestObject.isNull());
+    QVERIFY( !mTestObject.isNull() );
     
     // only collection view and playback view are accepted, so all other cases 
     // ends up into default: collectionview
-    data = int(MpxHbVideoCommon::VideoDetailsView);
-    VideoActivityState::instance().setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
+    data = int( MpxHbVideoCommon::VideoDetailsView );
+    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
     mTestObject->initialize();
-    QVERIFY(mTestObject);
-    QVERIFY(mTestObject->mCurrentViewPlugin);
-    QVERIFY(mTestObject->mPlaybackViewPlugin == 0);
-    QVERIFY(mTestObject->mCollectionViewPlugin);
-    QVERIFY(mTestObject->mFileDetailsViewPlugin == 0);
-    QVERIFY(mTestObject->mPlaybackWrapper);
-    QVERIFY(mTestObject->mCurrentViewPlugin->activated());
-    QVERIFY(mTestObject->mCollectionViewPlugin->activated());
+    QVERIFY( mTestObject );
+    QVERIFY( mTestObject->mCurrentViewPlugin );
+    QVERIFY( mTestObject->mPlaybackViewPlugin == 0 );
+    QVERIFY( mTestObject->mCollectionViewPlugin );
+    QVERIFY( mTestObject->mFileDetailsViewPlugin == 0 );
+    QVERIFY( mTestObject->mPlaybackWrapper );
+    QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
+    QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
     
     cleanup();
     
@@ -932,13 +936,15 @@ void TestVideoPlayerEngine::testInitWithActivityData()
 
 void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
 {
+    MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleQuitWihtActivityData()"));
+    
     // we make sure that engine saves correct plugin type before exit
     // using VideoActivityState since value is saved there before actually
     // being save to activitymanager
     
     init();
-    QVERIFY(!mTestObject.isNull());
-    connect(this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()));
+    QVERIFY( !mTestObject.isNull() );
+    connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
 
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
@@ -946,46 +952,46 @@ void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
     emit aboutToQuit();
        
     QVariant data = QVariant();
-    data = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_VIEWPLUGIN_TYPE);
-    QVERIFY(data.isValid());
-    QVERIFY(data.toInt() == MpxHbVideoCommon::CollectionView);
-    QVERIFY(VideoActivityState::mAllDataGetCount == 1);
+    data = VideoActivityState::instance().getActivityData( KEY_VIEWPLUGIN_TYPE );
+    QVERIFY( data.isValid() );
+    QVERIFY( data.toInt() == MpxHbVideoCommon::CollectionView );
+    QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
     
     cleanup();
     init();
-    QVERIFY(!mTestObject.isNull());
-    connect(this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()));
+    QVERIFY( ! mTestObject.isNull() );
+    connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
     
     data = int(MpxHbVideoCommon::PlaybackView);
-    VideoActivityState::instance().setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
+    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
     
     emit aboutToQuit();
     
     data = QVariant();
-    data = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_VIEWPLUGIN_TYPE);
-    QVERIFY(data.isValid());
-    QVERIFY(data.toInt() == MpxHbVideoCommon::PlaybackView);
-    QVERIFY(VideoActivityState::mAllDataGetCount == 1);
+    data = VideoActivityState::instance().getActivityData( KEY_VIEWPLUGIN_TYPE );
+    QVERIFY( data.isValid() );
+    QVERIFY( data.toInt() == MpxHbVideoCommon::PlaybackView );
+    QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
     
     cleanup();
     init();
-    QVERIFY(!mTestObject.isNull());
-    connect(this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()));
+    QVERIFY( ! mTestObject.isNull() );
+    connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
     
-    data = int(MpxHbVideoCommon::VideoDetailsView);
-    VideoActivityState::instance().setActivityData(data, VideoActivityData::KEY_VIEWPLUGIN_TYPE);
+    data = int( MpxHbVideoCommon::VideoDetailsView );
+    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
     
     emit aboutToQuit();
        
     data = QVariant();
-    data = VideoActivityState::instance().getActivityData(VideoActivityData::KEY_VIEWPLUGIN_TYPE);
-    QVERIFY(data.isValid());
-    QVERIFY(data.toInt() == MpxHbVideoCommon::CollectionView);
-    QVERIFY(VideoActivityState::mAllDataGetCount == 1);
+    data = VideoActivityState::instance().getActivityData( KEY_VIEWPLUGIN_TYPE );
+    QVERIFY( data.isValid() );
+    QVERIFY( data.toInt() == MpxHbVideoCommon::CollectionView );
+    QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
     
     cleanup();
 }
@@ -993,7 +999,7 @@ void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
 
 void TestVideoPlayerEngine::cleanupTestCase()
 {
-    MPX_DEBUG(_L("TestVideoServices::cleanupTestCase()"));    
+    MPX_DEBUG(_L("TestVideoPlayerEngine::cleanupTestCase()"));    
     // all common cleanup here
 }
 

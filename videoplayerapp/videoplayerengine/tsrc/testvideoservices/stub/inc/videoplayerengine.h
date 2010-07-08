@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description:  Implementation of QVideoPlayerEngine
+* Description:  Implementation of VideoPlayerEngine
 *
 */
 
-// Version : %version: da1mmcf#2 %
+// Version : %version: da1mmcf#3 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -26,25 +26,25 @@
 //FORWARD CLASS DECLARATION
 
 /**
- *  QVideoPlayerEngine
+ *  VideoPlayerEngine
  *
  */
-class QVideoPlayerEngine: public QObject
+class VideoPlayerEngine: public QObject
 {
     Q_OBJECT
 
     public:
+	
         /**
          * Constructor
          */
-        QVideoPlayerEngine(bool isService = false);
+        VideoPlayerEngine( bool isService = false );
 
         /**
         * Destructor.
         */
-        virtual ~QVideoPlayerEngine();
+        virtual ~VideoPlayerEngine();
 
-    public:
         void initialize();
         void playMedia( QString filePath );
         void playMedia( RFile file );

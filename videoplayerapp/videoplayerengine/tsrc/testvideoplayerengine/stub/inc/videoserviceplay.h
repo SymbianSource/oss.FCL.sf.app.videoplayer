@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: da1mmcf#2 %
 
 #ifndef VIDEOSERVICEPLAY_H
 #define VIDEOSERVICEPLAY_H
@@ -28,20 +28,20 @@
 class VideoServices;
 
 class VideoServicePlay : public QObject
-    {
+{
 
     Q_OBJECT
 
     public:
-        VideoServicePlay( VideoServices* parent, QVideoPlayerEngine* engine );
+        VideoServicePlay( VideoServices* parent, VideoPlayerEngine* engine );
         virtual ~VideoServicePlay();
 
     public slots:
         void playMedia( QString filePath );
 
     private:
-        QVideoPlayerEngine* mEngine;
+        VideoPlayerEngine* mEngine;
         VideoServices* mServiceApp;
-    };
+};
 
-    #endif
+#endif

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#4 %
+// Version : %version: da1mmcf#5 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -27,101 +27,92 @@
 class VideoServiceUriFetch;
 class VideoServicePlay;
 class VideoServiceView;
-class QVideoPlayerEngine;
+class VideoPlayerEngine;
 
 class VideoServices : public QObject
 {
     Q_OBJECT
 
-public:
+    public:
 
-    /**
-     * Returns singleton instance for this class.
-     *
-     * WARNING! Not safe to call this from destructor of another function scope static object!
-     *
-     * @return The singleton instance.
-     */
-    static VideoServices *instance(QVideoPlayerEngine* engine = 0);
+        /**
+         * Returns singleton instance for this class.
+         * WARNING! Not safe to call this from destructor of another function scope static object!
+         * @return The singleton instance.
+         */
+        static VideoServices *instance( VideoPlayerEngine* engine = 0 );
 
-    /**
-     * Decreases the reference count, when count reaches zero cleanup is done.
-     *
-     */
-    void decreaseReferenceCount();
+        /**
+         * Decreases the reference count, when count reaches zero cleanup is done.
+         *
+         */
+        void decreaseReferenceCount();
 
-	enum TVideoService
-    {
-        ENoService,
-        EUriFetcher,
-        EPlayback,
-        EView
-    };
+        enum TVideoService
+        {
+            ENoService,
+            EUriFetcher,
+            EPlayback,
+            EView
+        };
 
-    /**
-     * Returns service active status
-     *
-     * @return bool true if active, false if not active
-     *
-     */
-    VideoServices::TVideoService currentService();
+        /**
+         * Returns service active status
+         * @return bool true if active, false if not active
+         */
+        VideoServices::TVideoService currentService();
 
-private:
+    private:
+ 
+        /**
+         * Constructor
+         */
+        VideoServices();
 
-    /**
-     * Constructor
-     */
-    VideoServices();
+        /**
+         * Constructor
+         */
+        VideoServices( VideoPlayerEngine* engine );
 
-    /**
-     * Constructor
-     */
-    VideoServices(QVideoPlayerEngine* engine);
+        /**
+         * Destructor.
+         */
+        virtual ~VideoServices();
 
-    /**
-     * Destructor.
-     */
-    virtual ~VideoServices();
+        void setCurrentService( VideoServices::TVideoService service );
 
-    void setCurrentService(VideoServices::TVideoService service);
+        Q_DISABLE_COPY( VideoServices )
 
-    Q_DISABLE_COPY(VideoServices)
-
-signals:
+    signals:
 	void activated( int command );
 
-private:
+    private:
 
-    /**
-     * Singleton instance.
-     */
-    static VideoServices* mInstance;
+        /**
+         * Singleton instance.
+         */
+        static VideoServices*        mInstance;
 
-    VideoServiceUriFetch* mServiceUriFetch;
+        VideoServiceUriFetch*        mServiceUriFetch;
+        VideoServicePlay*            mServicePlay;    
+        VideoServiceView*            mServiceView;
+        VideoServices::TVideoService mCurrentService;
 
-    VideoServicePlay* mServicePlay;
-    
-    VideoServiceView* mServiceView;
+        friend class VideoServiceUriFetch;
+        friend class VideoServicePlay;    
+        friend class VideoServiceView;
 
-    VideoServices::TVideoService mCurrentService;
+    public:
 
-    friend class VideoServiceUriFetch;
+        /**
+         * Reference count.
+         */
+        static int mReferenceCount;
 
-    friend class VideoServicePlay;
-    
-    friend class VideoServiceView;
-
-public:
-
-    /**
-     * Reference count.
-     */
-    static int mReferenceCount;
-
-    /*
-     * indicate fetch service and attach operation has been selected
-     */
-    bool         mFetchSelected;
+        /*
+         * indicate fetch service and attach operation has been selected
+         */
+        bool mFetchSelected;
 
 };
 

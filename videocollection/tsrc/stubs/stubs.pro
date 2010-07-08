@@ -34,6 +34,7 @@ HEADERS_TEMP = \
 	inc/videoservicebrowse.h \
 	inc/xqserviceutilstub.h \
 	inc/xqserviceproviderstub.h \
+	inc/xqsettingsmanagerstub.h \
     inc/testobjectstore.h \
     inc/hbabstractitemview.h \
     inc/hbdocumentloader.h \
@@ -61,6 +62,7 @@ HEADERS_TEMP = \
     inc/hbstackedwidget.h \
     inc/hbstyleloader.h \
     inc/hbtoolbar.h \
+    inc/hbtoolbarextension.h \
     inc/hbwidget.h \
     inc/hbview.h \
     inc/hbeffect.h \
@@ -78,6 +80,7 @@ HEADERS_TEMP = \
     inc/videothumbnailtestdata.h \
     inc/videoactivitystate.h \
     inc/xqserviceutilxtra.h \
+    inc/videooperatorservicedata.h \
     # We need stub for this because it has static data and HW compilation of moc file fails because of that.
     inc/videoservices.h \
     ../../videocollectionview/inc/videocollectionuiloader.h \
@@ -89,7 +92,8 @@ HEADERS_TEMP = \
     ../../videocollectionwrapper/inc/videolistdatamodel.h \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
-    ../../videocollectionwrapper/inc/videothumbnaildata.h
+    ../../videocollectionwrapper/inc/videothumbnaildata.h \
+    ../../videocollectionview/inc/videooperatorservice.h
 
 SOURCES_TEMP = \
     src/xqserviceprovider.cpp \
@@ -110,6 +114,8 @@ SOURCES_TEMP = \
     src/hbscrollbar.cpp \
     src/hbstackedwidget.cpp \
     src/hbstyleloader.cpp \
+    src/hbtoolbar.cpp \
+    src/hbtoolbarextension.cpp \
     src/hbwidget.cpp \
     src/hbview.cpp \
     src/hbeffect.cpp \
@@ -128,7 +134,8 @@ SOURCES_TEMP = \
     src/videoservices.cpp \
     src/videoserviceurifetch.cpp \
     src/videoservicebrowse.cpp \ 
-    src/videoactivitystate.cpp 
+    src/videoactivitystate.cpp \
+    src/videooperatorservice.cpp
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)
 SOURCES += $$find(SOURCES_TEMP, ^(?!.*$$TESTEDCLASS).*$)

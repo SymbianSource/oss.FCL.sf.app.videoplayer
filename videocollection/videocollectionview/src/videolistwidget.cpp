@@ -30,6 +30,7 @@
 #include <hblistviewitem.h>
 #include <hbmessagebox.h>
 #include <hbinputdialog.h>
+#include <hbparameterlengthlimiter.h>
 #include <vcxmyvideosdefs.h>
 
 #include "videocollectionviewutils.h"
@@ -200,7 +201,7 @@ int VideoListWidget::activate(VideoCollectionCommon::TCollectionLevels level)
     // Enable thumbnail background fetching.
     VideoThumbnailData &thumbnailData = VideoThumbnailData::instance();
     thumbnailData.enableBackgroundFetching(true);
-    thumbnailData.startBackgroundFetching(mModel, 0);
+    fetchThumbnailsForVisibleItems();
 
     return 0;
 }
@@ -380,13 +381,14 @@ void VideoListWidget::deleteItemSlot()
 
     if (variant.isValid())
     {
-        QString text = hbTrId("txt_videos_info_do_you_want_to_delete_1").arg(
-                variant.toString());
+        QString text = HbParameterLengthLimiter(
+                hbTrId("txt_videos_info_do_you_want_to_delete_1")).arg(variant.toString()); 
         
         HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
+        messageBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
         messageBox->setObjectName(LIST_WIDGET_OBJECT_NAME_DELETE_VIDEO);
-        messageBox->open(this, SLOT(deleteItemDialogFinished(HbAction *)));
+        messageBox->open(this, SLOT(deleteItemDialogFinished(int)));
     }
 }
 
@@ -394,10 +396,9 @@ void VideoListWidget::deleteItemSlot()
 // deleteItemDialogFinished
 // ---------------------------------------------------------------------------
 //
-void VideoListWidget::deleteItemDialogFinished(HbAction *action)
+void VideoListWidget::deleteItemDialogFinished(int action)
 {
-    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
-    if(action == dlg->actions().at(0)) 
+    if(action == HbMessageBox::Yes)
     {
         QModelIndex index = currentIndex();
         if(index.isValid())
@@ -897,12 +898,14 @@ void VideoListWidget::removeCollectionSlot()
 
     if (variant.isValid())
     {
-        QString text = hbTrId("txt_videos_info_do_you_want_to_remove_collection").arg(
-                variant.toString());
+        QString text = HbParameterLengthLimiter(
+                hbTrId("txt_videos_info_do_you_want_to_remove_collection")).arg(variant.toString()); 
+        
         HbMessageBox *messageBox = new HbMessageBox(text, HbMessageBox::MessageTypeQuestion);
+        messageBox->setStandardButtons(HbMessageBox::Yes | HbMessageBox::No);
         messageBox->setAttribute(Qt::WA_DeleteOnClose);
-        messageBox->setObjectName(LIST_WIDGET_OBJECT_NAME_REMOVE_COLLECTION);            
-        messageBox->open(this, SLOT(removeCollectionDialogFinished(HbAction *)));
+        messageBox->setObjectName(LIST_WIDGET_OBJECT_NAME_REMOVE_COLLECTION);
+        messageBox->open(this, SLOT(removeCollectionDialogFinished(int)));
     }
 }
 
@@ -910,10 +913,9 @@ void VideoListWidget::removeCollectionSlot()
 // removeCollectionDialogFinished
 // ---------------------------------------------------------------------------
 //
-void VideoListWidget::removeCollectionDialogFinished(HbAction *action)
+void VideoListWidget::removeCollectionDialogFinished(int action)
 {
-    HbMessageBox *dlg = static_cast<HbMessageBox*>(sender());
-    if(action == dlg->actions().at(0)) 
+    if(action == HbMessageBox::Yes)
     {
         QModelIndex index = currentIndex();
         if(index.isValid())
@@ -1014,6 +1016,39 @@ void VideoListWidget::fetchThumbnailsForVisibleItems()
         int row = itemsVisible.value(0)->modelIndex().row();
         VideoThumbnailData::instance().startBackgroundFetching(mModel, row);
     }
+    else
+    {
+        // Nothing visible yet, start from first index.
+        VideoThumbnailData::instance().startBackgroundFetching(mModel, 0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// rowsInserted
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+    FUNC_LOG_ADDR(this);
+    Q_UNUSED(parent);
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+    fetchThumbnailsForVisibleItems();
+    HbListView::rowsInserted(parent, start, end);
+}
+
+// ---------------------------------------------------------------------------
+// rowsRemoved
+// ---------------------------------------------------------------------------
+//
+void VideoListWidget::rowsRemoved(const QModelIndex &parent, int start, int end)
+{
+    FUNC_LOG_ADDR(this);
+    Q_UNUSED(parent);
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+    fetchThumbnailsForVisibleItems();
+    HbListView::rowsRemoved(parent, start, end);
 }
 
 // end of file
