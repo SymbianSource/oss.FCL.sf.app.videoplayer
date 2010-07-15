@@ -703,6 +703,13 @@ void CVcxHgMyVideosVideoListImpl::DynInitMenuPaneL( TInt aResourceId,
             TBool showPlay = ( !videosMarked && ( highlight >= 0 ) && ( count > 0 ) );
             aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ! showPlay );
             }
+        else
+            {
+            if ( IsMarking() )
+                {
+                aMenuPane->SetItemDimmed( EVcxHgMyVideosCmdPlay, ETrue );
+                }
+            }
 
         if ( count > 0 )
             {

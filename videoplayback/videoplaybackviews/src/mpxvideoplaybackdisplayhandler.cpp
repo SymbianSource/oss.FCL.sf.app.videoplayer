@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 #include <sysutil.h>
@@ -239,10 +239,13 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
 
         //
         //  if can't find out match aspect ratio in dat file,
-        //  choose the scaling type through the rule
-        //      videoAspectRatio - aDisplayAspectRatio > 0.1 ==> zoom
-        //      videoAspectRatio - aDisplayAspectRatio < 0.1 ==> stretch
-        //      videoAspectRatio = aDisplayAspectRatio ==> natural
+        //  choose the scaling type through the rule        
+        //      aspectRatioDiff =  videoAspectRatio - aDisplayAspectRatio
+        //      aspectRatioDiff ==  0        ==> natural
+        //      aspectRatioDiff > 0.1        ==> zoom
+        //      aspectRatioDiff < - 0.3      ==> natural
+        //      aspectRatioDiff >= - 0.3 and <= 0.1   ==> stretch
+
         //
         if ( i == cnt )
         {
@@ -250,7 +253,8 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
             {
                 scalingType = EMMFZoom;
             }
-            else if ( videoAspectRatio != displayAspectRatio )
+            else if ( ( videoAspectRatio != displayAspectRatio ) &&
+                      ( videoAspectRatio - displayAspectRatio > (- 0.3) ) )
             {
                 scalingType = EMMFStretch;
             }

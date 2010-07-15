@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 82 %
+// Version : %version: 83 %
 
 
 //  Include Files
@@ -2037,7 +2037,7 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
 
     if ( err == KErrNone )
     {
-        DRM::CDrmUiHandling* drmUiHandling = DRM::CDrmUiHandling::NewL( iCoeEnv );
+        DRM::CDrmUiHandling* drmUiHandling = DRM::CDrmUiHandling::NewL();
         CleanupStack::PushL( drmUiHandling );
 
         if ( openError == KErrNone )
@@ -2073,6 +2073,11 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
     }
 
     CleanupStack::PopAndDestroy();  // fileHandle
+
+    //
+    //  User inputs should not be blocked when user close DRM details view
+    //
+    ResetPdlUserInputs();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -2295,6 +2300,15 @@ void CMPXVideoBasePlaybackView::DoHandleInitializingStateL( TMPXPlaybackState aL
 void CMPXVideoBasePlaybackView::HandlePdlReloadComplete()
 {
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandlePdlReloadComplete()"));
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::ResetPdlUserInputs()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoBasePlaybackView::ResetPdlUserInputs()
+{
+    MPX_DEBUG(_L("CMPXVideoBasePlaybackView::ResetPdlUserInputs()"));
 }
 
 // EOF

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 47 %
+// Version : %version: 48 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -490,7 +490,7 @@ void CVcxHgMyVideosMainView::HandleCommandL( TInt aCommand )
                 VideoListL()->HandleMarkCommandL( EVcxHgMyVideosCmdUnmarkAll );
                 ActivateCategoryListL();
                 }
-            else
+            else if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateCategoryIdle )
                 {
                 AppUi()->HandleCommandL( aCommand );
                 }

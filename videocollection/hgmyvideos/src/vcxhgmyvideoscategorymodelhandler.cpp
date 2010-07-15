@@ -1062,6 +1062,7 @@ void CVcxHgMyVideosCategoryModelHandler::ThumbnailReadyL(
             {
             thumbnail = CGulIcon::NewL( aThumbnail.DetachBitmap() );
             CleanupStack::PushL( thumbnail );
+            SetLastWatchedIndicatorL();
             }
         else
             {
@@ -1077,7 +1078,6 @@ void CVcxHgMyVideosCategoryModelHandler::ThumbnailReadyL(
         
         listItem.SetIcon( thumbnail ); // Takes ownership
         CleanupStack::Pop( thumbnail );
-        SetLastWatchedIndicatorL();
         iScroller.RefreshScreen( lastWatchedIndex );
         }
     }

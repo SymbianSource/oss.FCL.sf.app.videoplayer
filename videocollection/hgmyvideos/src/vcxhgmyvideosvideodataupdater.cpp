@@ -33,6 +33,7 @@
 #include <gulicon.h>
 
 #include "IptvDebug.h"
+#include <myvideosindicator.h>
 #include <vcxmyvideosdefs.h>
 #include "vcxhgmyvideosmodel.h"
 #include "vcxhgmyvideosmainview.h"
@@ -67,12 +68,14 @@ static TInt64 TimeStamp()
 CVcxHgMyVideosVideoDataUpdater* CVcxHgMyVideosVideoDataUpdater::NewL(
         CVcxHgMyVideosModel& aModel,
         CHgScroller& aScroller,
-        CVcxHgMyVideosVideoList& aVideoArray )
+        CVcxHgMyVideosVideoList& aVideoArray,
+        CMyVideosIndicator& aVideosIndicator )
     {
     CVcxHgMyVideosVideoDataUpdater* self = 
         CVcxHgMyVideosVideoDataUpdater::NewLC( aModel,
                                                aScroller,
-                                               aVideoArray );
+                                               aVideoArray,
+                                               aVideosIndicator );
     CleanupStack::Pop( self );
     return self;
     }
@@ -84,12 +87,14 @@ CVcxHgMyVideosVideoDataUpdater* CVcxHgMyVideosVideoDataUpdater::NewL(
 CVcxHgMyVideosVideoDataUpdater* CVcxHgMyVideosVideoDataUpdater::NewLC(
         CVcxHgMyVideosModel& aModel,
         CHgScroller& aScroller,
-        CVcxHgMyVideosVideoList& aVideoArray )
+        CVcxHgMyVideosVideoList& aVideoArray,
+        CMyVideosIndicator& aVideosIndicator)
     {
     CVcxHgMyVideosVideoDataUpdater* self = 
         new (ELeave) CVcxHgMyVideosVideoDataUpdater( aModel,
                                                      aScroller,
-                                                     aVideoArray );
+                                                     aVideoArray,
+                                                     aVideosIndicator );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
@@ -102,11 +107,13 @@ CVcxHgMyVideosVideoDataUpdater* CVcxHgMyVideosVideoDataUpdater::NewLC(
 CVcxHgMyVideosVideoDataUpdater::CVcxHgMyVideosVideoDataUpdater(
         CVcxHgMyVideosModel& aModel,
         CHgScroller& aScroller,
-        CVcxHgMyVideosVideoList& aVideoArray )
+        CVcxHgMyVideosVideoList& aVideoArray,
+        CMyVideosIndicator& aVideosIndicator )
   : CActive( EPriorityStandard ),
     iModel( aModel ),
     iScroller( aScroller ),
     iVideoArray( aVideoArray ),
+    iVideosIndicator( aVideosIndicator ),
     iPaused( EFalse )
     {
     CActiveScheduler::Add( this );
@@ -396,6 +403,8 @@ void CVcxHgMyVideosVideoDataUpdater::ContinueVideoDataFetchingL()
 //
 void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoData& aVideoData )
     {
+    IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL() ENTER" );
+
     TInt index = iVideoArray.IndexByMPXItemId( aVideoData.MPXItemId() );
     
     if ( index >= 0 && index < iScroller.ItemCount() )
@@ -406,7 +415,18 @@ void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoDa
         if ( aVideoData.Thumbnail() )
             {
             CGulIcon* thumbnail = CGulIcon::NewL( aVideoData.Thumbnail( ETrue ) );
-            listItem.SetIcon( thumbnail ); 
+            listItem.SetIcon( thumbnail );
+            CMPXMedia* media = iVideoArray.MPXMediaByMPXItemId( aVideoData.MPXItemId() );
+            if ( iVideosIndicator.IsIndicatorShown( *media ) )
+                {
+                IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL() has icon, has indicator" );
+                listItem.SetFlags( CHgItem::EHgItemFlagsIconOverlayIndicator );
+                }
+            else
+                {
+                IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL() has icon, no indicator" );
+                listItem.ClearFlags( CHgItem::EHgItemFlagsIconOverlayIndicator );
+                }
             }
         
         if ( drmUpdate )
@@ -464,6 +484,7 @@ void CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL( CVcxHgMyVideosVideoDa
             RefreshScreen();
             }
         }
+    IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosVideoDataUpdater::UpdateVideoDataToUiL() RETURN" );
     }
 
 // -----------------------------------------------------------------------------

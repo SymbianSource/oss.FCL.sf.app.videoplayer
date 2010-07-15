@@ -34,6 +34,7 @@ class CMPXMediaArray;
 class CThumbnailManager;
 class CVcxHgMyVideosVideoList;
 class CPeriodic;
+class CMyVideosIndicator;
 
 // CLASS DECLARATION
 
@@ -58,7 +59,8 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         static CVcxHgMyVideosVideoDataUpdater* NewL( 
                 CVcxHgMyVideosModel& aModel,
                 CHgScroller& aScroller,
-                CVcxHgMyVideosVideoList& aVideoArray );
+                CVcxHgMyVideosVideoList& aVideoArray,
+                CMyVideosIndicator& aVideosIndicator );
 
         /**
          * Two-phased constructor.
@@ -71,7 +73,8 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         static CVcxHgMyVideosVideoDataUpdater* NewLC( 
                 CVcxHgMyVideosModel& aModel,
                 CHgScroller& aScroller,
-                CVcxHgMyVideosVideoList& aVideoArray );
+                CVcxHgMyVideosVideoList& aVideoArray,
+                CMyVideosIndicator& aVideosIndicator );
 
         /**
          * Destructor.
@@ -182,7 +185,8 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
         CVcxHgMyVideosVideoDataUpdater( 
                 CVcxHgMyVideosModel& aModel,
                 CHgScroller& aScroller,
-                CVcxHgMyVideosVideoList& aVideoArray );
+                CVcxHgMyVideosVideoList& aVideoArray,
+                CMyVideosIndicator& aVideosIndicator );
     
         /**
          * 2nd phase constructor.
@@ -402,6 +406,12 @@ NONSHARABLE_CLASS( CVcxHgMyVideosVideoDataUpdater ) :
          * For refresh logic
          */
         TBool iPreviousModifiedIndexOnScreen;
+
+        /**
+         * Reference to overlay indicator handler
+         * Not own.
+         */
+        CMyVideosIndicator& iVideosIndicator;
 
     };
 

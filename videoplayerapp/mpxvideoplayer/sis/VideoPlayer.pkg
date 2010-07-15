@@ -20,7 +20,7 @@
 &EN
 
 ; Header
-#{"Video Player"},(0x200159B2),9,20,23, TYPE=SA, RU
+#{"Video Player"},(0x200159B2),9,20,24, TYPE=SA, RU
 
 ; Supports Series 60 v5.0
 ;[0x1028315F], 0, 0, 0, {"Series60ProductID"}

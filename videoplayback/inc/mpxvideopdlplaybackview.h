@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 // This file defines the API for VideoPlaybackView.dll
@@ -78,6 +78,8 @@ class CMPXVideoPdlPlaybackView : public CMPXVideoBasePlaybackView
         void SendWindowCommandL( TMPXVideoPlaybackCommand aCmd );
 
         void HandlePdlReloadComplete();
+
+        void ResetPdlUserInputs();
 
     private:
 

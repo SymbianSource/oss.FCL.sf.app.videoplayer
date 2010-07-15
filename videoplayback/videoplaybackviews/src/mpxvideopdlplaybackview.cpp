@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 27 %
+// Version : %version: 28 %
 
 
 //  Include Files
@@ -493,6 +493,17 @@ void CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()
     //
     //  User inputs should not be blocked since the new PDL command is complete
     //
+    ResetPdlUserInputs();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::ResetPdlUserInputs()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::ResetPdlUserInputs()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::ResetPdlUserInputs()"));
+
     iUserInputsBlocked = EFalse;
     iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
 }

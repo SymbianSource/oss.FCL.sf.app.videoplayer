@@ -125,11 +125,13 @@ void CVcxHgMyVideosVideoModelHandler::ConstructL()
     {
     iVideoArray = CVcxHgMyVideosVideoList::NewL();
 
+    iVideoIndicator = CMyVideosIndicator::NewL();
+
     iDataUpdater = CVcxHgMyVideosVideoDataUpdater::NewL( iModel,
                                                          iScroller,                                                        
-                                                         *iVideoArray );
+                                                         *iVideoArray,
+                                                         *iVideoIndicator );
 
-    iVideoIndicator = CMyVideosIndicator::NewL();
     }
 
 // -----------------------------------------------------------------------------
@@ -791,6 +793,8 @@ void CVcxHgMyVideosVideoModelHandler::ReplaceVideoArrayL( CMPXMediaArray& aVideo
 // 
 void CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL( TInt aListIndex )
     {
+    IPTVLOGSTRING2_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL() ENTER list index = %d", aListIndex );
+
     if ( aListIndex >= 0 && aListIndex < iScroller.ItemCount() )
         {
         TVcxHgMyVideosIndicatorHelper indicatorHelper;
@@ -856,7 +860,7 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL( TInt aListIndex )
                 {
                 item.SetFlags( CHgItem::EHgItemFlagMarked );
                 }
-            if ( VideoIndicator().IsIndicatorShown( *media ) )
+            if ( item.Icon() && VideoIndicator().IsIndicatorShown( *media ) )
                 {
                 item.SetFlags( CHgItem::EHgItemFlagsIconOverlayIndicator );
                 }
@@ -867,6 +871,8 @@ void CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL( TInt aListIndex )
                 }    
             }
         }
+
+    IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::UpdateVideoListItemL() RETURN" );
     }
 
 // -----------------------------------------------------------------------------
