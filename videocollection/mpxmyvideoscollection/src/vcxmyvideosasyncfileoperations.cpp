@@ -49,8 +49,6 @@
 CVcxMyVideosAsyncFileOperations* CVcxMyVideosAsyncFileOperations::NewL(
     CVcxMyVideosCollectionPlugin& aCollection )
     {
-    MPX_FUNC("CVcxMyVideosAsyncFileOperations::NewL");
-
     CVcxMyVideosAsyncFileOperations* self = new (ELeave) CVcxMyVideosAsyncFileOperations(
             aCollection );
     CleanupStack::PushL(self);
@@ -65,8 +63,6 @@ CVcxMyVideosAsyncFileOperations* CVcxMyVideosAsyncFileOperations::NewL(
 //
 CVcxMyVideosAsyncFileOperations::~CVcxMyVideosAsyncFileOperations()
     {
-    MPX_FUNC("CVcxMyVideosAsyncFileOperations::~CVcxMyVideosAsyncFileOperations");
-        
     iOperationIdArray.Close();
     iOperationResult.Close();
     delete iFileCopier;
@@ -78,11 +74,9 @@ CVcxMyVideosAsyncFileOperations::~CVcxMyVideosAsyncFileOperations()
 // Constructor.
 // ----------------------------------------------------------------------------
 //
-CVcxMyVideosAsyncFileOperations::CVcxMyVideosAsyncFileOperations(
-        CVcxMyVideosCollectionPlugin& aCollection )
+CVcxMyVideosAsyncFileOperations::CVcxMyVideosAsyncFileOperations( CVcxMyVideosCollectionPlugin& aCollection )
 : iCollection( aCollection )
     {
-    MPX_FUNC("CVcxMyVideosAsyncFileOperations::CVcxMyVideosAsyncFileOperations");
     }
 
 // ----------------------------------------------------------------------------
@@ -579,17 +573,11 @@ void CVcxMyVideosAsyncFileOperations::HandleFileCopyCompletedL( TInt aErr )
         MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: Copy succeeded");
         if ( iIsMoveOperation )
             {
-            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: move case");
+            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: move op: deleting source file");
             aErr = BaflUtils::DeleteFile( iCollection.iFs, iSourcePath );
             if ( aErr != KErrNone )
                 {
                 MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: delete for source file failed: %d", aErr );
-                MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: deleting target file");
-                TInt delErr = BaflUtils::DeleteFile( iCollection.iFs, iTargetPath );
-                if ( delErr != KErrNone )
-                    {
-                    MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: delete for target file failed: %d", delErr );
-                    }
                 }
             }
         }
@@ -598,15 +586,21 @@ void CVcxMyVideosAsyncFileOperations::HandleFileCopyCompletedL( TInt aErr )
         MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: CopyFile failed: %d", aErr);
         }
     
-    // roll mds and cache back if file operations failed
+    // roll everything back if file operations failed
     if ( aErr != KErrNone )
         {
         if ( iIsMoveOperation )
             {
-            MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: move failed %d", aErr );
-            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: setting media path back and leaving." );
+            MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: move operation failed %d", aErr );
+            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: setting media path back in MDS" );
             iMediaForMoveOp->SetTextValueL( KMPXMediaGeneralUri, iSourcePath );
             iCollection.SetVideoL( *iMediaForMoveOp );
+            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: deleting target file");
+            TInt delErr = BaflUtils::DeleteFile( iCollection.iFs, iTargetPath );
+            if ( delErr != KErrNone )
+                {
+                MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: delete for target file failed: %d", delErr );
+                }
             }
         else
             {

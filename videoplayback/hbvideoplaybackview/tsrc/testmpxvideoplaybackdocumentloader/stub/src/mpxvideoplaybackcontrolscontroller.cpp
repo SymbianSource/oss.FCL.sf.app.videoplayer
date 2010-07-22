@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 
@@ -67,6 +67,7 @@ void QMPXVideoPlaybackControlsController::changeViewMode(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::changeViewMode()"));
 
+    Q_UNUSED( transitionEffect );
     mViewMode = viewMode;
 }
 

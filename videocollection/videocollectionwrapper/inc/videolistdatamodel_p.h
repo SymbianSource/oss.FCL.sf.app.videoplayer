@@ -183,6 +183,11 @@ private slots: //slots from VideoDataSignalReceiver
      * @param itemId, item that has been modified.
      */
     void itemModifiedSlot(const TMPXItemId &itemId);
+    
+    /**
+     * Signalled when list is complete.
+     */
+    void listCompleteSlot();
 
 public: // services 
     

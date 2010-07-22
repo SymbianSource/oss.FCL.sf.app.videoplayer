@@ -18,10 +18,11 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 symbian: {
-BLD_INF_RULES.prj_mmpfiles += $$LITERAL_HASH"include \"videoplayer_plat/group/bld.inf\"" \
-                              $$LITERAL_HASH"include \"mediasettings/group/bld.inf\""
+BLD_INF_RULES.prj_mmpfiles += $$LITERAL_HASH"include \"videoplayer_plat/group/bld.inf\""
+
 SUBDIRS += videoplayback
 SUBDIRS += videoplayerapp
 SUBDIRS += videocollection
+SUBDIRS += mediasettings
 }
                      

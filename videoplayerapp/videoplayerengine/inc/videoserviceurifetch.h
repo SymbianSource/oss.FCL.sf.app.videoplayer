@@ -24,6 +24,7 @@
 
 // FORWARD DECLARATIONS
 class VideoServices;
+class QLatin1String;
 
 class VideoServiceUriFetch : public XQServiceProvider
 {
@@ -38,7 +39,7 @@ public:
     /**
      * contructor
      */
-    VideoServiceUriFetch( VideoServices *parent = 0 );
+    VideoServiceUriFetch( VideoServices *parent, QLatin1String service );
 
     /**
      * destructor
@@ -70,6 +71,12 @@ public:
     QString contextTitle() const;
 
 public slots:  // for QTHighway to notify provider about request
+    /*
+     *  Client can use this method launch video URI fetching
+     *
+     */
+    void fetch();
+
     /*
      *  Client can use this method launch video URI fetching
      *

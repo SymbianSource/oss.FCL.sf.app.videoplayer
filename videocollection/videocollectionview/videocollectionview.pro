@@ -26,6 +26,8 @@ symbian: {
     BLD_INF_RULES.prj_exports += \
     	"rom/videocollectionview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videocollectionview.iby)" \
     	"conf/videolistview.confml                      APP_LAYER_CONFML(videolistview.confml)" \
+    	"conf/CI_videoplayerservicelist.confml          APP_LAYER_CONFML(CI_videoplayerservicelist.confml)" \
+    	"conf/videoplayerservicelist.confml             APP_LAYER_CONFML(videoplayerservicelist.confml)" \
     	"conf/videolistview_2002BC63.crml               APP_LAYER_CRML(videolistview_2002BC63.crml)"
     
     TARGET.CAPABILITY = ALL -TCB -DRM
@@ -59,7 +61,8 @@ HEADERS += inc/videocollectionviewplugin.h \
            inc/videohintwidget.h \
            inc/videocollectionviewutils.h \
            inc/videocollectionuiloader.h \
-           inc/videolistselectiondialog.h
+           inc/videolistselectiondialog.h \
+           inc/videocollectioncenrepdefs.h
 
 SOURCES += src/videocollectionviewplugin.cpp \
            src/videolistview.cpp \

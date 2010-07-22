@@ -160,8 +160,13 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
 
         /**
          * Calculates and updates album media attributes.
+         * Adds events to iCollection.iMessageList if albums
+         * are modified. Does not send them.
+         * 
+         * @return  Returns ETrue if events were added to iCollection.iMessageList,
+         *          EFalse otherwise.
          */
-        void CalculateAttributesL();
+        TBool CalculateAttributesL();
         
         /**
          * Called when video's New Video flag changes. Calculates
@@ -180,6 +185,18 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          * @param aMdsId  MDS ID of the changed video.
          */
         void VideoTitleChangedL( TUint32 aMdsId );
+        
+        /**
+         * Called when video is added or removed from cache. Adds changed
+         * album indexes to iChangedAlbums.
+         */
+        void VideoAddedOrRemovedFromCacheL( CMPXMedia& video );
+
+        /**
+         * Goes through iChangedAlbums and updates album attributes and adds
+         * changed events.
+         */
+        void UpdateChangedAlbumsL();
 
 protected:
         
@@ -339,6 +356,13 @@ protected:
          * Used in MDS operations to store operation results. Is in sync with iMdsOpTargetIds. 
          */
         RArray<TUint32> iMdsOpResultsUint32;
+        
+        /**
+         * When videos are removed or added from cache, the indexes of the
+         * changed albums are stored here. Reason is to calculate new attributes
+         * only once per changed album.
+         */
+        RArray<TInt> iChangedAlbums;
         
     };
 

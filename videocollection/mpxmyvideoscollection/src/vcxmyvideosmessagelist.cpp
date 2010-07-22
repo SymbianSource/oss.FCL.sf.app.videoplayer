@@ -106,7 +106,7 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
     MPX_DEBUG1("CVcxMyVideosMessageList:: ----------------------------------------------'" );
 #endif
     
-    if ( AlreadyInMessageListL( aId, aChange, aExtraInfo ) )
+    if ( aChange == EMPXItemModified && AlreadyInMessageListL( aId, aChange, aExtraInfo ) )
         {
         MPX_DEBUG1("CVcxMyVideosMessageList:: already in message list, skipping add");
         return;
@@ -139,6 +139,11 @@ void CVcxMyVideosMessageList::AddEventL( const TMPXItemId& aId,
 
     iMessageCount++;
     iMessageList->SetTObjectValueL<TInt>( KMPXMessageArrayCount, iMessageCount );
+    
+    if ( iMessageArray->Count() > 100 )
+        {
+        SendL();
+        }
     }
 
 // ----------------------------------------------------------------------------------------------------------
@@ -277,10 +282,9 @@ void CVcxMyVideosMessageList::AddL( CMPXMessage* aMessage )
 #endif
 
     CreateMessageListL(); //does nothing if already created
-    iMessageArray->AppendL( aMessage ); // ownership moves
     iMessageCount++;
     iMessageList->SetTObjectValueL<TInt>( KMPXMessageArrayCount, iMessageCount );
-
+    iMessageArray->AppendL( aMessage ); // ownership moves
     }
 
 // ----------------------------------------------------------------------------------------------------------

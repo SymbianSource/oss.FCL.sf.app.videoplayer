@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: da1mmcf#2 %
 
 #ifndef __VIDEOSERVICEPLAY_H__
 #define __VIDEOSERVICEPLAY_H__
@@ -26,6 +26,7 @@
 // FORWARD DECLARATIONS
 class VideoServices;
 class QVideoPlayerEngine;
+class QLatin1String;
 
 class VideoServicePlay : public XQServiceProvider
     {
@@ -33,7 +34,7 @@ class VideoServicePlay : public XQServiceProvider
     Q_OBJECT
 
     public:
-        VideoServicePlay( VideoServices* parent, QVideoPlayerEngine* engine );
+        VideoServicePlay( VideoServices *parent, QVideoPlayerEngine* engine, QLatin1String service );
         virtual ~VideoServicePlay();
 
         void setEngine( QVideoPlayerEngine* engine );

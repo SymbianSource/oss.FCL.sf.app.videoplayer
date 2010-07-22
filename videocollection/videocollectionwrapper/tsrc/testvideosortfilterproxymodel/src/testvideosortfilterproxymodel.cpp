@@ -1365,6 +1365,7 @@ void TestVideoSortFilterProxyModel::testRemoveAlbums()
     // no albums in model
     QVERIFY(mTestObject->removeAlbums(indexList) == -1);
     
+    indexList.clear();
     mStubModel->removeAll();
     delete mTestObject;
     mTestObject = new FilterProxyTester(VideoCollectionCommon::EModelTypeCollections);
@@ -1374,9 +1375,9 @@ void TestVideoSortFilterProxyModel::testRemoveAlbums()
     mStubModel->appendData(TMPXItemId(1,2));
     mStubModel->appendData(TMPXItemId(2,2));
     mStubModel->appendData(TMPXItemId(3,2));
-    indexList.append(mTestObject->index(0,2));
-    indexList.append(mTestObject->index(1,2));
-    indexList.append(mTestObject->index(2,2));
+    indexList.append(mTestObject->index(0,0));
+    indexList.append(mTestObject->index(1,0));
+    indexList.append(mTestObject->index(2,0));
 
     // succeed
     QVERIFY(mTestObject->removeAlbums(indexList) == 0);

@@ -21,8 +21,6 @@
 
 #include <data_caging_paths_for_iby.hrh>
 
-ECOM_PLUGIN( mpsettropmodel.dll, 101f857b.rsc )
-
-data=DATAZ_\resource\MPSettingsROPModel.rsc      	    resource\MPSettingsROPModel.rsc
+ECOM_PLUGIN( mpsettropmodel.dll, mpsettropmodel.rsc )
 
 #endif // MPSETTROPMODEL_IBY

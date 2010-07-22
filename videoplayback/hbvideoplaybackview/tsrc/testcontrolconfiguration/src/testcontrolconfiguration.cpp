@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 4 %
 
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -82,7 +82,6 @@ void TestControlConfiguration::setup()
     mControlsController = new QMPXVideoPlaybackControlsController( mFileDetails );
                                                                      
     mControlConfig = new QMPXVideoPlaybackControlConfiguration( mControlsController );
-    mControlConfig->createControlList();
 }
 
 // ---------------------------------------------------------------------------
@@ -121,11 +120,54 @@ void TestControlConfiguration::testControlList()
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testControlList()"));
 
     setup();
-    
+
+    //
+    // Streaming case
+    //
+    mFileDetails->mPlaybackMode = EMPXVideoStreaming;
+
+    mControlConfig->createControlList();
     QList<TMPXVideoPlaybackControls> controlsList = mControlConfig->controlList();
-    
+
     QVERIFY( controlsList.contains( EMPXStatusPane ) );
-        
+    QVERIFY( ! controlsList.contains( EMPXRealLogoBitmap ) );
+    QVERIFY( controlsList.contains( EMPXBufferingAnimation ) );
+
+    cleanup();
+
+    //
+    // local + RN
+    //
+    setup();
+
+    mFileDetails->mPlaybackMode = EMPXVideoLocal;
+    mFileDetails->mRNFormat = true;
+
+    mControlConfig->createControlList();
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( controlsList.contains( EMPXStatusPane ) );
+    QVERIFY( controlsList.contains( EMPXRealLogoBitmap ) );
+    QVERIFY( ! controlsList.contains( EMPXBufferingAnimation ) );
+
+    cleanup();
+
+    //
+    // local + non RN
+    //
+    setup();
+
+    mFileDetails->mPlaybackMode = EMPXVideoLocal;
+    mFileDetails->mRNFormat = false;
+
+    mControlConfig->createControlList();
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( controlsList.contains( EMPXStatusPane ) );
+    QVERIFY( ! controlsList.contains( EMPXRealLogoBitmap ) );
+    QVERIFY( ! controlsList.contains( EMPXBufferingAnimation ) );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -137,8 +179,11 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testUpdateControlsWithFileDetails()"));
 
     setup();
-    
+    mControlConfig->createControlList();
+
+    //
     // 1. test with mVideoEnabled = false
+    //
     mControlsController->mFileDetails->mVideoEnabled = false;
     
     mControlConfig->updateControlsWithFileDetails();
@@ -146,8 +191,10 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
     QList<TMPXVideoPlaybackControls> controlsList = mControlConfig->controlList();
     
     QVERIFY( controlsList.contains( EMPXControlBar ) );
-    
+
+    //
     // 2. test with mVideoEnabled = true
+    //
     mControlsController->mFileDetails->mVideoEnabled = false;
     
     mControlConfig->updateControlsWithFileDetails(); 
@@ -158,6 +205,8 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
             mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
 
     QVERIFY( widget->isVisible() );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -169,30 +218,48 @@ void TestControlConfiguration::testUpdateControlList()
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testUpdateControlList()"));
 
     setup();    
-    
-    // 1.  Test for Details View
-    mControlConfig->updateControlList( EMPXControlCmdDetailsViewOpened );
+    mControlConfig->createControlList();
 
+    //
+    // 1.  Test for Details View
+    //
+    mControlConfig->updateControlList( EMPXControlCmdDetailsViewOpened );
     QList<TMPXVideoPlaybackControls> controlsList = mControlConfig->controlList();
 
     QVERIFY( controlsList.contains( EMPXFileDetailsWidget ) );    
+    QVERIFY( controlsList.contains( EMPXDetailsViewPlaybackWindow ) );
+    QVERIFY( ! controlsList.contains( EMPXIndicatorBitmap ) );    
 
 
+    //
     // 2. Test for Fullscreen View
+    //
     mControlConfig->updateControlList( EMPXControlCmdFullScreenViewOpened );
-
     controlsList = mControlConfig->controlList();
     
     QVERIFY( ! controlsList.contains( EMPXFileDetailsWidget ) );    
-    
-    
-    // 3. Test for Audio Only View
-    mControlConfig->updateControlList( EMPXControlCmdAudionOnlyViewOpened );
+    QVERIFY( ! controlsList.contains( EMPXDetailsViewPlaybackWindow ) );    
+    QVERIFY( ! controlsList.contains( EMPXIndicatorBitmap ) );
 
+    //
+    // 3. Test for Audio Only View
+    //
+    mControlConfig->updateControlList( EMPXControlCmdAudionOnlyViewOpened );
     controlsList = mControlConfig->controlList();
     
     QVERIFY( ! controlsList.contains( EMPXDetailsViewPlaybackWindow ) ); 
-    QVERIFY( controlsList.contains( EMPXIndicatorBitmap ) );        
+    QVERIFY( controlsList.contains( EMPXIndicatorBitmap ) );
+    QVERIFY( controlsList.contains( EMPXFileDetailsWidget ) );
+
+    //
+    // 4. RN log gets removed
+    //
+    mControlConfig->updateControlList( EMPXControlCmdAudionOnlyViewOpened );
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( ! controlsList.contains( EMPXRealLogoBitmap ) ); 
+
+    cleanup();
 }
 
 // End of file

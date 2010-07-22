@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 7 %
 
 
 
@@ -33,7 +33,7 @@
 // -------------------------------------------------------------------------------------------------
 //
 CMPXVideoViewWrapper::CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView )
-    : iView( aView )    
+    : iView( aView )
 {
 }
 
@@ -58,7 +58,7 @@ CMPXVideoViewWrapper* CMPXVideoViewWrapper::NewL( HbVideoBasePlaybackView* aView
 //
 void CMPXVideoViewWrapper::ConstructL()
 {
-    iMediaRequested = EFalse;        
+    iMediaRequested = EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ TBool CMPXVideoViewWrapper::IsLive()
 //
 TBool CMPXVideoViewWrapper::IsPlaylist()
 {
-    return EFalse;    
+    return EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -102,21 +102,7 @@ void CMPXVideoViewWrapper::CreateGeneralPlaybackCommandL( int aCmd )
 //
 void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 {
-    switch ( aCommand )
-    {
-        case EMPXPbvCmdNextListItem:
-        {
-            SetFileDetails( EFalse );            
-            break;    
-        }
-        
-        case EMPXPbvCmdPreviousListItem:
-        {
-            SetFileDetails( ETrue );  
-            break;    
-        }
-    }
-
+    iCommand = aCommand;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -126,11 +112,10 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 void CMPXVideoViewWrapper::RequestMediaL()
 {
     iMediaRequested = ETrue;
-    
-    SetFileDetails( ETrue );
-    
-}
 
+    SetFileDetails( ETrue );
+
+}
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoViewWrapper::ActivateClosePlayerActiveObject
@@ -161,64 +146,54 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
         delete iFileDetails;
         iFileDetails = NULL;
     }
-    
-    iFileDetails = new QMPXVideoPlaybackViewFileDetails(); 
-    
-    
-    _LIT(KTestMimeType, "video/3gp");        
+
+    iFileDetails = new QMPXVideoPlaybackViewFileDetails();
+
+    _LIT(KTestMimeType, "video/3gp");
     const QString qMimeType( (QChar*)KTestMimeType().Ptr(), KTestMimeType().Length() );
-    iFileDetails->mMimeType = qMimeType;   
-    
-    
+    iFileDetails->mMimeType = qMimeType;
+
     _LIT(KTestTitle, "Test Video Title");
     const QString qTitle( (QChar*)KTestTitle().Ptr(), KTestTitle().Length() );
-    iFileDetails->mTitle = qTitle;    
-    
-    
+    iFileDetails->mTitle = qTitle;
+
     _LIT(KTestArtist, "TestArtist");
     const QString qArtist( (QChar*)KTestArtist().Ptr(), KTestArtist().Length() );
     iFileDetails->mArtist = qArtist;
-    
-    
+
     _LIT(KTestDescription, "Test Description");
     const QString qDescription( (QChar*)KTestDescription().Ptr(), KTestDescription().Length() );
     iFileDetails->mDescription = qDescription;
-
 
     _LIT(KTestLocation, "Test Location");
     const QString qLocation( (QChar*)KTestLocation().Ptr(), KTestLocation().Length() );
     iFileDetails->mLocation = qLocation;
 
-
     _LIT(KTestCopyright, "Test Copyright");
     const QString qCopyright( (QChar*)KTestCopyright().Ptr(), KTestCopyright().Length() );
     iFileDetails->mCopyright = qCopyright;
-
 
     _LIT(KTestLanguage, "Test Language");
     const QString qLanguage( (QChar*)KTestLanguage().Ptr(), KTestLanguage().Length() );
     iFileDetails->mLanguage = qLanguage;
 
-
     _LIT(KTestKeywords, "Test Keywords");
     const QString qKeywords( (QChar*)KTestKeywords().Ptr(), KTestKeywords().Length() );
     iFileDetails->mKeywords = qKeywords;
-
 
     if ( aDefault )
     {
         _LIT(KTestClipName, "testClip.3gp");
         const QString qClipname( (QChar*)KTestClipName().Ptr(), KTestClipName().Length() );
-        iFileDetails->mClipName = qClipname;        
+        iFileDetails->mClipName = qClipname;
     }
     else
     {
         _LIT(KTestClipName, "nextClip.3gp");
         const QString qClipname( (QChar*)KTestClipName().Ptr(), KTestClipName().Length() );
-        iFileDetails->mClipName = qClipname;        
+        iFileDetails->mClipName = qClipname;
     }
-    
-    
+
     iFileDetails->mPlaybackMode = EMPXVideoLocal;
     iFileDetails->mSeekable = true;
     iFileDetails->mPausableStream = true;
@@ -228,12 +203,11 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
     iFileDetails->mRNFormat = false;
     iFileDetails->mDuration = 100;
     iFileDetails->mTvOutConnected  = false;
-    iFileDetails->mTvOutPlayAllowed = true;
     iFileDetails->mDrmProtected = false;
     iFileDetails->mMultiItemPlaylist = false;
     iFileDetails->mVideoHeight = 320;
     iFileDetails->mVideoWidth  = 240;
-    iFileDetails->mBitRate = 16000;         
+    iFileDetails->mBitRate = 16000;
 }
 
 // -------------------------------------------------------------------------------------------------

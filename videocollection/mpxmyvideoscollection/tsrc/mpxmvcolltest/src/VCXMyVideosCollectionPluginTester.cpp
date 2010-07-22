@@ -1644,6 +1644,7 @@ void CVCXMyVideosCollectionPluginTester::HandleSingleCollectionMessageL( CMPXMes
                         delete iCollectionEntries;
                         iCollectionEntries = NULL;
                         iCollectionEntries = CMPXMedia::NewL( *aMessage );
+                        iCollectionMediaArray = iCollectionEntries->Value<CMPXMediaArray>( KMPXMediaArrayContents );
 
                         UpdateOwnedMediaArrayL();
 
@@ -2822,7 +2823,7 @@ void CVCXMyVideosCollectionPluginTester::DeleteAllAlbumsL()
     
     for( TInt i = 0; i < iAlbumIds.Count(); i++ )
         {
-        // TODO: removing photos albums causes fails in opening albums.  
+        // don't remove photos albums
         if( iAlbumIds[i].iId1 > 2 )
             {
             album = CMPXMedia::NewL();
@@ -3027,7 +3028,7 @@ TInt CVCXMyVideosCollectionPluginTester::GetMediaIndexInCollectionL( TInt aDrive
                         break;
                         }
                     indexOfMediaWithDrive++;
-                    }            
+                    }
                 }
             }
         }

@@ -91,16 +91,19 @@ public:
     
     void disconnectSignals()
     {
-        disconnect(this, SIGNAL(markAllSignal(int)), mTestable, SLOT(markAllStateChangedSlot(int)));
-        disconnect(this, SIGNAL(selectionChangedSignal(const QItemSelection&, const QItemSelection&)), 
-                        mTestable, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection&)));
-        disconnect(this, SIGNAL(singleItemSelectedSignal(const QModelIndex&)), 
-                        mTestable, SLOT(singleItemSelectedSlot(const QModelIndex&)));
-        disconnect(this, SIGNAL(modelReadySignal()), mTestable, SLOT(modelReadySlot()));
-        disconnect(this, SIGNAL(updateCounterSignal()), mTestable, SLOT(updateCounterSlot()));
-        disconnect(this, SIGNAL(primaryActionTriggeredSignal()), 
-                        mTestable, SLOT(primaryActionTriggeredSlot()));
-        disconnect(this, SIGNAL(finishedSignal(HbAction*)), mTestable, SLOT(finishedSlot(HbAction*)));
+        if(mTestable)
+        {
+            disconnect(this, SIGNAL(markAllSignal(int)), mTestable, SLOT(markAllStateChangedSlot(int)));
+            disconnect(this, SIGNAL(selectionChangedSignal(const QItemSelection&, const QItemSelection&)), 
+                            mTestable, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection&)));
+            disconnect(this, SIGNAL(singleItemSelectedSignal(const QModelIndex&)), 
+                            mTestable, SLOT(singleItemSelectedSlot(const QModelIndex&)));
+            disconnect(this, SIGNAL(modelReadySignal()), mTestable, SLOT(modelReadySlot()));
+            disconnect(this, SIGNAL(updateCounterSignal()), mTestable, SLOT(updateCounterSlot()));
+            disconnect(this, SIGNAL(primaryActionTriggeredSignal()), 
+                            mTestable, SLOT(primaryActionTriggeredSlot()));
+            disconnect(this, SIGNAL(finishedSignal(HbAction*)), mTestable, SLOT(finishedSlot(HbAction*)));
+        }
     }
     
     void emitMarkAllStateChanged(int state)

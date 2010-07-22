@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -114,7 +114,6 @@ class QMPXVideoPlaybackToolBar : public QObject
         TMPXSeekingState                     mSeekingState;
 
         bool    mInitialized;
-        bool    mNeverVisibled;
         int     mPosition;
         int     mDuration;
         int     mAspectRatio;

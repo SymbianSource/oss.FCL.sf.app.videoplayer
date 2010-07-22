@@ -16,27 +16,38 @@
 */
 
 #include <qapplication.h>
+#include <vcxmyvideosdefs.h>
 #include "centralrepository.h"
 #include "testvideocollectionviewutils.h"
 #include "hblabel.h"
 #include "hbaction.h"
 #include "videocollectionwrapper.h"
 #include "videosortfilterproxymodeldata.h"
+#include "videoactivitystate.h"
 #include "videocollectioncommon.h"
 #include "centralrepository.h"
 #include "hbmessageboxdata.h"
 #include "hbnotificationdialog.h"
 #include "hblistview.h"
+#include <hbactivitymanager.h>
+#include <hbapplication.h>
 
 #define private public
 #include "videocollectionviewutils.h"
 #undef private
 
 // following consts are copied from videocollectionviewutils.cpp
-const int KVideoSortingRoleKey(0x5);
-const int KVideoSortingOrderKey(0x6);
-const int KCollectionsSortingRoleKey(0x7);
-const int KCollectionsSortingOrderKey(0x8);
+const int KVideoSortingRoleKey(0x1);
+const int KVideoSortingOrderKey(0x2);
+const int KCollectionsSortingRoleKey(0x3);
+const int KCollectionsSortingOrderKey(0x4);
+static const QString KEY_WIDGET_LEVEL    = "_VideoActivity_widget_level_";
+
+// id of the collection whose videolist is to be shown (int).
+static const QString KEY_COLLECTION_ID   = "_VideoActivity_collection_id_";
+
+// name of the collection whose videolist is to be shown (QString)
+static const QString KEY_COLLECTION_NAME = "_VideoActivity_collection_name_";
 
 // ---------------------------------------------------------------------------
 // main
@@ -44,7 +55,9 @@ const int KCollectionsSortingOrderKey(0x8);
 //
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    HbApplication app(argc, argv);
+    //HbMainWindow window;
+    //QApplication app(argc, argv);
     
     TestVideoVideoCollectionViewUtils tv;
 
@@ -91,96 +104,148 @@ void TestVideoVideoCollectionViewUtils::testShowStatusMsgSlot()
 {
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
     QVariant additional;
+    QList<QVariant> dataList;
     QString txt = "__test__";      
-    HbMessageBoxData::mWarningCallCount = 0;
     HbNotificationDialog::mNotifDialogTitle = "";
     HbNotificationDialog::mTitleTextWRapping = Hb::TextNoWrap;
     HbNotificationDialog::mAttribute = Qt::WA_Disabled;
-
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
     
     // status: VideoCollectionCommon::statusSingleDeleteFail
     additional = txt;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleDeleteFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
     HbMessageBoxData::mInformationCallCount = 0;
-
     
     // - invalid additional
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleDeleteFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
     
     // status: VideoCollectionCommon::statusMultipleDeleteFail
     additional = txt;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
 
     // - invalid additional (no change, since additional not excepted)
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultipleDeleteFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
     
     // status: VideoCollectionCommon::statusMultipleRemoveFail (additional not needed)
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultiRemoveFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mType = -1;
+    HbMessageBoxData::mShowCallCount = 0;
     
     // status: VideoCollectionCommon::statusVideosAddedToCollection
     // notification dialog shown
-    additional = txt;
+    dataList.clear();
+    dataList.append(QVariant(1)); // count
+    dataList.append(QVariant(txt)); // name
+    additional = dataList;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusVideosAddedToCollection, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() > 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextWordWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_DeleteOnClose);
-    HbMessageBoxData::mWarningCallCount = 0;
     HbNotificationDialog::mNotifDialogTitle = "";
     HbNotificationDialog::mTitleTextWRapping = Hb::TextNoWrap;
     HbNotificationDialog::mAttribute = Qt::WA_Disabled;
+        
+    // - too few additional
+    dataList.clear();
+    dataList.append(QVariant(txt)); // name
+    additional = dataList;
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusVideosAddedToCollection, additional);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
+    QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
+    QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
+    QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
     
+    // - empty message
+    dataList.clear();
+    dataList.append(QVariant(1)); // count
+    dataList.append(QVariant("")); // name
+    additional = dataList;
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusVideosAddedToCollection, additional);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
+    QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
+    QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
+    QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
+    
+    // - with zero video count
+    dataList.clear();
+    dataList.append(QVariant(0)); // count
+    dataList.append(QVariant(txt)); // name
+    additional = dataList;
+    testObject.showStatusMsgSlot(VideoCollectionCommon::statusVideosAddedToCollection, additional);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
+    QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
+    QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
+    QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);    
+
     // - invalid additional
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusVideosAddedToCollection, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
     
     // status: VideoCollectionCommon::statusAllVideosAlreadyInCollection
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusAllVideosAlreadyInCollection, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mShowCallCount = 0;
+    HbMessageBoxData::mType = -1;
     
     // status: VideoCollectionCommon::statusDeleteInProgress
     additional = txt;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusDeleteInProgress, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() > 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextWordWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_DeleteOnClose);
-    HbMessageBoxData::mWarningCallCount = 0;
     HbNotificationDialog::mNotifDialogTitle = "";
     HbNotificationDialog::mTitleTextWRapping = Hb::TextNoWrap;
     HbNotificationDialog::mAttribute = Qt::WA_Disabled;
@@ -188,7 +253,8 @@ void TestVideoVideoCollectionViewUtils::testShowStatusMsgSlot()
     // - invalid additional
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusDeleteInProgress, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
@@ -196,16 +262,19 @@ void TestVideoVideoCollectionViewUtils::testShowStatusMsgSlot()
     // status: VideoCollectionCommon::statusSingleRemoveFail
     additional = txt;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleRemoveFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mShowCallCount = 0;
+    HbMessageBoxData::mType = -1;
     
     // - invalid additional
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusSingleRemoveFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
@@ -213,33 +282,34 @@ void TestVideoVideoCollectionViewUtils::testShowStatusMsgSlot()
     // status: statusMultiRemoveFail
     additional = txt;
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultiRemoveFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
+    HbMessageBoxData::mShowCallCount = 0;
+    HbMessageBoxData::mType = -1;
     
     // invalid additional (no change, since additional not excepted)
     additional = QVariant();
     testObject.showStatusMsgSlot(VideoCollectionCommon::statusMultiRemoveFail, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 1);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 1);
+    QVERIFY(HbMessageBoxData::mType == HbMessageBox::MessageTypeWarning);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
-    
+    HbMessageBoxData::mShowCallCount = 0;
+    HbMessageBoxData::mType = -1;
     
     // invalid state
     additional = txt;
     testObject.showStatusMsgSlot(0, additional);
-    QVERIFY(HbMessageBoxData::mWarningCallCount == 0);
+    QVERIFY(HbMessageBoxData::mShowCallCount == 0);
+    QVERIFY(HbMessageBoxData::mType == -1);
     QVERIFY(HbNotificationDialog::mNotifDialogTitle.count() == 0);
     QVERIFY(HbNotificationDialog::mTitleTextWRapping == Hb::TextNoWrap);
     QVERIFY(HbNotificationDialog::mAttribute == Qt::WA_Disabled);
-    HbMessageBoxData::mWarningCallCount = 0;
-   
 }   
-    
 
 // -----------------------------------------------------------------------------
 // testSaveSortingValues
@@ -565,6 +635,10 @@ void TestVideoVideoCollectionViewUtils::testInitListView()
 
 }
 
+// -----------------------------------------------------------------------------
+// testSortModel
+// -----------------------------------------------------------------------------
+//
 void TestVideoVideoCollectionViewUtils::testSortModel()
 {
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
@@ -634,6 +708,92 @@ void TestVideoVideoCollectionViewUtils::testSortModel()
     QVERIFY(testObject.mVideosSortOrder == Qt::DescendingOrder);
     QVERIFY(testObject.mCollectionsSortRole == VideoCollectionCommon::KeyTitle);
     QVERIFY(testObject.mCollectionsSortOrder == Qt::DescendingOrder);
+}
+
+// -----------------------------------------------------------------------------
+// testSetAndGetWidgetLevel
+// -----------------------------------------------------------------------------
+//
+void TestVideoVideoCollectionViewUtils::testSetAndGetWidgetLevel()
+{
+    static const char* ACTIVITY_VIDEOS_MAINVIEW = "VideosMainView";
+    
+    VideoCollectionCommon::TCollectionLevels level;
+    
+    // Invalid level
+    level = VideoCollectionCommon::ELevelInvalid;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+    VideoCollectionViewUtils::getActivityWidgetLevel( level);
+    QVERIFY(level == VideoCollectionCommon::ELevelVideos);
+    
+    // Category level.
+    level = VideoCollectionCommon::ELevelCategory;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+    VideoCollectionViewUtils::getActivityWidgetLevel( level);
+    QVERIFY(level == VideoCollectionCommon::ELevelCategory);
+    
+    // make sure unneeded data is cleared
+    TMPXItemId id = TMPXItemId(1,1);
+    QString name = "name";
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    level = VideoCollectionCommon::ELevelVideos;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+
+    QVERIFY(level == VideoCollectionCommon::ELevelVideos);
+    QVariant data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+    QVERIFY(data.toInt() == 0);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+    QVERIFY(data.toString().isEmpty());
+    
+    id = TMPXItemId(1,1);
+    name = "name";
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    level = VideoCollectionCommon::ELevelAlbum;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level);
+
+    QVERIFY(level == VideoCollectionCommon::ELevelAlbum);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+    QVERIFY(data.toInt() == 1);
+    data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+    QVERIFY(data.toString() == "name");
+
+}
+
+void TestVideoVideoCollectionViewUtils::testSetAndGetCollectionActivityData()
+{
+    TMPXItemId id = TMPXItemId(1,1);
+    QString name = "name";   
+    
+    // no default collection nor user defined collection
+    VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+    QVERIFY(id == TMPXItemId::InvalidId());
+    QVERIFY(name.isEmpty());
+    
+    // default collection
+    level = VideoCollectionCommon::ELevelDefaultColl;
+    id = TMPXItemId(1,1);
+    name = "name"; 
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+   
+    QVERIFY(id == TMPXItemId(1, KVcxMvcMediaTypeCategory));
+    QVERIFY(name == "name");
+   
+    // user defined collection
+    level = VideoCollectionCommon::ELevelAlbum;
+    id = TMPXItemId(1,1);
+    name = "name"; 
+    VideoCollectionViewUtils::setWidgetActivityLevel(level); 
+    VideoCollectionViewUtils::setCollectionActivityData(id, name);
+    VideoCollectionViewUtils::getCollectionActivityData(id, name);
+    
+    QVERIFY(id == TMPXItemId(1, KVcxMvcMediaTypeAlbum));
+    QVERIFY(name == "name");
+   
 }
 
 // End of file

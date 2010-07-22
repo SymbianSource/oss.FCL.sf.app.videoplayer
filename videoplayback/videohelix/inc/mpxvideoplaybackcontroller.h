@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 29 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -126,6 +126,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         TBool IsVideoCall();
         TBool IsVoiceCall();
 
+        TBool IsViewActivated();
+
         void HandleTvOutEventL( TBool aConnected );
 
         void HandleError(TInt error);
@@ -133,6 +135,8 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         void HandleVolumeL( TBool aIncrease );
 
         void SendHideControlsEventL();
+        
+        void HandleFrameReady(TInt aError);
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
@@ -220,7 +224,6 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         TBool                                  iAppInForeground;
         CMediaRecognizer::TMediaType           iMediaType;
         TInt                                   iAccessPointId;
-        TBool                                  iForegroundPause;
         TBool                                  iAllowAutoPlay;
         TBool                                  iHelixLoadingStarted;
         TInt                                   iPBPluginError;
@@ -264,6 +267,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         CHWRMLight*                             iLight;
         TInt                                    iLightStatus;
         TInt                                    iSavedPosition;
+        TBool                                   iViewActivated;
 
     public:     // Friend classes
 
@@ -286,9 +290,12 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         friend class CMPXProgressiveDLPlaybackMode;
 
         friend class CMPXVideoSeeker;
+#ifdef USE_S60_DOWNLOAD_MANAGER 
         friend class CMPXVideoDlMgrIf;
+#endif // USE_S60_DOWNLOAD_MANAGER 
         friend class CMPXVideoAccessoryObserver;
         friend class CMpxVideoPlayerUtility;
+        friend class CMPXVideoPosterFrameSetter;
 };
 
 // INLINE METHODS

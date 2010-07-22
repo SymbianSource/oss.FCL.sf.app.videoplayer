@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#3 %
+// Version : %version: 5 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -164,9 +164,29 @@ private:
     VideoServiceUriFetch* mServiceUriFetch;
 
     /**
+     * Deprecated VideoServiceUriFetch service instance.
+     */
+    VideoServiceUriFetch* mServiceUriFetchDeprecatedNewService;
+    
+    /**
+     * Deprecated VideoServiceUriFetch service instance.
+     */
+    VideoServiceUriFetch* mServiceUriFetchDeprecatedOldService;
+
+    /**
      * VideoServicePlay service instance.
      */
     VideoServicePlay* mServicePlay;
+    
+    /**
+     * VideoServicePlay service instance.
+     */
+    VideoServicePlay* mServicePlayDeprecatedNewService;
+    
+    /**
+     * VideoServicePlay service instance.
+     */
+    VideoServicePlay* mServicePlayDeprecatedOldService;    
     
     /**
      * VideoServiceView service instance.
@@ -174,9 +194,29 @@ private:
     VideoServiceView* mServiceView; 
     
     /**
+     * VideoServiceView service instance.
+     */    
+    VideoServiceView* mServiceViewDeprecatedNewService; 
+    
+    /**
+     * VideoServiceView service instance.
+     */    
+    VideoServiceView* mServiceViewDeprecatedOldService;     
+    
+    /**
      * VideoServiceBrowse service instance.
      */
     VideoServiceBrowse *mServiceBrowse;
+
+    /**
+     * Deprecated VideoServiceBrowse service instance.
+     */
+    VideoServiceBrowse *mServiceBrowseDeprecatedNewService;
+    
+    /**
+     * Deprecated VideoServiceBrowse service instance.
+     */
+    VideoServiceBrowse *mServiceBrowseDeprecatedOldService;
 
     /**
      * Pointer of QVideoPlayerEngine.

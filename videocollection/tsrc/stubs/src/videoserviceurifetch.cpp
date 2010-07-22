@@ -15,11 +15,12 @@
  *
  */
 
+#include "xqserviceproviderstub.h"
 #include "videoserviceurifetch.h"
 #include "videoservices.h"
 
-VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent):
-    XQServiceProvider("TestListView"),
+VideoServiceUriFetch::VideoServiceUriFetch(VideoServices* parent, QLatin1String service):
+    XQServiceProvider( service, parent ),
     mRequestIndex(0),
     mServiceApp(parent)
 {
@@ -59,6 +60,11 @@ QString VideoServiceUriFetch::contextTitle() const
 {
     // not stubbed
     return QString();
+}
+
+void VideoServiceUriFetch::fetch()
+{
+    mServiceApp->setCurrentService(VideoServices::EUriFetcher);
 }
 
 void VideoServiceUriFetch::fetch(const QString& title)

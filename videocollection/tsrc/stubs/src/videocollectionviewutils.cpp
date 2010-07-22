@@ -28,6 +28,9 @@ Qt::SortOrder VideoCollectionViewUtilsData::mCollectionSortOrder = Qt::Ascending
 QString VideoCollectionViewUtilsData::mIconString = "";
 QString VideoCollectionViewUtilsData::mPressedString = "";
 QVariant VideoCollectionViewUtilsData::mLastStatusAdditional = QVariant();
+VideoCollectionCommon::TCollectionLevels VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelVideos;
+TMPXItemId VideoCollectionViewUtilsData::mActivityCollectionId = TMPXItemId::InvalidId();
+QString VideoCollectionViewUtilsData::mActivityCollectionName = "";
 
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
@@ -123,6 +126,29 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
     Q_UNUSED(view);
     // not stubbed
 }
+
+void VideoCollectionViewUtils::setWidgetActivityLevel(const VideoCollectionCommon::TCollectionLevels &level)
+{
+    VideoCollectionViewUtilsData::mWidgetLevel = level;
+}
+  
+void VideoCollectionViewUtils::getActivityWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+{
+    level = VideoCollectionViewUtilsData::mWidgetLevel;
+}
+
+void VideoCollectionViewUtils::setCollectionActivityData(const TMPXItemId &id, const QString &name)
+{
+    VideoCollectionViewUtilsData::mActivityCollectionId = id;
+    VideoCollectionViewUtilsData::mActivityCollectionName = name;
+}
+    
+void VideoCollectionViewUtils::getCollectionActivityData(TMPXItemId &id, QString &name)
+{
+    id = VideoCollectionViewUtilsData::mActivityCollectionId;
+    name = VideoCollectionViewUtilsData::mActivityCollectionName;
+}
+
 
 void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,
     bool async, VideoCollectionCommon::TCollectionLevels target)

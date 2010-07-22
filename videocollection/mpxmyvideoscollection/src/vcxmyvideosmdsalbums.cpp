@@ -50,27 +50,8 @@ CVcxMyVideosMdsAlbums::CVcxMyVideosMdsAlbums( CVcxMyVideosMdsDb& aMdsDb,
 void CVcxMyVideosMdsAlbums::ConstructL()
     {
     GetSchemaDefinitionsL();
-    CActiveScheduler::Add( this );
-    
-    if ( iObserver )
-        {
-        //ENotifyAdd and ENotifyModify are not supported
-        iMdsDb.MdsSessionL().AddRelationItemObserverL( *this, NULL,
-                ENotifyRemove, iMdsDb.iNamespaceDef );
-
-#if 0
-        // We receive only IDs from here. We need to make query to get
-        // relation objects-> slow to use. We use the response from
-        // the add operation instead. This way we don't receive
-        // add events if someone else adds videos to our albums
-        // but the performance is the best possible.
-        iMdsDb.MdsSessionL().AddRelationObserverL( *this, NULL,
-                ENotifyAdd | ENotifyModify | ENotifyRemove );        
-#endif
-        }
-    
-    //TODO: do we need this?
-    //iMdsDb.MdsSessionL().AddRelationPresentObserverL();
+    SetObservingL();
+    CActiveScheduler::Add( this );    
     }
 
 // ---------------------------------------------------------------------------
@@ -157,6 +138,30 @@ void CVcxMyVideosMdsAlbums::DoCancel()
     // MDS does not offer way to cancel these async requests
     
     MPX_DEBUG1("CVcxMyVideosMdsAlbums::DoCancel() exit");
+    }
+
+// ---------------------------------------------------------------------------
+// CVcxMyVideosMdsAlbums::SetObservingL
+// ---------------------------------------------------------------------------
+//
+void CVcxMyVideosMdsAlbums::SetObservingL()
+    {
+    if ( iObserver )
+        {
+        //ENotifyAdd and ENotifyModify are not supported
+        iMdsDb.MdsSessionL().AddRelationItemObserverL( *this, NULL,
+                ENotifyRemove, iMdsDb.iNamespaceDef );
+
+#if 0
+        // We receive only IDs from here. We need to make query to get
+        // relation objects-> slow to use. We use the response from
+        // the add operation instead. This way we don't receive
+        // add events if someone else adds videos to our albums
+        // but the performance is the best possible.
+        iMdsDb.MdsSessionL().AddRelationObserverL( *this, NULL,
+                ENotifyAdd | ENotifyModify | ENotifyRemove );        
+#endif    
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -441,6 +446,11 @@ void CVcxMyVideosMdsAlbums::Media2ObjectL(
     // TITLE (NAME)
     if ( aAlbum.IsSupported( KMPXMediaGeneralTitle ) )
         {
+        if ( TVcxMyVideosCollectionUtil::Title( aAlbum ).Length() > KVcxMvcMaxTitleLength )
+            {
+            User::Leave( KErrArgument );
+            }
+        
         if ( aObject.Property( *iMdsDb.iTitlePropertyDef, property, 0 ) != KErrNotFound )
             {
             static_cast<CMdETextProperty*>(property)->SetValueL(
@@ -1037,7 +1047,10 @@ void CVcxMyVideosMdsAlbums::HandleRelationItemNotification(CMdESession& /*aSessi
         TObserverNotificationType aType,
         const RArray<TMdERelation>& aRelationArray)
     {
-    iObserver->HandleRelationEvent( aType, aRelationArray );
+    if ( iObserver )
+        {
+        iObserver->HandleRelationEvent( aType, aRelationArray );
+        }
     }
 
 #if 0
@@ -1054,7 +1067,10 @@ void CVcxMyVideosMdsAlbums::HandleRelationNotification(CMdESession& /*aSession*/
         {
         case ENotifyAdd:
             MPX_DEBUG1("CVcxMyVideosMdsAlbums:: relation ENotifyAdd");
-            iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
+            if ( iObserver )
+                {
+                iObserver->HandleRelationIdEvent( aType, aRelationIdArray );
+                }
             break;
         case ENotifyModify:
             MPX_DEBUG1("CVcxMyVideosMdsAlbums:: ENotifyModify");

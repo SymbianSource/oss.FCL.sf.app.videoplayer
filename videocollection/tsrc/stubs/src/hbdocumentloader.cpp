@@ -309,5 +309,9 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     {
         obj = new HbStackedWidget();
     }
+    else if(name == DOCML_NAME_LBL_MARKALL)
+    {
+        obj = new HbLabel();
+    }
     return obj;
 }

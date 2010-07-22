@@ -20,9 +20,15 @@ symbian: {
     TARGET.UID2 = 0x1000008D
     TARGET.UID3 = 0x200211FD
     BLD_INF_RULES.prj_exports += "rom/videocollectionwrapper.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videocollectionwrapper.iby)"
-    MMP_RULES += "DEFFILE videocollectionwrapper.def"
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     TARGET.EPOCALLOWDLLDATA = 1
+    defBlock = \      
+        "$${LITERAL_HASH}if defined(EABI)" \
+        "DEFFILE ../eabi/videocollectionwrapper.def" \
+        "$${LITERAL_HASH}else" \
+        "DEFFILE ../bwins/videocollectionwrapper.def" \
+        "$${LITERAL_HASH}endif"
+    MMP_RULES += defBlock
 }
 CONFIG      += hb qt dll
 DEFINES     += BUILD_VIDEOCOLLECTION_DLL
@@ -75,5 +81,3 @@ LIBS += -lmpxcommon.dll \
         -lestor.dll \
         -lcentralrepository.dll \
         -lflogger.dll
-        
-RESOURCES += data/videocollectionwrapper.qrc

@@ -14,7 +14,7 @@
     </layer>
     
     <layer name="qt_unit_test_layer">
-        <module name="vado.videocollection.tsrc">
+        <module name="vado.101_videocollection_qt.tsrc">
             <unit unitID="vado.testcollectionview" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testcollectionview" proFile="testcollectionview.pro" name="unittest.testcollectionview"/>
             <unit unitID="vado.testhintwidget" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testhintwidget" proFile="testhintwidget.pro" name="unittest.testhintwidget"/>
             <unit unitID="vado.testlistview" mrp="" bldFile="&layer_real_source_path;/videocollection/videocollectionview/tsrc/testlistview" proFile="testlistview.pro" name="unittest.testlistview"/>
@@ -40,6 +40,12 @@
 	</layer>  
 
 	<layer name="unit_test_layer">
+		<module name="vado.101_videoplayback_tsrc">
+			<unit unitID="vado.videohelix_test" name="videohelix_tsrc" bldFile="&layer_real_source_path;/videoplayback/videohelix/tsrc/ut_videohelixtest/group" mrp=""/>
+		</module>
+		<module name="vado.101_mpxmyvideoscollection_tsrc">
+			<unit unitID="vado.mpxmyvideoscollection_test" name="mpxmyvideoscollection_tsrc" bldFile="&layer_real_source_path;/videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/group" mrp=""/>
+		</module>
 	</layer>  
 	
   </systemModel>

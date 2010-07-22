@@ -55,8 +55,12 @@ public: // Constructor
     /**
      * Returns the pointer into model. Creates the model if it doesn't exists yet.
      * 
+     * Noter that if application has signaled aboutToQuit -signal indicating closing, all
+     * previously created models have been removed and new ones will not be created 
+     * anymore
+     *  
      * @param type type of model
-     * @return address of model, NULL if creation did not succeed.
+     * @return address of model, NULL if creation did not succeed or if application is closing.
      */    
 	VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType &type);
 
@@ -65,7 +69,7 @@ private slots:
     
     /**
      * Signaled when UI environment is about to be destroyed. 
-     * Source model needs to be cleaned up before of that
+     * All models needs to be cleaned up before of that.
      * 
      */
     void aboutToQuitSlot();
@@ -96,6 +100,12 @@ private:
 	 * source model
 	 */
 	QPointer<VideoListDataModel>        mSourceModel;
+	
+	/**
+	 * flag to indicate, that object is to be deallocated, so no
+	 * models are to be returned anymore 
+	 */
+	bool mAboutToClose;
     
 };
 #endif  // __VIDEOCOLLECTIONWRAPPERPRIVATE_H__

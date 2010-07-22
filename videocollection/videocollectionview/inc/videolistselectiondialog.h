@@ -54,6 +54,7 @@ public:
         EDeleteVideos,
         EAddToCollection,        
         ERemoveFromCollection,
+        ECreateCollection,
         ESelectCollection
     };
     
@@ -218,6 +219,11 @@ private:
      * selected single items album id
      */
     TMPXItemId mSelectedAlbumId;
+    
+    /**
+     * Text for a new album.
+     */
+    QString mNewAlbumText;
     
     /**
      * header label

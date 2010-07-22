@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#17 %
+// Version : %version: da1mmcf#19 %
 
 
 
@@ -73,6 +73,7 @@ enum TPlaybackViewMode
 };
 
 const int KMPXControlsTimeOut = 4000;
+const int KMPXRNLogoTimeOut = 600;
 
 const QString KMPXPLAYBACKVIEW_XML = ":/hbvideoplaybackview/hbvideoplaybackview.docml";
 
@@ -146,7 +147,9 @@ class QMPXVideoPlaybackControlsController : public QObject
 
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
-        bool isAttachOperation();
+        inline bool isAttachOperation();
+
+        bool isRNLogoBitmapInControlList();
 
     private:
         /**
@@ -230,9 +233,9 @@ class QMPXVideoPlaybackControlsController : public QObject
         void handleErrors(); 
         
         /**
-		* Return ETrue if control is visible
+		* Return true if control is visible
 		*/
-		bool isSoftKeyVisible( int value );
+		bool isSoftKeyVisible();
 
         /**
         * Handle tvout connected/disconnected event
@@ -266,6 +269,9 @@ class QMPXVideoPlaybackControlsController : public QObject
         void controlsListUpdated();
         void attachVideo();
         void sendVideo();
+        void handleRNLogoVisibleChanged();
+        void handleRNLogoTimeout();
+        void handleOrientationChanged( Qt::Orientation orientation );
 
     private:
         HbVideoBasePlaybackView                   *mView;
@@ -278,6 +284,7 @@ class QMPXVideoPlaybackControlsController : public QObject
         QMPXVideoPlaybackControlConfiguration     *mControlsConfig;
 
         QTimer                                    *mControlsTimer;
+        QTimer                                    *mRNLogoTimer;
 
         QMPXVideoPlaybackDocumentLoader           *mLoader;
         HbVolumeSliderPopup                       *mVolumeControl;
@@ -292,6 +299,7 @@ class QMPXVideoPlaybackControlsController : public QObject
 
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
+        Qt::Orientation                            mOrientation;
 };
 
 // INLINE METHODS
@@ -356,6 +364,19 @@ inline
 TPlaybackViewMode QMPXVideoPlaybackControlsController::viewMode()
 {
     return mViewMode;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isAttachOperation
+// -------------------------------------------------------------------------------------------------
+//
+inline
+bool QMPXVideoPlaybackControlsController::isAttachOperation()
+{        
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
+        mIsAttachOperation );
+    
+    return mIsAttachOperation;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

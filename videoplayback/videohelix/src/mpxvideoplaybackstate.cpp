@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 41 %
+// Version : %version: 47 %
 
 
 //
@@ -170,6 +170,14 @@ void CMPXVideoPlaybackState::HandleStartSeekL( TBool /*aForward*/ )
 void CMPXVideoPlaybackState::HandleStopSeekL()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleStopSeekL()"));
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackState::HandleSetPosterFrame()"));    
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1195,8 +1203,6 @@ void CMPXInitialisedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
         IssuePlayCommand( EMPXVideoBuffering, MMPXPlaybackPluginObserver::EPBufferingStarted );
     }
     else
@@ -1267,6 +1273,16 @@ void CMPXInitialisedState::HandleForeground()
 {
     MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandleForeground()"));
     CommandHandleForeground();
+}
+
+//  ------------------------------------------------------------------------------------------------
+//  CMPXInitialisedState::HandlePause()
+//  ------------------------------------------------------------------------------------------------
+void CMPXInitialisedState::HandlePause()
+{
+    MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandlePause()"));
+
+    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
 }
 
 // *************************************************************************************************
@@ -1364,6 +1380,17 @@ void CMPXPlayingState::HandlePlayPause()
     MPX_DEBUG(_L("CMPXPlayingState::HandlePlayPause()"));
     HandlePause();
 }
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXPlayingState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXPlayingState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXPlayingState::HandleSetPosterFrame()"));
+    
+    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();    
+}
+
 
 //  ------------------------------------------------------------------------------------------------
 //  CMPXPlayingState::HandleStartSeekL()
@@ -1507,9 +1534,7 @@ void CMPXPausedState::HandlePlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
-        IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying );
+        MPX_TRAPD( error, iVideoPlaybackCtlr->iPlaybackMode->HandlePauseToPlayTransitionL() );
     }
 }
 
@@ -1520,6 +1545,16 @@ void CMPXPausedState::HandlePlayPause()
 {
     MPX_DEBUG(_L("CMPXPausedState::HandlePlayPause()"));
     HandlePlay();
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXPausedState::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXPausedState::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXPausedState::HandleSetPosterFrame()"));    
+    
+    iVideoPlaybackCtlr->iPlaybackMode->HandleSetPosterFrame();
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1595,17 +1630,9 @@ void CMPXPausedState::HandleStartSeekL( TBool aForward )
 //  ------------------------------------------------------------------------------------------------
 void CMPXPausedState::HandleForeground()
 {
-    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleForeground()"),
-                   _L("foreground pause = %d"), iVideoPlaybackCtlr->iForegroundPause );
+    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleForeground()"));
 
-    if ( iVideoPlaybackCtlr->iForegroundPause )
-    {
-        iVideoPlaybackCtlr->iState->HandlePlay();
-    }
-    else
-    {
-        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
-    }
+    MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->RefreshFrameL() );
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1619,9 +1646,30 @@ void CMPXPausedState::HandleCustomPlay()
 
     if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
-
         IssuePlayCommand( EMPXVideoPlaying, MMPXPlaybackPluginObserver::EPPlaying, EFalse );
+    }
+    else
+    {
+        // As the custom play command could not resume the playback. Send a pause event to 
+        // the view though the MPX FW to get the view state in sync playback plugin. 
+        iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
+                                                              0,
+                                                              KErrNone );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXPausedState::HandleUnexpectedError
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXPausedState::HandleUnexpectedError( TInt aError )
+{
+    MPX_ENTER_EXIT(_L("CMPXPausedState::HandleUnexpectedError()"),
+                   _L("aError = %d"), aError );
+
+    if ( iVideoPlaybackCtlr->iPlaybackMode->SendErrorToView( aError ) )
+    {
+        MPX_TRAPD( err, SendErrorToViewL( aError ) );
     }
 }
 
@@ -1712,6 +1760,21 @@ void CMPXStoppedState::ResolveTimeoutError( TInt aError )
     // Don't handle the error. Already in the stopped state
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXStoppedState::HandleUnexpectedError
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXStoppedState::HandleUnexpectedError( TInt aError )
+{
+    MPX_ENTER_EXIT(_L("CMPXStoppedState::HandleUnexpectedError()"),
+                   _L("aError = %d"), aError );
+
+    if ( iVideoPlaybackCtlr->iPlaybackMode->SendErrorToView( aError ) )
+    {
+        MPX_TRAPD( err, SendErrorToViewL( aError ) );
+    }
+}
+
 // *************************************************************************************************
 //
 //                          CMPXBufferingState
@@ -1779,7 +1842,7 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
 
     if ( aError == KErrNone )
     {
-        if ( iVideoPlaybackCtlr->iAppInForeground && !iVideoPlaybackCtlr->iForegroundPause )
+        if ( iVideoPlaybackCtlr->iPlaybackMode->CanPlayNow() )
         {
             iVideoPlaybackCtlr->ChangeState( EMPXVideoPlaying );
 

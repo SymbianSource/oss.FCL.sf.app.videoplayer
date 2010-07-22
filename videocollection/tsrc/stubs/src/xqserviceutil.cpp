@@ -15,8 +15,9 @@
 *
 */
 
-#include "hbaction.h"
+#include "xqserviceutilstub.h"
 #include "xqserviceutilxtra.h"
+#include "videoservices.h"
 
 void XQServiceUtil::toBackground(bool value)
 {
@@ -35,6 +36,27 @@ bool XQServiceUtil::isService()
     service = ptr->currentService();
     ptr->decreaseReferenceCount();
     return service;
+}
+
+QString XQServiceUtil::interfaceName()
+{
+    VideoServices *videoServices = VideoServices::instance();
+    QString interfaceName;
+    if(videoServices->currentService() == VideoServices::EUriFetcher)
+    {
+        interfaceName = "IVideoFetch";
+    } 
+    else if(videoServices->currentService() == VideoServices::EBrowse)
+    {
+        interfaceName = "IVideoBrowse";
+    }
+    videoServices->decreaseReferenceCount();
+    return interfaceName;
+}
+
+QString XQServiceUtil::operationName()
+{
+    return QString();
 }
 
 // End of file

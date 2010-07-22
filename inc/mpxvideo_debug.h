@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: ou1cpsw#3 %
+// Version : %version: ou1cpsw#5 %
 
 
 
@@ -40,29 +40,20 @@
 #else
     #ifdef _MPX_FILE_LOGGING_
         #define FU_DEBUG MPXDebug::FileLog
-    #else        
-        #define FU_DEBUG MPXDebug::NullLog
+    #else
+        #define FU_DEBUG
     #endif
-#endif 
+#endif
 
 
 class MPXDebug
 {
     public:
-        inline static void NullLog( TRefByValue<const TDesC16> /*aFmt*/, ... )
-        {
-        }
-
-        inline static void NullLog( TRefByValue<const TDesC> /*aFunctionName*/,
-		                            TRefByValue<const TDesC16> /*aFmt*/, ... )
-        {
-        }
-
         inline static void FileLog( TRefByValue<const TDesC16> aFmt, ... )
         {
             VA_LIST list;
             VA_START(list,aFmt);
-            RFileLogger::WriteFormat( _L("Fusion"), 
+            RFileLogger::WriteFormat( _L("Fusion"),
                                       _L("fusion.log"),
                                       EFileLoggingModeAppend,
                                       aFmt,
@@ -77,24 +68,24 @@ class MPXDebug
     #define MPX_DEBUG             TFusionLog::FusionLog
     #define MPX_ENTER_EXIT        TEnterExitLog _s
 #else
-    #define MPX_DEBUG             MPXDebug::NullLog
-    #define MPX_ENTER_EXIT        MPXDebug::NullLog
+    #define MPX_DEBUG
+    #define MPX_ENTER_EXIT
 #endif
 
 
 class TFusionLog : public TDes16Overflow
 {
     public:
-        
+
         inline static void FusionLog( TRefByValue<const TDesC16> aFmt, ... )
         {
-            TBuf< 512 > buffer;
-            
+            TBuf< 496 > buffer;
+
             VA_LIST list;
             VA_START( list, aFmt );
             buffer.AppendFormatList( aFmt, list );
             VA_END(list);
-            
+
             FU_DEBUG(_L("#Fu# %S"), &buffer );
         }
 };
@@ -102,7 +93,7 @@ class TFusionLog : public TDes16Overflow
 class TEnterExitLog : public TDes16Overflow
 {
     public:
-        
+
         void Overflow(TDes16& /*aDes*/)
         {
             FU_DEBUG(_L("%S Logging Overflow"), &iFunctionName);
@@ -112,40 +103,40 @@ class TEnterExitLog : public TDes16Overflow
                        TRefByValue<const TDesC> aFmt, ... )
         {
             iFunctionName = HBufC::New( TDesC(aFunctionName).Length() );
-            
+
             if ( iFunctionName )
             {
                 iFunctionName->Des().Copy(aFunctionName);
             }
-            
-            TBuf< 512 > buffer;
-            
+
+            TBuf< 496 > buffer;
+
             VA_LIST list;
             VA_START( list, aFmt );
             buffer.AppendFormatList( aFmt, list, this );
             VA_END(list);
-            
+
             FU_DEBUG(_L("#Fu# --> %S %S"), iFunctionName, &buffer );
         }
-        
+
         TEnterExitLog( TRefByValue<const TDesC> aFunctionName )
         {
             iFunctionName = HBufC::New( TDesC(aFunctionName).Length() );
-            
+
             if ( iFunctionName )
             {
                 iFunctionName->Des().Copy(aFunctionName);
             }
-            
+
             FU_DEBUG(_L("#Fu# --> %S"), iFunctionName );
         }
-        
+
         ~TEnterExitLog()
         {
             FU_DEBUG(_L("#Fu# <-- %S"), iFunctionName );
             delete iFunctionName;
         }
-        
+
     private:
         HBufC*    iFunctionName;
 };
@@ -160,8 +151,13 @@ _LIT(_KMPXErrorInfo, "#Fu# MPXVideo Error : error %d file %s line %d");
             FU_DEBUG(_KMPXErrorInfo, aErr, MPX_S(__FILE__), __LINE__);\
     }
 
-#define MPX_TRAP(_r, _s) TRAP(_r,_s);MPX_ERROR_LOG(_r);
-#define MPX_TRAPD(_r, _s) TRAPD(_r,_s);MPX_ERROR_LOG(_r);
+#ifdef _DEBUG
+    #define MPX_TRAP(_r, _s) TRAP(_r,_s);MPX_ERROR_LOG(_r);
+    #define MPX_TRAPD(_r, _s) TRAPD(_r,_s);MPX_ERROR_LOG(_r);
+#else // _DEBUG
+    #define MPX_TRAP(_r, _s) TRAP(_r,_s);(_r=_r);
+    #define MPX_TRAPD(_r, _s) TRAPD(_r,_s);(_r=_r);
+#endif // _DEBUG
 
 #endif  // __MPXVIDEO_DEBUG_H__
 

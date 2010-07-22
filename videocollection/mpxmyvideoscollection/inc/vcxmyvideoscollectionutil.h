@@ -252,6 +252,30 @@ NONSHARABLE_CLASS(TVcxMyVideosCollectionUtil)
         static TUint32 Uint32ValueL( CMPXMedia& aMedia );
         
         /**
+         * Gets KVcxMediaMyVideosCategoryItemCount attribute from aVideo.
+         *
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Returns 0, if attribute is not supported.
+         */
+        static TUint32 CategoryItemCountL( CMPXMedia& aVideo );
+
+        /**
+         * Gets KVcxMediaMyVideosCategoryNewItemCount attribute from aVideo.
+         * 
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Returns 0, if attribute is not supported.
+         */
+        static TUint32 CategoryNewItemCountL( CMPXMedia& aVideo );
+        
+        /**
+         * Gets KVcxMediaMyVideosCategoryNewItemName attribute from aVideo.
+         *
+         * @param aMedia  Media where from the attribute is fetched.
+         * @return        Category new video name.
+         */
+        static const TDesC& CategoryNewVideoName( const CMPXMedia& aVideo );
+        
+        /**
          * Gets KMPXMediaGeneralId attributes from aMediaArray and
          * puts them to aIdArray. aIdArray is reset before adding.
          * 

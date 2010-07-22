@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  ou1cpsw#8 %
+// Version : %version:  9 %
 
 
 
@@ -567,16 +567,7 @@ void CMpxVideoPlayerAppUiEngine::DoHandleMultiLinksFileL( CVideoPlaylistUtility*
 
         if ( aLocalFile )
         {
-            CMediaRecognizer::TMediaType mediaType = iRecognizer->IdentifyMediaTypeL( link );
-
-            if ( mediaType == CMediaRecognizer::EUnidentified )
-            {
-                User::Leave( KErrNotSupported );
-            }
-            else
-            {
-                iPlaybackUtility->InitL( link );
-            }
+            iPlaybackUtility->InitL( link );
         }
         else
         {

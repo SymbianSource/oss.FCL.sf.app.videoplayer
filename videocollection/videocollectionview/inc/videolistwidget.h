@@ -22,7 +22,9 @@
 #include <hbview.h>
 #include <hblistview.h>
 #include <qmap.h>
+#include <qpointer.h>
 #include <mpxitemid.h>
+#include "videoservices.h"
 #include "videocollectioncommon.h"
 
 class VideoSortFilterProxyModel;
@@ -67,9 +69,13 @@ public:
      * layout and activates correct view based on the current orientation
      * 
      * @param model Model for this list view.
+     * @param isService, flag indicating app service status
+     * @param level presetted level for the widget
      * @return int 0 initialization ok, < 0 if fails.
      */
-    int initialize(VideoSortFilterProxyModel &model, VideoServices* videoServices  = 0);
+    int initialize(VideoSortFilterProxyModel &model, 
+                   bool isService  = false,
+                   VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid);
 
     /**
      * Method enables and displays current active view
@@ -103,7 +109,7 @@ public:
      * 
      * @return VideoSortFilterProxyModel*
      */
-    VideoSortFilterProxyModel& getModel();
+    VideoSortFilterProxyModel* getModel();
     
 public:
     
@@ -142,7 +148,7 @@ signals:
      * @param true if opened, false if closed.
      * @param optional name string
      */
-    void collectionOpened(bool, const QString&, const QModelIndex&);
+    void collectionOpened(bool, const QString&, const TMPXItemId&);
 
     /**
      * signal is connected to service's itemSelected -slot
@@ -165,6 +171,12 @@ public slots:
      * Signaled by HbMessageBox when it's closed.
      */
     void removeCollectionDialogFinished(HbAction *action);
+    
+    /**
+     * called or signaled when delayed initialization is reauired for the widget
+     *
+     */
+    void doDelayedsSlot();
 
 protected slots:
     
@@ -174,12 +186,6 @@ protected slots:
      * Saves current selected item's index to mCurrentIndex
      */
     void longPressedSlot(HbAbstractViewItem *item, const QPointF &point);
-
-    /**
-     * Re-implemented in case context menu is visible, the below list shoud not
-     * be panned.
-     */
-    void panGesture(const QPointF &point);
     
 private slots:
 
@@ -233,16 +239,16 @@ private slots:
     void playItemSlot();
 
     /**
-     * slot is connected to view's doDelayeds -signal
-     *
-     */
-    void doDelayedsSlot();
-    
-    /**
      * Signaled when stepping back from collection in collection view
      *
      */
     void back();
+    
+    /**
+     * connected to navi -quit action triggered signal.
+     * Signals fileUri with empty path for servicing to be completed
+     */
+    void endVideoFecthingSlot();
 	
 	/**
 	 * Signaled when view scrolling starts, pauses thumbnail creation.
@@ -278,7 +284,7 @@ private slots:
      *
      */
     void fetchThumbnailsForVisibleItems();
-    
+
 private:
 
     enum TContextActionIds
@@ -307,9 +313,9 @@ private:
     void setContextMenu();
     
     /**
-     * Method sets correct popup menu during browsing service.
+     * Method sets correct popup menu for service.
      */
-    void setBrowsingServiceContextMenu();
+    void setServiceContextMenu();
 
     /**
      * Method connects signals needed by the widget
@@ -323,11 +329,6 @@ private:
      *
      */
     void disConnectSignals();
-    
-    /**
-     * Return if this is a browsing service.
-     */
-    bool isBrowsingService() const;
     
     /**
      * Set navigation action.
@@ -356,10 +357,11 @@ private:
      * Provided model
      * Not own.
      */
-    VideoSortFilterProxyModel *mModel;
+    QPointer<VideoSortFilterProxyModel> mModel;
 
     /**
-     * pointer to videoservices instance
+     * pointer to videoservices instance. If exists, 
+     * app has started as service.
      */
     VideoServices* mVideoServices;
 
@@ -379,11 +381,6 @@ private:
      */
 	bool                       mSignalsConnected;
 	
-    /**
-     * Boolean for knowing when the app was started as a service.
-     */
-	bool                       mIsService;
-
 	/**
      * Navigation softkey action.
      */
@@ -409,6 +406,11 @@ private:
      * ui loade object, not owned
      */
     VideoCollectionUiLoader     *mUiLoader;
+    
+    /**
+     * Service being provided
+     */
+    VideoServices::TVideoService mService;
 };
 
 #endif // VIDEOLISTWIDGET_H

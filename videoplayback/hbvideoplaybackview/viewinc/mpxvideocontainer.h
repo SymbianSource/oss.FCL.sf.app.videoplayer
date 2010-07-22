@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description: 
+* Description: CCoeControl to provide RWindow for videoplayback
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
 #ifndef CMPXVIDEOCONTAINER_H
@@ -32,9 +32,6 @@ class CMPXVideoContainer : public CCoeControl
         virtual ~CMPXVideoContainer();
 
         void ConstructL();
-
-    protected:
-        void Draw(const TRect& aRect) const;
 };
 
 #endif  // CMPXVIDEOCONTAINER_H

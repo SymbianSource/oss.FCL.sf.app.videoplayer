@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 #ifndef __TESTDETAILSPLAYBACKWINDOW_H__
@@ -54,8 +54,6 @@ private slots:
     // changing this order will affect the test results
     void testUpdateState();
     void testPlayPause();
-    void testMousePressEvent();
-    void testMouseReleaseEvent();
     void testAttach();
     void testSend();
 

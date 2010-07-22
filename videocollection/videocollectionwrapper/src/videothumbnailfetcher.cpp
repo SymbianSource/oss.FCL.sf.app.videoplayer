@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 6 %
 
 // INCLUDE FILES
 #include <qpixmap.h>
@@ -302,13 +302,15 @@ void VideoThumbnailFetcher::enableThumbnailCreation(bool enable)
 void VideoThumbnailFetcher::thumbnailReadySlot(QPixmap tnData, void *internal, int requestId, int error)
 {
     INFO_2("VideoThumbnailFetcher::thumbnailReadySlot() requestId: %d, error: %d", requestId, error);
+    Q_UNUSED(requestId);
     
     TMPXItemId mediaId = TMPXItemId::InvalidId();
     if(internal)
     {
-        mediaId = *(static_cast<TMPXItemId*>(internal));
+        TMPXItemId *idPointer = static_cast<TMPXItemId*>(internal); 
+        mediaId = *idPointer;
+        delete idPointer;
     }
-    delete internal;
 
     // Thumbnail has not been generated yet, put it into creation list.
     if(error == -1)

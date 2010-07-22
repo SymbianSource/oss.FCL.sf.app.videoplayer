@@ -17,13 +17,17 @@
 &EN
 
 ; Provide value for uid
-#{"VCXMyVideosCollectionPluginTest"},(0x00000000),1,0,0,TYPE=SA, RU
+#{"VCXMyVideosCollectionPluginTest"},(0x101FB3E3),1,0,0,TYPE=SA, RU
 
 ; Localised Vendor name
 %{"Nokia"}
 
 ; Unique Vendor name
 :"Nokia"
+[0x101F7961],0,0,0,{"S60ProductID"}
+[0x102032BE],0,0,0,{"S60ProductID"}
+[0x102752AE],0,0,0,{"S60ProductID"}
+[0x1028315F],0,0,0,{"S60ProductID"}
 
 ; Logo
 ; None
@@ -53,9 +57,9 @@
 ; The testframework.ini files won't install with sis, only for ATS test runs.
 "../init/TestFramework.ini"                                    -  "C:/TestFramework/TestFramework.ini"
 
-"../Data/MMC/video_3gp.3gp"                                     -  "e:/testing/data/video_3gp.xxx"
-"../Data/MMC/video_wmv.dat"                                     -  "e:/testing/data/video_wmv.xxx"
-"../Data/MMC/video_mpeg4.mp4"                                   -  "e:/testing/data/video_mpeg4.xxx"
+"../Data/MMC/video_3gp.3gp"                                     -  "c:/testing/data/video_3gp.xxx"
+"../Data/MMC/video_wmv.dat"                                     -  "c:/testing/data/video_wmv.xxx"
+"../Data/MMC/video_mpeg4.mp4"                                   -  "c:/testing/data/video_mpeg4.xxx"
 
 ; Embedded SIS
 ; None

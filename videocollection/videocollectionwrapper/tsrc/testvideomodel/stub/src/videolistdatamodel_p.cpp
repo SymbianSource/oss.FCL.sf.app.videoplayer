@@ -515,4 +515,12 @@ void VideoListDataModelPrivate::itemDeletedSlot(TMPXItemId id)
     Q_UNUSED(id);    
 }
 
+// -----------------------------------------------------------------------------
+// listCompleteSlot
+// -----------------------------------------------------------------------------
+// 
+void VideoListDataModelPrivate::listCompleteSlot()
+{
+}
+
 // End of file

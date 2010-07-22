@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  7 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -28,11 +28,6 @@
 #include "mpxvideoplaybackdisplayhandler.h"
 #include "mpxvideoregion.h"
 #include "mpxvideoplaybackviewfiledetails.h"
-
-const TInt KVIDEORESIZINGREPEATRATE = 50000;
-const TReal32 KTRANSITIONEFFECTCNT = 8;
-
-_LIT( KAspectRatioFile, "c:\\private\\200159b2\\mpxvideoplayer_aspect_ratio.dat" );
 
 
 CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
@@ -67,7 +62,6 @@ CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
 //
 void CMPXVideoPlaybackDisplayHandler::ConstructL()
 {
-    LoadAspectRatioL();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -92,53 +86,20 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 //
 void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 {
-#ifdef SYMBIAN_BUILD_GCE
     if ( iVideoDisplay )
     {
         delete iVideoDisplay;
         iVideoDisplay = NULL;
     }
-#else
-    if ( iDirectScreenAccess )
-    {
-        delete iDirectScreenAccess;
-        iDirectScreenAccess = NULL;
-    }
-#endif
 }
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessage )
+void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* /*aMessage*/ )
 {
-
-    TMPXVideoDisplayCommand message =
-        ( *(aMessage->Value<TMPXVideoDisplayCommand>(KMPXMediaVideoDisplayCommand)) );
-
-    switch ( message )
-    {
-#ifdef SYMBIAN_BUILD_GCE    	
-        case EPbMsgVideoSurfaceCreated:
-        {
-            SurfaceCreatedL( aMessage );
-            break;
-        }
-        case EPbMsgVideoSurfaceChanged:
-        {
-            SurfaceChangedL( aMessage );
-            break;
-        }
-        case EPbMsgVideoSurfaceRemoved:
-        {
-            SurfaceRemoved();
-            break;
-        }
-#endif        
-    }
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::SetAspectRatioL()
@@ -146,14 +107,29 @@ void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* a
 //
 TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
-    Q_UNUSED( aCmd );
-    TInt aspectRatio = 0;
-
-    iCurrentIndexForAspectRatio = 1;
+    iCommand = aCmd;
     
-    return aspectRatio;
-}
+    switch ( aCmd )
+    {
+        case EPbCmdNaturalAspectRatio:
+        {
+            iAspectRatio = EMMFNatural;
+            break;
+        }
+        case EPbCmdZoomAspectRatio:
+        {
+            iAspectRatio = EMMFZoom;
+            break;
+        }
+        case EPbCmdStretchAspectRatio:
+        {
+            iAspectRatio = EMMFStretch;
+            break;
+        }
+    }
 
+    return iAspectRatio;
+}
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
@@ -165,187 +141,21 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
 {
     Q_UNUSED( aFileDetails );
     Q_UNUSED( aDisplayAspectRatio );
-    TInt newAspectRatio = EMMFNatural;
 
-    return newAspectRatio;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL()
-{
+    return iAspectRatio;
 }
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL(  TRect aClipRect, TBool transitionEffect  )
+void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool transitionEffect  )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()"));
+
     Q_UNUSED( transitionEffect );
-    
-    iTlXDiff = (TReal32)( aClipRect.iTl.iX );
-    iTlYDiff = (TReal32)( aClipRect.iTl.iY );
-    iBrXDiff = (TReal32)( aClipRect.iBr.iX );
-    iBrYDiff = (TReal32)( aClipRect.iBr.iY );    
 
+    iRect = aClipRect;
 }
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL()
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL( TAny* aPtr )
-{
-    Q_UNUSED( aPtr );
-    return KErrNone;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetVideoRectL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
-{
-    Q_UNUSED( aRect );
-}
-
-#ifdef SYMBIAN_BUILD_GCE
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScreenDevice,
-                                                         RWindowBase& aWindowBase,
-                                                         RWindow* aWin )
-{
-    Q_UNUSED( aScreenDevice );
-    Q_UNUSED( aWindowBase );
-    Q_UNUSED( aWin );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
-{
-    Q_UNUSED( aMessage );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceChangedL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
-{
-    Q_UNUSED( aMessage );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
-{
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL()
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd )
-{
-    Q_UNUSED( aCmd );
-    return KErrNone;
-}
-
-
-#else
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetDisplayWindowL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::SetDisplayWindowL( RWsSession& aWs,
-                                                         CWsScreenDevice& aScreenDevice,
-                                                         RWindowBase& aWin,
-                                                         TRect aClipRect )
-{
-    Q_UNUSED( aWs );
-    Q_UNUSED( aScreenDevice );
-    Q_UNUSED( aWin );
-    Q_UNUSED( aClipRect );
-}
-
-// -------------------------------------------------------------------------------------------------
-//  CMPXVideoPlaybackDisplayHandler::Restart()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::Restart( RDirectScreenAccess::TTerminationReasons aReason )
-{
-    Q_UNUSED( aReason );
-}
-
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::RestartDsaL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::RestartDsaL()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::AbortNow()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::AbortNow( RDirectScreenAccess::TTerminationReasons aReason )
-{
-    Q_UNUSED( aReason );
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CreateAbortDsaCmdL()
-// -------------------------------------------------------------------------------------------------
-//
-void CMPXVideoPlaybackDisplayHandler::CreateAbortDsaCmdL()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CreateAspectRatioCommandL()
-// -------------------------------------------------------------------------------------------------
-//
-TInt CMPXVideoPlaybackDisplayHandler::CreateAspectRatioCommandL( TMPXVideoPlaybackCommand aCmd )
-{
-    Q_UNUSED( aCmd );
-}
-
-#endif
 
 // End of File

@@ -83,6 +83,41 @@ public:
      * Initilizes model sort values.
      */
     static void sortModel(VideoSortFilterProxyModel *model, bool async, VideoCollectionCommon::TCollectionLevels target);
+    
+    /**
+     * Method saves the latest videolist widget level into local activity manager 
+     * data container.
+     * 
+     * Note that collection id will be cleared in activity data in case level is
+     * all videos or collection list. 
+     * 
+     * @param level collection level
+     */
+    static void setWidgetActivityLevel(const VideoCollectionCommon::TCollectionLevels &level);
+   
+    /**
+     * Method gets the latest videolist widget level from local activity manager 
+     * data container.
+     * 
+     * @param level, reference to level variable where value is saved
+     */
+    static void getActivityWidgetLevel(VideoCollectionCommon::TCollectionLevels &level);
+    
+    /**
+     * method saves provided id and string into local activity
+     * manager data container.
+     * 
+     * @param id. Id to save
+     */
+    static void setCollectionActivityData(const TMPXItemId &id, const QString &name);
+    
+    /**
+     * method reads id and string from from local activity manager data 
+     * container and prepares MPX item id.
+     * 
+     * @param id. Id to return
+     */
+    static void getCollectionActivityData(TMPXItemId &id, QString &name);
 
 public slots:
     

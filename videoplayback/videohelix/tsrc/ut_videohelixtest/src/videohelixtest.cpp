@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 // INCLUDE FILES
@@ -129,10 +129,10 @@ void CVHPPTestClass::ConstructL()
 
     //
     //  CenRep volume range is 0 - number of steps (either 10 or 20).
-    //  Set default CenRep values as volume(4), mute(0)
+    //  Set default CenRep values as volume(40), mute(0)
     //
     CRepository* volCenRep = CRepository::NewL( KCRUidMPXVideoSettings );
-    volCenRep->Set( KMPXVideoPlaybackVolume, 4 );
+    volCenRep->Set( KMPXVideoPlaybackVolume, 40 );
     volCenRep->Set( KMPXVideoPlaybackMute, 0 );
     delete volCenRep;
 

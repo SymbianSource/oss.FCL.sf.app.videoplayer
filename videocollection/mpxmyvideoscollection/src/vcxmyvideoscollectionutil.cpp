@@ -254,10 +254,19 @@ TUint8 TVcxMyVideosCollectionUtil::OriginL( CMPXMedia& aVideo )
     if ( aVideo.IsSupported( KVcxMediaMyVideosOrigin ) )
         {
         origin = aVideo.ValueTObjectL<TUint8>( KVcxMediaMyVideosOrigin );                
-        if ( origin == EVcxMyVideosOriginSideLoaded )
+#ifndef VCX_DOWNLOADS_CATEGORY
+        if ( origin != EVcxMyVideosOriginCapturedWithCamera )
             {
             origin = EVcxMyVideosOriginOther;
             }
+#else
+        if ( origin != EVcxMyVideosOriginCapturedWithCamera &&
+				 origin != EVcxMyVideosOriginDownloaded
+				)
+            {
+            origin = EVcxMyVideosOriginOther;
+            }
+#endif
         }
     return origin;
     }
@@ -530,6 +539,52 @@ TUint32 TVcxMyVideosCollectionUtil::Uint32ValueL( CMPXMedia& aMedia )
         User::Leave( KErrArgument );
         }
     return aMedia.ValueTObjectL<TUint32>( KVcxMediaMyVideosUint32Value );
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::CategoryItemCountL
+// ----------------------------------------------------------------------------
+//
+TUint32 TVcxMyVideosCollectionUtil::CategoryItemCountL( CMPXMedia& aVideo )
+    {
+    TUint32 categoryItemCount = 0;
+                            
+    if ( aVideo.IsSupported( KVcxMediaMyVideosCategoryItemCount ) )
+        {
+        categoryItemCount = aVideo.ValueTObjectL<TUint32>( KVcxMediaMyVideosCategoryItemCount );                
+        }
+    return categoryItemCount;
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::CategoryNewItemCountL
+// ----------------------------------------------------------------------------
+//
+TUint32 TVcxMyVideosCollectionUtil::CategoryNewItemCountL( CMPXMedia& aVideo )
+    {
+    TUint32 categoryNewItemCount = 0;
+                            
+    if ( aVideo.IsSupported( KVcxMediaMyVideosCategoryNewItemCount ) )
+        {
+        categoryNewItemCount = aVideo.ValueTObjectL<TUint32>( KVcxMediaMyVideosCategoryNewItemCount );                
+        }
+    return categoryNewItemCount;
+    }
+
+// ----------------------------------------------------------------------------
+// TVcxMyVideosCollectionUtil::CategoryNewVideoName
+// ----------------------------------------------------------------------------
+//
+const TDesC& TVcxMyVideosCollectionUtil::CategoryNewVideoName( const CMPXMedia& aVideo )
+    {                            
+    if ( aVideo.IsSupported( KVcxMediaMyVideosCategoryNewItemName ) )
+        {
+        return aVideo.ValueText( KVcxMediaMyVideosCategoryNewItemName );
+        }
+    else
+        {
+        return KNullDesC;
+        }
     }
 
 // ----------------------------------------------------------------------------

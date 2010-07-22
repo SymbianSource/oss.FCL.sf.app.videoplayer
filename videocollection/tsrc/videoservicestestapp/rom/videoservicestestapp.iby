@@ -11,13 +11,13 @@
 *
 * Contributors:
 *
-* Description:     hbvideoplayer.iby
+* Description: videoservicetestapp.iby
 *
 */
 
 
-#ifndef __HBVIDEOSERVICESTESTAPP_IBY__
-#define __HBVIDEOSERVICESTESTAPP_IBY__
+#ifndef __VIDEOSERVICESTESTAPP_IBY__
+#define __VIDEOSERVICESTESTAPP_IBY__
 
 #include <bldvariant.hrh>
 #include <data_caging_paths_for_iby.hrh>
@@ -27,4 +27,4 @@ data=/epoc32/data/z/private/10003a3f/import/apps/videoservicestestapp_reg.rsc   
 data=DATAZ_/APP_RESOURCE_DIR/videoservicestestapp.rsc                                 APP_RESOURCE_DIR/videoservicestestapp.rsc
 
 
-#endif  // __HBVIDEOSERVICESTESTAPP_IBY__
+#endif  // __VIDEOSERVICESTESTAPP_IBY__

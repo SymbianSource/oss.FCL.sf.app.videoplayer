@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  6 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -26,11 +26,7 @@
 #include <mpxmessage2.h>
 #include <mmfscalingcustomcommandconstants.h>
 #include <mpxvideoplaybackdefs.h>
-#ifdef SYMBIAN_BUILD_GCE
 #include <mediaclientvideodisplay.h>
-#else
-#include <w32std.h>
-#endif
 
 
 // 
@@ -45,20 +41,7 @@ class QMPXVideoPlaybackViewFileDetails;
  *
  */
 class CMPXVideoPlaybackDisplayHandler : public CBase
-#ifndef SYMBIAN_BUILD_GCE
-                                      , public MDirectScreenAccess
-#endif
 {
-    //
-    //  To save user's preference for scaling type in video ratio + screen ratio
-    //
-    typedef struct
-    {
-        TReal32         videoRatio;
-        TReal32         screenRatio;
-        TMMFScalingType scalingType;
-    } TMPXAspectRatio ;
-    
     public:
 
         ~CMPXVideoPlaybackDisplayHandler();
@@ -80,7 +63,7 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         TInt SetDefaultAspectRatioL( QMPXVideoPlaybackViewFileDetails* aFileDetails, 
                                      TReal32 aDisplayAspectRatio );
 
-        void UpdateVideoRectL(  TRect aRect, TBool transitionEffect  );
+        void UpdateVideoRectL( TRect aRect, TBool transitionEffect );
 
     private:
 
@@ -88,86 +71,15 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
                                          CMPXVideoViewWrapper* aViewWrapper );
 
         void ConstructL();
-        
-        void LoadAspectRatioL();
-        
-        void SaveAspectRatioL();
-
-        void SetVideoRectL( TRect aClipRect );
-
-        void CalculateVideoRectL();
-
-        static TInt UpdateVideoRectTimeOutL( TAny* aPtr );
-
-#ifdef SYMBIAN_BUILD_GCE
-
-    private:
-        void AddDisplayWindowL( CWsScreenDevice& aScreenDevice,
-                                RWindowBase& aWindowBase,
-                                RWindow* aWin );
-
-        void SurfaceCreatedL( CMPXMessage* aMessage );
-        void SurfaceChangedL( CMPXMessage* aMessage );
-        void SurfaceRemoved();
-        TInt SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd );
-
-#else
-
-    private:
-        //
-        //  MDirectScreenAccess Implementation
-        //
-        void AbortNow( RDirectScreenAccess::TTerminationReasons aReason );
-        void Restart( RDirectScreenAccess::TTerminationReasons aReason );
-
-        TInt CreateAspectRatioCommandL( TMPXVideoPlaybackCommand aCmd );
-        
-        void SetDisplayWindowL( RWsSession& aWs,
-                                CWsScreenDevice& aScreenDevice,
-                                RWindowBase& aWin,
-                                TRect aClipRect );
-        void RestartDsaL();
-        void CreateAbortDsaCmdL();
-
-#endif
 
     public:
         MMPXPlaybackUtility*                iPlaybackUtility;
-
-        RArray<TMPXAspectRatio>             iAspectRatioArray;
-        TInt                                iCurrentIndexForAspectRatio;
-        TReal                               iDisplayAspectRatio;
-
-        TRect                               iWindowRect;
-
-        TReal32                             iTlXDiff;
-        TReal32                             iTlYDiff;
-        TReal32                             iBrXDiff;
-        TReal32                             iBrYDiff;
-
-        TInt                                iTransitionEffectCnt;
-
-        CPeriodic*                          iResizingTimer;
         CMPXVideoViewWrapper*               iViewWrapper;
-
-#ifdef SYMBIAN_BUILD_GCE
         CMediaClientVideoDisplay*           iVideoDisplay;
 
-        RWindowBase*                        iWindowBase;
-        TBool                               iSurfaceCached;
-        TSurfaceId                          iSurfaceId;
-        TRect                               iCropRect;
-        TVideoAspectRatio                   iAspectRatio;
-        TReal32                             iScaleWidth;
-        TReal32                             iScaleHeight;
-        TInt                                iHorizontalPosition;
-        TInt                                iVerticalPosition;
-        TVideoRotation                      iRotation;
-        TAutoScaleType                      iAutoScale;   
-#else
-        CDirectScreenAccess*                iDirectScreenAccess;
-#endif
-
+        TRect                               iRect;
+        TInt                                iAspectRatio;
+        TInt                                iCommand;
 };
 
 #endif // __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__

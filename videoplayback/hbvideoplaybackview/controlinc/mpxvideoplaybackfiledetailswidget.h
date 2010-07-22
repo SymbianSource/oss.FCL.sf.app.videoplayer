@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 
@@ -37,7 +37,6 @@ class QMPXVideoPlaybackFileDetailsWidget : public HbWidget
     public:
         QMPXVideoPlaybackFileDetailsWidget( QMPXVideoPlaybackControlsController* controller );
         virtual ~QMPXVideoPlaybackFileDetailsWidget();
-        void initialize();
 
     public:
         void updateWithFileDetails( QMPXVideoPlaybackViewFileDetails* details );

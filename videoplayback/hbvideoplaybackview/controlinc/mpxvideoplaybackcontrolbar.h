@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -23,8 +23,6 @@
 #define MPXVIDEOPLAYBACKCONTROLBAR_H_
 
 
-
-#include <hbeffect.h>
 #include <hbwidget.h>
 #include <mpxplaybackframeworkdefs.h>
 
@@ -47,10 +45,6 @@ class QMPXVideoPlaybackControlBar : public HbWidget
         void setVisibleToControlBar( bool visible );
         void durationChanged( int duration );
         void positionChanged( int position );
-
-    private slots:
-        void appeared( const HbEffect::EffectStatus &status );
-        void disappeared( const HbEffect::EffectStatus &status );
 
     private:
         QMPXVideoPlaybackControlsController *mController;

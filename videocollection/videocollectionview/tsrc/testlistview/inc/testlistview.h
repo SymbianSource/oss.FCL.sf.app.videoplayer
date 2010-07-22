@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   tester for methods in VideoSortFilterProxyModel
+* Description:   tester for methods in VideoListView
 * 
 */
 
@@ -167,11 +167,6 @@ private slots:
      * Tests doDelayedsSlot
      */
     void testDoDelayedsSlot();
-
-    /**
-     * Tests openNewAlbumSlot
-     */
-    void testOpenNewAlbumSlot();
 
     /**
      * Tests aboutToChangeOrientationSlot

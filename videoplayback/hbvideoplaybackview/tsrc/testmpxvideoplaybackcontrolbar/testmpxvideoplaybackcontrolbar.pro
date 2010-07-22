@@ -14,7 +14,7 @@
 # Description: Project file for building testmpxvideoplaybackcontrolbar
 #
 #
-# Version : %version:   3 %
+# Version : %version:   4 %
 
 TEMPLATE = app
 TARGET = testmpxvideoplaybackcontrolbar
@@ -30,18 +30,14 @@ DEPENDPATH += inc src stub/inc stub/src
 # Input
 HEADERS += testmpxvideoplaybackcontrolbar.h \
            mpxvideoplaybackcontrolscontroller.h \
-           mpxvideoplaybackdocumentloader.h \
            mpxvideoplaybackviewfiledetails.h \
            mpxvideoplaybackprogressbar.h \
            mpxvideoplaybacktoolbar.h \
-           hbeffect.h \
            ../../controlinc/mpxvideoplaybackcontrolbar.h
   
 SOURCES += testmpxvideoplaybackcontrolbar.cpp \
            mpxvideoplaybackcontrolscontroller.cpp \
-           mpxvideoplaybackdocumentloader.cpp \
            mpxvideoplaybackviewfiledetails.cpp \
            mpxvideoplaybackprogressbar.cpp \
            mpxvideoplaybacktoolbar.cpp \
-           hbeffect.cpp \
            ../../controlsrc/mpxvideoplaybackcontrolbar.cpp

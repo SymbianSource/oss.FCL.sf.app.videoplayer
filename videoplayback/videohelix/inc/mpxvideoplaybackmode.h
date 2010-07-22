@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 15 %
+// Version : %version: 20 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKMODE_H_
@@ -29,7 +29,9 @@
 #include <e32base.h>
 
 #include "mpxhelixplaybackplugindefs.h"
+#ifdef USE_S60_DOWNLOAD_MANAGER
 #include "mpxvideodlmgrif.h"
+#endif
 #include "mpxvideo_debug.h"
 
 //
@@ -37,6 +39,7 @@
 //
 class CMPXVideoPlaybackController;
 class CMPXVideoDlMgrIf;
+class CMPXVideoPosterFrameSetter;
 
 
 //
@@ -71,11 +74,14 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
         virtual TBool CanPlayNow();
         virtual void OpenFileL( const TDesC& aMediaFile );
         virtual void OpenFileL( const RFile& aMediaFile );
+        virtual void HandleSetPosterFrame();
+        virtual void HandleFrameReady(TInt aError);
+        virtual TBool SendErrorToView( TInt aError );
+        virtual void HandlePauseToPlayTransitionL();
 
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         virtual void OpenFile64L( const RFile64& aMediaFile );
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
 
     protected:
         /*
@@ -89,13 +95,12 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
          */
         virtual void ConstructL( CMPXVideoPlaybackController* aVideoPlaybackCtlr );
 
-
     protected:
         //
         //  Data
         //
         CMPXVideoPlaybackController*        iVideoPlaybackCtlr;   // not owned
-
+        CMPXVideoPosterFrameSetter*         iPosterFrameSetter;
 };
 
 /*******************************************************/
@@ -113,6 +118,8 @@ class CMPXLocalPlaybackMode : public CMPXVideoPlaybackMode
 
         // Methods where video plabkack behavior varies for local media
         inline virtual TInt GetMode();
+        virtual void HandleSetPosterFrame();
+        virtual void HandleFrameReady(TInt aError);
 };
 
 
@@ -147,7 +154,8 @@ class CMPXLiveStreamingPlaybackMode : public CMPXStreamingPlaybackMode
         // Methods where video plabkack behavior varies for live streaming media
         inline virtual TInt GetMode();
         virtual void HandlePause();
-        virtual void HandleBackground();
+        virtual TBool SendErrorToView( TInt aError );
+        virtual void HandlePauseToPlayTransitionL();
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,20 +171,48 @@ class CMPXProgressiveDLPlaybackMode : public CMPXLocalPlaybackMode
         static CMPXVideoPlaybackMode* NewL( CMPXVideoPlaybackController* aVideoPlaybackCtlr );
         virtual ~CMPXProgressiveDLPlaybackMode();
 
+#ifdef USE_S60_DOWNLOAD_MANAGER
+
         inline virtual TInt GetMode();
         void ConnectToDownloadL( CMPXCommand& aCmd );
         void HandleOpenComplete();
         void GetPdlStatusL( CMPXCommand& aCmd );
         void UpdateSeekPosition( TInt64& aPosition );
         inline TBool IsDownloadPaused();
+        void OpenFileL( const RFile& aMediaFile );
+
+#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+        void OpenFile64L( const RFile64& aMediaFile );
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+
+#endif // USE_S60_DOWNLOAD_MANAGER
 
     private:
-
         void ConstructL( CMPXVideoPlaybackController* aVideoPlaybackCtlr );
 
+#ifdef USE_S60_DOWNLOAD_MANAGER
     private:
         CMPXVideoDlMgrIf*  iDlMgrIf;   // owned
+#endif // USE_S60_DOWNLOAD_MANAGER
+
 };
+
+#ifdef USE_S60_DOWNLOAD_MANAGER
+
+inline
+TInt CMPXProgressiveDLPlaybackMode::GetMode()
+{
+    MPX_DEBUG(_L("CMPXProgressiveDLPlaybackMode::GetMode()"));
+    return EMPXVideoProgressiveDownload;
+}
+
+inline
+TBool CMPXProgressiveDLPlaybackMode::IsDownloadPaused()
+{
+    return iDlMgrIf->IsDownloadPaused();
+}
+
+#endif // USE_S60_DOWNLOAD_MANAGER
 
 // INLINE METHODS
 
@@ -210,22 +246,10 @@ TInt CMPXLiveStreamingPlaybackMode::GetMode()
 }
 
 inline
-TInt CMPXProgressiveDLPlaybackMode::GetMode()
-{
-    MPX_DEBUG(_L("CMPXProgressiveDLPlaybackMode::GetMode()"));
-    return EMPXVideoProgressiveDownload;
-}
-
-inline
 TBool CMPXVideoPlaybackMode::IsDownloadPaused()
 {
     return EFalse;
 }
 
-inline
-TBool CMPXProgressiveDLPlaybackMode::IsDownloadPaused()
-{
-    return iDlMgrIf->IsDownloadPaused();
-}
 
 #endif  //_CMPXVIDEOPLAYBACKMODE_H_

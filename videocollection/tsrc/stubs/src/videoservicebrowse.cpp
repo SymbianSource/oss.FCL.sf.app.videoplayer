@@ -15,10 +15,11 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 6 %
 
 #include <hbapplication.h>
 
+#include "xqserviceproviderstub.h"
 #include "videoservices.h"
 #include "videoservicebrowse.h"
 #include "mpxhbvideocommondefs.h"
@@ -30,8 +31,8 @@ int VideoServiceBrowseData::mBrowseCategory = 0;
     Constructor.
     \param parent, Pointer to the video services.
 */
-VideoServiceBrowse::VideoServiceBrowse(VideoServices* parent)
-    : XQServiceProvider( "TestListView" )
+VideoServiceBrowse::VideoServiceBrowse(VideoServices* parent, QLatin1String service)
+    : XQServiceProvider( service, parent  )
     , mRequestIndex( 0 )
     , mServiceApp( parent )
 {
@@ -88,6 +89,20 @@ void VideoServiceBrowse::browseVideos(const QString &title,
     int sortRole)
 {
     Q_UNUSED(title);
+    Q_UNUSED(category);
+    Q_UNUSED(sortRole);
+    
+    // not stubbed
+}
+
+/*!
+    Browse videos.
+    \param category, Category which type of videos are browsed.
+    \return None.
+*/
+void VideoServiceBrowse::browseVideos(int category,
+    int sortRole)
+{
     Q_UNUSED(category);
     Q_UNUSED(sortRole);
     

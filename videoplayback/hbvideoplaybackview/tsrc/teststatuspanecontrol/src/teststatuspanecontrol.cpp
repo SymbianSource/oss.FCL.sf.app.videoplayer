@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 #include <hbapplication.h>
@@ -34,6 +34,7 @@
 #include "hbvideobaseplaybackview.h"
 #include "mpxvideoplaybackdocumentloader.h"
 #include "hblabel.h"
+#include "hbgroupbox.h"
 
 #define private public
 #define protected public
@@ -88,12 +89,11 @@ void TestStatusPaneControl::setup()
     
     mControlsController = new QMPXVideoPlaybackControlsController( mBaseVideoView, 
                                                                    mFileDetails );
-                                                                            
+
     mStatusPane = new QMPXVideoPlaybackStatusPaneControl( mControlsController, 
                                                           EMPXStatusPane,
                                                           NULL, 
-                                                          0 );                                                                
-
+                                                          0 );
 }
 
 // ---------------------------------------------------------------------------
@@ -103,6 +103,12 @@ void TestStatusPaneControl::setup()
 void TestStatusPaneControl::cleanup()
 {
     MPX_ENTER_EXIT(_L("TestStatusPaneControl::cleanup()"));
+
+    if ( mStatusPane )
+    {
+        delete mStatusPane;
+        mStatusPane = NULL;    
+    }
 
     if ( mBaseVideoView )
     {
@@ -120,12 +126,6 @@ void TestStatusPaneControl::cleanup()
     {
         delete mControlsController;
         mControlsController = NULL;    
-    }
-    
-    if ( mStatusPane )
-    {
-        delete mStatusPane;
-        mStatusPane = NULL;    
     }
 }
 
@@ -145,6 +145,8 @@ void TestStatusPaneControl::testSetMenu()
     mStatusPane->setMenu( mFileDetails );
     
     QVERIFY( mControlsController->view()->menu()->isEmpty() );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -156,17 +158,22 @@ void TestStatusPaneControl::testSetVisible()
     MPX_ENTER_EXIT(_L("TestStatusPaneControl::testSetVisible()"));
 
     setup();    
-    
+    mStatusPane->updateControlsWithFileDetails( mFileDetails );
+
     // 1. Set visible
     mStatusPane->setVisible( true );    
-    QVERIFY( mStatusPane->isVisible() );  
-    QVERIFY( mStatusPane->mTitleLabel->isVisible() ); 
-    
+    QVERIFY( mControlsController->view()->mStatusBarVisible );  
+    QVERIFY( mControlsController->view()->mTitleBarVisible );  
+    QVERIFY( mStatusPane->mTitleLayout->isVisible() ); 
+
     // 2. Set invisible
-    mStatusPane->setVisible( false );    
-    QVERIFY( ! mStatusPane->isVisible() );  
-    QVERIFY( ! mStatusPane->mTitleLabel->isVisible() );     
-    
+    mStatusPane->setVisible( false );
+    QVERIFY( mControlsController->view()->menu()->isEmpty() ); 
+    QVERIFY( ! mControlsController->view()->mStatusBarVisible );  
+    QVERIFY( ! mControlsController->view()->mTitleBarVisible );  
+    QVERIFY( ! mStatusPane->mTitleLayout->isVisible() );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -178,34 +185,36 @@ void TestStatusPaneControl::testUpdateControlsWithFileDetails()
     MPX_ENTER_EXIT(_L("TestStatusPaneControl::testUpdateControlsWithFileDetails()"));
 
     setup(); 
-    
+
+    QString title = "Title";
+
     // 1. test for full creen mode
     mControlsController->mViewMode = EFullScreenView;
-    
-    mFileDetails->mTvOutConnected = true;
-    
+    mControlsController->mFileDetails->mTitle = title;
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
-    
+
+    QVERIFY( mStatusPane->mTitleLabel->mString == title );
+    QVERIFY( mStatusPane->mTitleGroupBox->mString == title );
+    QVERIFY( mStatusPane->mTitleLabel->isVisible() );
+    QVERIFY( ! mStatusPane->mTitleGroupBox->isVisible() );
     QVERIFY( mControlsController->view()->viewFlags() == 
             HbView::HbViewFlags( HbView::ViewTitleBarTransparent | HbView::ViewStatusBarTransparent ));
-    
+
     // 2. test for detial view mode    
-    mControlsController->mViewMode = EDetailsView;
-    
-    mFileDetails->mTvOutConnected = true;
-    
+    mControlsController->mViewMode = EDetailsView;    
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
 
     QVERIFY( mControlsController->view()->viewFlags() == HbView::ViewFlagNone );
+    QVERIFY( ! mStatusPane->mTitleLabel->isVisible() );     
+    QVERIFY( mStatusPane->mTitleGroupBox->isVisible() );
 
     // 3. test for audio only mode    
     mControlsController->mViewMode = EAudioOnlyView;
-    
-    mFileDetails->mTvOutConnected = true;
-    
     mStatusPane->updateControlsWithFileDetails( mFileDetails );
 
     QVERIFY( mControlsController->view()->viewFlags() == HbView::ViewFlagNone );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -225,6 +234,8 @@ void TestStatusPaneControl::testSetVisibility()
     // 2. test for second block of cases:
     mStatusPane->setVisibility( EPbStateInitialising );        
     QVERIFY( mControlsController->view()->menu()->isEmpty() );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -240,6 +251,8 @@ void TestStatusPaneControl::testControlListUpdated()
     mStatusPane->controlListUpdated( mFileDetails );    
         
     QVERIFY( mControlsController->view()->menu()->isEmpty() );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +272,8 @@ void TestStatusPaneControl::testSlot_handleAboutToShow()
     QVERIFY( mControlsController->mTimerAction == EMPXTimerCancel ); 
     
     disconnect( this, SIGNAL( commandSignal() ), mStatusPane, SLOT( handleAboutToShow() ) );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -277,7 +292,9 @@ void TestStatusPaneControl::testSlot_handleAboutToHide()
     
     QVERIFY( mControlsController->mTimerAction == EMPXTimerReset ); 
     
-    disconnect( this, SIGNAL( commandSignal() ), mStatusPane, SLOT( handleAboutToHide() ) );    
+    disconnect( this, SIGNAL( commandSignal() ), mStatusPane, SLOT( handleAboutToHide() ) );
+
+    cleanup();
 }
 
 // ---------------------------------------------------------------------------
@@ -297,6 +314,8 @@ void TestStatusPaneControl::testSlot_openFullScreenView()
     QVERIFY( mControlsController->mViewMode  == EFullScreenView ); 
     
     disconnect( this, SIGNAL( commandSignal() ), mStatusPane, SLOT( openFullScreenView() ) );
+
+    cleanup();
 }
 
 // End of file

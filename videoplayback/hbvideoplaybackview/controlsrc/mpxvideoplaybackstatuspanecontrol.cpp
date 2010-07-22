@@ -15,12 +15,16 @@
 *
 */
 
-// Version : %version: 15 %
+// Version : %version: 19 %
 
+
+
+#include <QFileInfo>
 
 #include <hbmenu.h>
 #include <hblabel.h>
 #include <hbaction.h>
+#include <hbgroupbox.h>
 #include <hbinstance.h>
 #include <hbframeitem.h>
 #include <hbframedrawer.h>
@@ -38,16 +42,20 @@
 // QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl()
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl( 
-        QMPXVideoPlaybackControlsController* controller, 
-        TMPXVideoPlaybackControls index, 
-        HbWidget* widget, 
+QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
+        QMPXVideoPlaybackControlsController* controller,
+        TMPXVideoPlaybackControls index,
+        HbWidget* widget,
         TUint controlproperties )
     : QMPXVideoPlaybackFullScreenControl( controller, index, widget, controlproperties )
     , mActionBack( NULL )
-    , mFrameItem( NULL )
+    , mTitleLabel( NULL )
+    , mTitleGroupBox( NULL )
+    , mTitleLayout( NULL )
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl()"));
+
+    Q_UNUSED( widget );
 
     mActionBack = new HbAction( Hb::BackNaviAction );
 
@@ -59,9 +67,6 @@ QMPXVideoPlaybackStatusPaneControl::QMPXVideoPlaybackStatusPaneControl(
 
     connect( mController->view()->menu(), SIGNAL( aboutToShow() ), this, SLOT( handleAboutToShow() ) );
     connect( mController->view()->menu(), SIGNAL( aboutToHide() ), this, SLOT( handleAboutToHide() ) );
-
-    QGraphicsWidget *widget1 = mController->layoutLoader()->findWidget( QString( "title" ) );
-    mTitleLabel = qobject_cast<HbLabel*>( widget1 );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -94,6 +99,8 @@ QMPXVideoPlaybackStatusPaneControl::~QMPXVideoPlaybackStatusPaneControl()
 //
 void QMPXVideoPlaybackStatusPaneControl::setVisible( bool visible )
 {
+    MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::setVisible visible = %d"), visible);
+
     mVisible = visible;
 
     if ( mVisible )
@@ -104,7 +111,7 @@ void QMPXVideoPlaybackStatusPaneControl::setVisible( bool visible )
         if ( mController->viewMode() == EFullScreenView ||
              mController->viewMode() == EDetailsView )
         {
-            mTitleLabel->setVisible( true );
+            mTitleLayout->setVisible( true );
         }
     }
     else
@@ -113,7 +120,7 @@ void QMPXVideoPlaybackStatusPaneControl::setVisible( bool visible )
         mController->view()->setTitleBarVisible( false );
         mController->view()->setStatusBarVisible( false );
 
-        mTitleLabel->setVisible( false );
+        mTitleLayout->setVisible( false );
     }
 }
 
@@ -164,29 +171,70 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails()"));
 
+    if ( ! mTitleLabel )
+    {
+        //
+        // If title is not available, show clip name
+        //
+        QString title = mController->fileDetails()->mTitle;
+
+        if ( title.count() == 0 )
+        {
+            QFileInfo fileInfo( mController->fileDetails()->mClipName );
+            title = fileInfo.completeBaseName();
+        }
+
+        QGraphicsWidget *qWidget = mController->layoutLoader()->findWidget( QString( "title" ) );
+        mTitleLabel = qobject_cast<HbLabel*>( qWidget );
+        mTitleLabel->setPlainText( title );
+
+        qWidget = mController->layoutLoader()->findWidget( QString( "titleGroupBox" ) );
+        mTitleGroupBox = qobject_cast<HbGroupBox*>( qWidget );
+        mTitleGroupBox->setHeading( title );
+
+        mTitleLayout = mController->layoutLoader()->findWidget( QString( "titleLayout" ) );
+
+        //
+        // Set framedrawer for semi transparent background
+        //
+        HbFrameItem *frameItem = new HbFrameItem();
+        frameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
+        frameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
+        frameItem->frameDrawer().setFillWholeRect( true );
+        mTitleLabel->setBackgroundItem( frameItem );
+    }
+
     switch( mController->viewMode() )
     {
         case EFullScreenView:
         {
             //
             // Set TitleBar transparent and go back to preview view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 
-            mController->view()->setViewFlags( 
-                    HbView::HbViewFlags( HbView::ViewTitleBarTransparent | HbView::ViewStatusBarTransparent ) );
+            mController->view()->setViewFlags( mController->view()->viewFlags() |
+                                               HbView::ViewTitleBarTransparent |
+                                               HbView::ViewStatusBarTransparent );
+
+            mTitleLabel->setVisible( true );
+            mTitleGroupBox->setVisible( false );
+
             break;
         }
         case EDetailsView:
         {
             //
             // Set TitleBar opaque and go back to full screen view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
             connect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
 
             mController->view()->setViewFlags( HbView::ViewFlagNone );
+
+            mTitleGroupBox->setVisible( true );
+            mTitleLabel->setVisible( false );
 
             break;
         }
@@ -194,7 +242,7 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
         {
             //
             // Set TitleBar opaque and go back to preview view with back key
-            // 
+            //
             disconnect( mActionBack, SIGNAL( triggered() ), this, SLOT( openFullScreenView() ) );
             connect( mActionBack, SIGNAL( triggered() ), mController->view(), SLOT( closePlaybackView() ) );
 
@@ -204,20 +252,6 @@ void QMPXVideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
     }
 
     setMenu( details );
-
-    //
-    // Set framedrawer for semi transparent background
-    //
-    if ( ! mFrameItem )
-    {
-        mFrameItem = new HbFrameItem ( mTitleLabel );
-        mFrameItem->frameDrawer().setFrameGraphicsName( "qtg_fr_multimedia_trans" );
-        mFrameItem->frameDrawer().setFrameType( HbFrameDrawer::NinePieces );
-        mFrameItem->frameDrawer().setFillWholeRect( true );
-    }
-
-    mFrameItem->setGeometry( mTitleLabel->boundingRect() );
-    mFrameItem->setVisible( ( mController->viewMode() == EFullScreenView )? ETrue:EFalse ); 
 }
 
 // -------------------------------------------------------------------------------------------------

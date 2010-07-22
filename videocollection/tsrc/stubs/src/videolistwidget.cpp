@@ -25,6 +25,7 @@ int VideoListWidgetData::mActivateCount = 0;
 int VideoListWidgetData::mActivateReturnValue = 0;
 bool VideoListWidgetData::mActive = false;
 int VideoListWidgetData::mDeactivateCount = 0;
+QModelIndex VideoListWidgetData::mEmitActivatedIndex = QModelIndex();
 
 VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *parent):
     HbListView(parent),
@@ -32,7 +33,6 @@ VideoListWidget::VideoListWidget(VideoCollectionUiLoader* uiLoader, HbView *pare
     mVideoServices(0),
     mCurrentLevel(VideoCollectionCommon::ELevelInvalid),
     mSignalsConnected(false),
-    mIsService(false),
     mNavKeyAction(0),
     mContextMenu(0),
     mSelectionMode(HbAbstractItemView::NoSelection),
@@ -48,13 +48,13 @@ VideoListWidget::~VideoListWidget()
 }
 
 int VideoListWidget::initialize(VideoSortFilterProxyModel &model,
-    VideoServices *videoServices)
+    bool isService, VideoCollectionCommon::TCollectionLevels level)
 {
-    Q_UNUSED(videoServices);
+    Q_UNUSED(isService);
 
     VideoListWidgetData::mInitializeCount++;
     mModel = &model;
-    
+    mCurrentLevel = level;
     return VideoListWidgetData::mInitializeReturnValue;
 }
 
@@ -109,15 +109,14 @@ VideoCollectionCommon::TCollectionLevels VideoListWidget::getLevel()
     return mCurrentLevel;
 }
 
-VideoSortFilterProxyModel& VideoListWidget::getModel()
+VideoSortFilterProxyModel* VideoListWidget::getModel()
 { 
-    return *mModel;
+    return mModel;
 }
 
 void VideoListWidget::emitActivated (const QModelIndex &modelIndex)
 {
-    Q_UNUSED(modelIndex);
-    // not stubbed
+    VideoListWidgetData::mEmitActivatedIndex = modelIndex;
 }
 
 void VideoListWidget::setSelectionMode(int mode)
@@ -129,12 +128,6 @@ void VideoListWidget::setSelectionMode(int mode)
 void VideoListWidget::longPressedSlot(HbAbstractViewItem *item, const QPointF &point)
 {
     Q_UNUSED(item);
-    Q_UNUSED(point);
-    // not stubbed
-}
-
-void VideoListWidget::panGesture (const QPointF &point)
-{
     Q_UNUSED(point);
     // not stubbed
 }
@@ -184,6 +177,11 @@ void VideoListWidget::back()
     // not stubbed
 }
 
+void VideoListWidget::endVideoFecthingSlot()
+{
+    // not stubbed
+}
+
 void VideoListWidget::scrollingStartedSlot()
 {
     // not stubbed
@@ -212,6 +210,24 @@ void VideoListWidget::fetchThumbnailsForVisibleItems()
 
 void VideoListWidget::setNavigationAction()
 {
+    // not stubbed
+}
+
+void VideoListWidget::renameDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
+void VideoListWidget::deleteItemDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
+void VideoListWidget::removeCollectionDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
     // not stubbed
 }
 

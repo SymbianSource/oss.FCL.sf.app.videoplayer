@@ -80,11 +80,12 @@ public: // Constructor
     static VideoCollectionWrapper &instance();  
     
 	/**
-     * Returns pointer to model
+     * Returns pointer to model. Null if creation fails or if
+     * application is closing.
      * 
      * @param type of the model
      * 
-     * @return address to model or NULL if fails.
+     * @return address to model or NULL if fails or if application is closing.
      */    
     VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType type);
 

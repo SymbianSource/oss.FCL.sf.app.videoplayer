@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 13 %
+// Version : %version: 16 %
 
 
 #ifndef __VHPPTESTCASE_H__
@@ -35,10 +35,10 @@
 #include <ctsydomainpskeys.h>
 #include <mmf/common/mmferrors.h>
 
-#include <accessoryserver.h>
-#include <accessorycontrol.h>
-#include <accpolgidheader.h>
-#include <accpolgenericid.h>
+#include <AccessoryServer.h>
+#include <AccessoryControl.h>
+#include <AccPolGIDHeader.h>
+#include <AccPolGenericID.h>
 
 #include <mpxvideoplaybackdefs.h>
 #include "timeoutController.h"
@@ -155,7 +155,6 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt ChangeAspectRatioL( CStifItemParser& aItem );
 
         virtual TInt AlarmOn( CStifItemParser& aItem );
-        virtual TInt AlarmAutoResume( CStifItemParser& aItem );
 
         virtual TInt PhoneCallRejected( CStifItemParser& aItem );
         virtual TInt VoiceCallAccepted( CStifItemParser& aItem );
@@ -173,6 +172,8 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt InitializeWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeLinkWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeHandleWithPositionL( CStifItemParser& aItem );
+        virtual TInt InitializeStreamingWithSdpFileHandleL( CStifItemParser& aItem  );
+        virtual TInt RetrieveFileNameAndModeL( CStifItemParser& aItem );
 
         // ---------------------------------------------------------------------
         //  Helper Functions

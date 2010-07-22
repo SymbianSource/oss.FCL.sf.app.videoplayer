@@ -1,8 +1,5 @@
 <RCC>
     <qresource prefix="/xml" >
-        <file alias="videofiledetails.docml">videofiledetails.xml</file>
-    </qresource>
-    <qresource prefix="/gfx" >
-        <file alias="pri_large_video.svg">pri_large_video.svg</file>
+        <file alias="videofiledetails.docml">videofiledetails.docml</file>
     </qresource>
 </RCC>

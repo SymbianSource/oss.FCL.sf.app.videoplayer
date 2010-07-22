@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 37 %
+// Version : %version: 43 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -26,19 +26,33 @@
 #include <hbmessagebox.h>
 #include <hbnotificationdialog.h>
 #include <centralrepository.h>
+#include <vcxmyvideosdefs.h>
 
 #include "videocollectioncommon.h"
 #include "videocollectionviewutils.h"
 #include "videosortfilterproxymodel.h"
+#include "videoactivitystate.h"
+#include "videocollectioncenrepdefs.h"
 #include "videocollectiontrace.h"
 
-const int KVideoCollectionViewCenrepUid(0x2002BC63);
-const int KVideoCollectionViewCenrepServiceIconKey(0x2);
-const int KVideoCollectionViewCenrepServiceIconPressedKey(0x3);
-const int KVideoCollectionViewCenrepVideoSortingRoleKey(0x5);
-const int KVideoCollectionViewCenrepVideoSortingOrderKey(0x6);
-const int KVideoCollectionViewCenrepCollectionsSortingRoleKey(0x7);
-const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
+// Object names.
+const char* const VIEW_UTILS_OBJECT_NAME_STATUS_MSG          = "vc:ViewUtilsStatusMessage";
+const char* const VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING = "vc:ViewUtilsMessageBoxWarning";
+
+const int KAddToCollectionDataCount(2);
+const int KAddToCollectionCountIndex(0);
+const int KAddToCollectionNameIndex(1);
+
+// type of collectionview plugin's widget level(int): 
+// all videos, collections or collection video list
+static const QString KEY_WIDGET_LEVEL    = "_VideoActivity_widget_level_";
+
+// id of the collection whose videolist is to be shown (int).
+static const QString KEY_COLLECTION_ID   = "_VideoActivity_collection_id_";
+
+// name of the collection whose videolist is to be shown (QString)
+static const QString KEY_COLLECTION_NAME = "_VideoActivity_collection_name_";
+
 
 // ---------------------------------------------------------------------------
 // instance
@@ -46,9 +60,9 @@ const int KVideoCollectionViewCenrepCollectionsSortingOrderKey(0x8);
 //
 VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 {
-	FUNC_LOG;
-     static VideoCollectionViewUtils _popupInstance;
-     return _popupInstance;
+    FUNC_LOG;
+    static VideoCollectionViewUtils _popupInstance;
+    return _popupInstance;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,7 +76,6 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
     mCollectionsSortOrder(Qt::AscendingOrder)
 {
 	FUNC_LOG;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +85,6 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
 VideoCollectionViewUtils::~VideoCollectionViewUtils()
 {
 	FUNC_LOG;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -198,10 +210,10 @@ int VideoCollectionViewUtils::getServiceIconStrings(QString& icon,
     {
         TBuf<255> iconValue;
         TBuf<255> pressedValue;
-        status = cenRep->Get(KVideoCollectionViewCenrepServiceIconKey, iconValue);
+        status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1IconPath, iconValue);
         if(status == KErrNone)
         {
-            status = cenRep->Get(KVideoCollectionViewCenrepServiceIconPressedKey, pressedValue);
+            status = cenRep->Get(KVideoCollectionViewCenrepServiceItem1PressedIconPath, pressedValue);
             if(status == KErrNone)
             {
                 QString iconTemp((QChar*)iconValue.Ptr(),iconValue.Length());
@@ -229,7 +241,7 @@ QString VideoCollectionViewUtils::getServiceUriString()
     if(cenRep)
     {
         TBuf<255> uriValue;
-        if(cenRep->Get(KVideoCollectionViewCenrepServiceIconKey, uriValue) == KErrNone)
+        if(cenRep->Get(KVideoCollectionViewCenrepServiceItem1Url, uriValue) == KErrNone)
         {
             QString uriTemp((QChar*)uriValue.Ptr(),uriValue.Length());
             uri = uriTemp;
@@ -304,6 +316,96 @@ void VideoCollectionViewUtils::sortModel(
 }
 
 // ---------------------------------------------------------------------------
+// setWidgetActivityLevel
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::setWidgetActivityLevel(
+        const VideoCollectionCommon::TCollectionLevels &level)
+{
+    FUNC_LOG; 
+    QVariant data = int(level);
+    VideoActivityState::instance().setActivityData(data, KEY_WIDGET_LEVEL);
+
+    if(level != VideoCollectionCommon::ELevelDefaultColl && 
+       level != VideoCollectionCommon::ELevelAlbum)
+    {
+        // no need to save collection related data, clear them
+        data.clear();
+        VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_ID);    
+        VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_NAME);   
+    }
+}
+
+// ---------------------------------------------------------------------------
+// getActivityWidgetLevel
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::getActivityWidgetLevel(VideoCollectionCommon::TCollectionLevels &level)
+{
+    FUNC_LOG;
+    // default value is all videos list level
+    level = VideoCollectionCommon::ELevelVideos;
+    QVariant data = VideoActivityState::instance().getActivityData(KEY_WIDGET_LEVEL);
+    
+    int value = data.toInt();
+    if(value == VideoCollectionCommon::ELevelCategory)
+    {
+        level = VideoCollectionCommon::ELevelCategory;
+    }
+    else if(value == VideoCollectionCommon::ELevelDefaultColl)
+    {
+        level = VideoCollectionCommon::ELevelDefaultColl;
+    }
+    else if(value == VideoCollectionCommon::ELevelAlbum)
+    {
+        level = VideoCollectionCommon::ELevelAlbum;
+    }
+}
+ 
+// ---------------------------------------------------------------------------
+// setCollectionActivityData
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::setCollectionActivityData(const TMPXItemId &id, const QString &name)
+{
+    FUNC_LOG;
+    QVariant data = int(id.iId1);
+    VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_ID);
+    data.clear();
+    data = name;
+    VideoActivityState::instance().setActivityData(data, KEY_COLLECTION_NAME);
+}
+
+// ---------------------------------------------------------------------------
+// getCollectionActivityData
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::getCollectionActivityData(TMPXItemId &id, QString &name)
+{
+    FUNC_LOG;
+    id = TMPXItemId::InvalidId();
+    name = "";
+    VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
+    getActivityWidgetLevel(level); 
+    
+    if(level == VideoCollectionCommon::ELevelDefaultColl)
+    {
+        id.iId2 = KVcxMvcMediaTypeCategory; 
+    }
+    else if(level == VideoCollectionCommon::ELevelAlbum)
+    {
+        id.iId2 = KVcxMvcMediaTypeAlbum;
+    }
+    if(id.iId2 != KMaxTUint32)
+    {
+        QVariant data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_ID);
+        id.iId1 = data.toInt();
+        data = VideoActivityState::instance().getActivityData(KEY_COLLECTION_NAME);
+        name = data.toString();
+    }
+}
+
+// ---------------------------------------------------------------------------
 // showStatusMsgSlot
 // ---------------------------------------------------------------------------
 //
@@ -335,11 +437,16 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
         case VideoCollectionCommon::statusMultiRemoveFail:
             msg = hbTrId("txt_videos_info_unable_to_remove_some_collections");
         break;
-        case VideoCollectionCommon::statusVideosAddedToCollection:
-            format = hbTrId("txt_videos_dpopinfo_videos_added_to_1");
-            if(additional.isValid())
+        case VideoCollectionCommon::statusVideosAddedToCollection:            
+            // videos added to collection - status should containg both count and collection name
+            if(additional.isValid() && additional.toList().count() == KAddToCollectionDataCount)
             {
-                msg = format.arg(additional.toString());
+                int count = additional.toList().at(KAddToCollectionCountIndex).toInt();
+                QString name = additional.toList().at(KAddToCollectionNameIndex).toString();
+                if(count && name.length())
+                {
+                    msg = hbTrId("txt_videos_dpopinfo_ln_videos_added_to_1", count).arg(name);
+                }
             }
             error = false;
         break;
@@ -347,10 +454,9 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             msg = hbTrId("txt_videos_info_all_videos_already_added_to_this_c");
         break;
         case VideoCollectionCommon::statusDeleteInProgress:
-            format = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted");
             if(additional.isValid())
             {
-                msg = format.arg(additional.toString());
+                msg = hbTrId("txt_videos_dpopinfo_ln_videos_are_being_deleted", additional.toInt());
             }
             error = false;
         break;
@@ -362,7 +468,10 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
     {
         if(error)
         {
-            HbMessageBox::warning(msg);
+            HbMessageBox *messageBox = new HbMessageBox(msg, HbMessageBox::MessageTypeWarning);
+            messageBox->setAttribute(Qt::WA_DeleteOnClose);
+            messageBox->setObjectName(VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING);
+            messageBox->show();
         }
         else
         {
@@ -371,8 +480,10 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             // only title can be two rows for HbNotificationDialog
             infoNote->setTitleTextWrapping(Hb::TextWordWrap);
             infoNote->setTitle(msg);
+            infoNote->setObjectName(VIEW_UTILS_OBJECT_NAME_STATUS_MSG);
             infoNote->show();
         }
     }
 }
 
+// End of file

@@ -12,11 +12,11 @@
 * Contributors:
 *
 * Description:  This class plays local video file
- *
+*
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 33 %
 
 
 //
@@ -25,6 +25,8 @@
 #include <mmf/server/mmffile.h>
 #include <MMFROPCustomCommandConstants.h>
 #include <mpxplaybackpluginobserver.h>
+#include <mpxmessagegeneraldefs.h>
+#include <mpxplaybackmessage.h>
 
 #include <etel.h>    // 3G
 #include <etelmm.h>
@@ -35,6 +37,7 @@
 #include "mpxvideofiledetails.h"
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideodrmhelper.h"
+#include "mpxvideoposterframesetter.h"
 
 // Constants
 const TUid KUidInterfaceMMFHelixController = {0x101F855D};
@@ -69,6 +72,12 @@ CMPXVideoPlaybackMode::CMPXVideoPlaybackMode()
 CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::~CMPXVideoPlaybackMode()"));
+
+    if ( iPosterFrameSetter )
+    {
+        delete iPosterFrameSetter;
+        iPosterFrameSetter = NULL;
+    }
 }
 
 //  ----------------------------------------------------------------------------
@@ -177,31 +186,26 @@ void CMPXVideoPlaybackMode::HandleBackground()
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleBackground()"));
 
-    //
-    //  Pause in all cases to remove the different behavior based on the decoder
-    //
-    iVideoPlaybackCtlr->iState->HandlePause();
-
     if ( iVideoPlaybackCtlr->iAppInForeground )
     {
         if ( iVideoPlaybackCtlr->IsAlarm() )
         {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
+            iVideoPlaybackCtlr->iState->HandlePause();
         }
         else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
                   iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
-            iVideoPlaybackCtlr->SendHideControlsEventL();
+            iVideoPlaybackCtlr->iState->HandlePause();
+            TRAP_IGNORE( iVideoPlaybackCtlr->SendHideControlsEventL() );
         }
         else if ( iVideoPlaybackCtlr->IsPhoneCall() || iVideoPlaybackCtlr->IsVideoCall() )
         {
-            iVideoPlaybackCtlr->iForegroundPause = EFalse;
+            iVideoPlaybackCtlr->iState->HandlePause();
         }
     }
     else
     {
-        iVideoPlaybackCtlr->iForegroundPause = EFalse;
+         iVideoPlaybackCtlr->iState->HandlePause();
     }
 }
 
@@ -224,13 +228,15 @@ TBool CMPXVideoPlaybackMode::CanPlayNow()
         else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
                   iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
-            iVideoPlaybackCtlr->iForegroundPause = ETrue;
+            // playback not allowed for the clip having video if keylock is true
+            // Let playAllowed remain false
         }
         else
         {
             playAllowed = ETrue;
         }
     }
+
     return playAllowed;
 }
 
@@ -276,6 +282,43 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
     return networkMode2g;
 }
 
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackMode::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleSetPosterFrame()"));
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::HandleSetPosterFrame()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackMode::HandleFrameReady( TInt /*aError*/ )
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackMode::HandleFrameReady()"));
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::SendErrorToView()
+//  ------------------------------------------------------------------------------------------------
+TBool CMPXVideoPlaybackMode::SendErrorToView( TInt aError )
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::SendErrorToView(%d)"), ETrue);
+
+    return ETrue;
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackMode::HandlePauseToPlayTransitionL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackMode::HandlePauseToPlayTransitionL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackMode::HandlePauseToPlayTransitionL()"));
+
+    iVideoPlaybackCtlr->iState->IssuePlayCommand( EMPXVideoPlaying,
+                                                  MMPXPlaybackPluginObserver::EPPlaying );
+}
+
 //************************************************************************************************//
 //          CMPXLocalPlaybackMode
 //************************************************************************************************//
@@ -294,6 +337,30 @@ CMPXLocalPlaybackMode::~CMPXLocalPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXLocalPlaybackMode::~CMPXLocalPlaybackMode()"));
 }
+
+void CMPXLocalPlaybackMode::HandleSetPosterFrame()
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleSetPosterFrame()"));
+
+    // create poster frame setter if it does not already exist
+    if ( ! iPosterFrameSetter )
+    {
+        TRAP_IGNORE(iPosterFrameSetter = CMPXVideoPosterFrameSetter::NewL( iVideoPlaybackCtlr ));
+    }
+
+    if ( iPosterFrameSetter )
+    {
+        iPosterFrameSetter->RequestPosterFrame();
+    }
+}
+
+void CMPXLocalPlaybackMode::HandleFrameReady(TInt aError)
+{
+    MPX_DEBUG(_L("CMPXLocalPlaybackMode::HandleFrameReady()"));
+
+    iPosterFrameSetter->HandlePosterFrameReady(aError);
+}
+
 
 //************************************************************************************************//
 //          CMPXStreamingPlaybackMode
@@ -386,9 +453,11 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
             MPX_TRAPD(err,
                       iVideoPlaybackCtlr->iState->SendErrorToViewL( KMPXVideoCallOngoingError ));
         }
-        else if ( iVideoPlaybackCtlr->IsKeyLocked() && iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
+        else if ( iVideoPlaybackCtlr->IsKeyLocked() &&
+                  iVideoPlaybackCtlr->iFileDetails->iVideoEnabled )
         {
-          //exit for live streaming
+            // playback not allowed for the clip having video if keylock is true
+            // Let playAllowed remain false
         }
         else
         {
@@ -445,9 +514,11 @@ void CMPXStreamingPlaybackMode::HandlePause()
     }
 }
 
+
 //************************************************************************************************//
 //          CMPXLiveStreamingPlaybackMode
 //************************************************************************************************//
+
 CMPXVideoPlaybackMode*
 CMPXLiveStreamingPlaybackMode::NewL( CMPXVideoPlaybackController* aVideoPlaybackCtlr )
 {
@@ -473,27 +544,83 @@ void CMPXLiveStreamingPlaybackMode::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXLiveStreamingPlaybackMode::HandlePause()"));
 
+    //
+    //  Send a stop command to the player, but change state to pause
+    //  The view will not close and the play button will be the only active button
+    //
     iVideoPlaybackCtlr->iPlayer->Stop();
 
-    iVideoPlaybackCtlr->ChangeState( EMPXVideoStopped );
+    iVideoPlaybackCtlr->ChangeState( EMPXVideoPaused );
 
-    iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPStopped,
+    iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
                                                           0,
                                                           KErrNone );
 }
 
 //  ------------------------------------------------------------------------------------------------
-//    CMPXLiveStreamingPlaybackMode::HandleBackground()
+//    CMPXLiveStreamingPlaybackMode::SendErrorToView()
 //  ------------------------------------------------------------------------------------------------
-void CMPXLiveStreamingPlaybackMode::HandleBackground()
+TBool CMPXLiveStreamingPlaybackMode::SendErrorToView( TInt aError )
 {
-    MPX_DEBUG(_L("CMPXLiveStreamingPlaybackMode::HandleBackground()"));
+    TBool retval = ETrue;
+
+    if ( aError == KErrSessionClosed )
+    {
+        retval = EFalse;
+    }
+
+    MPX_DEBUG(_L("CMPXLiveStreamingPlaybackMode::SendErrorToView(%d)"), retval);
+
+    return retval;
+}
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXLiveStreamingPlaybackMode::HandlePauseToPlayTransitionL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXLiveStreamingPlaybackMode::HandlePauseToPlayTransitionL()
+{
+    MPX_ENTER_EXIT(_L("CMPXLiveStreamingPlaybackMode::HandlePauseToPlayTransitionL()"));
 
     //
-    //  Pause in all cases to remove the different behavior based on the decoder
+    //  For live streaming, the controller must be reinitialized
+    //  Send a state change to Initializing to the view
     //
-    iVideoPlaybackCtlr->iState->HandlePause();
+    CMPXMessage* msg = CMPXMessage::NewL();
+    CleanupStack::PushL( msg );
+
+    msg->SetTObjectValueL<TMPXMessageId>( KMPXMessageGeneralId, KMPXMessageGeneral );
+    msg->SetTObjectValueL<TInt>( KMPXMessageGeneralEvent, TMPXPlaybackMessage::EStateChanged );
+    msg->SetTObjectValueL<TInt>( KMPXMessageGeneralType, EPbStateInitialising );
+    msg->SetTObjectValueL<TInt>( KMPXMessageGeneralData, 0 );
+
+    iVideoPlaybackCtlr->iMPXPluginObs->HandlePlaybackMessage( msg, KErrNone );
+
+    CleanupStack::PopAndDestroy( msg );
+
+    iVideoPlaybackCtlr->ChangeState( EMPXVideoInitializing );
+
+    iVideoPlaybackCtlr->iPlayer->Reset();
+
+    //
+    //  Reinitialize the player with the file handle or url
+    //
+    if ( iVideoPlaybackCtlr->iFileHandle.SubSessionHandle() )
+    {
+        iVideoPlaybackCtlr->iPlayer->OpenFileL( iVideoPlaybackCtlr->iFileHandle );
+    }
+#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+    else if ( iVideoPlaybackCtlr->iFileHandle64.SubSessionHandle() )
+    {
+        iVideoPlaybackCtlr->iPlayer->OpenFile64L( iVideoPlaybackCtlr->iFileHandle64 );
+    }
+#endif
+    else
+    {
+        iVideoPlaybackCtlr->iPlayer->OpenUrlL( iVideoPlaybackCtlr->iClipName->Des(),
+                                               iVideoPlaybackCtlr->iAccessPointId );
+    }
 }
+
 
 //************************************************************************************************//
 //          CMPXProgressiveDLPlaybackMode
@@ -514,22 +641,30 @@ void CMPXProgressiveDLPlaybackMode::ConstructL( CMPXVideoPlaybackController* aVi
 {
     iVideoPlaybackCtlr = aVideoPlaybackCtlr;
 
+#ifdef USE_S60_DOWNLOAD_MANAGER
     //
     //  Create the Download Mgr Interface
     //
     iDlMgrIf = CMPXVideoDlMgrIf::NewL( iVideoPlaybackCtlr );
+#endif // USE_S60_DOWNLOAD_MANAGER
+
 }
 
 CMPXProgressiveDLPlaybackMode::~CMPXProgressiveDLPlaybackMode()
 {
     MPX_DEBUG(_L("CMPXProgressiveDLPlaybackMode::~CMPXProgressiveDLPlaybackMode()"));
 
+#ifdef USE_S60_DOWNLOAD_MANAGER
     if ( iDlMgrIf )
     {
         delete iDlMgrIf;
         iDlMgrIf = NULL;
     }
+#endif // USE_S60_DOWNLOAD_MANAGER
+
 }
+
+#ifdef USE_S60_DOWNLOAD_MANAGER
 
 //  ------------------------------------------------------------------------------------------------
 //    CMPXProgressiveDLPlaybackMode::ConnectToDownloadL()
@@ -593,5 +728,31 @@ void CMPXProgressiveDLPlaybackMode::UpdateSeekPosition( TInt64& aPosition )
         aPosition / KPbMilliMultiplier,
         KErrNone );
 }
+
+//  ------------------------------------------------------------------------------------------------
+//    CMPXProgressiveDLPlaybackMode::OpenFileL()
+//  ------------------------------------------------------------------------------------------------
+void CMPXProgressiveDLPlaybackMode::OpenFileL( const RFile& aMediaFile )
+{
+    MPX_ENTER_EXIT(_L("CMPXProgressiveDLPlaybackMode::OpenFileL()"));
+
+    iDlMgrIf->UpdateDownloadSizeL();
+    CMPXVideoPlaybackMode::OpenFileL( aMediaFile );
+}
+
+#ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+//  ------------------------------------------------------------------------------------------------
+//    CMPXProgressiveDLPlaybackMode::OpenFile64L()
+//  ------------------------------------------------------------------------------------------------
+void CMPXProgressiveDLPlaybackMode::OpenFile64L( const RFile64& aMediaFile )
+{
+    MPX_ENTER_EXIT(_L("CMPXProgressiveDLPlaybackMode::OpenFile64L( RFile64 )"));
+
+    iDlMgrIf->UpdateDownloadSizeL();
+    CMPXVideoPlaybackMode::OpenFile64L( aMediaFile );
+}
+#endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
+
+#endif // USE_S60_DOWNLOAD_MANAGER
 
 // End of file

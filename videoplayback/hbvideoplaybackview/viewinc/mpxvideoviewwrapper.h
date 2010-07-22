@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#12 %
+// Version : %version:  da1mmcf#16 %
 
 
 
@@ -35,7 +35,12 @@
 
 #include "mpxvideoplaybackcontrol.hrh"
 
-//  Constants
+enum TMPXMediaRequestStatus
+{
+    MediaNotRequested,
+    MediaRequested,
+    MediaDelivered
+};
 
 //  Forward Declarations
 class MMPXPlaybackUtility;
@@ -59,14 +64,14 @@ class CMPXVideoViewWrapper : public CBase,
         virtual ~CMPXVideoViewWrapper();
 
     private:
-        CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView );        
+        CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView );
         void ConstructL();
 
     public:
         virtual void HandleCommandL( TInt aCommand );
 
         void RetrieveFileNameAndModeL( CMPXCommand* aCmd );
-        
+
         /*
          *  From MMPXViewActivationObserver
          *  Handle view activation.
@@ -75,7 +80,7 @@ class CMPXVideoViewWrapper : public CBase,
          *  @param aPreviousViewType Previous view type Uid.
          */
         inline void HandleViewActivation( const TUid& /*aCurrentViewType*/,
-                                          const TUid& /*aPreviousViewType*/ ) {}        
+                                          const TUid& /*aPreviousViewType*/ ) {}
 
         /**
         * From MMPXPlaybackObserver
@@ -158,19 +163,19 @@ class CMPXVideoViewWrapper : public CBase,
         */
         void SetPropertyL( TMPXPlaybackProperty aProperty, TInt aValue );
         virtual void RetrievePdlInformationL();
-                     
+
         TBool IsLive();
-        
+
         TBool IsPlaylist();
-       
-        void IssueVideoAppForegroundCmdL(TBool aForeground);        
-        
-        void RequestMediaL();  
-        
-        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd );
-        
+
+        void IssueVideoAppForegroundCmdL(TBool aForeground);
+
+        void RequestMediaL();
+
+        void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync = ETrue );
+
         TBool IsAppInFrontL();
-        
+
         /*
          *  Activates an active object to close the player
          *  @since 5.0
@@ -191,9 +196,6 @@ class CMPXVideoViewWrapper : public CBase,
 
         void HandleBufferingStateL();
 
-        void IssuePlayCommandL();
-
-
         /*
          *  Provides the static function for the callback to close the player
          *  Called by CIdle iIdle
@@ -201,14 +203,14 @@ class CMPXVideoViewWrapper : public CBase,
          *  @param aPtr Pointer to callback class
          *  @return KErrNone
          */
-        static TInt ClosePlayerL( TAny* aPtr );
+        static TInt ClosePlayer( TAny* aPtr );
 
         /*
          *  Called to stop and exit the player
          *  @since 3.2
          *  @return void
          */
-        void DoClosePlayerL();
+        void DoClosePlayer();
 
         void HandleVideoPlaybackMessage( CMPXMessage* aMessage );
 
@@ -246,11 +248,13 @@ class CMPXVideoViewWrapper : public CBase,
 
         void HandleGeneralPlaybackMessageL( CMPXMessage* aMessage );
 
-        void SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );        
+        void SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 
         void HandleVolumeCmdL( TMPXPlaybackCommand aCmd );
 
         void HandleShortPressBackwardL();
+
+        void IssuePlayCommandL();
 
     protected: // data
         MMPXPlaybackUtility*                 iPlaybackUtility;
@@ -264,9 +268,13 @@ class CMPXVideoViewWrapper : public CBase,
         CMPXVideoPlaybackDisplayHandler*     iDisplayHandler;
         CMPXVideoPlaybackUserInputHandler*   iUserInputHandler;
         QMPXVideoPlaybackControlsController* iControlsController;
+
+        TMPXMediaRequestStatus               iMediaRequestStatus;
+        TBool                                iPlaylistView;
+        int                                  iPlayPosition;
         
-        TBool                                iMediaRequested;
-        TBool                                iPlaylistView;        
+    public:
+        friend class HbVideoBasePlaybackView;        
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

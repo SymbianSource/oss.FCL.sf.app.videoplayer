@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 
@@ -37,8 +37,6 @@ class QMPXVideoPlaybackDetailsPlaybackWindow : public HbWidget
         virtual ~QMPXVideoPlaybackDetailsPlaybackWindow();
         void initialize();
         void updateState( TMPXPlaybackState state );
-        void mousePressEvent( QGraphicsSceneMouseEvent *event );
-        void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
     private slots:
         void playPause();

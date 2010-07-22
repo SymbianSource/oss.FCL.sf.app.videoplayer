@@ -15,20 +15,32 @@
 *
 */
 
+#include <platform_paths.hrh>
+
 PRJ_PLATFORMS
 DEFAULT
 
 PRJ_TESTEXPORTS
-../data/mmc/video_3gp.3gp                /epoc32/winscw/c/testing/data/video_3gp.xxx
-../data/mmc/video_mpeg4.mp4              /epoc32/winscw/c/testing/data/video_mpeg4.xxx
-../data/mmc/video_wmv.dat                /epoc32/winscw/c/testing/data/video_wmv.xxx
 
+../data/mmc/video_3gp.3gp                                       /epoc32/winscw/c/testing/data/video_3gp.xxx
+../data/mmc/video_mpeg4.mp4                                     /epoc32/winscw/c/testing/data/video_mpeg4.xxx
+../data/mmc/video_wmv.dat                                       /epoc32/winscw/c/testing/data/video_wmv.xxx
 ../conf/VCXDrives.inc                                           /epoc32/winscw/c/testframework/VCXDrives.inc
 ../conf/VCXErrors.inc                                           /epoc32/winscw/c/testframework/VCXErrors.inc
 ../conf/vcxmvcollectionplugintest.inc                           /epoc32/winscw/c/testframework/vcxmvcollectionplugintest.inc
 ../conf/VCXMyVideosCollectionPluginTest.cfg                     /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTest.cfg
 ../conf/VCXMyVideosCollectionPluginTestCategories.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestCategories.cfg
 ../conf/VCXMyVideosCollectionPluginTestAlbums.cfg               /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestAlbums.cfg
+
+../data/mmc/video_3gp.3gp                                       /epoc32/data/z/system/testdata/video_3gp.xxx
+../data/mmc/video_mpeg4.mp4                                     /epoc32/data/z/system/testdata/video_mpeg4.xxx
+../data/mmc/video_wmv.dat                                       /epoc32/data/z/system/testdata/video_wmv.xxx
+../conf/VCXDrives.inc                                           /epoc32/data/z/system/testdata/VCXDrives.inc
+../conf/VCXErrors.inc                                           /epoc32/data/z/system/testdata/VCXErrors.inc
+../conf/vcxmvcollectionplugintest.inc                           /epoc32/data/z/system/testdata/vcxmvcollectionplugintest.inc
+../conf/VCXMyVideosCollectionPluginTest.cfg                     /epoc32/data/z/system/testdata/VCXMyVideosCollectionPluginTest.cfg
+../conf/VCXMyVideosCollectionPluginTestCategories.cfg           /epoc32/data/z/system/testdata/VCXMyVideosCollectionPluginTestCategories.cfg
+../conf/VCXMyVideosCollectionPluginTestAlbums.cfg               /epoc32/data/z/system/testdata/VCXMyVideosCollectionPluginTestAlbums.cfg
 
 PRJ_EXPORTS
 

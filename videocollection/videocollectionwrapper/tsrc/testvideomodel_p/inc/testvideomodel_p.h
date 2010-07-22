@@ -88,6 +88,11 @@ signals:
     */
    void signalVideoDetailsCompleted(CMPXMedia*);
    
+   /**
+    * emitted to get listCompleteSlot to be called.
+    */
+   void signalListCompleteSlot();
+   
     // test functions for the test framework
 private slots:
     /**
@@ -248,6 +253,11 @@ private slots:
      * verifies getMediaIdFromIndex when fetching collections
      */
     void testGetCollectionIdFromIndex();
+    
+    /**
+     * verifies listCompleteSlot
+     */
+    void testListCompleteSlot();
 
 private:
   

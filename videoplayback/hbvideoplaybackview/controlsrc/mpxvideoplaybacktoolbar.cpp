@@ -15,14 +15,13 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  7 %
 
 
 
 #include <QTimer>
 #include <QGraphicsLayout>
 
-#include <hbeffect.h>
 #include <hbaction.h>
 #include <hbtoolbar.h>
 #include <hbinstance.h>
@@ -44,14 +43,13 @@ const int KRetrieveButtonTimeOut = 1000;
 // QMPXVideoPlaybackToolBar::QMPXVideoPlaybackToolBar()
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackToolBar::QMPXVideoPlaybackToolBar( 
+QMPXVideoPlaybackToolBar::QMPXVideoPlaybackToolBar(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
     , mSeekStartTimer( NULL )
     , mRetrieveButtonTimer( NULL )
     , mSeekingState( EMPXNotSeeking )
     , mInitialized( false )
-    , mNeverVisibled( true )
     , mPosition( 0 )
     , mDuration( 0 )
     , mAspectRatio( EMPXPbvCmdNaturalAspectRatio )
@@ -60,8 +58,7 @@ QMPXVideoPlaybackToolBar::QMPXVideoPlaybackToolBar(
 
     mToolBar = mController->view()->toolBar();
     mToolBar->setOrientation( Qt::Horizontal );
-    HbEffect::disable( mToolBar );
-    
+
     mController->view()->hideItems( Hb::ToolBarItem );
 
     initialize();
@@ -75,7 +72,6 @@ QMPXVideoPlaybackToolBar::~QMPXVideoPlaybackToolBar()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackToolBar::~QMPXVideoPlaybackToolBar()"));
 
-    HbEffect::enable( mToolBar );
     mToolBar->clearActions();
 
     for ( int i = 0 ; i < mButtonIcons.count() ; i++ )
@@ -171,7 +167,7 @@ void QMPXVideoPlaybackToolBar::initialize()
         mButtonActions[EMPX1stButton]->setIcon( *mButtonIcons[EMPXNaturalIcon] );
 
         //
-        // Attach/Share button 
+        // Attach/Share button
         //
         mButtonIcons[EMPXAttachIcon]->setIconName( "qtg_mono_attach" );
         mButtonIcons[EMPXShareIcon]->setIconName( "qtg_mono_share" );
@@ -185,28 +181,27 @@ void QMPXVideoPlaybackToolBar::initialize()
         mDuration = (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier;
 
         //
-        // Create a timer for seeking. 
+        // Create a timer for seeking.
         // We will issue SetPosition every KSeekingTimeOut msec to show the current frame to user
         //
         mSeekStartTimer = new QTimer();
         mSeekStartTimer->setSingleShot( true );
         mSeekStartTimer->setInterval( KSeekStartTimeOut );
-        
+
         //
         // get window size
         //
-        RWindow *window = mController->view()->getWindow();            
+        RWindow *window = mController->view()->getWindow();
         TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
-        
+
         //
         // get window aspect ratio
         //   if device is in portrait mode, width > height
         //   if device is in landscape mode, width < height
         //
         TReal32 width = (TReal32) displayRect.Width();
-        TReal32 height = (TReal32) displayRect.Height();            
+        TReal32 height = (TReal32) displayRect.Height();
         mDisplayAspectRatio = (width > height)? (width / height) : (height / width);
-        
     }
 }
 
@@ -235,7 +230,7 @@ void QMPXVideoPlaybackToolBar::ffPressing()
     {
         mSeekingState = EMPXFastForwarding;
 
-        mController->handleCommand( EMPXPbvCmdSeekForward );        
+        mController->handleCommand( EMPXPbvCmdSeekForward );
     }
 }
 
@@ -274,7 +269,7 @@ void QMPXVideoPlaybackToolBar::ffReleased()
 
     if ( mSeekingState == EMPXFastForwarding )
     {
-        mController->handleCommand( EMPXPbvCmdEndSeek );        
+        mController->handleCommand( EMPXPbvCmdEndSeek );
     }
     else
     {
@@ -312,7 +307,7 @@ void QMPXVideoPlaybackToolBar::rwReleased()
 
     if ( mSeekingState == EMPXRewinding )
     {
-        mController->handleCommand( EMPXPbvCmdEndSeek );        
+        mController->handleCommand( EMPXPbvCmdEndSeek );
     }
     else
     {
@@ -343,7 +338,7 @@ void QMPXVideoPlaybackToolBar::changeAspectRatio()
     MPX_DEBUG(_L("QMPXVideoPlaybackToolBar::changeAspectRatio()"));
 
     mController->resetDisappearingTimers( EMPXTimerReset );
-    
+
     TMPXVideoPlaybackViewCommandIds cmd = EMPXPbvCmdStretchAspectRatio;
 
     switch( mAspectRatio )
@@ -408,7 +403,13 @@ void QMPXVideoPlaybackToolBar::aspectRatioChanged( int aspectRatio )
 
     mAspectRatio = aspectRatio;
 
-    if ( ! mController->isAttachOperation() )
+    //
+    // If we are in attach service or audio only view, then don't update the icon.
+	// Aspect ratio icon slots are shared with attach and share icon.
+	// Just update the mAspectRatio
+	// and once we go back to full screen, we will show the correct aspect ratio icon
+	//
+    if ( ! mController->isAttachOperation() && mController->viewMode() == EFullScreenView )
     {
         switch( mAspectRatio )
         {
@@ -427,7 +428,7 @@ void QMPXVideoPlaybackToolBar::aspectRatioChanged( int aspectRatio )
                 mButtonActions[EMPX1stButton]->setIcon( *mButtonIcons[EMPXNaturalIcon] );
                 break;
             }
-        }    
+        }
     }
 }
 
@@ -500,7 +501,7 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
         if ( mButtons.count() )
         {
-            disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
+            disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
             connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                      mController, SLOT( attachVideo() ) );
         }
@@ -527,11 +528,11 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
             else
             {
                 //
-                // check if video clip has same aspect ratio as display window 
+                // check if video clip has same aspect ratio as display window
                 //
-                TReal32 videoAspectRatio = (TReal32) details->mVideoWidth / (TReal32) details->mVideoHeight; 
+                TReal32 videoAspectRatio = (TReal32) details->mVideoWidth / (TReal32) details->mVideoHeight;
                 bool enabled = ( mDisplayAspectRatio == videoAspectRatio )? false : true;
-                
+
                 //
                 // enable or dim 'aspect ratio' buttons accordingly
                 //
@@ -539,12 +540,12 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
                 if ( mButtons.count() )
                 {
-                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
+                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
                     connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                              this, SLOT( changeAspectRatio() ) );
                 }
             }
-        }                
+        }
         else if ( mController->viewMode() == EAudioOnlyView )
         {
             //
@@ -569,8 +570,8 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
 
                 if ( mButtons.count() )
                 {
-                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ) );
-                    connect( mButtons[EMPX1stButton], SIGNAL( released() ), 
+                    disconnect( mButtons[EMPX1stButton], SIGNAL( released() ), 0, 0 );
+                    connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                              mController, SLOT( sendVideo() ) );
                 }
             }
@@ -590,25 +591,42 @@ void QMPXVideoPlaybackToolBar::updateWithFileDetails(
         mButtonActions[EMPX5thButton]->setEnabled( true );
     }
 
-    if ( ! details->mSeekable )
-    {
-        mButtonActions[EMPX2ndButton]->setEnabled( false );
-        mButtonActions[EMPX4thButton]->setEnabled( false );
-    }
-    else
+    if ( details->mSeekable && details->mPausableStream )
     {
         mButtonActions[EMPX2ndButton]->setEnabled( true );
         mButtonActions[EMPX4thButton]->setEnabled( true );
     }
-
-    if ( ! details->mPausableStream )
+    else
     {
-        mButtonActions[EMPX3rdButton]->setEnabled( false );
+        mButtonActions[EMPX2ndButton]->setEnabled( false );
+        mButtonActions[EMPX4thButton]->setEnabled( false );
+    }
+
+    if ( details->mPausableStream )
+    {
+        mButtonActions[EMPX3rdButton]->setEnabled( true );
     }
     else
     {
-        mButtonActions[EMPX3rdButton]->setEnabled( true );
-    }        
+        mButtonActions[EMPX3rdButton]->setEnabled( false );
+    }
+
+    //
+    // toolbar creates button once it gets visible, so we don't know exact timing when toolbar
+    // creates button, so start timer to get layout information once the toolbar gets visible.
+    // This is needed since we don't use toolbar in proper way.
+    //
+    if ( ! mRetrieveButtonTimer && ! mButtons.count() )
+    {
+        mRetrieveButtonTimer = new QTimer();
+        mRetrieveButtonTimer->setSingleShot( false );
+        mRetrieveButtonTimer->setInterval( KRetrieveButtonTimeOut );
+        connect( mRetrieveButtonTimer, SIGNAL( timeout() ), this, SLOT( retrieveButtons() ) );
+
+        mRetrieveButtonTimer->start();
+    }
+
+    durationChanged( (qreal)mController->fileDetails()->mDuration / (qreal)KPbMilliMultiplier );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -636,7 +654,6 @@ void QMPXVideoPlaybackToolBar::positionChanged( int position )
     MPX_DEBUG(_L("QMPXVideoPlaybackToolBar::positionChanged position = %d"), position );
 
     mPosition = position;
-    retrieveButtons();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -661,24 +678,6 @@ void QMPXVideoPlaybackToolBar::setVisible( bool visible )
     if ( visible )
     {
         mController->view()->showItems( Hb::ToolBarItem );
-
-        if ( mNeverVisibled )
-        {
-            mNeverVisibled = false;
-
-
-            //
-            // toolbar creates button once it gets visible, so we don't know exact timing when toolbar 
-            // creates button, so start timer to get layout information once the toolbar gets visible.
-            // This is needed since we don't use toolbar in proper way.
-            //
-            mRetrieveButtonTimer = new QTimer();
-            mRetrieveButtonTimer->setSingleShot( false );
-            mRetrieveButtonTimer->setInterval( KRetrieveButtonTimeOut );
-            connect( mRetrieveButtonTimer, SIGNAL( timeout() ), this, SLOT( retrieveButtons() ) );
-
-            mRetrieveButtonTimer->start();
-        }
     }
     else
     {
@@ -700,10 +699,13 @@ void QMPXVideoPlaybackToolBar::retrieveButtons()
 
         if ( layout )
         {
-		    disconnect( mRetrieveButtonTimer, SIGNAL( timeout() ), this, SLOT( retrieveButtons() ) );
-            if ( mRetrieveButtonTimer->isActive() )
+            if ( mRetrieveButtonTimer )
             {
-                mRetrieveButtonTimer->stop();
+                disconnect( mRetrieveButtonTimer, SIGNAL( timeout() ), this, SLOT( retrieveButtons() ) );
+                if ( mRetrieveButtonTimer->isActive() )
+                {
+                    mRetrieveButtonTimer->stop();
+                }
             }
 
             for ( int i = 0 ; i < layout->count() ; i++ )
@@ -739,10 +741,10 @@ void QMPXVideoPlaybackToolBar::retrieveButtons()
                 {
                     connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                              this, SLOT( changeAspectRatio() ) );
-                }                
+                }
                 else if ( mController->viewMode() == EAudioOnlyView )
                 {
-                    connect( mButtons[EMPX1stButton], SIGNAL( released() ), 
+                    connect( mButtons[EMPX1stButton], SIGNAL( released() ),
                              mController, SLOT( sendVideo() ) );
                 }
             }

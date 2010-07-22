@@ -14,6 +14,8 @@
 # Description: 
 #
 
+DEFINES += XQPLUGIN_H
+DEFINES += XQSERVICEABSTRACTSERVICE_H
 DEFINES += XQSERVICEUTIL_H
     
 CONFIG += qtestlib \
@@ -23,11 +25,16 @@ CONFIG += qtestlib \
 LIBS += -lestor.dll \
     -lfbscli.dll \
     -lbitgdi.dll \
-    -lxqplugins.dll \
     -lmpxviewframeworkqt.dll \
+    -lxqplugins.dll \
     -lxqservice.dll
 
 HEADERS_TEMP = \
+	inc/videoserviceurifetch.h \	
+	inc/videoservicebrowse.h \
+	inc/xqserviceutilstub.h \
+	inc/xqserviceproviderstub.h \
+    inc/testobjectstore.h \
     inc/hbabstractitemview.h \
     inc/hbdocumentloader.h \
     inc/hbaction.h \
@@ -69,6 +76,7 @@ HEADERS_TEMP = \
     inc/videoplayerappexport.h \
     inc/videosortfilterproxymodeldata.h \
     inc/videothumbnailtestdata.h \
+    inc/videoactivitystate.h \
     inc/xqserviceutilxtra.h \
     # We need stub for this because it has static data and HW compilation of moc file fails because of that.
     inc/videoservices.h \
@@ -81,11 +89,11 @@ HEADERS_TEMP = \
     ../../videocollectionwrapper/inc/videolistdatamodel.h \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
-    ../../videocollectionwrapper/inc/videothumbnaildata.h \
-    ../../../videoplayerapp/videoplayerengine/inc/videoserviceurifetch.h \
-    ../../../videoplayerapp/videoplayerengine/inc/videoservicebrowse.h
+    ../../videocollectionwrapper/inc/videothumbnaildata.h
 
 SOURCES_TEMP = \
+    src/xqserviceprovider.cpp \
+    src/testobjectstore.cpp \
     src/hbdocumentloader.cpp \
     src/hbaction.cpp \
     src/hbcheckbox.cpp \
@@ -119,7 +127,8 @@ SOURCES_TEMP = \
     src/videothumbnaildata.cpp \
     src/videoservices.cpp \
     src/videoserviceurifetch.cpp \
-    src/videoservicebrowse.cpp
+    src/videoservicebrowse.cpp \ 
+    src/videoactivitystate.cpp 
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)
 SOURCES += $$find(SOURCES_TEMP, ^(?!.*$$TESTEDCLASS).*$)

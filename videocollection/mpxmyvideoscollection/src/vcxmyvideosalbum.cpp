@@ -292,10 +292,10 @@ void CVcxMyVideosAlbum::AppendToVideoListL( CMPXMedia& aFromVideoList,
 // CVcxMyVideosAlbum::CalculateAttributesL
 // ---------------------------------------------------------------------------
 //
-void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
+TBool CVcxMyVideosAlbum::CalculateAttributesL()
     {
+    TInt videoCount = 0;
     TUint32 count = iVideoList.Count();
-    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
     TInt newCount = 0;
     CMPXMedia* video;
     CMPXMedia* latestNewVideo = NULL;
@@ -303,11 +303,12 @@ void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
     TUint32 flags;
     TInt64 currentItemsCreationDate = 0;
     TInt64 latestCreationDate = TVcxMyVideosCollectionUtil::CreationDateL( *iMedia );
-    for ( TInt i = aStartIndex; i < count; i++ )
+    for ( TInt i = 0; i < count; i++ )
         {
         video = iCollection.iCache->FindVideoByMdsIdL( iVideoList[i].iMdsId, pos );
         if ( video )
             {
+            videoCount++;
             flags = TVcxMyVideosCollectionUtil::FlagsL( *video );
             if ( flags & EVcxMyVideosVideoNew )
                 {
@@ -321,13 +322,36 @@ void CVcxMyVideosAlbum::CalculateAttributesL( TInt aStartIndex )
                 }
             }
         }
-    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, count );
-    iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryNewItemCount, newCount );
+    
+    TBool modified = EFalse;
+    
+    TUint32 prevValue = TVcxMyVideosCollectionUtil::CategoryItemCountL( *iMedia );
+    if ( prevValue != videoCount )
+        {
+        iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryItemCount, videoCount );
+        modified = ETrue;
+        }
+
+    prevValue = TVcxMyVideosCollectionUtil::CategoryNewItemCountL( *iMedia );
+    if ( prevValue != newCount )
+        {
+        iMedia->SetTObjectValueL<TUint32>( KVcxMediaMyVideosCategoryNewItemCount, newCount );
+        modified = ETrue;
+        }
+    
     if ( latestNewVideo )
         {
-        iMedia->SetTextValueL( KVcxMediaMyVideosCategoryNewItemName,
-                TVcxMyVideosCollectionUtil::Title( *latestNewVideo ) );
+        TPtrC prevNewVideoName( TVcxMyVideosCollectionUtil::CategoryNewVideoName( *iMedia ) );
+        TPtrC latestNewVideoName( TVcxMyVideosCollectionUtil::Title( *latestNewVideo ) );
+        if ( prevNewVideoName != latestNewVideoName )
+            {
+            iMedia->SetTextValueL( KVcxMediaMyVideosCategoryNewItemName,
+                    TVcxMyVideosCollectionUtil::Title( *latestNewVideo ) );
+            iMedia->SetTObjectValueL<TInt64>( KMPXMediaGeneralDate, latestCreationDate );    
+            modified = ETrue;
+            }
         }
-    iMedia->SetTObjectValueL<TInt64>( KMPXMediaGeneralDate, latestCreationDate );
+    
+    return modified;
     }
 

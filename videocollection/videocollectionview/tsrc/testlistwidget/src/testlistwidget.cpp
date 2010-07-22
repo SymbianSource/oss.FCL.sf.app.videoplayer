@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 47 %
+// Version : %version: 56 %
 
 #include <qmap.h>
 #include <vcxmyvideosdefs.h>
@@ -86,14 +86,6 @@ public:
     {
         VideoListWidget::longPressedSlot(item, point);
     }
-    
-    /**
-    * calls pangesture
-    */
-    void callPanGesture(const QPointF &point)
-    {
-        VideoListWidget::panGesture(point);
-    }
 };
 
 // ---------------------------------------------------------------------------
@@ -155,6 +147,7 @@ void TestListWidget::setRowCount(int count,
 void TestListWidget::initTestCase()
 {
     qRegisterMetaType<QModelIndex>("QModelIndex");
+    qRegisterMetaType<TMPXItemId>("TMPXItemId");
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +189,7 @@ void TestListWidget::cleanup()
 }
  
 // ---------------------------------------------------------------------------
-// testInitialize
+// testInitialized
 // ---------------------------------------------------------------------------
 //
 void TestListWidget::testInitialize()
@@ -208,14 +201,12 @@ void TestListWidget::testInitialize()
     QVERIFY(mTestWidget->initialize(*model) == 0);
 	QVERIFY(mTestWidget->mModel == model);  
 	QVERIFY(mTestWidget->mVideoServices == 0);
-	QVERIFY(mTestWidget->mIsService == false);
 	
 	// service initialization
 	VideoServices *service = VideoServices::instance();
-    QVERIFY(mTestWidget->initialize(*model, service) == 0);
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
     QVERIFY(mTestWidget->mModel == model);  
     QVERIFY(mTestWidget->mVideoServices == service);
-    QVERIFY(mTestWidget->mIsService == true);
     service->decreaseReferenceCount();
     service = 0;
 	
@@ -236,20 +227,25 @@ void TestListWidget::testActivate()
     QCOMPARE(HbListView::mLatestVisibility, false);
     QCOMPARE(VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled, 0);
     
-    // model exist, no current view default level: succeeds
+    // model exist, no current view default level: fails
     QVERIFY(mTestWidget->initialize(*model) == 0);
-    QVERIFY(mTestWidget->activate() == 0);
+    QVERIFY(mTestWidget->activate() == -1);
     QCOMPARE(HbMenuData::mEnabledSetted, false);
-    QCOMPARE(HbListView::mLatestVisibility, true);
-    QCOMPARE(VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled, 1);
+    QCOMPARE(HbListView::mLatestVisibility, false);
+    QCOMPARE(VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled, 0);
     
     HbMenuData::mEnabledSetted = true;
     HbListView::mLatestVisibility = false;
     HbListView::mLatestEnableValue = false;
     VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = 0;
-    
-    // model exists, current view exists, level neither ELevelAlbum nor ELevelDefaultColl 
     HbView *tmpView = new HbView();
+    // model exists, current view exists, level neither ELevelAlbum nor ELevelDefaultColl 
+    delete mTestWidget;
+    mTestWidget = 0;
+    mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
+    model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+    
+    QVERIFY(mTestWidget->initialize(*model, 0, VideoCollectionCommon::ELevelVideos) == 0);
     hbInstance->allMainWindows().value(0)->addView(tmpView);
     QVERIFY(mTestWidget->activate() == 0);
     QCOMPARE(HbMenuData::mEnabledSetted, true);
@@ -285,15 +281,41 @@ void TestListWidget::testActivate()
     // activate:
     // -is service
     // -current service is browse
-    VideoServices *videoServices = VideoServices::instance();
-    videoServices->mCurrentService = VideoServices::EBrowse;
+    VideoServices *videoServices = VideoServices::instance();    
     delete mTestWidget;
     mTestWidget = 0;
     mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
-    QVERIFY(mTestWidget->initialize(*model, videoServices) == 0);
+    videoServices->mCurrentService = VideoServices::EBrowse;
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
     QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelDefaultColl) == 0);
     QVERIFY(mTestWidget->mNavKeyAction);
+    QVERIFY(HbAction::mNavAction == Hb::BackAction);    
+    
+    // activate:
+    // -is service
+    // -current service is fetch
+    // -activating all videos
+    delete mTestWidget;
+    mTestWidget = 0;
+    mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
+    QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelVideos) == 0);
+    QVERIFY(mTestWidget->mNavKeyAction);
     QVERIFY(HbAction::mNavAction == Hb::QuitAction);
+    
+    // activate:
+    // -is service
+    // -current service is fetch
+    // -activating album
+    delete mTestWidget;
+    mTestWidget = 0;
+    mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
+    QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelAlbum) == 0);
+    QVERIFY(mTestWidget->mNavKeyAction);
+    QVERIFY(HbAction::mNavAction == Hb::BackAction);
     
     hbInstance->allMainWindows().value(0)->removeView(tmpView);
     delete tmpView;
@@ -376,13 +398,13 @@ void TestListWidget::testGetModel()
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
-    QVERIFY(&(mTestWidget->getModel()) == 0);
+    QVERIFY(mTestWidget->getModel() == 0);
     
     HbListView::mVScrollBarIsNull = false;
     HbListView::mReturnNullPrototype = false;
     mTestWidget->initialize(*model);
     
-    QVERIFY(&(mTestWidget->getModel()) == model);
+    QVERIFY(mTestWidget->getModel() == model);
 }
  
 // ---------------------------------------------------------------------------
@@ -395,7 +417,7 @@ void TestListWidget::testEmitActivated()
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
-    QSignalSpy spysignal(mTestWidget, SIGNAL(collectionOpened(bool, const QString&, const QModelIndex&)));
+    QSignalSpy spysignal(mTestWidget, SIGNAL(collectionOpened(bool, const QString&, const TMPXItemId&)));
     QSignalSpy spysignalFileUri(mTestWidget, SIGNAL(fileUri(const QString&)));
     QSignalSpy spysignalActivated(mTestWidget, SIGNAL(activated(const QModelIndex&)));
     
@@ -459,13 +481,12 @@ void TestListWidget::testEmitActivated()
     spysignalActivated.clear();
     
     // current level is not ELevelCategory
-    // mIsService is true, variant gotten is invalid
-    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    // mVideoServices exist, variant gotten is invalid
+    mTestWidget->mService = VideoServices::EUriFetcher;
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, QVariant());
     mTestWidget->mCurrentLevel = VideoCollectionCommon::ELevelVideos;
-    mTestWidget->mIsService = true;
     mTestWidget->mVideoServices = videoServices;
-    fetchIndex = model->index(0, 0, QModelIndex());
+    fetchIndex = model->index(5, 0, QModelIndex());
     mTestWidget->callEmiteActivated(fetchIndex);
     QVERIFY(spysignal.count() == 0);
     QVERIFY(spysignalFileUri.count() == 0);
@@ -473,8 +494,8 @@ void TestListWidget::testEmitActivated()
     QVERIFY(VideoSortFilterProxyModelData::mLastItemId == TMPXItemId::InvalidId());
     
     // current level is not ELevelCategory
-    // mIsService is true, variant gotten is valid
-    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    // mVideoServices, variant gotten is valid
+    mTestWidget->mService = VideoServices::EUriFetcher;
     VideoListDataModelData::setData(VideoCollectionCommon::KeyFilePath, data);
     fetchIndex = model->index(0, 0, QModelIndex());
     mTestWidget->callEmiteActivated(fetchIndex);
@@ -488,8 +509,8 @@ void TestListWidget::testEmitActivated()
     spysignalActivated.clear();
     
     // current level is not ELevelCategory
-    // mIsService is false
-    mTestWidget->mIsService = false;
+    // mVideoServices does not exists
+    mTestWidget->mVideoServices = 0;
     fetchIndex = model->index(0, 0, QModelIndex());
     mTestWidget->callEmiteActivated(fetchIndex);
     QVERIFY(spysignal.count() == 0);
@@ -571,24 +592,26 @@ void TestListWidget::testLongPressedSlot()
     QVERIFY(HbMenuData::mExecPoint != point);
     mTestWidget->mModel = tmp;
     
-    // gotten id != KVcxMvcMediaTypeVideo, service is true and id != KVcxMvcMediaTypeAlbum
+    VideoServices *videoServices = VideoServices::instance();
+    
+    // gotten id != KVcxMvcMediaTypeVideo, service exists true and id != KVcxMvcMediaTypeAlbum
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(1,1));
-    mTestWidget->mIsService = true;
+    mTestWidget->mVideoServices = videoServices;
     mTestWidget->callLongPressedSlot(item, point);
     QVERIFY(HbMenuData::mExecPoint == point);
     
-    // gotten id != KVcxMvcMediaTypeVideo, service is false and id !=  KVcxMvcMediaTypeAlbum
+    // gotten id != KVcxMvcMediaTypeVideo, service does not exists and id !=  KVcxMvcMediaTypeAlbum
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(1,1));
-    mTestWidget->mIsService = false;
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     QVERIFY(HbMenuData::mExecPoint == point);
     
-    // gotten id != KVcxMvcMediaTypeVideo, service is false and id ==  KVcxMvcMediaTypeAlbum
+    // gotten id != KVcxMvcMediaTypeVideo, service service does not exists and id ==  KVcxMvcMediaTypeAlbum
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(1,2));
-    mTestWidget->mIsService = false;
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     QVERIFY(HbMenuData::mExecPoint == point);
     HbMenuData::mExecPoint = QPointF();
@@ -596,7 +619,7 @@ void TestListWidget::testLongPressedSlot()
     // gotten id == KVcxMvcMediaTypeVideo
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(1,02));
-    mTestWidget->mIsService = false;
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     QVERIFY(HbMenuData::mExecPoint == point);
     HbMenuData::mExecPoint = QPointF();
@@ -615,12 +638,11 @@ void TestListWidget::testLongPressedSlot()
     // -is service
     // -current service is browse
     HbMenuData::mExecPoint = QPointF();
-    VideoServices *videoServices = VideoServices::instance();
     videoServices->mCurrentService = VideoServices::EBrowse;
     delete mTestWidget;
     mTestWidget = 0;
     mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
-    QVERIFY(mTestWidget->initialize(*model, videoServices) == 0);
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
     QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelDefaultColl) == 0);
     mTestWidget->mItem->mModelIndex = model->index(0, 0, QModelIndex());
     mTestWidget->callLongPressedSlot(item, point);
@@ -630,19 +652,61 @@ void TestListWidget::testLongPressedSlot()
     QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionDetails]->isVisible());
     
     // long press gesture:
-    // -is service
-    // -current service is EUriFetcher
+    // - is service
+    // - current service is EUriFetcher
+    // - category view activated
     HbMenuData::mExecPoint = QPointF();
     videoServices = VideoServices::instance();
     videoServices->mCurrentService = VideoServices::EUriFetcher;
     delete mTestWidget;
     mTestWidget = 0;
     mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
-    QVERIFY(mTestWidget->initialize(*model, videoServices) == 0);
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
+    QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelCategory) == 0);
+    mTestWidget->mItem->mModelIndex = model->index(0, 0, QModelIndex());
+    mTestWidget->callLongPressedSlot(item, point);
+    QCOMPARE(mTestWidget->mContextMenuActions.count(), 4);
+    QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionOpen]->isVisible()); 
+    QVERIFY(!mTestWidget->mContextMenuActions[VideoListWidget::EActionAttach]->isVisible());    
+    QVERIFY(!mTestWidget->mContextMenuActions[VideoListWidget::EActionPlay]->isVisible());    
+    QVERIFY(!mTestWidget->mContextMenuActions[VideoListWidget::EActionDetails]->isVisible());
+    
+    // long press gesture:
+    // - is service
+    // - current service is EUriFetcher
+    // - user defined collection activated 
+    HbMenuData::mExecPoint = QPointF();
+    videoServices = VideoServices::instance();
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    delete mTestWidget;
+    mTestWidget = 0;
+    mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
+    QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelAlbum) == 0);
+    mTestWidget->mItem->mModelIndex = model->index(0, 0, QModelIndex());
+    mTestWidget->callLongPressedSlot(item, point);
+    QCOMPARE(mTestWidget->mContextMenuActions.count(), 4);
+    QVERIFY(!mTestWidget->mContextMenuActions[VideoListWidget::EActionOpen]->isVisible()); 
+    QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionAttach]->isVisible());    
+    QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionPlay]->isVisible());    
+    QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionDetails]->isVisible());
+    
+    // long press gesture:
+    // - is service
+    // - current service is EUriFetcher
+    // - default collection activated 
+    HbMenuData::mExecPoint = QPointF();
+    videoServices = VideoServices::instance();
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    delete mTestWidget;
+    mTestWidget = 0;
+    mTestWidget = new ListWidgetTester(mTestUiLoader, mTempView);
+    QVERIFY(mTestWidget->initialize(*model, true) == 0);
     QVERIFY(mTestWidget->activate(VideoCollectionCommon::ELevelDefaultColl) == 0);
     mTestWidget->mItem->mModelIndex = model->index(0, 0, QModelIndex());
     mTestWidget->callLongPressedSlot(item, point);
-    QCOMPARE(mTestWidget->mContextMenuActions.count(), 3);
+    QCOMPARE(mTestWidget->mContextMenuActions.count(), 4);
+    QVERIFY(!mTestWidget->mContextMenuActions[VideoListWidget::EActionOpen]->isVisible()); 
     QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionAttach]->isVisible());    
     QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionPlay]->isVisible());    
     QVERIFY(mTestWidget->mContextMenuActions[VideoListWidget::EActionDetails]->isVisible());
@@ -650,38 +714,6 @@ void TestListWidget::testLongPressedSlot()
     // final cleanup
     videoServices->decreaseReferenceCount();
     delete item;
-}
-
-// ---------------------------------------------------------------------------
-// testPanGesture
-// ---------------------------------------------------------------------------
-//
-void TestListWidget::testPanGesture()
-{
-    QPointF point(1,1);
-    // no context menu
-    mTestWidget->callPanGesture(point);
-    QVERIFY(HbListView::mPanGesturePoint == point);
-    
-    // create context menu
-    VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
-    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
-    mTestWidget->initialize(*model);
-    connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(doDelayedsSlot()));
-    emit testSignal();
-    disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(doDelayedsSlot()));
-    
-    HbListView::mPanGesturePoint = QPointF();
-    
-    // context menu visible
-    mTestWidget->mContextMenu->setVisible(true);
-    mTestWidget->callPanGesture(point);
-    QVERIFY(HbListView::mPanGesturePoint != point);
-    
-    // context menu not visible
-    mTestWidget->mContextMenu->setVisible(false);
-    mTestWidget->callPanGesture(point);
-    QVERIFY(HbListView::mPanGesturePoint == point);
 }
 
 // ---------------------------------------------------------------------------
@@ -699,7 +731,7 @@ void TestListWidget::testSetContextMenu()
     setRowCount(1);
     HbListView::mCurrentIndex = model->index(0, 0, QModelIndex());
     mTestWidget->mItem->mModelIndex = HbListView::mCurrentIndex ;
-    
+     
     TMPXItemId itemId;
     QPointF point(1,1);
     itemId.iId2 = 0;
@@ -741,8 +773,8 @@ void TestListWidget::testSetContextMenu()
     
     // mCurrentLevel == ELevelCategory
     mTestWidget->mCurrentLevel = VideoCollectionCommon::ELevelCategory;
-    // mIsService is false
-    mTestWidget->mIsService = false;
+    // service does not exist
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     iter = mTestWidget->mContextMenuActions.begin();
     QVERIFY(iter != mTestWidget->mContextMenuActions.end());
@@ -757,8 +789,9 @@ void TestListWidget::testSetContextMenu()
     }
     QVERIFY(visibleCount == 1);
     
-    // mIsService is true, mpxId.iId2 != KVcxMvcMediaTypeAlbum
-    mTestWidget->mIsService = true;
+    VideoServices *videoServices = VideoServices::instance();
+    // service exists, mpxId.iId2 != KVcxMvcMediaTypeAlbum
+    mTestWidget->mVideoServices = videoServices;
     mTestWidget->callLongPressedSlot(item, point);
     iter = mTestWidget->mContextMenuActions.begin();
     QVERIFY(iter != mTestWidget->mContextMenuActions.end());
@@ -773,12 +806,11 @@ void TestListWidget::testSetContextMenu()
     }
     QVERIFY(visibleCount == 1);
     
-    // mIsService is false, mpxId.iId2 == KVcxMvcMediaTypeAlbum
-    //VideoSortFilterProxyModelData::mItemIds.clear();
+    // service does not exists , mpxId.iId2 == KVcxMvcMediaTypeAlbum
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(1,KVcxMvcMediaTypeAlbum));
     HbListView::mCurrentIndex = model->index(1, 0, QModelIndex());
     item->mModelIndex = model->index(1, 0, QModelIndex());
-    mTestWidget->mIsService = false;
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     iter = mTestWidget->mContextMenuActions.begin();
     QVERIFY(iter != mTestWidget->mContextMenuActions.end());
@@ -796,8 +828,8 @@ void TestListWidget::testSetContextMenu()
     
     // mCurrentLevel == ELevelAlbum
     mTestWidget->mCurrentLevel = VideoCollectionCommon::ELevelAlbum;
-    // mIsService is false
-    mTestWidget->mIsService = false;
+    // service does not exists
+    mTestWidget->mVideoServices = 0;
     mTestWidget->callLongPressedSlot(item, point);
     iter = mTestWidget->mContextMenuActions.begin();
     QVERIFY(iter != mTestWidget->mContextMenuActions.end());
@@ -812,22 +844,21 @@ void TestListWidget::testSetContextMenu()
     }
     QVERIFY(visibleCount == 4);    
     
-    // mIsService is true
+    // service does exists
     // object needs to be resetted for the service use
     cleanup();
     init();
     setRowCount(1);
     model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
-    mTestWidget->initialize(*model);
+    mTestWidget->mVideoServices = videoServices;
+    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    mTestWidget->initialize(*model, videoServices);
     HbListView::mCurrentIndex = model->index(0, 0, QModelIndex());
     mTestWidget->mItem->mModelIndex = HbListView::mCurrentIndex ;
-    VideoServices *videoServices = VideoServices::instance();
     
     mTestWidget->mCurrentLevel = VideoCollectionCommon::ELevelAlbum;
     VideoSortFilterProxyModelData::mItemIds.append(itemId);
-    mTestWidget->mIsService = true;
-    mTestWidget->mVideoServices = videoServices;
-    videoServices->mCurrentService = VideoServices::EUriFetcher;
+
     mTestWidget->callLongPressedSlot(item, point);
     iter = mTestWidget->mContextMenuActions.begin();
     QVERIFY(iter != mTestWidget->mContextMenuActions.end());
@@ -857,6 +888,7 @@ void TestListWidget::testSetContextMenu()
         ++iter;
     }
     QVERIFY(visibleCount == 0);
+    videoServices->decreaseReferenceCount();
 }
 
 void TestListWidget::testDoDelayedsSlot()
@@ -901,7 +933,10 @@ void TestListWidget::testDeleteItemSlot()
     mTestWidget->initialize(*model);    
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(deleteItemSlot()));    
     
+    HbMessageBox *box = new HbMessageBox(); 
+    
     // no model
+    VideoListDataModelData::mDataAccessCount = 0;
     VideoSortFilterProxyModel *tmp = mTestWidget->mModel;
     mTestWidget->mModel = 0;
     emit testSignal();
@@ -912,6 +947,7 @@ void TestListWidget::testDeleteItemSlot()
     mTestWidget->mModel = tmp;
     
     // data fetched from item is invalid
+    VideoListDataModelData::mDataAccessCount = 0;
     setRowCount(1);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex()); 
     emit testSignal();
@@ -921,6 +957,7 @@ void TestListWidget::testDeleteItemSlot()
     setRowCount(0);
     
     // data is valid
+    VideoListDataModelData::mDataAccessCount = 0;
     setRowCount(1);
     QVariant data = QString("test");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
@@ -929,7 +966,8 @@ void TestListWidget::testDeleteItemSlot()
     // messagebox question returns false
     HbMessageBoxData::mQuestionReturnValue = false;
     emit testSignal();
-    QVERIFY(VideoListDataModelData::dataAccessCount() == 2);
+    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(HbAction *)), 1);
+    QVERIFY(VideoListDataModelData::dataAccessCount() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     QVERIFY(!VideoSortFilterProxyModelData::mLastIndex.isValid());
     HbMessageBoxData::mLatestTxt = "";
@@ -938,10 +976,12 @@ void TestListWidget::testDeleteItemSlot()
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     
     // messagebox question returns true
+    VideoListDataModelData::mDataAccessCount = 0;
     VideoSortFilterProxyModelData::mDeleteItemsFails = false;
     HbMessageBoxData::mQuestionReturnValue = true;
     emit testSignal();
-    QVERIFY(VideoListDataModelData::dataAccessCount() == 3);
+    box->emitDialogFinished(mTestWidget, SLOT(deleteItemDialogFinished(HbAction *)), 0);
+    QVERIFY(VideoListDataModelData::dataAccessCount() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.row() == 0);
     
@@ -957,6 +997,8 @@ void TestListWidget::testRenameSlot()
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
     
+    HbInputDialog *dialog = new HbInputDialog();
+    
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(renameSlot()));
     
     VideoSortFilterProxyModelData::reset();
@@ -965,70 +1007,82 @@ void TestListWidget::testRenameSlot()
     
     // Good case
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = "renamedVideo";
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "renamedVideo";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     setRowCount(1);
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(0, KVcxMvcMediaTypeAlbum));
     QVariant data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
+    dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "renamedVideo");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
-    
+    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
+        
     // New name is same as previous 
-    HbInputDialog::mGetTextReturnValue = QString();
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
+    dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
     
-    // Getting name from input dialog fails 
-    HbInputDialog::mGetTextFails = true;
+    // Dialog canceled 
+    HbInputDialog::mValueReturnValue = "";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = QString();
-    HbInputDialog::mGetTextCallCount = 0;
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
+    dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 1);
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
-
+    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
+    
     // New name is empty.
-    HbInputDialog::mGetTextFails = false;
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = "";
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
+    dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 1);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
     
     // Item is video
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(0, KVcxMvcMediaTypeVideo));
-    HbInputDialog::mGetTextFails = false;
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = "";
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 0);    
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
+    QVERIFY(HbInputDialog::mValueCallCount == 0);
 
     // No model
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = "renamedVideo";
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "renamedVideo";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(0, KVcxMvcMediaTypeAlbum));
     data = QString("albumName");
@@ -1039,12 +1093,13 @@ void TestListWidget::testRenameSlot()
     emit testSignal();
     mTestWidget->mModel = tmp;    
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 0);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
     
     // Variant data is invalid
     VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mGetTextReturnValue = "renamedVideo";
-    HbInputDialog::mGetTextCallCount = 0;
+    HbInputDialog::mValueReturnValue = "renamedVideo";
+    HbInputDialog::mValueCallCount = 0;
+    HbInputDialog::mOpenCallCount = 0;
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(0, KVcxMvcMediaTypeAlbum));
     data = QVariant();
@@ -1052,7 +1107,7 @@ void TestListWidget::testRenameSlot()
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mGetTextCallCount, 0);    
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
     
     disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(renameSlot()));
 }
@@ -1233,6 +1288,7 @@ void TestListWidget::testRemoveCollectionSlot()
     HbListView::mCurrentIndex = model->index(0, 0, QModelIndex());
     
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(removeCollectionSlot()));
+    HbMessageBox *box = new HbMessageBox();
     
     setRowCount(2);
     TMPXItemId savedId = TMPXItemId(1,1);
@@ -1258,6 +1314,7 @@ void TestListWidget::testRemoveCollectionSlot()
     // valid data 
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, "test");
     emit testSignal();
+    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(HbAction *)), 0);
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.isValid());
     QVERIFY(VideoSortFilterProxyModelData::mLastIndex.row() == 1);
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
@@ -1267,6 +1324,7 @@ void TestListWidget::testRemoveCollectionSlot()
     HbMessageBoxData::mLatestTxt = "";
     HbMessageBoxData::mQuestionReturnValue = false;
     emit testSignal();
+    box->emitDialogFinished(mTestWidget, SLOT(removeCollectionDialogFinished(HbAction *)), 1);
     QVERIFY(!VideoSortFilterProxyModelData::mLastIndex.isValid());
     QVERIFY(!HbMessageBoxData::mLatestTxt.isEmpty());
     
@@ -1329,7 +1387,7 @@ void TestListWidget::testBack()
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
-    QSignalSpy spysignal(mTestWidget, SIGNAL(collectionOpened(bool, const QString&, const QModelIndex&)));
+    QSignalSpy spysignal(mTestWidget, SIGNAL(collectionOpened(bool, const QString&, const TMPXItemId&)));
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(back()));
     // no model
     emit testSignal();        

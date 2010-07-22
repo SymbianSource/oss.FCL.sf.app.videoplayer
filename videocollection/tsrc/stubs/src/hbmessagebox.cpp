@@ -19,27 +19,71 @@
 
 #include "hbmessagebox.h"
 #include "hbmessageboxdata.h"
+#include "testobjectstore.h"
 
 bool HbMessageBoxData::mQuestionReturnValue = false;
 QString HbMessageBoxData::mLatestTxt = "";
 int HbMessageBoxData::mWarningCallCount = 0;
 int HbMessageBoxData::mInformationCallCount = 0;
+int HbMessageBoxData::mType = -1;
+int HbMessageBoxData::mAttribute = -1;
+int HbMessageBoxData::mOpenCallCount = 0;
+int HbMessageBoxData::mShowCallCount = 0;
 
-bool HbMessageBox::question(const QString &questionText,
-    const QString &primaryButtonText,
-    const QString &secondaryButtonText,
-    QGraphicsWidget *headWidget,
-    QGraphicsScene *scene,
-    QGraphicsItem *parent)
+HbMessageBox::HbMessageBox(MessageBoxType type, QGraphicsItem *parent)
 {
-    Q_UNUSED(primaryButtonText);
-    Q_UNUSED(secondaryButtonText);
-    Q_UNUSED(headWidget);
-    Q_UNUSED(scene);
     Q_UNUSED(parent);
+    HbMessageBoxData::mType = type;
+
+    HbAction *action = new HbAction();
+    mActions.append(action);
+    action = new HbAction();
+    mActions.append(action);
     
-    HbMessageBoxData::mLatestTxt = questionText;
-    return HbMessageBoxData::mQuestionReturnValue;
+    TestObjectStore::instance().addObject(this);
+}
+        
+HbMessageBox::HbMessageBox(const QString &text, MessageBoxType type, QGraphicsItem *parent)
+{
+    Q_UNUSED(parent);
+    HbMessageBoxData::mLatestTxt = text;
+    HbMessageBoxData::mType = type;
+    
+    HbAction *action = new HbAction();
+    mActions.append(action);
+    action = new HbAction();
+    mActions.append(action);
+    
+    TestObjectStore::instance().addObject(this);
+}
+
+HbMessageBox::~HbMessageBox()
+{
+    while(!mActions.isEmpty())
+    {
+        delete mActions.takeFirst();
+    }
+}
+
+void HbMessageBox::show()
+{
+    HbMessageBoxData::mShowCallCount++;
+}
+
+void HbMessageBox::open( QObject* receiver, const char* member )
+{
+    Q_UNUSED(receiver);
+    Q_UNUSED(member);
+    HbMessageBoxData::mOpenCallCount++;
+}
+
+void HbMessageBox::emitDialogFinished( QObject* receiver, const char* member, int actionNum )
+{
+    if(connect(this, SIGNAL(finished(HbAction *)), receiver, member))
+    {
+        emit finished(mActions.value(actionNum));
+        disconnect(this, SIGNAL(finished(HbAction *)), receiver, member);
+    }
 }
 
 void HbMessageBox::information(const QString &informationText,
@@ -66,6 +110,11 @@ void HbMessageBox::warning(const QString &warningText,
 
     HbMessageBoxData::mLatestTxt = warningText;
     HbMessageBoxData::mWarningCallCount++;
+}
+
+void HbMessageBox::setAttribute(int attribute)
+{
+    HbMessageBoxData::mAttribute = attribute;
 }
 
 // end of file

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -48,26 +48,26 @@ class CMPXVideoViewWrapper : public CBase
         virtual ~CMPXVideoViewWrapper();
 
     private:
-        CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView );        
+        CMPXVideoViewWrapper( HbVideoBasePlaybackView* aView );
         void ConstructL();
-        
+
         void SetFileDetails(TBool aDefault);
 
     public:
         void HandleCommandL( TInt aCommand );
-                             
+
         TBool IsLive();
-        
+
         TBool IsPlaylist();
-        
+
         TBool IsMultiItemPlaylist();
-               
-        void RequestMediaL();  
-        
+
+        void RequestMediaL();
+
         void CreateGeneralPlaybackCommandL( int aCmd );
-                
+
         void ActivateClosePlayerActiveObject();
-        
+
         void IssueVideoAppForegroundCmdL( TBool aForeground );
 
 
@@ -78,7 +78,7 @@ class CMPXVideoViewWrapper : public CBase
         QMPXVideoPlaybackViewFileDetails*    iFileDetails;
         TBool                                iClosePlayerAO;
         TBool                                iForeground;
-        
+        TInt                                 iCommand;
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

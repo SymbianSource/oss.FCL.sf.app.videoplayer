@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -48,17 +48,6 @@ HbVideoBasePlaybackView::HbVideoBasePlaybackView()
 HbVideoBasePlaybackView::~HbVideoBasePlaybackView()
 {
     MPX_DEBUG(_L("HbVideoBasePlaybackView::~HbVideoBasePlaybackView()"));
-}
-
-// -------------------------------------------------------------------------------------------------
-// HbVideoBasePlaybackView::mouseReleaseEvent
-// -------------------------------------------------------------------------------------------------
-//
-void HbVideoBasePlaybackView::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
-{
-    MPX_DEBUG(_L("HbVideoBasePlaybackView::mouseReleaseEvent()"));
-    Q_UNUSED( event );
-    emit tappedOnScreen();
 }
 
 // -------------------------------------------------------------------------------------------------

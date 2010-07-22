@@ -45,6 +45,7 @@ private slots:
     void testDeactivate();
     void testUpdateUiComponents();
     void testOrientationChangedSlot();
+    void testSetButtonShown();
 
 signals:
     

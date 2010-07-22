@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  ou1cpsw#5 %
 
 
 #include "mpxvideo_debug.h"
@@ -59,6 +59,7 @@ void QMpxVideoPlaybackWrapper::initializePlugins()
 
     TRAPD( err, mUiEngine = CMpxVideoPlayerAppUiEngine::NewL( this ) );
     MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::initializePlugins err = %d"), err);
+    Q_UNUSED(err);
 }
 
 // -------------------------------------------------------------------------------------------------

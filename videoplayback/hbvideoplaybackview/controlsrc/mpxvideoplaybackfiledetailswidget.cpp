@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  23 %
+// Version : %version:  26 %
 
 
 #include <QDir>
@@ -28,6 +28,7 @@
 #include <hblistwidget.h>
 #include <hblistviewitem.h>
 #include <hbextendedlocale.h>
+#include <hbanchorlayout.h>
 
 #include "mpxvideo_debug.h"
 #include "mpxvideoplaybackdocumentloader.h"
@@ -41,7 +42,7 @@ const float KILOBYTE = 1024 ;
 // QMPXVideoPlaybackFileDetailsWidget::QMPXVideoPlaybackFileDetailsWidget
 // -------------------------------------------------------------------------------------------------
 //
-QMPXVideoPlaybackFileDetailsWidget::QMPXVideoPlaybackFileDetailsWidget( 
+QMPXVideoPlaybackFileDetailsWidget::QMPXVideoPlaybackFileDetailsWidget(
         QMPXVideoPlaybackControlsController* controller )
     : mController( controller )
     , mListWidget( 0 )
@@ -57,22 +58,6 @@ QMPXVideoPlaybackFileDetailsWidget::QMPXVideoPlaybackFileDetailsWidget(
 QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::~QMPXVideoPlaybackFileDetailsWidget()"));
-
-    if ( mListWidget ) 
-    {
-        delete mListWidget;
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackFileDetailsWidget::initialize
-// -------------------------------------------------------------------------------------------------
-//
-void QMPXVideoPlaybackFileDetailsWidget::initialize()
-{
-    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::initialize"));
-
-    updateWithFileDetails( mController->fileDetails() );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -90,7 +75,7 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         // load fileDetails widget
         //
         QGraphicsWidget *widget = loader->findWidget( QString( "fileDetails" ) );
-        
+
         //
         // cast fileDetails widget to HbListWidget
         //
@@ -101,25 +86,24 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
         //
         HbListViewItem *prototype = mListWidget->listItemPrototype();
         prototype->setSecondaryTextRowCount( 1, 30 );
-        
+
+        //
+        // Title
+        //
+        makeTitleItem( details );
+
         if ( ! mFileDetailsUpdated )
         {
             HbExtendedLocale locale = HbExtendedLocale::system();
 
             mFileDetailsUpdated = true;
-            
-            //
-            // Title
-            //            
-            makeTitleItem( details );
-            
+
             //
             // Description
             //
-            addItemToListWidget( 
-                    hbTrId( "txt_videos_list_description" ), details->mDescription ); 
+            addItemToListWidget(
+                    hbTrId( "txt_videos_list_description" ), details->mDescription );
 
-            
             //
             // Duration
             //
@@ -132,11 +116,11 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
                 value = value % 60;
                 QString sec = locale.toString( value );
 
-                addItemToListWidget( 
+                addItemToListWidget(
                         hbTrId( "txt_videos_list_duration" ),
-                        hbTrId( "txt_videos_list_l1_l2_l3" ).arg( hour ).arg( min ).arg( sec ) );                                                                        
-            }    
-            
+                        hbTrId( "txt_videos_list_l1l2l3" ).arg( hour ).arg( min ).arg( sec ) );
+            }
+
             //
             // Date/Time
             //
@@ -145,28 +129,28 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             //
             // Location
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_location" ), details->mLocation );                                                
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_location" ), details->mLocation );
+
             //
             // Author
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_author" ), details->mArtist );                                            
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_author" ), details->mArtist );
+
             //
             // Copyright
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_copyright" ), details->mCopyright );                                        
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_copyright" ), details->mCopyright );
+
             //
             // Language
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_language" ), details->mLanguage );                                    
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_language" ), details->mLanguage );
+
             //
             // Keywords
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_keywords" ), details->mKeywords );                                
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_keywords" ), details->mKeywords );
+
             //
             // Size
             //
@@ -179,53 +163,68 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
             {
                 QString resolution = hbTrId( "txt_videos_list_l1l2" )
                        .arg( locale.toString( details->mVideoWidth ) )
-                       .arg( locale.toString( details->mVideoHeight ) );            
-                addItemToListWidget( hbTrId( "txt_videos_list_resolution" ), resolution );                    
+                       .arg( locale.toString( details->mVideoHeight ) );
+                addItemToListWidget( hbTrId( "txt_videos_list_resolution" ), resolution );
             }
-            
+
             //
             // Format
             //
-            addItemToListWidget( hbTrId( "txt_videos_list_format" ), details->mMimeType );                    
-            
+            addItemToListWidget( hbTrId( "txt_videos_list_format" ), details->mMimeType );
+
             //
             // Bitrate
             //
             makeBitRateItem( details );
-            
+
             //
             // Folder
             //
             if ( details->mPlaybackMode == EMPXVideoLocal ||
                  details->mPlaybackMode == EMPXVideoProgressiveDownload)
             {
-                QFileInfo fileInfo( details->mClipName );     
+                QFileInfo fileInfo( details->mClipName );
                 QString folder = fileInfo.dir().dirName();
                 addItemToListWidget( hbTrId( "txt_videos_list_collection_name" ), folder );
             }
-            
         }
 
         //
         // Set the rect size dynamically based on the view mode
         //
-        QString sectionName;
+        QGraphicsWidget *content = loader->findWidget( QString( "content" ) );
+        HbAnchorLayout *layout = static_cast<HbAnchorLayout*>( content->layout() );
 
-        if ( mController->viewMode() == EDetailsView )
+        if ( layout )
         {
-            sectionName = "detailsView";
-        }
-        else if ( mController->viewMode() == EAudioOnlyView )
-        {
-            sectionName = "audioOnlyView";
-        }
+            QGraphicsWidget *titleLayout = loader->findWidget( QString( "titleLayout" ) );
+            QRectF titleRect = titleLayout->geometry();
 
-        bool ok = false;
-        loader->load( KMPXPLAYBACKVIEW_XML, sectionName, &ok );
+            switch ( mController->viewMode() )
+            {
+                case EDetailsView:
+                {
+                    layout->setAnchor( titleLayout, Hb::BottomEdge, this, Hb::TopEdge, 0 );
+                    layout->setAnchor( layout, Hb::BottomEdge, this, Hb::BottomEdge, 0 );
 
-        if ( ! ok )
-        {
-            MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget failed to load section"));
+                    break;
+                }
+                case EAudioOnlyView:
+                {
+                    QGraphicsWidget *controlLayout = loader->findWidget( QString( "controlBarLayout" ) );
+                    QRectF controlRect = controlLayout->geometry();
+
+                    layout->setAnchor(
+                            this, Hb::TopEdge, titleLayout,
+                            Hb::BottomEdge, titleRect.bottom() - titleRect.top() );
+
+                    layout->setAnchor(
+                            this, Hb::BottomEdge,
+                            layout, Hb::BottomEdge, layout->geometry().height() - controlRect.top() );
+
+                    break;
+                }
+            }
         }
     }
 }
@@ -235,16 +234,16 @@ void QMPXVideoPlaybackFileDetailsWidget::updateWithFileDetails(
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::makeTitleItem( QMPXVideoPlaybackViewFileDetails* details )
-{    
+{
     MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget::makeTitleItem()"));
 
     //
     // Title should be the first item in file details list
     //
     if ( mController->viewMode() == EAudioOnlyView )
-    {    
+    {
         //
-        // show the title for audio-only view 
+        // show the title for audio-only view
         //
         if ( mListWidget->count() == 0 || ! mListWidget->item( 0 )->text().contains( "Title", Qt::CaseInsensitive ) )
         {
@@ -254,9 +253,9 @@ void QMPXVideoPlaybackFileDetailsWidget::makeTitleItem( QMPXVideoPlaybackViewFil
             {
                 //
                 // If title is not available, show clip name
-                //            
+                //
                 QFileInfo fileInfo( details->mClipName );
-                title = fileInfo.baseName ();
+                title = fileInfo.completeBaseName();
             }
 
             //
@@ -271,7 +270,7 @@ void QMPXVideoPlaybackFileDetailsWidget::makeTitleItem( QMPXVideoPlaybackViewFil
     else if ( mListWidget->count() &&
               mListWidget->item( 0 )->text().contains( "Title", Qt::CaseInsensitive ) )
     {
-        // 
+        //
         // title is displayed under the status pane for video clips,
         // so hide the title for this details view
         //
@@ -284,17 +283,17 @@ void QMPXVideoPlaybackFileDetailsWidget::makeTitleItem( QMPXVideoPlaybackViewFil
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::makeSizeItem( QMPXVideoPlaybackViewFileDetails* details )
-{        
+{
     if ( details->mPlaybackMode == EMPXVideoLocal ||
          details->mPlaybackMode == EMPXVideoProgressiveDownload )
     {
-        QFileInfo fileInfo( details->mClipName );     
-        
+        QFileInfo fileInfo( details->mClipName );
+
         //
         // to prevent overflow, get an unsigned value of file size
         //
         ulong fileSize = fileInfo.size();
-                
+
         //
         // convert file size to KB, MB, GB accordingly
         //
@@ -330,9 +329,9 @@ void QMPXVideoPlaybackFileDetailsWidget::makeSizeItem( QMPXVideoPlaybackViewFile
             int temp = size * 10;
             size = (float)temp / 10;
 
-            addItemToListWidget( 
+            addItemToListWidget(
                     hbTrId( "txt_videos_list_file_size" ), scale.arg( locale.toString( size ) ) );
-        }    
+        }
     }
 }
 
@@ -341,7 +340,7 @@ void QMPXVideoPlaybackFileDetailsWidget::makeSizeItem( QMPXVideoPlaybackViewFile
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::makeBitRateItem( QMPXVideoPlaybackViewFileDetails* details  )
-{        
+{
     if ( details->mBitRate > 0 )
     {
         HbExtendedLocale locale = HbExtendedLocale::system();
@@ -354,17 +353,17 @@ void QMPXVideoPlaybackFileDetailsWidget::makeBitRateItem( QMPXVideoPlaybackViewF
         {
              bitrate /= KILOBYTE;
         }
-        
+
         if ( bitrate > KILOBYTE )
         {
              bitrate /= KILOBYTE;
              scale = hbTrId( "txt_videos_list_l1_mbps" );
         }
-    
+
         int temp = bitrate * 10;
         bitrate = (float)temp / 10;
 
-        addItemToListWidget( 
+        addItemToListWidget(
                 hbTrId( "txt_videos_list_bitrate" ), scale.arg( locale.toString( bitrate ) ) );
     }
 }
@@ -374,18 +373,18 @@ void QMPXVideoPlaybackFileDetailsWidget::makeBitRateItem( QMPXVideoPlaybackViewF
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::addItemToListWidget( QString item, QString text  )
-{    
+{
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::addItemToListWidget"));
-	
+
     if ( text.count() > 0 )
     {
-        MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget::addItemToListWidget( %s %s )"), 
+        MPX_DEBUG(_L("QMPXVideoPlaybackFileDetailsWidget::addItemToListWidget( %s %s )"),
 		    item.data(), text.data() );
-		
+
         HbListWidgetItem* listWidgetItem = new HbListWidgetItem();
         listWidgetItem->setText( item );
         listWidgetItem->setSecondaryText( text );
-        
+
         mListWidget->addItem( listWidgetItem );
     }
 }
@@ -395,21 +394,21 @@ void QMPXVideoPlaybackFileDetailsWidget::addItemToListWidget( QString item, QStr
 // -------------------------------------------------------------------------------------------------
 //
 void QMPXVideoPlaybackFileDetailsWidget::makeDateTimeItem( QMPXVideoPlaybackViewFileDetails* details )
-{    
+{
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackFileDetailsWidget::makeDateTimeItem"));
-        
+
     //
     // attempt to get 'created' and 'last modified' date/time from metadata first,
     // if it's not available, then get it from the file system
     //
-    
+
     if ( details->mPlaybackMode == EMPXVideoLocal ||
          details->mPlaybackMode == EMPXVideoProgressiveDownload )
-    {        
+    {
         QDateTime dateTime;
-        QFileInfo fileInfo( details->mClipName );     
+        QFileInfo fileInfo( details->mClipName );
         HbExtendedLocale locale = HbExtendedLocale::system();
-        
+
         //
         // Date created
         //
@@ -421,15 +420,15 @@ void QMPXVideoPlaybackFileDetailsWidget::makeDateTimeItem( QMPXVideoPlaybackView
         {
             dateTime = fileInfo.created();
         }
-        
+
         //
         // convert 'created' date/time to proper string format
         // according to its current locale
         //
         QString date = locale.format( dateTime.date(), r_qtn_date_usual );
         QString time = locale.format( dateTime.time(), r_qtn_time_long_with_zero );
-        addItemToListWidget( hbTrId( "txt_videos_list_date" ), date + "  " + time );      
-        
+        addItemToListWidget( hbTrId( "txt_videos_list_date" ), date + "  " + time );
+
         //
         // Date modified
         //
@@ -441,15 +440,15 @@ void QMPXVideoPlaybackFileDetailsWidget::makeDateTimeItem( QMPXVideoPlaybackView
         {
             dateTime = fileInfo.lastModified();
         }
-        
+
         //
         // convert 'last modified' date/time to proper string format
         // according to its current locale
         //
         date = locale.format( dateTime.date(), r_qtn_date_usual );
         time = locale.format( dateTime.time(), r_qtn_time_long_with_zero );
-        addItemToListWidget( hbTrId( "txt_videos_list_modified" ), date + "  " + time );           
-    }    
+        addItemToListWidget( hbTrId( "txt_videos_list_modified" ), date + "  " + time );
+    }
 }
 
 //End of file

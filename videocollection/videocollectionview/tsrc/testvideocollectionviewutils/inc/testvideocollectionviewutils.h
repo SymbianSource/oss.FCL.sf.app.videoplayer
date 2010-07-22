@@ -79,7 +79,16 @@ private slots:
      * verifies sortModel
      */
     void testSortModel();
-
+    
+    /**
+     * verifies setWidgetLevel & getWidgetLevel
+     */
+    void testSetAndGetWidgetLevel();
+    
+    /**
+     * verifies setCollectionActivityData & getCollectionActivityData
+     */
+    void testSetAndGetCollectionActivityData();
 };
 
 

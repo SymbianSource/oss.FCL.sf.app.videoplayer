@@ -22,6 +22,7 @@
 
 class VideoCollectionUiLoader;
 class VideoListView;
+class VideoServices;
 
 class VideoCollectionViewPlugin: public MpxViewPlugin
 {
@@ -142,10 +143,10 @@ private:
     bool mActivated;
     
 	/*
-	 * Service mode flag. True if started as a service, otherwise false.
+	 * Video service object.
 	 *
 	 */
-    bool mIsService;
+    VideoServices *mVideoServices;
 };
 
 #endif  // VIDEOVIEWPLUGIN_H

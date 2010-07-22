@@ -17,10 +17,65 @@
 
 #include "hbmessagebox.h"
 
-bool HbMessageBox::mQuestionReturnValue = false;
-
 QString HbMessageBox::mLatestTxt = "";
+int HbMessageBox::mType = -1;
+int HbMessageBox::mAttribute = -1;
+int HbMessageBox::mOpenCallCount = 0;
+int HbMessageBox::mShowCallCount = 0;
 
+HbMessageBox::HbMessageBox(MessageBoxType type, QGraphicsItem *parent)
+{
+    Q_UNUSED(parent);
+    HbMessageBox::mType = type;
+    
+    HbAction *action = new HbAction();
+    mActions.append(action);
+    action = new HbAction();
+    mActions.append(action);   
+}
 
+HbMessageBox::HbMessageBox(const QString &text, MessageBoxType type, QGraphicsItem *parent)
+{
+    Q_UNUSED(parent);
+    HbMessageBox::mLatestTxt = text;
+    HbMessageBox::mType = type;
+    
+    HbAction *action = new HbAction();
+    mActions.append(action);
+    action = new HbAction();
+    mActions.append(action);   
+}
 
+HbMessageBox::~HbMessageBox()
+{
+    while(!mActions.isEmpty())
+    {
+        delete mActions.takeFirst();
+    }
+}
 
+void HbMessageBox::show()
+{
+    HbMessageBox::mShowCallCount++;
+}
+
+void HbMessageBox::open( QObject* receiver, const char* member )
+{
+    Q_UNUSED(receiver);
+    Q_UNUSED(member);
+    HbMessageBox::mOpenCallCount++;
+}
+
+void HbMessageBox::emitDialogFinished( QObject* receiver, const char* member, int actionNum )
+{
+    if(connect(this, SIGNAL(finished(HbAction *)), receiver, member))
+    {
+        emit finished(mActions.value(actionNum));
+        disconnect(this, SIGNAL(finished(HbAction *)), receiver, member);
+    }
+}
+
+void HbMessageBox::setAttribute(int attribute)
+{
+    HbMessageBox::mAttribute = attribute;
+}

@@ -15,6 +15,9 @@
 *
 */
 
+#include "xqplugin.h"
+#include "xqserviceutilstub.h"
+#include "xqserviceproviderstub.h"
 #include "xqserviceutilxtra.h"
 
 #include <hbaction.h>
@@ -117,9 +120,9 @@ void TestCollectionView::init()
 //
 void TestCollectionView::cleanup()
 {
-    HbMainWindow *window = hbInstance->allMainWindows().value(0);
-    if (window)
+    if(hbInstance->allMainWindows().count() > 0)
     {
+        HbMainWindow *window = hbInstance->allMainWindows().at(0);
         QList<HbView*> views = window->views(); 
         int count = views.count();
         for (int i = 0; i < count; i++)

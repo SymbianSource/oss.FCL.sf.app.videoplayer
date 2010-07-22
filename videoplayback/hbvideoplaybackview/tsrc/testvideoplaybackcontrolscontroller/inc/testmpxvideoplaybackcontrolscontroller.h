@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in Video Playback Controls Controller
-* 
+*
 */
 
-// Version : %version:  3 %
+// Version : %version:  6 %
 
 #ifndef __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 #define __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
@@ -41,29 +41,22 @@ public:
      * will be called before each testfunction is executed.
      *
      */
-    void init(); 
-    
+    void init();
+
     /**
      * will be called after every testfunction.
      *
      */
     void cleanup();
-       
+
 private:
 
     void verifyHandleEventStateChangedResult( int value );
     void verifyHandleEventTvOutResult( bool tvOutConnected, bool value );
-    
+
 private slots:
-    
-    //
-    // test addFileDetails()
-    //
+
     void testAddFileDetails();
-    
-    //
-    // test handleEvent()
-    //
     void testHandleEventSetPosition();
     void testHandleEventSetDuration();
     void testHandleEventStateChanged();
@@ -78,17 +71,17 @@ private slots:
     void testHandleEventTvOutDisconnected();
     void testHandleEventHandleErrors();
     void testHandleEventShowVolumeControls();
-    
+
     //
     // test handleCommand()
     //
     void testHandleCommand();
-    
+
     //
     // test handleTappedOnScreen()
     //
     void testHandleTappedOnScreen();
-    
+
     //
     // test updateVideoRectDone()
     //
@@ -112,30 +105,37 @@ private slots:
     //
     // test private slot attachVideo()
     //
-    void testslot_attachVideo();  
+    void testslot_attachVideo();
 
     //
     // test private slot attachVideo()
     //
-    void testslot_sendVideo();  
-  
-signals:
+    void testslot_sendVideo();
 
+    //
+    // test private slot handleOrientationChanged()
+    //
+    void testslot_handleOrientationChanged();
+
+    void testslot_handleRNLogoVisibleChanged();
+    void testslot_handleRNLogoTimeout();
+    void testIsRNLogoBitmapVisible();
+
+signals:
     void commandSignal();
-    
+    void commandSignal( Qt::Orientation );
+
 private:
 
     HbVideoBasePlaybackView*			    mBaseVideoView;
     CMPXVideoViewWrapper*			        mViewWrapper;
     QMPXVideoPlaybackControlsController*	mController;
     QMPXVideoPlaybackViewFileDetails*       mFileDetails;
-        
+
 };
 
 
 #endif  // __TESTMPXVIDEOPLAYBACKCONTROLSCONTROLLER_H__
 
 // End of file
-    
-
 

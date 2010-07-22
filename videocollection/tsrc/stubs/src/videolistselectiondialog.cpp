@@ -144,4 +144,16 @@ void VideoListSelectionDialog::disconnectSignals()
     // not stubbed
 }
 
+void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
+{
+    Q_UNUSED(action);
+    // not stubbed
+}
+
+void VideoListSelectionDialog::finalize(QString albumName)
+{
+    Q_UNUSED(albumName);
+    // not stubbed
+}
+
 // end of file

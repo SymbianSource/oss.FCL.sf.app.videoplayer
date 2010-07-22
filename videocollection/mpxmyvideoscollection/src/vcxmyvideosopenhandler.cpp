@@ -125,8 +125,10 @@ void CVcxMyVideosOpenHandler::OpenL(
         case categoryLevel:
             {
             //we are at root level, return main level items (categories + albums)
-            
+
+#ifdef VCX_ALBUMS             
             iCollection.AlbumsL().CreateAlbumListL(); //async
+#endif
 
             // This is needed to update category counters.
             // Goes to queue if CreateAlbumListL command goes to execution
@@ -139,8 +141,14 @@ void CVcxMyVideosOpenHandler::OpenL(
             
             CMPXMedia* itemList = TVcxMyVideosCollectionUtil::CreateEmptyMediaListL();
             CleanupStack::PushL( itemList );
+            
+            itemList->SetTObjectValueL<TBool>( KVcxMediaMyVideosVideoListIsPartial,
+                !iCache.IsComplete() );
+                
             TVcxMyVideosCollectionUtil::AppendToListL( *itemList, *iCollection.CategoriesL().iList );
+#ifdef VCX_ALBUMS
             TVcxMyVideosCollectionUtil::AppendToListL( *itemList, *iCollection.AlbumsL().iAlbumList );
+#endif
             itemList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
             iCollection.iObs->HandleOpen( itemList, KErrNone );
             CleanupStack::PopAndDestroy( itemList );
@@ -152,7 +160,9 @@ void CVcxMyVideosOpenHandler::OpenL(
             {
             //we are at second level, return video list from some category or album
 
+#ifdef VCX_ALBUMS
             iCollection.AlbumsL().CreateAlbumListL(); //async
+#endif
 
             TMPXItemId categoryId( aPath.Id() );
             
@@ -219,6 +229,8 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
             {
             MPX_DEBUG1("CVcxMyVideosOpenHandler:: KVcxMvcCategoryIdAll: calling HandleOpen(iCache.iVideoList)");
             iCache.iVideoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            iCache.iVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
             iCollection.iObs->HandleOpen( iCache.iVideoList, KErrNone );                    
             }
         else
@@ -227,6 +239,8 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
             CMPXMedia* videoList = iCache.CreateVideoListByOriginL( origin );
             MPX_DEBUG1("CVcxMyVideosOpenHandler:: calling HandleOpen(new list)");
             videoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            videoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
             iCollection.iObs->HandleOpen( videoList, KErrNone );
             delete videoList;
             }
@@ -262,8 +276,8 @@ void CVcxMyVideosOpenHandler::OpenCategoryL( TUint32 aCategoryId )
                 iVideoListsBeingOpened.AppendL( videoList );
                 CleanupStack::Pop( videoList );
                 MPX_DEBUG1("CVcxMyVideosOpenHandler:: calling HandleOpen");
-                iCache.iVideoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
-                iCollection.iObs->HandleOpen( iCache.iVideoList, KErrNone  );
+                videoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+                iCollection.iObs->HandleOpen( videoList, KErrNone  );
                 }
             else
                 {
@@ -322,7 +336,7 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
         // End event arrived
         
         iCache.SetComplete( ETrue );
-        iCache.IsFetchingVideoList = EFalse;
+        iCache.iIsFetchingVideoList = EFalse;
         
 
         // Create modify event for All category.
@@ -376,7 +390,7 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
 
         iCollection.CategoriesL().UpdateCategoriesNewVideoNamesL();
 
-        iCollection.AlbumsL().CalculateAttributesL();
+        iCollection.AlbumsL().CalculateAttributesL(); // adds events if attributes modified, does not send
         
         iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
         }
@@ -390,9 +404,6 @@ void CVcxMyVideosOpenHandler::DoHandleCreateVideoListRespL(
 //
 void CVcxMyVideosOpenHandler::HandleAlbumOpenL()
     {
-    //TODO: If iVideoList is partial and fetching is already going on -> use the implementation below.
-    //      If iVideoList is partial but fetching is not going on -> fetch only album items to iCache.
-
     MPX_DEBUG1("CVcxMyVideosOpenHandler::HandleAlbumOpenL() start");
     
     CVcxMyVideosAlbum* album = iCollection.AlbumsL().Album( iPendingAlbumOpenId );
@@ -402,15 +413,18 @@ void CVcxMyVideosOpenHandler::HandleAlbumOpenL()
             {
             //videolist complete
             CMPXMedia* videoList = album->CreateVideoListL();
+            CleanupStack::PushL( videoList ); // 1->
             videoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+            videoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete ); 
             iCollection.iObs->HandleOpen( videoList, KErrNone );
-            delete videoList;
+            CleanupStack::PopAndDestroy( videoList ); // <-1
             iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
             iCollection.iMessageList->SendL();
             }
         else
             {
-            if ( iCollection.iCache->IsFetchingVideoList )
+            if ( iCollection.iCache->iIsFetchingVideoList )
                 {
                 MPX_DEBUG1("CVcxMyVideosOpenHandler:: videolist fetching already in progress -> use that to populate album");
 
@@ -437,9 +451,6 @@ void CVcxMyVideosOpenHandler::HandleAlbumOpenL()
                 }
             else
                 {
-                // videolist incomplete and fetching hasn't been started
-                // TODO: Test how fast this is. If slow, then ditch the separate album fetching.
-
                 MPX_DEBUG1("CVcxMyVideosOpenHandler:: videolist partial and no fetching going on -> fetch the album videos separately");
 
                 delete iAlbumVideoList;
@@ -510,14 +521,16 @@ void CVcxMyVideosOpenHandler::HandleGetAlbumContentVideosRespL(
 
         MPX_DEBUG3("CVcxMyVideosOpenHandler:: adding modify event for album %d, extra info = %d",
                 aAlbumId, EVcxMyVideosVideoListOrderChanged );
-        iCollection.iMessageList->AddEventL( TMPXItemId( aAlbumId, 2 ), EMPXItemModified,
+        iCollection.iMessageList->AddEventL( TMPXItemId( aAlbumId, KVcxMvcMediaTypeAlbum ), EMPXItemModified,
                 EVcxMyVideosVideoListOrderChanged );
         }
     else
         {
         //TODO: should add album id
-        iCollection.AlbumsL().CalculateAttributesL();
+        iCollection.AlbumsL().CalculateAttributesL(); // adds events if attributes modified, does not send
 
+        iAlbumVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
         iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
 
         

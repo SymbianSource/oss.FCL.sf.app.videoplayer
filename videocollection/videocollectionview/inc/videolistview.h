@@ -81,7 +81,7 @@ public:
      * @param itemId, Id of the widget which is to be activated
      * @return 0 activation ok, < 0 if activation fails
      */
-    int activateView(const TMPXItemId &itemId);
+    int activateView(TMPXItemId &itemId);
 
     /**
      * Deactivates current widget, disables menu and disconnects
@@ -119,13 +119,6 @@ signals:
      */
     void viewReady();
 
-public slots:
-
-    /**
-     * Signaled by HbInputDialog when it's closed. 
-     */
-    void createCollectionDialogFinished(HbAction *action);
-    
 private slots:
 
     /**
@@ -169,12 +162,6 @@ private slots:
      */
     void openCollectionViewSlot();
     
-    /**
-     * Slot is connected to model's about to insert rows signal.
-     * Opens the new album which was created. 
-     */
-    void openNewAlbumSlot(const QModelIndex &parent, int start, int end);
-
     /**
      * Slot is connected into toolbar's Service tab's
      * triggered signal.
@@ -263,12 +250,12 @@ private slots:
     /**
      * Slot is connected to videolistwidgets collectionOpened -signal
      *
-     * @param collectionOpened
+     * @param openingCollection
      * @param collection contains the name of the collection opened
      */
-    void collectionOpenedSlot(bool collectionOpened,
+    void collectionOpenedSlot(bool openingCollection,
         const QString& collection,
-        const QModelIndex &index);
+        const TMPXItemId &collectionId);
         
     /**
      * Slot which is called when an object has been loaded.
@@ -333,12 +320,19 @@ private:
     void showAction(bool show, const QString &name);
     
     /**
-     * Activate to all videos view. 
+     * Activates all videos or collections -list.
+     * 
+     * @return int 0 ok 
      */
-    int activateVideosView();
+    int activateMainView();
     
     /**
-     * Activate to collection content view.
+     * Activate to collection content view when servicing.
+     * Only default collections are supported. If some other
+     * id is provided, all videos  -list will be activated 
+     * 
+     * @param itemId. Id of collection to activate
+     * @return int 
      */
     int activateCollectionContentView(const TMPXItemId &itemId);
     
@@ -372,14 +366,14 @@ private:
     VideoCollectionUiLoader* mUiLoader;
     
     /**
-     * Boolean for knowing when the app was started as a service.
-     */
-    bool mIsService;
-    
-    /**
      * Boolean for knowing when the model is ready.
      */
     bool mModelReady;
+    
+    /**
+     * Boolean for knowing when the view is ready.
+     */
+    bool mViewReady;
 
     /**
      * Hint level for the hint widget.
@@ -388,6 +382,7 @@ private:
 
     /**
      * pointer to videoservices instance
+     * if exists, app has started as service
      */
     VideoServices* mVideoServices;
 

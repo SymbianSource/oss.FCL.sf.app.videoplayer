@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#37 %
+// Version : %version: da1mmcf#41 %
 
 
 
@@ -26,18 +26,17 @@
 #include <f32file.h>
 
 #include <QTimer>
-#include <QFileInfo>
 #include <thumbnailmanager_qt.h>
 #include <xqserviceutil.h>
 
 #include <hblabel.h>
-#include <hbiconitem.h>
-#include <hbratingslider.h>
-#include <hbiconanimator.h>
 #include <hbvolumesliderpopup.h>
 #include <hbtransparentwindow.h>
 #include <hbiconanimationmanager.h>
 #include <shareui.h>
+#include <hbinstance.h>
+#include <hbtapgesture.h>
+#include <hbpangesture.h>
 
 #include "mpxvideoviewwrapper.h"
 #include "hbvideobaseplaybackview.h"
@@ -70,6 +69,7 @@ QMPXVideoPlaybackControlsController::QMPXVideoPlaybackControlsController(
     , mControlsPolicy( NULL )
     , mControlsConfig( NULL )
     , mControlsTimer( NULL )
+    , mRNLogoTimer( NULL )
     , mLoader( NULL )
     , mVolumeControl( NULL )
     , mThumbnailManager( NULL )
@@ -93,12 +93,22 @@ void QMPXVideoPlaybackControlsController::initializeController()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::initializeController()"));
 
+    mOrientation = hbInstance->allMainWindows()[0]->orientation();
+    bool ok = connect( hbInstance->allMainWindows()[0], SIGNAL( orientationChanged( Qt::Orientation ) ),
+                       this, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
+
+    MPX_DEBUG(
+        _L("QMPXVideoPlaybackControlsController::initializeController() orientation = %d, ok =%d"),
+        mOrientation, ok );
+
     setParent( mView );
+
+    mView->hideItems( Hb::AllItems );
 
     //
     // Create layout loader
     //
-    bool ok = false;
+    ok = false;
     mLoader = new QMPXVideoPlaybackDocumentLoader( this );
     mLoader->load( KMPXPLAYBACKVIEW_XML, &ok );
 
@@ -119,19 +129,25 @@ void QMPXVideoPlaybackControlsController::initializeController()
         mLoader = NULL;
     }
 
+    mFileDetails->mRNFormat = realFormat( mFileDetails->mClipName );
+
+    //
+    // Controls dismissing timer
+    //
     mControlsTimer = new QTimer( this );
     mControlsTimer->setInterval( KMPXControlsTimeOut );
     mControlsTimer->setSingleShot( false );
     connect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
 
-    connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
-	
     mControlsPolicy = new QMPXVideoPlaybackControlPolicy();
-    
+
     mControlsConfig = new QMPXVideoPlaybackControlConfiguration( this );
     connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
     mControlsConfig->createControlList();
 
+    //
+    // Create volume popup control
+    //
     mVolumeControl = new HbVolumeSliderPopup();
     mVolumeControl->setVisible( false );
     mVolumeControl->setTimeout( KMPXControlsTimeOut );
@@ -139,14 +155,30 @@ void QMPXVideoPlaybackControlsController::initializeController()
     mVolumeControl->setRange( KPbPlaybackVolumeLevelMin, KPbPlaybackVolumeLevelMax );
 
     //
+    // grab tap gesture
+    //
+    mView->grabGesture( Qt::TapGesture );
+    connect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
+
+    //
+    // grab pan gesture for playlist
+    //
+    if ( mFileDetails->mMultiItemPlaylist )
+    {
+        mView->grabGesture( Qt::PanGesture );
+        connect( mView, SIGNAL( pannedToRight() ), this, SLOT( skipToPreviousVideoItem() ) );
+        connect( mView, SIGNAL( pannedToLeft() ), this, SLOT( skipToNextVideoItem() ) );
+    }
+
+    //
     // if videoplayback is in service mode, create a videoservices instance
     //
     if ( XQServiceUtil::isService() && ! mVideoServices )
     {
         //
-        // obtain VideoServices instance 
+        // obtain VideoServices instance
         //
-        mVideoServices = VideoServices::instance(); 
+        mVideoServices = VideoServices::instance();
 
         //
         // allow 'attach' operation only for non-streaming media clips
@@ -157,18 +189,17 @@ void QMPXVideoPlaybackControlsController::initializeController()
             // determine if this is 'attach' operation
             //
             mIsAttachOperation = ( mVideoServices->currentService() == VideoServices::EUriFetcher );
-            
+
             if ( mIsAttachOperation )
             {
                 //
                 // connect signal filePath() to videoservices slot itemSelected()
                 //
-                connect( this, SIGNAL( attachVideoPath( const QString& ) ), 
-                         mVideoServices, SLOT( itemSelected( const QString& ) ) );                        
+                connect( this, SIGNAL( attachVideoPath( const QString& ) ),
+                         mVideoServices, SLOT( itemSelected( const QString& ) ) );
             }
         }
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -179,10 +210,21 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()"));
 
-    disconnect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
-
+    mView->ungrabGesture( Qt::TapGesture );
     disconnect( mView, SIGNAL( tappedOnScreen() ), this, SLOT( handleTappedOnScreen() ) );
+
+    if ( mFileDetails->mMultiItemPlaylist )
+    {
+        mView->ungrabGesture( Qt::PanGesture );
+
+        disconnect( mView, SIGNAL( pannedToRight() ), this, SLOT( skipToNextVideoItem() ) );
+        disconnect( mView, SIGNAL( pannedToLeft() ), this, SLOT( skipToPreviousVideoItem() ) );
+    }
+
+    disconnect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
     disconnect( mControlsTimer, SIGNAL( timeout() ), this, SLOT( hideAllControls() ) );
+    disconnect( hbInstance->allMainWindows()[0], SIGNAL( orientationChanged( Qt::Orientation ) ),
+                this, SLOT( handleOrientationChanged( Qt::Orientation ) ) );
 
     mView->setWidget( NULL );
 
@@ -192,6 +234,14 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     {
         delete mControlsTimer;
         mControlsTimer = NULL;
+    }
+
+    if ( mRNLogoTimer )
+    {
+        disconnect( mRNLogoTimer, SIGNAL( timeout() ), this, SLOT( handleRNLogoTimeout() ) );
+
+        delete mRNLogoTimer;
+        mRNLogoTimer = NULL;
     }
 
     if ( mControlsPolicy )
@@ -215,7 +265,7 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
     if ( mThumbnailManager )
     {
         delete mThumbnailManager;
-        mThumbnailManager = NULL;                    
+        mThumbnailManager = NULL;
     }
 
     if ( mVolumeControl )
@@ -223,25 +273,24 @@ QMPXVideoPlaybackControlsController::~QMPXVideoPlaybackControlsController()
         delete mVolumeControl;
         mVolumeControl = NULL;
     }
-    
+
     if ( mIsAttachOperation )
     {
         //
         // disable connection for 'attach' operation
         //
-        disconnect( this, SIGNAL( attachVideoPath( const QString& ) ), 
-                    mVideoServices, SLOT( itemSelected( const QString& ) ) );    
+        disconnect( this, SIGNAL( attachVideoPath( const QString& ) ),
+                    mVideoServices, SLOT( itemSelected( const QString& ) ) );
     }
-    
+
     if ( mVideoServices )
-    {    
+    {
         //
         // decrease videoservices instance count
         //
     	mVideoServices->decreaseReferenceCount();
     	mVideoServices = 0;
     }
-    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -280,21 +329,6 @@ void QMPXVideoPlaybackControlsController::addFileDetails(
         mVolumeControl->setValue( 0 );
         mVolumeControl->setEnabled( false );
     }
-
-    //
-    // If title is not available, show clip name
-    //
-    QString title = mFileDetails->mTitle;
-
-    if ( title.count() == 0 )
-    {
-        QFileInfo fileInfo( mFileDetails->mClipName );
-        title = fileInfo.baseName ();
-    }
-
-    QGraphicsWidget *widget = mLoader->findWidget( QString( "title" ) );
-    HbLabel *titleLabel = qobject_cast<HbLabel*>( widget );
-    titleLabel->setPlainText( title );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -435,7 +469,7 @@ void QMPXVideoPlaybackControlsController::handleStateChange( TMPXPlaybackState n
             }
             default:
             {
-                break;    
+                break;
             }
         }
     }
@@ -479,7 +513,7 @@ void QMPXVideoPlaybackControlsController::controlsListUpdated()
             //  Update the policy property based on file details and view mode to the controls
             //
             TUint properties = 0;
-            mControlsPolicy->setControlProperties( 
+            mControlsPolicy->setControlProperties(
                     mControls[i]->controlIndex(), properties, mFileDetails, mViewMode );
             mControls[i]->updateControlProperties( properties );
 
@@ -487,7 +521,7 @@ void QMPXVideoPlaybackControlsController::controlsListUpdated()
             //  Control exists in new list.
             //
             myList.removeAt( index );
-            i++;            
+            i++;
         }
     }
 
@@ -526,11 +560,27 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
         case EMPXBufferingAnimation:
         {
             //
+            // Load animation icons
+            //
+            QString animationName = ":/hbvideoplaybackview/animations/";
+
+            if ( mFileDetails->mRNFormat )
+            {
+                animationName.append( "rn_preroll_anim.axml" );
+            }
+            else
+            {
+                animationName.append( "generic_preroll_anim.axml" );
+            }
+
+            HbIconAnimationManager* manager = HbIconAnimationManager::global();
+            bool ok = manager->addDefinitionFile( animationName );
+
+            MPX_DEBUG(_L("    EMPXBufferingAnimation add animation definition ok = %d"), ok);
+
+            //
             // Buffering animation icon
             //
-            HbIconAnimationManager* manager = HbIconAnimationManager::global();
-            manager->addDefinitionFile(":/hbvideoplaybackview/animation.axml");
-			
             QGraphicsWidget *widget = mLoader->findWidget( QString( "bufferingIcon" ) );
             HbLabel *bufferingAnim = qobject_cast<HbLabel*>( widget );
 
@@ -548,7 +598,7 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
             // Status key (signal + title + back key)
             //
             control = new QMPXVideoPlaybackStatusPaneControl( this,
-                                                              controlIndex, 
+                                                              controlIndex,
                                                               NULL,
                                                               properties );
             mControls.append( control );
@@ -561,7 +611,7 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
             // Button bar
             //
             QGraphicsWidget *widget = mLoader->findWidget( QString( "controlBarLayout" ) );
-            QMPXVideoPlaybackControlBar *controlBar = 
+            QMPXVideoPlaybackControlBar *controlBar =
                 qobject_cast<QMPXVideoPlaybackControlBar*>( widget );
             controlBar->initialize();
 
@@ -576,9 +626,8 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
         case EMPXFileDetailsWidget:
         {
             QGraphicsWidget *widget = mLoader->findWidget( QString( "fileDetailsLayout" ) );
-            QMPXVideoPlaybackFileDetailsWidget *fileDetails = 
+            QMPXVideoPlaybackFileDetailsWidget *fileDetails =
                 qobject_cast<QMPXVideoPlaybackFileDetailsWidget*>( widget );
-            fileDetails->initialize();
 
             control = new QMPXVideoPlaybackFullScreenControl( this,
                                                               controlIndex,
@@ -602,10 +651,26 @@ void QMPXVideoPlaybackControlsController::appendControl( TMPXVideoPlaybackContro
 
             break;
         }
+        case EMPXRealLogoBitmap:
+        {
+            QGraphicsWidget *widget = mLoader->findWidget( QString( "rnLogoBitmap" ) );
+            HbWidget *bitmapWidget = qobject_cast<HbWidget*>( widget );
+
+            control = new QMPXVideoPlaybackFullScreenControl( this,
+                                                              controlIndex,
+                                                              bitmapWidget,
+                                                              properties );
+            mControls.append( control );
+
+            connect( bitmapWidget, SIGNAL( visibleChanged() ),
+                     this, SLOT( handleRNLogoVisibleChanged() ) );
+
+            break;
+        }
         case EMPXDetailsViewPlaybackWindow:
         {
             QGraphicsWidget *widget = mLoader->findWidget( QString( "detailsPlaybackWindow" ) );
-            QMPXVideoPlaybackDetailsPlaybackWindow *detailsPlaybackWindow = 
+            QMPXVideoPlaybackDetailsPlaybackWindow *detailsPlaybackWindow =
                     qobject_cast<QMPXVideoPlaybackDetailsPlaybackWindow*>( widget );
             detailsPlaybackWindow->initialize();
 
@@ -630,33 +695,41 @@ void QMPXVideoPlaybackControlsController::handleTappedOnScreen()
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::handleTappedOnScreen()"));
 
     //
-    //  Toggle visibility only if the followings are true 
-    //  - TV-Out is not connected
-    //  - Video is available
-    //  - We are in playing or paused state
+    // If we are in full screen view, toggle the visibility when playing and paused
+    // If we are in details view, issue playpause
+    // If we are in audio only view, ignore
     //
-    if ( ! isTvOutConnected() &&
-         mFileDetails->mVideoEnabled &&
-         ( mState == EPbStatePlaying || mState == EPbStatePaused ) )
+    switch( mViewMode )
     {
-        if ( mViewMode == EFullScreenView )
+        case EFullScreenView:
         {
-            if ( isVisible() )
+            if ( mState == EPbStatePlaying || mState == EPbStatePaused )
             {
-                //
-                // If the volume control is visible, hide it
-                //
-                if ( mVolumeControl->isVisible() )
+                if ( isVisible() )
                 {
-                    mVolumeControl->setVisible( false );
-                }
+                    //
+                    // If the volume control is visible, hide it
+                    //
+                    if ( mVolumeControl->isVisible() )
+                    {
+                        mVolumeControl->setVisible( false );
+                    }
 
-                hideAllControls();
+                    hideAllControls();
+                }
+                else
+                {
+                    showControls();
+                }
             }
-            else
-            {
-                showControls();
-            }            
+
+            break;
+        }
+        case EDetailsView:
+        {
+            handleCommand( EMPXPbvCmdPlayPause );
+
+            break;
         }
     }
 }
@@ -713,13 +786,13 @@ void QMPXVideoPlaybackControlsController::showControls()
 
     resetDisappearingTimers( EMPXTimerReset );
 
-    if ( ! mViewTransitionIsGoingOn )
+    if ( ! mViewTransitionIsGoingOn && mOrientation == Qt::Horizontal )
     {
         for ( int i = 0 ; i < mControls.count() ; i++ )
         {
             mControls[i]->setVisibility( mState );
         }
-    }        
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -728,7 +801,7 @@ void QMPXVideoPlaybackControlsController::showControls()
 //
 bool QMPXVideoPlaybackControlsController::isVisible()
 {
-    bool visible = EFalse;
+    bool visible = false;
 
     for ( int i = 0 ; i < mControls.count() ; i++ )
     {
@@ -736,7 +809,7 @@ bool QMPXVideoPlaybackControlsController::isVisible()
         {
             if ( mControls[i]->isVisible() )
             {
-                visible = ETrue;
+                visible = true;
             }
 
             break;
@@ -752,7 +825,7 @@ bool QMPXVideoPlaybackControlsController::isVisible()
 //   QMPXVideoPlaybackControlsController::handleCommand()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackControlsController::handleCommand( 
+void QMPXVideoPlaybackControlsController::handleCommand(
         TMPXVideoPlaybackViewCommandIds command, int value )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleCommand(%d)"), command);
@@ -761,14 +834,14 @@ void QMPXVideoPlaybackControlsController::handleCommand(
     {
         case EMPXPbvCmdSetPosition:
         {
-            TRAP_IGNORE( mViewWrapper->SetPropertyL( EPbPropertyPosition, 
+            TRAP_IGNORE( mViewWrapper->SetPropertyL( EPbPropertyPosition,
                                                      value * KPbMilliMultiplier ) );
             break;
         }
         case EMPXPbvCmdSetVolume:
         {
             TRAP_IGNORE( mViewWrapper->SetPropertyL( EPbPropertyVolume, value ) );
-            break;            
+            break;
         }
         default:
         {
@@ -877,7 +950,7 @@ void QMPXVideoPlaybackControlsController::updateState()
 //
 bool QMPXVideoPlaybackControlsController::realFormat( QString filename )
 {
-    bool realFormat = EFalse;
+    bool realFormat = false;
 
     if ( !filename.isNull() && !filename.isEmpty() )
     {
@@ -904,7 +977,7 @@ bool QMPXVideoPlaybackControlsController::realFormat( QString filename )
 //
 bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& des )
 {
-    bool realFormat = EFalse;
+    bool realFormat = false;
     TParse filePath;
 
     _LIT(KMPXRMEXT, ".R" );
@@ -936,7 +1009,7 @@ bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& d
                         fileName->Des()[j]='/';
                     }
                 }
-                err = filePath.Set( fileName->Des(), NULL, NULL );                
+                err = filePath.Set( fileName->Des(), NULL, NULL );
             }
 
             if ( fileName )
@@ -967,7 +1040,7 @@ bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& d
         // RealMedia Branding
         if ( ! buf.Compare( KMPXRMEXT ) )
         {
-            realFormat = ETrue;
+            realFormat = true;
         }
     }
 
@@ -983,16 +1056,16 @@ bool QMPXVideoPlaybackControlsController::realFormatForStreaming( const TDesC& d
 bool QMPXVideoPlaybackControlsController::realFormatForLocal()
 {
     bool realFormat = false;
-    
+
     QString real( "real" );
     QString rn( "rn" );
-    
+
     if ( mFileDetails->mMimeType.contains( real, Qt::CaseInsensitive ) ||
          mFileDetails->mMimeType.contains( rn, Qt::CaseInsensitive ) )
     {
         realFormat = true;
     }
-        
+
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::realFormatForLocal() [%d]"), realFormat);
 
     return realFormat;
@@ -1046,9 +1119,9 @@ void QMPXVideoPlaybackControlsController::handleErrors()
 //   QMPXVideoPlaybackControlsController::isSoftKeyVisible()
 // -------------------------------------------------------------------------------------------------
 //
-bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
+bool QMPXVideoPlaybackControlsController::isSoftKeyVisible()
 {
-    bool visible = EFalse;
+    bool visible = false;
 
     for ( int i = 0 ; i < mControls.count() ; i++ )
     {
@@ -1056,7 +1129,7 @@ bool QMPXVideoPlaybackControlsController::isSoftKeyVisible( int /*value*/ )
         {
             if ( mControls[i]->isVisible() )
             {
-                visible = ETrue;
+                visible = true;
             }
 
             break;
@@ -1089,7 +1162,7 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
     }
 
     //
-    // Change the view. 
+    // Change the view.
     // If Tv-out is connected, go to AudioOnlyView.
     // If not, go back to default view.
     //
@@ -1107,7 +1180,7 @@ void QMPXVideoPlaybackControlsController::handleTvOutEvent(
 //   QMPXVideoPlaybackControlsController::changeViewMode
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackControlsController::changeViewMode( 
+void QMPXVideoPlaybackControlsController::changeViewMode(
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::changeViewMode( %d, %d )"),
@@ -1181,7 +1254,10 @@ void QMPXVideoPlaybackControlsController::skipToPreviousVideoItem()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::skipToPreviousVideoItem()"));
 
-    handleCommand( EMPXPbvCmdPreviousListItem );
+    if ( mViewMode == EFullScreenView )
+    {
+        handleCommand( EMPXPbvCmdPreviousListItem );
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1192,7 +1268,10 @@ void QMPXVideoPlaybackControlsController::skipToNextVideoItem()
 {
     MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::skipToNextVideoItem()"));
 
-    handleCommand( EMPXPbvCmdNextListItem );
+    if ( mViewMode == EFullScreenView )
+    {
+        handleCommand( EMPXPbvCmdNextListItem );
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1212,7 +1291,7 @@ void QMPXVideoPlaybackControlsController::updateVideoRect( bool transitionEffect
 
         MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::updateVideoRect() : mViewMode = %d )"),
                 mViewMode );
-			
+
         if ( mViewMode == EDetailsView )
         {
             QGraphicsWidget *parent = mLoader->findWidget( QString( "detailsPlaybackWindow" ) );
@@ -1226,7 +1305,7 @@ void QMPXVideoPlaybackControlsController::updateVideoRect( bool transitionEffect
             rect = widget->geometry();
         }
 
-        mViewWrapper->UpdateVideoRect( 
+        mViewWrapper->UpdateVideoRect(
                 rect.x(), rect.y(), rect.width(), rect.height(), transitionEffect );
     }
 }
@@ -1261,7 +1340,7 @@ void QMPXVideoPlaybackControlsController::setDefaultBitmap()
         {
             tvOutBitmap->setVisible( true );
         }
-        else if ( mFileDetails->mRNFormat ) 
+        else if ( mFileDetails->mRNFormat )
         {
             realAudioOnlyBitmap->setVisible( true );
         }
@@ -1273,7 +1352,7 @@ void QMPXVideoPlaybackControlsController::setDefaultBitmap()
         {
             audioOnlyBitmap->setVisible( true );
         }
-    }    
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1291,12 +1370,12 @@ void QMPXVideoPlaybackControlsController::generateThumbNail()
     {
         if ( mThumbNailState == EThumbNailEmpty )
         {
-            mThumbnailManager = new ThumbnailManager(); ; 
+            mThumbnailManager = new ThumbnailManager(); ;
 
             mThumbnailManager->setThumbnailSize( ThumbnailManager::ThumbnailLarge );
             mThumbnailManager->setQualityPreference( ThumbnailManager::OptimizeForPerformance );
-         
-            if ( connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ), 
+
+            if ( connect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
                           this, SLOT( handleThumbnailReady( QPixmap , void * , int , int ) ) ) )
             {
                 mThumbnailManager->getThumbnail( mFileDetails->mClipName );
@@ -1314,7 +1393,7 @@ void QMPXVideoPlaybackControlsController::generateThumbNail()
 // QMPXVideoPlaybackControlsController::handleThumbnailReady()
 // -------------------------------------------------------------------------------------------------
 //
-void QMPXVideoPlaybackControlsController::handleThumbnailReady( 
+void QMPXVideoPlaybackControlsController::handleThumbnailReady(
         QPixmap tnData, void *internal , int id, int error )
 {
     Q_UNUSED( internal );
@@ -1340,20 +1419,8 @@ void QMPXVideoPlaybackControlsController::handleThumbnailReady(
 
     setDefaultBitmap();
 
-    disconnect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ), 
+    disconnect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
                 this, SLOT( handleThumbnailReady( QPixmap , void * , int , int ) ) );
-}
-
-// -------------------------------------------------------------------------------------------------
-// QMPXVideoPlaybackControlsController::isAttachOperation
-// -------------------------------------------------------------------------------------------------
-//
-bool QMPXVideoPlaybackControlsController::isAttachOperation()
-{        
-    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isAttachOperation() ret %d"), 
-	    mIsAttachOperation );
-    
-    return mIsAttachOperation;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1364,17 +1431,17 @@ void QMPXVideoPlaybackControlsController::attachVideo()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::attachVideo()"),
                    _L("file = %s"), mFileDetails->mClipName.data() );
-    
+
     //
     // close playback view
     //
     mView->closePlaybackView();
-	
+
     //
     // emit signal to launch videoservices itemSelected() slot
     //
     emit( attachVideoPath( mFileDetails->mClipName ) );
-    
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1385,19 +1452,110 @@ void QMPXVideoPlaybackControlsController::sendVideo()
 {
     MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::sendVideo()"),
                    _L("file = %s"), mFileDetails->mClipName.data() );
-    
+
     //
     // pause playback
     //
     handleCommand( EMPXPbvCmdPause );
-    
-    // 
+
+    //
     // send video to shareUI
     //
     ShareUi dlg;
     QStringList fileList;
     fileList.append( mFileDetails->mClipName );
-    dlg.send( fileList, true );   
+    dlg.send( fileList, true );
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::handleRNLogoVisibleChanged()"));
+
+    QGraphicsWidget *widget = mLoader->findWidget( QString( "rnLogoBitmap" ) );
+
+    if ( widget->isVisible() )
+    {
+        if ( mRNLogoTimer )
+        {
+            delete mRNLogoTimer;
+            mRNLogoTimer = NULL;
+        }
+
+        mRNLogoTimer = new QTimer( this );
+        mRNLogoTimer->setInterval( KMPXRNLogoTimeOut );
+        mRNLogoTimer->setSingleShot( true );
+        connect( mRNLogoTimer, SIGNAL( timeout() ), this, SLOT( handleRNLogoTimeout() ) );
+
+        mRNLogoTimer->start();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleRNLogoTimeout()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleRNLogoTimeout()
+{
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::handleRNLogoTimeout()"));
+
+    if ( mRNLogoTimer->isActive() )
+    {
+        mRNLogoTimer->stop();
+    }
+
+    //
+    // Remove RN logo from the controls list and issue play command if needed
+    //
+    mControlsConfig->updateControlList( EMPXControlCmdRemoveRNLogo );
+    handleCommand( EMPXPbvCmdRealOneBitmapTimeout );
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList()
+// -------------------------------------------------------------------------------------------------
+//
+bool QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList()
+{
+    bool exist = false;
+
+    //
+    // If we have a rn logo in the list, we are supposed to show the logo all the time
+    // unless we are in the middle of orientation transition
+    //
+    for ( int i = 0 ; i < mControls.count() ; i++ )
+    {
+        if ( mControls[i]->controlIndex() == EMPXRealLogoBitmap )
+        {
+            exist = true;
+            break;
+        }
+    }
+
+    MPX_DEBUG(_L("QMPXVideoPlaybackControlsController::isRNLogoBitmapInControlList() [%d]"), exist);
+
+    return exist;
+}
+
+// -------------------------------------------------------------------------------------------------
+// QMPXVideoPlaybackControlsController::handleOrientationChanged()
+// -------------------------------------------------------------------------------------------------
+//
+void QMPXVideoPlaybackControlsController::handleOrientationChanged( Qt::Orientation orientation )
+{
+    MPX_ENTER_EXIT(_L("QMPXVideoPlaybackControlsController::handleOrientationChanged()"),
+                   _L("old orientation %d, new orientation = %d"), mOrientation, orientation );
+
+    Qt::Orientation  oldOrientaiton = mOrientation;
+    mOrientation = orientation;
+
+    if ( oldOrientaiton == Qt::Vertical && orientation == Qt::Horizontal )
+    {
+        showControls();
+    }
 }
 
 // End of File

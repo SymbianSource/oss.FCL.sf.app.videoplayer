@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#24 %
+# Version : %version: 27 %
 
 
 TEMPLATE = lib
@@ -31,6 +31,13 @@ symbian:
     INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE \
                    $$APP_LAYER_SYSTEMINCLUDE SYSTEMINCLUDE
     BLD_INF_RULES.prj_exports += "rom/videoplayerengine.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videoplayerengine.iby)"
+    defBlock = \      
+        "$${LITERAL_HASH}if defined(EABI)" \
+        "DEFFILE ../eabi/videoplayerengine.def" \
+        "$${LITERAL_HASH}else" \
+        "DEFFILE ../bwins/videoplayerengine.def" \
+        "$${LITERAL_HASH}endif"
+    MMP_RULES += defBlock
 }
 
 INCLUDEPATH += ../../inc \
@@ -48,7 +55,7 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lxqservice.dll \
         -lxqserviceutil.dll \
         -lflogger.dll \
-        -lefsrv.dll
+        -lefsrv
 
 DEPENDPATH += ../../inc ../inc inc
 VPATH += src
@@ -60,7 +67,8 @@ HEADERS += videoplayerengine.h \
           videoserviceplay.h \
           videoserviceurifetch.h \
           videoserviceview.h \
-          videoservicebrowse.h
+          videoservicebrowse.h \
+          videoactivitystate.h
 
 SOURCES += videoplayerengine.cpp \
            mpxvideoplaybackwrapper.cpp \
@@ -69,5 +77,6 @@ SOURCES += videoplayerengine.cpp \
            videoserviceplay.cpp \
            videoserviceurifetch.cpp \
            videoserviceview.cpp \
-           videoservicebrowse.cpp
+           videoservicebrowse.cpp \
+           videoactivitystate.cpp
 

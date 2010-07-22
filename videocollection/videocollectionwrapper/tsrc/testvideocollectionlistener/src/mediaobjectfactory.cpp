@@ -58,7 +58,7 @@ CMPXMediaArray* MediaObjectFactory::newMediaArray()
 // newMedia
 // -----------------------------------------------------------------------------
 //
-CMPXMedia* MediaObjectFactory::newMedia(int id1, int id2  )
+CMPXMedia* MediaObjectFactory::newMedia(int id1, int id2)
 {
     CMPXMedia *media = NULL;
     TRAP_IGNORE(media = CMPXMedia::NewL());

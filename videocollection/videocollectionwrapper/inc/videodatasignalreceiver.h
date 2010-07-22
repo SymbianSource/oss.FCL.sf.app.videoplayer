@@ -112,6 +112,11 @@ public slots:
      * @param itemId, item that has been modified.
      */
     virtual void itemModifiedSlot(const TMPXItemId &itemId) = 0;
+    
+    /**
+     * Signalled when list is complete.
+     */
+    virtual void listCompleteSlot() = 0;
 };
 
 #endif // __VIDEOMODELOBSERVER_H

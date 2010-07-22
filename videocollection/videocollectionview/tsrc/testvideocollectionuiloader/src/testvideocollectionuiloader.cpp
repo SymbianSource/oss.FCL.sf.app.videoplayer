@@ -211,6 +211,15 @@ void TestVideoCollectionUiLoader::testFindWidget()
     mTestObject->addData(params,
         this,
         SLOT(handleObjectReady(QObject*, const QString&)));
+    
+    // first test the findWidget with loadIfNotFound == false.
+    bannerWidget =
+        mTestObject->findWidget<HbGroupBox>(
+            DOCML_NAME_VC_HEADINGBANNER, false);
+    QVERIFY(!bannerWidget);
+    QVERIFY(!mObjects.contains(DOCML_NAME_VC_HEADINGBANNER));
+    
+    // then with default value.
     bannerWidget =
         mTestObject->findWidget<HbGroupBox>(
             DOCML_NAME_VC_HEADINGBANNER);
@@ -295,6 +304,13 @@ void TestVideoCollectionUiLoader::testFindObject()
     // -object added in loading queue
     params.append(addToCollectionParam);
     mTestObject->addData(params, this, SLOT(handleObjectReady(QObject*, const QString&)));
+    
+    // first test with loadIfNotFound == false
+    addToCollection = mTestObject->findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION, false);
+    QVERIFY(!addToCollection);
+    QVERIFY(!mObjects.contains(DOCML_NAME_ADD_TO_COLLECTION));
+    
+    // then with default value.
     addToCollection = mTestObject->findObject<HbAction>(DOCML_NAME_ADD_TO_COLLECTION);
     QVERIFY(addToCollection);
     QVERIFY(mObjects.contains(DOCML_NAME_ADD_TO_COLLECTION));
@@ -849,9 +865,9 @@ void TestVideoCollectionUiLoader::handleObjectReady(QObject *object, const QStri
     {
         if (name == DOCML_NAME_VIEW)
         {
-            HbMainWindow *window = hbInstance->allMainWindows().at(0);
-            if (window)
+            if(hbInstance->allMainWindows().count())
             {
+                HbMainWindow *window = hbInstance->allMainWindows().at(0);
                 HbView *view = qobject_cast<HbView*>(object);
                 if (view)
                 {

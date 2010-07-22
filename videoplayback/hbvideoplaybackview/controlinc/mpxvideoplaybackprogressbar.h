@@ -15,23 +15,22 @@
 *
 */
 
-// Version : %version: da1mmcf#11 %
+// Version : %version: da1mmcf#13 %
 
 
 
 #ifndef MPXVIDEOPLAYBACKPROGRESSBAR_H_
 #define MPXVIDEOPLAYBACKPROGRESSBAR_H_
 
-#include <hbwidget.h>
+#include <QObject>
 #include <mpxplaybackframeworkdefs.h>
 
 class QTimer;
-class HbFrameItem;
 class HbProgressSlider;
 class QMPXVideoPlaybackViewFileDetails;
 class QMPXVideoPlaybackControlsController;
 
-class QMPXVideoPlaybackProgressBar : public HbWidget
+class QMPXVideoPlaybackProgressBar : public QObject
 {
     Q_OBJECT
 
@@ -59,7 +58,6 @@ class QMPXVideoPlaybackProgressBar : public HbWidget
     private:
         QMPXVideoPlaybackControlsController *mController;
         HbProgressSlider                    *mProgressSlider;
-        HbFrameItem                         *mFrameItem;
 
         int     mDuration;
         int     mDraggingPosition;

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#8 %
+// Version : %version: 11 %
 
 
 
@@ -45,21 +45,21 @@ SOURCE          videohelixtest.cpp
 SOURCE          videohelixtestbody.cpp
 SOURCE          timeoutcontroller.cpp
 SOURCE          mpxvideoplayerutility_stub.cpp
-SOURCE          dlmgr_stub.cpp
 SOURCE          mpxvideoregion.cpp
 SOURCE          stifutilities.cpp
 SOURCE          mediarecognizer_stub.cpp
 SOURCE          mpxvideoaccessoryobserver_stub.cpp
 SOURCE          mpxvideodrmhelper_stub.cpp
+SOURCE          tnmgr_stub.cpp
 
 SOURCEPATH      ../../../src
-SOURCE          mpxvideodlmgrif.cpp
 SOURCE          mpxvideofiledetails.cpp
 SOURCE          mpxvideohelixplayback.cpp
 SOURCE          mpxvideoplaybackcontroller.cpp
 SOURCE          mpxvideoplaybackmode.cpp
 SOURCE          mpxvideoplaybackstate.cpp
 SOURCE          mpxvideoseeker.cpp
+SOURCE          mpxvideoposterframesetter.cpp
 
 
 LIBRARY         euser.lib
@@ -89,5 +89,6 @@ LIBRARY         centralrepository.lib
 LIBRARY         flogger.lib
 LIBRARY         playbackhelper.lib
 LIBRARY         hwrmlightclient.lib   // Lights control
+LIBRARY         fbscli.lib
 
 // End of File

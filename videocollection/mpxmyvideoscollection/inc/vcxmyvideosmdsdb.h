@@ -61,10 +61,11 @@ NONSHARABLE_CLASS(MVcxMyVideosMdsDbObserver)
         /**
         * Handler function for database events.
         *
-        * @param aEvent Event type.
-        * @param aId    Array of IDs in database.
+        * @param aEvent       Event type.
+        * @param aId          Array of IDs in database.
+        * @param aEventsLeft  How many events are still coming.
         */
-        virtual void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId ) = 0;
+        virtual void HandleMyVideosDbEvent( TMPXChangeEventType aEvent, RArray<TUint32>& aId, TInt aEventsLeft ) = 0;
 
         /**
         * Handler function for video list fetching events. This callback is called as a response
@@ -275,19 +276,27 @@ public:
         ERemoveAlbums
         };
     
+    class TEvent
+        {
+    public:
+        
+        TUint32 iMdsId;
+        TInt    iEventType;
+        };
+    
     /**
      * Two-phased constructor.
      * @param aObserver The db change observer.
      */
     static CVcxMyVideosMdsDb* NewL( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     /**
      * Two-phased constructor.
      * @param aObserver The db change observer.
      */
     static CVcxMyVideosMdsDb* NewLC( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
 
     /**
@@ -356,6 +365,11 @@ public:
      */
     CMPXMedia* CreateVideoL( TUint32 aId, TBool aFullDetails = ETrue );
 
+    /**
+     * Called by iEventProcessor.
+     */
+    static TInt ProcessEvents( TAny* aPtr );
+    
 protected:
     
 // from MMdESessionObserver
@@ -434,7 +448,7 @@ private:
      * @param aFs      Session to file server.
      */
     CVcxMyVideosMdsDb( MVcxMyVideosMdsDbObserver* aObserver,
-            MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver, RFs& aFs );
+            RFs& aFs, MVcxMyVideosMdsAlbumsObserver* aAlbumsObserver = NULL );
 
     void ConstructL();
 
@@ -547,6 +561,11 @@ private:
     * @return MDS session.
     */
     CMdESession& MdsSessionL();
+    
+    /**
+     * Called by ProcessEvents.
+     */
+    TInt DoProcessEvents();
     
 public:
 
@@ -767,6 +786,15 @@ private: // data
     */
     CVcxMdsShutdownMonitor* iMdsShutdownMonitor;
 
+    /**
+     * Used for handling events on background.
+     */
+    CIdle* iEventProcessor;
+    
+    /**
+     * Incoming events are stored here and "slowly" fed to observer.
+     */
+    RArray<TEvent> iEvents;
     };
 
 #endif // VCXMYVIDEOSMDSDB_H

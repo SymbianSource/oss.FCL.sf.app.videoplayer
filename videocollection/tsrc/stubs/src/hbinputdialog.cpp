@@ -16,37 +16,88 @@
 */
 
 #include "hbinputdialog.h"
+#include "testobjectstore.h"
 
-bool HbInputDialog::mGetTextFails = false;
-QString HbInputDialog::mGetTextReturnValue = QString();
 int HbInputDialog::mGetTextCallCount = 0;
+int HbInputDialog::mAttribute = -1;
+QString HbInputDialog::mLastHeading = "";
+QString HbInputDialog::mLastText = "";
+QVariant HbInputDialog::mValueReturnValue = QVariant();
+int HbInputDialog::mValueCallCount = 0;
+int HbInputDialog::mOpenCallCount = 0;
 
-
-QString HbInputDialog::getText(const QString &label,const QString &text,
-           bool *ok, QGraphicsScene *scene, QGraphicsItem *parent)
+HbInputDialog::HbInputDialog(QGraphicsItem *parent) : HbWidget(parent) 
 {
-   Q_UNUSED(label);
-   Q_UNUSED(scene);
-   Q_UNUSED(parent);
-   mGetTextCallCount++;
-   QString textReturn;
-   if(HbInputDialog::mGetTextReturnValue.isNull())
-   {
-       textReturn = text;
-   }
-   else
-   {
-       textReturn = mGetTextReturnValue;
-   }
-   if(mGetTextFails)
-   {
-       *ok = false;
-       textReturn = "";
-   }
-   else
-   {
-       *ok = true;            
-   }
-   return textReturn;
+    HbAction *action = new HbAction();
+    mActions.append(action);
+    action = new HbAction();
+    mActions.append(action);
+    
+    TestObjectStore::instance().addObject(this);
+}
+
+HbInputDialog::~HbInputDialog()
+{
+    while(!mActions.isEmpty())
+    {
+        delete mActions.takeFirst();
+    }
+}   
+
+void HbInputDialog::open( QObject* receiver, const char* member )
+{
+    Q_UNUSED(receiver);
+    Q_UNUSED(member);
+    
+    mOpenCallCount++;
+}
+
+void HbInputDialog::getText(const QString &heading
+        ,QObject *receiver
+        ,const char *member
+        ,const QString &text
+        ,QGraphicsScene *scene
+        ,QGraphicsItem *parent)
+{
+    Q_UNUSED(receiver);
+    Q_UNUSED(member);
+    Q_UNUSED(scene);
+    Q_UNUSED(parent);
+    
+    mLastHeading = heading;
+    mLastText = text;
+    mGetTextCallCount++;
+}
+
+void HbInputDialog::emitDialogFinished( QObject* receiver, const char* member, int actionNum )
+{
+    if(connect(this, SIGNAL(finished(HbAction *)), receiver, member))
+    {
+        emit finished(mActions.value(actionNum));
+        disconnect(this, SIGNAL(finished(HbAction *)), receiver, member);
+    }
+}
+
+void HbInputDialog::setAttribute(int attribute)
+{
+    HbInputDialog::mAttribute = attribute;
+}
+
+void HbInputDialog::setPromptText(const QString &text, int row)
+{
+    while(mSetPromptTexts.count() < row+1)
+    {
+        mSetPromptTexts.append("");
+    }
+    mSetPromptTexts[row] = text;
+}
+
+void HbInputDialog::setValue(const QVariant &value, int row)
+{
+    while(mSetValues.count() < row+1)
+    {
+        mSetValues.append("");
+    }
+    mSetValues[row] = value;
 }
 

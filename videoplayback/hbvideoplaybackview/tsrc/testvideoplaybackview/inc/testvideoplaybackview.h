@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in Video Playback View Plugin
-* 
+*
 */
 
-// Version : %version: %
+// Version : %version: 7 %
 
 #ifndef __TESTVIDEOPLAYBACKVIEW_H__
 #define __TESTVIDEOPLAYBACKVIEW_H__
@@ -37,21 +37,21 @@ public:
      * will be called before each testfunction is executed.
      *
      */
-    void init(); 
-    
+    void init();
+
     /**
      * will be called after every testfunction.
      *
      */
     void cleanup();
-        
+
     void setup();
-    
+
 private:
-    
+
     void verifyHandlePluginError( TInt error, bool closeView = true );
-    
-    // test functions for the test framework         
+
+    // test functions for the test framework
 private slots:
 
     // the order in which these testXX methods are declared is important
@@ -60,10 +60,8 @@ private slots:
     void testShowDialog();
     void testGetWindow();
     void testIssuePlayCommand();
-    void testEvent();
+    void testEventFilter();
     void testClosePlaybackView();
-    void testMousePressEvent();
-    void testMouseReleaseEvent();
     void testHandlePdlStateChange();
     void testHandlePluginError();
     void testHandleStoppedStatePrevView();
@@ -73,6 +71,7 @@ private slots:
     void testHandleSoftkeyback();
     void testHandleDeactivateView();
     void testDoClosePlayer();
+    void testGestureEvent();
 
 signals:
     void commandSignal();
@@ -82,10 +81,7 @@ private:
 
 };
 
-
 #endif  // __TESTVIDEOPLAYBACKVIEW_H__
 
 // End of file
-    
-
 

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 32 %
+// Version : %version: 33 %
 
 // INCLUDE FILES
 #include <mpxmediageneraldefs.h>
@@ -120,19 +120,25 @@ void VideoCollectionListener::HandleOpenL(
 
     if(categoryOrAlbumVideoList)
     {
+        // checks if there are new videos in the list that are not yet in our data model.
+        mSignalReceiver.newVideoListSlot(array);
+        
         mSignalReceiver.albumListAvailableSlot(pathId, array);
-
-        // Update also all video list in case this is a default category. 
-        if(pathId.iId2 == KVcxMvcMediaTypeCategory)
-		{
-            mSignalReceiver.newVideoListSlot(array);
-		}
     }
     else
     {
         mSignalReceiver.newVideoListSlot(array);
     }
- }
+    
+    int listCompleted(-1);
+    if(mVideoUtils.mediaValue<int>(&aEntries, KVcxMediaMyVideosInt32Value, listCompleted))
+    {
+        if(listCompleted == EVcxMyVideosVideoListComplete)
+        {
+            mSignalReceiver.listCompleteSlot();
+        }
+    }
+}
 
 // -----------------------------------------------------------------------------
 // HandleOpenL

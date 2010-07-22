@@ -16,13 +16,14 @@
 */
 
 
-// Version : %version: 20 %
+// Version : %version: 22 %
 
 
 #include <AudioPreference.h>
 #include <mmf/server/mmffile.h>
 #include <caf/caftypes.h>
 #include <mpxmessagegeneraldefs.h>
+#include <fbs.h>
 
 #include "mpxvideoplayerutility.h"
 #include "mpxvideoplaybackcontroller.h"
@@ -45,7 +46,8 @@ CMpxVideoPlayerUtility::NewL( CMPXVideoPlaybackController* aVideoPlaybackCtrl )
 }
 
 CMpxVideoPlayerUtility::CMpxVideoPlayerUtility( CMPXVideoPlaybackController* aVideoPlaybackCtrl )
-    : iVideoPlaybackController( aVideoPlaybackCtrl )
+    : CActive( EPriorityStandard )
+    , iVideoPlaybackController( aVideoPlaybackCtrl )
     , iVideoControllerCustomCommands( iController )
     , iVideoPlayControllerCustomCommands( iController )
     , iAudioPlayDeviceCustomCommands( iController )
@@ -60,6 +62,8 @@ CMpxVideoPlayerUtility::CMpxVideoPlayerUtility( CMPXVideoPlaybackController* aVi
 void CMpxVideoPlayerUtility::ConstructL()
 {
     OpenControllerL();
+        
+    CActiveScheduler::Add( this );
 }
 
 CMpxVideoPlayerUtility::~CMpxVideoPlayerUtility()
@@ -84,6 +88,17 @@ void CMpxVideoPlayerUtility::Close()
 
     iController.Close();
     iDirectScreenAccessAbort = EFalse;
+    
+    if ( IsActive() )
+    {
+        Cancel();
+        
+        if ( iPosterFrameBitmap )
+        {
+            delete iPosterFrameBitmap;
+            iPosterFrameBitmap = NULL;         
+        }
+    }    
 }
 
 void CMpxVideoPlayerUtility::Reset()
@@ -308,6 +323,55 @@ void CMpxVideoPlayerUtility::GetVideoLoadingProgressL( TInt& aPercentageProgress
     MPX_DEBUG(_L("CMpxVideoPlayerUtility::GetVideoLoadingProgressL(%d)"), aPercentageProgress );
 }
 
+void CMpxVideoPlayerUtility::GetFrameL()
+{    
+    MPX_DEBUG(_L("CMpxVideoPlayerUtility::GetFrameL"));
+       
+    // dont get another frame if a request is already pending
+    //
+    if ( ! IsActive() )
+    {
+        iPosterFrameBitmap = new (ELeave) CFbsBitmap;
+        User::LeaveIfError(iPosterFrameBitmap->Create(TSize(0,0), EColor16MU));  
+                
+        iVideoPlayControllerCustomCommands.GetFrame( *iPosterFrameBitmap, iStatus );   
+        SetActive();    
+    }
+
+}
+
+void CMpxVideoPlayerUtility::RunL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::RunL()"));
+    
+    if ( iStatus.Int() == KErrNone )
+    {   
+        iVideoPlaybackController->HandleFrameReady( iStatus.Int() );        
+    }   
+    else
+    {
+        // Bitmap ownership will NOT be transferred to thumbnail manager so delete it    
+        delete iPosterFrameBitmap;
+        iPosterFrameBitmap = NULL;        
+    }        
+}
+
+void CMpxVideoPlayerUtility::DoCancel()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::DoCancel()"));
+    
+    // Bitmap ownership will NOT be transferred to thumbnail manager so delete it       
+    delete iPosterFrameBitmap;
+    iPosterFrameBitmap = NULL;         
+}
+
+CFbsBitmap& CMpxVideoPlayerUtility::GetBitmap()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetBitmap()"));
+        
+    return *iPosterFrameBitmap;
+}
+
 void CMpxVideoPlayerUtility::PlayL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::PlayL()"));
@@ -485,22 +549,23 @@ TInt CMpxVideoPlayerUtility::VideoSurfaceCreated()
     if ( iSurfaceId.IsNull() )
     {
         TSurfaceId surfaceId;
-        TRect cropRect;
-        TVideoAspectRatio aspectRatio;
 
         error = iVideoPlaySurfaceSupportCustomCommands.GetSurfaceParameters( surfaceId,
-                                                                             cropRect,
-                                                                             aspectRatio );
+                                                                             iCropRect,
+                                                                             iAspectRatio );
 
         if ( error == KErrNone )
         {
-            //
-            //  Send data to the display handler to remove old surface and add new surface
-            //
-            MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceCreated,
-                                                 surfaceId,
-                                                 cropRect,
-                                                 aspectRatio ) );
+            if ( iVideoPlaybackController->IsViewActivated() )
+            {
+                //
+                //  Send data to the display handler to remove old surface and add new surface
+                //
+                MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceCreated,
+                                                     surfaceId,
+                                                     iCropRect,
+                                                     iAspectRatio ) );
+            }
 
             iSurfaceId = surfaceId;
         }
@@ -631,6 +696,23 @@ void CMpxVideoPlayerUtility::SendSurfaceCommandL( TInt aCmd,
         iVideoPlaybackController->iMPXPluginObs->HandlePlaybackMessage( *msg );
 
         CleanupStack::PopAndDestroy( msg );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()"));
+
+    if ( ! iSurfaceId.IsNull() )
+    {
+        MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceCreated,
+                                             iSurfaceId,
+                                             iCropRect,
+                                             iAspectRatio ) );
     }
 }
 

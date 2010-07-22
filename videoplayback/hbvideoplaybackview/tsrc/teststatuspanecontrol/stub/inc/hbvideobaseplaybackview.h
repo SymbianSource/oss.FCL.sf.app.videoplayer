@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   5 %
+// Version : %version:   6 %
 
 
 
@@ -25,16 +25,18 @@
 #define __HBVIDEOBASEPLAYBACKVIEW_H__
 
 //  Include Files
+#include <hbwidget.h>
 #include <hbview.h>
-
 
 //  Constants
 
 //  Forward Declarations
 
 //  Class Definitions
+class HbAction;
+class HbMenu;
 
-class HbVideoBasePlaybackView : public HbView
+class HbVideoBasePlaybackView : public HbWidget
 {
     Q_OBJECT
 
@@ -55,14 +57,21 @@ class HbVideoBasePlaybackView : public HbView
         void setViewFlags( HbView::HbViewFlags flags );
         HbView::HbViewFlags viewFlags();
 
-    protected slots:
+        void setTitleBarVisible( bool visible );
+        void setStatusBarVisible( bool visible );
+        void setNavigationAction(HbAction *action);
+        HbMenu *menu();
 
+    public slots:
         virtual void closePlaybackView();
 
     public:
         bool mViewActive;
+        bool mTitleBarVisible;
+        bool mStatusBarVisible;
+
+        HbMenu *mMenu;
         HbView::HbViewFlags mFlag;
-        				
 };
 
 #endif  // __HBVIDEOBASEPLAYBACKVIEW_H__

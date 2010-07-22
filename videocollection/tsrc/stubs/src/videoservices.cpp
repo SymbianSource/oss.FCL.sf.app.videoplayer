@@ -70,8 +70,8 @@ VideoServices::VideoServices(QVideoPlayerEngine* engine):
     mCurrentService(VideoServices::ENoService),
     mSortRole(0)
 {
-    mServiceUriFetch = new VideoServiceUriFetch(this);
-    mServiceBrowse = new VideoServiceBrowse(this);
+    mServiceUriFetch = new VideoServiceUriFetch(this, QLatin1String("TestListView"));
+    mServiceBrowse = new VideoServiceBrowse(this, QLatin1String("TestListView"));
 }
 
 VideoServices::~VideoServices()

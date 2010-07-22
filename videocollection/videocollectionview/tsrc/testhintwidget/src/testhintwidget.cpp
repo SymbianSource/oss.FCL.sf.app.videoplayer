@@ -203,19 +203,22 @@ void TestHintWidget::testActivate()
     mTestObject->mServiceIconString = QString();
     mTestObject->activate();
     QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->isVisible() == false);
-    QVERIFY(mTestObject->mActivated == false);
+    QVERIFY(mTestObject->isVisible() == true);
+    QVERIFY(mTestObject->mActivated == true);
     
     // mServiceIconPressedString empty.
     mTestObject->mServiceIconString = "test";
     mTestObject->mServiceIconPressedString = QString();
     mTestObject->activate();
     QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->isVisible() == false);
-    QVERIFY(mTestObject->mActivated == false);
+    QVERIFY(mTestObject->isVisible() == true);
+    QVERIFY(mTestObject->mActivated == true);
     
     // successful case.
-    mTestObject->mServiceIconPressedString = "test2";
+    mTestObject->mActivated = false;
+    mTestObject->mServiceIconString = "qtg_mono_ovistore";
+    mTestObject->mServiceIconPressedString = "qtg_mono_ovistore";
+
     HbLabel *noVideosLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_NO_VIDEOS_LABEL);
     QVERIFY(noVideosLabel);
     noVideosLabel->setVisible(false);
@@ -245,7 +248,6 @@ void TestHintWidget::testDeactivate()
     
     // when serviceButton does not exist
     mTestObject->mServiceIcon = 0;
-    mTestObject->mAddVideosIcon = 0;
     HbDocumentLoader::mFindWidgetFails = true;
     mTestObject->deactivate();
     QVERIFY(mTestObject->mActivated == false);
@@ -266,17 +268,14 @@ void TestHintWidget::testDeactivate()
     // when icons are non-null, but widget is not activated.
     mTestObject->setVisible(true);
     mTestObject->mServiceIcon = new HbIcon;
-    mTestObject->mAddVideosIcon = new HbIcon;
     mTestObject->deactivate();
     QVERIFY(mTestObject->mServiceIcon != 0);
-    QVERIFY(mTestObject->mAddVideosIcon != 0);
     QVERIFY(mTestObject->isVisible() == true);
     
     // when icons are non-null and widget is activated.
     mTestObject->mActivated = true;
     mTestObject->deactivate();
     QVERIFY(mTestObject->mServiceIcon == 0);
-    QVERIFY(mTestObject->mAddVideosIcon == 0);
     QVERIFY(mTestObject->isVisible() == false);
     
     cleanup();
@@ -294,7 +293,6 @@ void TestHintWidget::testUpdateUiComponents()
     init(true);
     
     mTestObject->mServiceIcon = new HbIcon(QIcon(QPixmap(QSize(100,100))));
-    mTestObject->mAddVideosIcon = new HbIcon(QIcon(QPixmap(QSize(50,50))));
     mTestObject->mActivated = true;
     
     HbDocumentLoader::mFindWidgetFails = true;
@@ -318,9 +316,8 @@ void TestHintWidget::testUpdateUiComponents()
     mainWnd->setOrientation(Qt::Horizontal);
     mTestObject->mButtonShown = true;
     mTestObject->setLevel(VideoHintWidget::Collection);
-    QVERIFY(serviceButton->isVisible());
+    QVERIFY(!serviceButton->isVisible());
     QVERIFY(serviceButton->icon().isNull() == false);
-    QVERIFY(serviceButton->icon().qicon().cacheKey() == mTestObject->mAddVideosIcon->qicon().cacheKey());    
     QVERIFY(hintLabel->isVisible() == false);
     
     mTestObject->mButtonShown = false;
@@ -377,6 +374,30 @@ void TestHintWidget::testOrientationChangedSlot()
     QVERIFY(noVideosLabel->isVisible());
     
     cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testSetButtonShown
+// ---------------------------------------------------------------------------
+//
+void TestHintWidget::testSetButtonShown()
+{
+    HbMainWindow *mainWnd = hbInstance->allMainWindows()[0];
+    
+    init(true);
+    
+    HbLabel *noVideosLabel = mUiLoader->findWidget<HbLabel>(DOCML_NAME_NO_VIDEOS_LABEL);
+    QVERIFY(noVideosLabel);
+    
+    mTestObject->mActivated = true;
+    noVideosLabel->setVisible(false);
+    mTestObject->setButtonShown(true);
+    QVERIFY(noVideosLabel->isVisible());
+    
+    mTestObject->mActivated = false;
+    noVideosLabel->setVisible(false);
+    mTestObject->setButtonShown(false);
+    QVERIFY(noVideosLabel->isVisible() == false);
 }
 
 // end of file

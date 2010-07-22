@@ -212,24 +212,44 @@ void TestVideoDisplayHandler::testSetDefaultAspectRatioL()
 {
     setup();
         
+    //
+    // get window size
+    //
+    RWindow *window = mBaseVideoView->getWindow();
+    TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
+
+    //
+    // get window aspect ratio
+    //   if device is in landscape mode, width > height
+    //   if device is in portrait mode, width < height
+    //
+    TReal32 width = (TReal32) displayRect.Width();
+    TReal32 height = (TReal32) displayRect.Height();
+    TReal32 displayAspectRatio = (width > height)? (width / height) : (height / width);
+    
+    //
+    // aspect ratio zoom
+    //
     mFileDetails = new QMPXVideoPlaybackViewFileDetails(); 
     mFileDetails->mVideoHeight = 280;
     mFileDetails->mVideoWidth  = 600;
-    
-    RWindow *window = mBaseVideoView->getWindow();
 
-    TRect displayRect = TRect( window->Position().iX,
-                               window->Position().iY,
-                               window->Position().iX + window->Size().iWidth,                  
-                               window->Position().iY + window->Size().iHeight );
-
-    TReal displayAspectRatio = (TReal32)displayRect.Width() / (TReal32)displayRect.Height();
-    
     int aspectRatio = mDispHdlr->SetDefaultAspectRatioL( mFileDetails, displayAspectRatio );
     
     QVERIFY( aspectRatio == EMMFZoom ); 
        
-    mDispHdlr->RemoveDisplayWindow();    
+    //
+    // aspect ratio stretch
+    //
+    mFileDetails->mVideoHeight = 144;
+    mFileDetails->mVideoWidth  = 220;
+
+    aspectRatio = mDispHdlr->SetDefaultAspectRatioL( mFileDetails, displayAspectRatio );
+    
+    QVERIFY( aspectRatio == EMMFStretch ); 
+ 
+    mDispHdlr->RemoveDisplayWindow();   
+
     cleanup(); 
 }
 

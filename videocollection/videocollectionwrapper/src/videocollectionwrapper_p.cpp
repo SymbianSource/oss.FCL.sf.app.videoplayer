@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: %
+// Version : %version: 27 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -40,8 +40,10 @@
 VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate() 
     : mAllVideosModel( 0 )
     , mCollectionsModel( 0 )
+    , mCollectionContentModel( 0 )
     , mGenericModel( 0 )
     , mSourceModel( 0 )
+    , mAboutToClose( false )
 {
 	FUNC_LOG;
     // NOP 
@@ -54,7 +56,6 @@ VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate()
 VideoCollectionWrapperPrivate::~VideoCollectionWrapperPrivate()
 {
 	FUNC_LOG;
-    // NOP here
 }
 
 
@@ -67,6 +68,11 @@ VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(VideoCollecti
 	FUNC_LOG;
     INFO_1("VideoCollectionWrapperPrivate::getModel() type: %d", type);
 	
+    if(mAboutToClose)
+    {
+        return 0;
+    }
+    
     VideoSortFilterProxyModel *model = 0;
     if(!mSourceModel)
     {
@@ -143,6 +149,11 @@ void VideoCollectionWrapperPrivate::aboutToQuitSlot()
     if(!mSourceModel.isNull())
     {
         delete mSourceModel;
+        delete mAllVideosModel;
+        delete mCollectionsModel;
+        delete mCollectionContentModel;
+        delete mGenericModel;
+        mAboutToClose = true;
     }
 }
 

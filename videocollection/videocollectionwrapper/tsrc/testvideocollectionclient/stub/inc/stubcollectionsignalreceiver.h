@@ -123,9 +123,17 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    virtual void itemModifiedSlot(const TMPXItemId &itemId)
+    void itemModifiedSlot(const TMPXItemId &itemId)
     {
         Q_UNUSED(itemId);
+    }
+    
+    /**
+     * No implementation needed for these tests
+     */
+    void listCompleteSlot()
+    {
+        
     }
 };
 
