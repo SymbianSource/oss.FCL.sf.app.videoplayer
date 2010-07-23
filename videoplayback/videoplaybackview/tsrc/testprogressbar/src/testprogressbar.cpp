@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 
 #include <qdebug>
@@ -329,12 +329,33 @@ void TestProgressBar::testDurationChanged()
 
     setup();
 
-    int duration = 120;
+    int duration = 121;
     mProgBar->durationChanged( duration );
 
     QVERIFY( mProgBar->mDuration == duration );
     QVERIFY( mProgBar->mProgressSlider->maximum() == duration );
-    QVERIFY( mProgBar->mProgressSlider->maxText() == "2:00" );
+    QVERIFY( mProgBar->mProgressSlider->maxText() == "2:01" );
+
+    duration = 730;
+    mProgBar->durationChanged( duration );
+
+    QVERIFY( mProgBar->mDuration == duration );
+    QVERIFY( mProgBar->mProgressSlider->maximum() == duration );
+    QVERIFY( mProgBar->mProgressSlider->maxText() == "12:10" );
+
+    duration = 7413;
+    mProgBar->durationChanged( duration );
+
+    QVERIFY( mProgBar->mDuration == duration );
+    QVERIFY( mProgBar->mProgressSlider->maximum() == duration );
+    QVERIFY( mProgBar->mProgressSlider->maxText() == "2:03:33" );
+
+    duration = 37803;
+    mProgBar->durationChanged( duration );
+
+    QVERIFY( mProgBar->mDuration == duration );
+    QVERIFY( mProgBar->mProgressSlider->maximum() == duration );
+    QVERIFY( mProgBar->mProgressSlider->maxText() == "10:30:03" );
 
     cleanup();
 }

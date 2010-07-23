@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  7 %
+// Version : %version:  8 %
 
 
 
@@ -28,6 +28,7 @@
 
 #include <e32base.h>	// CBase
 #include <e32std.h>	 // TBuf
+#include <mpxcollectionobserver.h>
 
 
 #include "videoplaybackcontrol.hrh"
@@ -37,11 +38,15 @@
 //  Forward Declarations
 class VideoBasePlaybackView;
 class VideoPlaybackViewFileDetails;
+class CMPXCollectionUtility;
+class CMPXMedia;
+class CMPXCollectionPlaylist;
 
 
 //  Class Definitions
 
-class CMPXVideoViewWrapper : public CBase
+class CMPXVideoViewWrapper : public CBase,
+                             public MMPXCollectionObserver
 {
     public:
         static CMPXVideoViewWrapper* NewL( VideoBasePlaybackView* aView );
@@ -69,6 +74,17 @@ class CMPXVideoViewWrapper : public CBase
         void ActivateClosePlayerActiveObject();
 
         void IssueVideoAppForegroundCmdL( TBool aForeground );
+        
+        inline void HandleOpenL( const CMPXMedia& /*aEntries*/,
+                                 TInt /*aIndex*/,
+                                 TBool /*aComplete*/,
+                                 TInt /*aError*/ ) {}
+
+        inline void HandleOpenL( const CMPXCollectionPlaylist& /*aPlaylist*/, TInt /*aError*/ ) {}        
+        
+        inline void HandleCollectionMediaL( const CMPXMedia& /*aMedia*/, TInt /*aError*/ ) {}
+        
+        TInt GetMediaId();
 
 
     public: // data

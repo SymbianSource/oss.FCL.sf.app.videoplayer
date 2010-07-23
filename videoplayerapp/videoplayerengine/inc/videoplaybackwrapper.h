@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -42,6 +42,7 @@ class VideoPlaybackWrapper : public QObject
         int playMedia( RFile aFile ); 
         void openPlaybackView() ;
         void lateInit();        
+        int replayMedia( QString aFilename );
 
     private:
         void initializePlugins();

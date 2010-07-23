@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 #include "mpxvideo_debug.h"
@@ -79,7 +79,22 @@ int VideoPlaybackWrapper::playMedia( QString aFileName )
 }
 
 // -------------------------------------------------------------------------------------------------
-//   VideoPlaybackWrapper::playMedia()
+//   VideoPlaybackWrapper::replayMedia()
+// -------------------------------------------------------------------------------------------------
+//
+int VideoPlaybackWrapper::replayMedia( QString aFileName )
+{
+    MPX_ENTER_EXIT(_L("VideoPlaybackWrapper::replayMedia"));   
+    
+    TBuf<KMaxFileName> name( aFileName.utf16() );
+    
+    int error = mUiEngine->ReplayAfterPriorTermination( name );
+    
+    return error;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   QMpxVideoPlaybackWrapper::playMedia()
 // -------------------------------------------------------------------------------------------------
 //
 int VideoPlaybackWrapper::playMedia( RFile aFile )

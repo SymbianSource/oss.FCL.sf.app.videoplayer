@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestFileDetailsWidget
-* 
+*
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 #include <QDateTime>
@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\testfiledetailswidget.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
-    
+
     return res;
 }
 
@@ -70,7 +70,7 @@ void TestFileDetailsWidget::init()
 {
     MPX_ENTER_EXIT(_L("TestFileDetailsWidget::init()"));
 
-    mController = new VideoPlaybackControlsController();   
+    mController = new VideoPlaybackControlsController();
     mWidget = new VideoPlaybackFileDetailsWidget( mController );
 }
 
@@ -154,7 +154,7 @@ void TestFileDetailsWidget::testDescription()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mDescription = "This is for unit test";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Description", true, details->mDescription );
@@ -179,10 +179,10 @@ void TestFileDetailsWidget::testDuration()
     //
     details->mPlaybackMode = EMPXVideoLocal;
     details->mDuration = 3700000;
-    
+
     mWidget->updateWithFileDetails( details );
 
-    verifyResult( "Duration", true, "1 hr 1 min 40 sec" );
+    verifyResult( "Duration", true, "1:01:40" );
 
     cleanup();
 }
@@ -198,16 +198,16 @@ void TestFileDetailsWidget::testDate()
     init();
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
-    
+
     QDateTime dateTime;
     QString created("");
     QString modified("");
     details->mClipName = KFILEPATH;
-    QFileInfo fileInfo( details->mClipName ); 
-    
+    QFileInfo fileInfo( details->mClipName );
+
     //
     // If it is streaming case, we don't show size information
-    //    
+    //
     details->mPlaybackMode = EMPXVideoStreaming;
     mWidget->updateWithFileDetails( details );
 
@@ -235,26 +235,26 @@ void TestFileDetailsWidget::testDate()
     dateTime = fileInfo.created();
     created = dateTimeStringFormat( dateTime );
     verifyResult( "Date", true, created, true );
-    
+
     //
     // compare and verify 'Modified' for non-metadata local clip
     //
     dateTime = fileInfo.lastModified();
     modified = dateTimeStringFormat( dateTime );
     verifyResult( "Modified", true, modified, true );
-    
+
     //
     // clear the widget list
     //
     mWidget->mListWidget->clear();
     mWidget->mFileDetailsUpdated = false;
-    
+
     //
-    // local clip, with date/time metadata 
+    // local clip, with date/time metadata
     //
     details->mPlaybackMode = EMPXVideoLocal;
     details->mCreationTime = 1242367251;        // POSIX creation time
-    details->mModificationTime = 1270773249;    // POSIX modification time    
+    details->mModificationTime = 1270773249;    // POSIX modification time
     mWidget->updateWithFileDetails( details );
 
     //
@@ -263,11 +263,11 @@ void TestFileDetailsWidget::testDate()
     dateTime.setTime_t( details->mCreationTime );
     created = dateTimeStringFormat( dateTime );
     verifyResult( "Date", true, created, true );
-    
+
     //
     // compare and verify 'Modified' for metadata local clip
     //
-    dateTime.setTime_t( details->mModificationTime ); 
+    dateTime.setTime_t( details->mModificationTime );
     modified = dateTimeStringFormat( dateTime );
     verifyResult( "Modified", true, modified, true );
 
@@ -289,7 +289,7 @@ void TestFileDetailsWidget::testLocation()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mLocation = "C:\\data\\Videos\\";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Location", true, details->mLocation );
@@ -309,7 +309,7 @@ void TestFileDetailsWidget::testAuthor()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mArtist = "Fusion";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Author", true, details->mArtist );
@@ -329,7 +329,7 @@ void TestFileDetailsWidget::testCopyright()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mCopyright = "Fusion team";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Copyright", true, details->mCopyright );
@@ -349,7 +349,7 @@ void TestFileDetailsWidget::testLanguage()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mLanguage = "English";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Language", true, details->mLanguage );
@@ -369,7 +369,7 @@ void TestFileDetailsWidget::testKeywords()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mKeywords = "QTest";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Keywords", true, details->mKeywords );
@@ -407,7 +407,7 @@ void TestFileDetailsWidget::testSize()
     //
     details->mPlaybackMode = EMPXVideoLocal;
     mWidget->updateWithFileDetails( details );
-    
+
     verifyResult( "Size", true, "", false );
 
     cleanup();
@@ -429,7 +429,7 @@ void TestFileDetailsWidget::testResolution()
     // If it is audio only clip, don't need to show resolution
     //
     details->mVideoEnabled = false;
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Resolution", false );
@@ -466,7 +466,7 @@ void TestFileDetailsWidget::testFormat()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mMimeType = "Nothing";
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Format", true, details->mMimeType );
@@ -487,7 +487,7 @@ void TestFileDetailsWidget::testBitrate()
 
     VideoPlaybackViewFileDetails *details = mController->fileDetails();
     details->mBitRate = 512;
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Bitrate", true, "512 kbps" );
@@ -512,7 +512,7 @@ void TestFileDetailsWidget::testFolder()
     //
     details->mPlaybackMode = EMPXVideoStreaming;
     details->mClipName = KFILEPATH;
-    
+
     mWidget->updateWithFileDetails( details );
 
     verifyResult( "Collection", false );
@@ -537,12 +537,12 @@ void TestFileDetailsWidget::testFolder()
 // verifyResult
 // ---------------------------------------------------------------------------
 //
-void TestFileDetailsWidget::verifyResult( 
+void TestFileDetailsWidget::verifyResult(
         QString primaryText, bool exist, QString expectedSecondaryText, bool needToBeCompared )
 {
     MPX_DEBUG(_L("TestFileDetailsWidget::verifyResult(%s, %d, %s, %d)"),
             primaryText.data(), exist, expectedSecondaryText.data(), needToBeCompared );
-    
+
     QString secondaryText = "";
     int i = 0;
 
@@ -566,14 +566,14 @@ void TestFileDetailsWidget::verifyResult(
         {
             MPX_DEBUG(_L("TestFileDetailsWidget::verifyResult() : secondaryText(%s)"),
                     secondaryText.data() );
-            
+
             QVERIFY( expectedSecondaryText == secondaryText );
         }
         else
         {
             MPX_DEBUG(_L("TestFileDetailsWidget::verifyResult() : i(%d) count(%d)"),
                     i, mWidget->mListWidget->count() );
-            
+
             //
             // Doens't need to compare the secondary text. Just make sure it's in the list
             //
@@ -601,11 +601,11 @@ QString TestFileDetailsWidget::dateTimeStringFormat( QDateTime dateTime )
     QString date = locale.format( dateTime.date(), r_qtn_date_usual );
     QString time = locale.format( dateTime.time(), r_qtn_time_long_with_zero );
     QString dateTimeString( date + "  " + time );
-    
+
     MPX_DEBUG(_L("TestFileDetailsWidget::dateTimeStringFormat() ret '%s'"),
             dateTimeString.data() );
-    
-    return dateTimeString;    
+
+    return dateTimeString;
 }
 
 // End of file

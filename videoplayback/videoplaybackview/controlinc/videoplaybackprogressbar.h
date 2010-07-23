@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#15 %
+// Version : %version: da1mmcf#16 %
 
 
 
@@ -23,6 +23,7 @@
 #define VIDEOPLAYBACKPROGRESSBAR_H_
 
 #include <QObject>
+#include <hbextendedlocale.h>
 #include <mpxplaybackframeworkdefs.h>
 
 class QTimer;
@@ -58,7 +59,7 @@ class VideoPlaybackProgressBar : public QObject
 
     private:
         VideoPlaybackControlsController *mController;
-        HbProgressSlider                    *mProgressSlider;
+        HbProgressSlider                *mProgressSlider;
 
         int     mDuration;
         int     mDraggingPosition;
@@ -71,6 +72,7 @@ class VideoPlaybackProgressBar : public QObject
         bool    mLiveStreaming;
 
         QTimer *mSeekingTimer;
+        HbExtendedLocale mLocale;
 };
 
 #endif /*VIDEOPLAYBACKPROGRESSBAR_H_*/

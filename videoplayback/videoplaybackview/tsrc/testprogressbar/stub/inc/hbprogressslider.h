@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
@@ -61,6 +61,8 @@ class HbProgressSlider : public HbWidget
         void sliderPressed();
         void sliderReleased();
         void sliderMoved( int value );
+        void trackPressed();
+        void trackReleased();
 
     public:
         int mSliderValue;

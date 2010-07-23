@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#38 %
+// Version : %version: 40 %
 
 
 #include <QApplication>
@@ -162,7 +162,14 @@ void VideoPlayerEngine::initialize()
             createPlaybackView(); 
             viewType = MpxHbVideoCommon::MpxHbVideoViewType(typeGotten);
             QVariant data = VideoActivityState::instance().getActivityData( KEY_LAST_PLAYED_CLIP );
-            playMedia( data.toString() );
+            int error = mPlaybackWrapper->replayMedia( data.toString() );
+            
+            // if replay fails, then activate collection view instead
+            if ( error != KErrNone )
+            {
+                loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );  
+                activateView( MpxHbVideoCommon::CollectionView );                 
+            }            
         }
         else
         {
@@ -222,6 +229,20 @@ void VideoPlayerEngine::handleCommand( int commandCode )
             break;
         }
     }    
+}
+
+// -------------------------------------------------------------------------------------------------
+// viewReadySlot()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlayerEngine::viewReadySlot()
+{
+    MPX_ENTER_EXIT(_L("VideoPlayerEngine::viewReady()"));
+    emit applicationReady();
+    // since we need to emit applicationReady only once at startup,
+    // disconnect the viewReady -signal from this object
+    disconnect(hbInstance->allMainWindows().value(0), SIGNAL(viewReady()), 
+               this, SLOT(viewReadySlot()));
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -26,7 +26,7 @@
 
 #include "testvideosettingsgroup.h"
 #include "videosettingsaccesspointentry.h"
-#include "mpsettingsmodel.h"
+#include "stub/inc/mpsettingsmodel.h"
 #include "hbdataformmodel.h"
 #include "cpitemdatahelper.h"
 #include "hbvalidator.h"

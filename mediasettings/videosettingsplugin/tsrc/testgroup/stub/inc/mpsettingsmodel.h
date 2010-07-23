@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -85,13 +85,13 @@ class CMPSettingsModel
         *         EConfigDefault: Load default values
         *         EConfigUser:    Load user values
         */
-        void LoadSettingsL(TInt aConfigVersion);
+        virtual void LoadSettingsL(TInt aConfigVersion);
 
         /**
         * Writes settings to MMF controller.
         * @since 2.0
         */
-        void StoreSettingsL();
+        virtual void StoreSettingsL();
         
         /**
         * Sets proxy mode..
@@ -99,7 +99,7 @@ class CMPSettingsModel
         * @param aMode Proxy mode.
         * @return Error value.
         */
-        TInt SetProxyMode(TInt aMode);
+        virtual TInt SetProxyMode(TInt aMode);
         
         /**
         * Returns proxy mode.
@@ -109,7 +109,7 @@ class CMPSettingsModel
         *         1:    Enabled
         * @return Error value.
         */
-        TInt GetProxyMode(TInt& aMode);
+        virtual TInt GetProxyMode(TInt& aMode);
 
         /**
         * Sets Proxy host name.
@@ -117,7 +117,7 @@ class CMPSettingsModel
         * @param aHostName Proxy host name.
         * @return Error value.
         */
-        TInt SetProxyHostNameL(const TDesC& aHostName);
+        virtual TInt SetProxyHostNameL(const TDesC& aHostName);
         
         /**
         * Returns proxy host name.
@@ -125,7 +125,7 @@ class CMPSettingsModel
         * @param aHostName Proxy host name.
         * @return Error value.
         */
-        TInt GetProxyHostName(TDes& aHostName);
+        virtual TInt GetProxyHostName(TDes& aHostName);
 
         /**
         * Sets proxy port number.
@@ -133,7 +133,7 @@ class CMPSettingsModel
         * @param aPort Proxy port number.
         * @return Error value.
         */
-        TInt SetProxyPort(TInt aPort);
+        virtual TInt SetProxyPort(TInt aPort);
         
         /**
         * Returns proxy port number..
@@ -141,7 +141,7 @@ class CMPSettingsModel
         * @return Integer: Proxy port number.
         * @return Error value.
         */
-        TInt GetProxyPort(TInt& aPort);
+        virtual TInt GetProxyPort(TInt& aPort);
         
         /**
         * Sets default access point.
@@ -149,7 +149,7 @@ class CMPSettingsModel
         * @param aApId Access point ID.
         * @return Error value.
         */
-        TInt SetDefaultAp(TUint32 aApId);
+        virtual TInt SetDefaultAp(TUint32 aApId);
 
         /**
         * Returns default access point ID.
@@ -157,7 +157,7 @@ class CMPSettingsModel
         * @param aApId Access point ID.
         * @return Error value.
         */
-        TInt GetDefaultAp(TUint32& aApId);
+        virtual TInt GetDefaultAp(TUint32& aApId);
 
         /**
         * Sets minimum UDP port number.
@@ -165,7 +165,7 @@ class CMPSettingsModel
         * @param aPort minimum port number.
         * @return Error value.
         */
-        TInt SetMinUDPPort(TInt aPort);
+        virtual TInt SetMinUDPPort(TInt aPort);
 
         /**
         * Returns minimum UDP port number.
@@ -173,7 +173,7 @@ class CMPSettingsModel
         * @param aPort minimum UDP port number in minutes.
         * @return Error value.
         */
-        TInt GetMinUDPPort(TInt& aPort);
+        virtual TInt GetMinUDPPort(TInt& aPort);
 
         /**
         * Sets maximum UDP port number.
@@ -181,7 +181,7 @@ class CMPSettingsModel
         * @param aPort maximum port number.
         * @return Error value.
         */
-        TInt SetMaxUDPPort(TInt aPort);
+        virtual TInt SetMaxUDPPort(TInt aPort);
 
         /**
         * Returns maximum UDP port number.
@@ -189,7 +189,7 @@ class CMPSettingsModel
         * @param aPort maximum UDP port number in minutes.
         * @return Error value.
         */
-        TInt GetMaxUDPPort(TInt& aPort);
+        virtual TInt GetMaxUDPPort(TInt& aPort);
         
 public:
         static TUid mImplUid;

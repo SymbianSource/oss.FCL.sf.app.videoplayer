@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#45 %
+// Version : %version: da1mmcf#47 %
 
 
 
@@ -46,8 +46,8 @@
 #include "mpxvideoviewwrapper.h"
 #include "mpxvideoplaybackuids.hrh"
 #include "videobaseplaybackview.h"
-#include "videoactivitystate.h"   
-#include "videoplaybackviewfiledetails.h"  
+#include "videoactivitystate.h"
+#include "videoplaybackviewfiledetails.h"
 #include "mpxcommonvideoplaybackview.hrh"
 
 
@@ -83,23 +83,23 @@ void VideoBasePlaybackView::initializeVideoPlaybackView()
     mTimerForClosingView->setSingleShot( true );
     mTimerForClosingView->setInterval( 10 );
     connect( mTimerForClosingView, SIGNAL( timeout() ), this, SIGNAL( activatePreviousView() ) );
-    
+
     //
     // Read activity data ...
     // If last playback was forced to terminate due to low memory (GOOM, etc.)
-    // then the clip needs to be restored to the last played position 
+    // then the clip needs to be restored to the last played position
     // and the state needs to be paused, since forced termination can only occur for
     // background apps - so if this happened Video Player must have been in background
     // which implies paused state
-    //    
-    int lastViewType = VideoActivityState::instance().getActivityData(KEY_VIEWPLUGIN_TYPE).toInt();    
-    if ( lastViewType == MpxHbVideoCommon::PlaybackView ) 
+    //
+    int lastViewType = VideoActivityState::instance().getActivityData(KEY_VIEWPLUGIN_TYPE).toInt();
+    if ( lastViewType == MpxHbVideoCommon::PlaybackView )
     {
         QVariant data = VideoActivityState::instance().getActivityData(KEY_LAST_PLAY_POSITION_ID);
-        mLastPlayPosition = data.toInt();   
-        
+        mLastPlayPosition = data.toInt();
+
         mStayPaused = true;
-    }     
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ void VideoBasePlaybackView::handleDeactivateView()
     MPX_ENTER_EXIT(_L("VideoBasePlaybackView::handleDeactivateView()"));
 
     saveActivityData();
-    
+
     mActivated = false;
 
     QCoreApplication::instance()->removeEventFilter( this );
@@ -198,17 +198,20 @@ void VideoBasePlaybackView::handleDeactivateView()
 //
 void VideoBasePlaybackView::saveActivityData()
 {
-    MPX_DEBUG( _L("VideoBasePlaybackView::saveActivityData()") );  
-    
+    MPX_DEBUG( _L("VideoBasePlaybackView::saveActivityData()") );
+
     // save the activity data
     QVariant data = QString( mVideoMpxWrapper->iFileDetails->mClipName );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_CLIP); 
-    
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_CLIP);
+
     data = int( mVideoMpxWrapper->iPlayPosition );
     VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAY_POSITION_ID);
-    
+
     data = bool( mVideoMpxWrapper->iFileDetails->mPlaybackMode == EMPXVideoLocal );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_LOCAL_PLAYBACK);     
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_LOCAL_PLAYBACK);    
+    
+    data = uint ( mVideoMpxWrapper->GetMediaId() );
+    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_MEDIA_ID);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -296,9 +299,9 @@ void VideoBasePlaybackView::handlePluginError( int aError )
 //   VideoBasePlaybackView::showDialog
 // -------------------------------------------------------------------------------------------------
 //
-void VideoBasePlaybackView::showDialog( const QString& qString, bool closeView )
+void VideoBasePlaybackView::showDialog( const QString& string, bool closeView )
 {
-    MPX_DEBUG(_L("VideoBasePlaybackView::showDialog( %s, %d )"), qString.data(), closeView );
+    MPX_DEBUG(_L("VideoBasePlaybackView::showDialog( %s, %d )"), string.data(), closeView );
 
     //
     // create pop-up dialog for error notes,
@@ -308,9 +311,6 @@ void VideoBasePlaybackView::showDialog( const QString& qString, bool closeView )
     QRectF screenRect = hbInstance->allMainWindows()[0]->rect();
     HbNotificationDialog* dlg = new HbNotificationDialog();
     dlg->setAttribute( Qt::WA_DeleteOnClose );
-    dlg->setMinimumSize( QSizeF(200, 100) );
-    dlg->setPreferredPos( QPointF( screenRect.height()/2, screenRect.width()/2 ),
-                          HbPopup::Center );
 
 	if ( closeView )
 	{
@@ -321,16 +321,7 @@ void VideoBasePlaybackView::showDialog( const QString& qString, bool closeView )
         connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( handleClosePopupDialog() ) );
     }
 
-    //
-    // convert string to label so text alignment can be set
-    //
-    HbLabel *label = new HbLabel( qString );
-    label->setAlignment( Qt::AlignCenter );
-
-    //
-    // set label as content widget and show pop-up dialog
-    //
-    dlg->setContentWidget( label );
+	dlg->setTitle( string );
     dlg->show();
 }
 

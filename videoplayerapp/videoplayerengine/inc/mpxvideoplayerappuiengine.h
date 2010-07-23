@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 
@@ -200,6 +200,8 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          *  @since 10.1
          */        
         void LateInitL();
+        
+        TInt ReplayAfterPriorTermination(const TDesC& aFileName);
 
     private:
         /**
@@ -247,6 +249,8 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
        void UpdatePbPluginMediaL();
 
        void ActivateVideoPlaybackView();
+              
+       void ReadActivityData();
 
     private:       // data
 
@@ -267,6 +271,7 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         TBool                    iUpdateSeekInfo;
 
         VideoPlaybackWrapper*    iPlaybackWrapper;
+        TUint32                  iLastPlayedItemId;
 };
 
 //

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#23 %
+// Version : %version: da1mmcf#24 %
 
 
 
@@ -149,8 +149,10 @@ class VideoPlaybackControlsController : public QObject
 
         inline bool isAttachOperation();
 
+        inline bool isFileDetailsAdded();
+
         bool isRNLogoBitmapInControlList();
-        
+
         bool shouldShowRNLogo();
 
     private:
@@ -228,12 +230,12 @@ class VideoPlaybackControlsController : public QObject
         * Check whether this clip is real format or not for local/progressive donwload
         */
         bool realFormatForLocal();
-        
+
         /**
         * Handle errors
         */
-        void handleErrors(); 
-        
+        void handleErrors();
+
         /**
 		* Return true if control is visible
 		*/
@@ -242,7 +244,7 @@ class VideoPlaybackControlsController : public QObject
         /**
         * Handle tvout connected/disconnected event
         */
-		void handleTvOutEvent( bool connected, 
+		void handleTvOutEvent( bool connected,
 		                       TVideoPlaybackControlCommandIds event );
 
 		void updateVideoRect(  bool transitionEffect = true );
@@ -296,7 +298,8 @@ class VideoPlaybackControlsController : public QObject
 
         bool                                       mViewTransitionIsGoingOn;
         bool                                       mIsAttachOperation;
-        
+        bool                                       mFileDetailsAdded;
+
         TThumbNailState                            mThumbNailState;
 
         TMPXPlaybackState                          mState;
@@ -374,11 +377,24 @@ TPlaybackViewMode VideoPlaybackControlsController::viewMode()
 //
 inline
 bool VideoPlaybackControlsController::isAttachOperation()
-{        
-    MPX_DEBUG(_L("VideoPlaybackControlsController::isAttachOperation() ret %d"), 
+{
+    MPX_DEBUG(_L("VideoPlaybackControlsController::isAttachOperation() ret %d"),
         mIsAttachOperation );
-    
+
     return mIsAttachOperation;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::viewMode
+// -------------------------------------------------------------------------------------------------
+//
+inline
+bool VideoPlaybackControlsController::isFileDetailsAdded()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlsController::isFileDetailsAdded() ret %d"),
+        mFileDetailsAdded );
+
+    return mFileDetailsAdded;
 }
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

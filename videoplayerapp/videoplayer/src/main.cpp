@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
     HbMainWindow mainWindow( 0, Hb::WindowFlagTransparent );
 
     VideoPlayerEngine *engine = new VideoPlayerEngine( isService );
+    QObject::connect(&mainWindow, SIGNAL(viewReady()), engine, SLOT(viewReadySlot()));
     engine->initialize();
     mainWindow.show();
     return app.exec();

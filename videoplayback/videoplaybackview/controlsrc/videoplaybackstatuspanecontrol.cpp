@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 21 %
+// Version : %version: 22 %
 
 
 
@@ -111,7 +111,10 @@ void VideoPlaybackStatusPaneControl::setVisible( bool visible )
         if ( mController->viewMode() == EFullScreenView ||
              mController->viewMode() == EDetailsView )
         {
-            mTitleLayout->setVisible( true );
+            if ( mTitleLayout )
+            {
+                mTitleLayout->setVisible( true );
+            }
         }
     }
     else
@@ -120,7 +123,10 @@ void VideoPlaybackStatusPaneControl::setVisible( bool visible )
         mController->view()->setTitleBarVisible( false );
         mController->view()->setStatusBarVisible( false );
 
-        mTitleLayout->setVisible( false );
+        if ( mTitleLayout )
+        {
+            mTitleLayout->setVisible( false );
+        }
     }
 }
 
@@ -171,7 +177,7 @@ void VideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
 {
     MPX_DEBUG(_L("VideoPlaybackStatusPaneControl::updateControlsWithFileDetails()"));
 
-    if ( ! mTitleLabel )
+    if ( mController->isFileDetailsAdded() && ! mTitleLabel )
     {
         //
         // If title is not available, show clip name
@@ -218,8 +224,11 @@ void VideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
                                                HbView::ViewTitleBarTransparent |
                                                HbView::ViewStatusBarTransparent );
 
-            mTitleLabel->setVisible( true );
-            mTitleGroupBox->setVisible( false );
+            if ( mTitleLayout )
+            {
+                mTitleLabel->setVisible( true );
+                mTitleGroupBox->setVisible( false );
+            }
 
             break;
         }
@@ -233,8 +242,11 @@ void VideoPlaybackStatusPaneControl::updateControlsWithFileDetails(
 
             mController->view()->setViewFlags( HbView::ViewFlagNone );
 
-            mTitleGroupBox->setVisible( true );
-            mTitleLabel->setVisible( false );
+            if ( mTitleLayout )
+            {
+                mTitleLabel->setVisible( false );
+                mTitleGroupBox->setVisible( true );
+            }
 
             break;
         }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 113.1.1 %
+// Version : %version: 113.1.4 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -164,6 +164,7 @@ int VideoListView::initializeView()
     params.append(VideoCollectionUiLoaderParam(
         DOCML_NAME_VC_VIDEOLISTWIDGET,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
+        DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST,
         true,
         videoListPhase));
     
@@ -274,8 +275,6 @@ int VideoListView::initializeView()
                 DOCML_NAME_VC_COLLECTIONWIDGET );
     }
 
-
-    
     return 0;
 }
 
@@ -1411,32 +1410,20 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
     const TMPXItemId &collectionId)
 {
 	FUNC_LOG;
-
-    // clear toolbar actions.
-    toolBar()->clearActions();
-
-    VideoListWidget *collectionContentWidget =
-                mUiLoader->findWidget<VideoListWidget>(
-                    DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
-    
-    if(!collectionContentWidget)
-    {
-        return;
-    }
-    // update collection specific information
+ 
+    // update / clear collection name
 	mCollectionName = collection;
-	
-	// disable collection content animations during widget change        
-	HbAbstractItemView::ItemAnimations animationState = collectionContentWidget->enabledAnimations();
-	collectionContentWidget->setEnabledAnimations(HbAbstractItemView::None);
-	
+
 	if(openingCollection)
     {
-        // open album view        
-        if (collectionId == TMPXItemId::InvalidId() || mCurrentList == collectionContentWidget)
+	    VideoListWidget *collectionContentWidget =
+	                   mUiLoader->findWidget<VideoListWidget>(
+	                       DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
+        // open album view, mCurrentList might be NULL at this point        
+        if (!collectionContentWidget || mCurrentList == collectionContentWidget)
         {
-            // no currentlist or currentlist is already collection content -list 
-            collectionContentWidget->setEnabledAnimations(animationState);
+            // collection widget cannot be loaded or 
+            // currentlist is already collection content -list            
             return;
         }
                 
@@ -1453,18 +1440,21 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
         }
         else 
         {
-            collectionContentWidget->setEnabledAnimations(animationState);
             return;
         }
-        
-        // Start fetching content before changing.
+                
         VideoSortFilterProxyModel *model = collectionContentWidget->getModel();
         if(!model)
         {
             // no model for content widget, cannot activate
-            collectionContentWidget->setEnabledAnimations(animationState);
             return;
         }
+        
+        // disable collection content animations during widget change        
+        HbAbstractItemView::ItemAnimations animationState = collectionContentWidget->enabledAnimations();
+        collectionContentWidget->setEnabledAnimations(HbAbstractItemView::None);
+        
+        // Start fetching content before changing list widget
         model->openItem(collectionId);
         
         // deactivat current widget.
@@ -1478,31 +1468,40 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
         mCurrentList->activate(level);
 
         updateSubLabel();
-
-        model->invalidate();
         
         // update hint widget for correct content
         mModelReady = model->rowCount() > 0;
         setHintLevel(VideoHintWidget::Collection);
 
-        // update toolbar for albums, default categories don't have one.
-        if(level == VideoCollectionCommon::ELevelAlbum && 
+        // update toolbar for albums, default categories don't have one. Neither does services.
+        toolBar()->clearActions();
+        if(!mVideoServices && level == VideoCollectionCommon::ELevelAlbum && 
            mToolbarCollectionActionGroup && mToolbarActions.contains(ETBActionCollections))
         {
             mToolbarActions[ETBActionCollections]->setChecked(false);
             toolBar()->addActions(mToolbarCollectionActionGroup->actions());
+            setItemVisible(Hb::ToolBarItem, true);
         }
+        else
+        {
+            setItemVisible(Hb::ToolBarItem, false);
+        }
+        // restore animations for collection content widget
+        collectionContentWidget->setEnabledAnimations(animationState);
     }
     else
     {
+        // clear actions to make sure there is no wrong toolbar in case main 
+        // toolbar actiongroup actiongroup is missing
+        toolBar()->clearActions();   
         // open collection view
-        openCollectionViewSlot();
-        
+        openCollectionViewSlot();        
         // update toolbar
         if(mToolbarViewsActionGroup && mToolbarActions.contains(ETBActionCollections))
-        {
+        {                    
             toolBar()->addActions(mToolbarViewsActionGroup->actions());
             mToolbarActions[ETBActionCollections]->setChecked(true);
+            setItemVisible(Hb::ToolBarItem, true);
             
             if(mToolbarServiceExtension)
             {
@@ -1511,9 +1510,7 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
                 action->setIcon(icon);
             }
         }
-    }
-	// restore animations for collection content widget
-	collectionContentWidget->setEnabledAnimations(animationState);
+    }	
 	if(!mVideoServices)
 	{
 	    // save / clear collection related activity data

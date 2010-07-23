@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 38.1.1 %
+// Version : %version: 38.1.2 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -431,7 +431,9 @@ void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
         return;
     }
     QSet<TMPXItemId> items;
-       
+    
+    int oldCount = mAlbumData[albumId].count();
+    
     // remove existing
     mAlbumData.remove(albumId);
     
@@ -450,11 +452,14 @@ void VideoListDataModelPrivate::albumDataChangedL(TMPXItemId albumId,
  
     mAlbumData[albumId] = items;
     
-    // signal that album has been updated
-    emit q_ptr->albumChanged();
+    if(oldCount != items.count())
+    {
+        // signal that album has been updated
+        emit q_ptr->albumChanged();
 
-    // signal that model has changed.
-    emit q_ptr->modelChanged();
+        // signal that model has changed.
+        emit q_ptr->modelChanged();
+    }
 }
 
 

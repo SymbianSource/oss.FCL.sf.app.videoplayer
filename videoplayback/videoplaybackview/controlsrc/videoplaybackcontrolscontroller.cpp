@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#46 %
+// Version : %version: da1mmcf#48 %
 
 
 
@@ -76,6 +76,7 @@ VideoPlaybackControlsController::VideoPlaybackControlsController(
     , mVideoServices( 0 )
     , mViewTransitionIsGoingOn( false )
     , mIsAttachOperation( false )
+    , mFileDetailsAdded( false )
     , mThumbNailState( EThumbNailEmpty )
     , mState( EPbStateNotInitialised )
     , mViewMode( EFullScreenView )
@@ -291,6 +292,8 @@ void VideoPlaybackControlsController::addFileDetails(
     VideoPlaybackViewFileDetails* details )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::addFileDetails"));
+
+    mFileDetailsAdded = true;
 
     mFileDetails = details;
 
@@ -727,7 +730,7 @@ void VideoPlaybackControlsController::handleTappedOnScreen()
         case EDetailsView:
         {
             //
-            // ignore the tap for 'Pause' action for non-pausable stream in 
+            // ignore the tap for 'Pause' action for non-pausable stream in
             // 'Details' view during 'Playing' state
             //
             if ( mState != EPbStatePlaying || mFileDetails->mPausableStream )
@@ -1410,11 +1413,11 @@ void VideoPlaybackControlsController::handleThumbnailReady(
         QGraphicsWidget *tvOutBitmap = mLoader->findWidget( "tvOutBitmap" );
         HbLabel *tvOutLabel = qobject_cast<HbLabel*>( tvOutBitmap );
 
-        QIcon *qicon = new QIcon( tnData );
+        QIcon qicon( tnData );
 
-        HbIcon *hbIcon = new HbIcon( *qicon );
-        hbIcon->setSize( tvOutBitmap->size() );
-        tvOutLabel->setIcon( *hbIcon );
+        HbIcon hbIcon( qicon );
+        hbIcon.setSize( tvOutBitmap->size() );
+        tvOutLabel->setIcon( hbIcon );
 
         mThumbNailState = EThumbNailSet;
     }
@@ -1458,11 +1461,6 @@ void VideoPlaybackControlsController::sendVideo()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::sendVideo()"),
                    _L("file = %s"), mFileDetails->mClipName.data() );
-
-    //
-    // pause playback
-    //
-    handleCommand( EMPXPbvCmdPause );
 
     //
     // send video to shareUI
@@ -1573,13 +1571,13 @@ bool VideoPlaybackControlsController::shouldShowRNLogo()
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::shouldShowRNLogo()"));
 
     bool showRNLogo = false;
-    
-    if ( mFileDetails->mRNFormat &&  
+
+    if ( mFileDetails->mRNFormat &&
          !mViewWrapper->IsResumingPlaybackAfterTermination() )
     {
         showRNLogo = true;
     }
-     
+
     return showRNLogo;
 }
 

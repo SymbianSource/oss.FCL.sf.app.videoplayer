@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -94,9 +94,11 @@ class VideoPlaybackControlsController : public QObject
         VideoPlaybackDocumentLoader* layoutLoader();
 
         inline VideoBasePlaybackView* view();
-        
+
+        inline bool isFileDetailsAdded();
+
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
-        
+
         TPlaybackViewMode viewMode();
 
     public:
@@ -130,8 +132,8 @@ class VideoPlaybackControlsController : public QObject
 
         TMPXPlaybackState                      mState;
         TPlaybackViewMode                      mViewMode;
-        TTimerAction                        mTimerAction;
-        
+        TTimerAction                           mTimerAction;
+        bool                                   mFileDetailsAdded;
 };
 
 // INLINE METHODS
@@ -163,6 +165,16 @@ inline
 VideoBasePlaybackView* VideoPlaybackControlsController::view()
 {
     return mView;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::view
+// -------------------------------------------------------------------------------------------------
+//
+inline
+bool VideoPlaybackControlsController::isFileDetailsAdded()
+{
+    return mFileDetailsAdded;
 }
 
 #endif /*VIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/

@@ -100,45 +100,39 @@ VideoSettingsGroup::VideoSettingsGroup(CpItemDataHelper &itemDataHelper) :
     // Access point in use
     mAccessPointItem = new VideoSettingsAccessPointEntry(itemDataHelper,
         hbTrId("txt_videos_dblist_access_point"), this);
-    this->appendChild(mAccessPointItem);
 
     // Lowest UDP port
     mLowestUDPPortItem = new CpSettingFormItemData(HbDataFormModelItem::TextItem,
-        hbTrId("txt_videos_dblist_min_udp_port"));
+        hbTrId("txt_videos_dblist_min_udp_port"), this);
     mLowestUDPPortItem->setContentWidgetData(QString("maxRows"), 1);
     mItemDataHelper.addConnection(mLowestUDPPortItem, SIGNAL(editingFinished()),
         this, SLOT(lowestUdpPortEditingFinished()));
-    this->appendChild(mLowestUDPPortItem);
 
     // Highest UDP port
     mHighestUDPPortItem = new CpSettingFormItemData(HbDataFormModelItem::TextItem,
-        hbTrId("txt_videos_dblist_max_udp_port"));
+        hbTrId("txt_videos_dblist_max_udp_port"), this);
     mHighestUDPPortItem->setContentWidgetData(QString("maxRows"), 1);
     mItemDataHelper.addConnection(mHighestUDPPortItem, SIGNAL(editingFinished()),
         this, SLOT(highestUdpPortEditingFinished()));
-    this->appendChild(mHighestUDPPortItem);
 
     // Use proxy
-    mUseProxyItem = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, QString());
+    mUseProxyItem = new CpSettingFormItemData(HbDataFormModelItem::CheckBoxItem, QString(), this);
     mUseProxyItem->setContentWidgetData(QString("text"), hbTrId("txt_videos_formlabel_proxy_in_use"));
-    this->appendChild(mUseProxyItem);
 
     // Proxy server address
     mProxyServerItem = new CpSettingFormItemData(HbDataFormModelItem::TextItem,
-        hbTrId("txt_videos_dblist_proxy_host_name"));
+        hbTrId("txt_videos_dblist_proxy_host_name"), this);
     mProxyServerItem->setContentWidgetData(QString("maxRows"), 1);
     mProxyServerItem->setContentWidgetData(QString("placeholderText"), hbTrId("txt_videos_dblist_none"));
     mItemDataHelper.addConnection(mProxyServerItem, SIGNAL(editingFinished()),
         this, SLOT(proxyServerEditingFinished()));
-    this->appendChild(mProxyServerItem);
 
     // Proxy port number
     mProxyPortItem = new CpSettingFormItemData(HbDataFormModelItem::TextItem,
-        hbTrId("txt_videos_dblist_proxy_port"));
+        hbTrId("txt_videos_dblist_proxy_port"), this);
     mProxyPortItem->setContentWidgetData(QString("maxRows"), 1);
     mItemDataHelper.addConnection(mProxyPortItem, SIGNAL(editingFinished()),
         this, SLOT(proxyPortEditingFinished()));
-    this->appendChild(mProxyPortItem);
 
     loadSettings();
 }

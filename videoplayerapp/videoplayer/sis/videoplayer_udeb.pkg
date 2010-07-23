@@ -59,6 +59,6 @@
 "/epoc32/data/z/private/10003a3f/import/apps/videoplayer_reg.rsc" - "!:/private/10003a3f/import/apps/videoplayer_reg.rsc"
 "/epoc32/data/z/resource/qt/translations/videos_en.qm"            - "!:/resource/qt/translations/videos.qm"
 
-"/epoc32/data/z/resource/plugins/hbvideoplaybackviewplugin.rsc"   - "!:/resource/plugins/hbvideoplaybackviewplugin.rsc"
-"/epoc32/release/armv5/udeb/hbvideoplaybackview.dll"              - "!:/sys/bin/hbvideoplaybackview.dll"
-"/epoc32/release/armv5/udeb/hbvideoplaybackviewplugin.dll"        - "!:/sys/bin/hbvideoplaybackviewplugin.dll"
+"/epoc32/data/z/resource/plugins/videoplaybackviewplugin.rsc"   - "!:/resource/plugins/videoplaybackviewplugin.rsc"
+"/epoc32/release/armv5/udeb/videoplaybackview.dll"              - "!:/sys/bin/videoplaybackview.dll"
+"/epoc32/release/armv5/udeb/videoplaybackviewplugin.dll"        - "!:/sys/bin/videoplaybackviewplugin.dll"

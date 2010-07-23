@@ -60,4 +60,6 @@ EXPORTS
 	?shouldExit@VideoPlayerEngine@@AAE_NXZ @ 59 NONAME ; bool VideoPlayerEngine::shouldExit(void)
 	?instance@VideoServices@@SAPAV1@PAVVideoPlayerEngine@@@Z @ 60 NONAME ; class VideoServices * VideoServices::instance(class VideoPlayerEngine *)
 	??_EVideoPlayerEngine@@UAE@I@Z @ 61 NONAME ; VideoPlayerEngine::~VideoPlayerEngine(unsigned int)
+	?applicationReady@VideoPlayerEngine@@IAEXXZ @ 62 NONAME ; void VideoPlayerEngine::applicationReady(void)
+	?viewReadySlot@VideoPlayerEngine@@QAEXXZ @ 63 NONAME ; void VideoPlayerEngine::viewReadySlot(void)
 

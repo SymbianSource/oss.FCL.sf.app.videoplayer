@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 48 %
+// Version : %version: 50 %
 
 #define private public
 #include "videoservices.h"
@@ -1198,71 +1198,119 @@ void TestListView::testHandleStatusSlot()
 //
 void TestListView::testCollectionOpenedSlot()
 {
-	QString testString;
-
-	// View	is not initialized.
+	QString testString("");
+	TMPXItemId itemId = TMPXItemId::InvalidId();
+	int listWidgetActivateCount = 0;
+	
 	init(false);
-	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)),
-	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-	emit testCollectionOpenedSignal(false, testString, QModelIndex());
+	// collection content widget does not exist	
+	VideoCollectionUiLoaderData::mFindFailure = true;
+	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const TMPXItemId &)),
+	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&,  const TMPXItemId &)));
+	emit testCollectionOpenedSignal(true, testString, itemId);
+	VideoCollectionUiLoaderData::mFindFailure = false;
+	QVERIFY(!mTestView->mCurrentList);
 	cleanup();
-
-	// No toolbar actions.
+	
 	init(true);
-	mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONWIDGET); // load model
-	QModelIndex index = VideoCollectionWrapperData::mCollectionsModel->index(0, 0);
-	// Clear actions.
-	QMap<VideoListView::TViewActionIds,	HbAction*> backupActions =
-		QMap<VideoListView::TViewActionIds,	HbAction*>(mTestView->mToolbarActions);
-	mTestView->mToolbarActions.clear();
-	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)), 
-	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-	emit testCollectionOpenedSignal(true, testString, index);
-	mTestView->mToolbarActions.unite(backupActions);
-	cleanup();
-
-	// index is invalid
-	init();
-	emit testCollectionOpenedSignal(true, testString, QModelIndex());
-	cleanup();
+	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const TMPXItemId &)),
+	        mTestView, SLOT(collectionOpenedSlot(bool, const QString&,  const TMPXItemId &)));
+	QVERIFY(mTestView->mCurrentList->getLevel() < VideoCollectionCommon::ELevelDefaultColl );
+	VideoListWidget *listWidget = mTestView->mCurrentList;
+	listWidgetActivateCount = VideoListWidgetData::mActivateCount;
 	
-	// current list is null
-	init();
+	// id is invalid
+	emit testCollectionOpenedSignal(true, testString, itemId);
+	QVERIFY(mTestView->mCurrentList == listWidget);
+	QVERIFY(mTestView->mCurrentList->getLevel() < VideoCollectionCommon::ELevelDefaultColl );
+	QVERIFY(listWidgetActivateCount == VideoListWidgetData::mActivateCount);
+	itemId = TMPXItemId(1,1);
+	listWidget->activate();
+	listWidget->getModel()->open(VideoCollectionCommon::ELevelDefaultColl);
+	
+	VideoListWidget *collectionContent = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
+	
+	// current list is collection content
 	VideoListWidget *tmpList = mTestView->mCurrentList;
-	emit testCollectionOpenedSignal(true, testString, index);
+	mTestView->mCurrentList = collectionContent;	
+	listWidgetActivateCount = VideoListWidgetData::mActivateCount;
+	emit testCollectionOpenedSignal(true, testString, itemId);
+	QVERIFY(listWidgetActivateCount == VideoListWidgetData::mActivateCount);
 	mTestView->mCurrentList = tmpList;
-	cleanup();
 	
-	// current list is collectioncontentwidget
-	init();
+	// collection list widget has no model
+	VideoSortFilterProxyModel *nullModel = 0;
+	VideoSortFilterProxyModel *tempModel = collectionContent->getModel();
+	collectionContent->initialize(*nullModel, false, VideoCollectionCommon::ELevelDefaultColl);
+	listWidget = mTestView->mCurrentList;
+	listWidgetActivateCount = VideoListWidgetData::mActivateCount;
+	emit testCollectionOpenedSignal(true, testString, itemId);
+	QVERIFY(listWidgetActivateCount == VideoListWidgetData::mActivateCount);
+	QVERIFY(mTestView->mCurrentList == listWidget);
+	QVERIFY(mTestView->mCurrentList->getLevel() < VideoCollectionCommon::ELevelDefaultColl );	
 	cleanup();
-	
-	// index is for video item and not for collection.
-	init();
-	cleanup();
-	
-	// non-error cases:
-	testString = "Test text string";
-
+	init(true);
+	itemId = TMPXItemId::InvalidId();
+	VideoCollectionViewUtilsData::mWidgetLevel = VideoCollectionCommon::ELevelCategory;
+	mTestView->activateView(itemId);
+    connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const TMPXItemId &)),
+            mTestView, SLOT(collectionOpenedSlot(bool, const QString&,  const TMPXItemId &)));
+    
+    collectionContent = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET);
 	// Collection opened with default collection.
-	init();
-    mTestView->mCurrentList = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONWIDGET);
-    index = VideoCollectionWrapperData::mCollectionsModel->index(0, 0);
-	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)), 
-	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-	emit testCollectionOpenedSignal(true, testString, index);
-	// Verify checkable	and	visible	toolbar	actions.
-	cleanup();
-	
-	// Collection opened with userdefined album.
-	init();
-	cleanup();
-	
-	// Collection closed.
-	init();
-	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)), 
-	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
-	emit testCollectionOpenedSignal(false, testString, QModelIndex());
+    itemId = TMPXItemId(1,1);
+    listWidgetActivateCount = VideoListWidgetData::mActivateCount;
+    emit testCollectionOpenedSignal(true, testString, itemId);
+    QVERIFY(VideoListWidgetData::mActivateCount == listWidgetActivateCount + 1);
+    QVERIFY(mTestView->mCurrentList == collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelDefaultColl );  
+    QVERIFY(!HbView::mSetItemVisibleLast);
+    
+    // returning collection widget
+    emit testCollectionOpenedSignal(false, testString, itemId);
+    QVERIFY(mTestView->mCurrentList != collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelCategory );  
+    QVERIFY(HbView::mSetItemVisibleLast);
+    
+    // Collection opened with album.
+    itemId = TMPXItemId(1,2);
+    listWidgetActivateCount = VideoListWidgetData::mActivateCount;
+    emit testCollectionOpenedSignal(true, testString, itemId);
+    QVERIFY(VideoListWidgetData::mActivateCount == listWidgetActivateCount + 1);
+    QVERIFY(mTestView->mCurrentList == collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelAlbum );  
+    QVERIFY(HbView::mSetItemVisibleLast);
+    
+    // returning collection widget (no mToolbarViewsActionGroup for coverage)
+    HbView::mSetItemVisibleLast = false;
+    QActionGroup *tmpActionGroup = mTestView->mToolbarViewsActionGroup;
+    mTestView->mToolbarViewsActionGroup = 0;
+    emit testCollectionOpenedSignal(false, testString, itemId);
+    QVERIFY(mTestView->mCurrentList != collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelCategory ); 
+    QVERIFY(!HbView::mSetItemVisibleLast);
+    mTestView->mToolbarViewsActionGroup = tmpActionGroup;
+    
+    // service
+    VideoServices *tmpService = VideoServices::instance(); 
+    mTestView->mVideoServices = tmpService;
+    itemId = TMPXItemId(1,1);
+    listWidgetActivateCount = VideoListWidgetData::mActivateCount;
+    emit testCollectionOpenedSignal(true, testString, itemId);
+    QVERIFY(VideoListWidgetData::mActivateCount == listWidgetActivateCount + 1);
+    QVERIFY(mTestView->mCurrentList == collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelDefaultColl );  
+    QVERIFY(!HbView::mSetItemVisibleLast);
+    
+    // returning collection widget (no mToolbarServiceExtension for coverage)
+    HbToolBarExtension *tmpExtension = mTestView->mToolbarServiceExtension;
+    mTestView->mToolbarServiceExtension = 0;
+    emit testCollectionOpenedSignal(false, testString, itemId);
+    QVERIFY(mTestView->mCurrentList != collectionContent);
+    QVERIFY(mTestView->mCurrentList->getLevel() == VideoCollectionCommon::ELevelCategory ); 
+    QVERIFY(HbView::mSetItemVisibleLast);
+    mTestView->mToolbarServiceExtension = tmpExtension;
+
 	cleanup();
 }
 
@@ -1276,8 +1324,6 @@ void TestListView::testUpdateSubLabel()
     setRowCount(1);
     mTestView->mModelReady = true;
 	connect(this, SIGNAL(testLayoutChangedSignal()), mTestView, SLOT(layoutChangedSlot()));
-	connect(this, SIGNAL(testCollectionOpenedSignal(bool, const QString&, const QModelIndex&)), 
-	    mTestView, SLOT(collectionOpenedSlot(bool, const QString&, const QModelIndex&)));
 
     VideoListWidget *videoListWidget = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_VIDEOLISTWIDGET);   
     VideoListWidget *collectionWidget = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONWIDGET);   

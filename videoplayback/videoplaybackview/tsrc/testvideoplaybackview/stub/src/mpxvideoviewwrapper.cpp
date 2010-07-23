@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 
@@ -217,6 +217,15 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
 void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aForeground )
 {
     iForeground = aForeground;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::GetMediaId()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoViewWrapper::GetMediaId()
+{
+    return 0;
 }
 
 // EOF

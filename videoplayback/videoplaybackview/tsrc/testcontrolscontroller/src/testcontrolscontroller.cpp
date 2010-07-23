@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  14 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -1114,11 +1114,6 @@ void TestControlsController::testslot_sendVideo()
     emit commandSignal();
 
     //
-    // verify command EMPXPbvCmdClose has been issued
-    //
-    QVERIFY( mViewWrapper->mCommandId == EMPXPbvCmdPause );
-
-    //
     // disconnect signal
     //
     disconnect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
@@ -1283,6 +1278,29 @@ void TestControlsController::testIsRNLogoBitmapVisible()
     }
 
     QVERIFY( ! mController->isRNLogoBitmapInControlList() );
+
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// TestControlsController::testIsFileDetailsAdded
+// -------------------------------------------------------------------------------------------------
+//
+void TestControlsController::testIsFileDetailsAdded()
+{
+    MPX_DEBUG(_L("TestControlsController::testIsFileDetailsAdded()"));
+
+    init();
+
+    QVERIFY( ! mController->isFileDetailsAdded() );
+
+    mFileDetails = new VideoPlaybackViewFileDetails();
+    mFileDetails->mClipName = QString( "testClip.rm" );
+    mFileDetails->mMimeType = QString( "video/x-pn-realvideo" );
+
+    mController->addFileDetails( mFileDetails );
+
+    QVERIFY( mController->isFileDetailsAdded() );
 
     cleanup();
 }

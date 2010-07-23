@@ -21,11 +21,24 @@ DEPENDPATH += . \
     inc \
     src
 
-INCLUDEPATH += inc \
-               stub/inc \
-               ../../inc \
-               ../../../mediasettingsengine/inc \
-               ../../../../inc \
+INCLUDEPATH = inc \
+              stub/inc \
+              ../../inc \
+              ../../../mediasettingsengine/inc \
+              ../../../../inc \
+              /epoc32/include \
+              /epoc32/include/stdapis \
+              /epoc32/include/stdapis/sys \
+              /epoc32/include/platform/mw \
+              /epoc32/include/platform \
+              /epoc32/include/platform/loc \
+              /epoc32/include/platform/mw/loc \
+              /epoc32/include/platform/loc/sc \
+              /epoc32/include/platform/mw/loc/sc \
+              /epoc32/include/mw/hb/hbcore \
+              /epoc32/include/mw/hb/hbwidgets \
+              /epoc32/include/mw/hb/hbutils \
+              /epoc32/include/stdapis/stlportv5 \
 
 CONFIG += qtestlib \
     Hb \

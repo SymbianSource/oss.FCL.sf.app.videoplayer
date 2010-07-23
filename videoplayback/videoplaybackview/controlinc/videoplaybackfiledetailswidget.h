@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 12 %
+// Version : %version: 13 %
 
 
 
@@ -41,13 +41,14 @@ class VideoPlaybackFileDetailsWidget : public HbWidget
     public:
         void updateWithFileDetails( VideoPlaybackViewFileDetails* details );
 
-    private:        
+    private:
         void makeTitleItem( VideoPlaybackViewFileDetails* details );
         void makeSizeItem( VideoPlaybackViewFileDetails* details );
         void makeBitRateItem( VideoPlaybackViewFileDetails* details );
         void makeDateTimeItem( VideoPlaybackViewFileDetails* details );
         void addItemToListWidget( QString item, QString text );
-        
+        void makeDurationItem( VideoPlaybackViewFileDetails* details );
+
     private:
         VideoPlaybackControlsController *mController;
         HbListWidget                    *mListWidget;

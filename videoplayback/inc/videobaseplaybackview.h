@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#19 %
+// Version : %version:  da1mmcf#20 %
 
 
 
@@ -91,7 +91,7 @@ class VideoBasePlaybackView : public HbView
 
         void initializeVideoPlaybackView();
 
-        void showDialog( const QString& qString, bool closeView = true );
+        void showDialog( const QString& string, bool closeView = true );
 
         virtual void handleClosePlaybackView();
 
@@ -102,7 +102,7 @@ class VideoBasePlaybackView : public HbView
         void gestureEvent( QGestureEvent* event );
 
     private:
-        
+
         void saveActivityData();
 
     protected: // data

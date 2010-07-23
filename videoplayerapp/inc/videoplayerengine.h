@@ -58,9 +58,12 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
         void playMedia( QString filePath );
         void playMedia( RFile file );
         void setEmbedded();
-
+    signals:
+        void applicationReady();
+    
     public slots:
         void handleCommand( int commandCode );
+        void viewReadySlot();
 
     private slots:
         void handleQuit();

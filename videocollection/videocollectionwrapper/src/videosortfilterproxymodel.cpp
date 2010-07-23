@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 66 %
+// Version : %version: 66.1.5 %
 
 // INCLUDE FILES
 #include <qstringlist.h>
@@ -96,13 +96,9 @@ int VideoSortFilterProxyModel::initialize(VideoListDataModel *sourceModel)
 bool VideoSortFilterProxyModel::connectSignals()
 {
 	FUNC_LOG_ADDR(this);
-    if(!connect(mModel, SIGNAL(modelReady()),
-            this, SIGNAL(modelReady()))) 
-    {
-        return false;
-    }
+
     if(!connect(mModel, SIGNAL(modelChanged()),
-                    this, SIGNAL(modelChanged()))) 
+                    this, SLOT(invalidate()))) 
     {
         return false;
     }
@@ -132,8 +128,7 @@ bool VideoSortFilterProxyModel::connectSignals()
 void VideoSortFilterProxyModel::disconnectSignals()
 {
 	FUNC_LOG_ADDR(this);
-	disconnect(mModel, SIGNAL(modelReady()), this, SIGNAL(modelReady()));
-    disconnect(mModel, SIGNAL(modelChanged()), this, SIGNAL(modelChanged()));
+    disconnect(mModel, SIGNAL(modelChanged()), this, SLOT(invalidate()));
     if(mType == VideoCollectionCommon::EModelTypeCollectionContent)
     {
         disconnect(mModel, SIGNAL(albumChanged()), this, SLOT(albumChangedSlot()));
@@ -158,12 +153,16 @@ int VideoSortFilterProxyModel::open(VideoCollectionCommon::TCollectionLevels lev
     {
         return -1;
     }
-    
+
     if(mLevel != level) 
     {
-        INFO_1("VideoSortFilterProxyModel::open() [0x%x] opening different level, invalidating.", this);
-        mLevel = level;
-        invalidateFilter();
+       INFO_1("VideoSortFilterProxyModel::open() [0x%x] opening different level, invalidating.", this);
+       mLevel = level;
+       invalidateFilter();
+       // sorting call required here to setup correct sort order in cases where source model allready 
+       // contains items but proxy is not yet updated. (invalidate -call does not work since it updates proxy and
+       // calls sort in different order for us to use)
+       sort(0, mWantedSortOrder);
     }
     // need to call open every time to make sure all items are 
     // inserted to UI ( recent open might have been cancelled)
@@ -276,6 +275,10 @@ int VideoSortFilterProxyModel::openItem(TMPXItemId mediaId)
                 mModel->setAlbumInUse(mediaId);
                 INFO_1("VideoSortFilterProxyModel::open() [0x%x] opening album or category, invalidating.", this);
                 invalidateFilter();
+                // sorting call required here to setup correct sort order in cases where source model allready 
+                // contains items but proxy is not yet updated. (invalidate -call does not work since it updates proxy and
+                // calls sort in different order for us to use)
+                sort(0, mWantedSortOrder);
             } 
             return 0;
         }
@@ -704,6 +707,7 @@ int VideoSortFilterProxyModel::removeItemsFromAlbum(TMPXItemId &albumId,
             invalidateFilter();
             err = 0;
         }
+
     }
     return err;
 }
@@ -794,9 +798,9 @@ void VideoSortFilterProxyModel::albumChangedSlot()
     if (mType == VideoCollectionCommon::EModelTypeCollectionContent)
     {
         INFO_1("VideoSortFilterProxyModel::albumChangedSlot() [0x%x] invalidating.", this);
-	    // sort and invalidate filtering, otherwise newle created album content won't sort
+	    // sort and invalidate filtering, otherwise newly created album content won't sort
     	invalidateFilter();
-        setSortRole(mWantedSortRole);
+    	setSortRole(mWantedSortRole);
         sort(0, mWantedSortOrder);
     }
 }

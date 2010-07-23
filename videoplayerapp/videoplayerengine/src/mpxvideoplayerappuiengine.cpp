@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 
 
@@ -39,11 +39,14 @@
 #include <coeutils.h>
 #include <videoplaylistutility.h>
 #include <mpxvideoplaybackdefs.h>
+#include <mpxmediacontainerdefs.h>
+#include <mpxmediaarray.h>
 
 #include "mpxvideoplayerappuiengine.h"
 #include "mpxvideoplayerconstants.h"
 #include "videoplaybackwrapper.h"
 #include "mpxhbvideocommondefs.h"
+#include "videoactivitystate.h" 
 
 #include "mpxvideo_debug.h"
 
@@ -738,6 +741,52 @@ void CMpxVideoPlayerAppUiEngine::UpdatePbPluginMediaL()
     
     CleanupStack::PopAndDestroy( cmd );
 }
+
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination(const TDesC& aFileName)
+{
+    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination()"));        
+    
+    ReadActivityData();
+    TMPXItemId mpxItemId(iLastPlayedItemId);
+    
+    TInt error = KErrNone;    
+    
+    MPX_TRAP( error,         
+        CMPXMedia* media = CMPXMedia::NewL();
+        CleanupStack::PushL(media);
+        
+        media->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem );  
+        media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, mpxItemId );
+        media->SetTextValueL( KMPXMediaGeneralTitle, aFileName );
+        media->SetTextValueL( KMPXMediaGeneralUri, aFileName );    
+        
+        OpenMediaL( *media );
+        
+        CleanupStack::PopAndDestroy( media );
+        );
+    
+    return error;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::ReadActivityData()
+// -------------------------------------------------------------------------------------------------
+//
+void CMpxVideoPlayerAppUiEngine::ReadActivityData()
+{
+    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ReadActivityData()"));   
+        
+    iLastPlayedItemId = 
+            VideoActivityState::instance().getActivityData(KEY_LAST_PLAYED_MEDIA_ID).toUInt();    
+    
+}
+
+
 
 // EOF
 

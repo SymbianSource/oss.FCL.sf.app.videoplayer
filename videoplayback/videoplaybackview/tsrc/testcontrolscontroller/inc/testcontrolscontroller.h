@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 #ifndef __TESTCONTROLSCONTROLLER_H__
 #define __TESTCONTROLSCONTROLLER_H__
@@ -71,6 +71,7 @@ private slots:
     void testHandleEventTvOutDisconnected();
     void testHandleEventHandleErrors();
     void testHandleEventShowVolumeControls();
+    void testIsFileDetailsAdded();
 
     //
     // test handleCommand()
@@ -100,8 +101,8 @@ private slots:
     //
     // test private slot skipToPreviousVideoItem()
     //
-    void testslot_skipToPreviousVideoItem();    
-    
+    void testslot_skipToPreviousVideoItem();
+
     //
     // test private slot attachVideo()
     //

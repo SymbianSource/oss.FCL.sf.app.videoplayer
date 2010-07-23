@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#3 %
+// Version : %version:  da1mmcf#4 %
 
 #ifndef __VIDEOACTIVITYSTATE_H__
 #define __VIDEOACTIVITYSTATE_H__
@@ -29,6 +29,9 @@ static const QString ACTIVITY_VIDEOPLAYER_MAINVIEW = "VideosMainView";
 
 // last position of the last played media clip (int)
 static const QString KEY_LAST_PLAY_POSITION_ID   = "_VideoActivity_last_play_position_id_";
+
+// TMPXId of the last played media file
+static const QString KEY_LAST_PLAYED_MEDIA_ID   = "_VideoActivity_last_played_media_id_";
 
 // name of the media clip last played (QString)
 static const QString KEY_LAST_PLAYED_CLIP = "_VideoActivity_last_played_clip_";

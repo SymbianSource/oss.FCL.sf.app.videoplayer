@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#41 %
+// Version : %version: da1mmcf#42 %
 
 
 
@@ -35,6 +35,7 @@
 #include <mpxplaybackutility.h>
 #include <mmf/common/mmferrors.h>
 #include <mpxcollectionutility.h>
+#include <mpxcollectionpath.h>
 #include <mpxcollectionplaylist.h>
 #include <mpxmediageneralextdefs.h>
 #include <vcxmyvideosuids.h>
@@ -1664,5 +1665,18 @@ TBool CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()
     return iView->mStayPaused;
 }
 
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::GetItemId()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoViewWrapper::GetMediaId()
+{
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::GetItemId()"));
+        
+    CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
+    TInt itemId = path->Id().iId1;
+    
+    return itemId;
+}
 
 // EOF

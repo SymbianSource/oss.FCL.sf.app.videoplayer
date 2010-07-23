@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#20 %
+// Version : %version:  da1mmcf#21 %
 
 
 
@@ -265,7 +265,9 @@ class CMPXVideoViewWrapper : public CBase,
         TBool IsInMemoryPlugin();
 
         void UpdatePbPluginMediaL( TBool aSeek );
-
+        
+        TInt GetMediaId();
+        
     protected: // data
         MMPXPlaybackUtility*                 iPlaybackUtility;
         MMPXCollectionUtility*               iCollectionUtility;

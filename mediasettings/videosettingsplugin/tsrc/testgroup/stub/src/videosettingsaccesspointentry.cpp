@@ -16,6 +16,7 @@
  */
 
 #include "videosettingsaccesspointentry.h"
+#include "videosettingsgroup.h"
 #include <cpitemdatahelper.h>
 
 // ---------------------------------------------------------------------------
@@ -30,6 +31,7 @@ VideoSettingsAccessPointEntry::VideoSettingsAccessPointEntry(
     mText(text),
     mParent(parent)
 {
+    mParent->appendChild(this);
     Q_UNUSED(itemDataHelper);
 }
 

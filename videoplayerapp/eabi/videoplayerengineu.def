@@ -64,4 +64,6 @@ EXPORTS
 	_ZTV13VideoServices @ 63 NONAME
 	_ZTV17VideoPlayerEngine @ 64 NONAME
 	_ZTV18VideoActivityState @ 65 NONAME
+	_ZN17VideoPlayerEngine13viewReadySlotEv @ 66 NONAME
+	_ZN17VideoPlayerEngine16applicationReadyEv @ 67 NONAME
 

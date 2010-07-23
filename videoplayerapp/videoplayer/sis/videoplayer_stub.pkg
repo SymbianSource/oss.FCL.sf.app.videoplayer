@@ -41,9 +41,9 @@
 ;
 ; Video playback view
 ;
-"" - "z:\sys\bin\hbvideoplaybackview.dll" 
-"" - "z:\sys\bin\hbvideoplaybackviewplugin.dll" 
-"" - "z:\resource\plugins\hbvideoplaybackviewplugin.r*" 
+"" - "z:\sys\bin\videoplaybackview.dll" 
+"" - "z:\sys\bin\videoplaybackviewplugin.dll" 
+"" - "z:\resource\plugins\videoplaybackviewplugin.r*" 
 
 ;
 ; Collection view and wrapper

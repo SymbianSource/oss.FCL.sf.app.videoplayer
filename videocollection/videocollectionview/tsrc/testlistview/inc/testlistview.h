@@ -21,6 +21,7 @@
 
 // INCLUDES
 #include <QtTest/QtTest>
+#include <mpxitemid.h>
 #include "hbmessagebox.h"
 #include "hbeffect.h"
 
@@ -206,7 +207,7 @@ signals:
 
     void testLayoutChangedSignal();
 
-    void testCollectionOpenedSignal(bool, const QString&, const QModelIndex&);
+    void testCollectionOpenedSignal(bool, const QString&, const TMPXItemId&);
 
     void testStatusSignal(int, QVariant&);
     

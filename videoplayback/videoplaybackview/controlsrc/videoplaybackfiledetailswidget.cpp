@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  27 %
+// Version : %version:  28 %
 
 
 #include <QDir>
@@ -107,19 +107,7 @@ void VideoPlaybackFileDetailsWidget::updateWithFileDetails(
             //
             // Duration
             //
-            if ( details->mPlaybackMode != EMPXVideoLiveStreaming && details->mDuration > 0 )
-            {
-                int value = (qreal)details->mDuration / (qreal)KPbMilliMultiplier;
-                QString hour = locale.toString( value / 3600 );
-                value = value % 3600;
-                QString min = locale.toString( value / 60 );
-                value = value % 60;
-                QString sec = locale.toString( value );
-
-                addItemToListWidget(
-                        hbTrId( "txt_videos_list_duration" ),
-                        hbTrId( "txt_videos_list_l1l2l3" ).arg( hour ).arg( min ).arg( sec ) );
-            }
+            makeDurationItem( details );
 
             //
             // Date/Time
@@ -448,6 +436,51 @@ void VideoPlaybackFileDetailsWidget::makeDateTimeItem( VideoPlaybackViewFileDeta
         date = locale.format( dateTime.date(), r_qtn_date_usual );
         time = locale.format( dateTime.time(), r_qtn_time_long_with_zero );
         addItemToListWidget( hbTrId( "txt_videos_list_modified" ), date + "  " + time );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackFileDetailsWidget::makeDurationItem
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackFileDetailsWidget::makeDurationItem( VideoPlaybackViewFileDetails* details )
+{
+    MPX_ENTER_EXIT(_L("VideoPlaybackFileDetailsWidget::makeDurationItem"));
+
+    if ( details->mPlaybackMode != EMPXVideoLiveStreaming && details->mDuration > 0 )
+    {
+        HbExtendedLocale locale = HbExtendedLocale::system();
+        QString hourString, minString, secString;
+
+        int value = (qreal)details->mDuration / (qreal)KPbMilliMultiplier;
+
+        int hours = value / 3600;
+        value = value % 3600;
+        int mins = value / 60;
+        value = value % 60;
+        int secs = value;
+
+        //
+        // Put "0" if it is less than 10 (0:00:03)
+        //
+        hourString = locale.toString( hours );
+
+        if ( mins < 10 )
+        {
+            minString = locale.toString( 0 );
+        }
+        minString.append( locale.toString( mins ) );
+
+        if ( secs < 10 )
+        {
+            secString = locale.toString( 0 );
+        }
+        secString.append( locale.toString( secs ) );
+
+        addItemToListWidget(
+                hbTrId( "txt_videos_list_duration" ),
+                hbTrId( "txt_videos_list_l1l2l3" )
+                .arg( hourString ).arg( minString ).arg( secString ) );
     }
 }
 

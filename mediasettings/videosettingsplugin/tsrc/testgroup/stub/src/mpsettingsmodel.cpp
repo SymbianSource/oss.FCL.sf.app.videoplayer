@@ -16,7 +16,7 @@
 */
 
 // INCLUDE FILES
-#include "mpsettingsmodel.h"
+#include "stub/inc/mpsettingsmodel.h"
 #include <qglobal.h>
 #include <xqconversions.h>
 

@@ -15,20 +15,16 @@
 *
 */
 
-// Version : %version: da1mmcf#28 %
+// Version : %version: da1mmcf#30 %
 
 
 
 
-#include <QTime>
 #include <QTimer>
-#include <QGraphicsSceneMouseEvent>
 
-#include <hblabel.h>
 #include <hbframeitem.h>
 #include <hbframedrawer.h>
 #include <hbprogressslider.h>
-#include <hbextendedlocale.h>
 
 #include "mpxvideo_debug.h"
 #include "videoplaybackprogressbar.h"
@@ -86,6 +82,7 @@ void VideoPlaybackProgressBar::initialize()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackProgressBar::initialize()"));
 
+    HbExtendedLocale mLocale = HbExtendedLocale::system();
     VideoPlaybackDocumentLoader *loader = mController->layoutLoader();
 
     //
@@ -115,6 +112,8 @@ void VideoPlaybackProgressBar::initialize()
         connect( mProgressSlider, SIGNAL( sliderPressed() ), this, SLOT( handleSliderPressed() ) );
         connect( mProgressSlider, SIGNAL( sliderReleased() ), this, SLOT( handleSliderReleased() ) );
         connect( mProgressSlider, SIGNAL( sliderMoved( int ) ), this, SLOT( handleSliderMoved( int ) ) );
+        connect( mProgressSlider, SIGNAL( trackPressed() ), this ,SLOT( handleSliderPressed() ) );
+        connect( mProgressSlider, SIGNAL( trackReleased() ), this ,SLOT( handleSliderReleased() ) );
 
         //
         // If we init the progress bar after pp sends the duration informatin
@@ -224,24 +223,43 @@ QString VideoPlaybackProgressBar::valueToReadableFormat( int value )
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::valueToReadableFormat value = %d"), value);
 
-    int hour = value / 3600;
+    QString str, hourString, minString, secString;
+
+    int hours = value / 3600;
     value = value % 3600;
-    int minutes = value / 60;
+    int mins = value / 60;
     value = value % 60;
-    int second = value;
+    int secs = value;
 
-    QTime time( hour ,minutes ,second );
-    QString str;
+    //
+    // show like this
+    // 0:03, 10:03, 0:05:03, 12:12:12
+    //
+    if ( mins < 10 && mLongTimeFormat )
+    {
+        minString = mLocale.toString( 0 );
+    }
+    minString.append( mLocale.toString( mins ) );
 
-    HbExtendedLocale locale = HbExtendedLocale::system();
+    if ( secs < 10 )
+    {
+        secString = mLocale.toString( 0 );
+    }
+    secString.append( mLocale.toString( secs ) );
 
+    //
+    // Formatting
+    //
     if ( mLongTimeFormat )
     {
-        str = locale.format( time, r_qtn_time_durat_long );
+        hourString = mLocale.toString( hours );
+
+        str = hbTrId( "txt_videos_slidervalue_l1l2l3_2" )
+                .arg( hourString ).arg( minString ).arg( secString );
     }
     else
     {
-        str = locale.format( time, r_qtn_time_durat_min_sec );
+        str = hbTrId( "txt_videos_slidervalue_l1l2" ).arg( minString ).arg( secString );
     }
 
     return str;
@@ -362,7 +380,7 @@ void VideoPlaybackProgressBar::updateWithFileDetails(
         VideoPlaybackViewFileDetails* details )
 {
     Q_UNUSED( details );
-    
+
     MPX_DEBUG(_L("VideoPlaybackProgressBar::updateControlsWithFileDetails()"));
 
     setEnableProgressSlider( true );
