@@ -28,6 +28,7 @@
 class HbMessageBox : public QObject 
 {
     Q_OBJECT
+
 public:
 
     enum MessageBoxType {
@@ -109,5 +110,7 @@ signals:
 
     void finished(int);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(HbMessageBox::StandardButtons)
 
 #endif // HBMESSAGEBOX_H

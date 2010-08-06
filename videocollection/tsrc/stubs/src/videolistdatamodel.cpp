@@ -75,10 +75,9 @@ VideoCollectionClient* VideoListDataModel::getCollectionClient()
     return 0;
 }
  
-int VideoListDataModel::connectSignals()
+void VideoListDataModel::connectSignals()
 {
     // not stubbed
-    return 0;
 }
 
 void VideoListDataModel::disconnectSignals()

@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 4 %
+# Version : %version: 5 %
 
 TEMPLATE = app
 TARGET = testvideodisplayhandler
@@ -41,16 +41,16 @@ LIBS += -lmpxplaybackutility.dll \
 HEADERS += mpxvideoviewwrapper.h \
            videobaseplaybackview.h \
            videoplaybackviewfiledetails.h \
-           mpxvideocontainer.h \
+           videocontainer.h \
            alfcompositionutility.h \
            mediaclientvideodisplay.h \
            testvideodisplayhandler.h \
            ../../viewinc/mpxvideoplaybackdisplayhandler.h
                                                 
-SOURCES += mpxvideoviewwrapper.cpp \					 				
+SOURCES += mpxvideoviewwrapper.cpp \					 			
            videobaseplaybackview.cpp \
            videoplaybackviewfiledetails.cpp \
-           mpxvideocontainer.cpp \
+           videocontainer.cpp \
            alfcompositionutility.cpp \
            mediaclientvideodisplay.cpp \
            testvideodisplayhandler.cpp \

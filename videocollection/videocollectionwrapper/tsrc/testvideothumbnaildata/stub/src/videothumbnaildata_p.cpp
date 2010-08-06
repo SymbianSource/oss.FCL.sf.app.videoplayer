@@ -29,7 +29,7 @@ int VideoThumbnailDataPrivate::mStartFetchingThumbnailsCallCount = 0;
 int VideoThumbnailDataPrivate::mStartFetchingThumbnailCallCount = 0;
 int VideoThumbnailDataPrivate::mGetThumbnailCallCount = 0;
 int VideoThumbnailDataPrivate::mRemoveThumbnailCallCount = 0;
-int VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled = true;
+bool VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled = true;
 int VideoThumbnailDataPrivate::mFreeThumbnailDataCallCount = 0;
 int VideoThumbnailDataPrivate::mStartBackgroundFetchingCallCount = 0;
 int VideoThumbnailDataPrivate::mEnableThumbnailCreationCallCount = 0;
@@ -130,4 +130,14 @@ void VideoThumbnailDataPrivate::enableThumbnailCreation(bool enable)
 {
     mEnableThumbnailCreationCallCount++;
 }
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailData::enableThumbnailCreation()
+// -----------------------------------------------------------------------------
+//
+bool VideoThumbnailDataPrivate::backgroundFetchingEnabled()
+{
+    return mBackgroundThumbnailFetchingEnabled;
+}
+
 // End of file

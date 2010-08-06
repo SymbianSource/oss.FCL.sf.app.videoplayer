@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#9 %
+// Version : %version: da1mmcf#10 %
 
 #include "videoplayerengine.h"
 #include "videoservices.h"
@@ -23,6 +23,7 @@
 #include "videoserviceplay.h"
 #include "videoserviceview.h"
 #include "videoservicebrowse.h"
+#include "videoserviceuri.h"
 #include "mpxvideo_debug.h"
 #include <xqaiwdecl.h>
 #include <xqserviceutil.h>
@@ -86,6 +87,12 @@ void VideoServices::setEngine( VideoPlayerEngine* engine )
     {
     	mEngine = engine;
     	mServiceView->setEngine(engine);    	
+    }
+    
+    if ( mServiceUriView )
+    {
+        mEngine = engine;
+        mServiceUriView->setEngine(engine);  
     }
     		
 }
@@ -160,6 +167,11 @@ VideoServices::VideoServices( VideoPlayerEngine* engine )
     // Old service, old interface
     mServiceBrowseDeprecatedOldService = new VideoServiceBrowse( this, 
                                                       QLatin1String("com.nokia.Videos.IVideoBrowse") ); 
+	
+    // new service, new interface
+    mServiceUriView = new VideoServiceUri(  this, engine, QLatin1String("videoplayer.com.nokia.symbian.IUriView"));	
+    
+	
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -182,6 +194,7 @@ VideoServices::~VideoServices()
     delete mServiceUriFetchDeprecatedNewService;
     delete mServiceBrowseDeprecatedOldService;
     delete mServiceUriFetchDeprecatedOldService;
+    delete mServiceUriView;
 }
 
 // -------------------------------------------------------------------------------------------------

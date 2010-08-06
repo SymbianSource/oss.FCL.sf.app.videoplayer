@@ -151,6 +151,7 @@ void TestVideoDisplayHandler::testHandleSurfaceCreatedMessageL()
     mDispHdlr->HandleVideoDisplayMessageL( message );
 
     QVERIFY( ! mDispHdlr->iSurfaceId.IsNull() );
+    QVERIFY( mDispHdlr->iViewWrapper->iAttatched );
 
     mDispHdlr->RemoveDisplayWindow();
     cleanup();
@@ -191,6 +192,7 @@ void TestVideoDisplayHandler::testHandleVideoRemovedMessageL()
     mDispHdlr->HandleVideoDisplayMessageL( message );
 
     QVERIFY( mDispHdlr->iSurfaceId.IsNull() );
+    QVERIFY( ! mDispHdlr->iViewWrapper->iAttatched );
 
     mDispHdlr->RemoveDisplayWindow();
     cleanup();

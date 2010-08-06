@@ -15,28 +15,25 @@
 *
 */
 
-// Version : %version:  1 %
+// Version : %version:  2 %
 
 
-#ifndef CMPXVIDEOCONTAINER_H
-#define CMPXVIDEOCONTAINER_H
+#ifndef CVIDEOCONTAINER_H
+#define CVIDEOCONTAINER_H
 
 #include <coecntrl.h>
 
 
-class CMPXVideoContainer : public CCoeControl
+class CVideoContainer : public CCoeControl
 {
 
     public:
-        CMPXVideoContainer();
-        virtual ~CMPXVideoContainer();
+        CVideoContainer();
+        virtual ~CVideoContainer();
 
         void ConstructL();
-
-    protected:
-        void Draw(const TRect& aRect) const;
 };
 
-#endif  // CMPXVIDEOCONTAINER_H
+#endif  // CVIDEOCONTAINER_H
 
 // End of file

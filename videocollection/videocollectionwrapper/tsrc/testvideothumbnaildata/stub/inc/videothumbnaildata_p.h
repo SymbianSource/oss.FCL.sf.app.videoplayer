@@ -136,6 +136,13 @@ public:
      */
     void enableThumbnailCreation(bool enable);
     
+    /**
+     * Returns background fetching enabled status. 
+     * 
+     * @return bool: true if background fetching is enabled, otherwise false.
+     */
+    bool backgroundFetchingEnabled();
+    
 signals:
 
     /**
@@ -144,7 +151,7 @@ signals:
      * @param mediaIds: media ids of the videos whose thumbnail is ready.
      *
      */
-    void thumbnailsFetched(QList<TMPXItemId> mediaIds);
+    void thumbnailsFetched(QList<TMPXItemId>& mediaIds);
     
 public: // Data
 
@@ -155,7 +162,7 @@ public: // Data
     static int mGetThumbnailCallCount;
     static int mRemoveThumbnailCallCount;
     static int mFreeThumbnailDataCallCount;
-    static int mBackgroundThumbnailFetchingEnabled;
+    static bool mBackgroundThumbnailFetchingEnabled;
     static int mStartBackgroundFetchingCallCount;
     static int mEnableThumbnailCreationCallCount;
 };

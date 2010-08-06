@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #ifndef VIDEOPLAYBACKCONTROL_HRH_
@@ -88,7 +88,9 @@ enum TVideoPlaybackControlCommandIds
     EControlCmdFullScreenViewOpened,
     EControlCmdDetailsViewOpened,
     EControlCmdAudionOnlyViewOpened,
-    EControlCmdRemoveRNLogo
+    EControlCmdRemoveRNLogo,
+    EControlCmdSurfaceAttached,
+    EControlCmdSurfaceDetached
 };
 
 enum TVideoSeekingType

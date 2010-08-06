@@ -1,4 +1,4 @@
-/*
+/**
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
@@ -11,29 +11,27 @@
 *
 * Contributors:
 *
-* Description: CCoeControl to provide RWindow for videoplayback
+* Description:
 *
 */
 
-// Version : %version:  2 %
+#include "xqsettingsmanagerstub.h"
 
+QVariant XQSettingsManager::mReadItemValueReturnValue = QVariant();
 
-#ifndef CMPXVIDEOCONTAINER_H
-#define CMPXVIDEOCONTAINER_H
-
-#include <coecntrl.h>
-
-
-class CMPXVideoContainer : public CCoeControl
+QVariant XQSettingsManager::readItemValue(XQCentralRepositorySettingsKey &key, int type)
 {
+    Q_UNUSED(key);
+    Q_UNUSED(type);
+    return mReadItemValueReturnValue;
+}
 
-    public:
-        CMPXVideoContainer();
-        virtual ~CMPXVideoContainer();
+XQSettingsManager::XQSettingsManager()
+{
+    
+}
 
-        void ConstructL();
-};
-
-#endif  // CMPXVIDEOCONTAINER_H
-
-// End of file
+XQSettingsManager::~XQSettingsManager()
+{
+    
+}

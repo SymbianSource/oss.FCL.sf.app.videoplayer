@@ -134,9 +134,9 @@ signals:
     /**
      * Emitted if some delete startup fails.
      * 
-     * @param list of item ids whose edletion does not start
+     * @param list of item ids whose deletion does not start
      */
-    void deleteStartupFailed(QList<TMPXItemId>);
+    void deleteStartupFailed(QList<TMPXItemId>&);
 	
 private:
     

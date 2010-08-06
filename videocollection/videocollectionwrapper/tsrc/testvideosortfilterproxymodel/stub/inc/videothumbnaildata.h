@@ -93,6 +93,7 @@ private:
     ~VideoThumbnailData(); 
     
 public:
+    static int mEnableBackgroundThumbnailFetchingCallCount;
     static int mStartFetchingThumbnailsCallCount;
     static int mStartFetchingThumbnailsThumbnailCount;
     static int mInstanceCallCount;

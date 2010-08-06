@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#21 %
+// Version : %version:  da1mmcf#23 %
 
 
 
@@ -168,18 +168,12 @@ class CMPXVideoViewWrapper : public CBase,
 
         TBool IsPlaylist();
 
-        void IssueVideoAppForegroundCmdL(TBool aForeground);
+        void IssueVideoAppForegroundCmdL( TBool aViewForeground, TBool aAppForegournd );
 
         void RequestMediaL();
 
         void CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync = ETrue );
 
-        TBool IsAppInFrontL();
-
-        /*
-         *  Activates an active object to close the player
-         *  @since 5.0
-         */
         void ActivateClosePlayerActiveObject();
 
         void CreateControlsL();
@@ -213,8 +207,10 @@ class CMPXVideoViewWrapper : public CBase,
         void DoClosePlayer();
 
         void HandleVideoPlaybackMessage( CMPXMessage* aMessage );
-        
+
         TBool IsResumingPlaybackAfterTermination();
+
+        void SurfacedAttached( TBool aAttached );
 
     private:
 
@@ -265,9 +261,9 @@ class CMPXVideoViewWrapper : public CBase,
         TBool IsInMemoryPlugin();
 
         void UpdatePbPluginMediaL( TBool aSeek );
-        
+
         TInt GetMediaId();
-        
+
     protected: // data
         MMPXPlaybackUtility*                 iPlaybackUtility;
         MMPXCollectionUtility*               iCollectionUtility;
@@ -285,9 +281,9 @@ class CMPXVideoViewWrapper : public CBase,
         TBool                                iCollectionMediaRequested;
         TBool                                iPlaylistView;
         int                                  iPlayPosition;
-        
+
     public:
-        friend class VideoBasePlaybackView;        
+        friend class VideoBasePlaybackView;
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

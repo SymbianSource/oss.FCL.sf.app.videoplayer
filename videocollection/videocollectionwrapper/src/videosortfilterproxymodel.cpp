@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 66.1.5 %
+// Version : %version: 66.1.8 %
 
 // INCLUDE FILES
 #include <qstringlist.h>
@@ -31,6 +31,8 @@
 #include "videocollectionclient.h"
 #include "videocollectionwrapper.h"
 #include "videocollectiontrace.h"
+
+const TMPXItemId INVALID_ID = TMPXItemId::InvalidId();
 
 // -----------------------------------------------------------------------------
 // VideoSortFilterProxyModel::VideoSortFilterProxyModel
@@ -110,14 +112,7 @@ bool VideoSortFilterProxyModel::connectSignals()
             return false;
         }
     }
-    if(mType == VideoCollectionCommon::EModelTypeCollections)
-    {
-        if(!connect(mModel, SIGNAL(itemModified(const TMPXItemId &)),
-                    this, SLOT(itemModifiedSlot(const TMPXItemId &)))) 
-        {
-            return false;
-        }
-    }
+
     return true;
 }
    
@@ -240,6 +235,10 @@ void VideoSortFilterProxyModel::getSorting(int &sortingRole, Qt::SortOrder &orde
 int VideoSortFilterProxyModel::deleteItems(const QModelIndexList &indexList)
 {
 	FUNC_LOG_ADDR(this);
+	
+	// Disable thumbnail fetching while items are removed from the model. 
+	VideoThumbnailData::instance().enableBackgroundFetching(false);
+	
     if(mModel)
     {
         QModelIndexList mappedList;
@@ -251,10 +250,13 @@ int VideoSortFilterProxyModel::deleteItems(const QModelIndexList &indexList)
         if(mModel->removeRows(mappedList))
         {
             // Start fetching thumbnails at start of the model.
+            VideoThumbnailData::instance().enableBackgroundFetching(true);
             VideoThumbnailData::instance().startBackgroundFetching(0, 0);
             return 0;
         }
     }
+    
+    VideoThumbnailData::instance().enableBackgroundFetching(true);
     return -1;
 }
 
@@ -374,8 +376,10 @@ bool VideoSortFilterProxyModel::lessThan(const QModelIndex &left,
     {
         return false;
     }
-    TMPXItemId leftId = mModel->mediaIdAtIndex(left.row());
-    TMPXItemId rightId = mModel->mediaIdAtIndex(right.row());
+    int index = left.row();
+    TMPXItemId leftId = mModel->mediaIdAtIndex(index);
+    index = right.row();
+    TMPXItemId rightId = mModel->mediaIdAtIndex(index);
     
     // Default categories are always first in the following order:
     // Recently played (missing currently)
@@ -526,25 +530,24 @@ bool VideoSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelInd
 // VideoSortFilterProxyModel::getMediaIdAtIndex()
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoSortFilterProxyModel::getMediaIdAtIndex(const QModelIndex &index) const
+const TMPXItemId& VideoSortFilterProxyModel::getMediaIdAtIndex(const QModelIndex &index) const
 {
-    TMPXItemId mpxId = TMPXItemId::InvalidId();
     if(index.isValid())
     {
-        QModelIndex sourceIndex = mapToSource(index);
-        if(mModel && sourceIndex.isValid())
+        int rowIndex = mapToSource(index).row();
+        if(mModel)
         {
-            mpxId = mModel->mediaIdAtIndex(sourceIndex.row());
+            return mModel->mediaIdAtIndex(rowIndex);
         }
     }
-    return mpxId;
+    return INVALID_ID;
 }
 
 // -----------------------------------------------------------------------------
 //  VideoSortFilterProxyModel::indexOfId()
 // -----------------------------------------------------------------------------
 //
-QModelIndex VideoSortFilterProxyModel::indexOfId(TMPXItemId id)
+QModelIndex VideoSortFilterProxyModel::indexOfId(const TMPXItemId &id)
 {    
     QModelIndex sourceIndex;
     if(!mModel || id == TMPXItemId::InvalidId())
@@ -559,7 +562,7 @@ QModelIndex VideoSortFilterProxyModel::indexOfId(TMPXItemId id)
 // VideoSortFilterProxyModel::getMediaFilePathForId()
 // -----------------------------------------------------------------------------
 //
-QString VideoSortFilterProxyModel::getMediaFilePathForId(TMPXItemId mediaId)
+QString VideoSortFilterProxyModel::getMediaFilePathForId(const TMPXItemId &mediaId)
 {
     QString filePath;
     if(mModel)
@@ -695,9 +698,12 @@ int VideoSortFilterProxyModel::removeItemsFromAlbum(TMPXItemId &albumId,
 {
 	FUNC_LOG_ADDR(this);
     int err(-1);
-       
+
+    // Disable thumbnail fetching while items are removed from the model. 
+    VideoThumbnailData::instance().enableBackgroundFetching(false);
+    
     if (mModel)
-    {        
+    {
         // remove items in album
         err = mModel->removeItemsFromAlbum(albumId, mediaIds);
         if(err > 0)
@@ -707,23 +713,24 @@ int VideoSortFilterProxyModel::removeItemsFromAlbum(TMPXItemId &albumId,
             invalidateFilter();
             err = 0;
         }
-
     }
+ 
+    VideoThumbnailData::instance().enableBackgroundFetching(true);
     return err;
 }
 
 // -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::renameAlbum()
+// VideoSortFilterProxyModel::renameItem()
 // -----------------------------------------------------------------------------
 //
-int VideoSortFilterProxyModel::renameAlbum(const TMPXItemId &albumId, const QString &newTitle)
+int VideoSortFilterProxyModel::renameItem(const TMPXItemId &itemId, const QString &newTitle)
 {
 	FUNC_LOG_ADDR(this);
     int err(-1);
 
     if(mCollectionClient)
     {
-        return mCollectionClient->renameAlbum(albumId, newTitle);
+        return mCollectionClient->renameItem(itemId, newTitle);
     }
     return err;
 }
@@ -759,7 +766,7 @@ TMPXItemId VideoSortFilterProxyModel::getOpenItem() const
 // VideoSortFilterProxyModel::setGenericIdFilter()
 // -----------------------------------------------------------------------------
 //
-void VideoSortFilterProxyModel::setGenericIdFilter(TMPXItemId itemId, bool filterValue)
+void VideoSortFilterProxyModel::setGenericIdFilter(const TMPXItemId &itemId, bool filterValue)
 {
 	FUNC_LOG_ADDR(this);
     if(mType == VideoCollectionCommon::EModelTypeGeneric)
@@ -776,7 +783,7 @@ void VideoSortFilterProxyModel::setGenericIdFilter(TMPXItemId itemId, bool filte
 // VideoSortFilterProxyModel::setAlbumInUse()
 // -----------------------------------------------------------------------------
 //
-void VideoSortFilterProxyModel::setAlbumInUse(TMPXItemId albumId)
+void VideoSortFilterProxyModel::setAlbumInUse(const TMPXItemId &albumId)
 {
 	FUNC_LOG_ADDR(this);
     if(mModel)
@@ -802,21 +809,6 @@ void VideoSortFilterProxyModel::albumChangedSlot()
     	invalidateFilter();
     	setSortRole(mWantedSortRole);
         sort(0, mWantedSortOrder);
-    }
-}
-
-// -----------------------------------------------------------------------------
-// VideoSortFilterProxyModel::itemModifiedSlot()
-// -----------------------------------------------------------------------------
-//
-void VideoSortFilterProxyModel::itemModifiedSlot(const TMPXItemId &itemId)
-{
-	FUNC_LOG_ADDR(this);
-    if(mType == VideoCollectionCommon::EModelTypeCollections &&
-       (itemId.iId2 == KVcxMvcMediaTypeAlbum || itemId.iId2 == KVcxMvcMediaTypeCategory))
-    {
-        INFO_1("VideoSortFilterProxyModel::itemModifiedSlot() [0x%x] invalidating.", this);
-        invalidate();
     }
 }
 

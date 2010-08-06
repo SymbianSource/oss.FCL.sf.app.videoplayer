@@ -76,6 +76,11 @@ void VideoListView::modelReadySlot()
     // not stubbed
 }
 
+void VideoListView::albumListReadySlot()
+{
+    // not stubbed
+}
+
 void VideoListView::layoutChangedSlot()
 {
     // not stubbed
@@ -89,6 +94,11 @@ void VideoListView::deactivateView()
 void VideoListView::back()
 {
     VideoListViewData::mBackCount++;
+}
+
+void VideoListView::modelReady()
+{
+    // not stubbed
 }
 
 void VideoListView::cleanup()

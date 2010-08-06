@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -29,6 +29,7 @@ class VideoServicePlay;
 class VideoServiceView;
 class VideoServiceBrowse;
 class VideoPlayerEngine;
+class VideoServiceUri;
 
 class VIDEOPLAYERAPP_DLL_EXPORT VideoServices : public QObject
 {
@@ -70,6 +71,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoServices : public QObject
             EUriFetcher,
             EPlayback,
             EView,
+            EUriView,
             EBrowse
         };
     
@@ -209,6 +211,11 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoServices : public QObject
          * Deprecated VideoServiceBrowse service instance.
          */
         VideoServiceBrowse *mServiceBrowseDeprecatedOldService;
+                
+        /**
+         * VideoServiceUri service instance.
+         */
+        VideoServiceUri *mServiceUriView;        
     
         /**
          * Pointer of VideoPlayerEngine.
@@ -223,8 +230,9 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoServices : public QObject
         friend class VideoServiceUriFetch;    
         friend class VideoServicePlay;        
         friend class VideoServiceView;        
-        friend class VideoServiceBrowse;
-        
+        friend class VideoServiceBrowse;        
+	    friend class VideoServiceUri;
+	    
     public:
         
         /*

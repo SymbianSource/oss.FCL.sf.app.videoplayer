@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: CCoeControl to provide RWindow for videoplayback
+* Description:
 *
 */
 
@@ -19,25 +19,20 @@
 
 
 
-#include "mpxvideocontainer.h"
-#include "mpxvideo_debug.h"
+#include "videocontainer.h"
 
-CMPXVideoContainer::CMPXVideoContainer()
+
+CVideoContainer::CVideoContainer()
 {
-    MPX_ENTER_EXIT( _L("CMPXVideoContainer::CMPXVideoContainer()") );
 }
 
-CMPXVideoContainer::~CMPXVideoContainer()
+CVideoContainer::~CVideoContainer()
 {
-    MPX_ENTER_EXIT( _L("CMPXVideoContainer::~CMPXVideoContainer()") );
-
     CloseWindow();
 }
 
-void CMPXVideoContainer::ConstructL()
+void CVideoContainer::ConstructL()
 {
-    MPX_ENTER_EXIT( _L("CMPXVideoContainer::ConstructL()") );
-
     CreateWindowL();
     ActivateL();
 }

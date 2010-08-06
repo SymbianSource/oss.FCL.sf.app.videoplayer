@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#42 %
+// Version : %version: da1mmcf#44 %
 
 
 
@@ -1201,43 +1201,6 @@ void CMPXVideoViewWrapper::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoViewWrapper::IsAppInFrontL()
-// Returns true if app is foreground. Uses windowgroup id
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMPXVideoViewWrapper::IsAppInFrontL()
-{
-    TBool ret = EFalse;
-    RWsSession wsSession;
-
-    User::LeaveIfError( wsSession.Connect() );
-
-    if( wsSession.Handle() )
-    {
-        CArrayFixFlat<TInt>* wgList =
-            new (ELeave) CArrayFixFlat<TInt>( wsSession.NumWindowGroups() );
-
-        // check if our window is front or not
-        if ( wsSession.WindowGroupList( 0, wgList ) == KErrNone )
-        {
-            ret = ( CEikonEnv::Static()->RootWin().Identifier() == wgList->At(0) );
-        }
-        else
-        {
-            ret = EFalse;
-        }
-
-        delete wgList;
-    }
-
-    wsSession.Close();
-
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::IsAppInFrontL (%d)" ), ret);
-
-    return ret;
-}
-
-// -------------------------------------------------------------------------------------------------
 //   CMPXVideoViewWrapper::ClosePlaybackViewL()
 // -------------------------------------------------------------------------------------------------
 //
@@ -1303,14 +1266,14 @@ void CMPXVideoViewWrapper::HandleShortPressBackwardL()
 //   CMPXVideoViewWrapper::IssueVideoAppForegroundCmd()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aForeground )
+void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aViewForeground, TBool aAppForegournd )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL()"),
-                   _L("aForeground = %d"), aForeground );
+                   _L("aViewForeground = %d, aAppForegournd = %d"), aViewForeground, aAppForegournd );
 
     TMPXVideoPlaybackCommand videoCmd = EPbCmdHandleBackground;
 
-    if ( aForeground )
+    if ( aViewForeground )
     {
         videoCmd = EPbCmdHandleForeground;
     }
@@ -1324,7 +1287,7 @@ void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aForeground )
     cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
     cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXMediaIdVideoPlayback );
     cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, videoCmd );
-    cmd->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, IsAppInFrontL() );
+    cmd->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, aAppForegournd );
 
     iPlaybackUtility->CommandL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
@@ -1507,16 +1470,16 @@ void CMPXVideoViewWrapper::IssuePlayCommandL()
         // happen when app is on background, in which case Video Player is paused
         // by default
         if ( IsResumingPlaybackAfterTermination() )
-        {            
-            CreateGeneralPlaybackCommandL( EPbCmdPause );      
-            SetPropertyL( EPbPropertyPosition, iView->mLastPlayPosition );    
+        {
+            CreateGeneralPlaybackCommandL( EPbCmdPause );
+            SetPropertyL( EPbPropertyPosition, iView->mLastPlayPosition );
             iView->mStayPaused = false;
         }
         else
         {
             CreateGeneralPlaybackCommandL( EPbCmdPlay );
         }
-        
+
     }
 }
 
@@ -1661,7 +1624,7 @@ void CMPXVideoViewWrapper::UpdatePbPluginMediaL( TBool aSeek )
 TBool CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()
 {
     MPX_DEBUG(_L("CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()"));
-    
+
     return iView->mStayPaused;
 }
 
@@ -1672,11 +1635,29 @@ TBool CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()
 TInt CMPXVideoViewWrapper::GetMediaId()
 {
     MPX_DEBUG(_L("CMPXVideoViewWrapper::GetItemId()"));
-        
+
     CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
     TInt itemId = path->Id().iId1;
-    
+
     return itemId;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::SurfacedAttached()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::SurfacedAttached( TBool aAttached )
+{
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::SurfacedAttached() attached = %d"), aAttached);
+
+    TVideoPlaybackControlCommandIds event = EControlCmdSurfaceDetached;
+
+    if ( aAttached )
+    {
+        event = EControlCmdSurfaceAttached;
+    }
+
+    iControlsController->handleEvent( event );
 }
 
 // EOF

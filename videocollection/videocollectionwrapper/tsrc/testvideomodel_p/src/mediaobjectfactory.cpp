@@ -22,6 +22,7 @@
 #include <mpxmediaarray.h>
 #include <mpxmedia.h>
 #include <qdatetime.h>
+#include <xqconversions.h>
 #include "vcxmyvideosdefs.h"
 #include "mediaobjectfactory.h"
 
@@ -320,8 +321,13 @@ bool MediaObjectFactory::fillData(CMPXMedia *media, int index, int dataSelection
     // set "filepath"
     if(dataSelectionFlags & MediaDataFilePath)
     {
-        videoname.Format(KMediaTestPathPrefix, index);              
-        TRAPD(error, media->SetTextValueL( KMPXMediaGeneralUri, videoname));
+        mTmpFiles.append(new QTemporaryFile());
+        mTmpFiles.last()->open();
+        
+        HBufC *fileName = XQConversions::qStringToS60Desc(mTmpFiles.last()->fileName());
+
+        TRAPD(error, media->SetTextValueL( KMPXMediaGeneralUri, *fileName));
+        delete fileName;
         if(error != KErrNone)
         {
             delete media;
@@ -462,6 +468,13 @@ bool MediaObjectFactory::fillData(CMPXMedia *media, int index, int dataSelection
 //
 void MediaObjectFactory::removeArray()
 {
+    while(!mTmpFiles.isEmpty())
+    {
+        mTmpFiles.first()->close();
+        delete mTmpFiles.first();
+        mTmpFiles.removeFirst();
+    }
+    
     delete mArray;
     mArray = 0;
 }

@@ -72,7 +72,8 @@ SOURCES += src/videocollectionviewplugin.cpp \
            src/videolistselectiondialog.cpp \
            src/videooperatorservice.cpp
 
-DOCML += data/collectionview.docml
+DOCML += data/collectionview.docml \
+	 data/videolistselectiondialog.docml
 
 RESOURCES += data/videocollectionview.qrc
 

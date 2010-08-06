@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 113.1.4 %
+// Version : %version: 113.1.5 %
 
 // INCLUDE FILES
 #include <xqserviceutil.h>
@@ -350,7 +350,10 @@ int VideoListView::activateView( TMPXItemId &itemId)
                 this, SLOT(layoutChangedSlot())) ||
             !connect(
                 mCurrentList->getModel()->sourceModel(), SIGNAL(modelReady()),
-                this, SLOT(modelReadySlot())))
+                this, SLOT(modelReadySlot())) ||
+            !connect(
+                mCurrentList->getModel()->sourceModel(), SIGNAL(albumListReady()),
+                this, SLOT(albumListReadySlot())))
         {
             ERROR(-1, "VideoListView::activateView() failed to connect signals.");
             // deactivate view so we get rid of dangling connections.
@@ -388,20 +391,28 @@ void VideoListView::modelReadySlot()
 {
 	FUNC_LOG;
 	
-	// if mModelReady is false, then it means that this is the first time modelReady
-	// signal fires. Signaling that view is ready.
-	if(!mViewReady)
+	// check that current list is all videos or collection content.
+	VideoCollectionCommon::TCollectionLevels level = mCurrentList->getLevel();
+	if(level != VideoCollectionCommon::ELevelCategory)
 	{
-	    mViewReady = true;
-	    emit viewReady();
+	    modelReady();
 	}
-	
-    mModelReady = true;
+}
+
+// ---------------------------------------------------------------------------
+// albumListReadySlot
+// ---------------------------------------------------------------------------
+//
+void VideoListView::albumListReadySlot()
+{
+    FUNC_LOG;
     
-    // since the reset signal arrives after
-    // layout changed, need to make sure that
-    // view is updated in case needed
-    layoutChangedSlot();
+    // check that current list is category list.
+    VideoCollectionCommon::TCollectionLevels level = mCurrentList->getLevel();
+    if(level == VideoCollectionCommon::ELevelCategory)
+    {
+        modelReady();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +481,30 @@ void VideoListView::deactivateView()
 void VideoListView::back()
 {
 	FUNC_LOG;
+}
+
+// ---------------------------------------------------------------------------
+// modelReady()
+// ---------------------------------------------------------------------------
+//
+void VideoListView::modelReady()
+{
+    FUNC_LOG;
+
+    // if mViewReady is false, then it means that this is the first time 
+    // modelReady or albumListReady signal fires. Signaling that view is ready.
+    if(!mViewReady)
+    {
+        mViewReady = true;
+        emit viewReady();
+    }
+
+    mModelReady = true;
+    
+    // since the reset signal arrives after
+    // layout changed, need to make sure that
+    // view is updated in case needed
+    layoutChangedSlot();
 }
 
 // ---------------------------------------------------------------------------

@@ -15,6 +15,7 @@
 * 
 */
 
+#include <qdebug.h>
 #include <qapplication.h>
 #include "xqsettingsmanagerstub.h"
 #include <vcxmyvideosdefs.h>
@@ -32,6 +33,7 @@
 #include "hblistview.h"
 #include <hbactivitymanager.h>
 #include <hbapplication.h>
+#include <xqsettingsmanagerstub.h>
 
 #define private public
 #include "videocollectionviewutils.h"
@@ -376,7 +378,9 @@ void TestVideoVideoCollectionViewUtils::testSaveSortingValues()
 // -----------------------------------------------------------------------------
 //
 void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
-{      
+{
+    CRepository::setSetFail(255);
+
     CRepository::mSortValues[KVideoSortingRoleKey] = VideoCollectionCommon::KeyDateTime;
     CRepository::mSortValues[KVideoSortingOrderKey] = Qt::DescendingOrder;
     CRepository::mSortValues[KCollectionsSortingRoleKey] = VideoCollectionCommon::KeyTitle;
@@ -524,7 +528,15 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
 //
 void TestVideoVideoCollectionViewUtils::testGetCenRepStringValue()
 {  
+    VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
+
+    // Invalid
+    XQSettingsManager::mReadItemValueReturnValue = QVariant();
+    QVERIFY(testObject.getCenRepStringValue(0) == "");
     
+    // Ok
+    XQSettingsManager::mReadItemValueReturnValue = QVariant("test");
+    QVERIFY(testObject.getCenRepStringValue(0) == "test");
 }
 
 // -----------------------------------------------------------------------------
@@ -533,7 +545,15 @@ void TestVideoVideoCollectionViewUtils::testGetCenRepStringValue()
 //
 void TestVideoVideoCollectionViewUtils::testGetCenRepIntValue()
 {   
+    VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
+
+    // Invalid
+    XQSettingsManager::mReadItemValueReturnValue = QVariant();
+    QVERIFY(testObject.getCenRepIntValue(0) == -1);
     
+    // Ok
+    XQSettingsManager::mReadItemValueReturnValue = QVariant(13);
+    QVERIFY(testObject.getCenRepIntValue(0) == 13);
 }
 
 // -----------------------------------------------------------------------------
@@ -603,6 +623,8 @@ void TestVideoVideoCollectionViewUtils::testInitListView()
 //
 void TestVideoVideoCollectionViewUtils::testSortModel()
 {
+    CRepository::setGetFail(255);
+    
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
     testObject.mVideosSortRole = -1;
     testObject.mVideosSortOrder = Qt::AscendingOrder;
@@ -759,6 +781,3 @@ void TestVideoVideoCollectionViewUtils::testSetAndGetCollectionActivityData()
 }
 
 // End of file
-    
-
-

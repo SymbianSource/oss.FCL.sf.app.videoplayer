@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 40 %
+// Version : %version: da1mmcf#42 %
 
 
 #include <QApplication>
@@ -27,6 +27,7 @@
 #include <hbview.h>
 #include <hbapplication.h>
 #include <hbactivitymanager.h>
+#include <hbdevicenotificationdialog.h>
 
 #include "videoplayerengine.h"
 #include "videoactivitystate.h"
@@ -543,7 +544,29 @@ void VideoPlayerEngine::playMedia( QString filePath )
     MPX_ENTER_EXIT(_L("VideoPlayerEngine::playMedia()"),
                    _L("filePath = %s"), filePath.data() );  
 	  	
-    mPlaybackWrapper->playMedia( filePath );
+    int result = mPlaybackWrapper->playMedia( filePath );
+    
+    if ( result != KErrNone )
+    {
+        handlePlaybackFailure(result);                       
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// playURI()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlayerEngine::playURI( QString uri )
+{
+    MPX_ENTER_EXIT(_L("VideoPlayerEngine::playURI()"),
+                   _L("uri = %s"), uri.data() );  
+	  	
+    int result = mPlaybackWrapper->playURI( uri );
+    
+    if ( result != KErrNone )
+    {
+        handlePlaybackFailure(result);                       
+    }    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -554,7 +577,12 @@ void VideoPlayerEngine::playMedia( RFile file )
 {
     MPX_ENTER_EXIT(_L("VideoPlayerEngine::playMedia( RFile )")); 
         
-    mPlaybackWrapper->playMedia( file );    
+    int result = mPlaybackWrapper->playMedia( file );   
+    
+    if ( result != KErrNone )
+    {
+        handlePlaybackFailure(result);                        
+    }    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -612,7 +640,8 @@ bool VideoPlayerEngine::isPlayServiceInvoked()
         MPX_DEBUG(_L("VideoPlayerEngine::isPlayServiceInvoked() : interfaceName(%s)"), intface.data() );     
                         
         if ( intface.contains("IVideoView") ||
-             intface.contains("IFileView") )
+             intface.contains("IFileView")  ||
+             intface.contains("IUriView"))
         {
             result = true;
             mIsPlayService = true;
@@ -667,4 +696,53 @@ bool VideoPlayerEngine::shouldActivateCollectionView()
     return result;
 }
 
+
+// -------------------------------------------------------------------------------------------------
+// handlePlaybackFailure()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlayerEngine::handlePlaybackFailure(int errorCode)
+{                    
+    MPX_DEBUG(_L("VideoPlayerEngine::handlePlaybackFailure()"));        
+            
+    if ( mIsPlayService )  
+    { 
+        HbDeviceNotificationDialog* dlg = new HbDeviceNotificationDialog(); 
+        
+        switch ( errorCode )
+        {
+            case KErrNotSupported:
+            case KErrUnknown:
+            case KErrCorrupt:
+            case KErrTooBig:
+            {
+                dlg->setTitle( hbTrId( "txt_videos_info_invalid_clip_operation_canceled" ) );
+                break;
+            }
+            case KErrArgument:
+            case KErrBadName:
+            {
+                dlg->setTitle( hbTrId( "txt_videos_info_unable_to_connect_invalid_url" ) );
+                break;
+            }  
+            case KErrNotFound:
+            {
+                dlg->setTitle( hbTrId( "txt_videos_info_file_not_found" ) );
+                break;
+            } 
+            default:
+            {
+                const QString textToShow = mPlaybackWrapper->resloveErrorString(errorCode);
+                dlg->setTitle(textToShow);
+                break;
+            }
+        }
+        
+        dlg->show();                      
+        
+        
+        qApp->quit();
+        XQServiceUtil::toBackground( false );  
+    }
+}
 // End of file

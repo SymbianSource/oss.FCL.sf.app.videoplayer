@@ -132,7 +132,7 @@ public:
      * @return TMPXItemId mpx id if succeeds TMPXItemId::InvalidId() in case of error
      *  
      */
-    TMPXItemId getMediaIdAtIndex(const QModelIndex &index) const;
+    const TMPXItemId& getMediaIdAtIndex(const QModelIndex &index) const;
   
     /**
      * returns qmodelindex of item id provided.
@@ -140,7 +140,7 @@ public:
      * @param item id
      * @return QModelIndex;
      */
-    QModelIndex indexOfId(TMPXItemId id);
+    QModelIndex indexOfId(const TMPXItemId &id);
     
     /**
      * Method checks that model exists and asks for file path from
@@ -150,7 +150,7 @@ public:
      * @return QString file path if succeeds, empty string in case of error.
      *  
      */
-    QString getMediaFilePathForId(TMPXItemId mediaId);
+    QString getMediaFilePathForId(const TMPXItemId &mediaId);
         
     /**
      * Add a new album.
@@ -188,13 +188,13 @@ public:
     int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);    
 	
     /**
-     * Renames an album.
+     * Renames a video or user defined colletion.
      * 
-     * @param itemId, Album to be renamed.
-     * @param newTitle, New title for the album.
+     * @param itemId, id of item  to be renamed.
+     * @param newTitle, New title for the item.
      * @return 0 if no errors.
      */
-    int renameAlbum(const TMPXItemId &albumId, const QString &newTitle);
+    int renameItem(const TMPXItemId &itemId, const QString &newTitle);
 
     /**
 	 * Resolves duplicate album names and returns the resolved name.
@@ -217,14 +217,14 @@ public:
      * @param filterValue item id used as filter
      * @param filterValue
      */
-    void setGenericIdFilter(TMPXItemId itemId, bool filterValue);
+    void setGenericIdFilter(const TMPXItemId &itemId, bool filterValue);
     
     /**
      * Set album in use and invalidates filtering.
      * 
      * @param albumId album id
      */
-    void setAlbumInUse(TMPXItemId albumId);
+    void setAlbumInUse(const TMPXItemId &albumId);
     
 	/**
 	 * Gets the currently opened item.
@@ -297,12 +297,6 @@ private slots:
      * refiltering is required
      */
     void albumChangedSlot();
-
-    /**
-     * signaled when data for item has changed and 
-     * invalidate is required.
-     */
-    void itemModifiedSlot(const TMPXItemId &itemId);
     
 private:
     

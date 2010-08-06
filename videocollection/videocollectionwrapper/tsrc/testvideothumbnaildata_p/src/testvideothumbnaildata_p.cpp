@@ -123,7 +123,8 @@ void TestVideoThumbnailData_p::init()
     
     VideoSortFilterProxyModel::mReturnInvalidIndexes = false;
     VideoSortFilterProxyModel::mRowCountCallCount = 0;
-    qRegisterMetaType<QList<TMPXItemId> >("QList<TMPXItemId>");
+
+    qRegisterMetaType<QList<TMPXItemId> >("QList<TMPXItemId>& ");
 }
 
 // ---------------------------------------------------------------------------
@@ -249,7 +250,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     init();
     VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), -1);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     delete spy;
@@ -261,7 +262,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     init();
     VideoThumbnailFetcher* backup = mTestObject->mThumbnailFetcher;
     mTestObject->mThumbnailFetcher = NULL;
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), -1);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     delete spy;
@@ -271,7 +272,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
 
     // Thumbnail has been already fetched.
     init();
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->mThumbnailData.insert(TMPXItemId(10, 0), 0);
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(10, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -283,7 +284,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     init();
     VideoThumbnailFetcher::mAddFetchFails = true;
     mTestObject->mCurrentModel->appendData("testfile");
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
@@ -293,7 +294,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     // Filename is empty.
     init();
     mTestObject->mCurrentModel->appendData("");
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
@@ -303,7 +304,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     // Filename is null.
     init();
     mTestObject->mCurrentModel->appendData(QString());
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
@@ -316,7 +317,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     init();
     QString fileName("video.mp4");
     mTestObject->mCurrentModel->appendData(fileName);
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 1);
@@ -330,7 +331,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     init();
     mTestObject->mCurrentModel->appendData(fileName);
     VideoThumbnailFetcher::mRequests.insert(1, VideoThumbnailFetcher::TnRequest("test1", 0, -1, false));
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 1);
@@ -360,7 +361,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
     
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnails(indexes,
             BACKGROUND_FETCH_PRIORITY), -1);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -378,7 +379,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     indexes.append(mTestObject->mCurrentModel->index(0, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(10, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(20, 0, QModelIndex()));
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnails(indexes,
             BACKGROUND_FETCH_PRIORITY), -1);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -391,7 +392,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     // Tests when parameter array indexes is empty.
     init();
     indexes.clear();
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnails(indexes,
             BACKGROUND_FETCH_PRIORITY), 0);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -409,7 +410,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     VideoThumbnailFetcher::mRequests[40] = VideoThumbnailFetcher::TnRequest("test2", 0, -1, false);
     VideoThumbnailFetcher::mRequests[30] = VideoThumbnailFetcher::TnRequest("test3", 0, -1, false);
     indexes.append(mTestObject->mCurrentModel->index(0, 0, QModelIndex()));
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnails(indexes,
             BACKGROUND_FETCH_PRIORITY), 1);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -448,7 +449,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     indexes.append(mTestObject->mCurrentModel->index(2, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(3, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(4, 0, QModelIndex()));
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnails(indexes,
             BACKGROUND_FETCH_PRIORITY), 3);
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -482,7 +483,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     init();
     VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     delete spy;
@@ -496,7 +497,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     init();
     VideoThumbnailFetcher* backup = mTestObject->mThumbnailFetcher;
     mTestObject->mThumbnailFetcher = NULL;
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     delete spy;
@@ -511,7 +512,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     {
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2);
@@ -559,7 +560,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     {
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->mCurrentFetchIndex = THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2*-1;
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -575,7 +576,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     {
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->mCurrentFetchIndex = THUMBNAIL_BACKGROUND_FETCH_AMOUNT*2;
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -591,7 +592,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     {
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->mCurrentFetchIndex = THUMBNAIL_BACKGROUND_FETCH_AMOUNT + THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2;
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -603,7 +604,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
 
     // no items and fetch index -5
     init();
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->mCurrentFetchIndex = -5;
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -619,7 +620,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     {
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
-    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)));
     VideoSortFilterProxyModel::mReturnInvalidIndexes = true;
     mTestObject->mCurrentFetchIndex = THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2;
     mTestObject->emitDoBackgroundFetching();
@@ -854,6 +855,22 @@ void TestVideoThumbnailData_p::testEnableBackgroundFetching()
     cleanup();
 }
 
+// ---------------------------------------------------------------------------
+// testBackgroundFetchingEnabled
+// ---------------------------------------------------------------------------
+//
+void TestVideoThumbnailData_p::testBackgroundFetchingEnabled()
+{
+    init();
+    
+    mTestObject->enableBackgroundFetching(true);
+    QVERIFY(mTestObject->backgroundFetchingEnabled() == true);
+
+    mTestObject->enableBackgroundFetching(false);
+    QVERIFY(mTestObject->backgroundFetchingEnabled() == false);
+
+    cleanup();
+}
 // ---------------------------------------------------------------------------
 // testFreeThumbnailData
 // ---------------------------------------------------------------------------

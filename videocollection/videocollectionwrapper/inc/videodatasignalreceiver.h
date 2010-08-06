@@ -73,7 +73,7 @@ public slots:
      * 
      * @param itemId item id
      */
-    virtual void itemDeletedSlot( TMPXItemId itemId ) = 0;
+    virtual void itemDeletedSlot( TMPXItemId &itemId ) = 0;
            
     /**
      * Signaled when multiple video deletion command is completed.
@@ -103,7 +103,7 @@ public slots:
      * @param albumId, Album which items are received.
      * @param albumItems, Items belonging to the current album.
      */
-    virtual void albumListAvailableSlot(TMPXItemId albumId,
+    virtual void albumListAvailableSlot(TMPXItemId &albumId,
         CMPXMediaArray *albumItems) = 0;
     
     /**
@@ -114,9 +114,14 @@ public slots:
     virtual void itemModifiedSlot(const TMPXItemId &itemId) = 0;
     
     /**
-     * Signalled when list is complete.
+     * Signalled when video list is complete.
      */
-    virtual void listCompleteSlot() = 0;
+    virtual void videoListCompleteSlot() = 0;
+    
+    /**
+     * Signalled when album list is complete.
+     */
+    virtual void albumListCompleteSlot() = 0;
 };
 
 #endif // __VIDEOMODELOBSERVER_H

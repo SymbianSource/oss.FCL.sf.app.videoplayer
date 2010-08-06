@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#8 %
+// Version : %version: da1mmcf#9 %
 
 
 
@@ -67,7 +67,7 @@ class VideoPlaybackControlConfiguration : public QObject
         * Create control list
         */
         void createControlList();
-		
+
     private:
 
         /**
@@ -86,6 +86,7 @@ class VideoPlaybackControlConfiguration : public QObject
     private:
         VideoPlaybackControlsController *mControlsController;
         QList<TVideoPlaybackControls>    mControlsList;
+        bool                             mSurfaceAttached;
 };
 
 #endif /*VIDEOPLAYBACKCONTROLCONFIGURATION_H_*/

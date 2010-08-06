@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  11 %
+// Version : %version:  12 %
 
 
 
@@ -37,6 +37,7 @@
 #include <mmf/common/mmfcontrollerframeworkbase.h>
 
 #include <coeutils.h>
+#include <textresolver.h>
 #include <videoplaylistutility.h>
 #include <mpxvideoplaybackdefs.h>
 #include <mpxmediacontainerdefs.h>
@@ -787,6 +788,22 @@ void CMpxVideoPlayerAppUiEngine::ReadActivityData()
 }
 
 
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerAppUiEngine::ResolveErrorStringL()
+// -------------------------------------------------------------------------------------------------
+//
+const TDesC& CMpxVideoPlayerAppUiEngine::ResolveErrorStringL(TInt aErrorCode)
+{
+    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ResolveErrorStringL()"));   
+    
+    CTextResolver* textresolver = CTextResolver::NewL();
+    
+    const TDesC& text = textresolver->ResolveErrorString( aErrorCode );
+    
+    delete textresolver;
+    
+    return text;       
+}
 
 // EOF
 

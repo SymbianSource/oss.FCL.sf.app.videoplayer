@@ -62,4 +62,6 @@ EXPORTS
 	??_EVideoPlayerEngine@@UAE@I@Z @ 61 NONAME ; VideoPlayerEngine::~VideoPlayerEngine(unsigned int)
 	?applicationReady@VideoPlayerEngine@@IAEXXZ @ 62 NONAME ; void VideoPlayerEngine::applicationReady(void)
 	?viewReadySlot@VideoPlayerEngine@@QAEXXZ @ 63 NONAME ; void VideoPlayerEngine::viewReadySlot(void)
+	?handlePlaybackFailure@VideoPlayerEngine@@AAEXH@Z @ 64 NONAME ; void VideoPlayerEngine::handlePlaybackFailure(int)
+	?playURI@VideoPlayerEngine@@QAEXVQString@@@Z @ 65 NONAME ; void VideoPlayerEngine::playURI(class QString)
 

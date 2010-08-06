@@ -140,7 +140,7 @@ public:
      * @param aMediaId id of the item
      * @return KErrNone if ok  
      */
-    int openItem(TMPXItemId &mediaId);
+    int openItem(const TMPXItemId &mediaId);
 
     /**
      * calls collection to go back to collection level
@@ -157,7 +157,7 @@ public:
      * 
      * @return 0 media fetchingstarted ok 
      */
-    int fetchMpxMediaByMpxId(TMPXItemId &aMpxId);    
+    int fetchMpxMediaByMpxId(const TMPXItemId &aMpxId);    
     
     /**
      * Gets all details for the selected MPX Media object.
@@ -167,7 +167,7 @@ public:
      * 
      * @return 0 if detail fetching started ok
      */
-    int getVideoDetails(TMPXItemId& aMediaId);
+    int getVideoDetails(const TMPXItemId& aMediaId);
     
     /**
      * Add a new album.
@@ -192,7 +192,7 @@ public:
      * @param mediaIds, Items which to add.
      * @return 0 if no errors.
      */
-    int addItemsInAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    int addItemsInAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
     /**
      * Removes items from existing album.
@@ -201,16 +201,16 @@ public:
      * @param mediaIds, Items which to remove.
      * @return 0 if no errors.
      */
-    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    int removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
     /**
-     * Renames an album.
+     * Renames a video or user defined collection item.
      * 
-     * @param albumId, Album to be renamed.
+     * @param itemId, id of item to be renamed.
      * @param newTitle, New title for the album.
      * @return 0 if no errors.
      */
-    int renameAlbum(const TMPXItemId &albumId, const QString &newTitle);
+    int renameItem(const TMPXItemId &itemId, const QString &newTitle);
 
 private:
     
@@ -232,14 +232,14 @@ private:
      * 
      * @param videoId id of the video to open
      */
-    void openVideoL(TMPXItemId &videoId);
+    void openVideoL(const TMPXItemId &videoId);
 
     /**
      * Private implementation to handle leaving code of collection opening.
      * 
      * @param id id of the collection to open
      */
-    void openCategoryL(TMPXItemId &id);
+    void openCategoryL(const TMPXItemId &id);
 
     /**
      * Private implementation to handle leaving code of collection back stepping.
@@ -253,7 +253,7 @@ private:
      * 
      * @param videoId id of the video to get details from 
      */
-    void getVideoDetailsL(TMPXItemId &videoId);
+    void getVideoDetailsL(const TMPXItemId &videoId);
         
     /**
      * Removes user created albums.
@@ -268,7 +268,7 @@ private:
      * 
      * @param mpxId mpxif for the video object to fetch from collection
      */
-    void fetchMpxMediaByMpxIdL(TMPXItemId &mpxId);    
+    void fetchMpxMediaByMpxIdL(const TMPXItemId &mpxId);    
     
     /**
      * Create a new album.
@@ -285,7 +285,7 @@ private:
      * @param mediaIds, Items to add in the album.
      * @return None.
      */
-    void addItemsInAlbumL(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    void addItemsInAlbumL(const TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
     /**
      * Removes items from an album.
@@ -294,16 +294,16 @@ private:
      * @param mediaIds, Items to remove from album.
      * @return None.
      */
-    void removeItemsFromAlbumL(TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
+    void removeItemsFromAlbumL(const TMPXItemId &albumId, const QList<TMPXItemId> &mediaIds);
     
     /**
-     * Renames an album.
+     * Renames a media item.
      * 
-     * @param albumId, Album to be renamed.
+     * @param itemId, Album to be renamed.
      * @param newTitle, New title for the album.
      * @return None.
      */
-    void renameAlbumL(const TMPXItemId &albumId, const QString newTitle);
+    void renameL(const TMPXItemId &itemId, const QString newTitle);
     
 private:
 

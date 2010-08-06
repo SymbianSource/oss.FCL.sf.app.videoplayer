@@ -39,8 +39,8 @@ int VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue = 0;
 TMPXItemId VideoSortFilterProxyModelData::mGenericFilterId  = TMPXItemId::InvalidId();
 bool VideoSortFilterProxyModelData::mGenericFilterValue = false;
 TMPXItemId VideoSortFilterProxyModelData::mNewAlbumId = TMPXItemId::InvalidId();
-QString VideoSortFilterProxyModelData::mLastAlbumNameInRename;
-int VideoSortFilterProxyModelData::mRenameAlbumReturnValue = 0;
+QString VideoSortFilterProxyModelData::mLastItemNameInRename = "";
+int VideoSortFilterProxyModelData::mRenameItemReturnValue = 0;
 QString VideoSortFilterProxyModelData::mLastAddedAlbumName = "";
 
 VideoSortFilterProxyModel::VideoSortFilterProxyModel(VideoCollectionCommon::TModelType type, QObject *parent):
@@ -156,12 +156,6 @@ void VideoSortFilterProxyModel::processSorting()
 
 void VideoSortFilterProxyModel::albumChangedSlot()
 {
-    // not stubbed
-}
-
-void VideoSortFilterProxyModel::itemModifiedSlot(const TMPXItemId &itemId)
-{
-    Q_UNUSED(itemId);
     // not stubbed
 }
 
@@ -281,15 +275,15 @@ void VideoSortFilterProxyModel::setAlbumInUse(TMPXItemId albumId)
     VideoSortFilterProxyModelData::mLastItemId = albumId;
 }
 
-int VideoSortFilterProxyModel::renameAlbum(const TMPXItemId &albumId, const QString &newTitle)
+int VideoSortFilterProxyModel::renameItem(const TMPXItemId &itemId, const QString &newTitle)
 {
     if(VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue >= 0)
     {
-        VideoSortFilterProxyModelData::mLastItemId = albumId;
-        VideoSortFilterProxyModelData::mLastAlbumNameInRename = newTitle;
+        VideoSortFilterProxyModelData::mLastItemId = itemId;
+        VideoSortFilterProxyModelData::mLastItemNameInRename = newTitle;
 
     }
-    return VideoSortFilterProxyModelData::mRenameAlbumReturnValue;
+    return VideoSortFilterProxyModelData::mRenameItemReturnValue;
 }
 
 TMPXItemId VideoSortFilterProxyModel::getOpenItem() const

@@ -128,13 +128,14 @@ private slots:
     void singleItemSelectedSlot(const QModelIndex &index); 
     
     /**
-     * handles model ready signal from model.
-     * In case dialog type is ESelectCollection and there are no data
-     * in model, opens up a selection dialog for user to input new album name
-     * In case type is something else than ESelectCollection, calls
-     * updateCounterSlot()
+     * Handles model ready signal from model.
      */
     void modelReadySlot();
+    
+    /**
+     * Handles album list ready signal from model.
+     */
+    void albumListReadySlot();
     
     /**
      * Changes the counter value. Sets the checkbutton state based on selection count.
@@ -265,6 +266,16 @@ private:
      * Video list model
      */
     VideoSortFilterProxyModel *mModel;
+    
+    /**
+     * Boolean to know if the model is ready or not. 
+     */
+    bool mModelReady;
+    
+    /**
+     * Boolean to know if album list is ready or not.
+     */
+    bool mAlbumListReady;
     
     /** 
      * List widget to show in selection

@@ -153,7 +153,7 @@ signals:
      * @param mediaId: id of the video whose thumbnail is ready.
      * 
      */
-    void thumbnailsFetched( QList<TMPXItemId> mediaId );  
+    void thumbnailsFetched( QList<TMPXItemId>& mediaId );  
 
 private:
     

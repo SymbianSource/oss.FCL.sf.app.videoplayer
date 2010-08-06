@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#20 %
+// Version : %version:  da1mmcf#21 %
 
 
 
@@ -56,6 +56,8 @@ class VideoBasePlaybackView : public HbView
 
     protected slots:
         void handleClosePopupDialog();
+        void handleAppBackground();
+        void handleAppForeground();
 
     public:
 

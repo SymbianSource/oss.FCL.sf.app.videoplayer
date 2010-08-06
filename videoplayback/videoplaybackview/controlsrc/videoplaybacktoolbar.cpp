@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 
 
@@ -379,9 +379,9 @@ void VideoPlaybackToolBar::updateState( TMPXPlaybackState state )
                 //
                 // non-pausable stream, disable 'E3rdButton' action (for 'Pause' button)
                 //
-                mButtonActions[E3rdButton]->setEnabled( false ); 
-            }       
-			     
+                mButtonActions[E3rdButton]->setEnabled( false );
+            }
+
             break;
         }
         case EPbStatePaused:
@@ -393,11 +393,15 @@ void VideoPlaybackToolBar::updateState( TMPXPlaybackState state )
             if ( ! mButtonActions[E3rdButton]->isEnabled() )
             {
                 //
-                // enable 'E3rdButton' action (for 'Play' button) in 'Paused' state 
+                // enable 'E3rdButton' action (for 'Play' button) in 'Paused' state
                 //
-                mButtonActions[E3rdButton]->setEnabled( true ); 
-            }       
-                 
+                mButtonActions[E3rdButton]->setEnabled( true );
+            }
+
+            break;
+        }
+        case EPbStatePluginSeeking:
+        {
             break;
         }
         default:
@@ -623,7 +627,7 @@ void VideoPlaybackToolBar::updateWithFileDetails(
     // The logic to enable or disable 'E3rdButton' will depend on the current playback state.
     //
     updateState( mController->state() );
-    
+
     //
     // toolbar creates button once it gets visible, so we don't know exact timing when toolbar
     // creates button, so start timer to get layout information once the toolbar gets visible.

@@ -21,12 +21,15 @@
 
 #include <e32cmn.h>
 
+class CMPXCollectionPath;
 class MMPXCollectionObserver;
 
 class MMPXCollection
 {
     public:
         virtual TUid UidL() const = 0;
+
+        virtual CMPXCollectionPath* PathL() = 0;
 
     public:
         TUid iUid;
@@ -61,6 +64,8 @@ class CMPXCollectionUtility : public MMPXCollectionUtility,
         void Close();
 
         TUid UidL() const;
+
+        CMPXCollectionPath* PathL();
 };
 
 #endif //MMPXCOLLECTIONUTILITY_H

@@ -68,7 +68,7 @@ public:
      * @return QIcon* thumbnail pointer
      *
      */
-    const QIcon* getThumbnail(TMPXItemId mediaId);
+    const QIcon* getThumbnail(const TMPXItemId &mediaId);
 
     /**
      * Method removes thumbnail data from the icon cache.
@@ -78,7 +78,7 @@ public:
      * @return bool: true if item removed correctly, false if not.
      *
      */
-    bool removeThumbnail(TMPXItemId mediaId);
+    bool removeThumbnail(const TMPXItemId &mediaId);
 
     /**
      * Starts background thumbnail fetching from the given fetch index.
@@ -102,6 +102,13 @@ public:
      * @param enable true enables and false disables thumbnail creation.
      */
     void enableThumbnailCreation(bool enable); 
+    
+    /**
+     * Returns if background fetching is enabled.
+     * 
+     * @return bool: true if background fetching is enabled, otherwise false.
+     */
+    bool backgroundFetchingEnabled();
     
     /**
      * Frees allocated data for thumbnails and cancels ongoing fetches.
@@ -159,7 +166,7 @@ protected:
      * @return int: thumbnail id or -1 if fetch starting fails.
      *
      */
-    int startFetchingThumbnail(TMPXItemId mediaId, int priority);
+    int startFetchingThumbnail(const TMPXItemId &mediaId, int priority);
     
     /**
      * Appends indexes in the source model to the list between start and end.
@@ -168,7 +175,7 @@ protected:
      * @param startIndex start index
      * @param endIndex end index
      */
-    void getModelIndexes(QList<QModelIndex> &indexes, int startIndex, int endIndex);
+    void getModelIndexes(QList<QModelIndex> &indexes, int &startIndex, int &endIndex);
 
     /**
      * Method returns default thumbnail data.
@@ -178,7 +185,7 @@ protected:
      * @return QIcon: reference to default thumbnail data
      *
      */
-    const QIcon* defaultThumbnail(TMPXItemId mediaId);
+    const QIcon* defaultThumbnail(const TMPXItemId &mediaId);
     
     /**
      * Loads icon from file or resource, the icon is scaled to size of the 
@@ -204,7 +211,7 @@ signals:
      * @param mediaIds: media ids of the videos whose thumbnail is ready.
      *
      */
-    void thumbnailsFetched(QList<TMPXItemId> mediaIds);
+    void thumbnailsFetched(QList<TMPXItemId>& mediaIds);
 
 private slots:
 

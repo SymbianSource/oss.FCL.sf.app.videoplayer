@@ -57,7 +57,7 @@ bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, in
     mApplicationUid = utils.getCenRepIntValue(appUidKey);
     
     // Icon is required, either service uri or application uid is required.
-    if(mIconResource.isEmpty() && (mServiceUri.isEmpty() || mApplicationUid > 0))
+    if(mIconResource.isEmpty() || (mServiceUri.isEmpty() && mApplicationUid <= 0))
     {
         return false;
     }
@@ -93,7 +93,7 @@ void VideoOperatorService::launchService()
     
     if(!mServiceUri.isEmpty())
     {
-        INFO_1("VideoOperatorService::launchService() starting url: %S", mServiceUri);
+        INFOQSTR_1("VideoOperatorService::launchService() starting url: %S", mServiceUri);
         QDesktopServices::openUrl(QUrl(mServiceUri));
     }
     else

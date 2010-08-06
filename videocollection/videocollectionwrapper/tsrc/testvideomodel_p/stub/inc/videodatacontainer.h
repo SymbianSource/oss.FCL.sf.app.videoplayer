@@ -74,7 +74,7 @@ public:  // from QHash
      *                   object is not found from wanted index
      * 
      */
-    CMPXMedia* fromIndex(int index) const;
+    CMPXMedia* fromIndex(const int &index) const;
   
     /**
      * Returns an index of id.
@@ -83,7 +83,7 @@ public:  // from QHash
      * 
      * @return int index of item or -1 if item with provided id is not found
      */
-    int indexOfId(const TMPXItemId &id) const;
+    const int& indexOfId(const TMPXItemId &id) const;
 
     /**
      * Returns id of item from provided index
@@ -92,7 +92,7 @@ public:  // from QHash
      * 
      * @return id of item or invalid TMPXItemId if item is not found from provided index
      */
-    TMPXItemId idFromIndex(int index) const;
+    const TMPXItemId& idFromIndex(const int &index) const;
 
     /**
      * returns count of items
@@ -108,7 +108,7 @@ public:  // from QHash
     * @param inteIndex index of item
     * @return TMPXItemId id of the item marked as removed
     */
-    TMPXItemId markItemRemoved(const int &itemIndex);
+    const TMPXItemId markItemRemoved(const int &itemIndex);
    
     /**
      * Method removes provided items from mRemovedMedia
@@ -133,12 +133,12 @@ public:  // from QHash
      * 
      * @param itemId id of item to be returned
      */
-    CMPXMedia* getRemovedMedia(TMPXItemId itemId);
+    CMPXMedia* getRemovedMedia(TMPXItemId &itemId);
     
     /**
      * decrements indexes of items after provided index by one.
      */
-    void decHashIndexesAfter(int fromIndex);
+    void decHashIndexesAfter(const int &fromIndex);
     
 
 public: // data

@@ -22,6 +22,9 @@
 #include <qvariant.h>
 #include "videocollectioncommon.h"
 
+#define CENREP_NO_STRING "nostring"
+#define CENREP_NO_INT 1010100512
+
 class VideoCollectionViewUtilsData
 {
 public: // methods

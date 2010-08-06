@@ -42,7 +42,10 @@ int VideoOperatorServiceData::mLaunchApplicationLCallCount = 0;
 VideoOperatorService::VideoOperatorService(QObject *parent) : 
     QObject(parent)
 {
-    // not stubbed
+    mTitle = "";
+    mIconResource = "";
+    mServiceUri = "";
+    mApplicationUid = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,12 +54,6 @@ VideoOperatorService::VideoOperatorService(QObject *parent) :
 //
 bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, int appUidKey)
 {
-    // not stubbed
-    Q_UNUSED(titleKey);
-    Q_UNUSED(iconKey);
-    Q_UNUSED(serviceUriKey);
-    Q_UNUSED(appUidKey);
-    
     VideoOperatorServiceData::mLoadCallCount++;
     
     if(VideoOperatorServiceData::mTitles.count() > 0)
@@ -111,7 +108,6 @@ const QString VideoOperatorService::iconResource() const
 void VideoOperatorService::launchService()
 {
     VideoOperatorServiceData::mLaunchServiceCallCount++;
-    // not stubbed
 }
 
 // ---------------------------------------------------------------------------
@@ -123,7 +119,6 @@ void VideoOperatorService::launchApplicationL(const TUid uid, TInt viewId)
     Q_UNUSED(uid);
     Q_UNUSED(viewId);
     VideoOperatorServiceData::mLaunchApplicationLCallCount++;
-    // not stubbed
 }
 
 // End of file.

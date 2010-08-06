@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  15 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -579,21 +579,6 @@ void TestMPXVideoViewWrapper::testSetAspectRatio()
     cleanup();
 }
 
-void TestMPXVideoViewWrapper::testIsAppInFront()
-{
-    init();
-
-    TRAPD(errReqMedia, mVideoViewWrapper->RequestMediaL());
-    QVERIFY( errReqMedia == KErrNone );
-
-    bool front = false;
-    TRAPD( errIsAppInFrnt, front = mVideoViewWrapper->IsAppInFrontL() );
-
-    QVERIFY( errIsAppInFrnt == KErrNone );
-
-    cleanup();
-}
-
 void TestMPXVideoViewWrapper::testClosePlaybackView()
 {
     init();
@@ -663,14 +648,14 @@ void TestMPXVideoViewWrapper::testIssueVideoAppForegroundCmd()
     //
     // test foreground
     //
-    TRAPD( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( ETrue ) );
+    TRAPD( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( ETrue, ETrue ) );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdHandleForeground );
     QVERIFY( errIssueVidAppFGCmd == KErrNone );
 
     //
     // test background
     //
-    TRAP( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( EFalse ) );
+    TRAP( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( EFalse, EFalse ) );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdHandleBackground );
     QVERIFY( errIssueVidAppFGCmd == KErrNone );
 
@@ -858,7 +843,7 @@ void TestMPXVideoViewWrapper::testHandleMedia()
     }
 
     //
-    // working case - re-play after previous termination 
+    // working case - re-play after previous termination
     //
     TRAP_IGNORE(
         RArray<TInt> suppIds;
@@ -890,8 +875,8 @@ void TestMPXVideoViewWrapper::testHandleMedia()
     {
         delete media;
         media = NULL;
-    }    
-    
+    }
+
     //
     //  Handle playback media - working case - RN logo is visible
     //
@@ -955,6 +940,22 @@ void TestMPXVideoViewWrapper::testHandleMedia()
         delete media;
         media = NULL;
     }
+
+    cleanup();
+}
+
+void TestMPXVideoViewWrapper::testSurfacedAttached()
+{
+    init();
+
+    TRAPD(err, mVideoViewWrapper->CreateControlsL());
+    QVERIFY( err == KErrNone );
+
+    mVideoViewWrapper->SurfacedAttached( ETrue );
+    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSurfaceAttached );
+
+    mVideoViewWrapper->SurfacedAttached( EFalse );
+    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSurfaceDetached );
 
     cleanup();
 }

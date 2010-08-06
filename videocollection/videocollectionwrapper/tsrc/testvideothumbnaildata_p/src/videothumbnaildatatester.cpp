@@ -29,7 +29,6 @@
 VideoThumbnailDataTester::VideoThumbnailDataTester()
 {
     connect(this, SIGNAL(doBackgroundFetchingSignal()), this, SLOT(doBackgroundFetching()));
-    connect(this, SIGNAL(modelChangedSignal()), this, SLOT(modelChangedSlot()));
     connect(this, SIGNAL(reportThumbnailsReadySignal()), this, SLOT(reportThumbnailsReadySlot()));
     connect(this, SIGNAL(aboutToQuitSignal()), this, SLOT(aboutToQuitSlot()));
 }
@@ -41,7 +40,6 @@ VideoThumbnailDataTester::VideoThumbnailDataTester()
 VideoThumbnailDataTester::~VideoThumbnailDataTester()
 {
     disconnect(this, SIGNAL(doBackgroundFetchingSignal()), this, SLOT(doBackgroundFetching()));
-    disconnect(this, SIGNAL(modelChangedSignal()), this, SLOT(modelChangedSlot()));
     disconnect(this, SIGNAL(reportThumbnailsReadySignal()), this, SLOT(reportThumbnailsReadySlot()));
     disconnect(this, SIGNAL(aboutToQuitSignal()), this, SLOT(aboutToQuitSlot()));
 }
@@ -62,15 +60,6 @@ void VideoThumbnailDataTester::emitDoBackgroundFetching()
 void VideoThumbnailDataTester::emitReportThumbnailsReady()
 {
     emit reportThumbnailsReadySignal();
-}
-
-// -----------------------------------------------------------------------------
-// VideoThumbnailDataTester::emitModelChanged()
-// -----------------------------------------------------------------------------
-//
-void VideoThumbnailDataTester::emitModelChanged()
-{
-    emit modelChangedSignal();
 }
 
 // -----------------------------------------------------------------------------

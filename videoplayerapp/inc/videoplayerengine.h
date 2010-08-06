@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 16 %
+// Version : %version: 19 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -56,6 +56,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
     public:
         void initialize();
         void playMedia( QString filePath );
+		void playURI( QString uri );
         void playMedia( RFile file );
         void setEmbedded();
     signals:
@@ -91,6 +92,8 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
         bool shouldExit();
         
         bool shouldActivateCollectionView();
+        
+        void handlePlaybackFailure(int errorCode);
 
     private:
         bool                      mIsService;

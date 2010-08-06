@@ -86,7 +86,7 @@ public:
      * @param index index of the item to be opened
      * @return TMPXItemId item id  or TMPXItemId::Invalid() if no valid item.
      */ 
-	TMPXItemId mediaIdAtIndex(int index) const;
+	const TMPXItemId& mediaIdAtIndex(const int &index) const;
 
 	/**
 	 * returns model index of id provided
@@ -94,7 +94,7 @@ public:
 	 * @param id of the item
 	 * @return modelIndex
 	 */
-	QModelIndex indexOfId(TMPXItemId id);
+	QModelIndex indexOfId(const TMPXItemId &id);
 	
     /**
      * Method calls video list data to check if there are valid media object 
@@ -103,7 +103,7 @@ public:
      * @param mediaId id of the item to be opened
      * @return QString file path of the media at index, empty string if not valid item.
      */ 
-	QString mediaFilePathForId(TMPXItemId mediaId) const;
+	QString mediaFilePathForId(const TMPXItemId &mediaId) const;
     
 	/**
      * Called by the client when removal of videos are requested.
@@ -131,14 +131,14 @@ public:
      * @param albumId, Album to set in use.
      * @return None.
      */
-    void setAlbumInUse(TMPXItemId albumId);
+    void setAlbumInUse(const TMPXItemId &albumId);
     
     /**
      * returns album id currently in use
      * 
      * @return TMPXItemId
      */
-    TMPXItemId albumInUse();
+    const TMPXItemId& albumInUse() const;
     
     /**
      * removes provided items from provided album id and calls
@@ -149,7 +149,7 @@ public:
      * 
      * @return count of items removed or -1 if failed 
      */
-    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);    
+    int removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &items);    
     
 public: // from QAbstractItemModel
     
@@ -214,12 +214,17 @@ signals:
     * @param id of the video item
     */
     void shortDetailsReady(TMPXItemId id);
-    
+   
     /**
      * Signals that the model is ready, ie. loaded all data from
      * myvideocollection.
      */
     void modelReady();
+    
+    /**
+     * Signals that all albums have been loaded from myvideoscollection.
+     */
+    void albumListReady();
 
     /**
      * Signal to be emitted when something has happened in the 
@@ -231,11 +236,6 @@ signals:
      * Signals that album content has been updated.
      */
     void albumChanged();
-
-    /**
-     * Signals that item data has changed.
-     */
-    void itemModified(const TMPXItemId &itemId);
     
 private slots:
     
@@ -244,14 +244,14 @@ private slots:
      * 
      * @param ids list of ids whose deletion fails 
      */
-    void deleteStartingFailsSlot(QList<TMPXItemId> ids);
+    void deleteStartingFailsSlot(QList<TMPXItemId>& ids);
     
 private:
       
     /**
-     * Method connects signals emitted from or throught this object
+     * Method connects signals used for delete worker
      */
-    int connectSignals();
+    void connectSignals();
     
     /**
      * method disconnects signals
@@ -269,7 +269,7 @@ private:
      * 
      * @return QString detail string
      */
-    QString prepareDetailRow(int index) const; 
+    QString prepareDetailRow(int &index) const; 
 
       /**
      * Formats a detail row string for the video item
@@ -283,7 +283,7 @@ private:
      *
      * @return QString detail string
      */
-    QString doDetailRow(int index) const;
+    QString doDetailRow(int &index) const;
 
     /**
      * Generates a video count string for category or album at given index.
@@ -296,7 +296,7 @@ private:
      * 
      * @return QString video count string
      */
-    QString prepareVideoCountString(int index) const;
+    QString prepareVideoCountString(int &index) const;
     
     /**
      * Generates a video size string from video item at given index
@@ -308,7 +308,7 @@ private:
      * 
      * @return QString size string
      */
-    QString prepareSizeString(int index) const;
+    QString prepareSizeString(int &index) const;
     
     /**
      * Called when there are status changes in some async operation

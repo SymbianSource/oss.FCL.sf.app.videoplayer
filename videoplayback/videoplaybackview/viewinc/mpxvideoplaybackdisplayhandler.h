@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 
 #ifndef __VIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -32,7 +32,7 @@
 // 
 //  CLASS DECLARATION
 //
-class CMPXVideoContainer;
+class CVideoContainer;
 class MMPXPlaybackUtility;
 class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
@@ -135,7 +135,7 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         TInt                                iVerticalPosition;
         TVideoRotation                      iRotation;
         TAutoScaleType                      iAutoScale;
-        CMPXVideoContainer*                 iVideoContainer;
+        CVideoContainer*                    iVideoContainer;
 };
 
 #endif // __VIDEOPLAYBACKDISPLAYHANDLER_H__

@@ -19,6 +19,8 @@
 #define __TESTVIDEOLISTMEDIAFACTORY_H__
 
 
+#include <qtemporaryfile.h>
+
 class CMPXMediaArray;
 class CMPXMedia;
 
@@ -52,7 +54,7 @@ enum MediaDataSelection
 _LIT( KMediaTestNamePrefix, "MEDIATESTNAME_%d" );
 const QString gQTMediaNamePrefix = "MEDIATESTNAME_";
 
-_LIT( KMediaTestPathPrefix, "MEDIATESTPATH_%d" );
+_LIT( KMediaTestPathPrefix, "c:\\MEDIATESTPATH_%d\\" );
 const QString gQTMediaPathPrefix = "MEDIATESTPATH_";
 
 _LIT( KMediaTestDescPrefix, "MEDIATESTDESC_%d" );
@@ -144,6 +146,11 @@ private:
      * array of medias
      */
     CMPXMediaArray *mArray;
+    
+    /**
+     * list of temp files
+     */
+    QList<QTemporaryFile*> mTmpFiles;
 };
 
 

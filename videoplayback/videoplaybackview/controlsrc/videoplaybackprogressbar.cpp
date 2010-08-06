@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#30 %
+// Version : %version: da1mmcf#31 %
 
 
 
@@ -404,6 +404,10 @@ void VideoPlaybackProgressBar::updateState( TMPXPlaybackState state )
         {
             setEnableProgressSlider( true );
 
+            break;
+        }
+        case EPbStatePluginSeeking:
+        {
             break;
         }
         default:

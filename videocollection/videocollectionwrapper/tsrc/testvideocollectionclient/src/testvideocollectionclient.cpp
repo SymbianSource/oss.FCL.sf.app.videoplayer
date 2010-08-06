@@ -597,46 +597,46 @@ void TestVideoCollectionClient::testRemoveItemsFromAlbum()
 }
 
 // -----------------------------------------------------------------------------
-// testRenameAlbum
+// testRenameItem
 // -----------------------------------------------------------------------------
 //
-void TestVideoCollectionClient::testRenameAlbum()
+void TestVideoCollectionClient::testRenameItem()
 {
     MMPXCollection::setCommandLLeave(false);
     
     QString title = "test";
-    TMPXItemId albumId = TMPXItemId(1, 2);
+    TMPXItemId itemId = TMPXItemId(1, 2);
     
     // no collectionutility
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    QVERIFY(mTestObject->renameItem(itemId, title) < 0);
     
     mTestObject->initialize(mSignalReceiver);
     
     // invalid album id
-    albumId = TMPXItemId::InvalidId();
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    itemId = TMPXItemId::InvalidId();
+    QVERIFY(mTestObject->renameItem(itemId, title) < 0);
     
     // empty title
     title = "";
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    QVERIFY(mTestObject->renameItem(itemId, title) < 0);
     
     // video id
     title = "test";
-    albumId = TMPXItemId(0, 0);
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    itemId = TMPXItemId(0, 0);
+    QVERIFY(mTestObject->renameItem(itemId, title) == 0);
 
     // category id
-    albumId = TMPXItemId(0, 1);
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    itemId = TMPXItemId(0, 1);
+    QVERIFY(mTestObject->renameItem(itemId, title) < 0);
     
     // good case
-    albumId = TMPXItemId(0, 2);
-    QVERIFY(mTestObject->renameAlbum(albumId, title) == 0);
+    itemId = TMPXItemId(0, 2);
+    QVERIFY(mTestObject->renameItem(itemId, title) == 0);
     
     // command leaves
-    albumId = TMPXItemId(1, 2);
+    itemId = TMPXItemId(1, 2);
     MMPXCollection::setCommandLLeave(true);
-    QVERIFY(mTestObject->renameAlbum(albumId, title) < 0);
+    QVERIFY(mTestObject->renameItem(itemId, title) < 0);
     MMPXCollection::setCommandLLeave(false);
 }
 

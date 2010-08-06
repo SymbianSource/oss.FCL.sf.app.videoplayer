@@ -42,7 +42,8 @@ HEADERS += stub/inc/videoplayerengine.h \
            ../../inc/videoserviceurifetch.h \
            ../../inc/videoserviceplay.h \
            ../../inc/videoserviceview.h \
-           ../../inc/videoservicebrowse.h 
+           ../../inc/videoservicebrowse.h \
+           ../../inc/videoserviceuri.h
 
 SOURCES += stub/src/videoplayerengine.cpp \
            #stub/src/xqserviceprovider.cpp \
@@ -51,5 +52,6 @@ SOURCES += stub/src/videoplayerengine.cpp \
            ../../src/videoserviceurifetch.cpp \
            ../../src/videoserviceplay.cpp \
            ../../src/videoserviceview.cpp \
-           ../../src/videoservicebrowse.cpp 
+           ../../src/videoservicebrowse.cpp \
+           ../../src/videoserviceuri.cpp
 

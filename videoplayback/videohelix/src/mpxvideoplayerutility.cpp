@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 22 %
+// Version : %version: 23 %
 
 
 #include <AudioPreference.h>
@@ -62,7 +62,7 @@ CMpxVideoPlayerUtility::CMpxVideoPlayerUtility( CMPXVideoPlaybackController* aVi
 void CMpxVideoPlayerUtility::ConstructL()
 {
     OpenControllerL();
-        
+
     CActiveScheduler::Add( this );
 }
 
@@ -88,17 +88,17 @@ void CMpxVideoPlayerUtility::Close()
 
     iController.Close();
     iDirectScreenAccessAbort = EFalse;
-    
+
     if ( IsActive() )
     {
         Cancel();
-        
+
         if ( iPosterFrameBitmap )
         {
             delete iPosterFrameBitmap;
-            iPosterFrameBitmap = NULL;         
+            iPosterFrameBitmap = NULL;
         }
-    }    
+    }
 }
 
 void CMpxVideoPlayerUtility::Reset()
@@ -324,18 +324,18 @@ void CMpxVideoPlayerUtility::GetVideoLoadingProgressL( TInt& aPercentageProgress
 }
 
 void CMpxVideoPlayerUtility::GetFrameL()
-{    
+{
     MPX_DEBUG(_L("CMpxVideoPlayerUtility::GetFrameL"));
-       
+
     // dont get another frame if a request is already pending
     //
     if ( ! IsActive() )
     {
         iPosterFrameBitmap = new (ELeave) CFbsBitmap;
-        User::LeaveIfError(iPosterFrameBitmap->Create(TSize(0,0), EColor16MU));  
-                
-        iVideoPlayControllerCustomCommands.GetFrame( *iPosterFrameBitmap, iStatus );   
-        SetActive();    
+        User::LeaveIfError(iPosterFrameBitmap->Create(TSize(0,0), EColor16MU));
+
+        iVideoPlayControllerCustomCommands.GetFrame( *iPosterFrameBitmap, iStatus );
+        SetActive();
     }
 
 }
@@ -343,32 +343,32 @@ void CMpxVideoPlayerUtility::GetFrameL()
 void CMpxVideoPlayerUtility::RunL()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::RunL()"));
-    
+
     if ( iStatus.Int() == KErrNone )
-    {   
-        iVideoPlaybackController->HandleFrameReady( iStatus.Int() );        
-    }   
+    {
+        iVideoPlaybackController->HandleFrameReady( iStatus.Int() );
+    }
     else
     {
-        // Bitmap ownership will NOT be transferred to thumbnail manager so delete it    
+        // Bitmap ownership will NOT be transferred to thumbnail manager so delete it
         delete iPosterFrameBitmap;
-        iPosterFrameBitmap = NULL;        
-    }        
+        iPosterFrameBitmap = NULL;
+    }
 }
 
 void CMpxVideoPlayerUtility::DoCancel()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::DoCancel()"));
-    
-    // Bitmap ownership will NOT be transferred to thumbnail manager so delete it       
+
+    // Bitmap ownership will NOT be transferred to thumbnail manager so delete it
     delete iPosterFrameBitmap;
-    iPosterFrameBitmap = NULL;         
+    iPosterFrameBitmap = NULL;
 }
 
 CFbsBitmap& CMpxVideoPlayerUtility::GetBitmap()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetBitmap()"));
-        
+
     return *iPosterFrameBitmap;
 }
 
@@ -628,21 +628,32 @@ TInt CMpxVideoPlayerUtility::SurfaceParametersChanged()
 //   CMpxVideoPlayerUtility::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMpxVideoPlayerUtility::RemoveSurface()
+void CMpxVideoPlayerUtility::RemoveSurface()
 {
-    TInt error = KErrNone;
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::RemoveSurface()"));
 
-    if ( !iSurfaceId.IsNull() )
+    if ( ! iSurfaceId.IsNull() )
     {
         //
         //  Send command to view to remove the surface
         //
         MPX_TRAPD( err, SendSurfaceCommandL( EPbMsgVideoSurfaceRemoved ) );
 
-        error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( iSurfaceId );
-
         iSurfaceId = TSurfaceId::CreateNullId();
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayerUtility::RemoveSurfaceFromHelix()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayerUtility::RemoveSurfaceFromHelix( TSurfaceId aSurfaceId )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::RemoveSurfaceFromHelix()"));
+
+    TInt error = KErrNone;
+
+    error = iVideoPlaySurfaceSupportCustomCommands.SurfaceRemoved( aSurfaceId );
 
     return error;
 }

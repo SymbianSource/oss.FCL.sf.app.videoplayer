@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#47 %
+// Version : %version: da1mmcf#48 %
 
 
 
@@ -142,6 +142,9 @@ void VideoBasePlaybackView::handleActivateView()
 
     MPX_TRAPD( err, mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
 
+    connect( hbInstance->allMainWindows()[0], SIGNAL( obscured() ), this, SLOT( handleAppBackground() ) );
+    connect( hbInstance->allMainWindows()[0], SIGNAL( revealed() ), this, SLOT( handleAppForeground() ) );
+
     QCoreApplication::instance()->installEventFilter( this );
 
     //
@@ -174,6 +177,9 @@ void VideoBasePlaybackView::handleDeactivateView()
     mActivated = false;
 
     QCoreApplication::instance()->removeEventFilter( this );
+
+    disconnect( hbInstance->allMainWindows()[0], SIGNAL( obscured() ), this, SLOT( handleAppBackground() ) );
+    disconnect( hbInstance->allMainWindows()[0], SIGNAL( revealed() ), this, SLOT( handleAppForeground() ) );
 
     //
     //  Close the playback plugin to release all references to previous clip
@@ -382,9 +388,9 @@ void VideoBasePlaybackView::closePlaybackView()
     mTimerForClosingView->start( 0 );
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // VideoBasePlaybackView::eventFilter
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 bool VideoBasePlaybackView::eventFilter( QObject *object, QEvent *event )
 {
@@ -397,7 +403,8 @@ bool VideoBasePlaybackView::eventFilter( QObject *object, QEvent *event )
             if ( mActivated )
             {
                 MPX_DEBUG(_L("VideoBasePlaybackView::eventFilter foreground()") );
-                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( true ) );
+                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL(
+                        true, ! hbInstance->allMainWindows()[0]->isObscured() ) );
             }
             break;
         }
@@ -406,7 +413,8 @@ bool VideoBasePlaybackView::eventFilter( QObject *object, QEvent *event )
             if ( mActivated )
             {
                 MPX_DEBUG(_L("VideoBasePlaybackView::eventFilter background()") );
-                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( false ) );
+                TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL(
+                        false, ! hbInstance->allMainWindows()[0]->isObscured() ) );
             }
             break;
         }
@@ -469,6 +477,34 @@ void VideoBasePlaybackView::gestureEvent( QGestureEvent* event )
                 emit pannedToLeft();
             }
         }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoBasePlaybackView::handleAppBackground()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoBasePlaybackView::handleAppBackground()
+{
+    MPX_ENTER_EXIT(_L("VideoBasePlaybackView::handleAppBackground()") );
+
+    if ( mActivated )
+    {
+        TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( false, false ) );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoBasePlaybackView::handleAppForeground()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoBasePlaybackView::handleAppForeground()
+{
+    MPX_ENTER_EXIT(_L("VideoBasePlaybackView::handleAppForeground()") );
+
+    if ( mActivated )
+    {
+        TRAP_IGNORE( mVideoMpxWrapper->IssueVideoAppForegroundCmdL( true, true ) );
     }
 }
 

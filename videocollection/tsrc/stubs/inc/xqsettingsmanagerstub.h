@@ -23,7 +23,8 @@
 
 class XQCentralRepositorySettingsKey : public QObject
 {
-
+    Q_OBJECT
+    
 public:
     
     XQCentralRepositorySettingsKey(int uid, int key)
@@ -33,9 +34,14 @@ public:
     }
 };
 
-class XQSettingsManager
+class XQSettingsManager : QObject
 {
-
+    Q_OBJECT
+    
+public:
+    XQSettingsManager();
+    ~XQSettingsManager();
+    
     enum Type
     {
         TypeVariant = 0,
@@ -46,13 +52,9 @@ class XQSettingsManager
     };
     
 public:
-    QVariant readItemValue(XQCentralRepositorySettingsKey &key, int type)
-    {
-        Q_UNUSED(key);
-        Q_UNUSED(type);
-        return QVariant();
-    }
+    QVariant readItemValue(XQCentralRepositorySettingsKey &key, int type);
     
+    static QVariant mReadItemValueReturnValue;
 };
 
 #endif // XQSETTINGSMANAGER_H

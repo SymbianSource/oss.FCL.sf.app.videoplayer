@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 9 %
 
 
 
@@ -39,14 +39,17 @@ class VideoPlaybackWrapper : public QObject
         virtual ~VideoPlaybackWrapper();
 
         int playMedia( QString aFileName );
+		int playURI( QString aUri );
         int playMedia( RFile aFile ); 
         void openPlaybackView() ;
         void lateInit();        
         int replayMedia( QString aFilename );
+        const QString resloveErrorString( int errorCode );
 
     private:
         void initializePlugins();
         int openFileWithNativePath(const TDesC& aFileName);
+		int openURI(const TDesC& aUri);
  
     signals:
         void handlePlaybackView( int viewId );

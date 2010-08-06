@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  7 %
+// Version : %version:  8 %
 
 
 
@@ -202,6 +202,13 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         void LateInitL();
         
         TInt ReplayAfterPriorTermination(const TDesC& aFileName);
+        
+        /*
+         *  converts provided error code to a string  
+         *  @since 10.1
+         *  @param aErrorCode error code to be converted
+         */          
+        const TDesC& ResolveErrorStringL(TInt aErrorCode);
 
     private:
         /**

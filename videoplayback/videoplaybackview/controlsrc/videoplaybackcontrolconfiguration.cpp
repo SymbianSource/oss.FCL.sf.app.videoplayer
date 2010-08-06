@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#23 %
+// Version : %version: da1mmcf#24 %
 
 
 
@@ -39,6 +39,7 @@
 VideoPlaybackControlConfiguration::VideoPlaybackControlConfiguration(
         VideoPlaybackControlsController* controller)
     : mControlsController( controller )
+    , mSurfaceAttached( false )
 {
 }
 
@@ -102,7 +103,7 @@ void VideoPlaybackControlConfiguration::updateControlList(
 {
     MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList(%d)"), event);
 
-    QGraphicsWidget *widget = 
+    QGraphicsWidget *widget =
             mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
 
     switch ( event )
@@ -111,7 +112,10 @@ void VideoPlaybackControlConfiguration::updateControlList(
         {
             MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList() full screen view"));
 
-            widget->setVisible( true );
+            if ( mSurfaceAttached )
+            {
+                widget->setVisible( true );
+            }
 
             deleteControlFromList( EDetailsViewPlaybackWindow );
             deleteControlFromList( EFileDetailsWidget );
@@ -152,6 +156,26 @@ void VideoPlaybackControlConfiguration::updateControlList(
             MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList() RN Logo removed"));
 
             deleteControlFromList( ERealLogoBitmap );
+
+            break;
+        }
+        case EControlCmdSurfaceAttached:
+        {
+            MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList() surface added"));
+
+            mSurfaceAttached = true;
+
+            widget->setVisible( true );
+
+            break;
+        }
+        case EControlCmdSurfaceDetached:
+        {
+            MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList() surface removed"));
+
+            mSurfaceAttached = false;
+
+            widget->setVisible( false );
 
             break;
         }
@@ -199,15 +223,6 @@ void VideoPlaybackControlConfiguration::updateControlsWithFileDetails()
     MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlsWithFileDetails()"));
 
     addControlToList( EControlBar );
-
-    if ( mControlsController->fileDetails()->mVideoEnabled )
-    {
-        MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlsWithFileDetails() video enabled"));
-
-        QGraphicsWidget *widget = 
-                mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
-        widget->setVisible( true );
-    }
 
     emit controlListUpdated();
 }

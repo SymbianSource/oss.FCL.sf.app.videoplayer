@@ -168,9 +168,9 @@ private slots:
     void testRemoveItemsFromAlbum();
     
     /**
-     * verifies renameAlbum
+     * verifies testRenameItem
      */
-    void testRenameAlbum();
+    void testRenameItem();
 
     /**
      * verifies back -call

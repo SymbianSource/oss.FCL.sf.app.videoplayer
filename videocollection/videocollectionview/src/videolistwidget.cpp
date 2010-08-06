@@ -151,6 +151,7 @@ int VideoListWidget::initialize(VideoSortFilterProxyModel &model,
 		connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
 	}
 
+	setItemPixmapCacheEnabled(true);
 	setModel(mModel);
 	
     return 0;
@@ -544,6 +545,7 @@ void VideoListWidget::setContextMenu()
     	mContextMenuActions[EActionDelete]->setVisible(true);
     	mContextMenuActions[EActionPlay]->setVisible(true);
 		mContextMenuActions[EActionDetails]->setVisible(true);
+		mContextMenuActions[EActionRename]->setVisible(true);
     }
     else if(mCurrentLevel == VideoCollectionCommon::ELevelCategory) 
     {
@@ -561,6 +563,7 @@ void VideoListWidget::setContextMenu()
         mContextMenuActions[EActionDelete]->setVisible(true);
     	mContextMenuActions[EActionPlay]->setVisible(true);
 		mContextMenuActions[EActionDetails]->setVisible(true);
+		mContextMenuActions[EActionRename]->setVisible(true);
     }
 }
 
@@ -790,9 +793,8 @@ void VideoListWidget::renameSlot()
     
     QModelIndex index = currentIndex();
     QVariant variant = mModel->data(index, VideoCollectionCommon::KeyTitle);
-    TMPXItemId itemId = mModel->getMediaIdAtIndex(index);
-
-    if(variant.isValid() && itemId.iId2 == KVcxMvcMediaTypeAlbum)
+     
+    if(variant.isValid())
     {
         QString label(hbTrId("txt_videos_title_enter_name"));
         QString albumName = variant.toString();
@@ -815,26 +817,34 @@ void VideoListWidget::renameDialogFinished(HbAction *action)
     Q_UNUSED(action);
 
     HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
-    
+    if(dialog->actions().first() != action)
+    {
+        return;
+    }
     QModelIndex index = currentIndex();
     TMPXItemId itemId = mModel->getMediaIdAtIndex(index);
     QVariant newNameVariant = dialog->value();
     QVariant oldNameVariant = mModel->data(index, VideoCollectionCommon::KeyTitle);
-    
-    if(dialog->actions().first() == action &&
-       oldNameVariant.isValid() && newNameVariant.isValid() && itemId.iId2 == KVcxMvcMediaTypeAlbum)
+    if(!newNameVariant.isValid() || !oldNameVariant.isValid())
     {
-        QString newAlbumName = newNameVariant.toString();
-        QString oldAlbumName = oldNameVariant.toString();
-        
-        if(newAlbumName.length() && newAlbumName.trimmed() != oldAlbumName)
-        {
-            // Resolve collection true name and rename the album
-            newAlbumName = mModel->resolveAlbumName(newAlbumName);
-            mModel->renameAlbum(itemId, newAlbumName);
-        }
+        // invalid data at index
+        return;
     }
+    QString newAlbumName = newNameVariant.toString().trimmed();
+    QString oldAlbumName = oldNameVariant.toString();
+    if(!newAlbumName.length() || newAlbumName == oldAlbumName)
+    {
+        // no new name provided or name has not changed
+        return;
+    }
+    if(itemId.iId2 == KVcxMvcMediaTypeAlbum)
+    {     
+        // for album, we need to make sure name is unique
+        newAlbumName = mModel->resolveAlbumName(newAlbumName);
+    }
+    mModel->renameItem(itemId, newAlbumName);
 }
+
 // ---------------------------------------------------------------------------
 // addToCollectionSlot
 // ---------------------------------------------------------------------------
@@ -1009,8 +1019,15 @@ void VideoListWidget::scrollPositionTimerSlot()
 void VideoListWidget::fetchThumbnailsForVisibleItems()
 {
 	FUNC_LOG_ADDR(this);
+	
+	// No need to do anything if thumbnail fetching is not enabled.
+	if(!VideoThumbnailData::instance().backgroundFetchingEnabled())
+	{
+	    return;
+	}
+	
     const QList<HbAbstractViewItem *> itemsVisible = visibleItems();
-
+    
     if(itemsVisible.count() > 0)
     {
         int row = itemsVisible.value(0)->modelIndex().row();

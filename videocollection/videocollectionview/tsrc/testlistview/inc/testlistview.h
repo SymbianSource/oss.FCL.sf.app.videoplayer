@@ -194,6 +194,11 @@ private slots:
      */
     void testRemoveVideosFromCollectionSlot();
     
+    /**
+     * Tests createOperatorServicesToolbar
+     */
+    void testCreateOperatorServicesToolbar();
+    
 signals:
 
     // Signals needed in tests.

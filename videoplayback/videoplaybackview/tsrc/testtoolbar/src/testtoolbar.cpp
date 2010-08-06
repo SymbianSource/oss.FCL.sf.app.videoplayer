@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 #include <qdebug>
@@ -334,6 +334,15 @@ void TestToolBar::testUpdateState()
     // Paused
     //
     state = EPbStatePaused;
+    mVideoToolBar->updateState( state );
+
+    QVERIFY( mVideoToolBar->mToolBar->mEnabled == true );
+    QVERIFY( mVideoToolBar->mButtons[E3rdButton]->isEnabled() == true );
+
+    //
+    // Seeking
+    //
+    state = EPbStatePluginSeeking;
     mVideoToolBar->updateState( state );
 
     QVERIFY( mVideoToolBar->mToolBar->mEnabled == true );

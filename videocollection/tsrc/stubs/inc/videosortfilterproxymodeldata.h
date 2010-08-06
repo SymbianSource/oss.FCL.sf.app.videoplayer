@@ -43,8 +43,8 @@ public: // methods
         mGenericFilterId = TMPXItemId::InvalidId();
         mGenericFilterValue = false;
         mNewAlbumId = TMPXItemId::InvalidId(); 
-        mLastAlbumNameInRename = "";
-        mRenameAlbumReturnValue= 0;
+        mLastItemNameInRename = "";
+        mRenameItemReturnValue= 0;
         mLastAddedAlbumName = "";
     }
     
@@ -66,8 +66,8 @@ public: // data
     static TMPXItemId mGenericFilterId;
     static bool mGenericFilterValue; 
     static TMPXItemId mNewAlbumId;
-    static QString mLastAlbumNameInRename;
-    static int mRenameAlbumReturnValue;
+    static QString mLastItemNameInRename;
+    static int mRenameItemReturnValue;
     static QString mLastAddedAlbumName;
 };
 

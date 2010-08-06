@@ -51,6 +51,7 @@ private slots:
     void testRemoveThumbnail();
     void testStartBackgroundFetching();
     void testEnableBackgroundFetching();
+    void testBackgroundFetchingEnabled();
     void testFreeThumbnailData();
     void testAllThumbnailsFetchedSlot();
     void testEnableThumbnailCreation();

@@ -114,7 +114,7 @@ public: // services
      * @param index
      * @return int
      */
-    TMPXItemId getMediaIdFromIndex(int index) const;
+    TMPXItemId& getMediaIdFromIndex(const int &index) const;
     
     /**
     * return video path of the item with given media id
@@ -122,7 +122,7 @@ public: // services
     * @param mediaId
     * @return int
     */
-    const QString getFilePathForId(TMPXItemId mediaId) const;
+    const QString getFilePathForId(const TMPXItemId &mediaId) const;
            
     /**
      * return name of the item at given index
@@ -130,7 +130,7 @@ public: // services
      * @param index
      * @return QString
      */
-    const QString getVideoNameFromIndex( int index )  const;
+    const QString getVideoNameFromIndex(const int &index )  const;
    
     /**
      * return default tn always
@@ -138,7 +138,7 @@ public: // services
      * @param index
      * @return QIcon
      */
-    const QIcon* getVideoThumbnailFromIndex( int index ) const;
+    const QIcon* getVideoThumbnailFromIndex(const int &index ) const;
    
     /**
      * return video count of the item at given index
@@ -146,7 +146,7 @@ public: // services
      * @param index
      * @return quint32
      */
-    quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) const;
+    quint32 getCategoryVideoCountFromIndex(const int &index ) const;
     
     /**
      * return video size of the item at given index
@@ -154,7 +154,7 @@ public: // services
      * @param index
      * @return quint32
      */
-    quint32 getVideoSizeFromIndex( int index ) const;
+    quint32 getVideoSizeFromIndex(const int &index ) const;
    
     /**
      * return video age profile of the item at given index
@@ -162,7 +162,7 @@ public: // services
      * @param index
      * @return quint32
      */
-    quint32 getVideoAgeProfileFromIndex( int index ) const;
+    quint32 getVideoAgeProfileFromIndex(const int &index ) const;
    
     /**
      * return video duration of the item at given index
@@ -170,7 +170,7 @@ public: // services
      * @param index
      * @return quint32
      */
-    quint32 getVideodurationFromIndex( int index ) const;
+    quint32 getVideodurationFromIndex(const int &index ) const;
    
     /**
      * return video creation datetime of the item at given index
@@ -178,7 +178,7 @@ public: // services
      * @param index
      * @return QDateTime
      */
-    QDateTime getVideoDateFromIndex( int index ) const;
+    QDateTime getVideoDateFromIndex(const int &index ) const;
    
     /**
      * Returns video status
@@ -187,7 +187,7 @@ public: // services
      * 
      * @return int status code
      */
-    int getVideoStatusFromIndex(int index) const;
+    int getVideoStatusFromIndex(const int &index) const;
     
     /**
      * marks videos to be removed: it's id and index are saved to 
@@ -211,22 +211,22 @@ public: // services
      * 
      * @param index: item position where client wants the file path from.
      */
-    const QString getFilePathFromIndex(int index) const;
+    const QString getFilePathFromIndex(const int &index) const;
     
     /**
      * returns mBelongsToAlbum;
      */
-    bool belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId);
+    bool belongsToAlbum(const TMPXItemId &itemId, TMPXItemId albumId);
     
     /**
      * returns mBelongsToAlbum;
      */
-    void setAlbumInUse(TMPXItemId albumId);
+    void setAlbumInUse(const TMPXItemId &albumId);
     
     /**
      * returns mRemoveFrAlbumReturn
      */
-    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &ids);
+    int removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &ids);
     
     
 private: // private methods
@@ -245,7 +245,7 @@ private: // private methods
      * @param index
      * @return CMPXMedia
      */
-    CMPXMedia* getMediaFromIndex( int index ) const;
+    CMPXMedia* getMediaFromIndex(const int &index) const;
  
     /**
      * return index of item of given id
@@ -253,7 +253,7 @@ private: // private methods
      * @param mediaId
      * @return int
      */
-    int indexOfMediaId(TMPXItemId mediaId) const;
+    int indexOfMediaId(const TMPXItemId &mediaId) const;
     
       
 public slots: 
@@ -277,13 +277,7 @@ public slots:
      * 
      */
     void newVideoAvailableSlot(CMPXMedia* aVideo);
-
-    /**
-     * not used in stub
-     * 
-     */
-    void videoDeletedSlot(TMPXItemId videoId);
-           
+          
     /**
      * used to clear mItemsUnderDeletion for this stub
      * 
@@ -299,7 +293,7 @@ public slots:
     /**
      * not used in stub
      */
-    void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+    void albumListAvailableSlot(TMPXItemId &albumId, CMPXMediaArray *albumItems);
     
     /**
      * not used in stub
@@ -314,12 +308,17 @@ public slots:
     /**
      * not used in stub
      */
-    void itemDeletedSlot(TMPXItemId id);
+    void itemDeletedSlot(TMPXItemId &id);
     
     /**
      * not used in stub
      */
-    void listCompleteSlot();
+    void videoListCompleteSlot();
+    
+    /**
+     * not used in stub
+     */
+    void albumListCompleteSlot();
     
 public:    
     
@@ -409,6 +408,11 @@ public:
      */
     static int mRemoveFrAlbumReturn;
     
+    /**
+     * value returned from getMediaIdFromIndex
+     */
+    static TMPXItemId mItemIdToReturn;
+    
 };
 
 /**
@@ -427,7 +431,7 @@ public:
 
         for(int i = 0; i < mObj->getVideoCount(); ++i)
         {
-            if(id == mObj->getMediaIdFromIndex(i))
+            if(id == mObj->getMediaId(mObj->getMediaFromIndex(i)))
             {
                 return i;
             }

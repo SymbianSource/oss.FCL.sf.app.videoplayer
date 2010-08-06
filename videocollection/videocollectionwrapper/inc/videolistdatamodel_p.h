@@ -76,24 +76,6 @@ public: // Constructor
 	 */
 	int initialize();
 
-signals:
-
-    /**
-     * This signal is emitted, when data to some video item changes.
-     * Like for example new thumbnail is fetched.
-     * 
-     * @param startIndex
-     * @param endIndex
-     * 
-     */
-    void dataChanged(const QModelIndex &startIndex, const QModelIndex &endIndex);
-
-    /**
-     * This signal is emitted, collection notifies details for item has been
-     * fetched and provides a QMap of the details'.
-     */
-    void videoDetailsReady(QVariant &);
-
 private slots:
 
     /**
@@ -105,7 +87,7 @@ private slots:
      * @param mediaIds: media ids of the items  
      * 
      */
-    void thumbnailsFetchedSlot(QList<TMPXItemId> mediaIds);
+    void thumbnailsFetchedSlot(QList<TMPXItemId> &mediaIds);
     
 private slots: //slots from VideoDataSignalReceiver    
     
@@ -143,7 +125,7 @@ private slots: //slots from VideoDataSignalReceiver
      * 
      * @param itemId id of the removed item
      */
-    void itemDeletedSlot(TMPXItemId itemId);
+    void itemDeletedSlot(TMPXItemId &itemId);
 
     /**
      * Signaled by the collection client video deletion request
@@ -175,7 +157,7 @@ private slots: //slots from VideoDataSignalReceiver
      * @param albumId, Album which items are received.
      * @param albumItems, Items belonging to the current album.
      */
-    void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems);
+    void albumListAvailableSlot(TMPXItemId &albumId, CMPXMediaArray *albumItems);
     
     /**
      * Signalled when item has been mofidied.
@@ -185,9 +167,14 @@ private slots: //slots from VideoDataSignalReceiver
     void itemModifiedSlot(const TMPXItemId &itemId);
     
     /**
-     * Signalled when list is complete.
+     * Signalled when video list is complete.
      */
-    void listCompleteSlot();
+    void videoListCompleteSlot();
+    
+    /**
+     * Signalled when album list is complete.
+     */
+    void albumListCompleteSlot();
 
 public: // services 
     
@@ -206,7 +193,7 @@ public: // services
      * 
      * @return TMPXItemId item id or invalid TMPXItemId if id not found at that index
      */
-    TMPXItemId getMediaIdFromIndex(int index) const;
+    const TMPXItemId& getMediaIdFromIndex(const int &index) const;
         
     /**
      * Returns name of the video from the given index.
@@ -216,7 +203,7 @@ public: // services
      * 
      * @return QString name of the item
      */
-    const QString getVideoNameFromIndex(int index)  const;
+    const QString getVideoNameFromIndex(const int &index)  const;
       
     /**
      * Returns the thumbnail of the item from given index.
@@ -227,7 +214,7 @@ public: // services
      * 
      * @return QIcon thumbnail of the item
      */
-    const QIcon* getVideoThumbnailFromIndex(int index)  const;
+    const QIcon* getVideoThumbnailFromIndex(const int &index) const;
     
     /**
      * Returns the value for item count attribute from given index. 
@@ -237,7 +224,7 @@ public: // services
      * 
      * @return guint32 size in bytes
      */
-    quint32 getCategoryVideoCountFromIndex( int index ) const;
+    quint32 getCategoryVideoCountFromIndex(const int &index ) const;
     
     /**
      * Returns the size of the video from given index.
@@ -247,7 +234,7 @@ public: // services
      * 
      * @return guint32 size in bytes
      */
-    quint32 getVideoSizeFromIndex(int index) const;
+    quint32 getVideoSizeFromIndex(const int &index) const;
     
     /**
      * Returns the age profile of the video from given index
@@ -257,7 +244,7 @@ public: // services
      * 
      * @return quint32 age profile in bytes
      */
-    quint32 getVideoAgeProfileFromIndex(int index) const;
+    quint32 getVideoAgeProfileFromIndex(const int &index) const;
     
     /**
      * Returns the duration of the video from given index.
@@ -267,7 +254,7 @@ public: // services
      * 
      * @return guint32 duration
      */
-    quint32 getVideodurationFromIndex(int index) const;
+    quint32 getVideodurationFromIndex(const int &index) const;
     
     /**
      * Returns the duration of the video from given media.
@@ -285,7 +272,7 @@ public: // services
      * 
      * @return QDate date
      */
-    QDateTime getVideoDateFromIndex(int index) const;
+    QDateTime getVideoDateFromIndex(const int &index) const;
     
     /**
      * Returns the creation/download date of the video
@@ -302,7 +289,7 @@ public: // services
      * @return TMPXItemId: id of the item marked
      *
      */
-    TMPXItemId markVideoRemoved(const QModelIndex &itemIndex);
+    const TMPXItemId markVideoRemoved(const QModelIndex &itemIndex);
     
     /**
      * Removes provided ids from the remove -list
@@ -317,14 +304,14 @@ public: // services
      * 
      * @param index: item position where client wants the file path from.
      */
-    const QString getFilePathFromIndex(int index) const;
+    const QString getFilePathFromIndex(const int &index) const;
     
 	/**
      * Returns the file path of the video.
      * 
      * @param mediaId: id for the item
      */
-    const QString getFilePathForId(TMPXItemId mediaId) const;
+    const QString getFilePathForId(const TMPXItemId &mediaId);
     
     /**
      * Checks if the specified item belongs to currently open album.
@@ -341,7 +328,7 @@ public: // services
      * @param albumId, Album to set in use.
      * @return None.
      */
-    void setAlbumInUse(TMPXItemId albumId);
+    void setAlbumInUse(const TMPXItemId &albumId);
     
     /**
      * removes provided items from album provided
@@ -351,7 +338,7 @@ public: // services
      * 
      * @return count of item removed;
      */
-    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);
+    int removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &items);
 
 private: // private methods
   
@@ -403,21 +390,21 @@ private: // private methods
      * @param albumId id of album
      * @param videoarray array of videos in album 
      */
-    void albumDataChangedL(TMPXItemId albumId, CMPXMediaArray *videoArray);
+    void albumDataChangedL(TMPXItemId &albumId, CMPXMediaArray *videoArray);
 
     /**
      * Called when an album has been removed.
      * 
      * @param albumId, Album which items are received.
      */
-    void albumRemoved(TMPXItemId albumId);
+    void albumRemoved(TMPXItemId &albumId);
    
     /**
      * Called when a video has been removed.
      * 
      * @param videoId id of the removed video
      */
-    void videoDeleted(TMPXItemId videoId);
+    void videoDeleted(TMPXItemId &videoId);
 
 private:
     

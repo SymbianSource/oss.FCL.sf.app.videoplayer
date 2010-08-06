@@ -22,7 +22,7 @@ CONFIG += qtestlib \
           symbian_test
 
 LIBS += -lmpxcommon.dll -lflogger.dll -lestor.dll \
-        -lfbscli.dll -lbitgdi.dll -lgdi.dll 
+        -lfbscli.dll -lbitgdi.dll -lgdi.dll -lxqutils.dll
 
 # Input
 HEADERS += stub/inc/metadatasignalspy.h \

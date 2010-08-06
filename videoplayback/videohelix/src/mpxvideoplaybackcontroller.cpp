@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 62 %
+// Version : %version: 65 %
 
 
 //
@@ -544,7 +544,21 @@ CMPXVideoPlaybackController::HandleCustomPlaybackCommandL( CMPXCommand& aCmd )
             case EPbCmdSetPosterFrame:
             {
                 iState->HandleSetPosterFrame();
-                break;    
+                break;
+            }
+            case EPbCmdSurfaceRemovedFromWindow:
+            {
+                TSurfaceId surfaceId =
+                    aCmd.ValueTObjectL<TSurfaceId>( KMPXMediaVideoDisplayTSurfaceId );
+
+                TInt error = iPlayer->RemoveSurfaceFromHelix( surfaceId );
+
+                if ( error != KErrNone )
+                {
+                    MPX_TRAPD( err, iState->SendErrorToViewL( error ) );
+                }
+
+                break;
             }
         }
     }
@@ -770,12 +784,7 @@ void CMPXVideoPlaybackController::HandleMMFEvent( const TMMFEvent& aEvent )
     }
     else if ( aEvent.iEventType == KMMFEventCategoryVideoRemoveSurface )
     {
-        TInt error = iPlayer->RemoveSurface();
-
-        if ( error != KErrNone )
-        {
-            MPX_TRAPD( err, iState->SendErrorToViewL( error ) );
-        }
+        iPlayer->RemoveSurface();
     }
 #endif // SYMBIAN_BUILD_GCE
     else if ( aEvent.iEventType == KMMFEventCategoryVideoPlayerGeneralError )
@@ -868,7 +877,7 @@ void CMPXVideoPlaybackController::SetVolumeCenRepL( TInt aVolume )
         _L("CMPXVideoPlaybackController::SetVolumeCenRepL()"),
         _L("aVolume = %d"), aVolume );
 
-    if ( iFileDetails && iFileDetails->iAudioEnabled )
+    if ( iFileDetails && iFileDetails->iAudioEnabled && !iAccessoryMonitor->IsTvOutConnected() )
     {
         TInt volume( 0 );
 
@@ -891,7 +900,7 @@ void CMPXVideoPlaybackController::SetVolumeCenRepL( TInt aVolume )
         // For example, if we get 77, we need to save it as 70 in 10 volume steps
         //
         volume -= volume % iVolumeNormalizer;
- 
+
         MPX_DEBUG(
             _L("CMPXVideoPlaybackController::SetVolumeCenRepL(): Setting volume = %d"), volume );
 
@@ -2522,15 +2531,15 @@ void CMPXVideoPlaybackController::OpenFile64L( const TDesC& aMediaFile,
 
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
 
-//  ------------------------------------------------------------------------------------------------ 
-//    CMPXVideoPlaybackController::IsViewActivated() 
-//  ------------------------------------------------------------------------------------------------ 
-// 
-TBool CMPXVideoPlaybackController::IsViewActivated() 
-{ 
-    MPX_DEBUG(_L("CMPXVideoPlaybackController::IsViewActivated")); 
-    return iViewActivated; 
-} 
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackController::IsViewActivated()
+//  ------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackController::IsViewActivated()
+{
+    MPX_DEBUG(_L("CMPXVideoPlaybackController::IsViewActivated(%d)"), iViewActivated);
+    return iViewActivated;
+}
 
 //  ------------------------------------------------------------------------------------------------
 //    CMPXVideoPlaybackController::HandleFrameReady()
@@ -2539,7 +2548,7 @@ TBool CMPXVideoPlaybackController::IsViewActivated()
 void CMPXVideoPlaybackController::HandleFrameReady(TInt aError)
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackController::HandleFrameReady"));
-    
+
     iPlaybackMode->HandleFrameReady(aError);
 }
 // End of file

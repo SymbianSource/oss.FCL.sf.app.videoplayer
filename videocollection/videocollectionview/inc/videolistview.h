@@ -127,7 +127,12 @@ private slots:
      * slot is connected to model's modelReady -signal
      */
     void modelReadySlot();
-
+    
+    /**
+     * slot is connected to model's albumListReady -signal
+     */
+    void albumListReadySlot();
+    
     /**
      * slot is connected to plugin's doDelayeds -signal
      *
@@ -271,6 +276,11 @@ private slots:
     void debugNotImplementedYet();
 
 private:
+    /**
+     * Convenience method that modelReadySlot and albumListReadySlot calls.
+     */
+    void modelReady();
+    
     /**
      * Cleans all possibly created objects from this. In some cases there are no quarantees
      * that they were created correctly, and thus is better to start again from clean slate.

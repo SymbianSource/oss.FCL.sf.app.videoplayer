@@ -14,7 +14,7 @@
 * Description:   VideoDataContainer class declaration*
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 // INCLUDE FILES
 #include <mpxmediageneraldefs.h>
@@ -24,6 +24,10 @@
 #include "videodatacontainer.h"
 #include "videocollectionutils.h"
 #include "videocollectiontrace.h"
+
+const int INVALID_INDEX = -1;
+const TMPXItemId INVALID_ID = TMPXItemId::InvalidId();
+
 
 /**
  * global qHash function required fo creating hash values for TMPXItemId -keys
@@ -131,7 +135,7 @@ void VideoDataContainer::append(CMPXMedia *media)
 // fromIndex
 // -----------------------------------------------------------------------------
 //
-CMPXMedia* VideoDataContainer::fromIndex(int index) const
+CMPXMedia* VideoDataContainer::fromIndex(const int &index) const
 {   
     if(index >= 0 && index < mMediaIds.count() && mMediaData.contains(mMediaIds[index]))
     {   
@@ -144,27 +148,27 @@ CMPXMedia* VideoDataContainer::fromIndex(int index) const
 // indexOfId
 // -----------------------------------------------------------------------------
 //
-int VideoDataContainer::indexOfId(const TMPXItemId &id) const
+const int& VideoDataContainer::indexOfId(const TMPXItemId &id) const 
 {
     QHash<TMPXItemId, QPair<int, CMPXMedia*> >::const_iterator iter = mMediaData.find(id);
     if( iter != mMediaData.constEnd())
     {
         return iter->first;
     }
-    return -1;
+    return INVALID_INDEX;
 }
 
 // -----------------------------------------------------------------------------
 // idFromIndex
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoDataContainer::idFromIndex(int index) const
-{
+const TMPXItemId& VideoDataContainer::idFromIndex(const int &index) const
+{   
     if(index >= 0 && index < mMediaIds.count())
     {
-        return mMediaIds[index];
+        return mMediaIds.at(index);
     }
-    return TMPXItemId::InvalidId();    
+    return INVALID_ID;    
 }
 
 // -----------------------------------------------------------------------------
@@ -180,7 +184,7 @@ int VideoDataContainer::count() const
 // decIndexesAfter
 // -----------------------------------------------------------------------------
 //
-void VideoDataContainer::decIndexesAfter(int fromIndex)
+void VideoDataContainer::decIndexesAfter(const int &fromIndex)
 {
     int count = mMediaIds.count();
     QMultiHash<TMPXItemId, QPair<int, CMPXMedia*> >::iterator hashIter;   
@@ -198,7 +202,7 @@ void VideoDataContainer::decIndexesAfter(int fromIndex)
 // markItemsRemoved
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoDataContainer::markItemRemoved(const int &itemIndex)
+const TMPXItemId VideoDataContainer::markItemRemoved(const int &itemIndex)
 {
     // for all provided indexes:
     // - get item address from mMediaData
@@ -207,9 +211,9 @@ TMPXItemId VideoDataContainer::markItemRemoved(const int &itemIndex)
     // - remove item's id from mMediaIds -list 
     // - append item into mRemovedMedia
     // - append item's id into returned id -list
-    TMPXItemId id = TMPXItemId::InvalidId();
     CMPXMedia *media = 0;
-    id = idFromIndex(itemIndex);
+    // get copy of id of item to be removed
+    const TMPXItemId id = idFromIndex(itemIndex);
     media = fromIndex(itemIndex);    
     if(id == TMPXItemId::InvalidId() || !media)
     {
@@ -303,7 +307,7 @@ int VideoDataContainer::restoreRemovedItems(QList<TMPXItemId> *itemIds)
 // getRemovedMedia
 // -----------------------------------------------------------------------------
 //
-CMPXMedia* VideoDataContainer::getRemovedMedia(TMPXItemId itemId)
+CMPXMedia* VideoDataContainer::getRemovedMedia(TMPXItemId &itemId)
 {
     QHash<TMPXItemId, CMPXMedia*>::const_iterator itemIter = 
                                             mRemovedMedia.constFind(itemId);

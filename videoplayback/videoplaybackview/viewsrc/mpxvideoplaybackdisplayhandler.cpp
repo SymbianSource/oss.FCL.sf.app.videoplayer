@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  ou1cpsw#27 %
+// Version : %version:  28 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -24,7 +24,7 @@
 #include <mpxplaybackutility.h>
 #include <mpxvideoplaybackdefs.h>
 
-#include "mpxvideocontainer.h"
+#include "videocontainer.h"
 #include "mpxvideoviewwrapper.h"
 #include "mpxvideoplaybackdisplayhandler.h"
 #include "mpxvideoregion.h"
@@ -119,12 +119,10 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 
     if ( ! iVideoContainer )
     {
-        iVideoContainer = new ( ELeave ) CMPXVideoContainer();
+        iVideoContainer = new ( ELeave ) CVideoContainer();
         iVideoContainer->ConstructL();
         iVideoContainer->SetRect( aDisplayRect );
     }
-
-    aWin.SetSurfaceTransparency( ETrue );
 
     RWindowBase *videoWindow = iVideoContainer->DrawableWindow();
     videoWindow->SetOrdinalPosition( -1 );
@@ -551,6 +549,11 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
         iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
 
         iSurfaceCached = EFalse;
+
+        //
+        // Let ControlsController know that we get the surface.
+        //
+        iViewWrapper->SurfacedAttached( true );
     }
 }
 
@@ -585,6 +588,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
         //  Add new surface
         //
         iVideoDisplay->SurfaceCreated( iSurfaceId, iCropRect, iAspectRatio, iCropRect );
+
+        //
+        // Let ControlsController know that we get the surface.
+        //
+        iViewWrapper->SurfacedAttached( true );
     }
     else
     {
@@ -629,6 +637,11 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
 void CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()"));
+
+    //
+    // Let ControlsController know that we get the surface.
+    //
+    iViewWrapper->SurfacedAttached( false );
 
     if ( iVideoDisplay )
     {

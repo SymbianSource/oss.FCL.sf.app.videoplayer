@@ -163,4 +163,20 @@ void TestVideoThumbnailData::testEnableThumbnailCreation()
     QCOMPARE(VideoThumbnailDataPrivate::mEnableThumbnailCreationCallCount, 1);
 }
 
+// ---------------------------------------------------------------------------
+// testEnableThumbnailCreation
+// ---------------------------------------------------------------------------
+//
+void TestVideoThumbnailData::testBackgroundFetchingEnabled()
+{
+    VideoThumbnailData &instance = VideoThumbnailData::instance();
+    QCOMPARE(VideoThumbnailDataPrivate::mConstructCallCount, 1);
+    
+    VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled = true;
+    QVERIFY(instance.backgroundFetchingEnabled() == VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled);
+    
+    VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled = false;
+    QVERIFY(instance.backgroundFetchingEnabled() == VideoThumbnailDataPrivate::mBackgroundThumbnailFetchingEnabled);
+}
+
 // End of file

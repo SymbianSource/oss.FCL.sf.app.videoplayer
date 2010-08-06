@@ -25,7 +25,7 @@ public: // methods
     {
         mInstanceCallCount = 0;
         mFreeThumbnailDataCallCount = 0;
-        mBackgroundThumbnailFetchingEnabled = 0;
+        mBackgroundThumbnailFetchingEnabled = false;
         mStartBackgroundFetchingCallCount = 0;
         mFetchIndex = -1;
     }
@@ -33,7 +33,7 @@ public: // methods
 public: // data
     static int mInstanceCallCount;
     static int mFreeThumbnailDataCallCount;
-    static int mBackgroundThumbnailFetchingEnabled;
+    static bool mBackgroundThumbnailFetchingEnabled;
     static int mStartBackgroundFetchingCallCount;
     static int mFetchIndex;
 };

@@ -542,7 +542,7 @@ void TestVideoModel_p::testGetFilePathFromIndex()
     QVERIFY(path.isNull());
     
     path = mTestObject->getFilePathFromIndex(0);
-    QCOMPARE(path, gQTMediaPathPrefix + "0");
+    QVERIFY(!path.isEmpty());
     
     // data does not exist
     mTestObject->mMediaData.clear();
@@ -576,7 +576,7 @@ void TestVideoModel_p::testGetFilePathForId()
     QVERIFY(path.isNull());
     
     path = mTestObject->getFilePathForId(TMPXItemId(0,0));
-    QCOMPARE(path, gQTMediaPathPrefix + "0");
+    QVERIFY(!path.isEmpty());
     
     // data does not exist
     mTestObject->mMediaData.clear();
@@ -649,9 +649,9 @@ void TestVideoModel_p::testRemoveItemsFromAlbum()
 //
 void TestVideoModel_p::testThumbnailsFetchedSlot()
 {
-    QVERIFY(connect(this, SIGNAL(signalThumbnailsFetched(QList<TMPXItemId>)), mTestObject, SLOT(thumbnailsFetchedSlot(QList<TMPXItemId>))));      
+    QVERIFY(connect(this, SIGNAL(signalThumbnailsFetched(QList<TMPXItemId>&)), mTestObject, SLOT(thumbnailsFetchedSlot(QList<TMPXItemId>&))));      
     
-    QSignalSpy spysignal(mTestObject, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
+    QSignalSpy spysignal(mStubModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
     mMediaFactory->removeArray();
     
     QList<TMPXItemId> mediaIds;
@@ -699,7 +699,7 @@ void TestVideoModel_p::testThumbnailsFetchedSlot()
     QVERIFY(spysignal.count() == 1);
     
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));  
-    disconnect(this, SIGNAL(signalThumbnailsFetched(QList<TMPXItemId>)), mTestObject, SLOT(thumbnailsFetchedSlot(QList<TMPXItemId>)));
+    disconnect(this, SIGNAL(signalThumbnailsFetched(QList<TMPXItemId>&)), mTestObject, SLOT(thumbnailsFetchedSlot(QList<TMPXItemId>&)));
 }
 
 // -----------------------------------------------------------------------------
@@ -894,8 +894,8 @@ void TestVideoModel_p::testAlbumListAvailableSlot()
 
     QVERIFY(mTestObject->initialize() == 0);
         
-    QVERIFY(connect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*)),
-            mTestObject, SLOT(albumListAvailableSlot(TMPXItemId, CMPXMediaArray*))));  
+    QVERIFY(connect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId&, CMPXMediaArray*)),
+            mTestObject, SLOT(albumListAvailableSlot(TMPXItemId&, CMPXMediaArray*))));  
     
     TMPXItemId albumId(1,2);
     
@@ -932,8 +932,8 @@ void TestVideoModel_p::testAlbumListAvailableSlot()
     TMPXItemId itemToCheck(1,0);
     QVERIFY(mTestObject->belongsToAlbum(itemToCheck, albumId));    
     
-    disconnect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*)),
-                mTestObject, SLOT(albumListAvailableSlot(TMPXItemId, CMPXMediaArray*)));
+    disconnect(this, SIGNAL(signalAlbumListAvailable(TMPXItemId&, CMPXMediaArray*)),
+                mTestObject, SLOT(albumListAvailableSlot(TMPXItemId&, CMPXMediaArray*)));
 }
 
 // -----------------------------------------------------------------------------
@@ -946,7 +946,7 @@ void TestVideoModel_p::testItemModifiedSlot()
 
     QVERIFY(connect(this, SIGNAL(signalItemModified(const TMPXItemId &)), mTestObject, SLOT(itemModifiedSlot(const TMPXItemId &))));  
     
-    QSignalSpy spysignal(mTestObject, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
+    QSignalSpy spysignal(mStubModel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
 
     // invalid item id, no items
     TMPXItemId id = TMPXItemId::InvalidId();
@@ -1077,16 +1077,19 @@ void TestVideoModel_p::testItemDeletedSlot()
     QSignalSpy spyModelChanged(mStubModel, SIGNAL(modelChanged()));
     
     QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
-    QVERIFY(connect(this, SIGNAL(signalDeleteItem(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId))));  
+    QVERIFY(connect(this, SIGNAL(signalDeleteItem(TMPXItemId&)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId&))));  
+    
+    TMPXItemId idForSignal = TMPXItemId(0,0);
     
     // no videos
-    emit signalDeleteItem(TMPXItemId(0,0));
+    emit signalDeleteItem(idForSignal);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(spyModelChanged.count() == 0);
     
+    idForSignal = TMPXItemId::InvalidId();
     // invalid id
-    emit signalDeleteItem(TMPXItemId::InvalidId());
+    emit signalDeleteItem(idForSignal);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(spyModelChanged.count() == 0);
@@ -1097,9 +1100,10 @@ void TestVideoModel_p::testItemDeletedSlot()
     VideoListDataModel::mFirstRemoved = -1;
     VideoListDataModel::mLastRemoved = -1;
     spyModelChanged.clear();
-    
+        
     // not marked as removed
-    emit signalDeleteItem(TMPXItemId(MEDIA_COUNT / 2,0));
+    idForSignal = TMPXItemId(MEDIA_COUNT / 2,0);
+    emit signalDeleteItem(idForSignal);
     QVERIFY(VideoListDataModel::mFirstRemoved == MEDIA_COUNT / 2);
     QVERIFY(VideoListDataModel::mFirstRemoved == MEDIA_COUNT / 2);
     QVERIFY(spyModelChanged.count() == 1);
@@ -1154,7 +1158,8 @@ void TestVideoModel_p::testItemDeletedSlot()
     mTestObject->mAlbumData[album2] = items;
     
     // not existing album
-    emit signalDeleteItem(TMPXItemId(1,2));
+    idForSignal = TMPXItemId(1,2);
+    emit signalDeleteItem(idForSignal);
     QVERIFY(VideoListDataModel::mFirstRemoved == -1);
     QVERIFY(spyModelChanged.count() == 0);
     QVERIFY( mTestObject->mAlbumData.count() == 2);
@@ -1177,7 +1182,7 @@ void TestVideoModel_p::testItemDeletedSlot()
     QVERIFY( mTestObject->mAlbumData.count() == 0);
     mTestObject->mVideoThumbnailData  = pTmp;
     
-    disconnect(this, SIGNAL(signalDeleteItem(TMPXItemId)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId)));
+    disconnect(this, SIGNAL(signalDeleteItem(TMPXItemId&)), mTestObject, SLOT(itemDeletedSlot(TMPXItemId&)));
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));
     
 }
@@ -1294,12 +1299,12 @@ void TestVideoModel_p::testVideoDetailsCompletedSlot()
     using namespace VideoCollectionCommon;
     
     mMediaFactory->removeArray();
-//    QVERIFY(connect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*))));  
+
     QVERIFY(connect(this, SIGNAL(signalVideoDetailsCompleted(CMPXMedia*)), mTestObject, SLOT(videoDetailsCompletedSlot(CMPXMedia*))));      
     
     HbExtendedLocale locale = HbExtendedLocale::system();
     
-    MetaDataSignalSpy spysignal(mTestObject, SIGNAL(videoDetailsReady(QVariant&)));
+    MetaDataSignalSpy spysignal(mStubModel, SIGNAL(fullVideoDetailsReady(QVariant&)));
     
     // check with NULL media.
     emit signalVideoDetailsCompleted(0);
@@ -1326,6 +1331,9 @@ void TestVideoModel_p::testVideoDetailsCompletedSlot()
     QVERIFY(map.contains(MetaKeyFormat));
     QVERIFY(map.contains(MetaKeyVideoResolutionString));
     QVERIFY(map.contains(MetaKeyBitRate));
+    QVERIFY(map.contains(MetaKeyFileName));
+    QVERIFY(map.contains(MetaKeyFilePath));
+    QVERIFY(map.contains(MetaKeyVideoTitle));
     
     // one or several of these will fail, when rest of the metadata is implemented.
     QVERIFY(map.contains(MetaKeyDRMInfo) == false);
@@ -1346,7 +1354,9 @@ void TestVideoModel_p::testVideoDetailsCompletedSlot()
     QCOMPARE(map[MetaKeyFormat].toString(), gQTMediaFormatPrefix + "0");
     QCOMPARE(map[MetaKeyVideoResolutionString].toString(), hbTrId("txt_videos_list_l1l2").arg(1).arg(2));
     QCOMPARE(map[MetaKeyBitRate].toString(), hbTrId("txt_videos_list_l1_kbps", 800));
-    
+    QVERIFY(!map[MetaKeyFileName].toString().isEmpty());
+    QVERIFY(!map[MetaKeyFilePath].toString().isEmpty());
+    QVERIFY(!map[MetaKeyVideoTitle].toString().isEmpty());
     // Mbps case
     media = mMediaFactory->mediaArray()->operator [](1);
     emit signalVideoDetailsCompleted(media);
@@ -1369,7 +1379,7 @@ void TestVideoModel_p::testVideoDetailsCompletedSlot()
     QVERIFY(map.contains(MetaKeySizeString));
     
     disconnect(this, SIGNAL(signalNewVideoList(CMPXMediaArray*)), mTestObject, SLOT(newVideoListSlot(CMPXMediaArray*)));  
-    disconnect(this, SIGNAL(signalVideoDetailsCompleted(TMPXItemId)), mTestObject, SLOT(videoDetailsCompletedSlot(TMPXItemId)));
+    disconnect(this, SIGNAL(signalVideoDetailsCompleted(CMPXMedia*)), mTestObject, SLOT(videoDetailsCompletedSlot(CMPXMedia*)));
 }
 
 // -----------------------------------------------------------------------------
@@ -1420,8 +1430,20 @@ void TestVideoModel_p::testGetCollectionIdFromIndex()
 //
 void TestVideoModel_p::testListCompleteSlot()
 {
-    QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(listCompleteSlot())));
+    QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(videoListCompleteSlot())));
     QSignalSpy spy(mStubModel, SIGNAL(modelReady()));
+    emit signalListCompleteSlot();
+    QCOMPARE(spy.count(), 1);
+}
+
+// -----------------------------------------------------------------------------
+// testalbumListCompleteSlot
+// -----------------------------------------------------------------------------
+//
+void TestVideoModel_p::testalbumListCompleteSlot()
+{
+    QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(albumListCompleteSlot())));
+    QSignalSpy spy(mStubModel, SIGNAL(albumListReady()));
     emit signalListCompleteSlot();
     QCOMPARE(spy.count(), 1);
 }

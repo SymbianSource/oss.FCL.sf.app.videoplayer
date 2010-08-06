@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 
 #include <qdebug>
@@ -312,6 +312,12 @@ void TestProgressBar::testUpdateState()
 
     //
     // test for 2nd block of cases
+    //
+    mProgBar->updateState( EPbStatePluginSeeking );
+    QVERIFY( mProgBar->mProgressSlider->isEnabled() );
+
+    //
+    // test for 3rd block of cases
     //
     mProgBar->updateState( EPbStateBuffering );
     QVERIFY( ! mProgBar->mProgressSlider->isEnabled() );

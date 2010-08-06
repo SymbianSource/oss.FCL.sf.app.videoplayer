@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#8 %
+// Version : %version:  da1mmcf#10 %
 
 
 #include "videoplaybackwrapper.h"
@@ -91,6 +91,27 @@ int VideoPlaybackWrapper::playMedia( RFile aFile )
 void VideoPlaybackWrapper::lateInit()
 {
     MPX_DEBUG(_L("VideoPlaybackWrapper::lateInit()"));    
+}
+
+const QString VideoPlaybackWrapper::resloveErrorString( int errorCode ) 
+{ 
+    MPX_ENTER_EXIT(_L("VideoPlaybackWrapper::resloveErrorString()")); 
+    
+    Q_UNUSED( errorCode );
+    
+    const QString string("No Supported");
+    
+    return string;
+ 
+} 
+
+int VideoPlaybackWrapper::playURI( QString aUri )
+{
+    MPX_ENTER_EXIT(_L("QMpxVideoPlaybackWrapper::playURI"));   
+    
+    Q_UNUSED( aUri );  
+    
+    return 0;
 }
 
 // End of File

@@ -97,7 +97,7 @@ signals:
     /**
      * dummy signal
      */
-    void deleteStartupFailed(QList<TMPXItemId>);
+    void deleteStartupFailed(QList<TMPXItemId>&);
     
     
 public slots:

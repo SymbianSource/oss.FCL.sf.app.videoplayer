@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#29 %
+# Version : %version: da1mmcf#30 %
 
 
 TEMPLATE = lib
@@ -83,7 +83,7 @@ HEADERS += videobaseplaybackview.h \
            videoplaybackfiledetailswidget.h \
            mpxvideoplaybackuserinputhandler.h \
            videoplaybackdetailsplaybackwindow.h \
-           mpxvideocontainer.h
+           videocontainer.h
 
 SOURCES += videobaseplaybackview.cpp \
            videoplaybackview.cpp \
@@ -102,6 +102,6 @@ SOURCES += videobaseplaybackview.cpp \
            videoplaybackfiledetailswidget.cpp \
            mpxvideoplaybackuserinputhandler.cpp \
            videoplaybackdetailsplaybackwindow.cpp \
-           mpxvideocontainer.cpp
+           videocontainer.cpp
 
 RESOURCES += resources/videoplaybackview.qrc

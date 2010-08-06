@@ -582,12 +582,15 @@ void TestVideoDataContainer::testGetRemovedMedia()
     QVERIFY(mTestObject->mRemovedMedia.count() == 3);
     
     CMPXMedia *media = 0;
-    media = mTestObject->getRemovedMedia(TMPXItemId(1,0));
+    TMPXItemId testId = TMPXItemId(1,0);
+    media = mTestObject->getRemovedMedia(testId);
     QVERIFY(!media);
-    media = mTestObject->getRemovedMedia(TMPXItemId(0,0));
+    testId = TMPXItemId(0,0);
+    media = mTestObject->getRemovedMedia(testId);
     QVERIFY(media);
     media = 0; 
-    media = mTestObject->getRemovedMedia(TMPXItemId(MEDIA_COUNT - 1,0));
+    testId = TMPXItemId(MEDIA_COUNT - 1,0);
+    media = mTestObject->getRemovedMedia(testId);
     QVERIFY(media);        
 }
 

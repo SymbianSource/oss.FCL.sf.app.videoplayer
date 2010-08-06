@@ -39,7 +39,7 @@ signals:
     /**
      * emitted to test thumbnailFetchedSlot
      */
-    void signalThumbnailsFetched(QList<TMPXItemId>);
+    void signalThumbnailsFetched(QList<TMPXItemId>&);
     
     /**
      * emitted to pass new media-array into testable object and
@@ -56,7 +56,7 @@ signals:
     /**
      * emitted to verify albumListAvailableSlot
      */
-    void signalAlbumListAvailable(TMPXItemId, CMPXMediaArray*);
+    void signalAlbumListAvailable(TMPXItemId&, CMPXMediaArray*);
     
     /**
      * emitted to verify itemModifiedSlot
@@ -71,7 +71,7 @@ signals:
     /**
      * emitted to get deleteItemSlot to be called.
      */
-    void signalDeleteItem(TMPXItemId);
+    void signalDeleteItem(TMPXItemId&);
          
     /**
     * emitted to get videoDeleteCompletedSlot to be called.
@@ -255,9 +255,14 @@ private slots:
     void testGetCollectionIdFromIndex();
     
     /**
-     * verifies listCompleteSlot
+     * verifies videoListCompleteSlot
      */
     void testListCompleteSlot();
+    
+    /**
+     * verifies albumListCompleteSlot;
+     */
+    void testalbumListCompleteSlot();
 
 private:
   

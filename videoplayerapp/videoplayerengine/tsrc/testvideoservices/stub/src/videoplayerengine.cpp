@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#4 %
+// Version : %version: da1mmcf#5 %
 
 
 #include <qapplication>
@@ -108,6 +108,12 @@ void VideoPlayerEngine::playMedia( RFile file )
 {    
     MPX_DEBUG(_L("VideoPlayerEngine::playMedia( file )"));
     Q_UNUSED( file );
+}
+
+void VideoPlayerEngine::playURI( QString uri )
+{
+    MPX_DEBUG(_L("VideoPlayerEngine::playURI( uri )"));
+    Q_UNUSED( uri );    
 }
 
 // End of file

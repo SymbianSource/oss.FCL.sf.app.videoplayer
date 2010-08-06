@@ -42,6 +42,7 @@ private slots:
     void testFreeThumbnailData();
     void testStartBackgroundFetching();
     void testEnableThumbnailCreation();
+    void testBackgroundFetchingEnabled();
 
 signals:
 

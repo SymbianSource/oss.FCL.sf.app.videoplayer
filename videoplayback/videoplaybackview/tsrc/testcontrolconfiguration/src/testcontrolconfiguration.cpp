@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in videoplaybackcontrolconfiguration
-* 
+*
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -47,14 +47,14 @@ int main(int argc, char *argv[])
 
     HbApplication app(argc, argv);
     HbMainWindow window;
-    
+
     TestControlConfiguration tv;
 
     char *pass[3];
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\testcontrolconfiguration.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
 
     return res;
@@ -77,10 +77,10 @@ void TestControlConfiguration::setup()
 {
     MPX_ENTER_EXIT(_L("TestControlConfiguration::setup()"));
 
-    mFileDetails = new VideoPlaybackViewFileDetails();  
-    
+    mFileDetails = new VideoPlaybackViewFileDetails();
+
     mControlsController = new VideoPlaybackControlsController( mFileDetails );
-                                                                     
+
     mControlConfig = new VideoPlaybackControlConfiguration( mControlsController );
 }
 
@@ -95,19 +95,19 @@ void TestControlConfiguration::cleanup()
     if ( mFileDetails )
     {
         delete mFileDetails;
-        mFileDetails = NULL;    
+        mFileDetails = NULL;
     }
-    
+
     if ( mControlsController )
     {
         delete mControlsController;
-        mControlsController = NULL;    
+        mControlsController = NULL;
     }
-    
+
     if ( mControlConfig )
     {
         delete mControlConfig;
-        mControlConfig = NULL;    
+        mControlConfig = NULL;
     }
 }
 
@@ -185,23 +185,23 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
     // 1. test with mVideoEnabled = false
     //
     mControlsController->mFileDetails->mVideoEnabled = false;
-    
+
     mControlConfig->updateControlsWithFileDetails();
-    
+
     QList<TVideoPlaybackControls> controlsList = mControlConfig->controlList();
-    
+
     QVERIFY( controlsList.contains( EControlBar ) );
 
     //
     // 2. test with mVideoEnabled = true
     //
     mControlsController->mFileDetails->mVideoEnabled = false;
-    
-    mControlConfig->updateControlsWithFileDetails(); 
-    
+
+    mControlConfig->updateControlsWithFileDetails();
+
     QVERIFY( controlsList.contains( EControlBar ) );
-    
-    QGraphicsWidget *widget = 
+
+    QGraphicsWidget *widget =
             mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
 
     QVERIFY( widget->isVisible() );
@@ -217,28 +217,44 @@ void TestControlConfiguration::testUpdateControlList()
 {
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testUpdateControlList()"));
 
-    setup();    
+    setup();
     mControlConfig->createControlList();
 
+    QGraphicsWidget *widget =
+            mControlConfig->mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
     //
     // 1.  Test for Details View
     //
     mControlConfig->updateControlList( EControlCmdDetailsViewOpened );
     QList<TVideoPlaybackControls> controlsList = mControlConfig->controlList();
 
-    QVERIFY( controlsList.contains( EFileDetailsWidget ) );    
+    QVERIFY( ! widget->isVisible() );
+    QVERIFY( controlsList.contains( EFileDetailsWidget ) );
     QVERIFY( controlsList.contains( EDetailsViewPlaybackWindow ) );
-    QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );    
-
+    QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
 
     //
-    // 2. Test for Fullscreen View
+    // 2-1. Test for Fullscreen View
     //
+    mControlConfig->mSurfaceAttached = false;
     mControlConfig->updateControlList( EControlCmdFullScreenViewOpened );
     controlsList = mControlConfig->controlList();
-    
-    QVERIFY( ! controlsList.contains( EFileDetailsWidget ) );    
-    QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );    
+
+    QVERIFY( ! widget->isVisible() );
+    QVERIFY( ! controlsList.contains( EFileDetailsWidget ) );
+    QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
+    QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
+
+    //
+    // 2-2. Test for Fullscreen View
+    //
+    mControlConfig->mSurfaceAttached = true;
+    mControlConfig->updateControlList( EControlCmdFullScreenViewOpened );
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( widget->isVisible() );
+    QVERIFY( ! controlsList.contains( EFileDetailsWidget ) );
+    QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
 
     //
@@ -246,8 +262,9 @@ void TestControlConfiguration::testUpdateControlList()
     //
     mControlConfig->updateControlList( EControlCmdAudionOnlyViewOpened );
     controlsList = mControlConfig->controlList();
-    
-    QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) ); 
+
+    QVERIFY( ! widget->isVisible() );
+    QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( controlsList.contains( EIndicatorBitmap ) );
     QVERIFY( controlsList.contains( EFileDetailsWidget ) );
 
@@ -257,8 +274,23 @@ void TestControlConfiguration::testUpdateControlList()
     mControlConfig->updateControlList( EControlCmdAudionOnlyViewOpened );
     controlsList = mControlConfig->controlList();
 
-    QVERIFY( ! controlsList.contains( ERealLogoBitmap ) ); 
+    QVERIFY( ! controlsList.contains( ERealLogoBitmap ) );
 
+    //
+    // 5. Surface attached
+    //
+    mControlConfig->updateControlList( EControlCmdSurfaceAttached );
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( widget->isVisible() );
+
+    //
+    // 6. Surface detached
+    //
+    mControlConfig->updateControlList( EControlCmdSurfaceDetached );
+    controlsList = mControlConfig->controlList();
+
+    QVERIFY( ! widget->isVisible() );
     cleanup();
 }
 

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 30 %
+// Version : %version: 30.1.2 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -86,6 +86,8 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
     , mListContainer( 0 )
     , mForcedCheck( false )
     , mModel( 0 )
+    , mModelReady( false )
+    , mAlbumListReady( false )
     , mListWidget( 0 )
     , mPrimaryAction( 0 )
     , mSecondaryAction( 0 )
@@ -303,6 +305,9 @@ void VideoListSelectionDialog::activateSelection()
     }
 
     mPrimaryAction->setText(primaryTxt);
+    
+    mModelReady = false;
+    mAlbumListReady = false;
 
     if(mTypeOfSelection == ESelectCollection)
     {
@@ -346,10 +351,10 @@ void VideoListSelectionDialog::exec()
     // scroll list back to top
     mListWidget->scrollTo(mModel->index(0, 0));
     
+    connectSignals();
+
     if(mModel->rowCount())
     {
-        connectSignals();
-    
         if(mTypeOfSelection == ECreateCollection)
         {
             // note this does not leak memory as the dialog will destroy itself upon close.
@@ -362,7 +367,8 @@ void VideoListSelectionDialog::exec()
             HbDialog::open();
         }
     }
-    else
+    else if((mModelReady && mTypeOfSelection != ESelectCollection) || 
+            (mAlbumListReady && mTypeOfSelection == ESelectCollection))
     {
         INFO("VideoListSelectionDialog::exec(): nothing to show, finishing.")
         // no items, finish right away
@@ -389,6 +395,8 @@ void VideoListSelectionDialog::finishedSlot(HbAction *action)
         mTypeOfSelection = EAddToCollection;
         if(mSelectedAlbumId == TMPXItemId::InvalidId())
         {
+            close(); // closes selection dialog if it's open.
+            
             // note this does not leak memory as the dialog will destroy itself upon close.
             HbInputDialog *dialog = gCreateNewAlbumNameDialog(SELECTION_DIALOG_OBJECT_NAME_NEW_COLLECTION);
             dialog->open(this, SLOT(newAlbumNameDialogFinished(HbAction *)));
@@ -420,7 +428,7 @@ void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
     if(dialog->actions().first() == action && variant.isValid())
     {
         QString text = mModel->resolveAlbumName(variant.toString());
-        if(text.length())
+        if(!text.isEmpty())
         {
             if(mSelectedVideos.count() == 0)
             {
@@ -434,6 +442,16 @@ void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
                 finalize(text);
             }
         }
+        else
+        {
+            // new album name empty, effectively cancel, so disconnect signals.
+            disconnectSignals();
+        }
+    }
+    else
+    {
+        // new album dialog cancelled, disconnect signals.
+        disconnectSignals();
     }
 }
 
@@ -586,18 +604,68 @@ void VideoListSelectionDialog::singleItemSelectedSlot(const QModelIndex &index)
 void VideoListSelectionDialog::modelReadySlot()
 {
 	FUNC_LOG;
+    mModelReady = true;
+    
+	if(mTypeOfSelection != ESelectCollection)
+	{
+        if(!mModel->rowCount())
+        {
+            // no items, finish right away
+            INFO("VideoListSelectionDialog::modelReadySlot(): nothing to show, finishing.");
+            
+            if(mTypeOfSelection == EAddToCollection ||
+               mTypeOfSelection == ERemoveFromCollection)
+            {
+                primaryActionTriggeredSlot();
+            }
+            else
+            {
+                finishedSlot(mPrimaryAction);
+            }
+            
+            return;
+        }
+            
+        // if dialog is not yet visible, bring it visible. 
+        if(!isVisible() && mTypeOfSelection != ECreateCollection)
+        {
+            // scroll list back to top
+            mListWidget->scrollTo(mModel->index(0, 0));
+            
+            HbDialog::open();
+        }
+        
+        updateCounterSlot();
+	}
+}
+
+// ---------------------------------------------------------------------------
+// albumListReadySlot
+// ---------------------------------------------------------------------------
+//
+void VideoListSelectionDialog::albumListReadySlot()
+{
+    mAlbumListReady = true;
+    
     if(mTypeOfSelection == ESelectCollection)
     {
         if(!mModel->rowCount())
         {
-            // in case there are no user defined albums, 
-            // start input dialog right away by accepting dialog
-            INFO("VideoListSelectionDialog::selectionChangedSlot(): no albums, starting album creation.")
-            mPrimaryAction->trigger();
+            finishedSlot(mPrimaryAction);
             return;
         }
+            
+        // if dialog is not yet visible, bring it visible. 
+        if(!isVisible())
+        {
+            // scroll list back to top
+            mListWidget->scrollTo(mModel->index(0, 0));
+            
+            HbDialog::open();
+        }
+        
+        updateCounterSlot();
     }
-    updateCounterSlot();
 }
 
 // ---------------------------------------------------------------------------
@@ -639,11 +707,12 @@ void VideoListSelectionDialog::primaryActionTriggeredSlot()
     connect(mPrimaryAction, SIGNAL(triggered()), this, SLOT(close()));
 
     // update video items selection here before content changes.
-    int count = mSelection.indexes().count();
+    QModelIndexList indexes = mSelection.indexes();
+    int count = indexes.count();
     TMPXItemId id = TMPXItemId::InvalidId();
     for(int i = 0; i < count; ++i)
     {
-        id = mModel->getMediaIdAtIndex(mSelection.indexes().at(i));
+        id = mModel->getMediaIdAtIndex(indexes.at(i));
         if(id.iId2 == KVcxMvcMediaTypeVideo)
         {
             mSelectedVideos.insert(id);
@@ -685,8 +754,9 @@ void VideoListSelectionDialog::connectSignals()
             this, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection &)));
 
     // model changes signals
-    connect(mModel->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
-    connect(mModel->sourceModel(), SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));    
+    connect(mModel->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelReadySlot()));
+    connect(mModel->sourceModel(), SIGNAL(albumListReady()), this, SLOT(albumListReadySlot()));
+    connect(mModel->sourceModel(), SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));
     
     // mark all state changes
     connect(mCheckBox, SIGNAL(stateChanged(int)), this, SLOT(markAllStateChangedSlot(int)));
@@ -709,6 +779,7 @@ void VideoListSelectionDialog::disconnectSignals()
 
     // model changes signals
     disconnect(mModel->sourceModel(), SIGNAL(modelReady()), this, SLOT(modelReadySlot()));    
+    disconnect(mModel->sourceModel(), SIGNAL(albumListReady()), this, SLOT(albumListReadySlot()));
     disconnect(mModel->sourceModel(), SIGNAL(modelChanged()), this, SLOT(updateCounterSlot()));   
     
     // mark all state changes

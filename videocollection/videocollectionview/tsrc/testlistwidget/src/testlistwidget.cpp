@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 58 %
+// Version : %version: 60 %
 
 #include <qmap.h>
 #include <vcxmyvideosdefs.h>
@@ -771,7 +771,7 @@ void TestListWidget::testSetContextMenu()
         }
         ++iter;
     }
-    QVERIFY(visibleCount == 4);
+    QVERIFY(visibleCount == 5);
     
     // invalid amount of actions -> invalid items gets removed
     HbAction *nullAction = 0;
@@ -853,7 +853,7 @@ void TestListWidget::testSetContextMenu()
         }
         ++iter;
     }
-    QVERIFY(visibleCount == 4);    
+    QVERIFY(visibleCount == 5);    
     
     // service does exists
     // object needs to be resetted for the service use
@@ -1017,7 +1017,7 @@ void TestListWidget::testRenameSlot()
     mTestWidget->initialize(*model);
     
     // Good case
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
     HbInputDialog::mValueReturnValue = "renamedVideo";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
@@ -1028,21 +1028,21 @@ void TestListWidget::testRenameSlot()
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "renamedVideo");
+    
     QCOMPARE(HbInputDialog::mOpenCallCount, 1);
     QVERIFY(HbInputDialog::mValueCallCount == 1);
-        
-    // New name is same as previous 
-    HbInputDialog::mValueReturnValue = "";
+           
+    // New name is same as previous
+    HbInputDialog::mValueReturnValue = "albumName";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "");
     QCOMPARE(HbInputDialog::mOpenCallCount, 1);
     QVERIFY(HbInputDialog::mValueCallCount == 1);
     
@@ -1050,18 +1050,18 @@ void TestListWidget::testRenameSlot()
     HbInputDialog::mValueReturnValue = "";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
     data = QString("albumName");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 1);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "");
     QCOMPARE(HbInputDialog::mOpenCallCount, 1);
-    QVERIFY(HbInputDialog::mValueCallCount == 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 0);
     
     // New name is empty.
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
     HbInputDialog::mValueReturnValue = "";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
@@ -1070,28 +1070,29 @@ void TestListWidget::testRenameSlot()
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
     dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "");
     QCOMPARE(HbInputDialog::mOpenCallCount, 1);
     QVERIFY(HbInputDialog::mValueCallCount == 1);
     
     // Item is video
     VideoSortFilterProxyModelData::mItemIds.clear();
     VideoSortFilterProxyModelData::mItemIds.append(TMPXItemId(0, KVcxMvcMediaTypeVideo));
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mValueReturnValue = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
+    HbInputDialog::mValueReturnValue = "renamedVideo";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
-    data = QString("albumName");
+    data = QString("oldVideoNama");
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
-    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
-    QVERIFY(HbInputDialog::mValueCallCount == 0);
+    dialog->emitDialogFinished(mTestWidget, SLOT(renameDialogFinished(HbAction *)), 0);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 1);
+    QVERIFY(HbInputDialog::mValueCallCount == 1);
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "renamedVideo");
 
     // No model
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
-    HbInputDialog::mValueReturnValue = "renamedVideo";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
+    HbInputDialog::mValueReturnValue = "";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
     VideoSortFilterProxyModelData::mItemIds.clear();
@@ -1103,11 +1104,11 @@ void TestListWidget::testRenameSlot()
     mTestWidget->mModel = 0;    
     emit testSignal();
     mTestWidget->mModel = tmp;    
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "");
     QCOMPARE(HbInputDialog::mOpenCallCount, 0);
     
     // Variant data is invalid
-    VideoSortFilterProxyModelData::mLastAlbumNameInRename = "";
+    VideoSortFilterProxyModelData::mLastItemNameInRename = "";
     HbInputDialog::mValueReturnValue = "renamedVideo";
     HbInputDialog::mValueCallCount = 0;
     HbInputDialog::mOpenCallCount = 0;
@@ -1117,7 +1118,7 @@ void TestListWidget::testRenameSlot()
     VideoListDataModelData::setData(VideoCollectionCommon::KeyTitle, data);
     mTestWidget->mCurrentIndex = model->index(0, 0, QModelIndex());
     emit testSignal();
-    QVERIFY(VideoSortFilterProxyModelData::mLastAlbumNameInRename == "");
+    QVERIFY(VideoSortFilterProxyModelData::mLastItemNameInRename == "");
     QCOMPARE(HbInputDialog::mOpenCallCount, 0);
     
     disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(renameSlot()));
@@ -1417,7 +1418,7 @@ void TestListWidget::testBack()
 }
 
 // ---------------------------------------------------------------------------
-// testScrollingEndedSlot
+// testScrollingStartedSlot
 // ---------------------------------------------------------------------------
 //
 void TestListWidget::testScrollingStartedSlot()
@@ -1425,7 +1426,6 @@ void TestListWidget::testScrollingStartedSlot()
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollingStartedSlot()));
     
     emit testSignal();
-    
     
     disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollingStartedSlot()));
 }
@@ -1436,6 +1436,7 @@ void TestListWidget::testScrollingStartedSlot()
 // 
 void TestListWidget::testScrollingEndedSlot()
 {
+    VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = true;
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
     VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
 
@@ -1511,7 +1512,17 @@ void TestListWidget::testScrollPositionChangedSlot()
 void TestListWidget::testScrollPositionTimerSlot()
 {
     connect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollPositionTimerSlot()));
+
+    VideoThumbnailTestData::mStartBackgroundFetchingCallCount = 0;
+    VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = true;
     emit testSignal();
+    QCOMPARE(VideoThumbnailTestData::mStartBackgroundFetchingCallCount, 1);
+    
+    VideoThumbnailTestData::mStartBackgroundFetchingCallCount = 0;
+    VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = false;
+    emit testSignal();
+    QCOMPARE(VideoThumbnailTestData::mStartBackgroundFetchingCallCount, 0);
+    
     disconnect(this, SIGNAL(testSignal()), mTestWidget, SLOT(scrollPositionTimerSlot()));
 }
 
@@ -1534,6 +1545,7 @@ void TestListWidget::testRowsInsertedSlot()
     }
     
     // Test
+    VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = true;
     QModelIndex parent;
     mTestWidget->callRowsInserted(parent, 0, 0);
     QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);
@@ -1559,6 +1571,7 @@ void TestListWidget::testRowsRemovedSlot()
     }
     
     // Test
+    VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = true;
     QModelIndex parent;
     mTestWidget->callRowsRemoved(parent, 0, 0);
     QVERIFY(VideoThumbnailTestData::mStartBackgroundFetchingCallCount == 1);

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 52 %
+// Version : %version: 52.1.2 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -99,13 +99,6 @@ int VideoListDataModel::initialize()
         return -1;
     }
 
-    if(connectSignals() == -1)
-    {
-        ERROR(-1, "VideoListDataModel::initialize() failed to connect signals.");
-        disconnectSignals();
-        return -1;
-    }
-
     mInitialized = true;
     return 0;
 }
@@ -124,34 +117,16 @@ VideoCollectionClient* VideoListDataModel::getCollectionClient()
 // connectSignals()
 // -----------------------------------------------------------------------------
 //
-int VideoListDataModel::connectSignals()
+void VideoListDataModel::connectSignals()
 {
 	FUNC_LOG;
-    if(!connect(d_ptr, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-                           this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&))))
-    {
-        return -1;
-    }
-    if(!connect(d_ptr, SIGNAL(videoDetailsReady(QVariant&)),
-                       this, SIGNAL(fullVideoDetailsReady(QVariant&))))
-    {
-        return -1;
-    }
-    if(!connect(this, SIGNAL(modelChanged()), mDeleteWorker, SLOT(continueSlot())))
-    {
-        return -1;
-    }
-    if(!connect(this, SIGNAL(modelReady()), mDeleteWorker, SLOT(continueSlot())))
-    {
-        return -1;
-    }
-    if(!connect(mDeleteWorker, SIGNAL(deleteStartupFailed(QList<TMPXItemId>)), 
-            this, SLOT(deleteStartingFailsSlot(QList<TMPXItemId>))))
-    {
-        return -1;
-    }
-   
-    return 0;
+
+    connect(this, SIGNAL(modelChanged()), mDeleteWorker, SLOT(continueSlot()), Qt::UniqueConnection);
+
+    connect(this, SIGNAL(modelReady()), mDeleteWorker, SLOT(continueSlot()), Qt::UniqueConnection);
+
+    connect(mDeleteWorker, SIGNAL(deleteStartupFailed(QList<TMPXItemId>&)), 
+            this, SLOT(deleteStartingFailsSlot(QList<TMPXItemId>&)), Qt::UniqueConnection);
 }
 
 // -----------------------------------------------------------------------------
@@ -161,37 +136,26 @@ int VideoListDataModel::connectSignals()
 void VideoListDataModel::disconnectSignals()
 {
 	FUNC_LOG;
-    disconnect(d_ptr, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-                               this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
-    disconnect(d_ptr, SIGNAL(videoDetailsReady(QVariant&)),
-                           this, SIGNAL(fullVideoDetailsReady(QVariant&)));
     disconnect(this, SIGNAL(modelChanged()), mDeleteWorker, SLOT(continueSlot()));
     disconnect(this, SIGNAL(modelReady()), mDeleteWorker, SLOT(continueSlot()));
-    disconnect(mDeleteWorker, SIGNAL(deleteStartupFailed(QList<TMPXItemId>)), 
-                this, SLOT(deleteStartingFailsSlot(QList<TMPXItemId>)));
+    disconnect(mDeleteWorker, SIGNAL(deleteStartupFailed(QList<TMPXItemId>&)), 
+                this, SLOT(deleteStartingFailsSlot(QList<TMPXItemId>&)));
 }
 
 // -----------------------------------------------------------------------------
 // mediaIdAtIndex()
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoListDataModel::mediaIdAtIndex(int index) const
+const TMPXItemId& VideoListDataModel::mediaIdAtIndex(const int &index) const
 {
-    TMPXItemId mpxId =TMPXItemId::InvalidId();
-
-    if(index >= 0 && index < d_ptr->getVideoCount())
-    {
-        mpxId = d_ptr->getMediaIdFromIndex(index);
-    }
-
-    return mpxId;
+    return d_ptr->getMediaIdFromIndex(index); 
 }
 
 // -----------------------------------------------------------------------------
 // indexOfId()
 // -----------------------------------------------------------------------------
 //
-QModelIndex VideoListDataModel::indexOfId(TMPXItemId id)
+QModelIndex VideoListDataModel::indexOfId(const TMPXItemId &id)
 {
     int rowIndex = d_ptr->mMediaData.indexOfId(id);
     return index(rowIndex, 0, QModelIndex());     
@@ -201,12 +165,9 @@ QModelIndex VideoListDataModel::indexOfId(TMPXItemId id)
 // mediaFilePathForId()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::mediaFilePathForId(TMPXItemId mediaId) const
+QString VideoListDataModel::mediaFilePathForId(const TMPXItemId &mediaId) const
 {
-    QString filePath;
-    filePath = d_ptr->getFilePathForId(mediaId);
-
-    return filePath;
+    return d_ptr->getFilePathForId(mediaId);;
 }
 
 // -----------------------------------------------------------------------------
@@ -248,7 +209,7 @@ QMap<int, QVariant> VideoListDataModel::itemData(const QModelIndex &index) const
 // prepareDetailRow()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::prepareDetailRow(int index) const
+QString VideoListDataModel::prepareDetailRow(int &index) const
 {
     // TODO: download -status?
 
@@ -271,7 +232,7 @@ QString VideoListDataModel::prepareDetailRow(int index) const
 // prepareVideoCountString()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::prepareVideoCountString(int index) const
+QString VideoListDataModel::prepareVideoCountString(int &index) const
 {
     QString videoCountString("");
 
@@ -292,7 +253,7 @@ QString VideoListDataModel::prepareVideoCountString(int index) const
 // prepareSizeString()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::prepareSizeString(int index) const
+QString VideoListDataModel::prepareSizeString(int &index) const
 {
     QString sizeStr("");
 
@@ -306,7 +267,7 @@ QString VideoListDataModel::prepareSizeString(int index) const
 // VideoListDataModel::doDetailRow()
 // -----------------------------------------------------------------------------
 //
-QString VideoListDataModel::doDetailRow(int index) const
+QString VideoListDataModel::doDetailRow(int &index) const
 {
 	QString detailStr("");
 	
@@ -512,7 +473,8 @@ bool VideoListDataModel::removeRows(const QModelIndexList &indexList)
     }
     emit modelChanged();
     if(removedIds.count() > 0 )
-    {                         
+    {    
+        connectSignals();
         mDeleteWorker->requestDelete(removedIds);
         return true;
     }
@@ -533,7 +495,7 @@ bool VideoListDataModel::belongsToAlbum(const TMPXItemId &itemId,
 // setAlbumInUse()
 // -----------------------------------------------------------------------------
 //
-void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
+void VideoListDataModel::setAlbumInUse(const TMPXItemId &albumId)
 {
 	FUNC_LOG;
     d_ptr->setAlbumInUse(albumId);
@@ -543,7 +505,7 @@ void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
 // albumInUse()
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoListDataModel::albumInUse()
+const TMPXItemId& VideoListDataModel::albumInUse() const
 {
 	FUNC_LOG;
     return d_ptr->mCurrentAlbum;
@@ -553,7 +515,7 @@ TMPXItemId VideoListDataModel::albumInUse()
 // removeItemsFromAlbum()
 // -----------------------------------------------------------------------------
 //
-int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
+int VideoListDataModel::removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &items)
 {
 	FUNC_LOG;
     int removeCount = d_ptr->removeItemsFromAlbum(albumId, items);
@@ -573,7 +535,7 @@ int VideoListDataModel::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TM
 // deleteStartingFailsSlot()
 // -----------------------------------------------------------------------------
 //
-void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId> ids)
+void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId>& ids)
 {
 	FUNC_LOG;
     if(ids.count())
@@ -610,6 +572,7 @@ void VideoListDataModel::reportAsyncStatus(int statusCode, QVariant &additional)
             report = true;
             // delete procedure ends, reset statuses
             mDeleteWorker->clearStatus();
+            disconnectSignals();
         }
     }
     if(report)

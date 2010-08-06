@@ -71,7 +71,7 @@ public:
      * @return bool: true if item removed correctly, false if not.
      *
      */
-    bool removeThumbnail(TMPXItemId mediaId);
+    bool removeThumbnail(const TMPXItemId &mediaId);
     
     /**
      * Method returns a pointer to video's thumbnail.
@@ -85,7 +85,7 @@ public:
      * @return QIcon* thumbnail pointer
      *
      */
-    const QIcon* getThumbnail(TMPXItemId mediaId);
+    const QIcon* getThumbnail(const TMPXItemId &mediaId);
 
     /**
      * Starts background thumbnail fetching, the model used for the background fetching
@@ -113,6 +113,13 @@ public:
     void enableThumbnailCreation(bool enable);    
     
     /**
+     * Returns background fetching enabled status. 
+     * 
+     * @return bool: true if background fetching is enabled, otherwise false.
+     */
+    bool backgroundFetchingEnabled();
+    
+    /**
      * Frees allocated data for thumbnails and cancels ongoing fetches.
      * 
      */
@@ -126,7 +133,7 @@ signals:
      * @param mediaIds: media ids of the videos whose thumbnail is ready.
      *
      */
-    void thumbnailsFetched(QList<TMPXItemId> mediaIds);
+    void thumbnailsFetched(QList<TMPXItemId>& mediaIds);
     
 private:
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 50 %
+// Version : %version: 51 %
 
 #define private public
 #include "videoservices.h"
@@ -64,6 +64,7 @@
 #include "videolistdatamodeldata.h"
 #include "xqserviceutilxtra.h"
 #include "videooperatorservicedata.h"
+#include "videooperatorservice.h"
 
 // ---------------------------------------------------------------------------
 // main
@@ -799,10 +800,8 @@ void TestListView::testOpenCollectionViewSlot()
 void TestListView::testOpenOperatorServiceSlot()
 {
     init();
-
     TMPXItemId tmpId = TMPXItemId::InvalidId();
     mTestView->activateView(tmpId);
-    
     VideoOperatorServiceData::mLaunchServiceCallCount = 0;
     connect(this, SIGNAL(testSignal2()), mTestView, SLOT(openOperatorServiceSlot()));
     emit testSignal2();
@@ -1750,6 +1749,63 @@ void TestListView::testRemoveVideosFromCollectionSlot()
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(removeVideosFromCollectionSlot()));
     
     cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testCreateOperatorServicesToolbar
+// ---------------------------------------------------------------------------
+//
+void TestListView::testCreateOperatorServicesToolbar()
+{
+    // Only one service.
+    init();
+    HbToolBarExtension::mAddActionCallCount = 0;
+    VideoOperatorServiceData::mIcons.clear();
+    VideoOperatorServiceData::mUris.clear();
+    VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore");
+    VideoOperatorServiceData::mUris.append("testuri");
+    QCOMPARE(mTestView->mVideoOperatorServices.count(), 0);
+    TMPXItemId tmpId = TMPXItemId::InvalidId();
+    mTestView->activateView(tmpId);
+    QCOMPARE(mTestView->mVideoOperatorServices.count(), 1);
+    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionServices] != 0);
+    QVERIFY(mTestView->mToolbarServiceExtension == 0);
+    QCOMPARE(HbToolBarExtension::mAddActionCallCount, 0);
+    cleanup();
+    
+    // Multiple, 3, services
+    init();
+    HbToolBarExtension::mAddActionCallCount = 0;
+    VideoOperatorServiceData::mIcons.clear();
+    VideoOperatorServiceData::mUris.clear();
+    VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore");
+    VideoOperatorServiceData::mUris.append("testuri");
+    VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore2");
+    VideoOperatorServiceData::mUris.append("testuri2");
+    VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore3");
+    VideoOperatorServiceData::mUris.append("testuri3");
+    QCOMPARE(mTestView->mVideoOperatorServices.count(), 0);
+    tmpId = TMPXItemId::InvalidId();
+    mTestView->activateView(tmpId);
+    QCOMPARE(mTestView->mVideoOperatorServices.count(), 3);
+    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionServices] == 0);
+    QVERIFY(mTestView->mToolbarServiceExtension != 0); 
+    QCOMPARE(HbToolBarExtension::mAddActionCallCount, 3);
+    cleanup();
+    
+    // Services already loaded.
+    init();
+    VideoOperatorServiceData::mIcons.clear();
+    VideoOperatorServiceData::mUris.clear();
+    VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore");
+    VideoOperatorServiceData::mUris.append("testuri");    
+    mTestView->mVideoOperatorServices.append(new VideoOperatorService());
+    mTestView->activateView(tmpId);
+    QCOMPARE(mTestView->mVideoOperatorServices.count(), 1);
+    QVERIFY(mTestView->mToolbarActions[VideoListView::ETBActionServices] == 0);
+    QVERIFY(mTestView->mToolbarServiceExtension == 0); 
+    cleanup();
+    
 }
 
 // End of file

@@ -30,8 +30,12 @@ class QGraphicsItem;
 class HbMessageBox : public QObject
 {   
     Q_OBJECT
+
+    Q_FLAGS(StandardButton StandardButtons)
+    Q_ENUMS(MessageBoxType StandardButton)
     
 public:
+
     enum MessageBoxType {
         MessageTypeInformation,
         MessageTypeQuestion,
@@ -56,7 +60,7 @@ public:
     };    
 
     Q_DECLARE_FLAGS(StandardButtons, StandardButton)
-    
+
     HbMessageBox(MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
     HbMessageBox(const QString &text, MessageBoxType type = MessageTypeInformation, QGraphicsItem *parent = 0);
     ~HbMessageBox();
@@ -110,5 +114,7 @@ public:
     QList<HbAction*> mActions;
     
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(HbMessageBox::StandardButtons)
 
 #endif // HBMESSAGEBOX_H

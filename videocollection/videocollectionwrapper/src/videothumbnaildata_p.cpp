@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24.1.1 %
+// Version : %version: 24.1.3 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -211,7 +211,7 @@ int VideoThumbnailDataPrivate::connectSignals()
 // VideoThumbnailDataPrivate::getThumbnail()
 // -----------------------------------------------------------------------------
 //
-const QIcon* VideoThumbnailDataPrivate::getThumbnail(TMPXItemId mediaId)
+const QIcon* VideoThumbnailDataPrivate::getThumbnail( const TMPXItemId &mediaId)
 {
     const QIcon *thumbnail = mThumbnailData[mediaId];
     if(!thumbnail)
@@ -259,7 +259,7 @@ int VideoThumbnailDataPrivate::startFetchingThumbnails(const QList<QModelIndex> 
 // VideoThumbnailDataPrivate::startFetchingThumbnail()
 // -----------------------------------------------------------------------------
 //
-int VideoThumbnailDataPrivate::startFetchingThumbnail(TMPXItemId mediaId, int priority)
+int VideoThumbnailDataPrivate::startFetchingThumbnail(const TMPXItemId &mediaId, int priority)
 {
     if(!mCurrentModel || !mThumbnailFetcher)
     {
@@ -341,7 +341,7 @@ void VideoThumbnailDataPrivate::doBackgroundFetching()
 // VideoThumbnailDataPrivate::getModelIndexes()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::getModelIndexes(QList<QModelIndex> &indexes, int startIndex, int endIndex)
+void VideoThumbnailDataPrivate::getModelIndexes(QList<QModelIndex> &indexes, int &startIndex, int &endIndex)
 {
 	FUNC_LOG;
     INFO_2("VideoThumbnailDataPrivate::getModelIndexes() from %d to %d", startIndex, endIndex);
@@ -408,7 +408,7 @@ void VideoThumbnailDataPrivate::allThumbnailsFetchedSlot()
 // VideoThumbnailDataPrivate::defaultThumbnail()
 // -----------------------------------------------------------------------------
 //
-const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(TMPXItemId mediaId)
+const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &mediaId)
 {
     const TMPXItemId defaultIdVideo(KMaxTUint32-1, KVcxMvcMediaTypeVideo);
     const TMPXItemId defaultIdAlbum(KMaxTUint32-1, KVcxMvcMediaTypeAlbum);
@@ -523,7 +523,7 @@ HbIcon VideoThumbnailDataPrivate::loadIcon(QString iconName)
 // VideoThumbnailDataPrivate::removeThumbnail()
 // -----------------------------------------------------------------------------
 //
-bool VideoThumbnailDataPrivate::removeThumbnail(TMPXItemId mediaId)
+bool VideoThumbnailDataPrivate::removeThumbnail(const TMPXItemId &mediaId)
 {
 	FUNC_LOG;
     return mThumbnailData.remove(mediaId);
@@ -553,6 +553,15 @@ void VideoThumbnailDataPrivate::enableThumbnailCreation(bool enable)
     {
         mThumbnailFetcher->enableThumbnailCreation(enable);
     }
+}
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailDataPrivate::backgroundFetchingEnabled()
+// -----------------------------------------------------------------------------
+//
+bool VideoThumbnailDataPrivate::backgroundFetchingEnabled()
+{
+    return mBackgroundFetchingEnabled;
 }
 
 // -----------------------------------------------------------------------------

@@ -135,7 +135,8 @@ SOURCES_TEMP = \
     src/videoserviceurifetch.cpp \
     src/videoservicebrowse.cpp \ 
     src/videoactivitystate.cpp \
-    src/videooperatorservice.cpp
+    src/videooperatorservice.cpp \
+    src/xqsettingsmanagerstub.cpp
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)
 SOURCES += $$find(SOURCES_TEMP, ^(?!.*$$TESTEDCLASS).*$)

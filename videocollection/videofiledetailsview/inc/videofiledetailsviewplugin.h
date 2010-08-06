@@ -34,6 +34,7 @@ class ThumbnailManager;
 class VideoServices;
 class VideoCollectionWrapper;
 class VideoDetailsLabel;
+class ShareUi;
 
 class VideoFileDetailsViewPlugin : public MpxViewPlugin
 	{
@@ -297,6 +298,11 @@ private:
      * Play icon with transparent background.
      */
     QPixmap mPlayIcon;
+    
+    /**
+     * Share ui object for handling of sharing videos
+     */
+    ShareUi *mShareUi;
     };
 
 #endif  // VIDEOFILEDETAILSPLUGIN_H

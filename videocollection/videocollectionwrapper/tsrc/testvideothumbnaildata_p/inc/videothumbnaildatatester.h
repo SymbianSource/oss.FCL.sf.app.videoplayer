@@ -55,11 +55,6 @@ public:
     void emitReportThumbnailsReady();    
     
     /**
-     * Emits modelChanged signal to itself.
-     */
-    void emitModelChanged();
-    
-    /**
      * Emits aboutToQuit signal to itself.
      */
     void emitAboutToQuit();    

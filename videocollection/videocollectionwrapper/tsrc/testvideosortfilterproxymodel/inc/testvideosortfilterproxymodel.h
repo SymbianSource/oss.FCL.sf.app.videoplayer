@@ -252,15 +252,11 @@ private slots:
     void testSetAlbumInUse();
     
     /**
-     * tests renameAlbum
+     * tests renameItem
      */
-    void testRenameAlbum();
+    void testRenameItem();
     
-    /**
-     * tests itemModifiedSlot
-     */
-    void testItemModifiedSlot();
-    
+
 private:
     
     /**

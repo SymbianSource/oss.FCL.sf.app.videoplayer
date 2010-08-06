@@ -67,7 +67,7 @@ int VideoCollectionClient::initialize( VideoDataSignalReceiver* /*signalReceiver
 // removeItemsFromAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items)
+int VideoCollectionClient::removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &items)
 {
     Q_UNUSED(albumId);
     Q_UNUSED(items);

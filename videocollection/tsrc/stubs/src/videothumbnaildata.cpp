@@ -21,7 +21,7 @@
 
 int VideoThumbnailTestData::mInstanceCallCount = 0;
 int VideoThumbnailTestData::mFreeThumbnailDataCallCount = 0;
-int VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = 0;
+bool VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = false;
 int VideoThumbnailTestData::mStartBackgroundFetchingCallCount = 0;
 int VideoThumbnailTestData::mFetchIndex = -1;
 
@@ -70,6 +70,11 @@ void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *mode
 void VideoThumbnailData::enableBackgroundFetching(bool enable)
 {
     VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled = enable;
+}
+
+bool VideoThumbnailData::backgroundFetchingEnabled()
+{
+    return VideoThumbnailTestData::mBackgroundThumbnailFetchingEnabled;
 }
 
 void VideoThumbnailData::enableThumbnailCreation(bool enable)

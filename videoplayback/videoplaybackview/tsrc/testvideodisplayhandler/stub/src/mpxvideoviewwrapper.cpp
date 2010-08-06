@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 
@@ -33,7 +33,7 @@
 // -------------------------------------------------------------------------------------------------
 //
 CMPXVideoViewWrapper::CMPXVideoViewWrapper( VideoBasePlaybackView* aView )
-    : iView( aView )    
+    : iView( aView )
 {
 }
 
@@ -58,7 +58,7 @@ CMPXVideoViewWrapper* CMPXVideoViewWrapper::NewL( VideoBasePlaybackView* aView )
 //
 void CMPXVideoViewWrapper::ConstructL()
 {
-    iMediaRequested = EFalse;        
+    iMediaRequested = EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ TBool CMPXVideoViewWrapper::IsLive()
 //
 TBool CMPXVideoViewWrapper::IsPlaylist()
 {
-    return EFalse;    
+    return EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -106,14 +106,14 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
     {
         case EMPXPbvCmdNextListItem:
         {
-            SetFileDetails( EFalse );            
-            break;    
+            SetFileDetails( EFalse );
+            break;
         }
-        
+
         case EMPXPbvCmdPreviousListItem:
         {
-            SetFileDetails( ETrue );  
-            break;    
+            SetFileDetails( ETrue );
+            break;
         }
     }
 
@@ -126,9 +126,9 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 void CMPXVideoViewWrapper::RequestMediaL()
 {
     iMediaRequested = ETrue;
-    
+
     SetFileDetails( ETrue );
-    
+
 }
 
 
@@ -161,16 +161,16 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
         delete iFileDetails;
         iFileDetails = NULL;
     }
-    
-    iFileDetails = new VideoPlaybackViewFileDetails(); 
- 
-    _LIT(KTestMimeType, "video/3gp");        
+
+    iFileDetails = new VideoPlaybackViewFileDetails();
+
+    _LIT(KTestMimeType, "video/3gp");
     const QString qMimeType( (QChar*)KTestMimeType().Ptr(), KTestMimeType().Length() );
-    iFileDetails->mMimeType = qMimeType;   
+    iFileDetails->mMimeType = qMimeType;
 
     _LIT(KTestTitle, "Test Video Title");
     const QString qTitle( (QChar*)KTestTitle().Ptr(), KTestTitle().Length() );
-    iFileDetails->mTitle = qTitle;    
+    iFileDetails->mTitle = qTitle;
 
     _LIT(KTestArtist, "TestArtist");
     const QString qArtist( (QChar*)KTestArtist().Ptr(), KTestArtist().Length() );
@@ -200,16 +200,16 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
     {
         _LIT(KTestClipName, "testClip.3gp");
         const QString qClipname( (QChar*)KTestClipName().Ptr(), KTestClipName().Length() );
-        iFileDetails->mClipName = qClipname;        
+        iFileDetails->mClipName = qClipname;
     }
     else
     {
         _LIT(KTestClipName, "nextClip.3gp");
         const QString qClipname( (QChar*)KTestClipName().Ptr(), KTestClipName().Length() );
-        iFileDetails->mClipName = qClipname;        
+        iFileDetails->mClipName = qClipname;
     }
-    
-    
+
+
     iFileDetails->mPlaybackMode = EMPXVideoLocal;
     iFileDetails->mSeekable = true;
     iFileDetails->mPausableStream = true;
@@ -223,7 +223,7 @@ void CMPXVideoViewWrapper::SetFileDetails(TBool aDefault)
     iFileDetails->mMultiItemPlaylist = false;
     iFileDetails->mVideoHeight = 320;
     iFileDetails->mVideoWidth  = 240;
-    iFileDetails->mBitRate = 16000;         
+    iFileDetails->mBitRate = 16000;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -243,4 +243,14 @@ void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aForeground )
 void CMPXVideoViewWrapper::UpdateVideoRectDone()
 {
 }
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::SurfacedAttached()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::SurfacedAttached( TBool aAttached )
+{
+    iAttatched = aAttached;
+}
+
 // EOF

@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   tester for methods in Video Playback View Plugin
-* 
+*
 */
 
 #ifndef __TESTMPXVIDEOVIEWWRAPPER_H__
@@ -35,14 +35,14 @@ class TestMPXVideoViewWrapper : public QObject
          * will be called before each testfunction is executed.
          *
          */
-        void init(); 
-    
+        void init();
+
         /**
          * will be called after every testfunction.
          *
          */
         void cleanup();
-    
+
     private slots:
         // the order in which these testXX methods are declared is important
         // changing this order will affect the test results
@@ -58,7 +58,6 @@ class TestMPXVideoViewWrapper : public QObject
         void testActivateClosePlayerActiveObject();
         void testDoClosePlayer();
         void testSetAspectRatio();
-        void testIsAppInFront();
         void testClosePlaybackView();
         void testHandleVolumeCmd();
         void testHandleShortPressBackward();
@@ -71,13 +70,14 @@ class TestMPXVideoViewWrapper : public QObject
         void testHandleVideoPlaybackMessage();
         void testHandlePlaybackCommandComplete();
         void testHandleMedia();
+        void testSurfacedAttached();
 
     signals:
         void commandSignal(int);
-    
+
     private:
         CMPXVideoViewWrapper  *mVideoViewWrapper;
-        VideoBasePlaybackView *mBaseVideoView; 
+        VideoBasePlaybackView *mBaseVideoView;
 };
 
 #endif  // __TESTMPXVIDEOVIEWWRAPPER_H__

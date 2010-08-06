@@ -73,7 +73,7 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    void itemDeletedSlot(TMPXItemId id)
+    void itemDeletedSlot(TMPXItemId &id)
     {
         Q_UNUSED(id);
     }
@@ -89,7 +89,7 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    void videoDeletedSlot(TMPXItemId id)
+    void videoDeletedSlot(TMPXItemId &id)
     {
         Q_UNUSED(id);
     }
@@ -114,7 +114,7 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    void albumListAvailableSlot(TMPXItemId albumId, CMPXMediaArray *albumItems)
+    void albumListAvailableSlot(TMPXItemId &albumId, CMPXMediaArray *albumItems)
     {
         Q_UNUSED(albumId);
         Q_UNUSED(albumItems);
@@ -131,7 +131,14 @@ public slots:
     /**
      * No implementation needed for these tests
      */
-    void listCompleteSlot()
+    void videoListCompleteSlot()
+    {
+        
+    }
+    /**
+     * No implementation needed for these tests
+     */
+    void albumListCompleteSlot()
     {
         
     }

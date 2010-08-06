@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#7 %
+// Version : %version: da1mmcf#9 %
 
 
 
@@ -39,11 +39,13 @@ class VideoPlaybackWrapper : public QObject
         int playMedia( QString aFileName );
         int playMedia( RFile aFile );
         int replayMedia( QString aFileName );
+        int playURI( QString aUri );
 
     public:
         void openPlaybackView() ;
         static int GetInstanceCount();
         void lateInit();
+        const QString resloveErrorString( int errorCode );
 
     signals:
         void handlePlaybackView( int viewId );

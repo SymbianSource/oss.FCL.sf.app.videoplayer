@@ -62,6 +62,9 @@ namespace VideoCollectionCommon
     const char* const MetaKeyVideoResolutionString = "MetaKeyVideoResolutionString";
     const char* const MetaKeyBitRate = "MetaKeyBitRate";
     const char* const MetaKeyFormat = "MetaKeyFormat";
+    const char* const MetaKeyFileName = "MetaKeyFileName";
+    const char* const MetaKeyFilePath = "MetaKeyFilePath";
+    const char* const MetaKeyVideoTitle = "MetaKeyVideoTitle";
     
     enum VideoItemStatus
     {
@@ -74,6 +77,9 @@ namespace VideoCollectionCommon
      * order than the VideoDetailLabelKeys.
      */
     const char * const VideoDetailLabels[] = {
+            QT_TR_NOOP("txt_videos_list_title"),
+            QT_TR_NOOP("txt_videos_list_filename"),
+            QT_TR_NOOP("txt_videos_list_file_path"),
     		QT_TR_NOOP("txt_videos_list_drm"),
             QT_TR_NOOP("txt_videos_list_service"),
             QT_TR_NOOP("txt_videos_list_description"),
@@ -89,13 +95,16 @@ namespace VideoCollectionCommon
             QT_TR_NOOP("txt_videos_list_file_size"),
             QT_TR_NOOP("txt_videos_list_resolution"),
             QT_TR_NOOP("txt_videos_list_format"),
-            QT_TR_NOOP("txt_videos_list_bitrate")
+            QT_TR_NOOP("txt_videos_list_bitrate")            
 };
 
     /**
      * Order of keys in the labels const array.
      */
     const char * const VideoDetailLabelKeys[] = {
+            MetaKeyVideoTitle,
+            MetaKeyFileName,
+            MetaKeyFilePath,
             MetaKeyDRMInfo,
             MetaKeyServiceURL,
             MetaKeyDescription,
@@ -111,7 +120,7 @@ namespace VideoCollectionCommon
             MetaKeySizeString,
             MetaKeyVideoResolutionString,
             MetaKeyFormat,
-            MetaKeyBitRate
+            MetaKeyBitRate            
     };
     
     /**

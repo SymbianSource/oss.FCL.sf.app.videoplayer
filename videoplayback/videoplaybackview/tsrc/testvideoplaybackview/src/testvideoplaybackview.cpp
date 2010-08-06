@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 13 %
+// Version : %version: 14 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -239,7 +239,7 @@ void TestVideoPlaybackView::testEventFilter()
     //
     // ensure default foreground is false
     //
-    QCOMPARE( mVideoView->mVideoMpxWrapper->iForeground, 0 );
+    QCOMPARE( mVideoView->mVideoMpxWrapper->iViewForeground, 0 );
 
     //
     // declare foreground/background event
@@ -256,7 +256,7 @@ void TestVideoPlaybackView::testEventFilter()
     //
     // verify view is in foreground
     //
-    QCOMPARE( mVideoView->mVideoMpxWrapper->iForeground, 1 );
+    QCOMPARE( mVideoView->mVideoMpxWrapper->iViewForeground, 1 );
 
     //
     // verify the returned value (consumed) of VideoBasePlaybackView::event()
@@ -267,7 +267,7 @@ void TestVideoPlaybackView::testEventFilter()
     //
     // verify view is in background
     //
-    QCOMPARE( mVideoView->mVideoMpxWrapper->iForeground, 0 );
+    QCOMPARE( mVideoView->mVideoMpxWrapper->iViewForeground, 0 );
 
     //
     // clean up
@@ -649,20 +649,60 @@ void TestVideoPlaybackView::testReactivationAfterPriorTermination()
 {
     QVariant data = int( 10 );
     VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAY_POSITION_ID);
-    
+
     data = int ( MpxHbVideoCommon::PlaybackView );
-    VideoActivityState::instance().setActivityData(data, KEY_VIEWPLUGIN_TYPE);  
-    
+    VideoActivityState::instance().setActivityData(data, KEY_VIEWPLUGIN_TYPE);
+
     init();
     mVideoView->handleActivateView();
 
     QVERIFY( mVideoView->mVideoMpxWrapper->iMediaRequested == true );
     QCOMPARE( mVideoView->mVideoMpxWrapper->iFileDetails->mBitRate, 16000 );
     QCOMPARE( mVideoView->mVideoMpxWrapper->iFileDetails->mTitle, QString("Test Video Title") );
-    
+
     QCOMPARE( mVideoView->mLastPlayPosition, 10);
 
-    cleanup();            
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   TestVideoPlaybackView::testHandleAppBackground()
+// -------------------------------------------------------------------------------------------------
+//
+void TestVideoPlaybackView::testHandleAppBackground()
+{
+    setup();
+
+    mVideoView->mActivated = true;
+
+    connect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleAppBackground() ) );
+    emit commandSignal();
+
+    QVERIFY( ! mVideoView->mVideoMpxWrapper->iViewForeground );
+    QVERIFY( ! mVideoView->mVideoMpxWrapper->iAppForeground );
+
+    disconnect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleAppBackground() ) );
+
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   TestVideoPlaybackView::testHandleAppForeground()
+// -------------------------------------------------------------------------------------------------
+//
+void TestVideoPlaybackView::testHandleAppForeground()
+{
+    setup();
+
+    connect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleAppForeground() ) );
+    emit commandSignal();
+
+    QVERIFY( mVideoView->mVideoMpxWrapper->iViewForeground );
+    QVERIFY( mVideoView->mVideoMpxWrapper->iAppForeground );
+
+    disconnect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleAppForeground() ) );
+
+    cleanup();
 }
 
 // End of file

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  7 %
+// Version : %version:  9 %
 
 
 #include "mpxvideo_debug.h"
@@ -181,5 +181,50 @@ int VideoPlaybackWrapper::openFileWithNativePath(const TDesC& aFileName)
     return err;
 }
 
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackWrapper::resloveErrorString()
+// -------------------------------------------------------------------------------------------------
+//
+const QString VideoPlaybackWrapper::resloveErrorString( int errorCode )
+{
+    MPX_ENTER_EXIT(_L("VideoPlaybackWrapper::resloveErrorString()"));
+    
+    TPtrC text;
+    TRAP_IGNORE( text.Set(mUiEngine->ResolveErrorStringL(errorCode)) );
+    
+    const QString qString( (QChar*)text.Ptr(), text.Length() );
+    
+    return qString;
+}
 
+// -------------------------------------------------------------------------------------------------
+//   QMpxVideoPlaybackWrapper::playMedia()
+// -------------------------------------------------------------------------------------------------
+//
+int VideoPlaybackWrapper::playURI( QString aUri )
+{
+    MPX_ENTER_EXIT(_L("QMpxVideoPlaybackWrapper::playURI"));   
+    
+    TBuf<KMaxFileName> uri( aUri.utf16() );
+    int error = openURI( uri );
+
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::playURI err = %d"), error);
+
+    return error;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   QMpxVideoPlaybackWrapper::openURI()
+// -------------------------------------------------------------------------------------------------
+//
+int VideoPlaybackWrapper::openURI(const TDesC& aUri)
+{
+    MPX_DEBUG(_L("QMpxVideoPlaybackWrapper::openURI()"));    
+    
+    int err = KErrNone;
+
+    TRAP( err, mUiEngine->OpenFileL( aUri ) );
+
+    return err;
+}
 // End of File

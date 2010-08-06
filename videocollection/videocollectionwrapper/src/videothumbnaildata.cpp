@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 26 %
+// Version : %version: 26.1.2 %
 
 // INCLUDE FILES
 #include "videocollectiontrace.h"
@@ -44,8 +44,8 @@ VideoThumbnailData::VideoThumbnailData() :
 d_ptr(new VideoThumbnailDataPrivate())
 {
 	FUNC_LOG;
-    connect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)), 
-            this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    connect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)), 
+            this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)));
 }
 
 // -----------------------------------------------------------------------------
@@ -55,8 +55,8 @@ d_ptr(new VideoThumbnailDataPrivate())
 VideoThumbnailData::~VideoThumbnailData()
 {
 	FUNC_LOG;
-    disconnect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)), 
-            this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>)));
+    disconnect(d_ptr, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)), 
+            this, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)));
     delete d_ptr;
 }
 
@@ -64,7 +64,7 @@ VideoThumbnailData::~VideoThumbnailData()
 // VideoThumbnailData::removeThumbnail()
 // -----------------------------------------------------------------------------
 //
-bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
+bool VideoThumbnailData::removeThumbnail(const TMPXItemId &mediaId)
 {
 	INFO_2("VideoThumbnailData::removeThumbnail() mediaId (%d, %d)", mediaId.iId1, mediaId.iId2);
     return d_ptr->removeThumbnail(mediaId);
@@ -74,7 +74,7 @@ bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
 // VideoThumbnailData::getThumbnail()
 // -----------------------------------------------------------------------------
 //
-const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
+const QIcon* VideoThumbnailData::getThumbnail(const TMPXItemId &mediaId)
 {
 	INFO_2("VideoThumbnailData::getThumbnail() mediaId (%d, %d)", mediaId.iId1, mediaId.iId2);
     return d_ptr->getThumbnail(mediaId);
@@ -108,6 +108,15 @@ void VideoThumbnailData::enableThumbnailCreation(bool enable)
 {
     INFO_1("VideoThumbnailData::enableThumbnailCreation() enable: %d", enable);
     d_ptr->enableThumbnailCreation(enable);
+}
+
+// -----------------------------------------------------------------------------
+// VideoThumbnailData::backgroundFetchingEnabled()
+// -----------------------------------------------------------------------------
+//
+bool VideoThumbnailData::backgroundFetchingEnabled()
+{
+    return d_ptr->backgroundFetchingEnabled();
 }
 
 // -----------------------------------------------------------------------------

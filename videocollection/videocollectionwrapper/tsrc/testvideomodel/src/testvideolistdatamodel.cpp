@@ -201,32 +201,20 @@ void TestVideoListDataModel::testRowCount()
 //
 void TestVideoListDataModel::testMediaIdAtIndex() 
 {
-    mMediaFactory->removeArray();
+    // test is just for coverity, because there only 1 
+    // function call at mediaIdAtIndex -method
     
-    mMediaFactory->createMediaItems(MEDIA_COUNT);
-      
-    // ownership of media-array transferred
-    mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
-         
-    // invalid index: below bounds
-    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(-1) == TMPXItemId::InvalidId());
+    mTestObjectInitialized->d_ptr->mItemIdToReturn = TMPXItemId::InvalidId();
     
-    //invalid index: above bounds
-    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(MEDIA_COUNT) == TMPXItemId::InvalidId());
+    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(0) == TMPXItemId::InvalidId());
     
-    // first
-    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(0).iId1 == 0);
+    mTestObjectInitialized->d_ptr->mItemIdToReturn = TMPXItemId(0,0);
     
-    // middle
-    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(MEDIA_COUNT / 2).iId1 == (MEDIA_COUNT / 2));
+    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(0) ==  TMPXItemId(0,0));
     
-    // last
-    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(MEDIA_COUNT - 1).iId1 == (MEDIA_COUNT - 1));
-
-    // no items
-    mMediaFactory->removeArray();
-    mTestObjectInitialized->d_ptr->newVideoListSlot(0);
-    QVERIFY( mTestObjectInitialized->mediaIdAtIndex(MEDIA_COUNT / 2) == TMPXItemId::InvalidId());
+    mTestObjectInitialized->d_ptr->mItemIdToReturn = TMPXItemId(1,2);
+    
+    QVERIFY(mTestObjectInitialized->mediaIdAtIndex(0) ==  TMPXItemId(1,2));  
 }
 
 // -----------------------------------------------------------------------------
@@ -816,12 +804,25 @@ void TestVideoListDataModel::testRemoveRows()
 
 }
 
+// -----------------------------------------------------------------------------
+// testDeleteStartingFailsSlot
+// -----------------------------------------------------------------------------
+//
 void TestVideoListDataModel::testDeleteStartingFailsSlot()
-{
-    QSignalSpy spysignal(mTestObjectInitialized, SIGNAL(modelChanged()));
+{   
     mTestObjectInitialized->mDeleteWorker->mIsDeleting = false;
     VideoCollectionWrapper::mLatestStatusCode = -1;
     VideoCollectionWrapper::mLatestAdditional = QVariant();
+    
+    // "start deletion to get signals connected
+    QModelIndexList indexList;
+    mMediaFactory->createMediaItems(MEDIA_COUNT);
+    mTestObjectInitialized->d_ptr->newVideoListSlot(mMediaFactory->mediaArray());
+    indexList.append(mTestObjectInitialized->index(0,0));
+    indexList.append(mTestObjectInitialized->index(1,0));
+    mTestObjectInitialized->removeRows(indexList);
+ 
+    QSignalSpy spysignal(mTestObjectInitialized, SIGNAL(modelChanged()));
     
     QList<TMPXItemId> idList;
     // empty list

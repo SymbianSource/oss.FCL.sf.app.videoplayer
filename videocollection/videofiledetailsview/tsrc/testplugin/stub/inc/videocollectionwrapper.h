@@ -76,7 +76,7 @@ public: // Constructor
    
 signals:
    
-    void error(int errorCode, QVariant &additional);
+    void asyncStatus(int errorCode, QVariant &additional);
 
 private:
    

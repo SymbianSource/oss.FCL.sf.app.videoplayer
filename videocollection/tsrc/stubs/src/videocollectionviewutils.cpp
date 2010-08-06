@@ -107,9 +107,13 @@ QString VideoCollectionViewUtils::getCenRepStringValue(int key)
     Q_UNUSED(key);
     if(VideoCollectionViewUtilsData::mCenRepStringValues.count() > 0)
     {
-        return VideoCollectionViewUtilsData::mCenRepStringValues.takeFirst();;    
+        QString str = VideoCollectionViewUtilsData::mCenRepStringValues.takeFirst();
+        if(str != CENREP_NO_STRING) 
+        {
+            return str;
+        }
     }
-    return -1;
+    return QString();
 }
 
 int VideoCollectionViewUtils::getCenRepIntValue(int key)
@@ -117,7 +121,11 @@ int VideoCollectionViewUtils::getCenRepIntValue(int key)
     Q_UNUSED(key);
     if(VideoCollectionViewUtilsData::mCenRepIntValues.count() > 0)
     {
-        return VideoCollectionViewUtilsData::mCenRepIntValues.takeFirst();;    
+        int value = VideoCollectionViewUtilsData::mCenRepIntValues.takeFirst();;
+        if(value != CENREP_NO_INT)
+        {
+            return value;
+        }
     }
     return -1;
 }

@@ -16,6 +16,7 @@
 */
 
 #include <e32base.h>
+#include <mpxcollectionpath.h>
 
 #include "mpxcollectionutility.h"
 
@@ -92,6 +93,15 @@ void CMPXCollectionUtility::Close()
 TUid CMPXCollectionUtility::UidL() const
 {
     return iUid;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXCollectionUtility::PathL
+// -------------------------------------------------------------------------------------------------
+//
+CMPXCollectionPath* CMPXCollectionUtility::PathL()
+{
+    return NULL;
 }
 
 // End of file

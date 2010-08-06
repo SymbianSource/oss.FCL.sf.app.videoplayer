@@ -54,12 +54,22 @@ signals:
     /**
      * dummy signal
      */
+    void albumListReady();
+    
+    /**
+     * dummy signal
+     */
     void modelChanged();
     
     /**
      * dummy signal
      */
     void albumChanged();
+    
+    /**
+     * dummy signal
+     */
+    void fullVideoDetailsReady(QVariant &);
 
 public: // from QAbstractItemModel
     

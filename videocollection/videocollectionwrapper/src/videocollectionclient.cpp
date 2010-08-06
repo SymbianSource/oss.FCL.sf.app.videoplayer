@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 39 %
+// Version : %version: 41 %
 
 // INCLUDE FILES
 #include <qobject.h>
@@ -208,7 +208,7 @@ int VideoCollectionClient::deleteVideos(QList<TMPXItemId> *mediaIds)
 // openItem
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::openItem(TMPXItemId &mediaId)
+int VideoCollectionClient::openItem(const TMPXItemId &mediaId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -247,7 +247,7 @@ int VideoCollectionClient::back()
 // fetchMpxMediaByMpxId
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::fetchMpxMediaByMpxId(TMPXItemId &mpxId)
+int VideoCollectionClient::fetchMpxMediaByMpxId(const TMPXItemId &mpxId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -263,7 +263,7 @@ int VideoCollectionClient::fetchMpxMediaByMpxId(TMPXItemId &mpxId)
 // getVideoDetails
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::getVideoDetails(TMPXItemId &mediaId)
+int VideoCollectionClient::getVideoDetails(const TMPXItemId &mediaId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -319,7 +319,7 @@ int VideoCollectionClient::removeAlbums(const QList<TMPXItemId> &mediaIds)
 // addItemsInAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::addItemsInAlbum(TMPXItemId &albumId,
+int VideoCollectionClient::addItemsInAlbum(const TMPXItemId &albumId,
         const QList<TMPXItemId> &mediaIds)
 {
 	FUNC_LOG;
@@ -338,7 +338,7 @@ int VideoCollectionClient::addItemsInAlbum(TMPXItemId &albumId,
 // removeItemsFromAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::removeItemsFromAlbum(TMPXItemId &albumId, 
+int VideoCollectionClient::removeItemsFromAlbum(const TMPXItemId &albumId, 
         const QList<TMPXItemId> &mediaIds)
 {
 	FUNC_LOG;
@@ -354,19 +354,20 @@ int VideoCollectionClient::removeItemsFromAlbum(TMPXItemId &albumId,
 }
 
 // -----------------------------------------------------------------------------
-// renameAlbum
+// renameItem
 // -----------------------------------------------------------------------------
 //
-int VideoCollectionClient::renameAlbum(const TMPXItemId &albumId, 
+int VideoCollectionClient::renameItem(const TMPXItemId &itemId, 
         const QString &newTitle) 
 {
 	FUNC_LOG;
     int err(-1);
 
-    if(mCollectionUtility && albumId.iId2 == KVcxMvcMediaTypeAlbum && 
-       !newTitle.isEmpty())
+    if(mCollectionUtility && !newTitle.isEmpty() &&
+       (itemId.iId2 == KVcxMvcMediaTypeAlbum ||
+        itemId.iId2 == KVcxMvcMediaTypeVideo ) )
     {
-        TRAP(err, renameAlbumL(albumId, newTitle));
+        TRAP(err, renameL(itemId, newTitle));
     }
 
     return err;
@@ -453,7 +454,7 @@ void VideoCollectionClient::deleteVideosL(QList<TMPXItemId> &mediaIds)
 // openVideoL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::openVideoL(TMPXItemId &videoId)
+void VideoCollectionClient::openVideoL(const TMPXItemId &videoId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -475,7 +476,7 @@ void VideoCollectionClient::openVideoL(TMPXItemId &videoId)
 // openCategoryL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::openCategoryL(TMPXItemId &id)
+void VideoCollectionClient::openCategoryL(const TMPXItemId &id)
 {    
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -522,7 +523,7 @@ void VideoCollectionClient::backL()
 // getVideoDetailsL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::getVideoDetailsL(TMPXItemId &videoId)
+void VideoCollectionClient::getVideoDetailsL(const TMPXItemId &videoId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)
@@ -628,7 +629,7 @@ TMPXItemId VideoCollectionClient::createAlbumL(const QString &title)
 // addItemsInAlbumL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::addItemsInAlbumL(TMPXItemId &albumId,
+void VideoCollectionClient::addItemsInAlbumL(const TMPXItemId &albumId,
     const QList<TMPXItemId> &mediaIds)
 {
 	FUNC_LOG;
@@ -674,7 +675,7 @@ void VideoCollectionClient::addItemsInAlbumL(TMPXItemId &albumId,
 // removeItemsFromAlbumL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::removeItemsFromAlbumL(TMPXItemId &albumId, 
+void VideoCollectionClient::removeItemsFromAlbumL(const TMPXItemId &albumId, 
                                                 const QList<TMPXItemId> &mediaIds)
 {
 	FUNC_LOG;
@@ -716,16 +717,16 @@ void VideoCollectionClient::removeItemsFromAlbumL(TMPXItemId &albumId,
 }
 
 // -----------------------------------------------------------------------------
-// renameAlbumL
+// renameL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::renameAlbumL(const TMPXItemId &albumId, const QString newTitle)
+void VideoCollectionClient::renameL(const TMPXItemId &itemId, const QString newTitle)
 {
 	FUNC_LOG;
     CMPXMedia *media = CMPXMedia::NewL();
     CleanupStack::PushL(media);
     TPtrC titlePtrC(newTitle.utf16());
-    media->SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, albumId);
+    media->SetTObjectValueL<TMPXItemId>(KMPXMediaGeneralId, itemId);
     media->SetTextValueL(KMPXMediaGeneralTitle, titlePtrC);
 
     CMPXCommand* cmd = CMPXMedia::NewL();
@@ -747,7 +748,7 @@ void VideoCollectionClient::renameAlbumL(const TMPXItemId &albumId, const QStrin
 // fetchMpxMediaByMpxIdL
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionClient::fetchMpxMediaByMpxIdL(TMPXItemId &aMpxId)
+void VideoCollectionClient::fetchMpxMediaByMpxIdL(const TMPXItemId &aMpxId)
 {
 	FUNC_LOG;
     if(!mCollectionUtility)

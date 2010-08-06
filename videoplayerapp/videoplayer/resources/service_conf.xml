@@ -40,5 +40,11 @@
      <name>com.nokia.symbian.IFileView</name>
      <version>1.0</version>
      <description>Interface for playing video given a QFile</description>
-  </interface>   
+  </interface>
+  <interface>
+     <name>com.nokia.symbian.IUriView</name>
+     <version>1.0</version>
+     <description>Interface for playing RSTP and MMS</description>
+     <customproperty key="schemes">rtsp, rtspt, rtspu, mms, mmst</customproperty>
+  </interface>  
 </service>

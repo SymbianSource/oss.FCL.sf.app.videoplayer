@@ -165,6 +165,7 @@ void TestVideoSortFilterProxyModel::testOpen()
 //
 void TestVideoSortFilterProxyModel::testDeleteItems()
 {
+    VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount = 0;
     VideoCollectionClient::mFailStartOpen = false;
     QVERIFY(mTestObject->initialize(mStubModel) == 0);
     QVERIFY(mTestObject->open(VideoCollectionCommon::ELevelVideos) == 0);
@@ -198,7 +199,11 @@ void TestVideoSortFilterProxyModel::testDeleteItems()
     QModelIndexList emptyList;
     VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
 	QVERIFY(mTestObject->deleteItems(emptyList) == 0);
+	QCOMPARE(VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount, 2);
+	QVERIFY(VideoThumbnailData::mBackgroundThumbnailFetchingEnabled == true);
 	QVERIFY(mTestObject->deleteItems(list) == 0);
+	QCOMPARE(VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount, 4);
+	QVERIFY(VideoThumbnailData::mBackgroundThumbnailFetchingEnabled == true);
 	QVERIFY(mStubModel->mLastDeletedIndexRow == 0);
 	QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 2);
 }
@@ -851,8 +856,8 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     // need to wait for awhile to make sure zero-counter gets 
     // processing time.
     QTest::qWait(500);
-    QCOMPARE(spyAboutToChange.count(), 2); // 2 times because also the setSortRole causes this signal.
-    QCOMPARE(spyChanged.count(), 2);  // 2 times because also the setSortRole causes this signal.
+    QCOMPARE(spyAboutToChange.count(), 1); 
+    QCOMPARE(spyChanged.count(), 1); 
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
     QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
@@ -1274,18 +1279,25 @@ void TestVideoSortFilterProxyModel::testRemoveItemsFromAlbum()
     TMPXItemId albumId(1,2);
     QList<TMPXItemId> items;
     items.append(TMPXItemId(1,0));
-    
+    VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount = 0;
     // no model
+    
     QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == -1);
+    QCOMPARE(VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount, 2);
+    QVERIFY(VideoThumbnailData::mBackgroundThumbnailFetchingEnabled == true);
     mTestObject->initialize(mStubModel);
     
     // model returns < 0
     VideoListDataModel::mRemoveFrAlbumReturn = -1;
     QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == -1);
+    QCOMPARE(VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount, 4);
+    QVERIFY(VideoThumbnailData::mBackgroundThumbnailFetchingEnabled == true);
     
     VideoListDataModel::mRemoveFrAlbumReturn = 11;
     // "succeed"
     QVERIFY(mTestObject->removeItemsFromAlbum(albumId, items) == 0);
+    QCOMPARE(VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount, 6);
+    QVERIFY(VideoThumbnailData::mBackgroundThumbnailFetchingEnabled == true);
 }
 
 // ---------------------------------------------------------------------------
@@ -1486,10 +1498,10 @@ void TestVideoSortFilterProxyModel::testSetAlbumInUse()
 }
 
 // ---------------------------------------------------------------------------
-// testRenameAlbum
+// testRenameItem
 // ---------------------------------------------------------------------------
 //
-void TestVideoSortFilterProxyModel::testRenameAlbum()
+void TestVideoSortFilterProxyModel::testRenameItem()
 {
     delete mTestObject;
     mTestObject = new FilterProxyTester(VideoCollectionCommon::EModelTypeAllVideos);
@@ -1497,42 +1509,11 @@ void TestVideoSortFilterProxyModel::testRenameAlbum()
     // Not initialized.
     TMPXItemId id = TMPXItemId::InvalidId();
     QString name = "";
-    QVERIFY(mTestObject->renameAlbum(id, name) == -1);
+    QVERIFY(mTestObject->renameItem(id, name) == -1);
     
     // Initialized.
     mTestObject->initialize(mStubModel);
-    QVERIFY(mTestObject->renameAlbum(id, name) == 0);
-}
-
-// ---------------------------------------------------------------------------
-// testItemModifiedSlot
-// ---------------------------------------------------------------------------
-//
-void TestVideoSortFilterProxyModel::testItemModifiedSlot()
-{
-    connect(this, SIGNAL(testSignalMpxId(const TMPXItemId &)), mTestObject, SLOT(itemModifiedSlot(const TMPXItemId &)));
-    
-    TMPXItemId id = TMPXItemId::InvalidId();
-    mTestObject->initialize(mStubModel);
-    
-    // mType wrong
-    mTestObject->mType = VideoCollectionCommon::EModelTypeAllVideos;
-    emit testSignalMpxId(id);
-    
-    // invalid id
-    mTestObject->mType = VideoCollectionCommon::EModelTypeCollections;
-
-    emit testSignalMpxId(id);
-    
-    // item is album
-    id = TMPXItemId(0, KVcxMvcMediaTypeAlbum);
-    emit testSignalMpxId(id);
-    
-    // item is category
-    id = TMPXItemId(0, KVcxMvcMediaTypeCategory);
-    emit testSignalMpxId(id);
-
-    disconnect(this, SIGNAL(testSignalMpxId(const TMPXItemId &)), mTestObject, SLOT(itemModifiedSlot(const TMPXItemId &)));
+    QVERIFY(mTestObject->renameItem(id, name) == 0);
 }
 
 // End of file

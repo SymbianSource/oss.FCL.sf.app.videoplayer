@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#48 %
+// Version : %version: da1mmcf#50 %
 
 
 
@@ -399,6 +399,8 @@ void VideoPlaybackControlsController::handleEvent(
             updateDownloadPosition( value );
             break;
         }
+        case EControlCmdSurfaceAttached:
+        case EControlCmdSurfaceDetached:
         case EControlCmdSetDownloadPaused:
         case EControlCmdClearDownloadPaused:
         {
@@ -460,6 +462,7 @@ void VideoPlaybackControlsController::handleStateChange( TMPXPlaybackState newSt
             case EPbStateBuffering:
             case EPbStatePaused:
             case EPbStateNotInitialised:
+            case EPbStatePluginSeeking:
             {
                 //
                 //  Show all the controls

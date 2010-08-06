@@ -28,6 +28,8 @@
 #include "vcxmyvideosdefs.h"
 #include "videocollectioncommon.h"
 
+const TMPXItemId INVALID_ID = TMPXItemId::InvalidId();
+
 inline uint qHash(TMPXItemId key) 
 { 
     QPair<uint, uint> keyPair(key.iId1, key.iId2); 
@@ -78,6 +80,8 @@ int VideoListDataModelPrivate::mGetVideoCountFail = -1;
 bool VideoListDataModelPrivate::mBelongsToAlbum = false;
 
 int VideoListDataModelPrivate::mRemoveFrAlbumReturn = -1;
+
+TMPXItemId VideoListDataModelPrivate::mItemIdToReturn = TMPXItemId::InvalidId();
 
 // -----------------------------------------------------------------------------
 // CVideoListData
@@ -156,7 +160,7 @@ int VideoListDataModelPrivate::getVideoCount()
 // getVideoNameFromIndex
 // -----------------------------------------------------------------------------
 //
-const QString VideoListDataModelPrivate::getVideoNameFromIndex( int index )  const
+const QString VideoListDataModelPrivate::getVideoNameFromIndex(const int &index )  const
 {
     QString txt = "";
     CMPXMedia* media = getMediaFromIndex(index);
@@ -169,7 +173,7 @@ const QString VideoListDataModelPrivate::getVideoNameFromIndex( int index )  con
 // getVideoThumbnailFromIndex
 // -----------------------------------------------------------------------------
 //
-const QIcon* VideoListDataModelPrivate::getVideoThumbnailFromIndex( int index )  const
+const QIcon* VideoListDataModelPrivate::getVideoThumbnailFromIndex(const int &index )  const
 {
     Q_UNUSED(index);
     
@@ -180,7 +184,7 @@ const QIcon* VideoListDataModelPrivate::getVideoThumbnailFromIndex( int index ) 
 // getVideoThumbnailFromIndex
 // -----------------------------------------------------------------------------
 //
-quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) const
+quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex(const int &index ) const
 {
     if(mOverrideVideoCount)
     {
@@ -200,7 +204,7 @@ quint32 VideoListDataModelPrivate::getCategoryVideoCountFromIndex( int index ) c
 // getVideoSizeFromIndex
 // -----------------------------------------------------------------------------
 //
-quint32 VideoListDataModelPrivate::getVideoSizeFromIndex( int index ) const
+quint32 VideoListDataModelPrivate::getVideoSizeFromIndex(const int &index ) const
 {
     if(mOverrideSize)
     {
@@ -219,7 +223,7 @@ quint32 VideoListDataModelPrivate::getVideoSizeFromIndex( int index ) const
 // getVideodurationFromIndex
 // -----------------------------------------------------------------------------
 //
-quint32 VideoListDataModelPrivate::getVideodurationFromIndex( int index ) const
+quint32 VideoListDataModelPrivate::getVideodurationFromIndex(const int &index ) const
 {
     if(mOverrideDuration)
     {
@@ -240,7 +244,7 @@ quint32 VideoListDataModelPrivate::getVideodurationFromIndex( int index ) const
 // getVideoDateFromIndex
 // -----------------------------------------------------------------------------
 //
-QDateTime VideoListDataModelPrivate::getVideoDateFromIndex( int index ) const
+QDateTime VideoListDataModelPrivate::getVideoDateFromIndex(const int &index ) const
 {
     QDateTime date;
     CMPXMedia *media = getMediaFromIndex(index);
@@ -258,16 +262,17 @@ QDateTime VideoListDataModelPrivate::getVideoDateFromIndex( int index ) const
 // getMediaIdFromIndex
 // -----------------------------------------------------------------------------
 //
-TMPXItemId VideoListDataModelPrivate::getMediaIdFromIndex( int index ) const
+TMPXItemId& VideoListDataModelPrivate::getMediaIdFromIndex(const int &index ) const
 {
-    return getMediaId( getMediaFromIndex(index) );
+    Q_UNUSED(index);
+    return mItemIdToReturn;
 }
 
 // -----------------------------------------------------------------------------
 // getFilePathForId
 // -----------------------------------------------------------------------------
 //
-const QString VideoListDataModelPrivate::getFilePathForId( TMPXItemId mediaId ) const
+const QString VideoListDataModelPrivate::getFilePathForId(const TMPXItemId &mediaId ) const
 {
     return getFilePathFromIndex( indexOfMediaId(mediaId) );
 }
@@ -276,7 +281,7 @@ const QString VideoListDataModelPrivate::getFilePathForId( TMPXItemId mediaId ) 
 // getFilePathForId
 // -----------------------------------------------------------------------------
 //
-bool VideoListDataModelPrivate::belongsToAlbum(TMPXItemId itemId, TMPXItemId albumId)
+bool VideoListDataModelPrivate::belongsToAlbum(const TMPXItemId &itemId, TMPXItemId albumId)
 {
     Q_UNUSED(itemId);
     Q_UNUSED(albumId);
@@ -287,7 +292,7 @@ bool VideoListDataModelPrivate::belongsToAlbum(TMPXItemId itemId, TMPXItemId alb
 // setAlbumInUse
 // -----------------------------------------------------------------------------
 //
-void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
+void VideoListDataModelPrivate::setAlbumInUse(const TMPXItemId &albumId)
 {
     mCurrentAlbum = albumId;
 }
@@ -296,7 +301,7 @@ void VideoListDataModelPrivate::setAlbumInUse(TMPXItemId albumId)
 // removeItemsFromAlbum
 // -----------------------------------------------------------------------------
 //
-int VideoListDataModelPrivate::removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &ids)
+int VideoListDataModelPrivate::removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &ids)
 {
     Q_UNUSED(albumId);
     Q_UNUSED(ids);    
@@ -307,7 +312,7 @@ int VideoListDataModelPrivate::removeItemsFromAlbum(TMPXItemId &albumId, const Q
 // getVideoStatusFromIndex
 // -----------------------------------------------------------------------------
 //
-int VideoListDataModelPrivate::getVideoStatusFromIndex(int index) const
+int VideoListDataModelPrivate::getVideoStatusFromIndex(const int &index) const
 {
     int status = 0;
     if(mItemsUnderDeletion.contains(getMediaIdFromIndex(index)))
@@ -354,7 +359,7 @@ void VideoListDataModelPrivate::restoreRemoved(QList<TMPXItemId> *idList)
 // getFilePathFromIndex
 // -----------------------------------------------------------------------------
 //
-const QString VideoListDataModelPrivate::getFilePathFromIndex(int index) const
+const QString VideoListDataModelPrivate::getFilePathFromIndex(const int &index) const
 {
     QString filePath;
     VideoCollectionUtils::instance().mediaValue<QString>(getMediaFromIndex(index), 
@@ -366,7 +371,7 @@ const QString VideoListDataModelPrivate::getFilePathFromIndex(int index) const
 // getMediaFromIndex
 // -----------------------------------------------------------------------------
 //
-CMPXMedia* VideoListDataModelPrivate::getMediaFromIndex( int index ) const
+CMPXMedia* VideoListDataModelPrivate::getMediaFromIndex(const int &index) const
 {
     CMPXMedia *media = NULL;
     if( mMediaArray && index >= 0 && index < mMediaArray->Count() )
@@ -394,7 +399,7 @@ TMPXItemId VideoListDataModelPrivate::getMediaId(const CMPXMedia *media ) const
 // indexOfMediaId
 // -----------------------------------------------------------------------------
 //
-int VideoListDataModelPrivate::indexOfMediaId(TMPXItemId mediaId) const
+int VideoListDataModelPrivate::indexOfMediaId(const TMPXItemId &mediaId) const
 {
     int index = -1;
     if( !mMediaArray )
@@ -449,15 +454,6 @@ void VideoListDataModelPrivate::newVideoAvailableSlot(CMPXMedia* aVideo)
 }
 
 // -----------------------------------------------------------------------------
-// videoDeleted
-// -----------------------------------------------------------------------------
-// 
-void VideoListDataModelPrivate::videoDeletedSlot(TMPXItemId videoId)
-{
-    Q_UNUSED(videoId);    
-}
-
-// -----------------------------------------------------------------------------
 // videoDeleteCompleted
 // -----------------------------------------------------------------------------
 // 
@@ -481,7 +477,7 @@ void VideoListDataModelPrivate::videoDetailsCompletedSlot(CMPXMedia* media)
 // albumListAvailableSlot
 // -----------------------------------------------------------------------------
 // 
-void VideoListDataModelPrivate::albumListAvailableSlot(TMPXItemId albumId, 
+void VideoListDataModelPrivate::albumListAvailableSlot(TMPXItemId &albumId, 
                                                         CMPXMediaArray *albumItems)
 {
     Q_UNUSED(albumId);
@@ -510,16 +506,24 @@ void VideoListDataModelPrivate::albumRemoveFailureSlot(QList<TMPXItemId> *items)
 // itemDeletedSlot
 // -----------------------------------------------------------------------------
 // 
-void VideoListDataModelPrivate::itemDeletedSlot(TMPXItemId id)
+void VideoListDataModelPrivate::itemDeletedSlot(TMPXItemId &id)
 {
     Q_UNUSED(id);    
 }
 
 // -----------------------------------------------------------------------------
-// listCompleteSlot
+// videoListCompleteSlot
 // -----------------------------------------------------------------------------
 // 
-void VideoListDataModelPrivate::listCompleteSlot()
+void VideoListDataModelPrivate::videoListCompleteSlot()
+{
+}
+
+// -----------------------------------------------------------------------------
+// albumListCompleteSlot
+// -----------------------------------------------------------------------------
+// 
+void VideoListDataModelPrivate::albumListCompleteSlot()
 {
 }
 

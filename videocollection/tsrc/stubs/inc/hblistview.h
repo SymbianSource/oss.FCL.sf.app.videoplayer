@@ -301,6 +301,14 @@ public:
         Q_UNUSED(end);
     }
     
+    /**
+     * Dummy method
+     */
+    void setItemPixmapCacheEnabled(bool enabled)
+    {
+        Q_UNUSED(enabled);    
+    }
+    
 public:
     
     /**

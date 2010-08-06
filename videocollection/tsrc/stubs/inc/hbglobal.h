@@ -18,6 +18,9 @@
 #ifndef HBGLOBAL_H
 #define HBGLOBAL_H
 
+// need this here for forced include 
+#include "xqsettingsmanagerstub.h"
+
 #include <QtGlobal>
 
 #ifdef BUILD_HB_CORE

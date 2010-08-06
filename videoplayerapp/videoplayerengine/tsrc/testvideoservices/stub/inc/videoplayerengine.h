@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#3 %
+// Version : %version: da1mmcf#4 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -49,6 +49,7 @@ class VideoPlayerEngine: public QObject
         void playMedia( QString filePath );
         void playMedia( RFile file );
         void setEmbedded();
+        void playURI( QString uri );
 
     public slots:
         void handleCommand( int commandCode );

@@ -84,7 +84,7 @@ void TestVideoFileDetails::initTestCase()
 //
 void TestVideoFileDetails::cleanupTestCase()
 {
-    disconnect(this, SIGNAL(shortDetailsReady(int)), mDummyModel, SIGNAL(shortDetailsReady(int)));
+    disconnect(this, SIGNAL(shortDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(shortDetailsReady(TMPXItemId)));
     disconnect(this, SIGNAL(fullDetailsReady(QVariant&)),mDummyModel, SIGNAL(fullVideoDetailsReady(QVariant&)));
     disconnect(this, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
             mDummyModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)));
@@ -484,24 +484,6 @@ void TestVideoFileDetails::testFullDetailsReadySlot()
         QVERIFY( detail->text().contains(expected) );
     }
     
-    // for coverity sake, retest without star-rating
-    variant = QVariant(createDummyMetadata());
-    emit fullDetailsReady(variant);
-
-    int ii = 0;
-    for(int i = 0; i<detailCount; i++) 
-    {        
-        if(VideoCollectionCommon::VideoDetailLabelKeys[i] != VideoCollectionCommon::MetaKeyStarRating)
-        {
-            QString expected = tr(VideoCollectionCommon::VideoDetailLabels[i]).arg(
-                    VideoCollectionCommon::VideoDetailLabelKeys[i]);
-            HbListWidgetItem* detail = list->item(ii);
-            QVERIFY( detail != 0 );
-            QVERIFY( detail->text().contains(expected) );
-        }
-        ++ii;
-    }
-
     cleanup();
 }
 
@@ -549,7 +531,6 @@ void TestVideoFileDetails::testStartPlaybackSlot()
 //
 void TestVideoFileDetails::testSendVideoSlot()
 {
-//    QFAIL("Feature not yet implemented!");
     
     mDummyModel->reset();
     init();
@@ -579,6 +560,10 @@ void TestVideoFileDetails::testSendVideoSlot()
     QVERIFY( ShareUi::mEmbedded );
     QCOMPARE( ShareUi::mFileList.count(), 1 );
     QCOMPARE( ShareUi::mFileList.at(0), filePath );
+    
+    mPlugin->deactivateView();
+    
+    QVERIFY(!mPlugin->mShareUi);
     
     cleanup();
 }

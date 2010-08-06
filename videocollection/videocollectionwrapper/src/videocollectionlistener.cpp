@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 33 %
+// Version : %version: 34 %
 
 // INCLUDE FILES
 #include <mpxmediageneraldefs.h>
@@ -131,11 +131,23 @@ void VideoCollectionListener::HandleOpenL(
     }
     
     int listCompleted(-1);
-    if(mVideoUtils.mediaValue<int>(&aEntries, KVcxMediaMyVideosInt32Value, listCompleted))
+    
+    if(path->Levels() == VideoCollectionCommon::PathLevelCategories)
+    {
+        bool listIsPartial(false);
+        if(mVideoUtils.mediaValue<bool>(&aEntries, KVcxMediaMyVideosVideoListIsPartial, listIsPartial))
+        {
+            if(!listIsPartial)
+            {
+                mSignalReceiver.albumListCompleteSlot();
+            }
+        }
+    }
+    else if(mVideoUtils.mediaValue<int>(&aEntries, KVcxMediaMyVideosInt32Value, listCompleted))
     {
         if(listCompleted == EVcxMyVideosVideoListComplete)
         {
-            mSignalReceiver.listCompleteSlot();
+            mSignalReceiver.videoListCompleteSlot();
         }
     }
 }

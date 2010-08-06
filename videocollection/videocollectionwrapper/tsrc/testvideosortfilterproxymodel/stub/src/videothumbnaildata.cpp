@@ -24,6 +24,7 @@
 
 #include "videothumbnaildata.h"
 
+int VideoThumbnailData::mEnableBackgroundThumbnailFetchingCallCount = 0;
 int VideoThumbnailData::mStartFetchingThumbnailsCallCount = 0;
 int VideoThumbnailData::mStartFetchingThumbnailsThumbnailCount = 0;
 int VideoThumbnailData::mInstanceCallCount = 0;
@@ -78,6 +79,7 @@ void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *mode
 void VideoThumbnailData::enableBackgroundFetching(bool enable)
 {
     mBackgroundThumbnailFetchingEnabled = enable;
+    mEnableBackgroundThumbnailFetchingCallCount++;
 }
 
 // -----------------------------------------------------------------------------

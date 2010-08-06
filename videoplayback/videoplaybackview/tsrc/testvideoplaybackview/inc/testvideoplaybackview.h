@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 #ifndef __TESTVIDEOPLAYBACKVIEW_H__
 #define __TESTVIDEOPLAYBACKVIEW_H__
@@ -73,6 +73,8 @@ private slots:
     void testDoClosePlayer();
     void testGestureEvent();
     void testReactivationAfterPriorTermination();
+    void testHandleAppBackground();
+    void testHandleAppForeground();
 
 signals:
     void commandSignal();

@@ -41,6 +41,8 @@ VideoListSelectionDialog::VideoListSelectionDialog(
     mListContainer(0),
     mForcedCheck(false),
     mModel(0),
+    mModelReady(false),
+    mAlbumListReady(false),
     mListWidget(0),
     mPrimaryAction(0),
     mSecondaryAction(0)
@@ -120,6 +122,11 @@ void VideoListSelectionDialog::singleItemSelectedSlot(const QModelIndex &index)
 }
 
 void VideoListSelectionDialog::modelReadySlot()
+{
+    // not stubbed
+}
+
+void VideoListSelectionDialog::albumListReadySlot()
 {
     // not stubbed
 }

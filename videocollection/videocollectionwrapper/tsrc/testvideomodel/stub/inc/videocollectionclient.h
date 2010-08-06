@@ -58,7 +58,7 @@ public: // Constructors and destructor
     /**
      * returns mRemoveItemsReturn
      */
-    int removeItemsFromAlbum(TMPXItemId &albumId, const QList<TMPXItemId> &items);
+    int removeItemsFromAlbum(const TMPXItemId &albumId, const QList<TMPXItemId> &items);
     
     /**
      * if true, initializate fails

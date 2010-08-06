@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 76.1.5 %
+// Version : %version: 76.1.7 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -33,6 +33,7 @@
 #include <hblistwidgetitem.h>
 #include <hblistviewitem.h>
 #include <hbparameterlengthlimiter.h>
+#include <hbtextitem.h>
 #include <cmath>
 #include <thumbnailmanager_qt.h>
 #include <shareui.h>
@@ -88,6 +89,7 @@ VideoFileDetailsViewPlugin::VideoFileDetailsViewPlugin()
     , mThumbLabel( 0 )
     , mThumbnailManager( 0 )
     , mCollectionWrapper( VideoCollectionWrapper::instance() )
+    , mShareUi(0)
 {
 	FUNC_LOG;
 }
@@ -273,7 +275,7 @@ void VideoFileDetailsViewPlugin::activateView()
         HbView *currentView = mainWnd->currentView();
         if(currentView && mNavKeyBackAction)
         {
-        	if (connect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back())))
+        	if (connect(mNavKeyBackAction, SIGNAL(triggered()), this, SLOT(back())), Qt::UniqueConnection)
         	{
         		currentView->setNavigationAction(mNavKeyBackAction);
         	}
@@ -340,12 +342,12 @@ void VideoFileDetailsViewPlugin::activateView()
 			HbIcon icon = HbIcon("qtg_mono_attach");
 			button->setIcon(icon);
 
-            connect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()));
-            connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)));
+            connect(button, SIGNAL(clicked(bool)), this, SLOT(getFileUri()), Qt::UniqueConnection);
+            connect(this, SIGNAL(fileUri(const QString&)), mVideoServices, SLOT(itemSelected(const QString&)), Qt::UniqueConnection);
 		}
 		else
 		{
-			connect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()));
+			connect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()), Qt::UniqueConnection);
 
 			HbIcon icon = HbIcon("qtg_mono_share");
 			button->setIcon(icon);
@@ -353,11 +355,13 @@ void VideoFileDetailsViewPlugin::activateView()
 
         connect(mainWnd,
                 SIGNAL(orientationChanged(Qt::Orientation)),
-                this, SLOT(orientationChange(Qt::Orientation)));
+                this, SLOT(orientationChange(Qt::Orientation)),
+                Qt::UniqueConnection);
 
         connect(&mCollectionWrapper,
                SIGNAL(asyncStatus(int, QVariant&)),
-               this, SLOT(handleErrorSlot(int, QVariant&)));
+               this, SLOT(handleErrorSlot(int, QVariant&)),
+               Qt::UniqueConnection);
 
         // setup title size in order for animation to be enabled if needed
         mTitleAnim->setMinimumWidth(hbInstance->allMainWindows().value(0)->width()-50);
@@ -418,6 +422,8 @@ void VideoFileDetailsViewPlugin::deactivateView()
 			disconnect(button, SIGNAL(clicked(bool)), this, SLOT(sendVideoSlot()));
 		}
     }
+    delete mShareUi;
+    mShareUi = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -518,10 +524,20 @@ void VideoFileDetailsViewPlugin::fullDetailsReadySlot(QVariant& variant)
         if (metadata.contains(VideoDetailLabelKeys[i]))
         {
             HbListWidgetItem* listWidgetItem = new HbListWidgetItem();
-            listWidgetItem->setEnabled(false);
             listWidgetItem->setText( hbTrId(VideoDetailLabels[i]));
             listWidgetItem->setSecondaryText(metadata[VideoDetailLabelKeys[i]].toString());
             list->addItem(listWidgetItem);
+            
+            // following is required to change wrapping-mode for the second row
+            HbListViewItem *viewItem = static_cast<HbListViewItem*>(list->viewItem(list->row(listWidgetItem)));
+            if(viewItem)
+            {
+                HbTextItem *secondLine = static_cast<HbTextItem*>(viewItem->primitive("text-2"));
+                if(secondLine)
+                {
+                    secondLine->setTextWrapping(Hb::TextWrapAnywhere);
+                }
+            }
         }
     }
 
@@ -568,18 +584,20 @@ void VideoFileDetailsViewPlugin::startPlaybackSlot()
 void VideoFileDetailsViewPlugin::sendVideoSlot()
 {
 	FUNC_LOG;
-//	HbMessageBox::information(tr("Not implemented yet"));
 
     if(mVideoId != TMPXItemId::InvalidId())
     {
-        ShareUi dialog;
+        if(!mShareUi)
+        {
+            mShareUi = new ShareUi();
+        }
         QModelIndex modelIndex = mModel->indexOfId(mVideoId);
         QVariant variant = mModel->data(modelIndex, VideoCollectionCommon::KeyFilePath);
         if(variant.isValid())
         {
             QStringList fileList;
             fileList.append(variant.toString());
-            dialog.send(fileList, true);
+            mShareUi->send(fileList, true);
         }
     }
 }

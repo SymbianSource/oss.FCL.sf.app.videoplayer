@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#4 %
+// Version : %version:  da1mmcf#5 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -31,6 +31,7 @@
 #include "videoservices.h"
 #include "videoserviceurifetch.h"
 #include "videoserviceplay.h"
+#include "videoserviceuri.h"
 #undef private
 
 // ---------------------------------------------------------------------------
@@ -100,6 +101,7 @@ void TestVideoServices::testCreateDelete()
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
     QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mServiceUriView );
     QVERIFY( mTestObject->mEngine == 0 );
     QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 }
@@ -115,6 +117,7 @@ void TestVideoServices::testCreateDeleteEngine()
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
     QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mServiceUriView );    
     QVERIFY( mTestObject->mEngine == mEngine );
     QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 }
@@ -130,6 +133,7 @@ void TestVideoServices::testCurrentService()
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
     QVERIFY( mTestObject->mServiceView );
+    QVERIFY( mTestObject->mServiceUriView );    
     QVERIFY( mTestObject->mEngine == 0 );
     QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
@@ -159,6 +163,9 @@ void TestVideoServices::testCurrentService()
     
     mTestObject->mServicePlay->playMedia( QString() );
     QVERIFY( mTestObject->mCurrentService == VideoServices::EPlayback );
+    
+    mTestObject->mServiceUriView->view( QString() );
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EUriView );    
 }
 
 void TestVideoServices::cleanupTestCase()
