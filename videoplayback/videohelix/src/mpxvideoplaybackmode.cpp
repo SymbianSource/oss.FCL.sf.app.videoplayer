@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 33 %
+// Version : %version: 34 %
 
 
 //
@@ -301,7 +301,7 @@ void CMPXVideoPlaybackMode::HandleFrameReady( TInt /*aError*/ )
 //  ------------------------------------------------------------------------------------------------
 //    CMPXVideoPlaybackMode::SendErrorToView()
 //  ------------------------------------------------------------------------------------------------
-TBool CMPXVideoPlaybackMode::SendErrorToView( TInt aError )
+TBool CMPXVideoPlaybackMode::SendErrorToView( TInt /*aError*/ )
 {
     MPX_DEBUG(_L("CMPXLocalPlaybackMode::SendErrorToView(%d)"), ETrue);
 

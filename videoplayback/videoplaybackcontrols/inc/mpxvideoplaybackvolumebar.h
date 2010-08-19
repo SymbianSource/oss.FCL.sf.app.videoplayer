@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#8 %
+// Version : %version: 9 %
 
 
 
@@ -69,6 +69,8 @@ class CMPXVideoPlaybackVolumeBar : public CCoeControl
          * By default Symbian 2nd phase constructor is private.
          */
         void ConstructL();
+        
+        void CreateSliderIconsL();
 
     private: // from CoeControl
 
@@ -110,6 +112,12 @@ class CMPXVideoPlaybackVolumeBar : public CCoeControl
          *  @since 5.0
          */        
         void Reset();
+ 
+        /**
+        * TV Out connected
+        * @return void
+        */
+        void UpdateTVOutStatusL( TBool aConnected );
 
     private: //new fuctions
         /**

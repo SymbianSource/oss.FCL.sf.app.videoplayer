@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -101,7 +101,7 @@ void CMPXVideoPlaybackUserInputHandler::ProcessPointerEventL( CCoeControl* aCont
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ProcessPointerEvent"));
 
-    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"), 
+    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"),
        aPointerEvent.iType, aPointerEvent.iPosition.iX, aPointerEvent.iPosition.iY );
 
     switch (iProcessingInputType)
@@ -154,7 +154,6 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
             if (aType == EEventKeyDown)
             {
                 iProcessingInputType = EMpxVideoKeyboard;
-                iLastPressedKeyCode = aKeyEvent.iCode;
                 iLastPressedKeyScanCode = aKeyEvent.iScanCode;
                 iContainer->DoHandleKeyEventL(aKeyEvent, aType);
             }
@@ -162,19 +161,16 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
         }
         case EMpxVideoKeyboard:
         {
-            if (aType == EEventKeyUp)
+            if ( aKeyEvent.iScanCode == iLastPressedKeyScanCode )
             {
-                // only handle up event for the key being handled
-                // ignore spurious key presses
-                if (aKeyEvent.iCode == iLastPressedKeyCode  &&
-                    aKeyEvent.iScanCode == iLastPressedKeyScanCode)
-                {
-                    iContainer->DoHandleKeyEventL(aKeyEvent, aType);
+                iContainer->DoHandleKeyEventL( aKeyEvent, aType );
 
-                    // reset the value only on key up event
+                if ( aType == EEventKeyUp )
+                {
                     iProcessingInputType = EMpxVideoNone;
                 }
             }
+
             break;
         }
         default:

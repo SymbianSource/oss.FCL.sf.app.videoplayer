@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 29 %
+// Version : %version: 30 %
 
 
 // INCLUDE FILES
@@ -190,8 +190,7 @@ TKeyResponse CMPXVideoPlaybackContainer::OfferKeyEventL( const TKeyEvent& aKeyEv
 {
     MPX_ENTER_EXIT(
         _L("CMPXVideoPlaybackContainer::OfferKeyEventL()"),
-        _L("iCode = %d iScanCode = %d aType = %d"),
-        aKeyEvent.iCode, aKeyEvent.iScanCode, aType );
+        _L("aKeyEvent = (%d,%d), aType = %d"), aKeyEvent.iCode, aKeyEvent.iScanCode, aType );
 
     iKeyResponse = EKeyWasNotConsumed;
 
@@ -208,7 +207,7 @@ TKeyResponse CMPXVideoPlaybackContainer::OfferKeyEventL( const TKeyEvent& aKeyEv
 EXPORT_C void
 CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackContainer::DoHandleKeyEventL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::DoHandleKeyEventL()"));
 
     switch ( aKeyEvent.iScanCode )
     {
@@ -221,36 +220,38 @@ CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, TEven
         }
         case EStdKeyUpArrow:        // rocker up key
         {
-            if ( aType == EEventKeyDown )
+            if ( aType != EEventKeyUp )
             {
                 HandleCommandL( EMPXPbvCmdIncreaseVolume );
                 iKeyResponse = EKeyWasConsumed;
             }
+
             break;
         }
         case EStdKeyDownArrow:      // rocker down key
         {
-            if ( aType == EEventKeyDown )
+            if ( aType != EEventKeyUp )
             {
                 HandleCommandL( EMPXPbvCmdDecreaseVolume );
                 iKeyResponse = EKeyWasConsumed;
             }
+
             break;
         }
         case EStdKeyLeftArrow:      // rocker left key
         {
-            HandleSeekBackL(aType);
+            HandleSeekBackL( aType );
             iKeyResponse = EKeyWasConsumed;
             break;
         }
         case EStdKeyRightArrow:     // rocker right key
         {
-            HandleSeekFwdL(aType);
+            HandleSeekFwdL( aType );
             iKeyResponse = EKeyWasConsumed;
             break;
         }
-        case EStdKeyDevice0:
-        case EStdKeyDevice1:
+        case EStdKeyDevice0:    // LSK
+        case EStdKeyDevice1:    // RSK
         {
             if ( aType == EEventKeyUp )
             {
@@ -273,7 +274,7 @@ void CMPXVideoPlaybackContainer::HandleRockerMiddleKeyL( const TKeyEvent& aKeyEv
 {
     if ( aKeyEvent.iCode == EKeyNull && aType == EEventKeyDown  )
     {
-        iView->HandleCommandL(EMPXPbvCmdPlayPause);
+        iView->HandleCommandL( EMPXPbvCmdPlayPause );
     }
 }
 

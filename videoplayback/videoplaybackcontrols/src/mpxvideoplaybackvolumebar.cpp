@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 24 %
+// Version : %version: 27 %
 
 
 // INCLUDE FILES
@@ -283,6 +283,8 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
     TFileName iconsPath;
     iController->LocateBitmapFileL( iconsPath );
 
+    CreateSliderIconsL();
+    
     delete iSpeakerIcon;
     iSpeakerIcon = NULL;
     iSpeakerIcon = AknsUtils::CreateGulIconL(
@@ -331,38 +333,6 @@ void CMPXVideoPlaybackVolumeBar::SkinChangeL()
         AknIconUtils::SetSize( iNoAudioIcon->Bitmap(),
                                iSpeakerRect.Size(),
                                EAspectRatioPreserved );
-    }
-
-    delete iSliderIcon;
-    iSliderIcon = NULL;
-    iSliderIcon = AknsUtils::CreateGulIconL(
-            skin,
-            KAknsIIDQgnGrafNsliderVerticalMarker,
-            iconsPath,
-            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker,
-            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_mask );
-
-    if ( iSliderIcon )
-    {
-        AknIconUtils::SetSize( iSliderIcon->Bitmap(),
-                               TSize(KMPXSliderWidth, KMPXSliderHeight),
-                               EAspectRatioNotPreserved );
-    }
-
-    delete iSliderSelectedIcon;
-    iSliderSelectedIcon = NULL;
-    iSliderSelectedIcon = AknsUtils::CreateGulIconL(
-            skin,
-            KAknsIIDQgnGrafNsliderVerticalMarkerSelected,
-            iconsPath,
-            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected,
-            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected_mask );
-
-    if ( iSliderSelectedIcon )
-    {
-        AknIconUtils::SetSize( iSliderSelectedIcon->Bitmap(),
-                               TSize(KMPXSliderWidth, KMPXSliderHeight),
-                               EAspectRatioNotPreserved );
     }
 
     delete iVolumeUpIcon;
@@ -487,13 +457,9 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButtonRepeat:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdIncreaseVolume );
@@ -516,13 +482,9 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Up:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -549,13 +511,9 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButtonRepeat:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdDecreaseVolume );
@@ -578,13 +536,9 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Up:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -613,11 +567,7 @@ void CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL( const TPointerEvent
 #ifdef RD_TACTILE_FEEDBACK
             if ( iFeedback )
             {
-#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
-#else
-                iFeedback->InstantFeedback( ETouchFeedbackBasic );
-#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -686,7 +636,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Down:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback )
+            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
             {
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
             }
@@ -707,7 +657,8 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
         case TPointerEvent::EDrag:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && giveDynamicSliderFeedback )
+            if ( iFeedback && giveDynamicSliderFeedback && 
+                 !iController->FileDetails()->iTvOutConnected )
             {
                 iFeedback->StartFeedback( this,
                                           ETouchDynamicSlider,
@@ -932,6 +883,7 @@ void CMPXVideoPlaybackVolumeBar::Draw( const TRect& aRect ) const
 
     if ( iController->FileDetails() &&
          iController->FileDetails()->iAudioEnabled &&
+         !iController->FileDetails()->iTvOutConnected &&
          iSliderIcon &&
          iSliderSelectedIcon )
     {
@@ -1015,4 +967,80 @@ void CMPXVideoPlaybackVolumeBar::SetVolumeL( TInt aVolume )
     iController->HandleCommandL( EMPXPbvCmdSetVolume, aVolume );
 }
 
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackVolumeBar::UpdateTVOutStatus()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackVolumeBar::UpdateTVOutStatusL( TBool aConnected )
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::UpdateTVOutStatus()"));
+    
+    if ( aConnected )
+    {
+        if ( iSliderIcon )
+        {
+            delete iSliderIcon;
+            iSliderIcon = NULL;
+        }
+        
+        if ( iSliderSelectedIcon )
+        {
+            delete iSliderSelectedIcon;
+            iSliderSelectedIcon = NULL;
+        }
+    }
+    else
+    {
+        CreateSliderIconsL();
+    }  
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackVolumeBar::CreateSliderIconsL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPlaybackVolumeBar::CreateSliderIconsL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackVolumeBar::CreateSliderIconsL()"));
+    
+    //
+    // Create icons
+    //
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    
+    TFileName iconsPath;
+    iController->LocateBitmapFileL( iconsPath );
+    
+    delete iSliderIcon;
+    iSliderIcon = NULL;
+    iSliderIcon = AknsUtils::CreateGulIconL(
+            skin,
+            KAknsIIDQgnGrafNsliderVerticalMarker,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_mask );
+    
+    if ( iSliderIcon )
+    {
+        AknIconUtils::SetSize( iSliderIcon->Bitmap(),
+                               TSize(KMPXSliderWidth, KMPXSliderHeight),
+                               EAspectRatioNotPreserved );
+    }
+    
+    delete iSliderSelectedIcon;
+    iSliderSelectedIcon = NULL;
+    iSliderSelectedIcon = AknsUtils::CreateGulIconL(
+            skin,
+            KAknsIIDQgnGrafNsliderVerticalMarkerSelected,
+            iconsPath,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected,
+            EMbmMpxvideoplaybackcontrolsQgn_graf_nslider_vertical_marker_selected_mask );
+    
+    if ( iSliderSelectedIcon )
+    {
+        AknIconUtils::SetSize( iSliderSelectedIcon->Bitmap(),
+                               TSize(KMPXSliderWidth, KMPXSliderHeight),
+                               EAspectRatioNotPreserved );
+    }
+}
 //  End of File

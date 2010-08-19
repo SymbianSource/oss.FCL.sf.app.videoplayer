@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 14 %
+// Version : %version: 15 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -25,6 +25,7 @@
 //  INCLUDES
 //
 #include <mmf/common/mmfcontroller.h>
+#include <e32base.h>
 
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <mmf/common/mmfstandardcustomcommandsimpl.h>
@@ -33,6 +34,10 @@
 #endif
 
 #include <mmf/common/mmfdrmcustomcommands.h>
+
+#ifdef SYMBIAN_BUILD_GCE
+#include <mmf/common/mmfvideosurfacecustomcommands.h>
+#endif
 
 #include "videohelixtest.h"
 
@@ -113,7 +118,7 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
         void SetVolumeSteps( TInt aVolumeSteps );
 
         void SurfaceRemovedFromView();
-        
+
         void GetFrameL();
         CFbsBitmap& GetBitmap();
 
@@ -125,7 +130,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
 
         TInt VideoSurfaceCreated();
         TInt SurfaceParametersChanged();
-        TInt RemoveSurface();
+        void RemoveSurface();
+        TInt RemoveSurfaceFromHelix( TSurfaceId aSurfaceId );;
         void SendSurfaceCreatedCommand();
 
 #endif
@@ -184,7 +190,7 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CBase,
 
         TTimeIntervalMicroSeconds iPosition;
         TTimeIntervalMicroSeconds iDuration;
-        
+
         CFbsBitmap* iPosterFrameBitmap;
 };
 

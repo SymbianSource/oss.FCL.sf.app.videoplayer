@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,13 +15,13 @@
 *
 */
 
-// Version : %version: e003sa33#15 %
+// Version : %version: 16 %
 
 
 // INCLUDES
 #include <coeaui.h>
 #include <aknutils.h>
-#include <aknsutils.h> 
+#include <aknsutils.h>
 #include <aknviewappui.h>
 #include <aknsdrawutils.h>
 #include <aknsbasicbackgroundcontrolcontext.h>
@@ -64,16 +64,16 @@ void CMPXVideoPlaybackContainer::ConstructL( const TDesC& aFileName )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackContainer::ConstructL()"));
 
-    iFileDetails = CMPXVideoPlaybackViewFileDetails::NewL();    
+    iFileDetails = CMPXVideoPlaybackViewFileDetails::NewL();
     iFileDetails->iClipName = HBufC::NewL( aFileName.Length() );
     iFileDetails->iClipName->Des().Copy( aFileName );
 
-    CreateWindowL();       
+    CreateWindowL();
 
     iUserInputHandler = CMPXVideoPlaybackUserInputHandler::NewL( this );
-    
+
     SetFocus( ETrue );
-    
+
     MakeVisible( ETrue );
 
     ActivateL();
@@ -98,7 +98,7 @@ CMPXVideoPlaybackContainer* CMPXVideoPlaybackContainer::NewL( const TDesC& aFile
     return self;
 }
 
-// 
+//
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackContainer::~CMPXVideoPlaybackContainer()
 // Destructor.
@@ -112,13 +112,13 @@ CMPXVideoPlaybackContainer::~CMPXVideoPlaybackContainer()
     {
         delete iFileDetails;
         iFileDetails = NULL;
-    }   
-    
+    }
+
     if ( iUserInputHandler )
     {
         delete iUserInputHandler;
         iUserInputHandler = NULL;
-    } 
+    }
 
     CloseWindow();
 }
@@ -146,7 +146,7 @@ void CMPXVideoPlaybackContainer::Draw(const TRect& aRect) const
     gc.DrawRect( aRect );
 }
 
-// 
+//
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackContainer::HandleCommandL()
 // -------------------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ void CMPXVideoPlaybackContainer::HandleCommandL( TInt aCommand, TInt aValue )
     iValue = aValue;
 }
 
-// 
+//
 // -------------------------------------------------------------------------------------------------
 // CMPXVideoPlaybackContainer::ExpectedResultL()
 // -------------------------------------------------------------------------------------------------
@@ -168,8 +168,26 @@ void CMPXVideoPlaybackContainer::ExpectedResultL( TInt aCommand, TInt aValue )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackContainer::ExpectedResultL(aCommand=%d,aValue=%d)"),aCommand,aValue);
 
-    if ( iCommand != aCommand || iValue != aValue )
+    if ( aCommand == iCommand )
     {
+        if ( iValue != aValue )
+        {
+            if ( aCommand == EMPXPbvCmdSetVolume )
+            {
+                if ( Abs( iValue - aValue ) > 6 )
+                {
+                    User::Leave( KErrGeneral );
+                }
+            }
+            else
+            {
+                User::Leave( KErrGeneral );
+            }
+        }
+    }
+    else
+    {
+
         User::Leave( KErrGeneral );
     }
 }
@@ -199,16 +217,16 @@ void CMPXVideoPlaybackContainer::AddFileDetailsL( TBool aHasVideoTrack )
     iFileDetails->iAudioEnabled = ETrue;
     iFileDetails->iVideoEnabled = aHasVideoTrack;
     iFileDetails->iSeekable = ETrue;
-    
+
     iFileDetails->iTitle    = _L("Test Title").Alloc();
 
     if ( iFileDetails->iVideoEnabled )
-    {        
+    {
         iFileDetails->iVideoHeight = 176;
         iFileDetails->iVideoWidth = 144;
-        
+
         iFileDetails->iBitRate = 8000;
-        iFileDetails->iMimeType = _L("video/3gp").Alloc();        
+        iFileDetails->iMimeType = _L("video/3gp").Alloc();
     }
 
     if ( iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
@@ -243,9 +261,9 @@ TKeyResponse CMPXVideoPlaybackContainer::OfferKeyEventL( const TKeyEvent& aKeyEv
                                                          TEventCode aType )
 {
     iKeyResponse = EKeyWasNotConsumed;
-    
+
     iUserInputHandler->ProcessKeyEventL( aKeyEvent, aType );
-    
+
     return iKeyResponse;
 }
 
@@ -256,7 +274,7 @@ TKeyResponse CMPXVideoPlaybackContainer::OfferKeyEventL( const TKeyEvent& aKeyEv
 void CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackContainer::DoHandleKeyEventL()"));
-    
+
     switch ( aKeyEvent.iScanCode )
     {
         case EStdKeyDevice3:        // rocker middle key
@@ -288,7 +306,7 @@ void CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, 
             {
                 HandleCommandL(EMPXPbvCmdEndSeek);
             }
-            
+
             iKeyResponse = EKeyWasConsumed;
             break;
         }
@@ -302,7 +320,7 @@ void CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, 
             {
                 HandleCommandL(EMPXPbvCmdEndSeek);
             }
-            
+
             iKeyResponse = EKeyWasConsumed;
             break;
         }
@@ -317,7 +335,7 @@ void CMPXVideoPlaybackContainer::DoHandleKeyEventL( const TKeyEvent& aKeyEvent, 
         {
             break;
         }
-    }    
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -375,7 +393,7 @@ void CMPXVideoPlaybackContainer::HandlePointerEventL( const TPointerEvent& aPoin
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackContainer::HandlePointerEventL()"));
 
-    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"), 
+    MPX_DEBUG(_L("   iType = %d, iPosition = (%d,%d)"),
        aPointerEvent.iType, aPointerEvent.iPosition.iX, aPointerEvent.iPosition.iY );
 }
 
@@ -385,19 +403,19 @@ void CMPXVideoPlaybackContainer::HandlePointerEventL( const TPointerEvent& aPoin
 //
 void CMPXVideoPlaybackContainer::AddSameARFileDetailsL( TBool aHasVideoTrack )
 {
-	MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackContainer::AddSameARFileDetailsL() ") );
+    MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackContainer::AddSameARFileDetailsL() ") );
 
     iFileDetails->iAudioEnabled = ETrue;
     iFileDetails->iVideoEnabled = aHasVideoTrack;
     iFileDetails->iSeekable = ETrue;
 
     if ( iFileDetails->iVideoEnabled )
-    {        
+    {
         iFileDetails->iVideoHeight = this->Rect().Height();
         iFileDetails->iVideoWidth = this->Rect().Width();
-        
+
         iFileDetails->iBitRate = 8000;
-        iFileDetails->iMimeType = _L("video/3gp").Alloc();        
+        iFileDetails->iMimeType = _L("video/3gp").Alloc();
     }
 
     if ( iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )
@@ -420,14 +438,14 @@ void CMPXVideoPlaybackContainer::AddEmptyTitleFileDetailsL( TBool aHasVideoTrack
     iFileDetails->iAudioEnabled = ETrue;
     iFileDetails->iVideoEnabled = aHasVideoTrack;
     iFileDetails->iSeekable = ETrue;
-    
+
     if ( iFileDetails->iVideoEnabled )
-    {        
+    {
         iFileDetails->iVideoHeight = 176;
         iFileDetails->iVideoWidth = 144;
-        
+
         iFileDetails->iBitRate = 8000;
-        iFileDetails->iMimeType = _L("video/3gp").Alloc();        
+        iFileDetails->iMimeType = _L("video/3gp").Alloc();
     }
 
     if ( iFileDetails->iPlaybackMode == EMPXVideoLiveStreaming )

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 42 %
+// Version : %version: 45 %
 
 
 // INCLUDE FILES
@@ -117,9 +117,17 @@ void CMPXVideoPlaybackControlsController::ConstructL( CMPXVideoPlaybackViewFileD
 
     iFileDetails = aDetails;
     iTvOutConnected = iFileDetails->iTvOutConnected;
-    iShowControls  = ETrue;
 
     iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
+
+    if ( IsRealOneBitmapVisible() )
+    {
+        iShowControls  = EFalse;
+    }
+    else
+    {
+        iShowControls  = ETrue;
+    }
 
     iControlsPolicy = CMPXVideoPlaybackControlPolicy::NewL();
     iControlsConfig = CMPXVideoPlaybackControlConfiguration::NewL( this );
@@ -228,9 +236,6 @@ EXPORT_C void CMPXVideoPlaybackControlsController::AddFileDetailsL(
 
     ControlsListUpdatedL();
 
-    //
-    //  Show controls initially if this doens't have playable video track
-    //
     for ( TInt i = 0 ; i < iControls.Count() ; i++ )
     {
         iControls[i]->UpdateControlsWithFileDetailsL( iFileDetails );
@@ -315,16 +320,22 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         }
         case EMPXControlCmdTvOutConnected:
         {
-            MPX_DEBUG(_L("    [EMPXControlCmdTvOutConnected]"));
             iTvOutConnected = ETrue;
-            HandleTvOutEventL( ETrue, aEvent );
+
+            //
+            //  Do not show the aspect ratio icon when TV Out is connected
+            //
+            HandleTvOutEventL( ETrue, aEvent, EFalse );
             break;
         }
         case EMPXControlCmdTvOutDisconnected:
         {
-            MPX_DEBUG(_L("    [EMPXControlCmdTvOutDisConnected]"));
             iTvOutConnected = EFalse;
-            HandleTvOutEventL( EFalse, aEvent );
+
+            //
+            //  Pass in the show aspect ratio flag from the event
+            //
+            HandleTvOutEventL( EFalse, aEvent, aValue );
             break;
         }
         case EMPXControlCmdHandleBackgroundEvent:
@@ -334,7 +345,9 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
             TBool keylock( EFalse );
             RProperty::Get( KPSUidAvkonDomain, KAknKeyguardStatus, keylock );
 
-            // Don't show controls when key is locked 
+            //
+            //  Don't show controls when key is locked
+            //
             if ( keylock )
             {
                 iShowControls = EFalse;
@@ -352,8 +365,13 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         case EMPXControlCmdHandleForegroundEvent:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdHandleForegroundEvent]"));
-            iShowControls = ETrue;
-            UpdateControlsVisibility();
+
+            if ( ! IsRealOneBitmapVisible() )
+            {
+                iShowControls = ETrue;
+                UpdateControlsVisibility();
+            }
+
             break;
         }
         case EMPXControlCmdHandleErrors:
@@ -398,6 +416,23 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         {
             HandleLoadingStarted();
             break;
+        }
+        case EMPXControlCmdCreateAspectRatioIcon:
+        case EMPXControlCmdDeleteAspectRatioIcon:
+        {
+            //
+            //  Ignore the Aspect Ration commands for non touch devices and
+            //  when the TV-Out is connected.
+            //
+            if ( AknLayoutUtils::PenEnabled() && ! iTvOutConnected )
+            {
+                iControlsConfig->UpdateControlListL( aEvent );
+
+                //
+                //  Set the update visibility flag based on the visibility of the controls
+                //
+                ControlsListUpdatedL( IsVisible() );
+            }
         }
     }
 }
@@ -546,9 +581,10 @@ CMPXVideoPlaybackControlsController::GetBitmap( TMPXVideoPlaybackControls aBitma
 // CMPXVideoPlaybackControlsController::ControlsListUpdatedL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackControlsController::ControlsListUpdatedL()
+void CMPXVideoPlaybackControlsController::ControlsListUpdatedL( TBool aUpdateVisibility )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ControlsListUpdatedL()"));
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ControlsListUpdatedL()"),
+                   _L("aUpdateVisibility = %d"), aUpdateVisibility );
 
     RArray<TMPXVideoPlaybackControls>& updatedList = iControlsConfig->ControlList();
 
@@ -603,7 +639,10 @@ void CMPXVideoPlaybackControlsController::ControlsListUpdatedL()
         AppendControlL( myList[j] );
     }
 
-    UpdateControlsVisibility();
+    if ( aUpdateVisibility )
+    {
+        UpdateControlsVisibility();
+    }
 
     CleanupStack::PopAndDestroy();
 }
@@ -824,12 +863,15 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
 
             TRect ctrlRect = dlPausedBitmap->Rect();
 
-            // To make it aligned with AspectRatioIcon when touch is supported.
+            //
+            //  To make it aligned with AspectRatioIcon when touch is supported.
+            //
             if ( AknLayoutUtils::PenEnabled() )
             {
                 ctrlRect.iBr.iY += 10;
                 ctrlRect.iTl.iY += 10;
             }
+
             CMPXVideoPlaybackControl* control =
                 CMPXVideoPlaybackControlPdl::NewL( this,
                                                    dlPausedBitmap,
@@ -871,6 +913,8 @@ void CMPXVideoPlaybackControlsController::AppendControlL( TMPXVideoPlaybackContr
                                                 touchableArea,
                                                 aControlIndex,
                                                 properties );
+
+            control->MakeVisible( EFalse );
 
             CleanupStack::PushL( control );
 
@@ -1745,7 +1789,39 @@ void CMPXVideoPlaybackControlsController::SetRealOneBitmapVisibility( TBool aVis
     if ( iRealOneBitmap )
     {
         iRealOneBitmap->MakeVisible( aVisible );
+
+        if ( ! aVisible )
+        {
+            // HDMI/TV-out cable connected then show the controls
+            if ( iTvOutConnected  && !iShowControls )
+            {
+                iShowControls = ETrue;
+                UpdateControlsVisibility();
+            }
+            else
+            {
+                iShowControls = ETrue;
+            }
+        }
+    }// iRealOneBitmap
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible()
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible()
+{
+    TBool visible = EFalse;
+
+    if ( iRealOneBitmap )
+    {
+        visible = iRealOneBitmap->IsVisible();
     }
+
+    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible(%d)"), visible);
+
+    return visible;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1813,13 +1889,21 @@ TBool CMPXVideoPlaybackControlsController::IsSoftKeyVisible( TInt aValue )
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackControlsController::HandleTvOutEventL(
-        TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent )
+        TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent, TBool aShowArIcon )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::HandleTvOutEventL()"));
 
     iFileDetails->iTvOutConnected = aConnected;
-    iControlsConfig->UpdateControlListL( aEvent );
+    iControlsConfig->UpdateControlListL( aEvent, aShowArIcon );
     ControlsListUpdatedL();
+
+    for ( TInt i = 0 ; i < iControls.Count() ; i++ )
+    {
+        if ( iControls[i]->UpdateTVOutStatusL( aConnected ) )
+        {
+            break;
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1936,38 +2020,6 @@ void CMPXVideoPlaybackControlsController::CloseMediaDetailsViewer()
         delete iMediaDetailsViewerControl;
         iMediaDetailsViewerControl = NULL;
     }
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackControlsController::ShowAspectRatioIcon
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()
-{
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()"));
-
-    TBool retVal = EFalse;
-
-    if ( iFileDetails->iVideoEnabled &&
-         iFileDetails->iVideoHeight > 0 &&
-         iFileDetails->iVideoWidth > 0 &&
-         AknLayoutUtils::PenEnabled() )
-    {
-        TRect displayRect = iContainer->Rect();
-        TReal displayAspectRatio = ( TReal32 )displayRect.Width() / ( TReal32 )displayRect.Height();
-        TReal videoAspectRatio = ( TReal32 )iFileDetails->iVideoWidth /
-                                 ( TReal32 )iFileDetails->iVideoHeight;
-
-        // If clip's AR is as same as screen display AR, AspectRatioIcon does not display.
-        if ( displayAspectRatio != videoAspectRatio )
-        {
-            retVal = ETrue;
-        }
-    }
-
-    MPX_DEBUG( _L( "CMPXVideoPlaybackControlsController::ShowAspectRatioIcon()[%d]" ), retVal );
-
-    return retVal;
 }
 
 // -------------------------------------------------------------------------------------------------

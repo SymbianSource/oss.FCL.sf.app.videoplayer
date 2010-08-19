@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e92_38 %
+// Version : %version: da1mmcf#e92_38.1.1 %
 
 
 #include <hlplch.h>                     // Help launcher
@@ -70,6 +70,12 @@ void CMpxVideoPlayerAppUi::ConstructL()
         //  Set the orientation to landscape for Embedded instances
         //
         SetOrientationL( CAknAppUiBase::EAppUiOrientationLandscape );
+
+        //
+        //  Hide status pane for embedded use cases
+        //
+        MPX_DEBUG(_L("CMpxVideoPlayerAppUi::ConstructL() Hide Status Pane"));
+        StatusPane()->MakeVisible( EFalse );
     }
 
     iAppUiEngine = CMpxVideoPlayerAppUiEngine::NewL( this );

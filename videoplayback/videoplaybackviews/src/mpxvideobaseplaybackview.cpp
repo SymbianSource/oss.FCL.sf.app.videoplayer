@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 83 %
+// Version : %version: 86 %
 
 
 //  Include Files
@@ -189,7 +189,8 @@ CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
 //   CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd, TBool aDoSync )
+void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackCommand aCmd,
+                                                               TBool aDoSync )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL()"),
                    _L("aCmd = %d, aDoSync, = %d"), aCmd, aDoSync );
@@ -234,7 +235,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdClose:
         {
             MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleCommandL() EMPXPbvCmdClose"));
-            CreateGeneralPlaybackCommandL( EPbCmdClose );
+            CreateGeneralPlaybackCommandL( EPbCmdClose, iSyncClose );
             break;
         }
         case EMPXPbvCmdSeekForward:
@@ -469,11 +470,6 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     iKeyboardInFocus = ETrue;
     iAknEventMonitor->Enable( ETrue );
     iAknEventMonitor->AddObserverL( this );
-
-    //
-    //  Deactivate the CBA set the LSK & RSK to empty
-    //
-    Cba()->SetCommandSetL( R_AVKON_SOFTKEYS_EMPTY );
 
     //
     //  Determine if the playback is from a playlist on view activation
@@ -891,8 +887,10 @@ void CMPXVideoBasePlaybackView::HandleVideoPlaybackMessage( CMPXMessage* aMessag
 
             if ( iContainer )
             {
-                MPX_TRAPD( err, iContainer->HandleEventL( cmdId ) );
+                MPX_TRAPD( err,
+                    iContainer->HandleEventL( cmdId, iDisplayHandler->ShowAspectRatioIcon() ) );
             }
+
             break;
         }
         case EPbCmdLoadingStarted:
@@ -1280,12 +1278,9 @@ void CMPXVideoBasePlaybackView::DoHandleMediaL( const CMPXMessage& aMedia, TInt 
             //  Aspect ratio should be calculated 1st so the auto scale will be set when
             //  the display window is created.
             //
-            TInt newAspectRatio = iDisplayHandler->SetDefaultAspectRatioL( iFileDetails );
-
             iDisplayHandler->CreateDisplayWindowL( *(CCoeEnv::Static()->ScreenDevice()),
-                                                   iContainer->GetWindow() );
-
-            iContainer->HandleEventL( EMPXControlCmdSetAspectRatio, newAspectRatio );
+                                                   iContainer->GetWindow(),
+                                                   iFileDetails );
         }
         else
         {
@@ -1620,12 +1615,7 @@ void CMPXVideoBasePlaybackView::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::SetAspectRatioL()"));
 
-    TInt newAspectRatio = iDisplayHandler->SetAspectRatioL( aCmd );
-
-    if ( iContainer )
-    {
-        iContainer->HandleEventL( EMPXControlCmdSetAspectRatio, newAspectRatio );
-    }
+    iDisplayHandler->SetAspectRatioL( aCmd );
 }
 
 // -------------------------------------------------------------------------------------------------

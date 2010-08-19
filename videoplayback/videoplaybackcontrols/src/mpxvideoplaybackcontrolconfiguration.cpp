@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 
 // INCLUDE FILES
@@ -137,7 +137,7 @@ RArray<TMPXVideoPlaybackControls>& CMPXVideoPlaybackControlConfiguration::Contro
 // -------------------------------------------------------------------------------------------------
 //
 void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
-    TMPXVideoPlaybackControlCommandIds aEvent )
+    TMPXVideoPlaybackControlCommandIds aEvent, TBool aShowArIcon )
 {
     MPX_DEBUG(_L("CMPXVideoPlaybackControlConfiguration::UpdateControlListL(%d)"), aEvent);
 
@@ -145,7 +145,6 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
     //  This fuction will be getting called
     //    - After Initialization complete
     //    - When TV-out cable get connected/disconnected
-    //    - When enters/exits aspect ratio mode
     //
     switch ( aEvent )
     {
@@ -201,7 +200,7 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
                     iTitleArtistIndicatorsAdded = EFalse;
                 }
 
-                if ( ! iAspectRatioIconAdded && iControlsController->ShowAspectRatioIcon() )
+                if ( ! iAspectRatioIconAdded && aShowArIcon )
                 {
                     iControlsList.AppendL( EMPXAspectRatioIcon );
                     iAspectRatioIconAdded = ETrue;
@@ -215,6 +214,26 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlListL(
                  iControlsController->FileDetails()->iPlaybackMode == EMPXVideoLiveStreaming )
             {
                 DeleteControlFromList( EMPXBrandingAnimation );
+            }
+
+            break;
+        }
+        case EMPXControlCmdCreateAspectRatioIcon:
+        {
+            if ( ! iAspectRatioIconAdded )
+            {
+                iControlsList.AppendL( EMPXAspectRatioIcon );
+                iAspectRatioIconAdded = ETrue;
+            }
+
+            break;
+        }
+        case EMPXControlCmdDeleteAspectRatioIcon:
+        {
+            if ( iAspectRatioIconAdded )
+            {
+                DeleteControlFromList( EMPXAspectRatioIcon );
+                iAspectRatioIconAdded = EFalse;
             }
 
             break;
@@ -269,12 +288,6 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
 
                 iTitleArtistIndicatorsAdded = ETrue;
             }
-
-            if ( iAspectRatioIconAdded )
-            {
-                DeleteControlFromList( EMPXAspectRatioIcon );
-                iAspectRatioIconAdded = EFalse;
-            }
         }
         else
         {
@@ -284,12 +297,6 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
                 DeleteControlFromList( EMPXArtistLabel );
 
                 iTitleArtistIndicatorsAdded = EFalse;
-            }
-
-            if ( ! iAspectRatioIconAdded && iControlsController->ShowAspectRatioIcon() )
-            {
-                iControlsList.AppendL( EMPXAspectRatioIcon );
-                iAspectRatioIconAdded = ETrue;
             }
         }
     }
@@ -334,15 +341,6 @@ void CMPXVideoPlaybackControlConfiguration::UpdateControlsWithFileDetailsL()
             iControlsList.AppendL( EMPXArtistLabel );
 
             iTitleArtistIndicatorsAdded = ETrue;
-        }
-
-        //
-        //  If video isn't enable, delete aspect ratio icon
-        //
-        if ( iAspectRatioIconAdded )
-        {
-            DeleteControlFromList( EMPXAspectRatioIcon );
-            iAspectRatioIconAdded = EFalse;
         }
     }
 }

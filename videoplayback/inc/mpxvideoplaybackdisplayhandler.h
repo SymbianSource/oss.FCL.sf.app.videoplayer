@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 10 %
+// Version : %version: 12 %
 
 
 #ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -26,11 +26,7 @@
 
 #include <mpxmessage2.h>
 #include <MMFScalingCustomCommandConstants.h>
-
-#ifdef SYMBIAN_BUILD_GCE
 #include <mediaclientvideodisplay.h>
-#endif
-
 #include <mpxvideoplaybackdefs.h>
 
 //
@@ -63,17 +59,19 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         static CMPXVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
                                                       CMPXVideoPlaybackContainer* aContainer );
 
-        void CreateDisplayWindowL( CWsScreenDevice& aScreenDevice, RWindow& aWin );
+        void CreateDisplayWindowL( CWsScreenDevice& aScreenDevice,
+                                   RWindow& aWin,
+                                   CMPXVideoPlaybackViewFileDetails* aFileDetails );
 
         void RemoveDisplayWindow();
 
         void HandleVideoDisplayMessageL( CMPXMessage* aMessage );
 
-        TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
-
-        TInt SetDefaultAspectRatioL( CMPXVideoPlaybackViewFileDetails* aFileDetails );
+        void SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 
         void DoHandleRealOneBitmapTimeoutL();
+
+        TBool ShowAspectRatioIcon();
 
     private:
 
@@ -86,10 +84,6 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
         void SaveAspectRatioL();
 
-
-#ifdef SYMBIAN_BUILD_GCE
-
-    private:
         void AddDisplayWindowL( CWsScreenDevice& aScreenDevice,
                                 RWindowBase& aWindowBase,
                                 RWindow* aWin );
@@ -97,11 +91,18 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         void SurfaceCreatedL( CMPXMessage* aMessage );
         void SurfaceChangedL( CMPXMessage* aMessage );
         void SurfaceRemoved();
-        TInt SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd );
 
         void SignalSurfaceRemovedL();
 
-#endif
+        void AttachNewSurfaceToWindowL();
+
+        void CalculateAspectRatioL();
+
+        TBool IsAspectRatioEqual( TReal aRatio1, TReal aRatio2 );
+
+        TReal CalculateVideoAspectRatio();
+
+        void RemoveSurfaceFromPlaybackPluginL();
 
     private:
         MMPXPlaybackUtility*                iPlaybackUtility;
@@ -109,9 +110,7 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
         RArray<TMPXAspectRatio>             iAspectRatioArray;
         TInt                                iCurrentIndexForAspectRatio;
-        TReal                               iDisplayAspectRatio;
 
-#ifdef SYMBIAN_BUILD_GCE
         CMediaClientVideoDisplay*           iVideoDisplay;
 
         TBool                               iSurfaceCached;
@@ -124,8 +123,10 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         TInt                                iVerticalPosition;
         TVideoRotation                      iRotation;
         TAutoScaleType                      iAutoScale;
-#endif
 
+        TReal                               iDisplayAspectRatio;
+        TInt                                iVideoHeight;
+        TInt                                iVideoWidth;
 };
 
 #endif // __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__

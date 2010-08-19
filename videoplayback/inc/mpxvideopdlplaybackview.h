@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 10 %
 
 
 // This file defines the API for VideoPlaybackView.dll
@@ -93,11 +93,19 @@ class CMPXVideoPdlPlaybackView : public CMPXVideoBasePlaybackView
 
         void ClosePlaybackViewWithErrorL();
 
+        //
+        //  Functions to unblock user inputs after a timeout
+        //
+        static TInt HandleBlockInputsTimeOut( TAny* aPtr );
+        void DoHandleBlockInputsTimeOut();
+
     private: // data
 
         TMPXPlaybackPdDownloadState         iPdlState;
         TInt                                iDownloadSize;
         TBool                               iUserInputsBlocked;
+
+        CPeriodic*                          iBlockInputsTimer;
 };
 
 #endif  // __VIDEOPDLPLAYBACKVIEW_H__

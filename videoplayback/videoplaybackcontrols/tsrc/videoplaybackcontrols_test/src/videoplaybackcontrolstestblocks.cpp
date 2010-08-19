@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#12 %
+// Version : %version: 13 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -92,11 +92,11 @@ TInt CVideoPlaybackControlsTest::RunMethodL( CStifItemParser& aItem )
         ENTRY( "TvOutDisconnected", CVideoPlaybackControlsTest::TvOutDisconnected ),
 
         ENTRY( "HandleErrors", CVideoPlaybackControlsTest::HandleErrors ),
-        
+
         // Media Details Viewer
         ENTRY( "ShowMediaDetailsViewer", CVideoPlaybackControlsTest::ShowMediaDetailsViewer ),
         ENTRY( "CloseMediaDetailsViewer", CVideoPlaybackControlsTest::CloseMediaDetailsViewer )
-        
+
         //ADD NEW ENTRY HERE
         // [test cases entries] - Do not remove
     };
@@ -118,13 +118,13 @@ void CVideoPlaybackControlsTest::CreateController( const TDesC& aFileName, TInt 
 
     if ( iAvkonViewAppUi->OrientationCanBeChanged() )
     {
-        TRAPD( err, iAvkonViewAppUi->SetOrientationL( CAknAppUiBase::EAppUiOrientationLandscape ) );
+        MPX_TRAPD( err, iAvkonViewAppUi->SetOrientationL( CAknAppUiBase::EAppUiOrientationLandscape ) );
         MPX_DEBUG(_L("CVideoPlaybackControlsTest::CreateController() err = [%d]"), err);
     }
 
     TRect rect = iAvkonViewAppUi->ApplicationRect();
 
-    TRAP
+    MPX_TRAP
     (
         result,
         {
@@ -156,7 +156,7 @@ TInt CVideoPlaybackControlsTest::DeleteControls()
 
     TInt err = KErrNone;
 
-    TRAP( err, iAvkonViewAppUi->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic ) );
+    MPX_TRAP( err, iAvkonViewAppUi->SetOrientationL( CAknAppUiBase::EAppUiOrientationAutomatic ) );
 
     if ( iController )
     {
@@ -228,7 +228,12 @@ TInt CVideoPlaybackControlsTest::SetAspectRatio( CStifItemParser&  aItem )
     {
         MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetAspectRatio() [%d]"), aspectRatio);
 
-        TRAP( result, iController->HandleEventL( EMPXControlCmdSetAspectRatio, aspectRatio ) );
+        MPX_TRAP(
+            result,
+            {
+                iController->HandleEventL( EMPXControlCmdSetAspectRatio, aspectRatio );
+                iController->HandleEventL( EMPXControlCmdCreateAspectRatioIcon );
+            } );
     }
 
     return result;
@@ -250,7 +255,7 @@ TInt CVideoPlaybackControlsTest::SetVolume( CStifItemParser&  aItem )
     {
         MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetVolume() [%d]"), volume);
 
-        TRAP( result, iController->HandleEventL( EMPXControlCmdSetVolume,
+        MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdSetVolume,
                                                  (TInt64)volume ) );
     }
 
@@ -271,7 +276,7 @@ TInt CVideoPlaybackControlsTest::SetDuration( CStifItemParser&  aItem )
 
     if ( result == KErrNone )
     {
-         TRAP( result, iController->HandleEventL( EMPXControlCmdSetDuration,
+         MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdSetDuration,
                                                    (TInt64)duration ) );
     }
 
@@ -434,7 +439,7 @@ TInt CVideoPlaybackControlsTest::ExpectedResult( CStifItemParser&  aItem )
 
         if ( result == KErrNone  )
         {
-            TRAP( result, iContainer->ExpectedResultL( command, value ) );
+            MPX_TRAP( result, iContainer->ExpectedResultL( command, value ) );
         }
     }
 
@@ -454,7 +459,7 @@ TInt CVideoPlaybackControlsTest::SetState( CStifItemParser&  aItem )
 
     if ( result == KErrNone )
     {
-        TRAP( result, iController->HandleEventL( EMPXControlCmdStateChanged, state ) );
+        MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdStateChanged, state ) );
     }
 
     return result;
@@ -468,7 +473,7 @@ TInt CVideoPlaybackControlsTest::AddDefaultFileDetails()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::AddDefaultFileDetails()"));
 
-    TRAPD( result, iContainer->AddFileDetailsL() );
+    MPX_TRAPD( result, iContainer->AddFileDetailsL() );
 
     return result;
 }
@@ -481,7 +486,7 @@ TInt CVideoPlaybackControlsTest::AddAudioOnlyFileDetails()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::AddAudioOnlyFileDetails()"));
 
-    TRAPD( result, iContainer->AddFileDetailsL( EFalse ) );
+    MPX_TRAPD( result, iContainer->AddFileDetailsL( EFalse ) );
 
     return result;
 }
@@ -494,7 +499,7 @@ TInt CVideoPlaybackControlsTest::AddLongFileDetails()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::AddLongFileDetails()"));
 
-    TRAPD( result, iContainer->AddLongFileDetailsL() );
+    MPX_TRAPD( result, iContainer->AddLongFileDetailsL() );
 
     return result;
 }
@@ -505,7 +510,7 @@ TInt CVideoPlaybackControlsTest::AddLongFileDetails()
 //
 TInt CVideoPlaybackControlsTest::AddSameARFileDetails()
 {
-	MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddSameARFileDetails()" ) );
+    MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddSameARFileDetails()" ) );
 
     MPX_TRAPD( result, iContainer->AddSameARFileDetailsL() );
 
@@ -518,7 +523,7 @@ TInt CVideoPlaybackControlsTest::AddSameARFileDetails()
 //
 TInt CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL()
 {
-	MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL()" ) );
+    MPX_ENTER_EXIT( _L( "CVideoPlaybackControlsTest::AddEmptyTitleFileDetailsL()" ) );
 
     MPX_TRAPD( result, iContainer->AddEmptyTitleFileDetailsL() );
 
@@ -585,12 +590,12 @@ void CVideoPlaybackControlsTest::TapOnScreen( TPointerEvent::TType aType,
     //      The YOffset can be read from the wsini.ini file
     //
     //  iy = oldPosition.iX
-    //  
+    //
     tapPoint.iX = ( 360 - 1 ) - aPosition.iY - 12;
     tapPoint.iY = aPosition.iX;
 
 #endif
-    
+
     MPX_DEBUG(_L("   tapPosition = (%d,%d)"), tapPoint.iX, tapPoint.iY);
 
     TRawEvent pointer;
@@ -617,14 +622,14 @@ void CVideoPlaybackControlsTest::TapOnScreen( TPointerEvent::TType aType,
 //
 TInt CVideoPlaybackControlsTest::SetDownLoadSize( CStifItemParser& aItem )
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetExpectedResult()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetExpectedResult()"));
 
     TInt size = 0;
     TInt result = aItem.GetNextInt( size );
 
     if ( result == KErrNone )
     {
-        TRAP( result, iController->HandleEventL( EMPXControlCmdSetDownloadSize, size ) );
+        MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdSetDownloadSize, size ) );
     }
 
     return result;
@@ -636,14 +641,14 @@ TInt CVideoPlaybackControlsTest::SetDownLoadSize( CStifItemParser& aItem )
 //
 TInt CVideoPlaybackControlsTest::SetDownLoadPostion( CStifItemParser&  aItem )
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetExpectedResult()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetExpectedResult()"));
 
     TInt position = 0;
     TInt result = aItem.GetNextInt( position );
 
     if ( result == KErrNone )
     {
-        TRAP( result, iController->HandleEventL( EMPXControlCmdSetPosition, position ) );
+        MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdSetPosition, position ) );
     }
 
     return result;
@@ -662,7 +667,7 @@ TInt CVideoPlaybackControlsTest::UpdateDownloadPosition( CStifItemParser&  aItem
 
     if ( result == KErrNone )
     {
-        TRAP( result, iController->HandleEventL( EMPXControlCmdDownloadUpdated, position ) );
+        MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdDownloadUpdated, position ) );
     }
 
     return result;
@@ -674,9 +679,9 @@ TInt CVideoPlaybackControlsTest::UpdateDownloadPosition( CStifItemParser&  aItem
 //
 TInt CVideoPlaybackControlsTest::SetDownLoadPaused()
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetDownLoadPaused()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::SetDownLoadPaused()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdSetDownloadPaused) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdSetDownloadPaused) );
 
     return result;
 }
@@ -687,9 +692,9 @@ TInt CVideoPlaybackControlsTest::SetDownLoadPaused()
 //
 TInt CVideoPlaybackControlsTest::ClearDownLoadPaused()
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::ClearDownLoadPaused()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::ClearDownLoadPaused()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdClearDownloadPaused) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdClearDownloadPaused) );
 
     return result;
 }
@@ -700,9 +705,9 @@ TInt CVideoPlaybackControlsTest::ClearDownLoadPaused()
 //
 TInt CVideoPlaybackControlsTest::TvOutConnected()
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::TvOutConnected()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::TvOutConnected()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdTvOutConnected ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdTvOutConnected ) );
 
     return result;
 }
@@ -713,9 +718,9 @@ TInt CVideoPlaybackControlsTest::TvOutConnected()
 //
 TInt CVideoPlaybackControlsTest::TvOutDisconnected()
 {
-	MPX_DEBUG(_L("CVideoPlaybackControlsTest::TvOutDisconnected()"));
+    MPX_DEBUG(_L("CVideoPlaybackControlsTest::TvOutDisconnected()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdTvOutDisconnected ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdTvOutDisconnected ) );
 
     return result;
 }
@@ -728,7 +733,7 @@ TInt CVideoPlaybackControlsTest::HandleErrors()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::HandleErrors()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdHandleErrors ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdHandleErrors ) );
 
     return result;
 }
@@ -745,7 +750,7 @@ TInt CVideoPlaybackControlsTest::SoftkeyPressed( CStifItemParser&  aItem )
 
     TInt result = aItem.GetNextInt( key );
 
-    TRAP( result, iController->HandleEventL( EMPXControlCmdSoftKeyPressed, key ) );
+    MPX_TRAP( result, iController->HandleEventL( EMPXControlCmdSoftKeyPressed, key ) );
 
     return result;
 }
@@ -758,7 +763,7 @@ TInt CVideoPlaybackControlsTest::ShowControls()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::ShowControls()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdShowControls ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdShowControls ) );
 
     return result;
 }
@@ -771,7 +776,7 @@ TInt CVideoPlaybackControlsTest::ToggleVisibility()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::ToggleVisibility()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdToggleVisibility ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdToggleVisibility ) );
 
     return result;
 }
@@ -784,7 +789,7 @@ TInt CVideoPlaybackControlsTest::HandleBackgroundEvnet()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::HandleBackgroundEvnet()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdHandleBackgroundEvent ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdHandleBackgroundEvent ) );
 
     return result;
 }
@@ -825,7 +830,7 @@ TInt CVideoPlaybackControlsTest::ShowMediaDetailsViewer()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::ShowMediaDetailsViewer()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdShowFileDetailsViewer ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdShowFileDetailsViewer ) );
 
     return result;
 }
@@ -838,7 +843,7 @@ TInt CVideoPlaybackControlsTest::CloseMediaDetailsViewer()
 {
     MPX_DEBUG(_L("CVideoPlaybackControlsTest::CloseMediaDetailsViewer()"));
 
-    TRAPD( result, iController->HandleEventL( EMPXControlCmdCloseFileDetailsViewer ) );
+    MPX_TRAPD( result, iController->HandleEventL( EMPXControlCmdCloseFileDetailsViewer ) );
 
     return result;
 }

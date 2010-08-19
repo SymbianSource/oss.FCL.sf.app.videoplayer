@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 9 %
+
+// Version : %version: 10 %
 
 
 // INCLUDE FILES
@@ -94,16 +95,7 @@ void CMPXVideoPlaybackControlPolicy::SetControlProperties(
             //
             //  Transitory Buffering states will be filtered out by the View
             //
-            aProperties = EMPXBufferingControl;
-
-            //
-            //  Do not show Back when Initializing for Local Mode
-            //  It causes a flicker when playback begins
-            //
-            if ( aDetails->iPlaybackMode != EMPXVideoLocal )
-            {
-                aProperties += EMPXShownWhenInitializing;
-            }
+            aProperties = EMPXBufferingControl | EMPXShownWhenInitializing;
         }
         case EMPXSoftkeyDetails:
         {
@@ -117,6 +109,16 @@ void CMPXVideoPlaybackControlPolicy::SetControlProperties(
         case EMPXBufferingLabel:
         {
             aProperties = EMPXBufferingControl;
+
+            //
+            //  Show Loading when Initializing for local playback modes
+            //  This allows for a smoother transition to playing state
+            //
+            if ( aDetails->iPlaybackMode == EMPXVideoLocal ||
+                 aDetails->iPlaybackMode ==  EMPXVideoProgressiveDownload )
+            {
+                aProperties += EMPXShownWhenInitializing;
+            }
             break;
         }
         case EMPXTitleLabel:

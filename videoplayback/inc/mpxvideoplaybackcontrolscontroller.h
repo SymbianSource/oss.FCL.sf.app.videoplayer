@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 18 %
+// Version : %version: 20 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -137,14 +137,6 @@ class CMPXVideoPlaybackControlsController : public CBase
 
         inline TBool IsRealMediaFormat();
 
-        /**
-         *  Check aspect ratio icon
-         *  In case that Clip's AR is equals to Screen Display AR, also hide AR icon.
-         *
-         *  @return ETrue in case that clip's AspectRatioIcon can be shown
-         */
-        TBool ShowAspectRatioIcon();
-
     private:
         /**
         * Create controls
@@ -175,7 +167,7 @@ class CMPXVideoPlaybackControlsController : public CBase
         /**
         * Create/delete controls based on updated control list
         */
-        void ControlsListUpdatedL();
+        void ControlsListUpdatedL( TBool aUpdateVisibility = ETrue );
 
         /**
         * Create fake softkeyL
@@ -234,6 +226,11 @@ class CMPXVideoPlaybackControlsController : public CBase
         * Return ETrue if any control is visible
         */
         TBool IsVisible();
+
+        /**
+        * Return ETrue if real one bitmap is visible
+        */
+        TBool IsRealOneBitmapVisible();
 
         /**
         * Append a control based on control index
@@ -312,7 +309,9 @@ class CMPXVideoPlaybackControlsController : public CBase
         /**
         * Handle tvout connected/disconnected event
         */
-        void HandleTvOutEventL( TBool aConnected, TMPXVideoPlaybackControlCommandIds aEvent );
+        void HandleTvOutEventL( TBool aConnected,
+                                TMPXVideoPlaybackControlCommandIds aEvent,
+                                TBool aShowArIcon );
         /**
         * Handle softkey pressed event
         */

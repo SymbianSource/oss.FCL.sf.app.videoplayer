@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  ou1cpsw#4 %
+// Version : %version:  5 %
 
 
 #ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
@@ -78,11 +78,10 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
 
     private:
 
-        TMPXVideoUserInputType                  iProcessingInputType; 	// the type of input being processed
-        TUint                                   iLastPressedKeyCode;     // keycode of last key that sent EEventKeyDown
+        TMPXVideoUserInputType                  iProcessingInputType;     // the type of input being processed
         TInt                                    iLastPressedKeyScanCode; // scancode of last key that sent EEventKeyDown
 
-        CMPXVideoPlaybackContainer*             iContainer;	  // not owned
+        CMPXVideoPlaybackContainer*             iContainer;      // not owned
 };
 
 

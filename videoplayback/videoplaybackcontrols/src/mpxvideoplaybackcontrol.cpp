@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: 25 %
 
 
 // INCLUDE FILES
@@ -332,6 +332,7 @@ void CMPXVideoPlaybackControl::SetVisibility( TMPXPlaybackState aState )
             }
             break;
         }
+        case EPbStateInitialised:
         case EPbStateBuffering:
         {
             if ( iProperties & EMPXBufferingControl )
@@ -550,6 +551,26 @@ TBool CMPXVideoPlaybackControl::StopBrandingAnimationTimer()
         MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::StopBrandingAnimationTimer()"));
 
         static_cast<CMPXVideoPlaybackBrandingAnimation*>(iControl)->CancelBrandingTimer();
+
+        changed = ETrue;
+    }
+
+    return changed;
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoPlaybackControl::UpdateTVOutStatusL()
+// -------------------------------------------------------------------------------------------------
+//
+TBool CMPXVideoPlaybackControl::UpdateTVOutStatusL( TBool aTvOutConnected)
+{
+    TBool changed = EFalse;
+
+    if ( iControlIndex == EMPXVolumeBar )
+    {
+        MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::UpdateTVOutStatus()"));
+
+        static_cast<CMPXVideoPlaybackVolumeBar*>(iControl)->UpdateTVOutStatusL( aTvOutConnected );
 
         changed = ETrue;
     }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 #ifndef MPXPLAYBACKCONTROL_H_
@@ -167,6 +167,12 @@ class CMPXVideoPlaybackControl : public CCoeControl
          *  Stop Animation Branding Timer
          */
         TBool StopBrandingAnimationTimer();
+        
+        /*
+         *  Update the controls with TV Out Connected information
+         */
+        TBool UpdateTVOutStatusL( TBool aTvOutConnected );
+
 
         IMPORT_C void DoHandlePointerEventL( const TPointerEvent& aPointerEvent );
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 17 %
+// Version : %version: 18 %
 
 #include <audiopreference.h>
 #include <mmf/server/mmffile.h>
@@ -427,8 +427,8 @@ void CMpxVideoPlayerUtility::OpenUrlL( const TDesC& aUrl, TInt aApId )
 
 void CMpxVideoPlayerUtility::GetFrameL()
 {
-    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetFrameL()"));    
-    
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetFrameL()"));
+
     if ( iStifObserver )
     {
         TCallbackEvent* event = new TCallbackEvent;
@@ -436,16 +436,16 @@ void CMpxVideoPlayerUtility::GetFrameL()
         event->iData  = 0;
         event->iError = KErrNone;
         iStifObserver->HandleUtilityEvent( event );
-    }    
-    
-    iVideoPlaybackController->HandleFrameReady( KErrGeneral );    
+    }
+
+    iVideoPlaybackController->HandleFrameReady( KErrGeneral );
 }
- 
+
 CFbsBitmap& CMpxVideoPlayerUtility::GetBitmap()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerUtility::GetBitmap()"));
-    
-    iPosterFrameBitmap = new (ELeave) CFbsBitmap;    
+
+    iPosterFrameBitmap = new (ELeave) CFbsBitmap;
     return *iPosterFrameBitmap;
 }
 
@@ -681,7 +681,7 @@ void CMpxVideoPlayerUtility::FindFileDetail( TPtrC8& aItem, TPtrC8& value )
         iTitle = value.AllocL();
     }
     else if ( ! aItem.Compare(_L8("Description")) ||
-    	      ! aItem.Compare(_L8("Abstract")) )
+              ! aItem.Compare(_L8("Abstract")) )
     {
         if ( ! iDescription )
         {
@@ -771,14 +771,18 @@ TInt CMpxVideoPlayerUtility::SurfaceParametersChanged()
     return KErrNone;
 }
 
-TInt CMpxVideoPlayerUtility::RemoveSurface()
+void CMpxVideoPlayerUtility::RemoveSurface()
+{
+}
+
+TInt CMpxVideoPlayerUtility::RemoveSurfaceFromHelix( TSurfaceId aSurfaceId )
 {
     return KErrNone;
 }
 
-void CMpxVideoPlayerUtility::SendSurfaceCreatedCommand() 
-{ 
-    MPX_DEBUG(_L("CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()")); 
+void CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()
+{
+    MPX_DEBUG(_L("CMpxVideoPlayerUtility::SendSurfaceCreatedCommand()"));
 }
 
 #endif

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 10 %
+// Version : %version: 11 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROL_HRH_
@@ -101,7 +101,9 @@ enum TMPXVideoPlaybackControlCommandIds
     EMPXControlCmdHideControls,
     EMPXControlCmdSurfaceCreated,
     EMPXControlCmdSurfaceRemoved,
-    EMPXControlCmdLoadingStarted
+    EMPXControlCmdLoadingStarted,
+    EMPXControlCmdCreateAspectRatioIcon,
+    EMPXControlCmdDeleteAspectRatioIcon
 };
 
 enum TMPXVideoSeekingType

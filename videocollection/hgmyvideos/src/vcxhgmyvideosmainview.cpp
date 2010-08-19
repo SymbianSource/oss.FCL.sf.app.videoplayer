@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 48 %
+// Version : %version: 49 %
 
 // INCLUDE FILES
 #include <bldvariant.hrh>
@@ -530,22 +530,14 @@ TKeyResponse CVcxHgMyVideosMainView::HandleKeyEventL( const TKeyEvent& aKeyEvent
     {
     TKeyResponse response( EKeyWasNotConsumed );
     
-    // Clear key performs 'Delete'.
-    if ( aKeyEvent.iScanCode == EStdKeyBackspace && aType == EEventKey )
+    // Clear and Delete keys perform 'Delete'.
+    if ( ( aKeyEvent.iScanCode == EStdKeyBackspace || 
+           aKeyEvent.iScanCode == EStdKeyDelete ) &&
+         aType == EEventKey )
         {
         if ( iModel->AppState() == CVcxHgMyVideosModel::EVcxMyVideosAppStateVideoIdle )
             {
-            RArray<TInt> markedVideos;
-            CleanupClosePushL( markedVideos );
-            
-            VideoListL()->VideoModel().MarkedVideosL( markedVideos );
-            TInt count = markedVideos.Count();
-			CleanupStack::PopAndDestroy( &markedVideos );
-			
-            if ( count > 0 )
-                {
-                HandleCommandL( EVcxHgMyVideosCmdDelete );
-                }
+            HandleCommandL( EVcxHgMyVideosCmdDelete );
             
 			response = EKeyWasConsumed;
             }

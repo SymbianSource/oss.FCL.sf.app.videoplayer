@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 
 // INCLUDE FILES
@@ -448,7 +448,8 @@ void CMPXVideoPlaybackUserInputHandler::ReRoutePointerEventL( CCoeControl* aCont
 void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyEvent,
                                                           TEventCode aType )
 {
-    MPX_ENTER_EXIT(_L("MPXVideoPlaybackUserInputHandler::ProcessKeyEvent()"));
+    MPX_ENTER_EXIT(_L("MPXVideoPlaybackUserInputHandler::ProcessKeyEvent()"),
+                   _L("iProcessingInputType = %d, aType = %d"), iProcessingInputType, aType );
 
     switch ( iProcessingInputType )
     {
@@ -457,28 +458,30 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyE
             if ( aType == EEventKeyDown && IsUserInputAllowed() )
             {
                 iProcessingInputType = EMpxVideoKeyboard;
-                iLastPressedKeyCode = aKeyEvent.iCode;
                 iLastPressedKeyScanCode = aKeyEvent.iScanCode;
 
-                iContainer->DoHandleKeyEventL(aKeyEvent, aType);
+                iContainer->DoHandleKeyEventL( aKeyEvent, aType );
             }
             break;
         }
         case EMpxVideoKeyboard:
         {
-            if ( aType == EEventKeyUp )
-            {
-                // only handle up event for the key being handled
-                // ignore spurious key presses
-                if ( aKeyEvent.iCode == iLastPressedKeyCode  &&
-                     aKeyEvent.iScanCode == iLastPressedKeyScanCode )
-                {
-                    iContainer->DoHandleKeyEventL(aKeyEvent, aType);
+            MPX_DEBUG(_L("aKeyEvent.iScanCode = %d, iLastPressedKeyScanCode = %d"),
+                aKeyEvent.iScanCode, iLastPressedKeyScanCode );
 
-                    // reset the value only on key up event
+            //
+            //  Only handle events for the key being handled
+            //
+            if ( aKeyEvent.iScanCode == iLastPressedKeyScanCode )
+            {
+                iContainer->DoHandleKeyEventL( aKeyEvent, aType );
+
+                if ( aType == EEventKeyUp )
+                {
                     iProcessingInputType = EMpxVideoNone;
                 }
             }
+
             break;
         }
     } // switch

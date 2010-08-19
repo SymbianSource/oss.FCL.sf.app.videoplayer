@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 28 %
+// Version : %version: 30 %
 
 
 //  Include Files
@@ -83,7 +83,9 @@ void CMPXVideoPdlPlaybackView::ConstructL()
     MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::ConstructL()"));
 
     InitializeVideoPlaybackViewL();
-	
+
+    iBlockInputsTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+
     iSyncClose = ETrue;
 }
 
@@ -94,6 +96,13 @@ void CMPXVideoPdlPlaybackView::ConstructL()
 CMPXVideoPdlPlaybackView::~CMPXVideoPdlPlaybackView()
 {
     MPX_DEBUG(_L("CMPXVideoPdlPlaybackView::~CMPXVideoPdlPlaybackView()"));
+
+    if ( iBlockInputsTimer )
+    {
+        iBlockInputsTimer->Cancel();
+        delete iBlockInputsTimer;
+        iBlockInputsTimer = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -239,7 +248,7 @@ void CMPXVideoPdlPlaybackView::HandlePluginErrorL( TInt aError )
             //  For progressive download mode, this indicates that the file
             //  could not be played until the entire file is downloaded.
             //
-            DisplayInfoMessageL( R_MPX_VIDEO_PDL_WAIT_DL_COMPLETE_MSG );
+            DisplayInfoMessageL( R_MPX_VIDEO_PDL_WAIT_DL_COMPLETE_MSG, ETrue );
             ClosePlaybackViewWithErrorL();
 
             break;
@@ -452,12 +461,11 @@ void CMPXVideoPdlPlaybackView::HandleInitializingStateL( TMPXPlaybackState aLast
     //  For PDL view, reset the container and controls for new download
     //
     DoHandleInitializingStateL( aLastState );
-    
+
     //
     //  User inputs should not be blocked since the new download is initializing
     //
-    iUserInputsBlocked = EFalse;
-    iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
+    ResetPdlUserInputs();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -471,7 +479,29 @@ void CMPXVideoPdlPlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCmd
 
     CMPXVideoBasePlaybackView::SendWindowCommandL( aCmd );
 
-    if ( aCmd == EPbCmdHandleBackground && ! IsAppInFrontL() )
+    if ( aCmd == EPbCmdHandleForeground )
+    {
+        //
+        //  If user inputs are blocked, start timer to unblock them
+        //
+        if ( iUserInputsBlocked )
+        {
+            if ( iBlockInputsTimer->IsActive() )
+            {
+                iBlockInputsTimer->Cancel();
+            }
+
+            //
+            //  Set timer to unblock user inputs after 1 second
+            //  The message from the download manager should take less than 1 second
+            //
+            iBlockInputsTimer->Start(
+                1000000,
+                0,
+                TCallBack( CMPXVideoPdlPlaybackView::HandleBlockInputsTimeOut, this ) );
+        }
+    }
+    else if ( aCmd == EPbCmdHandleBackground && ! IsAppInFrontL() )
     {
         //
         //  Block all inputs when PDL view is sent to full background
@@ -489,7 +519,7 @@ void CMPXVideoPdlPlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCmd
 void CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPdlPlaybackView::HandlePdlReloadComplete()"));
-    
+
     //
     //  User inputs should not be blocked since the new PDL command is complete
     //
@@ -506,6 +536,43 @@ void CMPXVideoPdlPlaybackView::ResetPdlUserInputs()
 
     iUserInputsBlocked = EFalse;
     iContainer->UserInputHandler()->BlockPdlUserInputs( iUserInputsBlocked );
+
+    if ( iBlockInputsTimer->IsActive() )
+    {
+        iBlockInputsTimer->Cancel();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::HandleBlockInputsTimeOut()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoPdlPlaybackView::HandleBlockInputsTimeOut( TAny* aPtr )
+{
+    MPX_DEBUG(_L("CMPXVideoPdlPlaybackView::HandleBlockInputsTimeOut()"));
+
+    static_cast<CMPXVideoPdlPlaybackView*>(aPtr)->DoHandleBlockInputsTimeOut();
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoPdlPlaybackView::DoHandleBlockInputsTimeOut()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoPdlPlaybackView::DoHandleBlockInputsTimeOut()
+{
+    //
+    //  Check if we are reloading due to the message from the Download Manager
+    //  If we are still reloading, keep the user inputs blocked.
+    //  If not, unblock the user inputs
+    //
+    if ( ! iPdlReloading )
+    {
+        //
+        //  Reload message not received, unblock inputs
+        //
+        ResetPdlUserInputs();
+    }
 }
 
 // EOF

@@ -15,7 +15,8 @@
 *
 */
 
-// Version : %version: 13 %
+
+// Version : %version: 14 %
 
 
 #ifndef __MPXVIDEOPLAYERUTILITY__
@@ -103,16 +104,16 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CActive,
         void SetPlayVelocityL( TInt aVelocity );
 
         void GetVideoLoadingProgressL( TInt& aPercentageProgress );
-        
+
         void GetFrameL();
 
         //
         //  MMMFControllerEventMonitorObserver Implementation
         //
         void HandleEvent( const TMMFEvent& aEvent );
-             
+
         CFbsBitmap& GetBitmap();
-        
+
         void RunL();
         void DoCancel();
 
@@ -124,7 +125,8 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CActive,
 
         TInt VideoSurfaceCreated();
         TInt SurfaceParametersChanged();
-        TInt RemoveSurface();
+        void RemoveSurface();
+        TInt RemoveSurfaceFromHelix( TSurfaceId aSurfaceId );
 
         void SendSurfaceCommandL( TInt aCmd );
 
@@ -168,7 +170,7 @@ NONSHARABLE_CLASS( CMpxVideoPlayerUtility ) : public CActive,
         CMMFControllerEventMonitor*               iControllerEventMonitor;
 
         TBool                                     iDirectScreenAccessAbort;
-        
+
         CFbsBitmap*                               iPosterFrameBitmap;
 };
 

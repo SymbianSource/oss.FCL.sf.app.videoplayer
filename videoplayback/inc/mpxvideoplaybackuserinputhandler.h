@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 
 #ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
@@ -139,7 +139,6 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
     private:
 
         TMPXVideoUserInputType                  iProcessingInputType;     // the type of input being processed
-        TUint                                   iLastPressedKeyCode;     // keycode of last key that sent EEventKeyDown
         TInt                                    iLastPressedKeyScanCode; // scancode of last key that sent EEventKeyDown
         TRemConCoreApiOperationId               iLastMediaKeyPressed;    // Id of last mediakey thats sent a button-press
 

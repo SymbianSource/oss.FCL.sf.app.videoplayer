@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -65,7 +65,8 @@ class CMPXVideoPlaybackControlConfiguration : public CBase
         /**
         * Update control list
         */
-        void UpdateControlListL( TMPXVideoPlaybackControlCommandIds aEvent );
+        void UpdateControlListL( TMPXVideoPlaybackControlCommandIds aEvent,
+                                 TBool aShowArIcon = EFalse );
 
         /**
         * Return control list

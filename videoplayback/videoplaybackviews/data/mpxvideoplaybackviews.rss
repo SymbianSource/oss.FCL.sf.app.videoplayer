@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 // RESOURCE NAME IDENTIFIER
@@ -126,7 +126,6 @@ RESOURCE MENU_BAR r_mpx_video_playback_view_menubar
 RESOURCE AVKON_VIEW r_mpx_video_playback_view
 {
     menubar = r_mpx_video_playback_view_menubar;
-    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
 }
 
 // -------------------------------------------------------------------------------------------------
