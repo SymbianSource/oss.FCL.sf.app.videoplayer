@@ -197,6 +197,10 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
     
+    /////////////////
+    // Tests with all videos collection level.
+    /////////////////
+    
     delete collectionPath;
     // empty array, path exists level correct      
     collectionPath = 0;
@@ -215,7 +219,8 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
-    QVERIFY(mSignalReceiver->getListComplete() == false);
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
 
     mStubCollectionClient->setCollectionLevel(VideoCollectionCommon::ELevelVideos);
     delete array;
@@ -235,7 +240,24 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
-    QVERIFY(mSignalReceiver->getListComplete() == false);
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
+    
+    // third call contains KVcxMediaMyVideosInt32Value with value EVcxMyVideosVideoListComplete.
+    int listComplete(EVcxMyVideosVideoListComplete);
+    mMediaFactory->putTValue<int>(media, KVcxMediaMyVideosInt32Value, listComplete);
+    
+    mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );
+    
+    QVERIFY(mSignalReceiver->getVideoListComplete());
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
+    
+    mSignalReceiver->resetLatestItems();
+    mMediaFactory->putTValue<int>(media, KVcxMediaMyVideosInt32Value, invalid);
+    
+    /////////////////
+    // Tests with default category collection level.
+    /////////////////
     
     delete collectionPath;
     collectionPath = 0;
@@ -245,16 +267,13 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
          collectionPath->AppendL( KVcxMvcMediaTypeCategory););
     mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
     
-    // third call contains KVcxMediaMyVideosInt32Value with value EVcxMyVideosVideoListComplete.
-    int listComplete(EVcxMyVideosVideoListComplete);
-    mMediaFactory->putTValue<int>(media, KVcxMediaMyVideosInt32Value, listComplete);
-    
     mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
        
     arrayToTest = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(arrayToTest != 0);
     QVERIFY(arrayToTest->Count() == array->Count());
-    QVERIFY(mSignalReceiver->getListComplete());
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
     
     CMPXMediaArray *gottenArray = static_cast<CMPXMediaArray*>(mSignalReceiver->getLatestPointerAddr());
     QVERIFY(gottenArray->Count() == 3);
@@ -266,7 +285,44 @@ void TestVideoCollectionListener::testHandleOpenLMediaFunc()
     QVERIFY(mediaId.iId1 == 2);
     VideoCollectionUtils::instance().mediaValue<TMPXItemId>((*gottenArray)[2], KMPXMediaGeneralId, mediaId );
     QVERIFY(mediaId.iId1 == 3);
-
+    
+    /////////////////
+    // Tests with categories list collection level.
+    /////////////////
+    
+    delete collectionPath;
+    collectionPath = 0;
+    TRAP_IGNORE(
+         collectionPath =  CMPXCollectionPath::NewL();
+         collectionPath->AppendL( KVcxUidMyVideosMpxCollection );
+    );
+    mMediaFactory->putValuePtr<CMPXCollectionPath>(media, KMPXMediaGeneralContainerPath, collectionPath); 
+    
+    // first collection level call does not contain the KVcxMediaMyVideosVideoListIsPartial.
+    mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
+       
+    // second collection level call contains the KVcxMediaMyVideosVideoListIsPartial, but it's true
+    bool listIsPartial(true);
+    mMediaFactory->putTValue(media, KVcxMediaMyVideosVideoListIsPartial, listIsPartial);
+    
+    mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete() == false);
+    
+    // third collection level call contains the KVcxMediaMyVideosVideoListIsPartial, and it's false
+    listIsPartial = false;
+    mMediaFactory->putTValue(media, KVcxMediaMyVideosVideoListIsPartial, listIsPartial);
+    
+    mStubCollection->callHandleOpenLFunc(*media, 0, true, 0 );    
+    QVERIFY(mSignalReceiver->getVideoListComplete() == false);
+    QVERIFY(mSignalReceiver->getAlbumListComplete());
+    
+    /////////////////
+    // Tests with user created album collection level.
+    /////////////////
+    
     collectionPath->Reset();
     delete collectionPath;
     TMPXItemId albumId(100,2);

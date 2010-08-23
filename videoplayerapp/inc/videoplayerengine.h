@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 19 %
+// Version : %version: 20 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -68,6 +68,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
 
     private slots:
         void handleQuit();
+        void serviceQuit();
 
     private:
         void activateView( MpxHbVideoCommon::MpxHbVideoViewType viewType );

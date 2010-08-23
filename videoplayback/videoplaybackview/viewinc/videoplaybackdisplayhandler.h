@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  11 %
+// Version : %version:  12 %
 
 
 #ifndef __VIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -38,10 +38,10 @@ class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
 
 /*
- *  CMPXVideoPlaybackDisplayHandler
+ *  CVideoPlaybackDisplayHandler
  *
  */
-class CMPXVideoPlaybackDisplayHandler : public CBase
+class CVideoPlaybackDisplayHandler : public CBase
 {
     //
     //  To save user's preference for scaling type in video ratio + screen ratio
@@ -55,10 +55,10 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
     
     public:
 
-        ~CMPXVideoPlaybackDisplayHandler();
+        ~CVideoPlaybackDisplayHandler();
 
-        static CMPXVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
-                                                      CMPXVideoViewWrapper* aViewWrapper );
+        static CVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
+                                                   CMPXVideoViewWrapper* aViewWrapper );
 
         void CreateDisplayWindowL( RWsSession& aWs,
                                    CWsScreenDevice& aScreenDevice,
@@ -78,8 +78,8 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
     private:
 
-        CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                         CMPXVideoViewWrapper* aViewWrapper );
+        CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
+                                      CMPXVideoViewWrapper* aViewWrapper );
 
         void ConstructL();
         

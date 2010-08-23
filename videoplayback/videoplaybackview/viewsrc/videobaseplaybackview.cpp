@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#48 %
+// Version : %version: da1mmcf#49 %
 
 
 
@@ -206,18 +206,20 @@ void VideoBasePlaybackView::saveActivityData()
 {
     MPX_DEBUG( _L("VideoBasePlaybackView::saveActivityData()") );
 
+    VideoActivityState& videoActivityState = VideoActivityState::instance();
+
     // save the activity data
     QVariant data = QString( mVideoMpxWrapper->iFileDetails->mClipName );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_CLIP);
+    videoActivityState.setActivityData( data, KEY_LAST_PLAYED_CLIP );
 
     data = int( mVideoMpxWrapper->iPlayPosition );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAY_POSITION_ID);
+    videoActivityState.setActivityData( data, KEY_LAST_PLAY_POSITION_ID );
 
     data = bool( mVideoMpxWrapper->iFileDetails->mPlaybackMode == EMPXVideoLocal );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_LOCAL_PLAYBACK);    
-    
+    videoActivityState.setActivityData( data, KEY_LAST_LOCAL_PLAYBACK );
+
     data = uint ( mVideoMpxWrapper->GetMediaId() );
-    VideoActivityState::instance().setActivityData(data, KEY_LAST_PLAYED_MEDIA_ID);
+    videoActivityState.setActivityData( data, KEY_LAST_PLAYED_MEDIA_ID );
 }
 
 // -------------------------------------------------------------------------------------------------

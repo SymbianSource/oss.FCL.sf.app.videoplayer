@@ -17,9 +17,9 @@
 
 #include <qdebug.h>
 #include <qapplication.h>
+#include <qhash.h>
 #include "xqsettingsmanagerstub.h"
 #include <vcxmyvideosdefs.h>
-#include "centralrepository.h"
 #include "testvideocollectionviewutils.h"
 #include "hblabel.h"
 #include "hbaction.h"
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 //
 void TestVideoVideoCollectionViewUtils::init()
 {
-
+    XQSettingsManager::mReadItemSucceedCounter = 99999;
 }
  
 // ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ void TestVideoVideoCollectionViewUtils::init()
 //
 void TestVideoVideoCollectionViewUtils::cleanup()
 {
-
+    XQSettingsManager::mWrittenValueHash.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -321,56 +321,60 @@ void TestVideoVideoCollectionViewUtils::testShowStatusMsgSlot()
 void TestVideoVideoCollectionViewUtils::testSaveSortingValues()
 {
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
-    CRepository::setNewLLeave(true);
     int sortRole = VideoCollectionCommon::KeyDateTime;
     Qt::SortOrder sortOrder = Qt::AscendingOrder;
     VideoCollectionCommon::TCollectionLevels target = VideoCollectionCommon::ELevelInvalid;
-    CRepository::mSortValues.clear();
+    XQSettingsManager::mWrittenValueHash.clear();
     
     // target invalid
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) < 0);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 0);
     
     // target == VideoCollectionCommon::ELevelCategory
     target = VideoCollectionCommon::ELevelCategory;    
     
-    // cenrep creation fails
-    CRepository::setNewLLeave(true);
+    // first writing fails 
+    XQSettingsManager::mWriteItemSucceedCounter = 0;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) < 0);
-    QCOMPARE(CRepository::mSortValues.count(), 0);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 0);
 
-    // set fails
-    CRepository::setNewLLeave(false);
-    CRepository::setSetFail(0);
+    // second writing fails (writing of sortrole has succeed)
+    XQSettingsManager::mWriteItemSucceedCounter = 1;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) < 0);
-    QCOMPARE(CRepository::mSortValues.count(), 0);
-    CRepository::setSetFail(2);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 1);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KCollectionsSortingRoleKey).toInt() == sortRole);
     
+    XQSettingsManager::mWrittenValueHash.clear();
+
     // succeed
+    XQSettingsManager::mWriteItemSucceedCounter = 2;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) == 0);
-    QCOMPARE(CRepository::mSortValues.count(), 2);
-    QVERIFY(CRepository::mSortValues.values().contains(sortRole));
-    QVERIFY(CRepository::mSortValues.values().contains(sortOrder));
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 2);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KCollectionsSortingRoleKey).toInt() == sortRole);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KVideoSortingOrderKey).toInt() == Qt::AscendingOrder);
     
     // target != VideoCollectionCommon::ELevelCategory
-    CRepository::mSortValues.clear();
+    XQSettingsManager::mWrittenValueHash.clear();
     target = VideoCollectionCommon::ELevelVideos;    
     
-    // cenrep creation fails
-    CRepository::setNewLLeave(true);
+    // writing fails
+    XQSettingsManager::mWriteItemSucceedCounter = 0;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) < 0);
-    QCOMPARE(CRepository::mSortValues.count(), 0);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 0);
     
-    // set fails
-    CRepository::setNewLLeave(false);
-    CRepository::setSetFail(0);
+    // second writing fails (writing of sortrole has succeed)
+    XQSettingsManager::mWriteItemSucceedCounter = 1;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) < 0);
-    QCOMPARE(CRepository::mSortValues.count(), 0);
-    CRepository::setSetFail(2);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 1);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KVideoSortingRoleKey).toInt() == sortRole);
+
+    XQSettingsManager::mWrittenValueHash.clear();
     // succeed
+    XQSettingsManager::mWriteItemSucceedCounter = 2;
     QVERIFY(testObject.saveSortingValues(sortRole, sortOrder, target) == 0);
-    QCOMPARE(CRepository::mSortValues.count(), 2);
-    QVERIFY(CRepository::mSortValues.values().contains(sortRole));
-    QVERIFY(CRepository::mSortValues.values().contains(sortOrder));
+    QVERIFY(XQSettingsManager::mWrittenValueHash.count() == 2);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KVideoSortingRoleKey).toInt() == sortRole);
+    QVERIFY(XQSettingsManager::mWrittenValueHash.value(KVideoSortingOrderKey).toInt() == Qt::AscendingOrder);
 }
  
 // -----------------------------------------------------------------------------
@@ -379,12 +383,11 @@ void TestVideoVideoCollectionViewUtils::testSaveSortingValues()
 //
 void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
 {
-    CRepository::setSetFail(255);
 
-    CRepository::mSortValues[KVideoSortingRoleKey] = VideoCollectionCommon::KeyDateTime;
-    CRepository::mSortValues[KVideoSortingOrderKey] = Qt::DescendingOrder;
-    CRepository::mSortValues[KCollectionsSortingRoleKey] = VideoCollectionCommon::KeyTitle;
-    CRepository::mSortValues[KCollectionsSortingOrderKey] = Qt::DescendingOrder;
+    XQSettingsManager::mWrittenValueHash.insert(KVideoSortingRoleKey, VideoCollectionCommon::KeyDateTime);
+    XQSettingsManager::mWrittenValueHash.insert(KVideoSortingOrderKey, Qt::DescendingOrder);
+    XQSettingsManager::mWrittenValueHash.insert(KCollectionsSortingRoleKey, VideoCollectionCommon::KeyTitle);
+    XQSettingsManager::mWrittenValueHash.insert(KCollectionsSortingOrderKey, Qt::DescendingOrder);
     
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
     
@@ -409,8 +412,8 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     // target is VideoCollectionCommon::ELevelCategory
     target = VideoCollectionCommon::ELevelCategory;
     
-    // cerep creation fails 
-    CRepository::setNewLLeave(true);
+    // first read fails
+    XQSettingsManager::mReadItemSucceedCounter = 0;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
@@ -418,10 +421,10 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     QVERIFY(testObject.mCollectionsSortOrder == Qt::AscendingOrder);
     QVERIFY(sortRole == -1);
     QVERIFY(sortOrder == Qt::AscendingOrder);
-    CRepository::setNewLLeave(false);
+
     
-    // getting from cenrep fails from first
-    CRepository::setGetFail(0);
+    // second read fails
+    XQSettingsManager::mReadItemSucceedCounter = 1;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
@@ -430,18 +433,9 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     QVERIFY(sortRole == -1);
     QVERIFY(sortOrder == Qt::AscendingOrder);
     
-    // getiing from cenrep fails from the second
-    CRepository::setGetFail(1);
-    QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
-    QVERIFY(testObject.mVideosSortRole == -1);
-    QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
-    QVERIFY(testObject.mCollectionsSortRole == -1);
-    QVERIFY(testObject.mCollectionsSortOrder == Qt::AscendingOrder);
-    QVERIFY(sortRole == -1);
-    QVERIFY(sortOrder == Qt::AscendingOrder);
-    CRepository::setGetFail(2);
     
     // succeeds
+    XQSettingsManager::mReadItemSucceedCounter = 2;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) == 0);
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
@@ -465,20 +459,9 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     
     // target is different than VideoCollectionCommon::ELevelCategory
     target = VideoCollectionCommon::ELevelVideos;
-    
-    // cerep creation fails 
-    CRepository::setNewLLeave(true);
-    QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
-    QVERIFY(testObject.mVideosSortRole == -1);
-    QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
-    QVERIFY(testObject.mCollectionsSortRole == VideoCollectionCommon::KeyTitle);
-    QVERIFY(testObject.mCollectionsSortOrder == Qt::DescendingOrder);
-    QVERIFY(sortRole == -1);
-    QVERIFY(sortOrder == Qt::AscendingOrder);
-    CRepository::setNewLLeave(false);
-    
-    CRepository::setGetFail(0);
-    // getting from cenrep fails from first
+       
+    // first read fails
+    XQSettingsManager::mReadItemSucceedCounter = 0;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
@@ -487,8 +470,8 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     QVERIFY(sortRole == -1);
     QVERIFY(sortOrder == Qt::AscendingOrder);
     
-    CRepository::setGetFail(1);
-    // getting from cenrep fails from second
+    // second read fails
+    XQSettingsManager::mReadItemSucceedCounter = 1;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) < 0);
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
@@ -497,9 +480,9 @@ void TestVideoVideoCollectionViewUtils::testLoadSortingValues()
     QVERIFY(sortRole == -1);
     QVERIFY(sortOrder == Qt::AscendingOrder);
     
-    CRepository::setGetFail(2);
     
     // succeeds
+    XQSettingsManager::mReadItemSucceedCounter = 2;
     QVERIFY(testObject.loadSortingValues(sortRole, sortOrder, target) == 0);
     QVERIFY(testObject.mVideosSortRole == VideoCollectionCommon::KeyDateTime);
     QVERIFY(testObject.mVideosSortOrder == Qt::DescendingOrder);
@@ -530,12 +513,12 @@ void TestVideoVideoCollectionViewUtils::testGetCenRepStringValue()
 {  
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
 
-    // Invalid
-    XQSettingsManager::mReadItemValueReturnValue = QVariant();
+    // no data
+    XQSettingsManager::mWrittenValueHash.clear();
     QVERIFY(testObject.getCenRepStringValue(0) == "");
     
     // Ok
-    XQSettingsManager::mReadItemValueReturnValue = QVariant("test");
+    XQSettingsManager::mWrittenValueHash.insert(0, QVariant("test"));
     QVERIFY(testObject.getCenRepStringValue(0) == "test");
 }
 
@@ -547,12 +530,12 @@ void TestVideoVideoCollectionViewUtils::testGetCenRepIntValue()
 {   
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
 
-    // Invalid
-    XQSettingsManager::mReadItemValueReturnValue = QVariant();
+    // no data
+    XQSettingsManager::mWrittenValueHash.clear();
     QVERIFY(testObject.getCenRepIntValue(0) == -1);
     
     // Ok
-    XQSettingsManager::mReadItemValueReturnValue = QVariant(13);
+    XQSettingsManager::mWrittenValueHash.insert(0, QVariant(13));
     QVERIFY(testObject.getCenRepIntValue(0) == 13);
 }
 
@@ -623,18 +606,17 @@ void TestVideoVideoCollectionViewUtils::testInitListView()
 //
 void TestVideoVideoCollectionViewUtils::testSortModel()
 {
-    CRepository::setGetFail(255);
-    
+
     VideoCollectionViewUtils &testObject(VideoCollectionViewUtils::instance());
     testObject.mVideosSortRole = -1;
     testObject.mVideosSortOrder = Qt::AscendingOrder;
     testObject.mCollectionsSortRole = -1;
     testObject.mCollectionsSortOrder = Qt::AscendingOrder;
     
-    CRepository::mSortValues[KVideoSortingRoleKey] = VideoCollectionCommon::KeyDateTime;
-    CRepository::mSortValues[KVideoSortingOrderKey] = Qt::DescendingOrder;
-    CRepository::mSortValues[KCollectionsSortingRoleKey] = VideoCollectionCommon::KeyTitle;
-    CRepository::mSortValues[KCollectionsSortingOrderKey] = Qt::DescendingOrder;
+    XQSettingsManager::mWrittenValueHash.insert(KVideoSortingRoleKey, VideoCollectionCommon::KeyDateTime);
+    XQSettingsManager::mWrittenValueHash.insert(KVideoSortingOrderKey, Qt::DescendingOrder);
+    XQSettingsManager::mWrittenValueHash.insert(KCollectionsSortingRoleKey, VideoCollectionCommon::KeyTitle);
+    XQSettingsManager::mWrittenValueHash.insert(KCollectionsSortingOrderKey, Qt::DescendingOrder);
     
     VideoCollectionCommon::TCollectionLevels target = VideoCollectionCommon::ELevelInvalid;
     
@@ -692,6 +674,7 @@ void TestVideoVideoCollectionViewUtils::testSortModel()
     QVERIFY(testObject.mVideosSortOrder == Qt::DescendingOrder);
     QVERIFY(testObject.mCollectionsSortRole == VideoCollectionCommon::KeyTitle);
     QVERIFY(testObject.mCollectionsSortOrder == Qt::DescendingOrder);
+    
 }
 
 // -----------------------------------------------------------------------------

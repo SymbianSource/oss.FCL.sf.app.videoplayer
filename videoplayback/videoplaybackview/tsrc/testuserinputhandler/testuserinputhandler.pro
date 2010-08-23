@@ -14,7 +14,7 @@
 # Description: Project file for building testuserinputhandler
 #
 #
-# Version : %version: 3 %
+# Version : %version: 4 %
 
 TEMPLATE = app
 TARGET = testuserinputhandler
@@ -41,7 +41,7 @@ HEADERS += stub/inc/mpxvideoviewwrapper.h \
            stub/inc/hal.h \
            stub/inc/centralrepository.h \
            inc/testuserinputhandler.h \
-           ../../viewinc/mpxvideoplaybackuserinputhandler.h
+           ../../viewinc/videoplaybackuserinputhandler.h
                                                 
 SOURCES += stub/src/mpxvideoviewwrapper.cpp \					 				 
            stub/src/videobaseplaybackview.cpp \
@@ -49,4 +49,4 @@ SOURCES += stub/src/mpxvideoviewwrapper.cpp \
            stub/src/hal.cpp \
            stub/src/centralrepository.cpp \
            src/testuserinputhandler.cpp \		       
-           ../../viewsrc/mpxvideoplaybackuserinputhandler.cpp
+           ../../viewsrc/videoplaybackuserinputhandler.cpp

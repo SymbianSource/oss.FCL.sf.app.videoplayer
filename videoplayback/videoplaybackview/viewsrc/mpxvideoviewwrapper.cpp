@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#44 %
+// Version : %version: da1mmcf#45 %
 
 
 
@@ -48,10 +48,10 @@
 #include "videobaseplaybackview.h"
 #include "videoplaybackcontrol.hrh"
 #include "videoplaybackviewfiledetails.h"
-#include "mpxvideoplaybackdisplayhandler.h"
+#include "videoplaybackdisplayhandler.h"
 #include "mpxcommonvideoplaybackview.hrh"
 #include "videoplaybackcontrolscontroller.h"
-#include "mpxvideoplaybackuserinputhandler.h"
+#include "videoplaybackuserinputhandler.h"
 
 //  Member Functions
 
@@ -115,7 +115,7 @@ void CMPXVideoViewWrapper::ConstructL()
     //
     //  Create Video Playback Display Handler
     //
-    iDisplayHandler = CMPXVideoPlaybackDisplayHandler::NewL( iPlaybackUtility, this );
+    iDisplayHandler = CVideoPlaybackDisplayHandler::NewL( iPlaybackUtility, this );
 
     //
     // Create control's controller
@@ -125,7 +125,7 @@ void CMPXVideoViewWrapper::ConstructL()
     //
     // Create user input handler
     //
-    iUserInputHandler = CMPXVideoPlaybackUserInputHandler::NewL( this, iFileDetails->mTvOutConnected );
+    iUserInputHandler = CVideoPlaybackUserInputHandler::NewL( this, iFileDetails->mTvOutConnected );
 }
 
 // -------------------------------------------------------------------------------------------------

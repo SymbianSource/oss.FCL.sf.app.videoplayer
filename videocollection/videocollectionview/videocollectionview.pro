@@ -24,7 +24,6 @@ symbian: {
     BLD_INF_RULES.prj_exports += \
     	"rom/videocollectionview.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videocollectionview.iby)" \
     	"conf/videolistview.confml                      APP_LAYER_CONFML(videolistview.confml)" \
-    	"conf/CI_videoplayerservicelist.confml          APP_LAYER_CONFML(CI_videoplayerservicelist.confml)" \
     	"conf/videoplayerservicelist.confml             APP_LAYER_CONFML(videoplayerservicelist.confml)" \
     	"conf/videolistview_2002BC63.crml               APP_LAYER_CRML(videolistview_2002BC63.crml)"
     
@@ -61,7 +60,8 @@ HEADERS += inc/videocollectionviewplugin.h \
            inc/videocollectionuiloader.h \
            inc/videolistselectiondialog.h \
            inc/videocollectioncenrepdefs.h \
-           inc/videooperatorservice.h
+           inc/videooperatorservice.h \
+           inc/videooperatorservice_p.h
 
 SOURCES += src/videocollectionviewplugin.cpp \
            src/videolistview.cpp \
@@ -70,7 +70,8 @@ SOURCES += src/videocollectionviewplugin.cpp \
            src/videocollectionviewutils.cpp \
            src/videocollectionuiloader.cpp \
            src/videolistselectiondialog.cpp \
-           src/videooperatorservice.cpp
+           src/videooperatorservice.cpp \
+           src/videooperatorservice_p.cpp
 
 DOCML += data/collectionview.docml \
 	 data/videolistselectiondialog.docml
@@ -79,7 +80,6 @@ RESOURCES += data/videocollectionview.qrc
 
 LIBS += -lmpxviewframeworkqt.dll \
         -lvideocollectionwrapper.dll \
-        -lcentralrepository.dll \
         -lxqserviceutil.dll \
         -lvideoplayerengine.dll \
         -lflogger.dll \

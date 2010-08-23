@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -25,30 +25,30 @@
 #include <mpxvideoplaybackdefs.h>
 
 #include "mpxvideoviewwrapper.h"
-#include "mpxvideoplaybackdisplayhandler.h"
+#include "videoplaybackdisplayhandler.h"
 #include "mpxvideoregion.h"
 #include "videoplaybackviewfiledetails.h"
 
 
-CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                                                  CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
+                                                            CMPXVideoViewWrapper* aViewWrapper )
     : iPlaybackUtility( aPlayUtil )
     , iViewWrapper( aViewWrapper )
 {
 }
 
-CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
+CVideoPlaybackDisplayHandler::~CVideoPlaybackDisplayHandler()
 {
 }
 
-CMPXVideoPlaybackDisplayHandler*
-CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
-                                       CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler*
+CVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
+                                    CMPXVideoViewWrapper* aViewWrapper )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::NewL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::NewL()"));
 
-    CMPXVideoPlaybackDisplayHandler* self =
-        new(ELeave) CMPXVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
+    CVideoPlaybackDisplayHandler* self =
+        new(ELeave) CVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -57,18 +57,18 @@ CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
 }
 
 // -------------------------------------------------------------------------------------------------
-//  CMPXVideoPlaybackDisplayHandler::ConstructL()
+//  CVideoPlaybackDisplayHandler::ConstructL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::ConstructL()
+void CVideoPlaybackDisplayHandler::ConstructL()
 {
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()
+//   CVideoPlaybackDisplayHandler::CreateDisplayWindowL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
+void CVideoPlaybackDisplayHandler::CreateDisplayWindowL(
                                           RWsSession& aWs,
                                           CWsScreenDevice& aScreenDevice,
                                           RWindow& aWin,
@@ -81,10 +81,10 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
+//   CVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
+void CVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 {
     if ( iVideoDisplay )
     {
@@ -94,18 +94,18 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
+//   CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* /*aMessage*/ )
+void CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* /*aMessage*/ )
 {
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetAspectRatioL()
+//   CVideoPlaybackDisplayHandler::SetAspectRatioL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
+TInt CVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
     iCommand = aCmd;
     
@@ -132,10 +132,10 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
+//   CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
+TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
                                           VideoPlaybackViewFileDetails* aFileDetails,
                                           TReal32 aDisplayAspectRatio )
 {
@@ -146,12 +146,12 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()
+//   CVideoPlaybackDisplayHandler::UpdateVideoRectL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool transitionEffect  )
+void CVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool transitionEffect  )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::UpdateVideoRectL()"));
 
     Q_UNUSED( transitionEffect );
 

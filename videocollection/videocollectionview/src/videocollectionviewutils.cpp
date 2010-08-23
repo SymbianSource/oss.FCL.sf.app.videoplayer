@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 45 %
+// Version : %version: 47 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -27,7 +27,6 @@
 #include <hbnotificationdialog.h>
 #include <hbparameterlengthlimiter.h>
 #include <xqsettingsmanager.h>
-#include <centralrepository.h>
 #include <vcxmyvideosdefs.h>
 
 #include "videocollectioncommon.h"
@@ -101,9 +100,6 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order, V
     int status = -1;
     if (target != VideoCollectionCommon::ELevelInvalid)
 	{
-	    CRepository *cenRep = 0;
-	    TRAP_IGNORE(cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-
 		int *rolePtr            = &mVideosSortRole;
 		Qt::SortOrder *orderPtr = &mVideosSortOrder;
 
@@ -118,19 +114,23 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order, V
 	    	roleKey  = KVideoCollectionViewCenrepCollectionsSortingRoleKey;
 			orderKey = KVideoCollectionViewCenrepCollectionsSortingOrderKey;
 	    }
-
-	    if(cenRep)
-	    {
-	    	status = cenRep->Set(roleKey, static_cast<TInt>(role));
-	        if(status == KErrNone)
-	        {
-	            status = cenRep->Set(orderKey, static_cast<TInt>(order));
-	        }
-	        delete cenRep;
-	    }
-
+		XQSettingsManager mgr;
+		XQCentralRepositorySettingsKey crRoleKey(KVideoCollectionViewCenrepUid, roleKey);
+		XQCentralRepositorySettingsKey crOrderKey(KVideoCollectionViewCenrepUid, orderKey);
+		QVariant value;
+		value = role;
+		if(!mgr.writeItemValue(crRoleKey, value))
+		{
+		    return -1;
+		}
+		value = order;
+		if(!mgr.writeItemValue(crOrderKey, value))
+        {
+            return -1;
+        }
 	    *rolePtr = role;
 	    *orderPtr = order;
+	    status = 0;
 	}
     return status;
 }
@@ -142,7 +142,6 @@ int VideoCollectionViewUtils::saveSortingValues(int role, Qt::SortOrder order, V
 int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order, VideoCollectionCommon::TCollectionLevels target)
 {
 	FUNC_LOG;
-    int err(0);
 
     if ((target > VideoCollectionCommon::ELevelCategory) &&
 		(mVideosSortRole != -1))
@@ -158,11 +157,12 @@ int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order,
     }
     else if (target != VideoCollectionCommon::ELevelInvalid)
     {
-    	int *rolePtr            = &mVideosSortRole;
-    	Qt::SortOrder *orderPtr = &mVideosSortOrder;
-    	int roleKey(KVideoCollectionViewCenrepVideoSortingRoleKey);
-    	int orderKey(KVideoCollectionViewCenrepVideoSortingOrderKey);
-
+        int roleKey(KVideoCollectionViewCenrepVideoSortingRoleKey);
+        int orderKey(KVideoCollectionViewCenrepVideoSortingOrderKey);
+    	
+        int *rolePtr             = &mVideosSortRole;
+    	Qt::SortOrder *orderPtr  = &mVideosSortOrder;
+    	    	
     	if(target == VideoCollectionCommon::ELevelCategory)
         {
     		roleKey  = KVideoCollectionViewCenrepCollectionsSortingRoleKey;
@@ -171,30 +171,22 @@ int VideoCollectionViewUtils::loadSortingValues(int &role, Qt::SortOrder &order,
         	orderPtr = &mCollectionsSortOrder;
         }
 
-		CRepository *cenRep = 0;
-		TRAP(err, cenRep = CRepository::NewL(TUid::Uid(KVideoCollectionViewCenrepUid)));
-		if(cenRep)
-		{
-			int sortRole(-1);
-			int sortOrder(-1);
-			err = cenRep->Get(roleKey, sortRole);
-			if(err == KErrNone)
-			{
-				err = cenRep->Get(orderKey, sortOrder);
-				if(err == KErrNone)
-				{
-					*orderPtr = static_cast<Qt::SortOrder>(sortOrder);
-					*rolePtr = sortRole;
-				}
-			}
-			delete cenRep;
-		}
+    	*rolePtr       = getCenRepIntValue(roleKey);
+    	int orderValue = getCenRepIntValue(orderKey);
 
+    	if(*rolePtr < 0 || (orderValue < Qt::AscendingOrder || orderValue > Qt::DescendingOrder))
+    	{
+    	    *rolePtr  = -1;
+    	    return -1;
+    	}
+    	orderValue == Qt::AscendingOrder ? 
+    	        *orderPtr = Qt::AscendingOrder : *orderPtr = Qt::DescendingOrder;
+    	        
 		role  = *rolePtr;
 		order = *orderPtr;
     }
     INFO_3("VideoCollectionViewUtils::loadSortingValues() loaded: role: %d, order: %d, target: %d", role, order, target);
-    return err;
+    return 0;
 }
 
 // ---------------------------------------------------------------------------

@@ -160,7 +160,7 @@ const int& VideoDataContainer::indexOfId(const TMPXItemId &id) const
 // idFromIndex
 // -----------------------------------------------------------------------------
 //
-TMPXItemId& VideoDataContainer::idFromIndex(const int &index) const
+const TMPXItemId& VideoDataContainer::idFromIndex(const int &index) const
 {
     if(index >= 0 && index < mMediaIds.count())
     {

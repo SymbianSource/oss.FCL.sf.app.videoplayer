@@ -42,7 +42,7 @@ VideoThumbnailData::~VideoThumbnailData()
     // not stubbed
 }
 
-bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
+bool VideoThumbnailData::removeThumbnail(const TMPXItemId &mediaId)
 {
     Q_UNUSED(mediaId);
     
@@ -51,7 +51,7 @@ bool VideoThumbnailData::removeThumbnail(TMPXItemId mediaId)
     return true;
 }
 
-const QIcon* VideoThumbnailData::getThumbnail(TMPXItemId mediaId)
+const QIcon* VideoThumbnailData::getThumbnail(const TMPXItemId &mediaId)
 {
     Q_UNUSED(mediaId);
     

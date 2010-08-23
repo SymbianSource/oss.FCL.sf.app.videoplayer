@@ -32,5 +32,6 @@ bool HbListView::mLatestFrictionEnabled = false;
 bool HbListView::mLatestUniformItemSizes = false;
 bool HbListView::mLatestVisibility = false;
 bool HbListView::mLatestEnableValue = false;
+QModelIndex HbListView::mLatestScrollToIndex = QModelIndex();
 QModelIndex HbListView::mCurrentIndex = QModelIndex();
 int HbListView::mAllSelectedStatus = -1;

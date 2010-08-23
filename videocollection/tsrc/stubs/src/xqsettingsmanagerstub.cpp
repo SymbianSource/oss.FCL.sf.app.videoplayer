@@ -17,13 +17,30 @@
 
 #include "xqsettingsmanagerstub.h"
 
-QVariant XQSettingsManager::mReadItemValueReturnValue = QVariant();
+int XQSettingsManager::mReadItemSucceedCounter = 0;
+int XQSettingsManager::mWriteItemSucceedCounter = 0;
+QHash<int, QVariant> XQSettingsManager::mWrittenValueHash = QHash<int, QVariant>();
 
 QVariant XQSettingsManager::readItemValue(XQCentralRepositorySettingsKey &key, int type)
 {
-    Q_UNUSED(key);
     Q_UNUSED(type);
-    return mReadItemValueReturnValue;
+    mReadItemSucceedCounter--;
+    if(mReadItemSucceedCounter >= 0)
+    {
+        return mWrittenValueHash.value(key.mKey);
+    }
+    return QVariant();
+}
+
+bool XQSettingsManager::writeItemValue(const XQCentralRepositorySettingsKey& key, const QVariant& value)
+{
+    mWriteItemSucceedCounter--;
+    if(mWriteItemSucceedCounter >= 0)
+    {
+        mWrittenValueHash.insert(key.mKey, value);
+        return true;
+    }    
+    return false;
 }
 
 XQSettingsManager::XQSettingsManager()
@@ -33,5 +50,4 @@ XQSettingsManager::XQSettingsManager()
 
 XQSettingsManager::~XQSettingsManager()
 {
-    
 }

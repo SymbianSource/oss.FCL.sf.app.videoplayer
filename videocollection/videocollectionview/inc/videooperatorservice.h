@@ -21,14 +21,16 @@
 
 #include <qobject.h>
 
-class HbPushButton;
+class VideoOperatorServicePrivate;
 
 /**
- * Loading and launching functionality for operator customisable services.  
+ * Public functionality for loading and launching operator customisable services.
  */
 class VideoOperatorService : public QObject
 {
     Q_OBJECT
+
+    Q_DISABLE_COPY(VideoOperatorService)
 
 public:
 
@@ -39,6 +41,12 @@ public:
      */
     VideoOperatorService(QObject *parent = 0);
 
+    /**
+     * Destructor.
+     *
+     */
+    ~VideoOperatorService();    
+    
     /**
      * Loads the service.
      * 
@@ -65,10 +73,6 @@ public:
      */
     const QString iconResource() const;
     
-private:
-    
-    void launchApplicationL(const TUid uid, TInt viewId);
-    
 public slots:
     
     /**
@@ -78,27 +82,11 @@ public slots:
     
 private:
     
-    Q_DISABLE_COPY(VideoOperatorService)
-    
     /**
-     * Title for the service.
+     * Pointer to private implementation.
      */
-    QString mTitle;
-    
-    /**
-     * Icon for the service.
-     */
-    QString mIconResource;
-    
-    /**
-     * Service URL if service should launch an URL.
-     */
-    QString mServiceUri;
-    
-    /**
-     * Application UID if service should launch an external application.  
-     */
-    int mApplicationUid;
+    VideoOperatorServicePrivate *d_ptr;
+
 };
 
 #endif // VIDEOOPERATORSERVICE_H

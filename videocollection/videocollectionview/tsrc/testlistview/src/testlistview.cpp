@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 51 %
+// Version : %version: 54 %
 
 #define private public
 #include "videoservices.h"
@@ -116,6 +116,8 @@ void TestListView::init(bool initTestView)
     QVERIFY(mTestView);
     if(initTestView)
     {
+        VideoOperatorServiceData::mIcons.clear();
+        VideoOperatorServiceData::mUris.clear();
         VideoOperatorServiceData::mIcons.append("qtg_mono_ovistore");
         VideoOperatorServiceData::mUris.append("testuri");
         QVERIFY(mTestView->initializeView() == 0);
@@ -968,12 +970,59 @@ void TestListView::testModelReadySlot()
     mTestView->mViewReady = false;
     connect( this, SIGNAL(testSignal()), mTestView, SLOT(modelReadySlot()) );
     QSignalSpy spy(mTestView, SIGNAL(viewReady()));
+    
+    // test where level is ELevelCategory
+    mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelCategory);
+    emit testSignal();
+    QVERIFY(mTestView->mModelReady == false);
+    QVERIFY(mTestView->mViewReady == false);
+    QCOMPARE(spy.count(), 0);
+    spy.clear();
+    
+    // test where level is ELevelVideos
+    mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelVideos);
     emit testSignal();
     QVERIFY(mTestView->mModelReady);
     QVERIFY(mTestView->mViewReady);
     QCOMPARE(spy.count(), 1);
     spy.clear();
     
+    // test that view ready is not emitted second time.
+    emit testSignal();
+    QCOMPARE(spy.count(), 0);
+    
+    cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testAlbumListReadySlot
+// ---------------------------------------------------------------------------
+//
+void TestListView::testAlbumListReadySlot()
+{
+    init();
+    mTestView->mModelReady = false;
+    mTestView->mViewReady = false;
+    connect( this, SIGNAL(testSignal()), mTestView, SLOT(albumListReadySlot()) );
+    QSignalSpy spy(mTestView, SIGNAL(viewReady()));
+    
+    // test where level is ELevelVideos
+    mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelVideos);
+    emit testSignal();
+    QVERIFY(mTestView->mModelReady == false);
+    QVERIFY(mTestView->mViewReady == false);
+    QCOMPARE(spy.count(), 0);
+    spy.clear();
+    
+    // test where level is ELevelCategory
+    mTestView->mCurrentList->activate(VideoCollectionCommon::ELevelCategory);
+    emit testSignal();
+    QVERIFY(mTestView->mModelReady);
+    QVERIFY(mTestView->mViewReady);
+    QCOMPARE(spy.count(), 1);
+    spy.clear();
+    
+    // test that view ready is not emitted second time.
     emit testSignal();
     QCOMPARE(spy.count(), 0);
     
@@ -1076,16 +1125,44 @@ void TestListView::testAboutToShowMainMenuSlot()
 	QCOMPARE(visible, 4);
 	cleanup();
 
-	// Model has no	items.
+	// All videos is active and model has no items.
 	init();
     connect(this, SIGNAL(testSignal()), mTestView, SLOT(aboutToShowMainMenuSlot()));
     mTestView->activateView(invalidId);
 	setRowCount(0);
+    action = mTestView->mToolbarActions[VideoListView::ETBActionAllVideos];
+    QVERIFY(action != 0);
+    action->setChecked(false);
+    action->trigger();
     emit testSignal();
 	visible = visibleMenuActions();
 	QCOMPARE(visible, 0);
 	cleanup();
 
+    // Collections is active and model has no items.
+    init();
+    connect(this, SIGNAL(testSignal()), mTestView, SLOT(aboutToShowMainMenuSlot()));
+    mTestView->activateView(invalidId);
+    setRowCount(0);
+    action = mTestView->mToolbarActions[VideoListView::ETBActionCollections];
+    QVERIFY(action != 0);
+    action->setChecked(false);
+    action->trigger();
+    emit testSignal();
+    visible = visibleMenuActions();
+    QCOMPARE(visible, 1);
+    cleanup();
+	
+    // Album is open and model has no items.
+    init();
+    connect(this, SIGNAL(testSignal()), mTestView, SLOT(aboutToShowMainMenuSlot()));
+    mTestView->activateView(invalidId);
+    setRowCount(0);
+    emit testSignal();
+    visible = visibleMenuActions();
+    QCOMPARE(visible, 0);
+    cleanup();    
+    
 	// Toolbar action group	is null
 	init();
     connect(this, SIGNAL(testSignal()), mTestView, SLOT(aboutToShowMainMenuSlot()));

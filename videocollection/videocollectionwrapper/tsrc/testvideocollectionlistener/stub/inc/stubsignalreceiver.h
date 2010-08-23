@@ -75,9 +75,14 @@ public:
     int getLatestIntegerData();
     
     /**
-     * return mListComplete
+     * return mVideoListComplete
      */
-    bool getListComplete();
+    bool getVideoListComplete();
+    
+    /**
+     * return mAlbumListComplete
+     */
+    bool getAlbumListComplete();
     
 public slots:
 
@@ -120,7 +125,7 @@ public slots:
      * Saves provided integer to mLatestItemId and provided pointer to
      * mLatestPtr
      */
-    void albumListAvailableSlot(TMPXItemId albumId,
+    void albumListAvailableSlot(TMPXItemId &albumId,
             CMPXMediaArray *albumItems);
     
     /**
@@ -131,7 +136,7 @@ public slots:
     /**
      * saves provided item id into mLatestItemId
      */
-    void itemDeletedSlot(TMPXItemId id);
+    void itemDeletedSlot(TMPXItemId &id);
     
     /**
      * saves provided item id into mLatestModifiedItemId
@@ -139,9 +144,14 @@ public slots:
     virtual void itemModifiedSlot(const TMPXItemId &itemId);
     
     /**
-     * Sets boolean mListComplete to true;
+     * Sets boolean mVideoListComplete to true;
      */
-    void listCompleteSlot();
+    void videoListCompleteSlot();
+    
+    /**
+     * Sets boolean mAlbumListcomplete to true;
+     */
+    void albumListCompleteSlot();
     
 private:
     /**
@@ -170,9 +180,14 @@ private:
     QList<TMPXItemId> mLatesListData;
     
     /**
-     * True if listCompleteSlot has been called.
+     * True if videoListCompleteSlot has been called.
      */
-    bool mListComplete;
+    bool mVideoListComplete;
+
+    /**
+     * True if albumListCompleteSlot has been called.
+     */
+    bool mAlbumListComplete;
 };
 
 #endif

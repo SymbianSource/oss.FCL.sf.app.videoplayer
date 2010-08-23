@@ -351,22 +351,22 @@ public:
         InstantBoundaryReached,
         InstantRotated90Degrees,
         InstantSelectionChanged,
-        /* add new standard instant interactions here */
+        // add new standard instant interactions here 
 //        NumberOfInstantInteractions,
 //        InstantUser = 1000,
-        /* value range for user defined custom instant interactions */
+        // value range for user defined custom instant interactions 
 //        InstantMaxUser = 65535
 //    };
 
-/*    enum ContinuousInteraction {
+//    enum ContinuousInteraction {
         ContinuousScrolled = 0,
         ContinuousDragged,
         ContinuousPinched,
-        /* add new standard continuous interactions here */
+        // add new standard continuous interactions here 
 //        NumberOfContinuousInteractions,
 //        ContinuousUser = 1000,
-        /* value range for user defined custom continuous interactions */
-/*        ContinuousMaxUser = 65535
+        // value range for user defined custom continuous interactions 
+//        ContinuousMaxUser = 65535
     };
 
     enum InteractionModifier {

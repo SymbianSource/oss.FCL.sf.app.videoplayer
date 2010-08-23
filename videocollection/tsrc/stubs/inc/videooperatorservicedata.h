@@ -34,7 +34,6 @@ public: // methods
         mTitleCallCount = 0;
         mIconResourceCallCount = 0;
         mLaunchServiceCallCount = 0;
-        mLaunchApplicationLCallCount = 0;
     }
     
 public: // data
@@ -49,7 +48,6 @@ public: // data
     static int mTitleCallCount;
     static int mIconResourceCallCount;
     static int mLaunchServiceCallCount;
-    static int mLaunchApplicationLCallCount;
 };
 
 #endif /* VIDEOOPERATORSERVICEDATA_H */

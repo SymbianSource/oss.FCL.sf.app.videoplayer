@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 66.1.8 %
+// Version : %version: 66.1.9 %
 
 // INCLUDE FILES
 #include <qstringlist.h>
@@ -360,9 +360,8 @@ void VideoSortFilterProxyModel::processSorting()
         // no other way of setting the sort order than calling sort().
         sort(0, mWantedSortOrder);
     }
-    
-    // Start fetching thumbnails at start of the model.
-    VideoThumbnailData::instance().startBackgroundFetching(0, 0);
+
+    emit modelSorted();
 }
 
 // -----------------------------------------------------------------------------

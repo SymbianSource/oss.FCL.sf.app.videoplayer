@@ -43,6 +43,8 @@ QString VideoSortFilterProxyModelData::mLastItemNameInRename = "";
 int VideoSortFilterProxyModelData::mRenameItemReturnValue = 0;
 QString VideoSortFilterProxyModelData::mLastAddedAlbumName = "";
 
+const TMPXItemId INVALID_ID = TMPXItemId::InvalidId();
+
 VideoSortFilterProxyModel::VideoSortFilterProxyModel(VideoCollectionCommon::TModelType type, QObject *parent):
     QSortFilterProxyModel(parent),
     mModel(0),
@@ -177,7 +179,7 @@ bool VideoSortFilterProxyModel::filterAcceptsRow (int source_row,
     return true;
 }
 
-TMPXItemId VideoSortFilterProxyModel::getMediaIdAtIndex(
+ const TMPXItemId& VideoSortFilterProxyModel::getMediaIdAtIndex(
     const QModelIndex &index) const
 {
     if (index.row() >= 0 &&
@@ -185,10 +187,10 @@ TMPXItemId VideoSortFilterProxyModel::getMediaIdAtIndex(
     {
         return VideoSortFilterProxyModelData::mItemIds[index.row()];
     }
-    return TMPXItemId::InvalidId();
+    return INVALID_ID;
 }
 
-QModelIndex VideoSortFilterProxyModel::indexOfId(TMPXItemId id)
+QModelIndex VideoSortFilterProxyModel::indexOfId(const TMPXItemId &id)
 {
     //VideoListDataModel *sourceModel = qobject_cast<VideoListDataModel*>(sourceModel());
 
@@ -203,7 +205,7 @@ QModelIndex VideoSortFilterProxyModel::indexOfId(TMPXItemId id)
     return QModelIndex();
 }
 
-QString VideoSortFilterProxyModel::getMediaFilePathForId(TMPXItemId mediaId)
+QString VideoSortFilterProxyModel::getMediaFilePathForId(const TMPXItemId &mediaId)
 {
     Q_UNUSED(mediaId);
     // not stubbed
@@ -270,7 +272,7 @@ int VideoSortFilterProxyModel::removeItemsFromAlbum(class TMPXItemId &album, QLi
     return VideoSortFilterProxyModelData::mRemoveItemsFromAlbumReturnValue;
 }
 
-void VideoSortFilterProxyModel::setAlbumInUse(TMPXItemId albumId)
+void VideoSortFilterProxyModel::setAlbumInUse(const TMPXItemId &albumId)
 {
     VideoSortFilterProxyModelData::mLastItemId = albumId;
 }
@@ -291,7 +293,7 @@ TMPXItemId VideoSortFilterProxyModel::getOpenItem() const
     return VideoSortFilterProxyModelData::mOpenedItemId;
 }
 
-void VideoSortFilterProxyModel::setGenericIdFilter(TMPXItemId itemId, bool filterValue)
+void VideoSortFilterProxyModel::setGenericIdFilter(const TMPXItemId &itemId, bool filterValue)
 {
     VideoSortFilterProxyModelData::mGenericFilterId  = itemId;
     VideoSortFilterProxyModelData::mGenericFilterValue = filterValue;

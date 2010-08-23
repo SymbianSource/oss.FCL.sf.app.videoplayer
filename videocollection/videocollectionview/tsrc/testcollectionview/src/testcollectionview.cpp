@@ -304,25 +304,6 @@ void TestCollectionView::testDestroyView()
 }
 
 // ---------------------------------------------------------------------------
-// testGetView
-// ---------------------------------------------------------------------------
-//
-void TestCollectionView::testGetView()
-{
-    QVERIFY( mTestView->getView() == mTestView->mView );
-    mTestView->createView();
-    QVERIFY( mTestView->getView() == mTestView->mView );
-    mTestView->activateView();
-    QVERIFY( mTestView->getView() == mTestView->mView );
-    mTestView->deactivateView();
-    QVERIFY( mTestView->getView() == mTestView->mView );
-    mTestView->destroyView();
-    QVERIFY( mTestView->getView() == 0 );    
-    // need to create view to handle cleaning up correctly
-    mTestView->createView();
-}
-
-// ---------------------------------------------------------------------------
 // testBack
 // ---------------------------------------------------------------------------
 //
@@ -369,7 +350,26 @@ void TestCollectionView::testTimerEvent()
     
 }
 
-
+// ---------------------------------------------------------------------------
+// testGetView
+// ---------------------------------------------------------------------------
+//
+void TestCollectionView::testGetView()
+{
+    QVERIFY( mTestView->getView() == mTestView->mView );
+    mTestView->createView();
+    QVERIFY( mTestView->getView() == mTestView->mView );
+    mTestView->activateView();
+    QVERIFY( mTestView->getView() == mTestView->mView );
+    mTestView->deactivateView();
+    QVERIFY( mTestView->getView() == mTestView->mView );
+    mTestView->destroyView();
+    QVERIFY( mTestView->getView() == 0 );    
+    // need to create view to handle cleaning up correctly
+    mTestView->createView();
+    HbMainWindow *window = hbInstance->allMainWindows().value(0);
+    window->removeView(mTestView->mView);
+}
 
 // End of file
 

@@ -812,6 +812,7 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     // these signals are emitted during sorting procedure from the fw
     QSignalSpy spyAboutToChange(mTestObject, SIGNAL(layoutAboutToBeChanged()));
     QSignalSpy spyChanged(mTestObject, SIGNAL(layoutChanged()));
+    QSignalSpy spySorted(mTestObject, SIGNAL(modelSorted()));
     
     QString name1 = "cc";
     QString name2 = "bb";
@@ -851,7 +852,6 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     Qt::SortOrder sortingOrder;
 
     // first sort call, includes timer creation and setup
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle, Qt::AscendingOrder);
     // need to wait for awhile to make sure zero-counter gets 
     // processing time.
@@ -860,7 +860,7 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(spyChanged.count(), 1); 
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
@@ -868,23 +868,24 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     // reset spys
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
 
     // second sort call, should use same timer appropriately
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle, Qt::DescendingOrder);
     QTest::qWait(500);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::DescendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::DescendingOrder);
     
     // reset spys
     spyAboutToChange.clear();
-    spyChanged.clear();    
+    spyChanged.clear();
+    spySorted.clear();
     
     // double call without first letting timer to timeout
     VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
@@ -895,130 +896,132 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
     
     // syncronous call checks
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle, Qt::DescendingOrder, false);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::DescendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::DescendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
     
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle, Qt::AscendingOrder, false);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
     
     // check that layout signals are not send if the sorting values don't change.
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle, Qt::AscendingOrder);
     QCOMPARE(spyAboutToChange.count(), 0);
     QCOMPARE(spyChanged.count(), 0);
+    QCOMPARE(spySorted.count(), 0);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(mTestObject->sortOrder(), Qt::AscendingOrder);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 0);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyTitle);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
     
     // date role check    
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyDateTime, Qt::AscendingOrder);
     QTest::qWait(500);
     int count = spyAboutToChange.count();
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyDateTime);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyDateTime);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
     
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
     
     // size role check
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeySizeValue, Qt::AscendingOrder);
     QTest::qWait(500);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(),  (int)VideoCollectionCommon::KeySizeValue);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeySizeValue);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
 
     spyAboutToChange.clear();
     spyChanged.clear();
+    spySorted.clear();
 
     // number of items role check
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyNumberOfItems, Qt::AscendingOrder);
     QTest::qWait(500);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(),  (int)VideoCollectionCommon::KeyNumberOfItems);
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    QCOMPARE(spySorted.count(), 1);
     mTestObject->getSorting(sortingRole, sortingOrder);
     QCOMPARE(sortingRole, (int)VideoCollectionCommon::KeyNumberOfItems);
     QCOMPARE(sortingOrder, Qt::AscendingOrder);
 
     spyAboutToChange.clear();
-    spyChanged.clear();    
+    spyChanged.clear();
+    spySorted.clear();
     
     // invalid role call, sorting should be set to date
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->mType = VideoCollectionCommon::EModelTypeAllVideos;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle - 100, Qt::AscendingOrder);
     QTest::qWait(500);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(spySorted.count(), 1);
+
     spyAboutToChange.clear();
     spyChanged.clear();
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);
+    spySorted.clear();
     
     // invalid role call, model type is categories, sorting should be set to VideoCollectionCommon::KeyTitle
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->mType = VideoCollectionCommon::EModelTypeCollections;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle - 100, Qt::AscendingOrder);
     QTest::qWait(500);
     QCOMPARE(spyAboutToChange.count(), 1);
     QCOMPARE(spyChanged.count(), 1);
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyTitle);
+    QCOMPARE(spySorted.count(), 1);   
+
     spyAboutToChange.clear();
     spyChanged.clear();
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 1);   
+    spySorted.clear();
     
     // sync sorting call for non -changing sort order (for coverity)
-    VideoThumbnailData::mStartBackgroundFetchingCallCount = 0;
     mTestObject->mType = VideoCollectionCommon::EModelTypeAllVideos;
     mTestObject->mIdleSortTimer = 0;
     mTestObject->doSorting(VideoCollectionCommon::KeyTitle - 100, Qt::AscendingOrder, false);
@@ -1030,7 +1033,7 @@ void TestVideoSortFilterProxyModel::testDoSorting()
     QCOMPARE(mTestObject->sortRole(), (int)VideoCollectionCommon::KeyDateTime);
     spyAboutToChange.clear();
     spyChanged.clear();
-    QVERIFY(VideoThumbnailData::mStartBackgroundFetchingCallCount == 2);
+    QCOMPARE(spySorted.count(), 2);
 }
 
 // ---------------------------------------------------------------------------

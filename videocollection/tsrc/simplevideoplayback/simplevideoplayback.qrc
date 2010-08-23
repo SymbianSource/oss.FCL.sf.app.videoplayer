@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/" >
-        <file>resources/simplevideoplayback.docml</file>
+        <file alias="resources/simplevideoplayback.docml">resources/simplevideoplayback.docml.bin</file>
     </qresource>
 </RCC>

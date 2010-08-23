@@ -23,7 +23,7 @@
 #include <QtTest/QtTest>
 
 // forward declaration
-class CMPXVideoPlaybackDisplayHandler;
+class CVideoPlaybackDisplayHandler;
 class MMPXPlaybackUtility;
 class VideoBasePlaybackView;
 class CMPXVideoViewWrapper;
@@ -65,7 +65,7 @@ class TestVideoDisplayHandler : public QObject
     
     
     private:
-        CMPXVideoPlaybackDisplayHandler*  mDispHdlr;	
+        CVideoPlaybackDisplayHandler*     mDispHdlr;	
         MMPXPlaybackUtility*              mPlaybackUtility;  
         VideoBasePlaybackView*            mBaseVideoView;
         CMPXVideoViewWrapper*             mVideoViewWrapper;

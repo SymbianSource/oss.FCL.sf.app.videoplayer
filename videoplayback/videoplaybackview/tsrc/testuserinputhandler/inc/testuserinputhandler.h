@@ -26,7 +26,7 @@
 
 // forward declaration
 class CMPXVideoViewWrapper;
-class CMPXVideoPlaybackUserInputHandler;
+class CVideoPlaybackUserInputHandler;
 class VideoBasePlaybackView;
 
 
@@ -68,7 +68,7 @@ private slots:
 signals:
     
 private:
-    CMPXVideoPlaybackUserInputHandler*  mUserInputHdlr;	
+    CVideoPlaybackUserInputHandler*     mUserInputHdlr;	
     VideoBasePlaybackView*              mBaseVideoView;
     CMPXVideoViewWrapper*               mVideoViewWrapper;
  

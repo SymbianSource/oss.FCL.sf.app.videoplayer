@@ -52,7 +52,7 @@ public:
     /**
      * returns mProxyModel
      */
-    VideoSortFilterProxyModel* getModel(int type)
+    VideoSortFilterProxyModel* getModel(int /*type*/)
     {
         return mProxyModel;
     }

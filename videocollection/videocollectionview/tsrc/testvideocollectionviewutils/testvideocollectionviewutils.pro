@@ -21,12 +21,10 @@ TARGET =
 DEPENDPATH += . \
     inc \
     src \
-    stubs \
     ../../../tsrc/stubs
 
 INCLUDEPATH = . \
     inc \
-    stubs/inc \
     ../../../tsrc/stubs/inc \
     \ # keep these at bottom so that stubbed headers are taken first
     ../../../inc \
@@ -44,12 +42,10 @@ LIBS += -lestor.dll \
 
 # Input
 HEADERS += inc/testvideocollectionviewutils.h \
-    stubs/inc/centralrepository.h \
     \ # headers needed in test
     ../../inc/videocollectionviewutils.h
     
 SOURCES += src/testvideocollectionviewutils.cpp \
-	stubs/src/centralrepository.cpp \
     \ # sources needed in test
     ../../src/videocollectionviewutils.cpp
    

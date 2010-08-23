@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 30.1.2 %
+// Version : %version: 30.1.3 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -353,19 +353,16 @@ void VideoListSelectionDialog::exec()
     
     connectSignals();
 
-    if(mModel->rowCount())
+    if(mTypeOfSelection == ECreateCollection)
     {
-        if(mTypeOfSelection == ECreateCollection)
-        {
-            // note this does not leak memory as the dialog will destroy itself upon close.
-            HbInputDialog *dialog = gCreateNewAlbumNameDialog(LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION);
-            dialog->open(this, SLOT(newAlbumNameDialogFinished(HbAction *)));
-        }
-        else
-        {
-            // show dialog
-            HbDialog::open();
-        }
+        // note this does not leak memory as the dialog will destroy itself upon close.
+        HbInputDialog *dialog = gCreateNewAlbumNameDialog(LIST_VIEW_OBJECT_NAME_CREATE_COLLECTION);
+        dialog->open(this, SLOT(newAlbumNameDialogFinished(HbAction *)));
+    }
+    else if(mModel->rowCount())
+    {
+        // show dialog
+        HbDialog::open();
     }
     else if((mModelReady && mTypeOfSelection != ESelectCollection) || 
             (mAlbumListReady && mTypeOfSelection == ESelectCollection))
@@ -430,7 +427,7 @@ void VideoListSelectionDialog::newAlbumNameDialogFinished(HbAction *action)
         QString text = mModel->resolveAlbumName(variant.toString());
         if(!text.isEmpty())
         {
-            if(mSelectedVideos.count() == 0)
+            if(mSelectedVideos.count() == 0 && mModel->rowCount())
             {
                 mNewAlbumText = text;
                 // show video selection dialog

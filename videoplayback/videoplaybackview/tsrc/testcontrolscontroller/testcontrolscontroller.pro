@@ -14,16 +14,16 @@
 # Description: Project file for building testcontrolscontroller
 #
 #
-# Version : %version: 8 %
+# Version : %version: 9 %
 
 
 TEMPLATE = app
 TARGET = testcontrolscontroller
 CONFIG += qtestlib hb qt
 
-LIBS += -lxqserviceutil.dll \
-        -lefsrv.dll
+LIBS = -lefsrv.dll
 
+INCLUDEPATH = hbstub
 INCLUDEPATH += stub/inc \
                ../inc \
                ../../inc \

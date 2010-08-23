@@ -26,7 +26,8 @@ mLatestPtr(0),
 mLatestItemId(TMPXItemId::InvalidId()),
 mLatestModifiedItemId(TMPXItemId::InvalidId()),
 mLatestInteger(-1),
-mListComplete(false)
+mVideoListComplete(false),
+mAlbumListComplete(false)
 {
     
 }
@@ -51,7 +52,8 @@ void StubSignalReceiver::resetLatestItems()
     mLatestModifiedItemId = TMPXItemId::InvalidId();
     mLatesListData.clear();
     mLatestInteger = -1;
-    mListComplete = false;
+    mVideoListComplete = false;
+    mAlbumListComplete = false;
 }
 
 // -----------------------------------------------------------------------------
@@ -101,12 +103,21 @@ int StubSignalReceiver::getLatestIntegerData()
 }
 
 // -----------------------------------------------------------------------------
-// getListComplete
+// getVideoListComplete
 // -----------------------------------------------------------------------------
 //
-bool StubSignalReceiver::getListComplete()
+bool StubSignalReceiver::getVideoListComplete()
 {
-    return mListComplete;
+    return mVideoListComplete;
+}
+
+// -----------------------------------------------------------------------------
+// getAlbumListComplete
+// -----------------------------------------------------------------------------
+//
+bool StubSignalReceiver::getAlbumListComplete()
+{
+    return mAlbumListComplete;
 }
 
 // -----------------------------------------------------------------------------
@@ -189,7 +200,7 @@ void StubSignalReceiver::videoDetailsCompletedSlot(CMPXMedia* media)
 // albumListAvailableSlot
 // -----------------------------------------------------------------------------
 //
-void StubSignalReceiver::albumListAvailableSlot(TMPXItemId albumId, 
+void StubSignalReceiver::albumListAvailableSlot(TMPXItemId &albumId, 
                                                 CMPXMediaArray *albumItems)
 {
     mLatestItemId = albumId;
@@ -200,7 +211,7 @@ void StubSignalReceiver::albumListAvailableSlot(TMPXItemId albumId,
 // itemDeletedSlot
 // -----------------------------------------------------------------------------
 //
-void StubSignalReceiver::itemDeletedSlot(TMPXItemId id)
+void StubSignalReceiver::itemDeletedSlot(TMPXItemId &id)
 {
     mLatestItemId = id;
 }
@@ -215,12 +226,21 @@ void StubSignalReceiver::itemModifiedSlot(const TMPXItemId &itemId)
 }
 
 // -----------------------------------------------------------------------------
-// listCompleteSlot
+// videoListCompleteSlot
 // -----------------------------------------------------------------------------
 //
-void StubSignalReceiver::listCompleteSlot()
+void StubSignalReceiver::videoListCompleteSlot()
 {
-    mListComplete = true;
+    mVideoListComplete = true;
+}
+
+// -----------------------------------------------------------------------------
+// albumListCompleteSlot
+// -----------------------------------------------------------------------------
+//
+void StubSignalReceiver::albumListCompleteSlot()
+{
+    mAlbumListComplete = true;
 }
 
 // -----------------------------------------------------------------------------

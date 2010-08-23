@@ -25,6 +25,9 @@ QModelIndex VideoListDataModelData::mLastIndex;
 int VideoListDataModelData::mDataAccessCount = 0;
 int VideoListDataModelData::mRowCount = 0;
 int VideoListDataModelData::mRowCountDecrement = 0;
+TMPXItemId VideoListDataModelData::mItemId = TMPXItemId::InvalidId();
+
+
 
 VideoListDataModel::VideoListDataModel(QObject *parent) :
     QAbstractItemModel(parent),
@@ -85,14 +88,14 @@ void VideoListDataModel::disconnectSignals()
     // not stubbed
 }
 
-TMPXItemId VideoListDataModel::mediaIdAtIndex(int index) const
+const TMPXItemId& VideoListDataModel::mediaIdAtIndex(const int &index) const
 {
     Q_UNUSED(index);
     // not stubbed
-    return TMPXItemId();
+    return VideoListDataModelData::mItemId;
 }
 
-QString VideoListDataModel::mediaFilePathForId(TMPXItemId mediaId) const
+QString VideoListDataModel::mediaFilePathForId(const TMPXItemId &mediaId) const
 {
     Q_UNUSED(mediaId);
     // not stubbed
@@ -124,7 +127,7 @@ QMap<int, QVariant> VideoListDataModel::itemData(const QModelIndex &index) const
     return itemData;
 }
 
-QString VideoListDataModel::prepareDetailRow(int index) const
+QString VideoListDataModel::prepareDetailRow(int &index) const
 {
     Q_UNUSED(index);
     
@@ -132,7 +135,7 @@ QString VideoListDataModel::prepareDetailRow(int index) const
     return QString();
 }
 
-QString VideoListDataModel::prepareSizeString(int index) const
+QString VideoListDataModel::prepareSizeString(int &index) const
 {
     Q_UNUSED(index);
     
@@ -194,14 +197,14 @@ bool VideoListDataModel::belongsToAlbum(const TMPXItemId &itemId, TMPXItemId alb
     return false;
 }
 
-void VideoListDataModel::setAlbumInUse(TMPXItemId albumId)
+void VideoListDataModel::setAlbumInUse(const TMPXItemId &albumId)
 {
     Q_UNUSED(albumId);
     
     // not stubbed
 }
 
-void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId> ids)
+void VideoListDataModel::deleteStartingFailsSlot(QList<TMPXItemId>& ids)
 {
     Q_UNUSED(ids);
     

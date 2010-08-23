@@ -255,9 +255,12 @@ int VideoListWidget::connectSignals()
        !connect(this, SIGNAL(scrollingEnded()), this, SLOT(scrollingEndedSlot())) ||
        !connect(this, SIGNAL(scrollPositionChanged(const QPointF &)), 
                this, SLOT(scrollPositionChangedSlot(const QPointF &))) ||
-       !connect(mScrollPositionTimer, SIGNAL(timeout()), this, SLOT(scrollPositionTimerSlot())) || 
+       !connect(mScrollPositionTimer, SIGNAL(timeout()), 
+               this, SLOT(scrollPositionTimerSlot())) || 
        !connect(this, SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)), 
-                this, SLOT(longPressedSlot(HbAbstractViewItem *, const QPointF &))))
+                this, SLOT(longPressedSlot(HbAbstractViewItem *, const QPointF &))) ||
+       !connect(mModel, SIGNAL(modelSorted()), this, 
+               SLOT(fetchThumbnailsForVisibleItems()), Qt::QueuedConnection))
     {
         return -1;
     }
@@ -314,6 +317,8 @@ void VideoListWidget::disConnectSignals()
         this, SLOT(scrollPositionChangedSlot(const QPointF&)));
     disconnect(this, SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)), 
              this, SLOT(longPressedSlot(HbAbstractViewItem *, const QPointF &)));
+    disconnect(mModel, SIGNAL(modelSorted()), 
+             this, SLOT(fetchThumbnailsForVisibleItems()));
     
     // check that scroll position timer is created
     if (mScrollPositionTimer)
@@ -430,7 +435,7 @@ void VideoListWidget::createContextMenu()
     if (mService == VideoServices::EUriFetcher)
     {
         mContextMenuActions[EActionAttach] = 
-                mContextMenu->addAction(hbTrId("txt_videos_menu_attach"), this, SLOT(openItemSlot()));
+                mContextMenu->addAction(hbTrId("txt_common_menu_select"), this, SLOT(openItemSlot()));
         mContextMenuActions[EActionAttach]->setObjectName(LIST_WIDGET_OBJECT_NAME_ACTION_ATTACH);
         
         mContextMenuActions[EActionOpen]   = 

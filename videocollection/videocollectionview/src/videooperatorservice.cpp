@@ -19,17 +19,8 @@
 
 // INCLUDE FILES
 
-#include <qdesktopservices.h>
-#include <qurl.h>
-
-#include <e32base.h>
-#include <eikenv.h>
-#include <eikappui.h>
-#include <apgcli.h>
-
 #include "videooperatorservice.h"
-#include "videocollectionviewutils.h"
-#include "videocollectioncenrepdefs.h"
+#include "videooperatorservice_p.h"
 #include "videocollectiontrace.h"
 
 // ---------------------------------------------------------------------------
@@ -37,9 +28,20 @@
 // ---------------------------------------------------------------------------
 //
 VideoOperatorService::VideoOperatorService(QObject *parent) : 
-    QObject(parent)
+    QObject(parent), d_ptr( new VideoOperatorServicePrivate() )
 {
     FUNC_LOG;
+}
+
+
+// ---------------------------------------------------------------------------
+// Destructor
+// ---------------------------------------------------------------------------
+//
+VideoOperatorService::~VideoOperatorService()
+{
+    FUNC_LOG;
+    delete d_ptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -49,20 +51,7 @@ VideoOperatorService::VideoOperatorService(QObject *parent) :
 bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, int appUidKey)
 {
     FUNC_LOG;
-    VideoCollectionViewUtils& utils = VideoCollectionViewUtils::instance();
-    
-    mTitle = utils.getCenRepStringValue(titleKey);
-    mIconResource = utils.getCenRepStringValue(iconKey);
-    mServiceUri = utils.getCenRepStringValue(serviceUriKey);
-    mApplicationUid = utils.getCenRepIntValue(appUidKey);
-    
-    // Icon is required, either service uri or application uid is required.
-    if(mIconResource.isEmpty() || (mServiceUri.isEmpty() && mApplicationUid <= 0))
-    {
-        return false;
-    }
-    
-    return true;
+    return d_ptr->load(titleKey, iconKey, serviceUriKey, appUidKey);
 }
 
 // ---------------------------------------------------------------------------
@@ -71,7 +60,7 @@ bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, in
 //
 const QString VideoOperatorService::title() const
 {
-    return mTitle;
+    return d_ptr->title();
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +69,7 @@ const QString VideoOperatorService::title() const
 //
 const QString VideoOperatorService::iconResource() const
 {
-    return mIconResource;
+    return d_ptr->iconResource();
 }
 
 // ---------------------------------------------------------------------------
@@ -90,69 +79,7 @@ const QString VideoOperatorService::iconResource() const
 void VideoOperatorService::launchService()
 {
     FUNC_LOG;
-    
-    if(!mServiceUri.isEmpty())
-    {
-        INFOQSTR_1("VideoOperatorService::launchService() starting url: %S", mServiceUri);
-        QDesktopServices::openUrl(QUrl(mServiceUri));
-    }
-    else
-    {
-        INFO_1("VideoOperatorService::launchService() starting application 0x%x", mApplicationUid);
-        TRAP_IGNORE(launchApplicationL(TUid::Uid(mApplicationUid), 0));
-    }
-}
-
-// ---------------------------------------------------------------------------
-// launchApplicationL
-// ---------------------------------------------------------------------------
-//
-void VideoOperatorService::launchApplicationL(const TUid uid, TInt viewId)
-{
-    CEikonEnv *eikEnv = CEikonEnv::Static();
-    
-    if (viewId > 0 && eikEnv) {
-        TVwsViewId view(uid, TUid::Uid(viewId));
-        eikEnv->EikAppUi()->ActivateViewL(view);
-    } else 
-    {
-        RWsSession wsSession;
-        User::LeaveIfError(wsSession.Connect());
-        CleanupClosePushL<RWsSession>(wsSession);
-
-        // TApaAppInfo size is greater then 1024 bytes
-        // so its instances should not be created on the stack.
-        TApaAppInfo* appInfo = new (ELeave) TApaAppInfo;
-        CleanupStack::PushL(appInfo);
-        TApaAppCapabilityBuf capabilityBuf;
-        RApaLsSession appArcSession;
-        User::LeaveIfError(appArcSession.Connect());
-        CleanupClosePushL<RApaLsSession>(appArcSession);
-
-        User::LeaveIfError(appArcSession.GetAppInfo(*appInfo, uid));
-        User::LeaveIfError(appArcSession.GetAppCapability(
-           capabilityBuf, uid));
-
-        TApaAppCapability &caps = capabilityBuf();
-        CApaCommandLine *cmdLine = CApaCommandLine::NewLC();
-        cmdLine->SetExecutableNameL(appInfo->iFullName);
-
-        if (caps.iLaunchInBackground) {
-            cmdLine->SetCommandL(EApaCommandBackground);
-        } else {
-            cmdLine->SetCommandL(EApaCommandRun);
-        }
-
-        cmdLine->SetTailEndL(KNullDesC8);
-
-        User::LeaveIfError(appArcSession.StartApp(*cmdLine));
-
-        CleanupStack::PopAndDestroy(cmdLine);
-        CleanupStack::PopAndDestroy(&appArcSession);
-        CleanupStack::PopAndDestroy(appInfo);
-
-        CleanupStack::PopAndDestroy(&wsSession);
-    }
+    d_ptr->launchService();
 }
 
 // End of file.

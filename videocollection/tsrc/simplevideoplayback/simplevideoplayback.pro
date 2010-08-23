@@ -42,6 +42,8 @@ SOURCES += svpbdocumentloader.cpp \
            svpbplugin.cpp \
            svpbview.cpp
 
+DOCML += resources/simplevideoplayback.docml
+
 RESOURCES = simplevideoplayback.qrc
 
 LIBS += -lcone \

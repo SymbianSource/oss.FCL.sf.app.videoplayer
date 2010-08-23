@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#30 %
+# Version : %version: 32 %
 
 
 TEMPLATE = lib
@@ -70,7 +70,7 @@ HEADERS += videobaseplaybackview.h \
            videoplaybackviewfiledetails.h \
            mpxvideoviewwrapper.h \
            mpxvideoregion.h \
-           mpxvideoplaybackdisplayhandler.h \
+           videoplaybackdisplayhandler.h \
            videoplaybackfullscreencontrol.h \
            videoplaybackstatuspanecontrol.h \
            videoplaybackprogressbar.h \
@@ -81,7 +81,7 @@ HEADERS += videobaseplaybackview.h \
            videoplaybackcontrolscontroller.h \
            videoplaybackdocumentloader.h \
            videoplaybackfiledetailswidget.h \
-           mpxvideoplaybackuserinputhandler.h \
+           videoplaybackuserinputhandler.h \
            videoplaybackdetailsplaybackwindow.h \
            videocontainer.h
 
@@ -89,7 +89,7 @@ SOURCES += videobaseplaybackview.cpp \
            videoplaybackview.cpp \
            videoplaybackviewfiledetails.cpp \
            mpxvideoviewwrapper.cpp \
-           mpxvideoplaybackdisplayhandler.cpp \
+           videoplaybackdisplayhandler.cpp \
            videoplaybackfullscreencontrol.cpp \
            videoplaybackstatuspanecontrol.cpp \
            videoplaybackprogressbar.cpp \
@@ -100,8 +100,10 @@ SOURCES += videobaseplaybackview.cpp \
            videoplaybackcontrolconfiguration.cpp \
            videoplaybackdocumentloader.cpp \
            videoplaybackfiledetailswidget.cpp \
-           mpxvideoplaybackuserinputhandler.cpp \
+           videoplaybackuserinputhandler.cpp \
            videoplaybackdetailsplaybackwindow.cpp \
            videocontainer.cpp
+
+DOCML += resources/videoplaybackview.docml
 
 RESOURCES += resources/videoplaybackview.qrc

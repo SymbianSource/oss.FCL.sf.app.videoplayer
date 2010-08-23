@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 8 %
+// Version : %version: 9 %
 
 
 // INCLUDE FILES
@@ -39,7 +39,7 @@
 #include "mpxvideo_debug.h"
 #include "mpxvideoviewwrapper.h"
 #include "mpxcommonvideoplaybackview.hrh"
-#include "mpxvideoplaybackuserinputhandler.h"
+#include "videoplaybackuserinputhandler.h"
 
 
 // CONSTANTS
@@ -49,25 +49,25 @@ const TInt KMPXMicroSecondsInASecond = 1000000;
 // ======== MEMBER FUNCTIONS =======================================================================
 
 // -------------------------------------------------------------------------------------------------
-// MPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler()
+// CVideoPlaybackUserInputHandler::CVideoPlaybackUserInputHandler()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper )
+CVideoPlaybackUserInputHandler::CVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper )
    : iViewWrapper( aWrapper )
 {
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::NewL()
+// CVideoPlaybackUserInputHandler::NewL()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
+CVideoPlaybackUserInputHandler* CVideoPlaybackUserInputHandler::NewL(
         CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::NewL()"));
+    MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::NewL()"));
 
-    CMPXVideoPlaybackUserInputHandler* self =
-        new (ELeave) CMPXVideoPlaybackUserInputHandler( aWrapper );
+    CVideoPlaybackUserInputHandler* self =
+        new (ELeave) CVideoPlaybackUserInputHandler( aWrapper );
     CleanupStack::PushL( self );
     self->ConstructL( aTvOutConnected );
     CleanupStack::Pop();
@@ -75,13 +75,13 @@ CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::ConstructL
+// CVideoPlaybackUserInputHandler::ConstructL
 // Symbian 2nd phase constructor can leave.
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
+void CVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::ConstructL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::ConstructL()"));
 
     iVolumeRepeatTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     iDisplayTimer = CPeriodic::NewL( CPeriodic::EPriorityStandard );
@@ -98,7 +98,7 @@ void CMPXVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
     
         // What's the timeout value (in seconds ) for the display light?
         repository->Get( KDisplayLightsTimeout, iDisplayTimeOut );
-        MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ConstructL Display Timeout( %d )"), iDisplayTimeOut);
+        MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::ConstructL Display Timeout( %d )"), iDisplayTimeOut);
     
         CleanupStack::PopAndDestroy( repository );
     
@@ -116,10 +116,10 @@ void CMPXVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
+// CVideoPlaybackUserInputHandler::~CVideoPlaybackUserInputHandler()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
+CVideoPlaybackUserInputHandler::~CVideoPlaybackUserInputHandler()
 {
     if ( iVolumeRepeatTimer )
     {
@@ -146,28 +146,28 @@ CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::MrccatoPlay()
+// CVideoPlaybackUserInputHandler::MrccatoPlay()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::MrccatoPlay( TRemConCoreApiPlaybackSpeed /*aSpeed*/,
-                                                     TRemConCoreApiButtonAction aButtonAct )
+void CVideoPlaybackUserInputHandler::MrccatoPlay( TRemConCoreApiPlaybackSpeed /*aSpeed*/,
+                                                  TRemConCoreApiButtonAction aButtonAct )
 {
     MPX_ENTER_EXIT(
-        _L("CMPXVideoPlaybackUserInputHandler::MrccatoPlay"),
+        _L("CVideoPlaybackUserInputHandler::MrccatoPlay"),
         _L("aButtonAct = %d"), aButtonAct );
 
     ProcessMediaKey(ERemConCoreApiPlay, aButtonAct);
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::MrccatoCommand()
+// CVideoPlaybackUserInputHandler::MrccatoCommand()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::MrccatoCommand(TRemConCoreApiOperationId aOperationId,
-                                                       TRemConCoreApiButtonAction aButtonAct )
+void CVideoPlaybackUserInputHandler::MrccatoCommand( TRemConCoreApiOperationId aOperationId,
+                                                     TRemConCoreApiButtonAction aButtonAct )
 {
     MPX_ENTER_EXIT(
-        _L("CMPXVideoPlaybackUserInputHandler::MrccatoCommand"),
+        _L("CVideoPlaybackUserInputHandler::MrccatoCommand"),
         _L("aButtonAct = %d"), aButtonAct );
 
     ProcessMediaKey(aOperationId, aButtonAct);
@@ -175,13 +175,13 @@ void CMPXVideoPlaybackUserInputHandler::MrccatoCommand(TRemConCoreApiOperationId
 
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey()
+// CVideoPlaybackUserInputHandler::DoHandleMediaKey()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperationId aOperationId,
-                                                          TRemConCoreApiButtonAction aButtonAct )
+void CVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperationId aOperationId,
+                                                       TRemConCoreApiButtonAction aButtonAct )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::DoHandleMediaKey()"));
 
     switch ( aOperationId )
     {
@@ -240,10 +240,10 @@ void CMPXVideoPlaybackUserInputHandler::DoHandleMediaKey( TRemConCoreApiOperatio
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::HandleFastForward()
+// CVideoPlaybackUserInputHandler::HandleFastForward()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleFastForward(TRemConCoreApiButtonAction aButtonAct)
+void CVideoPlaybackUserInputHandler::HandleFastForward( TRemConCoreApiButtonAction aButtonAct )
 {
     if (aButtonAct == ERemConCoreApiButtonPress)
     {
@@ -257,10 +257,10 @@ void CMPXVideoPlaybackUserInputHandler::HandleFastForward(TRemConCoreApiButtonAc
 
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::HandleRewind()
+// CVideoPlaybackUserInputHandler::HandleRewind()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleRewind(TRemConCoreApiButtonAction aButtonAct)
+void CVideoPlaybackUserInputHandler::HandleRewind( TRemConCoreApiButtonAction aButtonAct )
 {
     if (aButtonAct == ERemConCoreApiButtonPress)
     {
@@ -273,10 +273,10 @@ void CMPXVideoPlaybackUserInputHandler::HandleRewind(TRemConCoreApiButtonAction 
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::HandleVolumeUp()
+// CVideoPlaybackUserInputHandler::HandleVolumeUp()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonAction aButtonAct)
+void CVideoPlaybackUserInputHandler::HandleVolumeUp( TRemConCoreApiButtonAction aButtonAct )
 {
     switch ( aButtonAct )
     {
@@ -293,7 +293,7 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonActio
                 KAknStandardKeyboardRepeatRate,
                 KAknStandardKeyboardRepeatRate,
                 TCallBack(
-                    CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL,
+                    CVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL,
                     this ) );
 
             break;
@@ -315,10 +315,10 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeUp(TRemConCoreApiButtonActio
 
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::HandleVolumeDown()
+// CVideoPlaybackUserInputHandler::HandleVolumeDown()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown(TRemConCoreApiButtonAction aButtonAct)
+void CVideoPlaybackUserInputHandler::HandleVolumeDown( TRemConCoreApiButtonAction aButtonAct )
 {
     switch ( aButtonAct )
     {
@@ -335,7 +335,7 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown(TRemConCoreApiButtonAct
                 KAknStandardKeyboardRepeatRate,
                 KAknStandardKeyboardRepeatRate,
                 TCallBack(
-                    CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL,
+                    CVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL,
                     this ) );
 
             break;
@@ -356,13 +356,13 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeDown(TRemConCoreApiButtonAct
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::ProcessKeyEvent()
+// CVideoPlaybackUserInputHandler::ProcessKeyEvent()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& /*aKeyEvent*/,
-                                                          TEventCode /*aType*/ )
+void CVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& /*aKeyEvent*/,
+                                                       TEventCode /*aType*/ )
 {
-    MPX_DEBUG(_L("MPXVideoPlaybackUserInputHandler::ProcessKeyEvent"));
+    MPX_DEBUG(_L("VideoPlaybackUserInputHandler::ProcessKeyEvent"));
 
     /*
     switch (iProcessingInputType)
@@ -408,13 +408,13 @@ void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& /*aKe
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::ProcessMediaKey()
+// CVideoPlaybackUserInputHandler::ProcessMediaKey()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ProcessMediaKey(TRemConCoreApiOperationId aOperationId,
-                                       					TRemConCoreApiButtonAction aButtonAct)
+void CVideoPlaybackUserInputHandler::ProcessMediaKey( TRemConCoreApiOperationId aOperationId,
+                                                      TRemConCoreApiButtonAction aButtonAct )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ProcessMediaKey"));
+    MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::ProcessMediaKey"));
 
     switch (iProcessingInputType)
     {
@@ -467,25 +467,25 @@ void CMPXVideoPlaybackUserInputHandler::ProcessMediaKey(TRemConCoreApiOperationI
 
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL()
+//   CVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL( TAny* aPtr )
+TInt CVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL( TAny* aPtr )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL()"));
+    MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::HandleVolumeRepeatTimeoutL()"));
 
-    static_cast<CMPXVideoPlaybackUserInputHandler*>(aPtr)->HandleVolumeRepeatL();
+    static_cast<CVideoPlaybackUserInputHandler*>(aPtr)->HandleVolumeRepeatL();
 
     return KErrNone;
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
+//   CVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
+void CVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()"));
+    MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::HandleVolumeRepeatL()"));
 
     TMPXVideoPlaybackViewCommandIds command = EMPXPbvCmdDecreaseVolume;
 
@@ -499,10 +499,10 @@ void CMPXVideoPlaybackUserInputHandler::HandleVolumeRepeatL()
 
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::SetForeground()
+//   CVideoPlaybackUserInputHandler::SetForeground()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::SetForeground(TBool aForeground)
+void CVideoPlaybackUserInputHandler::SetForeground( TBool aForeground )
 {
     iForeground = aForeground;
 
@@ -514,12 +514,12 @@ void CMPXVideoPlaybackUserInputHandler::SetForeground(TBool aForeground)
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::DisableBacklight()
+// CVideoPlaybackUserInputHandler::DisableBacklight()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::DisableBacklight()
+void CVideoPlaybackUserInputHandler::DisableBacklight()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::DisableBacklight"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::DisableBacklight"));
     
     // cancel the timer
     iDisplayTimer->Cancel(); 
@@ -529,12 +529,12 @@ void CMPXVideoPlaybackUserInputHandler::DisableBacklight()
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::EnableBacklight()
+// CVideoPlaybackUserInputHandler::EnableBacklight()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::EnableBacklight()
+void CVideoPlaybackUserInputHandler::EnableBacklight()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::EnableBacklight"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::EnableBacklight"));
  
     // enable the backlight
     HAL::Set( HALData::EBacklightState, 1 );    
@@ -542,12 +542,12 @@ void CMPXVideoPlaybackUserInputHandler::EnableBacklight()
 
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::HandleTVOutEvent()
+//   CVideoPlaybackUserInputHandler::HandleTVOutEvent()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleTVOutEventL(TBool aTVOutConnected)
+void CVideoPlaybackUserInputHandler::HandleTVOutEventL(TBool aTVOutConnected)
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleTVOutEvent"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::HandleTVOutEvent"));
 
     iTVOutConnected = aTVOutConnected;
 
@@ -558,7 +558,7 @@ void CMPXVideoPlaybackUserInputHandler::HandleTVOutEventL(TBool aTVOutConnected)
     
         // What's the timeout value (in seconds ) for the display light?
         repository->Get( KDisplayLightsTimeout, iDisplayTimeOut );
-        MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::ConstructL Display Timeout( %d )"), iDisplayTimeOut);
+        MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::ConstructL Display Timeout( %d )"), iDisplayTimeOut);
     
         CleanupStack::PopAndDestroy( repository );
     
@@ -575,25 +575,25 @@ void CMPXVideoPlaybackUserInputHandler::HandleTVOutEventL(TBool aTVOutConnected)
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::HandleDisplayTimeout
+//   CVideoPlaybackUserInputHandler::HandleDisplayTimeout
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackUserInputHandler::HandleDisplayTimeout( TAny* aPtr )
+TInt CVideoPlaybackUserInputHandler::HandleDisplayTimeout( TAny* aPtr )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::HandleDisplayTimeout"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::HandleDisplayTimeout"));
 
-    static_cast<CMPXVideoPlaybackUserInputHandler*>(aPtr)->DisableBacklight();
+    static_cast<CVideoPlaybackUserInputHandler*>(aPtr)->DisableBacklight();
 
     return KErrNone;
 }
 
 // -----------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::RestartDisplayTimer
+// CVideoPlaybackUserInputHandler::RestartDisplayTimer
 // -----------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::RestartDisplayTimer()
+void CVideoPlaybackUserInputHandler::RestartDisplayTimer()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackUserInputHandler::RestartDisplayTimer"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackUserInputHandler::RestartDisplayTimer"));
 
     // check if the display timer is running if so cancelit
     if ( iDisplayTimer->IsActive() )
@@ -612,7 +612,7 @@ void CMPXVideoPlaybackUserInputHandler::RestartDisplayTimer()
 
     // Re start the display backlight timer
     iDisplayTimer->Start( iDisplayTimeOut, iDisplayTimeOut,
-                          TCallBack( CMPXVideoPlaybackUserInputHandler::HandleDisplayTimeout, this ) );                     
+                          TCallBack( CVideoPlaybackUserInputHandler::HandleDisplayTimeout, this ) );                     
 }
 
 // EOF

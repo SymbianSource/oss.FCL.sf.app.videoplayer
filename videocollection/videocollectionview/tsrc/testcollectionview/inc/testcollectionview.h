@@ -30,8 +30,6 @@ class TestCollectionView : public QObject
     Q_OBJECT
 
 public:
-    
-
 
     // test functions for the test framework
 private slots:
@@ -61,10 +59,10 @@ private slots:
     void testActivateView();
     void testDeactivateView();
     void testDestroyView();
-    void testGetView();
     void testBack();
     void testOrientationChange();
     void testTimerEvent();
+    void testGetView();
 
 signals:
 

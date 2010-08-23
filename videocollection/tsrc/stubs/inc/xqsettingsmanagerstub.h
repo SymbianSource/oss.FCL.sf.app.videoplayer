@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QHash>
 
 class XQCentralRepositorySettingsKey : public QObject
 {
@@ -27,11 +28,15 @@ class XQCentralRepositorySettingsKey : public QObject
     
 public:
     
+    
     XQCentralRepositorySettingsKey(int uid, int key)
     {
-        Q_UNUSED(uid);
-        Q_UNUSED(key);
+        mUid = uid;
+        mKey = key;
     }
+    
+    int mUid;
+    int mKey;
 };
 
 class XQSettingsManager : QObject
@@ -54,7 +59,13 @@ public:
 public:
     QVariant readItemValue(XQCentralRepositorySettingsKey &key, int type);
     
-    static QVariant mReadItemValueReturnValue;
+    bool writeItemValue(const XQCentralRepositorySettingsKey& key, const QVariant& value);
+    
+    // decrease by one at beginning of every readItemValue -method. If goes below zero method fails
+    static int mReadItemSucceedCounter;
+    // decrease by one at beginning of every writeItemValue -method. If goes below zero method fails
+    static int mWriteItemSucceedCounter;
+    static QHash<int, QVariant> mWrittenValueHash;
 };
 
 #endif // XQSETTINGSMANAGER_H

@@ -28,7 +28,7 @@
 #include "../stub/inc/videobaseplaybackview.h"
 
 #define private public
-#include "mpxvideoplaybackuserinputhandler.h"
+#include "videoplaybackuserinputhandler.h"
 #undef private
 
 
@@ -63,7 +63,7 @@ void TestUserInputHandler::init()
     mBaseVideoView    = new VideoBasePlaybackView();
     mVideoViewWrapper = CMPXVideoViewWrapper::NewL( mBaseVideoView );   
         
-    mUserInputHdlr = CMPXVideoPlaybackUserInputHandler::NewL(mVideoViewWrapper, false);
+    mUserInputHdlr = CVideoPlaybackUserInputHandler::NewL(mVideoViewWrapper, false);
 }
 
 // ---------------------------------------------------------------------------

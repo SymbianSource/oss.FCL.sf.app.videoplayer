@@ -78,4 +78,5 @@ EXPORTS
 	_ZTV18VideoThumbnailData @ 77 NONAME
 	_ZTV22VideoCollectionWrapper @ 78 NONAME
 	_ZTV25VideoSortFilterProxyModel @ 79 NONAME
+	_ZN25VideoSortFilterProxyModel11modelSortedEv @ 80 NONAME
 

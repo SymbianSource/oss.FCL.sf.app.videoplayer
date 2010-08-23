@@ -104,6 +104,7 @@ void TestVideoModel_p::init()
 //
 void TestVideoModel_p::cleanup()
 {
+    disconnect();
     if(mTestObject)
     {
         delete mTestObject;
@@ -1425,27 +1426,31 @@ void TestVideoModel_p::testGetCollectionIdFromIndex()
 }
 
 // -----------------------------------------------------------------------------
-// testListCompleteSlot
+// testVideoListCompleteSlot
 // -----------------------------------------------------------------------------
 //
-void TestVideoModel_p::testListCompleteSlot()
+void TestVideoModel_p::testVideoListCompleteSlot()
 {
     QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(videoListCompleteSlot())));
-    QSignalSpy spy(mStubModel, SIGNAL(modelReady()));
+    QSignalSpy modelReadySpy(mStubModel, SIGNAL(modelReady()));
+    QSignalSpy albumListReadySpy(mStubModel, SIGNAL(albumListReady()));
     emit signalListCompleteSlot();
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(modelReadySpy.count(), 1);
+    QCOMPARE(albumListReadySpy.count(), 0);
 }
 
 // -----------------------------------------------------------------------------
-// testalbumListCompleteSlot
+// testAlbumListCompleteSlot
 // -----------------------------------------------------------------------------
 //
-void TestVideoModel_p::testalbumListCompleteSlot()
+void TestVideoModel_p::testAlbumListCompleteSlot()
 {
     QVERIFY(connect(this, SIGNAL(signalListCompleteSlot()), mTestObject, SLOT(albumListCompleteSlot())));
-    QSignalSpy spy(mStubModel, SIGNAL(albumListReady()));
+    QSignalSpy modelReadySpy(mStubModel, SIGNAL(modelReady()));
+    QSignalSpy albumListReadySpy(mStubModel, SIGNAL(albumListReady()));
     emit signalListCompleteSlot();
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(albumListReadySpy.count(), 1);
+    QCOMPARE(modelReadySpy.count(), 0);
 }
 
 // End of file

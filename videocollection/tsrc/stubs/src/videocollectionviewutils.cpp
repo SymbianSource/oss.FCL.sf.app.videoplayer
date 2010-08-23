@@ -121,7 +121,7 @@ int VideoCollectionViewUtils::getCenRepIntValue(int key)
     Q_UNUSED(key);
     if(VideoCollectionViewUtilsData::mCenRepIntValues.count() > 0)
     {
-        int value = VideoCollectionViewUtilsData::mCenRepIntValues.takeFirst();;
+        int value = VideoCollectionViewUtilsData::mCenRepIntValues.takeFirst();
         if(value != CENREP_NO_INT)
         {
             return value;

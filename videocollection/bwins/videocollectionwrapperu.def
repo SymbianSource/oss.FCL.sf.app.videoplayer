@@ -78,4 +78,5 @@ EXPORTS
 	?trUtf8@VideoCollectionWrapper@@SA?AVQString@@PBD0H@Z @ 77 NONAME ; class QString VideoCollectionWrapper::trUtf8(char const *, char const *, int)
 	??0VideoThumbnailData@@AAE@XZ @ 78 NONAME ; VideoThumbnailData::VideoThumbnailData(void)
 	?staticMetaObject@VideoThumbnailData@@2UQMetaObject@@B @ 79 NONAME ; struct QMetaObject const VideoThumbnailData::staticMetaObject
+	?modelSorted@VideoSortFilterProxyModel@@IAEXXZ @ 80 NONAME ; void VideoSortFilterProxyModel::modelSorted(void)
 

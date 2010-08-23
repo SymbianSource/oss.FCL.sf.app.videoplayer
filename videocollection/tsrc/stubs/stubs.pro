@@ -81,6 +81,7 @@ HEADERS_TEMP = \
     inc/videoactivitystate.h \
     inc/xqserviceutilxtra.h \
     inc/videooperatorservicedata.h \
+    inc/videooperatorservice_pdata.h \
     # We need stub for this because it has static data and HW compilation of moc file fails because of that.
     inc/videoservices.h \
     ../../videocollectionview/inc/videocollectionuiloader.h \
@@ -93,7 +94,8 @@ HEADERS_TEMP = \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
     ../../videocollectionwrapper/inc/videothumbnaildata.h \
-    ../../videocollectionview/inc/videooperatorservice.h
+    ../../videocollectionview/inc/videooperatorservice.h \
+    ../../videocollectionview/inc/videooperatorservice_p.h
 
 SOURCES_TEMP = \
     src/xqserviceprovider.cpp \
@@ -136,6 +138,7 @@ SOURCES_TEMP = \
     src/videoservicebrowse.cpp \ 
     src/videoactivitystate.cpp \
     src/videooperatorservice.cpp \
+    src/videooperatorservice_p.cpp \
     src/xqsettingsmanagerstub.cpp
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)

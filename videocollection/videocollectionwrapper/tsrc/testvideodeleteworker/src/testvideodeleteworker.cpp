@@ -100,6 +100,8 @@ void TestVideoDeleteWorker::cleanup()
 //
 void TestVideoDeleteWorker::testRequestDelete()
 {
+    qRegisterMetaType<QList<TMPXItemId> >("QList<TMPXItemId>& ");
+    
     mDummyCollection->mDeleteFails = false;
     QList<TMPXItemId> itemIds;
     // empty list
@@ -125,7 +127,8 @@ void TestVideoDeleteWorker::testRequestDelete()
     QVERIFY(mTestObject->mRemoveBuffer.count() == 2);
     
     // delete -call fails
-    QSignalSpy spysignal(mTestObject, SIGNAL( deleteStartupFailed(QList<TMPXItemId>)));
+    
+    QSignalSpy spysignal(mTestObject, SIGNAL(deleteStartupFailed(QList<TMPXItemId>&)));
     mDummyCollection->mDeleteFails = true;
     itemIds.clear();
     itemIds.append(TMPXItemId(0,0));
@@ -133,7 +136,7 @@ void TestVideoDeleteWorker::testRequestDelete()
     QVERIFY(mTestObject->mRemoveBuffer.count() == 3);
     
     QCoreApplication::processEvents();
-    QVERIFY(mTestObject->mRemoveBuffer.count() == 0);
+    QCOMPARE(mTestObject->mRemoveBuffer.count(), 0);
     QVERIFY(spysignal.count() == 1);   
     
 }

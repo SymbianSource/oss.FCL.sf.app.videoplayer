@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 76.1.7 %
+// Version : %version: 76.1.8 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -34,6 +34,7 @@
 #include <hblistviewitem.h>
 #include <hbparameterlengthlimiter.h>
 #include <hbtextitem.h>
+#include <hbscrollbar.h>
 #include <cmath>
 #include <thumbnailmanager_qt.h>
 #include <shareui.h>
@@ -231,6 +232,15 @@ void VideoFileDetailsViewPlugin::createView()
     }
 
     list->setEnabledAnimations(HbAbstractItemView::None);
+    
+    list->setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAsNeeded);
+    
+    HbScrollBar* bar = list->verticalScrollBar();
+    
+    if(bar)
+    {
+        bar->setInteractive(true);
+    }
 }
 
 // ---------------------------------------------------------------------------

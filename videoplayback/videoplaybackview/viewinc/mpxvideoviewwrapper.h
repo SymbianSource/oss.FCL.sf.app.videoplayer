@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#23 %
+// Version : %version:  da1mmcf#24 %
 
 
 
@@ -46,9 +46,9 @@ enum TMPXMediaRequestStatus
 class MMPXPlaybackUtility;
 class MMPXCollectionUtility;
 class VideoBasePlaybackView;
-class CMPXVideoPlaybackDisplayHandler;
+class CVideoPlaybackDisplayHandler;
 class VideoPlaybackViewFileDetails;
-class CMPXVideoPlaybackUserInputHandler;
+class CVideoPlaybackUserInputHandler;
 class VideoPlaybackControlsController;
 
 //  Class Definitions
@@ -273,8 +273,8 @@ class CMPXVideoViewWrapper : public CBase,
         CIdle*                               iCloseAO;
 
         VideoBasePlaybackView*               iView;
-        CMPXVideoPlaybackDisplayHandler*     iDisplayHandler;
-        CMPXVideoPlaybackUserInputHandler*   iUserInputHandler;
+        CVideoPlaybackDisplayHandler*        iDisplayHandler;
+        CVideoPlaybackUserInputHandler*      iUserInputHandler;
         VideoPlaybackControlsController*     iControlsController;
 
         TMPXMediaRequestStatus               iMediaRequestStatus;

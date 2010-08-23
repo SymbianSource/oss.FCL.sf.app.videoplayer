@@ -3,7 +3,7 @@
     <qresource prefix="videoplaybackview">
         <file>animations/rn_preroll_anim.axml</file>
         <file>animations/generic_preroll_anim.axml</file>
-        <file>videoplaybackview.docml</file>
+        <file alias="videoplaybackview.docml">videoplaybackview.docml.bin</file>
         <file>effects/controlbar_appear.fxml</file>
         <file>effects/controlbar_disappear.fxml</file>
     </qresource>

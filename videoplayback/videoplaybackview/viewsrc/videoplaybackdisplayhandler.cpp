@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  28 %
+// Version : %version:  29 %
 
 #include <sysutil.h>
 #include <s32file.h>
@@ -26,7 +26,7 @@
 
 #include "videocontainer.h"
 #include "mpxvideoviewwrapper.h"
-#include "mpxvideoplaybackdisplayhandler.h"
+#include "videoplaybackdisplayhandler.h"
 #include "mpxvideoregion.h"
 #include "videoplaybackviewfiledetails.h"
 
@@ -36,8 +36,8 @@ const TReal32 KTRANSITIONEFFECTCNT = 8;
 _LIT( KAspectRatioFile, "c:\\private\\200159b2\\mpxvideoplayer_aspect_ratio.dat" );
 
 
-CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                                                  CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
+                                                            CMPXVideoViewWrapper* aViewWrapper )
     : iPlaybackUtility( aPlayUtil )
     , iTransitionEffectCnt( 0 )
     , iViewWrapper( aViewWrapper )
@@ -50,9 +50,9 @@ CMPXVideoPlaybackDisplayHandler::CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUt
 {
 }
 
-CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
+CVideoPlaybackDisplayHandler::~CVideoPlaybackDisplayHandler()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::~CVideoPlaybackDisplayHandler()"));
 
     MPX_TRAPD( error, SaveAspectRatioL() );
 
@@ -80,14 +80,14 @@ CMPXVideoPlaybackDisplayHandler::~CMPXVideoPlaybackDisplayHandler()
     }
 }
 
-CMPXVideoPlaybackDisplayHandler*
-CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
-                                       CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler*
+CVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
+                                    CMPXVideoViewWrapper* aViewWrapper )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::NewL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::NewL()"));
 
-    CMPXVideoPlaybackDisplayHandler* self =
-        new(ELeave) CMPXVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
+    CVideoPlaybackDisplayHandler* self =
+        new(ELeave) CVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -96,26 +96,26 @@ CMPXVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
 }
 
 // -------------------------------------------------------------------------------------------------
-//  CMPXVideoPlaybackDisplayHandler::ConstructL()
+//  CVideoPlaybackDisplayHandler::ConstructL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::ConstructL()
+void CVideoPlaybackDisplayHandler::ConstructL()
 {
     iResizingTimer = CPeriodic::NewL( CActive::EPriorityStandard );
     LoadAspectRatioL();
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()
+//   CVideoPlaybackDisplayHandler::CreateDisplayWindowL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
+void CVideoPlaybackDisplayHandler::CreateDisplayWindowL(
                                           RWsSession& /*aWs*/,
                                           CWsScreenDevice& aScreenDevice,
                                           RWindow& aWin,
                                           TRect aDisplayRect )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::CreateDisplayWindowL()"));
 
     if ( ! iVideoContainer )
     {
@@ -135,12 +135,12 @@ void CMPXVideoPlaybackDisplayHandler::CreateDisplayWindowL(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
+//   CVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
+void CVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::RemoveDisplayWindow()"));
 
     if ( iVideoDisplay )
     {
@@ -159,18 +159,18 @@ void CMPXVideoPlaybackDisplayHandler::RemoveDisplayWindow()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
+//   CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessage )
+void CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* aMessage )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessage()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::HandleVideoDisplayMessage()"));
 
     TMPXVideoDisplayCommand message =
         ( *(aMessage->Value<TMPXVideoDisplayCommand>(KMPXMediaVideoDisplayCommand)) );
 
     MPX_DEBUG(
-      _L("CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL() message = %d"), message );
+      _L("CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL() message = %d"), message );
 
     switch ( message )
     {
@@ -194,12 +194,12 @@ void CMPXVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* a
 
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetAspectRatioL()
+//   CVideoPlaybackDisplayHandler::SetAspectRatioL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
+TInt CVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::SetAspectRatioL()"));
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::SetAspectRatioL()"));
 
     TInt aspectRatio;
 
@@ -219,13 +219,13 @@ TInt CMPXVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand 
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
+//   CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
+TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         VideoPlaybackViewFileDetails* aFileDetails, TReal32 aDisplayAspectRatio )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
 
     TInt newAspectRatio = EMMFNatural;
 
@@ -303,12 +303,12 @@ TInt CMPXVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL
+//   CVideoPlaybackDisplayHandler::SaveAspectRatioL
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL()
+void CVideoPlaybackDisplayHandler::SaveAspectRatioL()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SaveAspectRatioL"));
 
     RFs fs;
     TInt err = fs.Connect();
@@ -355,12 +355,12 @@ void CMPXVideoPlaybackDisplayHandler::SaveAspectRatioL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL
+//   CVideoPlaybackDisplayHandler::LoadAspectRatioL
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL()
+void CVideoPlaybackDisplayHandler::LoadAspectRatioL()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::LoadAspectRatioL()"));
 
     RFs fs;
     RFileReadStream in;
@@ -394,12 +394,12 @@ void CMPXVideoPlaybackDisplayHandler::LoadAspectRatioL()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()
+//   CVideoPlaybackDisplayHandler::UpdateVideoRectL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool transitionEffect )
+void CVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool transitionEffect )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::UpdateVideoRectL()"));
 
     if ( transitionEffect )
     {
@@ -416,7 +416,7 @@ void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool t
         iResizingTimer->Start(
                 0,
                 KVIDEORESIZINGREPEATRATE,
-                TCallBack( CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL, this ) );
+                TCallBack( CVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL, this ) );
     }
     else
     {
@@ -429,23 +429,23 @@ void CMPXVideoPlaybackDisplayHandler::UpdateVideoRectL( TRect aClipRect, TBool t
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL()
+//   CVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL( TAny* aPtr )
+TInt CVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL( TAny* aPtr )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL()"));
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::UpdateVideoRectTimeOutL()"));
 
-    static_cast<CMPXVideoPlaybackDisplayHandler*>(aPtr)->CalculateVideoRectL();
+    static_cast<CVideoPlaybackDisplayHandler*>(aPtr)->CalculateVideoRectL();
 
     return KErrNone;
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
+//   CVideoPlaybackDisplayHandler::CalculateVideoRectL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
+void CVideoPlaybackDisplayHandler::CalculateVideoRectL()
 {
     iTransitionEffectCnt++;
 
@@ -454,7 +454,7 @@ void CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
                       (TInt)( (TReal32)iWindowRect.iBr.iX - iBrXDiff * (TReal32)iTransitionEffectCnt ),
                       (TInt)( (TReal32)iWindowRect.iBr.iY - iBrYDiff * (TReal32)iTransitionEffectCnt ) );
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL() %d %d %d %d"),
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::CalculateVideoRectL() %d %d %d %d"),
             windowRect.iTl.iX, windowRect.iTl.iY, windowRect.iBr.iX, windowRect.iBr.iY );
 
     SetVideoRectL( windowRect );
@@ -469,19 +469,19 @@ void CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL()
             iResizingTimer->Cancel();
         }
 
-        MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::CalculateVideoRectL() Done"));
+        MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::CalculateVideoRectL() Done"));
 
         iViewWrapper->UpdateVideoRectDone();
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetVideoRectL()
+//   CVideoPlaybackDisplayHandler::SetVideoRectL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
+void CVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetVideoRectL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SetVideoRectL()"));
 
     if ( iVideoDisplay )
     {
@@ -490,20 +490,20 @@ void CMPXVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL()
+//   CVideoPlaybackDisplayHandler::AddDisplayWindowL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScreenDevice,
+void CVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScreenDevice,
                                                          RWindowBase& aWindowBase,
                                                          RWindow* aWin )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::AddDisplayWindowL()"));
 
     iWindowBase = &aWindowBase;
 
     TInt displayId = aScreenDevice.GetScreenNumber();
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() displayId %d"), displayId);
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::AddDisplayWindowL() displayId %d"), displayId);
 
     CMediaClientVideoDisplay* tempDisplay = iVideoDisplay;
 
@@ -523,7 +523,7 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
 
     iWindowRect = cropRect;
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() cropRect (%d, %d), (%d, %d)"),
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::AddDisplayWindowL() cropRect (%d, %d), (%d, %d)"),
         cropRect.iTl.iX, cropRect.iTl.iY, cropRect.iBr.iX, cropRect.iBr.iY);
 
     MPX_TRAPD( dispError,
@@ -540,7 +540,7 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
                                       aWin );
     );
 
-    MPX_DEBUG(_L("CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL() Display Added"));
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::AddDisplayWindowL() Display Added"));
     //
     //  Check if surface was created before window was ready
     //
@@ -558,12 +558,12 @@ void CMPXVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScree
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()
+//   CVideoPlaybackDisplayHandler::SurfaceCreatedL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
+void CVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SurfaceCreatedL()"));
 
     TSurfaceId oldSurfaceId = iSurfaceId;
 
@@ -605,12 +605,12 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceChangedL()
+//   CVideoPlaybackDisplayHandler::SurfaceChangedL()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
+void CVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceChangedL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SurfaceChangedL()"));
 
     //
     //  Extract the surface parameters from the message
@@ -631,12 +631,12 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
+//   CVideoPlaybackDisplayHandler::SurfaceRemoved()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
+void CVideoPlaybackDisplayHandler::SurfaceRemoved()
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SurfaceRemoved()"));
 
     //
     // Let ControlsController know that we get the surface.
@@ -652,12 +652,12 @@ void CMPXVideoPlaybackDisplayHandler::SurfaceRemoved()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL()
+//   CVideoPlaybackDisplayHandler::SetNgaAspectRatioL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd )
+TInt CVideoPlaybackDisplayHandler::SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackDisplayHandler::SetNgaAspectRatioL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SetNgaAspectRatioL()"));
 
     TInt aspectRatio = EMMFNatural;
 

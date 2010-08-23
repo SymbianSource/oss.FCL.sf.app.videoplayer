@@ -50,11 +50,13 @@ LIBS += -lestor.dll \
     -lcone
         
 HEADERS += inc/testvideooperatorservice.h \
-    ../../../videocollectionview/inc/videooperatorservice.h
+    ../../../videocollectionview/inc/videooperatorservice.h \
+    ../../../videocollectionview/inc/videooperatorservice_p.h
 
 SOURCES += src/testvideooperatorservice.cpp \ 
     \ # sources needed in test
-    ../../../videocollectionview/src/videooperatorservice.cpp
+    ../../../videocollectionview/src/videooperatorservice.cpp \
+    ../../../tsrc/stubs/src/videooperatorservice_p.cpp
     
 TESTEDCLASS = videooperatorservice
 include(../../../tsrc/stubs/stubs.pro)

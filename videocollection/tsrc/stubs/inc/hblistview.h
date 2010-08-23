@@ -242,9 +242,7 @@ public:
      */
     void scrollTo(const QModelIndex &index)
     {
-        Q_UNUSED(index);
-        
-        // nop
+        mLatestScrollToIndex = index;
     }
     
     /**
@@ -402,6 +400,11 @@ public:
      * latest value setted in setEnabled
      */
     static bool mLatestEnableValue;
+    
+    /**
+     *  latest index setted in scrollTo
+     */
+    static QModelIndex mLatestScrollToIndex;
     
     /**
      * index value to be returned from current index 

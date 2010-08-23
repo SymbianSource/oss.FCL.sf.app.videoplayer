@@ -100,9 +100,14 @@ private slots:
     void testBack();
     
     /**
-    * Tests modelReadySlot.
-    */
-   void testModelReadySlot();
+     * Tests modelReadySlot.
+     */
+    void testModelReadySlot();
+   
+    /**
+     * Tests albumListReadySlot();
+     */
+    void testAlbumListReadySlot();
 
     /**
      * Tests deleteItemsSlot.

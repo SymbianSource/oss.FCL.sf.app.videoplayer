@@ -23,6 +23,9 @@
 #include "videooperatorservicedata.h"
 #include "videocollectionviewutils.h"
 #include "videocollectioncenrepdefs.h"
+#define private public
+#include "videooperatorservice_p.h"
+#undef private
 
 QList<QString> VideoOperatorServiceData::mTitles;
 QList<QString> VideoOperatorServiceData::mIcons;
@@ -33,19 +36,23 @@ int VideoOperatorServiceData::mLoadCallCount = 0;
 int VideoOperatorServiceData::mTitleCallCount = 0;
 int VideoOperatorServiceData::mIconResourceCallCount = 0;
 int VideoOperatorServiceData::mLaunchServiceCallCount = 0;
-int VideoOperatorServiceData::mLaunchApplicationLCallCount = 0;
 
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
 //
 VideoOperatorService::VideoOperatorService(QObject *parent) : 
-    QObject(parent)
+    QObject(parent), d_ptr(new VideoOperatorServicePrivate())
 {
-    mTitle = "";
-    mIconResource = "";
-    mServiceUri = "";
-    mApplicationUid = 0;
+}
+
+// ---------------------------------------------------------------------------
+// Destructor
+// ---------------------------------------------------------------------------
+//
+VideoOperatorService::~VideoOperatorService()
+{
+    delete d_ptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,30 +61,34 @@ VideoOperatorService::VideoOperatorService(QObject *parent) :
 //
 bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, int appUidKey)
 {
+    Q_UNUSED(titleKey);
+    Q_UNUSED(iconKey);
+    Q_UNUSED(serviceUriKey);
+    Q_UNUSED(appUidKey);
+    if(d_ptr)
+    {
+        if(!VideoOperatorServiceData::mTitles.isEmpty())
+        {
+            d_ptr->mTitle = VideoOperatorServiceData::mTitles.takeFirst();
+        }
+         
+        if(!VideoOperatorServiceData::mUris.isEmpty())
+        {
+            d_ptr->mServiceUri = VideoOperatorServiceData::mUris.takeFirst();
+        }
+        
+        if(!VideoOperatorServiceData::mIcons.isEmpty())
+        {
+            d_ptr->mIconResource = VideoOperatorServiceData::mIcons.takeFirst();
+        }        
+    }
     VideoOperatorServiceData::mLoadCallCount++;
-    
-    if(VideoOperatorServiceData::mTitles.count() > 0)
-    {
-        mTitle = VideoOperatorServiceData::mTitles.takeFirst();
-    }
-    if(VideoOperatorServiceData::mIcons.count() > 0)
-    {
-        mIconResource = VideoOperatorServiceData::mIcons.takeFirst();
-    }
-    if(VideoOperatorServiceData::mUris.count() > 0)
-    {
-        mServiceUri = VideoOperatorServiceData::mUris.takeFirst();
-    }
-    if(VideoOperatorServiceData::mUids.count() > 0)
-    {
-        mApplicationUid = VideoOperatorServiceData::mUids.takeFirst();
-    }
 
     // Icon is required, either service uri or application uid is required.
-    if(mIconResource.isEmpty() && (mServiceUri.isEmpty() || mApplicationUid > 0))
+    if(d_ptr->mIconResource.isEmpty() || (d_ptr->mServiceUri.isEmpty() && d_ptr->mApplicationUid <= 0))
     {
         return false;
-    }    
+    }
     return true;
 }
 
@@ -88,7 +99,7 @@ bool VideoOperatorService::load(int titleKey, int iconKey, int serviceUriKey, in
 const QString VideoOperatorService::title() const
 {
     VideoOperatorServiceData::mTitleCallCount++;
-    return mTitle;
+    return d_ptr->mTitle;
 }
 
 // ---------------------------------------------------------------------------
@@ -98,7 +109,7 @@ const QString VideoOperatorService::title() const
 const QString VideoOperatorService::iconResource() const
 {
     VideoOperatorServiceData::mIconResourceCallCount++;
-    return mIconResource;
+    return d_ptr->mIconResource;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,17 +119,6 @@ const QString VideoOperatorService::iconResource() const
 void VideoOperatorService::launchService()
 {
     VideoOperatorServiceData::mLaunchServiceCallCount++;
-}
-
-// ---------------------------------------------------------------------------
-// launchApplicationL
-// ---------------------------------------------------------------------------
-//
-void VideoOperatorService::launchApplicationL(const TUid uid, TInt viewId)
-{
-    Q_UNUSED(uid);
-    Q_UNUSED(viewId);
-    VideoOperatorServiceData::mLaunchApplicationLCallCount++;
 }
 
 // End of file.

@@ -257,12 +257,12 @@ private slots:
     /**
      * verifies videoListCompleteSlot
      */
-    void testListCompleteSlot();
-    
+    void testVideoListCompleteSlot();
+
     /**
-     * verifies albumListCompleteSlot;
+     * verifies albumListCompleteSlot
      */
-    void testalbumListCompleteSlot();
+    void testAlbumListCompleteSlot();
 
 private:
   

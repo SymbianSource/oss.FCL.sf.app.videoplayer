@@ -11,16 +11,16 @@
 *
 * Contributors:
 *
-* Description:  Implementation of MPXVideoPlaybackUserInputHandler
+* Description:  Implementation of VideoPlaybackUserInputHandler
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
-#ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
-#define MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
+#ifndef VIDEOPLAYBACKUSERINPUTHANDLER_H_
+#define VIDEOPLAYBACKUSERINPUTHANDLER_H_
 
 // INCLUDES
 
@@ -30,27 +30,27 @@ class CMPXVideoViewWrapper;
 
 // CLASS DECLARATION
 
-class CMPXVideoPlaybackUserInputHandler : public CBase
+class CVideoPlaybackUserInputHandler : public CBase
 {
     public: // Constructors and destructor
 
         /**
         * Two-phased constructor.
         */
-        IMPORT_C static CMPXVideoPlaybackUserInputHandler* NewL(
+        IMPORT_C static CVideoPlaybackUserInputHandler* NewL(
                 CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected );
 
         /**
         * Destructor.
         */
-        IMPORT_C virtual ~CMPXVideoPlaybackUserInputHandler();
+        IMPORT_C virtual ~CVideoPlaybackUserInputHandler();
 
     private:
 
         /**
         * C++ default constructor.
         */
-        CMPXVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper );
+        CVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper );
 
         /**
         * Symbian 2nd phase constructor.
@@ -71,6 +71,6 @@ class CMPXVideoPlaybackUserInputHandler : public CBase
 };
 
 
-#endif /*MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_*/
+#endif /*VIDEOPLAYBACKUSERINPUTHANDLER_H_*/
 
 // End of File

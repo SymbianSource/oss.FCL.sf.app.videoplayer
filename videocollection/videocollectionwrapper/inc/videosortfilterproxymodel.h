@@ -244,7 +244,6 @@ public:
     
 signals:
 
-
     /**
     * Signal to be emitted if detail fetching started ok
     * 
@@ -259,12 +258,17 @@ signals:
     void modelReady();
     
     /**
-     * notifies that model's physical data structure has changed:
+     * Notifies that model's physical data structure has changed:
      * - item inserted
      * - item removed 
      */
     void modelChanged();
  
+    /**
+     * Notifies that model has been sorted.
+     */
+    void modelSorted();
+
 protected: // from QSortFilterProxyModel
     
     /**

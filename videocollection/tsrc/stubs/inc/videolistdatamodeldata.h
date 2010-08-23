@@ -30,6 +30,7 @@ public: // methods
         mDataAccessCount = 0;
         mRowCount = 0;
         mRowCountDecrement = 0;
+        mItemId = TMPXItemId::InvalidId();
     }
     
     static QModelIndex lastIndex()
@@ -62,6 +63,7 @@ public: // data
     static int mDataAccessCount;
     static int mRowCount;
     static int mRowCountDecrement;
+    static TMPXItemId mItemId;
 };
 
 #endif /* VIDEOLISTDATAMODELDATA_H */

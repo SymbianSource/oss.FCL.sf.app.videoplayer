@@ -15,11 +15,11 @@
 *
 */
 
-// Version : %version:  7 %
+// Version : %version:  8 %
 
 
-#ifndef __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
-#define __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
+#ifndef __CVIDEOPLAYBACKDISPLAYHANDLER_H__
+#define __CVIDEOPLAYBACKDISPLAYHANDLER_H__
 
 // INCLUDES
 
@@ -37,17 +37,17 @@ class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
 
 /*
- *  CMPXVideoPlaybackDisplayHandler
+ *  CVideoPlaybackDisplayHandler
  *
  */
-class CMPXVideoPlaybackDisplayHandler : public CBase
+class CVideoPlaybackDisplayHandler : public CBase
 {
     public:
 
-        ~CMPXVideoPlaybackDisplayHandler();
+        ~CVideoPlaybackDisplayHandler();
 
-        static CMPXVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
-                                                      CMPXVideoViewWrapper* aViewWrapper );
+        static CVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
+                                                   CMPXVideoViewWrapper* aViewWrapper );
 
         void CreateDisplayWindowL( RWsSession& aWs,
                                    CWsScreenDevice& aScreenDevice,
@@ -67,8 +67,8 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
 
     private:
 
-        CMPXVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                         CMPXVideoViewWrapper* aViewWrapper );
+        CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
+                                      CMPXVideoViewWrapper* aViewWrapper );
 
         void ConstructL();
 
@@ -82,4 +82,4 @@ class CMPXVideoPlaybackDisplayHandler : public CBase
         TInt                                iCommand;
 };
 
-#endif // __CMPXVIDEOPLAYBACKDISPLAYHANDLER_H__
+#endif // __CVIDEOPLAYBACKDISPLAYHANDLER_H__

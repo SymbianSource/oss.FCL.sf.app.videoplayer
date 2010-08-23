@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#42 %
+// Version : %version: da1mmcf#43 %
 
 
 #include <QApplication>
@@ -27,7 +27,7 @@
 #include <hbview.h>
 #include <hbapplication.h>
 #include <hbactivitymanager.h>
-#include <hbdevicenotificationdialog.h>
+#include <hbnotificationdialog.h>
 
 #include "videoplayerengine.h"
 #include "videoactivitystate.h"
@@ -323,8 +323,7 @@ void VideoPlayerEngine::activateView( MpxHbVideoCommon::MpxHbVideoViewType viewT
         {
             if ( shouldExit() )
             {
-                qApp->quit();
-                XQServiceUtil::toBackground( false );             
+                serviceQuit();
             }
             else if ( shouldActivateCollectionView()  )
             {
@@ -707,7 +706,9 @@ void VideoPlayerEngine::handlePlaybackFailure(int errorCode)
             
     if ( mIsPlayService )  
     { 
-        HbDeviceNotificationDialog* dlg = new HbDeviceNotificationDialog(); 
+        HbNotificationDialog* dlg = new HbNotificationDialog();
+        
+        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( serviceQuit() ) );
         
         switch ( errorCode )
         {
@@ -739,10 +740,22 @@ void VideoPlayerEngine::handlePlaybackFailure(int errorCode)
         }
         
         dlg->show();                      
-        
-        
-        qApp->quit();
-        XQServiceUtil::toBackground( false );  
+ 
     }
 }
+
+
+// -------------------------------------------------------------------------------------------------
+// serviceQuit()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlayerEngine::serviceQuit()
+{                    
+    MPX_DEBUG(_L("VideoPlayerEngine::serviceQuit()"));     
+    
+    qApp->quit();
+    XQServiceUtil::toBackground( false );
+}
+
+
 // End of file

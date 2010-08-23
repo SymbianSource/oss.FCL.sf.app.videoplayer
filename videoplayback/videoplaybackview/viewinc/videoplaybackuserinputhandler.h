@@ -11,16 +11,16 @@
 *
 * Contributors:
 *
-* Description:  Implementation of MPXVideoPlaybackUserInputHandler
+* Description:  Implementation of VideoPlaybackUserInputHandler
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 
-#ifndef MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
-#define MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_
+#ifndef VIDEOPLAYBACKUSERINPUTHANDLER_H_
+#define VIDEOPLAYBACKUSERINPUTHANDLER_H_
 
 // INCLUDES
 #include <remconcoreapitargetobserver.h> // Side volume key
@@ -33,28 +33,28 @@ class CMPXVideoViewWrapper;
 
 // CLASS DECLARATION
 
-class CMPXVideoPlaybackUserInputHandler : public CBase,
-                                          public MRemConCoreApiTargetObserver
+class CVideoPlaybackUserInputHandler : public CBase,
+                                       public MRemConCoreApiTargetObserver
 {
     public: // Constructors and destructor
 
         /**
         * Two-phased constructor.
         */
-        static CMPXVideoPlaybackUserInputHandler* NewL(
+        static CVideoPlaybackUserInputHandler* NewL(
                 CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected );
 
         /**
         * Destructor.
         */
-        virtual ~CMPXVideoPlaybackUserInputHandler();
+        virtual ~CVideoPlaybackUserInputHandler();
 
     private:
 
         /**
         * C++ default constructor.
         */
-        CMPXVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper );
+        CVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper );
 
         /**
         * Symbian 2nd phase constructor.
@@ -147,6 +147,6 @@ class CMPXVideoPlaybackUserInputHandler : public CBase,
 };
 
 
-#endif /*MPXVIDEOPLAYBACKUSERINPUTHANDLER_H_*/
+#endif /*VIDEOPLAYBACKUSERINPUTHANDLER_H_*/
 
 // End of File

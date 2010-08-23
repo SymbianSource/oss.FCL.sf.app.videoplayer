@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 
 // INCLUDE FILES
@@ -32,7 +32,7 @@
 #include "mpxvideo_debug.h"
 #include "mpxvideoviewwrapper.h"
 #include "mpxcommonvideoplaybackview.hrh"
-#include "../inc/mpxvideoplaybackuserinputhandler.h"
+#include "../inc/videoplaybackuserinputhandler.h"
 
 
 // CONSTANTS
@@ -42,25 +42,25 @@ const TInt KMPXMicroSecondsInASecond = 1000000;
 // ======== MEMBER FUNCTIONS =======================================================================
 
 // -------------------------------------------------------------------------------------------------
-// MPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler()
+// CVideoPlaybackUserInputHandler::CVideoPlaybackUserInputHandler()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler::CMPXVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper )
+CVideoPlaybackUserInputHandler::CVideoPlaybackUserInputHandler( CMPXVideoViewWrapper* aWrapper )
    : iViewWrapper( aWrapper )
 {
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::NewL()
+// CVideoPlaybackUserInputHandler::NewL()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
+CVideoPlaybackUserInputHandler* CVideoPlaybackUserInputHandler::NewL(
         CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected )
 {
-    MPX_DEBUG(_L("CMPXVideoPlaybackUserInputHandler::NewL()"));
+    MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::NewL()"));
 
-    CMPXVideoPlaybackUserInputHandler* self =
-        new (ELeave) CMPXVideoPlaybackUserInputHandler( aWrapper );
+    CVideoPlaybackUserInputHandler* self =
+        new (ELeave) CVideoPlaybackUserInputHandler( aWrapper );
     CleanupStack::PushL( self );
     self->ConstructL( aTvOutConnected );
     CleanupStack::Pop();
@@ -68,49 +68,49 @@ CMPXVideoPlaybackUserInputHandler* CMPXVideoPlaybackUserInputHandler::NewL(
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::ConstructL
+// CVideoPlaybackUserInputHandler::ConstructL
 // Symbian 2nd phase constructor can leave.
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
+void CVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
 {
     Q_UNUSED( aTvOutConnected );
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
+// CVideoPlaybackUserInputHandler::~CVideoPlaybackUserInputHandler()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoPlaybackUserInputHandler::~CMPXVideoPlaybackUserInputHandler()
+CVideoPlaybackUserInputHandler::~CVideoPlaybackUserInputHandler()
 {
 
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoPlaybackUserInputHandler::ProcessKeyEvent()
+// CVideoPlaybackUserInputHandler::ProcessKeyEvent()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyEvent,
-                                                          TEventCode aType )
+void CVideoPlaybackUserInputHandler::ProcessKeyEventL( const TKeyEvent& aKeyEvent,
+                                                       TEventCode aType )
 {
     Q_UNUSED( aKeyEvent );
     Q_UNUSED( aType );
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::SetForeground()
+//   CVideoPlaybackUserInputHandler::SetForeground()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::SetForeground(TBool aForeground)
+void CVideoPlaybackUserInputHandler::SetForeground(TBool aForeground)
 {
     Q_UNUSED( aForeground );
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackUserInputHandler::HandleTVOutEvent()
+//   CVideoPlaybackUserInputHandler::HandleTVOutEvent()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoPlaybackUserInputHandler::HandleTVOutEventL( TBool aTVOutConnected )
+void CVideoPlaybackUserInputHandler::HandleTVOutEventL( TBool aTVOutConnected )
 {
     Q_UNUSED( aTVOutConnected );
 }

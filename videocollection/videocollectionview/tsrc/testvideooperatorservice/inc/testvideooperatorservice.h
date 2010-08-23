@@ -16,9 +16,9 @@
 */
 
 #ifndef TESTVIDEOOPERATORSERVICE_H
-#define TESTVIDEOCOLLECTIONUILOADER_H
+#define TESTVIDEOOPERATORSERVICE_H
 
-// INCLUDES
+// INCLUDE FILES
 #include <qttest/qttest>
 
 // FORWARD DECLARATIONS
@@ -39,18 +39,12 @@ private slots: // test functions for the test framework
     
 private slots:
     
-    void testLoad();
-    void testTitle();
-    void testIconResource();
-    void testLaunchService();
-    
-signals:
+    void test();
     
 private:
     /** class under test */
     VideoOperatorService *mTestObject;
-    
 
 };
 
-#endif//TESTVIDEOCOLLECTIONUILOADER_H
+#endif//TESTVIDEOOPERATORSERVICE_H

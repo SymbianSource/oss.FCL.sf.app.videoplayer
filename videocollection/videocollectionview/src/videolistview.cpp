@@ -1306,7 +1306,19 @@ void VideoListView::aboutToShowMainMenuSlot()
     showAction(false, DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS);
     showAction(false, DOCML_NAME_SORT_BY_SIZE);
     showAction(false, DOCML_NAME_SORT_MENU);
+
+    HbAction *firstAction = (HbAction*)(toolBar()->actions().first());
+
+    bool isCollectionsView = mToolbarViewsActionGroup->checkedAction() == mToolbarActions[ETBActionCollections] &&
+           firstAction == mToolbarActions[ETBActionAllVideos];
     
+    // Create collection action is shown even when there's no videos. 
+    if(isCollectionsView && !mVideoServices)
+    {
+        showAction(true, DOCML_NAME_CREATE_COLLECTION);
+    }
+    
+    //  No other actions shown if there's no videos.
     VideoSortFilterProxyModel *model = mCurrentList->getModel();
     if (!model || !model->rowCount())
     {
@@ -1318,13 +1330,10 @@ void VideoListView::aboutToShowMainMenuSlot()
     Qt::SortOrder order;
     model->getSorting(role, order);
 
-    HbAction *firstAction = (HbAction*)(toolBar()->actions().first());
-
     if(mToolbarViewsActionGroup->checkedAction() == mToolbarActions[ETBActionAllVideos] &&
        firstAction == mToolbarActions[ETBActionAllVideos])
     {
         showAction(true, DOCML_NAME_SORT_MENU);
-
         showAction(true, DOCML_NAME_SORT_BY_DATE);
         showAction(true, DOCML_NAME_SORT_BY_NAME);
         showAction(true, DOCML_NAME_SORT_BY_SIZE);
@@ -1341,13 +1350,8 @@ void VideoListView::aboutToShowMainMenuSlot()
             showAction(true, DOCML_NAME_DELETE_MULTIPLE);
         }
     }
-    else if(mToolbarViewsActionGroup->checkedAction() == mToolbarActions[ETBActionCollections] &&
-    		firstAction == mToolbarActions[ETBActionAllVideos] )
+    else if(isCollectionsView)
     {
-        if (!mVideoServices)
-        {
-            showAction(true, DOCML_NAME_CREATE_COLLECTION);
-        }
         showAction(true, DOCML_NAME_SORT_MENU);
         showAction(true, DOCML_NAME_SORT_BY_NAME);
         showAction(true, DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS);

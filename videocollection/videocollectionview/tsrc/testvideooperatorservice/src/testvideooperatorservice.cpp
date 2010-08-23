@@ -15,17 +15,17 @@
 *
 */
 
+// INCLUDE FILES
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbinstance.h>
 #include <qdebug.h>
 
 #include "testvideooperatorservice.h"
-#include "videocollectionviewutilsdata.h"
+#include "videooperatorservice_pdata.h"
 
 #define private public
 #include "videooperatorservice.h"
-#include "videooperatorservicedata.h"
 #undef private
 
 int main(int argc, char *argv[])
@@ -66,11 +66,11 @@ TestVideoOperatorService::~TestVideoOperatorService()
 // ---------------------------------------------------------------------------
 //
 void TestVideoOperatorService::init()
-{
+{    
     // create test object
     if (!mTestObject)
     {
-        mTestObject = new VideoOperatorService;
+        mTestObject = new VideoOperatorService();
     }
 }
 
@@ -88,80 +88,33 @@ void TestVideoOperatorService::cleanup()
 // TEST CASES START ----------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// testLoad
-// ---------------------------------------------------------------------------
-//
-void TestVideoOperatorService::testLoad()
-{
-    // Good case
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test title");
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test icon");
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test uri");
-    VideoCollectionViewUtilsData::mCenRepIntValues.append(5050);
-    QVERIFY(mTestObject->load(0, 0, 0, 0) == true);
-    QVERIFY(mTestObject->mTitle == "test title");
-    QVERIFY(mTestObject->mIconResource == "test icon");
-    QVERIFY(mTestObject->mServiceUri == "test uri");
-    QCOMPARE(mTestObject->mApplicationUid, 5050);
-    
-    // Only icon is defined for service.
-    VideoCollectionViewUtilsData::mCenRepStringValues.append(CENREP_NO_STRING);
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test icon");
-    QVERIFY(mTestObject->load(0, 0, 0, 0) == false);
-    QVERIFY(mTestObject->mTitle == "");
-    QVERIFY(mTestObject->mIconResource == "test icon");
-    QVERIFY(mTestObject->mServiceUri == "");
-    QCOMPARE(mTestObject->mApplicationUid, -1);
-
-    // Only icon and uri are defined for service.
-    VideoCollectionViewUtilsData::mCenRepStringValues.append(CENREP_NO_STRING);
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test icon");
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test uri");
-    QVERIFY(mTestObject->load(0, 0, 0, 0) == true);
-    QVERIFY(mTestObject->mTitle == "");
-    QVERIFY(mTestObject->mIconResource == "test icon");
-    QVERIFY(mTestObject->mServiceUri == "test uri");
-    QCOMPARE(mTestObject->mApplicationUid, -1);
-    
-    // Only icon and app uid are defined for service.
-    VideoCollectionViewUtilsData::mCenRepStringValues.append(CENREP_NO_STRING);
-    VideoCollectionViewUtilsData::mCenRepStringValues.append("test icon");
-    VideoCollectionViewUtilsData::mCenRepIntValues.append(5050);
-    QVERIFY(mTestObject->load(0, 0, 0, 0) == true);
-    QVERIFY(mTestObject->mTitle == "");
-    QVERIFY(mTestObject->mIconResource == "test icon");
-    QVERIFY(mTestObject->mServiceUri == "");
-    QCOMPARE(mTestObject->mApplicationUid, 5050);
-}
-
-// ---------------------------------------------------------------------------
-// testTitle
-// ---------------------------------------------------------------------------
-//
-void TestVideoOperatorService::testTitle()
-{
-    mTestObject->mTitle = "test title";
-    QVERIFY(mTestObject->title() == "test title");
-}
-
-// ---------------------------------------------------------------------------
-// testIconResource
-// ---------------------------------------------------------------------------
-//
-void TestVideoOperatorService::testIconResource()
-{
-    mTestObject->mIconResource = "test icon";
-    QVERIFY(mTestObject->iconResource() == "test icon");
-}
-
-// ---------------------------------------------------------------------------
 // test
 // ---------------------------------------------------------------------------
 //
-void TestVideoOperatorService::testLaunchService()
+void TestVideoOperatorService::test()
 {
-    mTestObject->mApplicationUid = 0;
+    init();
+    
+    VideoOperatorServicePrivateData::mLoadReturnValue = true;
+    QVERIFY(mTestObject->load(0, 0, 0, 0) == true);
+    VideoOperatorServicePrivateData::mLoadReturnValue = false;
+    QVERIFY(mTestObject->load(0, 0, 0, 0) == false);
+
+    VideoOperatorServicePrivateData::mTitleReturnValue = "test1";
+    QVERIFY(mTestObject->title() == QString("test1"));
+    VideoOperatorServicePrivateData::mTitleReturnValue = "test2";
+    QVERIFY(mTestObject->title() == QString("test2"));
+    
+    VideoOperatorServicePrivateData::mIconResourceReturnValue = "test3";
+    QVERIFY(mTestObject->iconResource() == QString("test3"));
+    VideoOperatorServicePrivateData::mIconResourceReturnValue = "test4";
+    QVERIFY(mTestObject->iconResource() == QString("test4"));
+    
+    VideoOperatorServicePrivateData::mLaunchServiceCallCount = 0;
     mTestObject->launchService();
+    QCOMPARE(VideoOperatorServicePrivateData::mLaunchServiceCallCount, 1);
+    
+    cleanup();
 }
 
 // end of file

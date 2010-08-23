@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  15 %
+// Version : %version:  16 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -40,7 +40,7 @@
 
 #include "../stub/inc/videobaseplaybackview.h"
 #include "../stub/inc/videoplaybackviewfiledetails.h"
-#include "../stub/inc/mpxvideoplaybackdisplayhandler.h"
+#include "../stub/inc/videoplaybackdisplayhandler.h"
 #include "../stub/inc/videoplaybackcontrolscontroller.h"
 
 

@@ -250,6 +250,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
     
     VideoSortFilterProxyModelData::reset();
     
@@ -273,6 +275,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
         
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
@@ -300,6 +304,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(!VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
     
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
@@ -327,7 +333,9 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(!VideoSortFilterProxyModelData::mGenericFilterValue);
-    
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
+   
     // No data. type ECreateCollection:. Default mpx item 
     setRowCount(0);
     mpxId = TMPXItemId();
@@ -350,6 +358,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(!VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
 
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
@@ -377,6 +387,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
     
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);    
@@ -404,7 +416,9 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
-    
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
+   
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoSortFilterProxyModelData::reset();
@@ -430,7 +444,9 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
-    
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
+   
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoSortFilterProxyModelData::reset();
@@ -456,7 +472,9 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);  
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
-    
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
+   
     VideoSortFilterProxyModelData::reset();
     // some data, second initialization without widget and model, for coverity
     delete mTestObject->mListWidget;
@@ -482,6 +500,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mSecondaryAction != 0);  
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterId == mpxId);
     QVERIFY(VideoSortFilterProxyModelData::mGenericFilterValue);
+    QVERIFY(mTestObject->mModelReady == false);
+    QVERIFY(mTestObject->mAlbumListReady == false);
 }
 
 // ---------------------------------------------------------------------------
@@ -569,11 +589,45 @@ void TestVideoListSelectionDialog::testExec()
     
     // empty model row count
     setRowCount(0);
+    mTestObject->mTypeOfSelection = VideoListSelectionDialog::EDeleteVideos;
+    mTestObject->mModelReady = true;
+    mTestObject->mAlbumListReady = false;
     mTestObject->exec();
     QVERIFY(VideoCollectionViewUtilsData::mLastError == VideoCollectionCommon::statusDeleteInProgress);
     QCOMPARE(HbDialog::openAmount, 0);
     QCOMPARE(HbInputDialog::mOpenCallCount, 0);
     VideoCollectionViewUtilsData::mLastError = -1;
+    
+    // empty model row count, mModelReady is false.
+    mTestObject->mModelReady = false;
+    mTestObject->mAlbumListReady = true;
+    mTestObject->exec();
+    QVERIFY(VideoCollectionViewUtilsData::mLastError == -1);
+    QCOMPARE(HbDialog::openAmount, 0);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
+    VideoCollectionViewUtilsData::mLastError = -1;
+    
+    // empty model row count, type is ESelectCollection
+    mTestObject->mTypeOfSelection = VideoListSelectionDialog::ESelectCollection;
+    mTestObject->mSelectedAlbumId = TMPXItemId(1,0);
+    mTestObject->mModelReady = false;
+    mTestObject->mAlbumListReady = true;
+    mTestObject->exec();
+    QVERIFY(VideoCollectionViewUtilsData::mLastError == VideoCollectionCommon::statusVideosAddedToCollection);
+    QCOMPARE(HbDialog::openAmount, 0);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
+    VideoCollectionViewUtilsData::mLastError = -1;
+    
+    // empty model row count, mAlbumListReady is false, type is ESelectCollection
+    mTestObject->mTypeOfSelection = VideoListSelectionDialog::ESelectCollection;
+    mTestObject->mModelReady = true;
+    mTestObject->mAlbumListReady = false;
+    mTestObject->exec();
+    QVERIFY(VideoCollectionViewUtilsData::mLastError == -1);
+    QCOMPARE(HbDialog::openAmount, 0);
+    QCOMPARE(HbInputDialog::mOpenCallCount, 0);
+    VideoCollectionViewUtilsData::mLastError = -1;
+    mTestObject->mTypeOfSelection = VideoListSelectionDialog::EDeleteVideos;
     
     // model contains data
     setRowCount(10);
@@ -612,6 +666,8 @@ void TestVideoListSelectionDialog::testFinishedSlot()
     
     TMPXItemId mpxId = TMPXItemId(1, KVcxMvcMediaTypeAlbum);
     mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, mpxId);
+    mTestObject->mModelReady = true;
+    mTestObject->mAlbumListReady = true;
     // finished with secondary action
     VideoCollectionViewUtilsData::mLastError = -1;
     HbDialog::execReturnPrimary = false;
@@ -940,25 +996,60 @@ void TestVideoListSelectionDialog::testModelReadySlot()
 
     mTestHelper->mTestable = mTestObject;
     mTestHelper->connectSignals();
-    mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, TMPXItemId(1,2));
-    
-    mTestObject->mPrimaryAction->mTriggeredCount = 0;
-    
-    // type of selection != ESelectCollection    
-    mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 0);    
-    
     mTestObject->setupContent(VideoListSelectionDialog::ESelectCollection, TMPXItemId(1,2));
-    // no items in model
-    setRowCount(0);
-    mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 1);    
     
     mTestObject->mPrimaryAction->mTriggeredCount = 0;
-    setRowCount(10);
-    // type of selection is ESelectCollection and there are items in model
+    setRowCount(0);
+    VideoCollectionViewUtilsData::mLastError = -1;
+    
+    // type of selection == ESelectCollection    
     mTestHelper->emitModelReadySlot();
-    QVERIFY(mTestObject->mPrimaryAction->mTriggeredCount == 0);   
+    QVERIFY(VideoCollectionViewUtilsData::mLastError == -1);
+    
+    //////////////////////////
+    // Tests with empty model.
+    
+    // type EDeleteVideos
+    mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, TMPXItemId(1,2));
+    mTestHelper->emitModelReadySlot();
+    QVERIFY(VideoCollectionViewUtilsData::mLastError == VideoCollectionCommon::statusDeleteInProgress);
+    
+    // type EAddToCollection
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->setupContent(VideoListSelectionDialog::EAddToCollection, TMPXItemId(1,2));
+    mTestHelper->emitModelReadySlot();
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 1);
+    
+    // type ERemoveFromCollection
+    mTestObject->mPrimaryAction->mTriggeredCount = 0;
+    mTestObject->setupContent(VideoListSelectionDialog::ERemoveFromCollection, TMPXItemId(1,2));
+    mTestHelper->emitModelReadySlot();
+    QCOMPARE(mTestObject->mPrimaryAction->mTriggeredCount, 1);
+    
+    //////////////////////////
+    // Tests with items in model.
+    setRowCount(10);
+    QModelIndex index = mModel->index(5, 0);
+    
+    // type ECreateCollection, dialog hidden
+    mTestObject->setupContent(VideoListSelectionDialog::ECreateCollection, TMPXItemId::InvalidId());
+    mTestObject->hide();
+    HbListView::mLatestScrollToIndex = index;
+    mTestHelper->emitModelReadySlot();
+    QCOMPARE(HbListView::mLatestScrollToIndex, index);
+    
+    // type EDeleteVideos, dialog hidden.
+    mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, TMPXItemId(1,2));
+    mTestObject->hide();
+    mTestHelper->emitModelReadySlot();
+    QCOMPARE(HbListView::mLatestScrollToIndex, mModel->index(0, 0));
+    
+    // type EDeleteVideos, dialog visible.
+    mTestObject->setupContent(VideoListSelectionDialog::EDeleteVideos, TMPXItemId(1,2));
+    HbListView::mLatestScrollToIndex = index;
+    mTestObject->setVisible(true);
+    mTestHelper->emitModelReadySlot();
+    QCOMPARE(HbListView::mLatestScrollToIndex, index);
     
     mTestHelper->disconnectSignals();
 }

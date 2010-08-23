@@ -31,7 +31,7 @@
 #include "mpxvideoviewwrapper.h"
 
 #define private public
-#include "mpxvideoplaybackdisplayhandler.h"
+#include "videoplaybackdisplayhandler.h"
 #undef private
 
 
@@ -65,10 +65,10 @@ void TestVideoDisplayHandler::init()
 {
     mPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
 
-	  mBaseVideoView    = new VideoBasePlaybackView();
-	  mVideoViewWrapper = CMPXVideoViewWrapper::NewL( mBaseVideoView );
+    mBaseVideoView    = new VideoBasePlaybackView();
+    mVideoViewWrapper = CMPXVideoViewWrapper::NewL( mBaseVideoView );
 
-    mDispHdlr = CMPXVideoPlaybackDisplayHandler::NewL(mPlaybackUtility, mVideoViewWrapper);
+    mDispHdlr = CVideoPlaybackDisplayHandler::NewL(mPlaybackUtility, mVideoViewWrapper);
 }
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 34 %
+// Version : %version: 35 %
 
 // INCLUDE FILES
 #include <mpxmediageneraldefs.h>
@@ -458,9 +458,11 @@ void VideoCollectionListener::handleMyVideosItemsChanged(CMPXMessage* aMessage)
             INFO("VideoCollectionListener::handleMyVideosItemsChanged EMPXItemModified");
             // Inform that item data has changed.
             mSignalReceiver.itemModifiedSlot(itemId);
-            // Update category contents.
-            if(itemId.iId2 == KVcxMvcMediaTypeAlbum ||
-               itemId.iId2 == KVcxMvcMediaTypeCategory)
+            // Update contents for albums and captured and downloads categories.
+            if( itemId.iId2 == KVcxMvcMediaTypeAlbum ||
+               (itemId.iId2 == KVcxMvcMediaTypeCategory &&
+               (itemId.iId1 == KVcxMvcCategoryIdCaptured ||
+                itemId.iId1 == KVcxMvcCategoryIdDownloads)) )
             {
                 INFO("VideoCollectionListener::handleMyVideosItemsChanged album or category modified, opening.");
                 mCollectionClient.openItem(itemId);

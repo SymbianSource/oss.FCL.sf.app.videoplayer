@@ -337,7 +337,6 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentVideosL( TUint32 aAlbumId, CMPXMedi
             rootCondition.AddRelationConditionL( *iContainsRelationDef );
 
     CMdELogicCondition& leftCondition = relationCondition.LeftL();
-    CMdELogicCondition& rightCondition = relationCondition.RightL();
 
     //...left side is an album...
     leftCondition.AddObjectConditionL( *iAlbumObjectDef );
