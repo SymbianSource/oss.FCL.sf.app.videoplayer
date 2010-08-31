@@ -185,6 +185,12 @@ NONSHARABLE_CLASS(CVcxMyVideosAlbums) : public CBase, public MVcxMyVideosMdsAlbu
          * @param aMdsId  MDS ID of the changed video.
          */
         void VideoTitleChangedL( TUint32 aMdsId );
+
+        /**
+         * Called when multiple videos are added or removed from cache. Adds changed
+         * album indexes to iChangedAlbums.
+         */
+        void VideosAddedOrRemovedFromCacheL( RArray<TUint32> aMdsIds );
         
         /**
          * Called when video is added or removed from cache. Adds changed

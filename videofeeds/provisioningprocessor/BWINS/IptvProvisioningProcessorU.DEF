@@ -1,5 +1,0 @@
-EXPORTS
-	?ExternalProvisionL@CIptvProvisioningProcessor@@QAEPAVCIptvServices@@AAVRFile@@AAH@Z @ 1 NONAME ; class CIptvServices * CIptvProvisioningProcessor::ExternalProvisionL(class RFile &, int &)
-	?LocalProvisionL@CIptvProvisioningProcessor@@QAEPAVCIptvServices@@ABVTDesC16@@AAH@Z @ 2 NONAME ; class CIptvServices * CIptvProvisioningProcessor::LocalProvisionL(class TDesC16 const &, int &)
-	?NewL@CIptvProvisioningProcessor@@SAPAV1@XZ @ 3 NONAME ; class CIptvProvisioningProcessor * CIptvProvisioningProcessor::NewL(void)
-

@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 16 %
+// Version : %version: ou1cpsw#18 %
 
 
 
@@ -39,7 +39,6 @@ SOURCE          mpxvideoplaybackstate.cpp
 SOURCE          mpxvideoplaybackmode.cpp
 SOURCE          mpxvideofiledetails.cpp
 SOURCE          mpxvideoseeker.cpp
-SOURCE          mpxvideodlmgrif.cpp
 SOURCE          mpxvideoaccessoryobserver.cpp
 SOURCE          mpxvideoplayerutility.cpp
 SOURCE          mpxvideodrmhelper.cpp
@@ -56,6 +55,8 @@ USERINCLUDE     ../../../inc
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom
 
+SMPSAFE
+
 LIBRARY  apgrfx.lib
 LIBRARY  apmime.lib
 LIBRARY  ecom.lib
@@ -67,7 +68,6 @@ LIBRARY  mpxcommon.lib
 LIBRARY  estor.lib
 LIBRARY  flogger.lib
 LIBRARY  playbackhelper.lib
-LIBRARY  downloadmgr.lib
 LIBRARY  platformenv.lib
 LIBRARY  etel.lib
 LIBRARY  etelmm.lib
@@ -84,7 +84,5 @@ LIBRARY  thumbnailmanager.lib
 LIBRARY accclient.lib
 LIBRARY accpolicy.lib
 #endif
-
-MACRO    USE_S60_DOWNLOAD_MANAGER
 
 // End of File

@@ -1,4 +1,4 @@
-/*TYPE TESTCLASS*//*
+/*
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
@@ -32,7 +32,6 @@ DEFFILE         VCXMyVideosCollectionPluginTest.def
 
 USERINCLUDE     ../inc
 USERINCLUDE		../../../inc
-USERINCLUDE     ../../../../../tsrc/VCXTestCommon/inc
 
 SYSTEMINCLUDE /Epoc32/include/ecom
 APP_LAYER_SYSTEMINCLUDE
@@ -42,10 +41,11 @@ SOURCEPATH      ../src
 SOURCE          VCXMyVideosCollectionPluginTest.cpp
 SOURCE          VCXMyVideosCollectionPluginTestBlocks.cpp
 SOURCE          VCXMyVideosCollectionPluginTester.cpp
-SOURCE          VCXMyVideosTestDlWatcher.cpp
-SOURCE          VCXMyVideosTestServiceEmu.cpp
 SOURCE          VCXTestMdsDbModifier.cpp
 SOURCE          VCXMyVideosTestTransactions.cpp
+SOURCE          VCXMyVideosTestUtils.cpp
+SOURCE           CVcxTestTimer.cpp
+SOURCE          CVcxTestActiveWait.cpp
 
 //RESOURCE        resource_file
 //RESOURCE        resource_file2
@@ -55,7 +55,6 @@ LIBRARY         mpxcommon.lib
 LIBRARY         mpxcollectionutility.lib
 LIBRARY         estor.lib
 LIBRARY         stiftestinterface.lib
-LIBRARY         VCXTestCommon.lib
 LIBRARY         FLOGGER.lib
 LIBRARY         efsrv.lib
 LIBRARY         bafl.lib

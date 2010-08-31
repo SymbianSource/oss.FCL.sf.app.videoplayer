@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 4 %
+// Version : %version: 3 %
 
 
 
@@ -347,13 +347,15 @@ HBufC8* CMPSettingsRopConfigParser::CreateConfigEntryL(CMPRopSettingItem* aItem)
         case EMPRopConfTypeString:
             {
             HBufC* str = aItem->iStringValue;
-            HBufC8* str8 = CnvUtfConverter::ConvertFromUnicodeToUtf8L( *str );
-            CleanupStack::PushL( str8 );
-            TInt str8Length = str8->Length();
-            buf = HBufC8::NewL(aItem->iKey->Length() + str8Length + KMPRopStringEntryPrototypeStaticLength);
+            TInt strLength = str->Length();
+            HBufC8* str8 = HBufC8::NewLC(strLength);
+            TPtr8 str8Ptr = str8->Des();
+            CnvUtfConverter::ConvertFromUnicodeToUtf8(str8Ptr, *str);
+            
+            buf = HBufC8::NewL(aItem->iKey->Length() + strLength + KMPRopStringEntryPrototypeStaticLength);
             TPtr8 ptr = buf->Des();
             ptr.Format(KMPRopStringEntryPrototype, aItem->iKey, &(*str8));
-            CleanupStack::PopAndDestroy( str8 );
+            CleanupStack::PopAndDestroy(); //str8
             break;
             }
         default:

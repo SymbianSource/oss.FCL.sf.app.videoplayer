@@ -136,17 +136,7 @@ void CVcxMyVideosAsyncFileOperations::DeleteVideoL( TUint32 aMdsId, TBool aForce
     
     MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: trying to delete: %S",
             &videoInCache->ValueText( KMPXMediaGeneralUri ));
-    
-    TUint attr ( 0 ); 
-    TPtrC fileName = videoInCache->ValueText( KMPXMediaGeneralUri );
-    
-    iCollection.iFs.Att( fileName, attr );
-    if ( attr & KEntryAttReadOnly )
-        {
-        iCollection.iFs.SetAtt( fileName, 0, KEntryAttReadOnly );
-        }
-    
-    TInt err = iCollection.iFs.Delete( fileName );
+    TInt err = iCollection.iFs.Delete( videoInCache->ValueText( KMPXMediaGeneralUri ) );
         
     if ( err != KErrNone )
         {

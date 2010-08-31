@@ -1,8 +1,0 @@
-EXPORTS
-	?LibEntryL@@YAPAVCScriptBase@@AAVCTestModuleIf@@@Z @ 1 NONAME ; class CScriptBase * LibEntryL(class CTestModuleIf &)
-	?NewL@MMPXCollectionUtility@@SAPAV1@PAVMMPXCollectionObserver@@ABVTUid@@@Z @ 2 NONAME ; class MMPXCollectionUtility * MMPXCollectionUtility::NewL(class MMPXCollectionObserver *, class TUid const &)
-	?UtilityL@MMPXViewUtility@@SAPAV1@XZ @ 3 NONAME ; class MMPXViewUtility * MMPXViewUtility::UtilityL(void)
-	?UtilityL@MMPXPlaybackUtility@@SAPAV1@W4TMPXCategory@@ABVTUid@@@Z @ 4 NONAME ; class MMPXPlaybackUtility * MMPXPlaybackUtility::UtilityL(enum TMPXCategory, class TUid const &)
-	?FileExists@ConeUtils@@SAHABVTDesC16@@@Z @ 5 NONAME ; int ConeUtils::FileExists(class TDesC16 const &)
-	?SetAutoPlay@CMPXCollectionPlaylist@@QAEXH@Z @ 6 NONAME ; void CMPXCollectionPlaylist::SetAutoPlay(int)
-
