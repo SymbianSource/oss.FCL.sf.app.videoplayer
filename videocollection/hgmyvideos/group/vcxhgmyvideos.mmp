@@ -1,0 +1,115 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   vcxhgmyvideos.dll build file*
+*/
+
+
+// Version : %version: 31 %
+
+#include <platform_paths.hrh>
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET                  vcxhgmyvideos.dll
+TARGETTYPE              dll
+UID                     0x00000000 0x20021191
+
+CAPABILITY              CAP_GENERAL_DLL -AllFiles
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+SOURCE                  vcxhgmyvideosmainview.cpp
+SOURCE                  vcxhgmyvideosmainviewcontainer.cpp
+SOURCE                  vcxhgmyvideosmodel.cpp 
+SOURCE                  vcxhgmyvideoscollectionclient.cpp
+SOURCE                  vcxhgmyvideosdownloadclient.cpp
+SOURCE                  vcxhgmyvideoslistbase.cpp
+SOURCE                  vcxhgmyvideoscategorylistimpl.cpp
+SOURCE                  vcxhgmyvideoscategorymodelhandler.cpp 
+SOURCE                  vcxhgmyvideosvideolistimpl.cpp
+SOURCE                  vcxhgmyvideosvideomodelhandler.cpp 
+SOURCE                  vcxhgmyvideosvideodataupdater.cpp
+SOURCE                  vcxhgmyvideosvideodata.cpp
+SOURCE                  vcxhgmyvideosvideolistitem.cpp
+SOURCE                  vcxhgmyvideosfulldrminfo.cpp
+SOURCE                  vcxhgmyvideosmemorystatus.cpp
+SOURCE                  vcxhgmyvideosindicatorhelper.cpp
+SOURCE                  vcxhgmyvideosvideodetailsdialog.cpp
+SOURCE                  vcxhgmyvideosvideolist.cpp
+SOURCE                  vcxhgmyvideosvideocopier.cpp
+SOURCE                  vcxhgmyvideosupnpinterface.cpp
+#ifdef RD_VIDEO_AS_RINGING_TONE 
+SOURCE                  vcxhgmyvideosaiwmenuhandler.cpp
+#endif
+SOURCE                  vcxhgmyvideosthumbnailmanager.cpp
+SOURCE                  CIptvResourceLoader.cpp
+SOURCE                  CIptvDriveMonitor.cpp
+SOURCE                  TIptvDriveInfo.cpp
+SOURCE                  TIptvDriveMonitorEvent.cpp
+
+USERINCLUDE             ../inc
+USERINCLUDE    ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+START RESOURCE          ../data/vcxhgmyvideos.rss
+HEADER
+TARGETPATH              APP_RESOURCE_DIR
+#ifdef WINSCW
+LANG sc 01 02 03
+#else
+LANGUAGE_IDS
+#endif
+END // RESOURCE
+
+LIBRARY                 euser.lib
+LIBRARY                 apparc.lib
+LIBRARY                 cone.lib
+LIBRARY                 eikctl.lib             
+LIBRARY                 eikcoctl.lib
+LIBRARY                 eikcore.lib  
+LIBRARY                 egul.lib 
+LIBRARY                 avkon.lib
+LIBRARY                 aknicon.lib         
+LIBRARY                 bafl.lib                  // CDesCArray 
+LIBRARY                 commonengine.lib          // String loader
+LIBRARY                 flogger.lib               // RFileLogger
+LIBRARY                 hlplch.lib                // HlpLauncher
+LIBRARY                 efsrv.lib
+LIBRARY                 ws32.lib                  // RWsSession
+LIBRARY                 estor.lib
+LIBRARY                 aknskins.lib
+LIBRARY                 mpxcommon.lib             // MPX
+LIBRARY                 mpxcollectionutility.lib  // MPX
+LIBRARY                 commondialogs.lib         // Memory selection dialog
+LIBRARY                 drmhelper.lib             // DRM
+LIBRARY                 centralrepository.lib	  // Upnp
+LIBRARY                 thumbnailmanager.lib      // CThumbnailManager
+LIBRARY                 caf.lib                   // CAF
+LIBRARY                 cafutils.lib              // CAF Utils
+LIBRARY                 sendui.lib                // For send video
+LIBRARY                 drmutility.lib            // DRM
+LIBRARY                 playbackhelper.lib        // Recognizer
+LIBRARY                 upnpcommand.lib
+LIBRARY                 ganes.lib                 // for HgList
+LIBRARY                 ecom.lib
+LIBRARY                 apgrfx.lib                // RApaLsSession
+#ifdef RD_VIDEO_AS_RINGING_TONE
+LIBRARY                 servicehandler.lib        // AIW Service Handler
+#endif
+LIBRARY                 platformenv.lib
+LIBRARY                 fbscli.lib                // CFbsBitmap

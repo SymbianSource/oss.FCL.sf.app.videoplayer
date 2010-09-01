@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Project specification file for view message utility.*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include "../inc/vcxviewmessageutility.hrh"
+
+TARGET          vcxviewmessageutility.dll
+TARGETTYPE      dll
+UID             0x1000008d KVcxViewMessageUtilityDllUid
+
+CAPABILITY      CAP_GENERAL_DLL
+
+SOURCEPATH      ../src
+
+SOURCE          vcxviewmessageutility.cpp
+
+USERINCLUDE     . 
+USERINCLUDE     ../inc
+USERINCLUDE     ../../utils/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         cone.lib
+LIBRARY         flogger.lib

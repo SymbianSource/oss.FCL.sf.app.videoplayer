@@ -1,0 +1,95 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project VideoPlaybackViewControlsTest.
+*
+*/
+
+// Version : %version: e003sa33#10 %
+
+
+
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+EPOCALLOWDLLDATA
+
+TARGET          ui_videoplaybackcontrolstest.dll
+TARGETTYPE      dll
+UID             0x1000008D 0x101FB3E3
+
+CAPABILITY      ALL -TCB
+
+APP_LAYER_SYSTEMINCLUDE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../../inc
+USERINCLUDE     ../../../../../inc
+
+SOURCEPATH      ../src
+SOURCE          videoplaybackcontrolstest.cpp
+SOURCE          videoplaybackcontrolstestblocks.cpp
+SOURCE          mpxvpbc_stub.cpp
+SOURCE          mpxvpbvfd_stub.cpp
+SOURCE          mpxvpbuih_stub.cpp
+
+SOURCEPATH      ../../../src
+SOURCE          mpxvideoplaybackcontrol.cpp
+SOURCE          mpxvideoplaybackcontrolpolicy.cpp
+SOURCE          mpxvideoplaybackcontrolconfiguration.cpp
+SOURCE          mpxvideoplaybackcontrolscontroller.cpp
+SOURCE          mpxvideoplaybackbutton.cpp
+SOURCE          mpxvideoplaybackbuttonbar.cpp
+SOURCE          mpxvideoplaybackvolumebar.cpp
+SOURCE          mpxvideoplaybackprogressbar.cpp
+SOURCE          mpxvideoplaybackcontrolpdl.cpp
+SOURCE          mpxvideoplaybackaspectratioicon.cpp
+SOURCE          mpxvideoplaybackbrandinganimation.cpp
+SOURCE          mpxvideoplaybackmediadetailsviewer.cpp
+
+LIBRARY         ws32.lib
+LIBRARY         euser.lib
+LIBRARY         cone.lib
+LIBRARY         stiftestinterface.lib
+LIBRARY         stiftestengine.lib
+LIBRARY         avkon.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikctl.lib
+LIBRARY         apgrfx.lib
+LIBRARY         aknskins.lib 
+LIBRARY         bafl.lib
+LIBRARY         aknskinsrv.lib
+LIBRARY         eikcore.lib
+LIBRARY         cdlengine.lib
+LIBRARY         estor.lib
+LIBRARY         aknicon.lib
+LIBRARY         bitgdi.lib
+LIBRARY         fbscli.lib
+LIBRARY         commonengine.lib 
+LIBRARY         efsrv.lib
+LIBRARY         gdi.lib
+LIBRARY         AknLayout2Scalable.lib
+LIBRARY         aknlayout2.lib
+LIBRARY         egul.lib
+LIBRARY         touchfeedback.lib
+LIBRARY         bmpanim.lib
+LIBRARY         flogger.lib
+LIBRARY         playbackhelper.lib
+LIBRARY         RemConInterfaceBase.lib
+LIBRARY         RemConCoreApi.lib
+LIBRARY         ecom.lib
+LIBRARY         inetprotutil.lib
+
+// End of File

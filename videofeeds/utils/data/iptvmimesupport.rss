@@ -1,0 +1,223 @@
+/*
+* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource definitions for project Iptv Util*
+*/
+
+
+#include "iptvmimesupporttypes.rh"
+
+NAME    VCTF
+
+RESOURCE RSS_SIGNATURE {}
+
+// ---------------------------------------------------------------------------
+// r_sup_mime_type_list
+// 
+// ---------------------------------------------------------------------------
+//
+RESOURCE IPTV_SUP_MIME_TYPE_LIST r_sup_mime_type_list
+    {
+    version = 1;
+    types =
+        {
+        IPTV_MIME_TYPE_ITEM    /* item video/x-flv */
+            {
+            mimeType = "video/x-flv";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+        IPTV_MIME_TYPE_ITEM    /* item video/mp4 */
+            {
+            mimeType = "video/mp4";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/mpeg4 */
+            {
+            mimeType = "video/mpeg4";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/m4v */
+            {
+            mimeType = "video/m4v";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/x-m4v */
+            {
+            mimeType = "video/x-m4v";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/3gpp */
+            {
+            mimeType = "video/3gpp";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/3gp */
+            {
+            mimeType = "video/3gp";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/3gpp2 */
+            {
+            mimeType = "video/3gpp2";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/vnd.rn-realvideo */
+            {
+            mimeType = "video/vnd.rn-realvideo";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item application/vnd.rn-realmedia */
+            {
+            mimeType = "application/vnd.rn-realmedia";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/vnd.objectvideo */
+            {
+            mimeType = "video/vnd.objectvideo";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item application/vnd.oma.drm.message */
+            {
+            mimeType = "application/vnd.oma.drm.message";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item application/vnd.oma.drm.content */
+            {
+            mimeType = "application/vnd.oma.drm.content";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/windows media */
+            {
+            mimeType = "video/x-ms-wm";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/windows media video */
+            {
+            mimeType = "video/x-ms-wmv";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item video/advanced systems format */
+            {
+            mimeType = "video/x-ms-asf";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+            
+        IPTV_MIME_TYPE_ITEM    /* for avi */
+            {
+            mimeType = "video/msvideo";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+            
+        IPTV_MIME_TYPE_ITEM    /* for avi */
+            {
+            mimeType = "video/x-msvideo";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+            
+        IPTV_MIME_TYPE_ITEM    /* for avi */
+            {
+            mimeType = "video/avi";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+            
+                       
+        IPTV_MIME_TYPE_ITEM    /* for mp4 content */
+            {
+            mimeType = "video/quicktime";
+            maxBitrate = 768;
+            maxScreensizeH = 1024;
+            maxScreensizeV = 768;
+            maxFramerate = 30;
+            },
+
+        IPTV_MIME_TYPE_ITEM    /* item application/sdp */
+            {
+            mimeType = "application/sdp";
+            maxBitrate = 768;
+            maxScreensizeH = 320;
+            maxScreensizeV = 240;
+            maxFramerate = 30;
+            }
+        };
+    }

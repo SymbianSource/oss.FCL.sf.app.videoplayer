@@ -337,6 +337,7 @@ void CVcxMyVideosMdsAlbums::DoGetAlbumContentVideosL( TUint32 aAlbumId, CMPXMedi
             rootCondition.AddRelationConditionL( *iContainsRelationDef );
 
     CMdELogicCondition& leftCondition = relationCondition.LeftL();
+    CMdELogicCondition& rightCondition = relationCondition.RightL();
 
     //...left side is an album...
     leftCondition.AddObjectConditionL( *iAlbumObjectDef );
@@ -445,11 +446,6 @@ void CVcxMyVideosMdsAlbums::Media2ObjectL(
     // TITLE (NAME)
     if ( aAlbum.IsSupported( KMPXMediaGeneralTitle ) )
         {
-        if ( TVcxMyVideosCollectionUtil::Title( aAlbum ).Length() > KVcxMvcMaxTitleLength )
-            {
-            User::Leave( KErrArgument );
-            }
-        
         if ( aObject.Property( *iMdsDb.iTitlePropertyDef, property, 0 ) != KErrNotFound )
             {
             static_cast<CMdETextProperty*>(property)->SetValueL(

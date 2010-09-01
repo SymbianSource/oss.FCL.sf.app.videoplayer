@@ -1,0 +1,11 @@
+EXPORTS
+	_ZN22CVcxViewMessageUtility12AddObserverLER23MVcxViewMessageObserver @ 1 NONAME
+	_ZN22CVcxViewMessageUtility14RemoveObserverER23MVcxViewMessageObserver @ 2 NONAME
+	_ZN22CVcxViewMessageUtility22SendCustomViewMessageLE4TUidRK6TDesC8 @ 3 NONAME
+	_ZN22CVcxViewMessageUtility9InstanceLEv @ 4 NONAME
+	_ZN22CVcxViewMessageUtilityD0Ev @ 5 NONAME
+	_ZN22CVcxViewMessageUtilityD1Ev @ 6 NONAME
+	_ZN22CVcxViewMessageUtilityD2Ev @ 7 NONAME
+	_ZTI22CVcxViewMessageUtility @ 8 NONAME ; #<TI>#
+	_ZTV22CVcxViewMessageUtility @ 9 NONAME ; #<VT>#
+

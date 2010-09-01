@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: ou1cpsw#5 %
+// Version : %version: ou1cpsw#3 %
 
 
 
@@ -40,10 +40,10 @@
 #else
     #ifdef _MPX_FILE_LOGGING_
         #define FU_DEBUG MPXDebug::FileLog
-    #else
+    #else        
         #define FU_DEBUG
     #endif
-#endif
+#endif 
 
 
 class MPXDebug
@@ -53,7 +53,7 @@ class MPXDebug
         {
             VA_LIST list;
             VA_START(list,aFmt);
-            RFileLogger::WriteFormat( _L("Fusion"),
+            RFileLogger::WriteFormat( _L("Fusion"), 
                                       _L("fusion.log"),
                                       EFileLoggingModeAppend,
                                       aFmt,
@@ -76,16 +76,16 @@ class MPXDebug
 class TFusionLog : public TDes16Overflow
 {
     public:
-
+        
         inline static void FusionLog( TRefByValue<const TDesC16> aFmt, ... )
         {
-            TBuf< 496 > buffer;
-
+            TBuf< 512 > buffer;
+            
             VA_LIST list;
             VA_START( list, aFmt );
             buffer.AppendFormatList( aFmt, list );
             VA_END(list);
-
+            
             FU_DEBUG(_L("#Fu# %S"), &buffer );
         }
 };
@@ -93,7 +93,7 @@ class TFusionLog : public TDes16Overflow
 class TEnterExitLog : public TDes16Overflow
 {
     public:
-
+        
         void Overflow(TDes16& /*aDes*/)
         {
             FU_DEBUG(_L("%S Logging Overflow"), &iFunctionName);
@@ -103,40 +103,40 @@ class TEnterExitLog : public TDes16Overflow
                        TRefByValue<const TDesC> aFmt, ... )
         {
             iFunctionName = HBufC::New( TDesC(aFunctionName).Length() );
-
+            
             if ( iFunctionName )
             {
                 iFunctionName->Des().Copy(aFunctionName);
             }
-
-            TBuf< 496 > buffer;
-
+            
+            TBuf< 512 > buffer;
+            
             VA_LIST list;
             VA_START( list, aFmt );
             buffer.AppendFormatList( aFmt, list, this );
             VA_END(list);
-
+            
             FU_DEBUG(_L("#Fu# --> %S %S"), iFunctionName, &buffer );
         }
-
+        
         TEnterExitLog( TRefByValue<const TDesC> aFunctionName )
         {
             iFunctionName = HBufC::New( TDesC(aFunctionName).Length() );
-
+            
             if ( iFunctionName )
             {
                 iFunctionName->Des().Copy(aFunctionName);
             }
-
+            
             FU_DEBUG(_L("#Fu# --> %S"), iFunctionName );
         }
-
+        
         ~TEnterExitLog()
         {
             FU_DEBUG(_L("#Fu# <-- %S"), iFunctionName );
             delete iFunctionName;
         }
-
+        
     private:
         HBufC*    iFunctionName;
 };

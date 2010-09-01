@@ -1,0 +1,13 @@
+EXPORTS
+	??0CVcxNsScheduleView@@IAE@VTUid@@@Z @ 1 NONAME ; CVcxNsScheduleView::CVcxNsScheduleView(class TUid)
+	??1CVcxNsScheduleView@@UAE@XZ @ 2 NONAME ; CVcxNsScheduleView::~CVcxNsScheduleView(void)
+	?ConstructL@CVcxNsScheduleView@@IAEXXZ @ 3 NONAME ; void CVcxNsScheduleView::ConstructL(void)
+	?DoActivateL@CVcxNsScheduleView@@MAEXABVTVwsViewId@@VTUid@@ABVTDesC8@@@Z @ 4 NONAME ; void CVcxNsScheduleView::DoActivateL(class TVwsViewId const &, class TUid, class TDesC8 const &)
+	?DoDeactivate@CVcxNsScheduleView@@MAEXXZ @ 5 NONAME ; void CVcxNsScheduleView::DoDeactivate(void)
+	?DynInitMenuPaneL@CVcxNsScheduleView@@MAEXHPAVCEikMenuPane@@@Z @ 6 NONAME ; void CVcxNsScheduleView::DynInitMenuPaneL(int, class CEikMenuPane *)
+	?HandleClientRectChange@CVcxNsScheduleView@@QAEXXZ @ 7 NONAME ; void CVcxNsScheduleView::HandleClientRectChange(void)
+	?HandleCommandL@CVcxNsScheduleView@@UAEXH@Z @ 8 NONAME ; void CVcxNsScheduleView::HandleCommandL(int)
+	?HandleStatusPaneSizeChange@CVcxNsScheduleView@@MAEXXZ @ 9 NONAME ; void CVcxNsScheduleView::HandleStatusPaneSizeChange(void)
+	?NewL@CVcxNsScheduleView@@SAPAV1@XZ @ 10 NONAME ; class CVcxNsScheduleView * CVcxNsScheduleView::NewL(void)
+	?NewLC@CVcxNsScheduleView@@SAPAV1@XZ @ 11 NONAME ; class CVcxNsScheduleView * CVcxNsScheduleView::NewLC(void)
+

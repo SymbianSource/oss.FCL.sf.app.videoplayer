@@ -1,0 +1,48 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: Package file for videoplaybackcontrols STIF test
+;
+; Version : %version: %
+;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"MPX Videoplayback Controls STIF"}, (0x101FB3E3), 1, 0, 1, TYPE=SA, RU
+
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Install files
+; Need to build videoplaybackcontrols first to have rsc and mif
+"/epoc32/release/armv5/udeb/ui_videoplaybackcontrolstest.dll"      - "!:/sys/bin/ui_videoplaybackcontrolstest.dll"
+
+"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.rsc" - "!:/resource/apps/mpxvideoplaybackcontrols.rsc" 
+"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.mif" - "!:/resource/apps/mpxvideoplaybackcontrols.mif"
+
+"../conf/ui_videoplaybackcontrolstest.cfg" - "c:/testframework/ui_videoplaybackcontrolstest.cfg"
+"../init/testframework.ini" - "c:/testframework/testframework.ini"
+
+"../data/mmc/test.3gp" - "e:/testing/data/test.3gp"
+"../data/mmc/test.rm" - "e:/testing/data/test.rm"
+"../data/mmc/TestClipWithLongNameToTestScrollingInMediaDetailsViewer.3gp" - "e:/testing/data/TestClipWithLongNameToTestScrollingInMediaDetailsViewer.3gp"
+

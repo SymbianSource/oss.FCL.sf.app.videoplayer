@@ -1,0 +1,85 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <bldvariant.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET      iptvprovisioningapp.exe
+TARGETTYPE  exe
+UID         0x0 0x10281F1A
+TARGETPATH      PROGRAMS_DIR
+
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_APPLICATION -DRM -AllFiles
+
+SOURCEPATH  ../Src
+SOURCE IptvProvisioningApp.cpp 
+SOURCE IptvProvisioningAppUi.cpp
+SOURCE IptvProvisioningDocument.cpp
+
+START RESOURCE ../Data/IptvProvisioningApp.rss
+HEADER
+TARGETPATH APP_RESOURCE_DIR
+LANGUAGE_IDS 
+END // RESOURCE
+
+START RESOURCE ../Data/IptvProvisioningApp_reg.rss
+HEADER
+TARGETPATH /private/10003a3f/apps
+END
+
+SOURCEPATH      ../Data
+
+USERINCLUDE     . 
+USERINCLUDE     ../Inc
+USERINCLUDE     ../../clientapi/inc
+USERINCLUDE     ../../server/IptvNetworkSelection/inc
+USERINCLUDE     ../../provisioningprocessor/inc
+USERINCLUDE     ../../server/server/inc
+USERINCLUDE     ../../utils/inc
+USERINCLUDE     ../../vccommon/conf
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY euser.lib 
+LIBRARY apparc.lib 
+LIBRARY cone.lib 
+LIBRARY eikcore.lib 
+LIBRARY avkon.lib
+LIBRARY eiksrv.lib
+LIBRARY	ws32.lib
+LIBRARY apgrfx.lib
+LIBRARY efsrv.lib 
+LIBRARY bafl.lib
+LIBRARY	iptvclientapi.lib
+LIBRARY iptvutil.lib // CIptvIapList
+LIBRARY	iptvprovisioningprocessor.lib
+LIBRARY commonengine.lib // for StringLoader
+LIBRARY ecom.lib // for REComSession
+LIBRARY flogger.lib
+
+//  End of File
+
+
+

@@ -1,0 +1,19 @@
+// From VCXTestMyVideosObserver.h
+EVCXTestVideoGeneral 0 
+EVCXTestVideoListRefreshed 1
+EVCXTestVideoVideoAdded 2
+EVCXTestVideoVideoDeleted 3
+EVCXTestVideoDownloadStarted 4
+EVCXTestVideoDownloadPaused 5
+EVCXTestVideoDownloadFailed 6
+EVCXTestVideoDownloadCompleted 7
+EVCXTestVideoDownloadDeleted 8
+EVCXTestVideoDownloadProgressed 9
+
+10SECONDS 10
+30SECONDS 30
+1MINUTE 60
+2MINUTES 120
+5MINUTES 300
+10MINUTES 600
+30MINUTES 2300

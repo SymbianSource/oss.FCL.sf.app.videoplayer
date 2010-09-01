@@ -1,0 +1,6 @@
+EXPORTS
+	?LibEntryL@@YAPAVCScriptBase@@AAVCTestModuleIf@@@Z @ 1 NONAME ; class CScriptBase * __cdecl LibEntryL(class CTestModuleIf &)
+	??1CVcxHgMyVideosMainView@@UAE@XZ @ 2 NONAME ; CVcxHgMyVideosMainView::~CVcxHgMyVideosMainView(void)
+	?NewL@CVcxHgMyVideosMainView@@SAPAV1@XZ @ 3 NONAME ; class CVcxHgMyVideosMainView * CVcxHgMyVideosMainView::NewL(void)
+	?NewLC@CVcxHgMyVideosMainView@@SAPAV1@XZ @ 4 NONAME ; class CVcxHgMyVideosMainView * CVcxHgMyVideosMainView::NewLC(void)
+

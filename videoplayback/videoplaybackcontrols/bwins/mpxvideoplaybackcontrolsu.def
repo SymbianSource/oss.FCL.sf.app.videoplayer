@@ -1,0 +1,8 @@
+EXPORTS
+	??1CMPXVideoPlaybackControlsController@@UAE@XZ @ 1 NONAME ; CMPXVideoPlaybackControlsController::~CMPXVideoPlaybackControlsController(void)
+	?AddFileDetailsL@CMPXVideoPlaybackControlsController@@QAEXPAVCMPXVideoPlaybackViewFileDetails@@@Z @ 2 NONAME ; void CMPXVideoPlaybackControlsController::AddFileDetailsL(class CMPXVideoPlaybackViewFileDetails *)
+	?DoHandlePointerEventL@CMPXVideoPlaybackControl@@QAEXABUTPointerEvent@@@Z @ 3 NONAME ; void CMPXVideoPlaybackControl::DoHandlePointerEventL(struct TPointerEvent const &)
+	?GetBitmap@CMPXVideoPlaybackControlsController@@QAEPAVCEikImage@@W4TMPXVideoPlaybackControls@@@Z @ 4 NONAME ; class CEikImage * CMPXVideoPlaybackControlsController::GetBitmap(enum TMPXVideoPlaybackControls)
+	?HandleEventL@CMPXVideoPlaybackControlsController@@QAEXW4TMPXVideoPlaybackControlCommandIds@@H@Z @ 5 NONAME ; void CMPXVideoPlaybackControlsController::HandleEventL(enum TMPXVideoPlaybackControlCommandIds, int)
+	?NewL@CMPXVideoPlaybackControlsController@@SAPAV1@PAVCMPXVideoPlaybackContainer@@VTRect@@PAVCMPXVideoPlaybackViewFileDetails@@@Z @ 6 NONAME ; class CMPXVideoPlaybackControlsController * CMPXVideoPlaybackControlsController::NewL(class CMPXVideoPlaybackContainer *, class TRect, class CMPXVideoPlaybackViewFileDetails *)
+

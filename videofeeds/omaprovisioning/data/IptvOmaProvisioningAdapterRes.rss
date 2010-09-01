@@ -1,0 +1,38 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resources for Iptv OMA Provisioning adapter.*
+*/
+
+
+
+NAME    IOPA // 4 letter ID
+
+//  INCLUDES
+
+#include <eikon.rh>
+#include <ipvideo.loc>
+
+
+RESOURCE RSS_SIGNATURE { }
+
+// -----------------------------------------------------------------------------
+// r_iptv_oma_client_prov_summary_title
+// -----------------------------------------------------------------------------
+//
+RESOURCE LBUF r_iptv_oma_client_prov_summary_title
+    {
+    txt = qtn_vcx_ns_service_settings_title; 
+    }
+
+

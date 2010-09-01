@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET          iptvprovisioningprocessor.dll
+TARGETTYPE      DLL
+UID             0x101fdfae 0x10275125 
+TARGETPATH      shared_lib_dir
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          CIptvProvisioningProcessor.cpp
+SOURCE          CIptvPPContentHandler.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../clientapi/inc
+USERINCLUDE     ../../utils/inc
+USERINCLUDE     ../../vccommon/conf
+
+APP_LAYER_SYSTEMINCLUDE 
+ 
+
+LIBRARY         iptvclientapi.lib
+LIBRARY         euser.lib 
+LIBRARY         flogger.lib
+LIBRARY         xmlframework.lib
+LIBRARY         efsrv.lib 
+LIBRARY         bafl.lib
+LIBRARY         iptvutil.lib
+LIBRARY         charconv.lib
+LIBRARY         hash.lib
+
+// End of File

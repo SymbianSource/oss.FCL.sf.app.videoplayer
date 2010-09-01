@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   ?Description*
+*/
+
+
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+//XML -files for testing purposes:
+//../data/ValidXMLFiles/VCXProvisioningTestAccountManagement.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestAccountManagement.xml
+//../data/ValidXMLFiles/VCXProvisioningTestAccountManagementLiveTv.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestAccountManagementLiveTv.xml
+
+//../data/ValidXMLFiles/VCXProvisioningTestDVBIPI.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestDVBIPI.xml
+//../data/ValidXMLFiles/VCXProvisioningTestIapId.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestIapId.xml
+//../data/ValidXMLFiles/VCXProvisioningTestIapName.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestIapName.xml
+//../data/ValidXMLFiles/VCXProvisioningTestSearch.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestSearch.xml
+//../data/ValidXMLFiles/VCXProvisioningTestVC.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestVC.xml
+//../data/ValidXMLFiles/VCXProvisioningTestVod.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestVod.xml
+//../data/ValidXMLFiles/VCXProvisioningTestXMLTV.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestXMLTV.xml
+//../data/ValidXMLFiles/VCXProvisioningTestIapIdZero.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestIapIdZero.xml
+//../data/ValidXMLFiles/VCXProvisioningTestTypeBrowser.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestTypeBrowser.xml
+//../data/ValidXMLFiles/VCXProvisioningTestTypeApplication.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestTypeApplication.xml
+
+//../data/InvalidXMLFiles/VCXProvisioningInvalid1.xml /epoc32/winscw/c/testing/data/VCXProvisioningInvalid1.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestEmptyFields.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestEmptyFields.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestTInvalidAppUid.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestTInvalidAppUid.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestTypeXXX.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestTypeXXX.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestVCInvalidProtocol.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestVCInvalidProtocol.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestVODInvalidProtocol.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestVODInvalidProtocol.xml
+//../data/InvalidXMLFiles/VCXProvisioningTestXMLTVInvalidProtocol.xml  /epoc32/winscw/c/testing/data/VCXProvisioningTestXMLTVInvalidProtocol.xml
+
+// Provision files in Zip
+../data/c/provisionzip/provision.zip    /epoc32/winscw/c/testing/data/provisionzip/provision.zip
+../data/c/verifyzip/verify.zip          /epoc32/winscw/c/testing/data/verifyzip/verify.zip
+../conf/VCXProvisioningTest.cfg         /epoc32/winscw/c/TestFramework/VCXProvisioningTest.cfg
+
+PRJ_EXPORTS
+
+PRJ_TESTMMPFILES
+VCXProvisioningTest.mmp
+
+PRJ_MMPFILES
+
+//  End of File

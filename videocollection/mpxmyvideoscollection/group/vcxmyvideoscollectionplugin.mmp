@@ -59,8 +59,6 @@ USERINCLUDE     ../../inc
 
 APP_LAYER_SYSTEMINCLUDE
 
-SMPSAFE
-
 LIBRARY         euser.lib
 LIBRARY         ecom.lib
 

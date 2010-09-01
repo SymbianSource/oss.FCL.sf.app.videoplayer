@@ -1,0 +1,91 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource headers for project hgvodui*
+*/
+
+
+
+
+#ifndef VCXNSVODUI_HRH
+#define VCXNSVODUI_HRH
+
+/** VOD View IDs */
+enum TIptvVodViewIds
+ 	{
+ 	EIptvVodFeedView             = 1, 
+ 	EIptvVodScheduleSettingsView = 2, 
+ 	EVodPlayerViewId             = 3,
+ 	EVodSettingsViewId           = 4,
+ 	// IDs from 5 to 9 are reserved for future use.
+ 	EVodDynamicViewBaseId        = 10
+ 	};
+
+/** Service view command IDs  */
+enum TVcxHgVodServiceOptionCmd
+    {
+    EVcxHgVodServiceOpenCmd = 50,
+    EVcxHgVodServiceSubscriptionsCmd, 
+    EVcxHgVodServiceDetailsCmd,
+    EVcxHgVodServiceRemoveCmd,
+    EVcxHgVodServiceAddCmd,
+    EVcxHgVodServiceAddViaCatalogCmd,
+    EVcxHgVodServiceAddManuallyCmd,
+    EVcxHgVodServiceRefreshAllCmd,
+    EVcxHgVodServiceManageAccountCmd,
+    EVcxHgVodServiceMoveCmd
+    };
+
+/** Category view command IDs  */
+enum TVcxHgVodCategoryOptionCmd
+    {
+    EVcxHgVodCategoryOpenCmd = 100,
+    EVcxHgVodCategoryScheduleDownloadsCmd
+    };
+
+/** Content view command IDs  */
+enum TVcxHgVodContentOptionCmd
+    {
+    EVcxHgVodContentPlayCmd = 150,
+    EVcxHgVodContentStartDownloadCmd,
+    EVcxHgVodContentResumeDownloadCmd,
+    EVcxHgVodContentCancelDownloadCmd,
+    EVcxHgVodContentOpenLinkCmd,
+    EVcxHgVodContentPreviewCmd,
+    EVcxHgVodContentDetailsCmd,
+    EVcxHgVodContentSendCmd,
+    EVcxHgVodContentSendViaMsgCmd,
+    EVcxHgVodContentSendViaEmailCmd,
+    EVcxHgVodContentNewSearchCmd,
+    EVcxHgVodContentScheduleDownloadsCmd
+    };
+
+/** Service group view command IDs  */
+enum TVcxHgVodServiceGroupOptionCmd
+    {
+    EVcxHgVodServiceGroupOpenCmd = 200
+    };
+
+/** Content view MSK command IDs  */
+enum TVcxHgVodMskOptionCmd
+    {
+    EVcxHgVodEmptyMskCmd = 250
+    };
+
+enum TVcxHgVodMovingCmd 
+    {
+    EVcxHgVodMovingSoftkeyOk = 300,
+    EVcxHgVodMovingSoftkeyCancel
+    };
+
+#endif // VCXNSVODUI_HRH

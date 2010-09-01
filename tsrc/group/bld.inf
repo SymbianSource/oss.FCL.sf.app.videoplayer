@@ -1,0 +1,35 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Build information file for API test modules under VADO video*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+#include "../VCXTestCommon/group/bld.inf"
+#include "../VCXTestMyVideosCollectionClient/group/bld.inf"
+#include "../VCXTestUtilModule/group/bld.inf"
+#include "../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/group/bld.inf"
+#include "../../videoplayer_plat/video_player_file_details_dialog_api/tsrc/group/bld.inf"
+#include "../../videoplayer_plat/videoplayer_startup_api/tsrc/group/bld.inf"
+#include "../../mediasettings/mediasettingsengine/tsrc/mediasettingsenginetest/group/bld.inf"
+#include "../../mediasettings/videoplayersettingsengine/tsrc/vpsettingsenginetest/group/bld.inf"

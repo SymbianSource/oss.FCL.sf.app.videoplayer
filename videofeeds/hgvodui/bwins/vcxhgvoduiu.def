@@ -1,0 +1,5 @@
+EXPORTS
+	??1CVcxHgVodMainView@@UAE@XZ @ 1 NONAME ; CVcxHgVodMainView::~CVcxHgVodMainView(void)
+	?NewL@CVcxHgVodMainView@@SAPAV1@XZ @ 2 NONAME ; class CVcxHgVodMainView * CVcxHgVodMainView::NewL(void)
+	?NewLC@CVcxHgVodMainView@@SAPAV1@XZ @ 3 NONAME ; class CVcxHgVodMainView * CVcxHgVodMainView::NewLC(void)
+

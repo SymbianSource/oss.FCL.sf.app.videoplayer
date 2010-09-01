@@ -442,11 +442,7 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             CategoriesL().UpdateCategoriesL( *iCache->iVideoList, 0 );
             CategoriesL().UpdateCategoriesNewVideoNamesL();
             
-#ifdef VCX_ALBUMS
-            // Adds changed album indexes to Albums().iChangedAlbums.
-            // AlbumsL().UpdateChangedAlbumsL() will update the changed ones and add events.
-            AlbumsL().VideosAddedOrRemovedFromCacheL( aId );
-            
+#ifdef VCX_ALBUMS 
             AlbumsL().RemoveAlbumsL( aId );
 #endif
             }
@@ -474,18 +470,9 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             iCache->AddVideosFromMdsL( aId, videoListFetchingWasCancelled,
                     &nonVideoIds, EFalse /* dont update categories*/ );
 
-            if ( aId.Count() )
-                {
-                CategoriesL().ResetVideoCountersL();
-                CategoriesL().UpdateCategoriesL( *iCache->iVideoList, 0 );
-                CategoriesL().UpdateCategoriesNewVideoNamesL();
-
-#ifdef VCX_ALBUMS          
-                // Adds changed album indexes to Albums().iChangedAlbums.
-                // AlbumsL().UpdateChangedAlbumsL() will update the changed ones and add events.
-                AlbumsL().VideosAddedOrRemovedFromCacheL( aId );
-#endif
-                }
+            CategoriesL().ResetVideoCountersL();
+            CategoriesL().UpdateCategoriesL( *iCache->iVideoList, 0 );
+            CategoriesL().UpdateCategoriesNewVideoNamesL();
             
 #ifdef VCX_ALBUMS
 #if 0 //TODO: do this if we want to support albums which are being added by someone else than My Videos Collection
@@ -493,8 +480,6 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
             //After the call nonVideoIds will contain only items which were actually added
             //to albums.
             AlbumsL().AddAlbumsFromMdsL( nonVideoIds );
-#else
-            nonVideoIds.Reset();
 #endif
 #endif
             
@@ -581,7 +566,7 @@ void CVcxMyVideosCollectionPlugin::DoHandleMyVideosDbEventL(
                 TMPXItemId( nonVideoIds[i], KVcxMvcMediaTypeAlbum ), aEvent ) );
         }
 
-    AlbumsL().UpdateChangedAlbumsL();
+    iAlbums->UpdateChangedAlbumsL();
 #endif
 
     CleanupStack::PopAndDestroy( &nonVideoIds );

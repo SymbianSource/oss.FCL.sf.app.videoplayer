@@ -15,20 +15,16 @@
 *
 */
 
-// Version : %version: da1mmcf#7.1 %
+// Version : %version: da1mmcf#7 %
 
 
 
 #include <platform_paths.hrh>
 
 #include "../videohelix/group/bld.inf"
-
-//
-// Don't need to build the following components in 10.1
-//
-//#include "../videopdlplaybackviewplugin/group/bld.inf"
-//#include "../videoplaybackcontrols/group/bld.inf"
-//#include "../videoplaybackviewplugin/group/bld.inf"
-//#include "../videoplaybackviews/group/bld.inf"
+#include "../videopdlplaybackviewplugin/group/bld.inf"
+#include "../videoplaybackcontrols/group/bld.inf"
+#include "../videoplaybackviewplugin/group/bld.inf"
+#include "../videoplaybackviews/group/bld.inf"
 
 //  End of File

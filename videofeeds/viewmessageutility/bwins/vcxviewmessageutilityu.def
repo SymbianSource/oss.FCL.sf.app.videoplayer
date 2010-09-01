@@ -1,0 +1,7 @@
+EXPORTS
+	??1CVcxViewMessageUtility@@UAE@XZ @ 1 NONAME ; CVcxViewMessageUtility::~CVcxViewMessageUtility(void)
+	?AddObserverL@CVcxViewMessageUtility@@QAEXAAVMVcxViewMessageObserver@@@Z @ 2 NONAME ; void CVcxViewMessageUtility::AddObserverL(class MVcxViewMessageObserver &)
+	?InstanceL@CVcxViewMessageUtility@@SAPAV1@XZ @ 3 NONAME ; class CVcxViewMessageUtility * CVcxViewMessageUtility::InstanceL(void)
+	?RemoveObserver@CVcxViewMessageUtility@@QAEXAAVMVcxViewMessageObserver@@@Z @ 4 NONAME ; void CVcxViewMessageUtility::RemoveObserver(class MVcxViewMessageObserver &)
+	?SendCustomViewMessageL@CVcxViewMessageUtility@@QAEXVTUid@@ABVTDesC8@@@Z @ 5 NONAME ; void CVcxViewMessageUtility::SendCustomViewMessageL(class TUid, class TDesC8 const &)
+

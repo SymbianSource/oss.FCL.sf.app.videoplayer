@@ -1,0 +1,89 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of the License "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:  Package file for video feed content STIF tests;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"VCXVodContentApiTest"},(0x00000000),1,1,0,TYPE=SA
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Logo
+; None
+
+; Package signature - Optional
+; None
+
+; Start of Package body
+
+; Condition blocks
+; None
+
+; Options list
+; None
+
+; Install files
+"/epoc32/release/armv5/udeb/VCXVodContentApiTest.dll"        - "!:/Sys/Bin/VCXVodContentApiTest.dll"
+"/epoc32/release/armv5/udeb/IptvTestUtility.dll"             - "!:/Sys/Bin/IptvTestUtility.dll"
+"/epoc32/release/armv5/udeb/VCXTestCommon.dll"               - "!:/Sys/Bin/VCXTestCommon.dll"
+"/epoc32/release/armv5/udeb/VCXTestUtilModule.dll"           - "!:/Sys/Bin/VCXTestUtilModule.dll"
+"/epoc32/release/armv5/udeb/VCXServiceManagementApiTest.dll" - "!:/Sys/Bin/VCXServiceManagementApiTest.dll"
+"/epoc32/release/armv5/udeb/VCXTestEcgFileObserver.dll"      - "!:/Sys/Bin/VCXTestEcgFileObserver.dll"
+
+"../data/c/verifyzip/verify.zip" - "c:/testing/data/verifyzip/verify.zip"
+
+"../../VCXServiceManagementApiTest/conf/VCXServiceManagementApiTest.inc" - "c:/testframework/VCXServiceManagementApiTest.inc"
+"../conf/VCXVodContentApiTest.inc"                 - "c:/testframework/VCXVodContentApiTest.inc"
+"../conf/VCXServiceUpdating.inc"                   - "c:/testframework/VCXServiceUpdating.inc"
+"../conf/VCXServiceNames.inc"                      - "c:/testframework/VCXServiceNames.inc"
+"../conf/VCXConsts.inc"                            - "c:/testframework/VCXConsts.inc"
+"../conf/VCXErrors.inc"                            - "c:/testframework/VCXErrors.inc"
+"../conf/VCXDrives.inc"                            - "c:/testframework/VCXDrives.inc"
+"../conf/VCXVodContentApiTest.cfg"                 - "c:/testframework/VCXVodContentApiTest.cfg"
+"../conf/VCXVodContentApiTestCategoriesR3.cfg"     - "c:/testframework/VCXVodContentApiTestCategoriesR3.cfg"
+"../conf/VCXVodContentApiTestDb.cfg"               - "c:/testframework/VCXVodContentApiTestDb.cfg"
+"../conf/VCXVodContentApiTestErrors.cfg"           - "c:/testframework/VCXVodContentApiTestErrors.cfg"
+"../conf/VCXVodContentApiTestInterference.cfg"     - "c:/testframework/VCXVodContentApiTestInterference.cfg"
+"../conf/VCXVodContentApiTestMimeTypes.cfg"        - "c:/testframework/VCXVodContentApiTestMimeTypes.cfg"
+"../conf/VCXVodContentApiTestParental.cfg"         - "c:/testframework/VCXVodContentApiTestParental.cfg"
+"../conf/VCXVodContentApiTestSearch2R3.cfg"        - "c:/testframework/VCXVodContentApiTestSearch2R3.cfg"
+"../conf/VCXVodContentApiTestSearchR3.cfg"         - "c:/testframework/VCXVodContentApiTestSearchR3.cfg"
+"../conf/VCXVodContentApiTestSearchStressR3.cfg"   - "c:/testframework/VCXVodContentApiTestSearchStressR3.cfg"
+"../conf/VCXVodContentModificationCheckTest.cfg"   - "c:/testframework/VCXVodContentModificationCheckTest.cfg"
+"../conf/VCXVodContentApiTestHelium.cfg"           - "c:/testframework/VCXVodContentApiTestHelium.cfg"
+
+; The cenrep and testframework.ini files won't install with sis, only for ATS test runs.
+"../data/cccccc00.cre" - "c:/private/10202be9/persists/cccccc00.cre"
+"../init/TestFramework.ini" - "c:/testframework/TestFramework.ini"
+
+
+; Embedded SIS
+; None
+
+; End of Package body
+
+; PKG dependencies
+; None
+
+; PKG capabilities
+; None

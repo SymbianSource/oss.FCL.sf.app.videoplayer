@@ -511,6 +511,11 @@ void CVcxMyVideosOpenHandler::HandleGetAlbumContentVideosRespL(
         MPX_DEBUG2("CVcxMyVideosOpenHandler:: First videos for album %d arrived, calling HandleOpen()", aAlbumId);
         
         iAlbumVideoList->SetCObjectValueL( KMPXMediaGeneralContainerPath, iPath );
+        if ( aComplete )
+            {
+            iAlbumVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
+                    EVcxMyVideosVideoListComplete );
+            }
         iCollection.iObs->HandleOpen( iAlbumVideoList, aError );
         iPendingAlbumOpenId = 0;
         }
@@ -529,8 +534,6 @@ void CVcxMyVideosOpenHandler::HandleGetAlbumContentVideosRespL(
         //TODO: should add album id
         iCollection.AlbumsL().CalculateAttributesL(); // adds events if attributes modified, does not send
 
-        iAlbumVideoList->SetTObjectValueL<TInt>( KVcxMediaMyVideosInt32Value,
-                    EVcxMyVideosVideoListComplete );
         iCollection.iMessageList->AddEventL( KVcxMessageMyVideosListComplete );
 
         

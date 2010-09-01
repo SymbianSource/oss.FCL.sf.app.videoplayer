@@ -1,0 +1,51 @@
+v=0
+o=- 1125527826 1125527826 IN IP4 10.48.2.51
+s=SDP: h263_aaclc.3gp
+i=<No author> <No copyright>
+c=IN IP4 0.0.0.0
+t=0 0
+a=SdpplinVersion:1610641560
+a=StreamCount:integer;2
+a=control:rtsp://10.48.2.51/TestContent/MediaContent/WCDMA/SDP/VideoAudio/h263_aaclc.3gp
+a=DefaultLicenseValue:integer;0
+a=FileType:string;"3GPPRel6FileFormat"
+a=LicenseKey:string;"license.Summary.Datatypes.3GPPRel6FileFormat.Enabled"
+a=range:npt=0-148.700000
+m=video 0 RTP/AVP 96
+b=AS:40
+b=RR:795
+b=RS:397
+a=control:rtsp://10.48.2.51/TestContent/MediaContent/WCDMA/SDP/VideoAudio/h263_aaclc.3gp/streamid=65335
+a=range:npt=0-136.400000
+a=length:npt=136.400000
+a=rtpmap:96 H263-2000/90000
+a=fmtp:96 profile=0; level=10
+a=mimetype:string;"video/H263-2000"
+a=Helix-Adaptation-Support:1
+a=AvgBitRate:integer;39780
+a=Width:integer;176
+a=Height:integer;144
+a=HasOutOfOrderTS:integer;1
+a=Preroll:integer;1000
+a=ASMRuleBook:string;"Marker=0,AverageBandwidth=39780,TimeStampDelivery=TRUE;Marker=1,AverageBandwidth=0,TimeStampDelivery=TRUE;"
+a=framesize:96 176-144
+a=cliprect:0,0,144,176
+a=mpeg4-esid:201
+a=x-envivio-verid:00035A23
+m=audio 0 RTP/AVP 97
+b=AS:8
+b=RR:161
+b=RS:80
+a=control:rtsp://10.48.2.51/TestContent/MediaContent/WCDMA/SDP/VideoAudio/h263_aaclc.3gp/streamid=65435
+a=range:npt=0-136.400000
+a=length:npt=136.400000
+a=rtpmap:97 MP4A-LATM/12000/1
+a=fmtp:97 profile-level-id=15; object=2; cpresent=0; config=400029103FC0
+a=mimetype:string;"audio/MP4A-LATM"
+a=Helix-Adaptation-Support:1
+a=AvgBitRate:integer;8094
+a=HasOutOfOrderTS:integer;1
+a=Preroll:integer;1000
+a=ASMRuleBook:string;"Marker=0,AverageBandwidth=8094,TimeStampDelivery=TRUE;Marker=1,AverageBandwidth=0,TimeStampDelivery=TRUE;"
+a=mpeg4-esid:101
+a=x-envivio-verid:00035A23

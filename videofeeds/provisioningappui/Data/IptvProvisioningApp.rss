@@ -1,0 +1,247 @@
+/*
+* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    RECO
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <eikon.rsg>
+#include <avkon.rh>
+#include <avkon.loc>
+
+#include <ipvideo.loc>
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+RESOURCE EIK_APP_INFO
+    {
+    status_pane=R_AVKON_STATUS_PANE_LAYOUT_EMPTY;
+    }
+
+//----------------------------------------------------
+// r_iptv_provisioning_query_install_service
+// Query dialog for provisioned service installation
+// 
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_iptv_provisioning_query_install_service
+    {
+    flags   = EGeneralQueryFlags;
+    buttons = r_iptv_provisioning_query_softkey_ok_cancel;
+    items   =
+        {
+        DLG_LINE
+            {
+            type    = EAknCtQuery;
+            id      = EGeneralQuery;
+            control = AVERELL_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_iptv_provisioning_vod_reset_existing_service
+// Query dialog for provisioned service installation
+// 
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_iptv_provisioning_vod_reset_existing_service
+    {
+    flags   = EGeneralQueryFlags;
+    buttons = r_iptv_provisioning_query_softkey_install_cancel;
+    items   =
+        {
+        DLG_LINE
+            {
+            type    = EAknCtQuery;
+            id      = EGeneralQuery;
+            control = AVERELL_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_iptv_provisioning_vod_query_added_service_open
+// Query dialog for added service opening.
+// 
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_iptv_provisioning_vod_query_added_service_open
+    {
+    flags   = EGeneralQueryFlags;
+    buttons = r_iptv_provisioning_query_softkey_yes_cancel;
+    items   =
+        {
+        DLG_LINE
+            {
+            type    = EAknCtQuery;
+            id      = EGeneralQuery;
+            control = AVERELL_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_provisioning_query_softkey_ok_cancel
+//   CBA buttons for the r_iptv_vod_notify_install_service 
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_iptv_provisioning_query_softkey_ok_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = text_softkey_ok; }
+        };
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_provisioning_query_softkey_yes_cancel
+//   CBA buttons for the r_iptv_provisioning_vod_query_added_service_open 
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_iptv_provisioning_query_softkey_yes_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyYes; txt = text_softkey_yes; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyYes; txt = text_softkey_yes; }
+        };
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_provisioning_query_softkey_install_cancel
+//   CBA buttons for the r_iptv_provisioning_vod_reset_existing_service query
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_iptv_provisioning_query_softkey_install_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_iptv_softkey_install; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyOk; txt = qtn_iptv_softkey_install; }
+        };
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_provisioning_query_softkey_ok_cancel
+//   CBA buttons for the r_iptv_vod_notify_install_service 
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_install_provisioning_service
+    {
+    buf = qtn_iptv_install_service;
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_invalid_data
+//   Text for the r_iptv_invalid_data
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_invalid_data
+    {
+    buf = qtn_iptv_invalid_data;
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_invalid_service_type
+//   Text for the r_iptv_invalid_service_type
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_invalid_service_type
+    {
+    buf = qtn_iptv_invalid_service_type;
+    }
+
+// ---------------------------------------------------------------------------
+// r_iptv_installed
+// Note that from Rel4 onwards, the translated text is not "Done" anymore.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_installed
+    {
+    buf = qtn_iptv_service_installed_to_vodcast_note;
+    }
+
+// ---------------------------------------------------------------------------
+// r_iptv_done
+// Text for the r_iptv_done
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_done
+    {
+    buf = text_done;
+    }
+
+// ---------------------------------------------------------
+//   r_iptv_reset_existing_service
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_reset_existing_service
+    {
+    buf = qtn_iptv_service_exists;
+    }
+
+// ---------------------------------------------------------------------------
+// r_iptv_video_store_list
+// "Nokia video store"
+// NOTE Replaces provisioned logical text.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_video_store_list
+    {
+    buf = qtn_iptv_video_store_list;
+    }
+
+// ---------------------------------------------------------------------------
+// r_iptv_added_service_open
+// Query text added service open.
+// 
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_iptv_added_service_open
+    {
+    buf = qtn_iptv_added_service_open;
+    }

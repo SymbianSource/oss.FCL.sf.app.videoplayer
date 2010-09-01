@@ -1,0 +1,11 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZTI13CVcxTestTimer @ 2 NONAME ; #<TI>#
+	_ZTI17CEdwinTestControl @ 3 NONAME ; #<TI>#
+	_ZTI20CVcxTestControlEvent @ 4 NONAME ; #<TI>#
+	_ZTI25CVcxTestControlEventQueue @ 5 NONAME ; #<TI>#
+	_ZTV13CVcxTestTimer @ 6 NONAME ; #<VT>#
+	_ZTV17CEdwinTestControl @ 7 NONAME ; #<VT>#
+	_ZTV20CVcxTestControlEvent @ 8 NONAME ; #<VT>#
+	_ZTV25CVcxTestControlEventQueue @ 9 NONAME ; #<VT>#
+

@@ -1,0 +1,186 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: Contains all needed component for the MPX Video Player application
+;
+; Version : %version: %
+;
+
+; Languages
+&EN
+
+; Header
+#{"Video Player"},(0x200159B2),9,20,28, TYPE=SA, RU
+
+; Supports Series 60 v5.0
+;[0x1028315F], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Non-localised vendor name
+:"Nokia"
+
+@"cenrep.sisx",(0x10202be9)
+;
+; MPX Video Player
+;
+"/epoc32/release/armv5/urel/mpxvideoplayer.exe"                         - "!:/sys/bin/mpxvideoplayer.exe"
+"/epoc32/data/z/resource/apps/mpxvideoplayer.rsc"                       - "!:/resource/apps/mpxvideoplayer.rsc"
+"/epoc32/data/z/private/10003a3f/apps/mpxvideoplayer_reg.rsc"           - "!:/private/10003a3f/import/apps/mpxvideoplayer_reg.rsc"
+"/epoc32/data/Z/resource/apps/mpxvideoplayer_aif.mif"                   - "!:/resource/apps/mpxvideoplayer_aif.mif"
+
+;
+; Playback Plugin
+;
+"/epoc32/release/armv5/urel/mpxvideohelixplayback.dll"                  - "!:/sys/bin/mpxvideohelixplayback.dll"
+"/epoc32/data/z/resource/plugins/mpxvideohelixplayback.rsc"             - "!:/resource/plugins/mpxvideohelixplayback.rsc"
+
+;
+; View Plugin
+;
+"/epoc32/release/armv5/urel/mpxvideoplaybackviewplugin.dll"             - "!:/sys/bin/mpxvideoplaybackviewplugin.dll"
+"/epoc32/data/z/resource/plugins/mpxvideoplaybackviewplugin.rsc"        - "!:/resource/plugins/mpxvideoplaybackviewplugin.rsc"
+
+"/epoc32/release/armv5/urel/mpxvideopdlplaybackviewplugin.dll"          - "!:/sys/bin/mpxvideopdlplaybackviewplugin.dll"
+"/epoc32/data/z/resource/plugins/mpxvideopdlplaybackviewplugin.rsc"     - "!:/resource/plugins/mpxvideopdlplaybackviewplugin.rsc"
+
+;
+; Controls
+;
+"/epoc32/release/armv5/urel/mpxvideoplaybackcontrols.dll"               - "!:/sys/bin/mpxvideoplaybackcontrols.dll"
+"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.rsc"             - "!:/resource/apps/mpxvideoplaybackcontrols.rsc" 
+"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.mif"             - "!:/resource/apps/mpxvideoplaybackcontrols.mif"
+
+;
+; View
+;
+"/epoc32/release/armv5/urel/mpxvideoplaybackviews.dll"                  - "!:/sys/bin/mpxvideoplaybackviews.dll"
+"/epoc32/data/z/resource/apps/mpxvideoplaybackviews.rsc"                - "!:/resource/apps/mpxvideoplaybackviews.rsc"
+
+;
+; Video Playback Helpers
+;
+"/epoc32/release/armv5/urel/playbackhelper.dll"                         - "!:/sys/bin/playbackhelper.dll"
+
+;
+; LW player
+;
+"/epoc32/release/armv5/urel/lwplayer.exe"                               - "!:/sys/bin/lwplayer.exe" 
+"/epoc32/data/z/resource/apps/lwplayer.rsc"                             - "!:/resource/apps/lwplayer.rsc" 
+"/epoc32/data/z/private/10003a3f/apps/lwplayer_reg.rsc"                 - "!:/private/10003a3f/import/apps/lwplayer_reg.rsc" 
+
+;
+; File details dialog
+;
+"/epoc32/release/armv5/urel/MPFileDetailsDialog.dll"                    - "!:/sys/bin/MPFileDetailsDialog.dll"
+"/epoc32/data/z/resource/apps/MPFileDetails.rsc"                        - "!:/resource/apps/MPFileDetails.rsc"
+
+;
+; File details plugin
+;
+"/epoc32/release/armv5/urel/filedetailsplugin.dll"                      - "!:/sys/bin/filedetailsplugin.dll"
+"/epoc32/data/z/resource/plugins/filedetailsplugin.rsc"                 - "!:/resource/plugins/filedetailsplugin.rsc"
+
+;
+; MyVideos Collection Plugin
+;
+"/epoc32/release/armv5/urel/vcxmyvideoscollectionplugin.dll"            - "!:/sys/bin/vcxmyvideoscollectionplugin.dll"
+"/epoc32/data/z/resource/plugins/vcxmyvideoscollectionplugin.rsc"       - "!:/resource/plugins/vcxmyvideoscollectionplugin.rsc"
+
+;
+; Connection Utility
+;
+"/epoc32/release/armv5/urel/vcxconnectionutility.dll"                   - "!:/sys/bin/vcxconnectionutility.dll"
+"/epoc32/release/armv5/urel/vcxconnutilpsworker.exe"                    - "!:/sys/bin/vcxconnutilpsworker.exe"
+
+;
+; Video Scheduler
+;
+"/epoc32/release/armv5/urel/cseschedulerserver.exe"                     - "!:/sys/bin/cseschedulerserver.exe"
+"/epoc32/release/armv5/urel/cseschedulerclient.dll"                     - "!:/sys/bin/cseschedulerclient.dll"
+
+;
+; MediaSettings
+;
+"/epoc32/release/armv5/urel/mediasettings.exe"                          - "!:/sys/bin/mediasettings.exe" 
+"/epoc32/data/z/resource/mediasettings.rsc"                             - "!:/resource/mediasettings.rsc" 
+"/epoc32/data/z/resource/apps/mediasettings.rsc"                        - "!:/resource/apps/mediasettings.rsc" 
+"/epoc32/data/z/resource/apps/mediasettings.mif"                        - "!:/resource/apps/mediasettings.mif"
+"/epoc32/data/z/private/10003a3f/apps/mediasettings_reg.rsc"            - "!:/private/10003a3f/import/apps/mediasettings_reg.rsc" 
+
+;
+; MPSettBase
+;
+"/epoc32/release/armv5/urel/mpsettbase.dll"                             - "!:/sys/bin/mpsettbase.dll"
+
+;
+; MPSettROPModel
+;
+"/epoc32/release/armv5/urel/mpsettropmodel.dll"                         - "!:/sys/bin/mpsettropmodel.dll"
+"/epoc32/data/z/resource/mpsettingsropmodel.rsc"                        - "!:/resource/plugins/mpsettingsropmodel.rsc"
+"/epoc32/data/z/resource/plugins/mpsettropmodel.rsc"                    - "!:/resource/plugins/mpsettropmodel.rsc"
+"/epoc32/data/z/resource/mpsettingsropmodel.rsc"                        - "!:/resource/mpsettingsropmodel.rsc"
+
+;
+; GSVideoPlugin
+;
+"/epoc32/release/armv5/urel/gsvideoplugin.dll"                          - "!:/sys/bin/gsvideoplugin.dll"
+"/epoc32/data/z/resource/plugins/gsvideoplugin.rsc"                     - "!:/resource/plugins/gsvideoplugin.rsc"
+
+;
+; Video Player Specific Settings Engine
+;
+"/epoc32/release/armv5/urel/vcxnssettingsengine.dll"                    - "!:/sys/bin/vcxnssettingsengine.dll"
+
+;
+; View Plugins
+;
+"/epoc32/release/armv5/urel/vcxhgmyvideosplugin.dll"                    - "!:/sys/bin/vcxhgmyvideosplugin.dll"
+"/epoc32/data/z/resource/plugins/vcxhgmyvideosplugin.rsc"               - "!:/resource/plugins/vcxhgmyvideosplugin.rsc"
+
+;
+; Views
+;
+"/epoc32/release/armv5/urel/vcxhgmyvideos.dll"                          - "!:/sys/bin/vcxhgmyvideos.dll"
+"/epoc32/data/z/resource/apps/vcxhgmyvideos.rsc"                        - "!:/resource/apps/vcxhgmyvideos.rsc"
+"/epoc32/data/z/resource/apps/vcxhgmyvideos.mif"                        - "!:/resource/apps/vcxhgmyvideos.mif"
+"/epoc32/data/z/resource/apps/vcxhgmyvideosicons.mif"                   - "!:/resource/apps/vcxhgmyvideosicons.mif"
+
+;
+; My Videos indicator plugin
+;
+"/epoc32/release/armv5/urel/myvideosindicatorplugin.dll"                - "!:/sys/bin/myvideosindicatorplugin.dll"
+"/epoc32/data/z/resource/plugins/myvideosindicatorplugin.rsc"           - "!:/resource/plugins/myvideosindicatorplugin.rsc"
+
+;
+; Help files
+;
+"/epoc32/data/z/resource/xhtml/01/0x102750E2/contents.zip"              - "!:/resource/xhtml/01/0x102750E2/contents.zip"
+"/epoc32/data/z/resource/xhtml/01/0x102750E2/index.xml"                 - "!:/resource/xhtml/01/0x102750E2/index.xml"
+"/epoc32/data/z/resource/xhtml/01/0x102750E2/keywords.xml"              - "!:/resource/xhtml/01/0x102750E2/keywords.xml"
+"/epoc32/data/z/resource/xhtml/01/0x102750E2/meta.xml"                  - "!:/resource/xhtml/01/0x102750E2/meta.xml"
+
+;
+; Language specific files for Video Player application
+; If user want to create sis files for a specific variant then add supported languages here 
+;
+"/epoc32/data/z/resource/mediasettings.r01"                             - "!:/resource/mediasettings.r01"
+"/epoc32/data/z/resource/apps/MPFileDetails.r01"                        - "!:/resource/apps/MPFileDetails.r01"
+"/epoc32/data/z/resource/apps/mediasettings.r01"                        - "!:/resource/apps/mediasettings.r01" 
+"/epoc32/data/z/resource/apps/vcxhgmyvideos.r01"                        - "!:/resource/apps/vcxhgmyvideos.r01"
+"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.r01"             - "!:/resource/apps/mpxvideoplaybackcontrols.r01"
+"/epoc32/data/z/resource/apps/mpxvideoplaybackviews.r01"                - "!:/resource/apps/mpxvideoplaybackviews.r01"
+"/epoc32/data/z/resource/apps/lwplayer.r01"                             - "!:/resource/apps/lwplayer.r01"
+"/epoc32/data/z/resource/apps/mpxvideoplayer.r01"                       - "!:/resource/apps/mpxvideoplayer.r01"
+

@@ -11,8 +11,10 @@
 *
 * Contributors:
 *
-* Description:
+* Description:   ?Description*
 */
+
+
 
 #ifndef VCXMYVIDEOSCOLLECTIONPLUGINTEST_H
 #define VCXMYVIDEOSCOLLECTIONPLUGINTEST_H
@@ -23,15 +25,21 @@
 #include <StifTestModule.h>
 #include "MVCXMyVideosCollectionPluginTesterObserver.h"
 #include <f32file.h>
-#include "MVcxTestTimerObserver.h"
+#include "MIptvTestTimerObserver.h"
 //#ifdef __WINSCW__
 #include <harvesterclient.h>
 //#endif // __WINSCW__
-#include "VCXMyVideosTestUtils.h"
+#include "CIptvTestVideoCreator.h"
 
 // CONSTANTS
 const TInt KTimeoutMinute = 60 * 1000000; // a minute
 const TInt KTimeoutSecond = 1000000;
+_LIT( KVCXMYVideosTest2kURLTag, "XXX2kURLXXX" );
+_LIT( KVCXMYVideosTest1200CharsURLTag, "XXX21200charsURLXXX" );
+_LIT( KVCXMYVideosTest1kURLTag, "XXX1kURLXXX" );
+_LIT( KVCXMYVideosTest2kURL, "http://193.65.182.78/Nseries/video1.3gp?123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456_END" );
+//_LIT( KVCXMYVideosTest1200charsURL, "http://193.65.182.78/Nseries/video1.3gp?123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012_END" );
+_LIT( KVCXMYVideosTest1kURL, "http://193.65.182.78/Nseries/video1.3gp?123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012ASDFASDFAADSFDSFASDFSDAFSDFASDFADFASDF_END" );
 _LIT( KVCXTestZeroIap, "VcxTestZeroIap" );
 _LIT( KVCXTestInvalidIap, "VcxTestInvalidIap" );
 _LIT( KVCXTestZeroUrl, "VcxTestZeroUrl" );
@@ -46,16 +54,17 @@ _LIT( KVCXMyVideosCollectionPluginTestLogFile, "VCXMyVideosCollectionPluginTest.
 // FORWARD DECLARATIONS
 class CVCXMyVideosCollectionPluginTest;
 class CVCXMyVideosCollectionPluginTester;
-class CVCXMyVideosTestUtils;
-class CVcxTestActiveWait;
-class CVcxTestTimer;
+class CVCXTestCommon;
+class CIptvTestActiveWait;
+class CIptvTestTimer;
 class CMPXMedia;
 class TMPXAttributeData;
-class CVcxVodContentContentBriefDetails;
+class CIptvVodContentContentBriefDetails;
 class CVCXMyVideosTestServiceEmu;
 class CVCXTestMdsDbModifier;
 class CFileMan;
 class CMPXMediaArray;
+class CVCXTestStatsKeeper;
 
 // DATA TYPES
 //enum ?declaration
@@ -113,19 +122,19 @@ enum TVcxTestMediaAttributeIdMapping
     EVcxTestMapping_KVcxMediaMyVideosAudioFourCc
     };
 
-typedef RPointerArray<CVcxVodContentContentBriefDetails> TVcxTestContentArray;
+typedef RPointerArray<CIptvVodContentContentBriefDetails> TVcxTestContentArray;
 
-// TestUtils DECLARATION
+// CLASS DECLARATION
 
 /**
-*  CVCXMyVideosCollectionPluginTest test TestUtils for STIF Test Framework TestScripter.
+*  CVCXMyVideosCollectionPluginTest test class for STIF Test Framework TestScripter.
 *  ?other_description_lines
 *
 *  @lib ?library
 *  @since ?Series60_version
 */
 NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
-            public MVCXMyVideosCollectionPluginTesterObserver, public MVcxTestTimerObserver
+            public MVCXMyVideosCollectionPluginTesterObserver, public MIptvTestTimerObserver
     {
     public:  // Constructors and destructor
 
@@ -155,7 +164,7 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         virtual void HandleVcxMvTesterMessageL( TInt aMessage, TInt aError );
 
         /**
-        * From MVcxTestTimerObserver Handles timer completion
+        * From MIptvTestTimerObserver Handles timer completion
         * @since
         * @param aTimerId
         * @param aError
@@ -193,6 +202,21 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         virtual TInt CreateL( CStifItemParser& aItem );
 
         /**
+         * Enables statistics for this instance. Disables error reporting to STIF for errors from collection plugin.
+         *
+         * @param Name for the stats.
+         * @param Filename for the stats. 
+         */
+         virtual TInt EnableStatsL( CStifItemParser& aItem );
+             
+        /**
+         * Sets CenRep value for My Videos MPX plugin preferred memory for downloads.
+         *
+         * @param aPreferredMemory, a drive letter
+         */
+        virtual TInt SetPreferredMemoryL( CStifItemParser& aItem );
+
+        /**
          * Sets CenRep value for My Videos MPX plugin sort.
          * If category is whole collection is refreshed:
          *  - Sort order set to none.
@@ -224,15 +248,21 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         virtual TInt CoolDownL( CStifItemParser& aItem );
 
         /**
+         * Disables check for missing downloads.
+         */
+        virtual TInt DisableDownloadCheckL( CStifItemParser& aItem );
+
+        /**
          * Toggle filecheck on/off.
          */
         virtual TInt SetFileCheckL( CStifItemParser& aItem );
 
         /**
-         * Sets requests that use multiple medias to use copy of the current medias,
-         * those medias will not be updated before this is called again.
+         * Enables or disables the resuming paused downloads automaticly.
+         *
+         * @param TBool
          */
-        virtual TInt SetUseCopiedMediasL( CStifItemParser& aItem );
+        virtual TInt SetAutoResumeL( CStifItemParser& aItem );
 
         /**
          * Opens MPX collection.
@@ -246,17 +276,9 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * Opens collection level, e.g. My Videos category.
          * Asynchronous, test script will be signaled.
          *
-         * @param name name of the level.
+         * @param index number of the level.
          */
         virtual TInt OpenLevelL( CStifItemParser& aItem );
-
-        /**
-         * Opens collection level, e.g. My Videos category.
-         * Asynchronous, test script will be signaled.
-         *
-         * @param index of the level.
-         */
-        virtual TInt OpenLevelByIndexL( CStifItemParser& aItem );
 
         /**
          * Closes collection level, e.g. My Videos category.
@@ -313,7 +335,7 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * This will fetch the full media from MPX.
          *
          * @param driveLetter
-         * @param itemIndex or itemName
+         * @param itemIndex
          * @param media attribute mapping id, see vcxmvcollectionplugintest.inc
          * @param expectedValue
          * @param expectedValue2...X
@@ -335,28 +357,6 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          */
         virtual TInt SetMediaDetailL( CStifItemParser& aItem );
 
-        /**
-         * Checks the album count.
-         *
-         * @param expectedCount
-         */
-        virtual TInt CheckAlbumCountL( CStifItemParser& aItem );
-
-        /**
-         * Renames an album.
-         *
-         * @param albumName
-         * @param newAlbumName
-         */
-        virtual TInt RenameAlbumL( CStifItemParser& aItem );
-        
-        /**
-         * Checks that an album exists.
-         *
-         * @param albumName
-         */
-        virtual TInt CheckAlbumExistsL( CStifItemParser& aItem );                
-        
         /**
          * Checks the video count and that the videos really exist.
          *
@@ -380,7 +380,21 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * @param maximumCount
          */
         virtual TInt CheckMaximumMediaCountL( CStifItemParser& aItem );
+
+        /**
+         * Checks the download count.
+         *
+         * @param expectedCount
+         */
+        virtual TInt CheckDownloadCountL( CStifItemParser& aItem );
         
+        /**
+         * Checks the download progress.
+         *
+         * @param minimum progress
+         */
+        virtual TInt CheckDownloadProgressL( CStifItemParser& aItem );
+
         /**
          * Creates copy of a media from currently listed medias and stores it to
          * a member variable. It is used by AddMediaL, SetMediaL and
@@ -554,49 +568,6 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         virtual TInt DeleteFilesOfAllMediasL( CStifItemParser& aItem );
 
         /**
-         * Adds an album. If category or album is currently open the change is not 
-         * seen by tests before current level is closed.
-         *
-         * @param aAlbumName
-         * @param aAsyncCall, default true
-         */
-        virtual TInt CreateAlbumL( CStifItemParser& aItem );        
-
-        /**
-         * Deletes albums. If category or album is currently open the change is not 
-         * seen by tests before current level is closed.
-         *
-         * @param aAlbumName(s)
-         */
-        virtual TInt DeleteAlbumsL( CStifItemParser& aItem );
-        
-        /**
-         * Deletes all albums. If category or album is currently open the change is not 
-         * seen by tests before current level is closed.
-         */
-        virtual TInt DeleteAllAlbumsL( CStifItemParser& aItem );
-
-        /**
-         * Adds medias to an album.
-         *
-         * @param aAlbumName album where medias are added.
-         * @param aDrive drive where medias are
-         * @param aStartIndex index of first media 
-         * @param aEndIndex index of last media 
-         */
-        virtual TInt AddMediasToAlbumL( CStifItemParser& aItem );        
-
-        /**
-         * Removes medias from an album.
-         *
-         * @param aAlbumName album where medias are removed from.
-         * @param aDrive drive where medias are
-         * @param aStartIndex index of first media 
-         * @param aEndIndex index of last media 
-         */
-        virtual TInt RemoveMediasFromAlbumL( CStifItemParser& aItem );
-        
-        /**
          * Creates a video file to the file system.
          * Test module keeps track of these files with iSideloadedFiles array.
          * If size is -1 video size will not be altered.
@@ -614,7 +585,7 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         /**
          * Creates video file(s).
          */
-        void CreateVideoFileL( CVCXMyVideosTestUtils::TVcxTestVideoType aType, const TDesC& aDriveLetter, const TDesC& aFileName, TInt aSize, TInt aVideoCount, TBool aDoSync );
+        void CreateVideoFileL( CIptvTestVideoCreator::TIptvTestVideoType aType, const TDesC& aDriveLetter, const TDesC& aFileName, TInt aSize, TInt aVideoCount, TBool aDoSync );
 
         /**
          * Ensures that drive has specified amount of videos, they are created and removed if needed.
@@ -634,6 +605,112 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
          * Toggle deletion of created videos in the destructor.
          */
         virtual TInt SetDeleteSideloadedVideos( CStifItemParser& aItem );
+
+        /**
+         * Start a download using My Videos MPX plugin.
+         *
+         * @param iapName
+         * @param serviceName
+         * @param contentId
+         * @param syncCall
+         * @param userName (optional)
+         * @param password (optional)
+         */
+        virtual TInt DownloadL( CStifItemParser& aItem );
+        
+        /**
+         * Resume a download using My Videos MPX plugin.
+         *
+         * See DownloadL for parameters.
+         */
+        virtual TInt ResumeDownloadL( CStifItemParser& aItem );        
+
+        /**
+         * Resumes all paused downloads.
+         */
+        virtual TInt ResumeAllDownloadsL( CStifItemParser& aItem );        
+
+        /**
+         * Start a download using My Videos MPX plugin.
+         * The current media from CreateEmptyMediaL or CreateCopyOfMediaL is used to pass
+         * attributes to My Videos MPX plugin.
+         *
+         * See DownloadL for parameters.
+         */
+        virtual TInt DownloadUsingMediaL( CStifItemParser& aItem );
+        
+        /**
+         * Resume a download using My Videos MPX plugin.
+         * The current media from CreateEmptyMediaL or CreateCopyOfMediaL is used to pass
+         * attributes to My Videos MPX plugin.
+         *
+         * See DownloadL for parameters.
+         */
+        virtual TInt ResumeDownloadUsingMediaL( CStifItemParser& aItem );        
+
+        /**
+         * Starts download or resumes one. Cannot be called from STIF script.
+         * 
+         * @param aUseCurrentMedia, use the attributes of the current media.
+         * @param aResume, is this resume download.
+         */
+        void DownloadOrResumeL( CStifItemParser& aItem, TBool aUseCurrentMedia, TBool aResume );
+        
+        /**
+         * Start or resume a download using My Videos MPX plugin.
+         *
+         * Can be called with 'Download' and 'ResumeDownload' commands from STIF script.
+         *
+         * @param iapName
+         * @param URL
+         * @param syncCall
+         * @param userName (optional)
+         * @param password (optional)
+         */
+        virtual TInt DownloadUrlL( CStifItemParser& aItem );
+
+        /**
+         * Cancel a download using My Videos MPX plugin.
+         *
+         * @param serviceName
+         * @param contentId
+         * @param syncCall
+         */
+        virtual TInt CancelDownloadL( CStifItemParser& aItem );
+
+        /**
+         * Cancel a download using My Videos MPX plugin.
+         *
+         * @param mpxId, if -1 then first DL's mpxId is used.
+         * @param downloadId, if -1 then first DL's downloadId is used.
+         * @param syncCall
+         */
+        virtual TInt CancelDownloadByIdL( CStifItemParser& aItem );
+
+        /**
+         * Pause a download using My Videos MPX plugin.
+         * Also disables automatic resuming of paused downloads.
+         *
+         * @param serviceName
+         * @param contentId
+         * @param syncCall
+         */
+        virtual TInt PauseDownloadL( CStifItemParser& aItem );
+
+        /**
+         * Pause a download using My Videos MPX plugin.
+         * Also disables automatic resuming of paused downloads.
+         *
+         * @param url
+         */
+        TInt PauseDownloadByUrlL( CStifItemParser& aItem );
+
+        /**
+         * Wait all downloads to complete.
+         *
+         * @param timeout minutes (default 10)
+         */
+        virtual TInt WaitAllDownloadsL( CStifItemParser& aItem );
 
         /**
          * Starts a wait for message or messages of same type.
@@ -726,8 +803,8 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         // Instance of class holding the test logic to test MV MPX collection.
         CVCXMyVideosCollectionPluginTester *iTester;
 
-        // CVCXMyVideosTestUtils
-        CVCXMyVideosTestUtils* iTestUtils;
+        // CVCXTestCommon
+        CVCXTestCommon* iTestCommon;
 
         // RFs
         RFs iFs;
@@ -741,11 +818,11 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         // Folders used for sideloading.
         RPointerArray<HBufC> iSideloadFolders;
 
-        // CVcxTestActiveWait
-        CVcxTestActiveWait* iActiveWait;
+        // CIptvTestActiveWait
+        CIptvTestActiveWait* iActiveWait;
 
-        // CVcxTestActiveWait
-        CVcxTestActiveWait* iActiveWaitBlocking;
+        // CIptvTestActiveWait
+        CIptvTestActiveWait* iActiveWaitBlocking;
 
         TBool iDeleteSideloadedFilesAndFolders;
 
@@ -760,6 +837,8 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         // Seconds to wait before message is got, default is 5
         TInt iMessageWaitTimeout;
 
+        TBool iWaitingForAllDownloads;
+
         // Wait is not called from script but from test module.
         TBool iMessageWaitIsBlocking;
 
@@ -768,21 +847,26 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
 //#endif // __WINSCW__
 
         // Timeout timer
-        CVcxTestTimer* iTimeoutTimer;
+        CIptvTestTimer* iTimeoutTimer;
 
         TBuf<256> iCaseId;
 
         TBool iLoggingEnabled;
 
-        CVcxTestTimer* iCoolDownTimer;
+        CIptvTestTimer* iCoolDownTimer;
 
         TBool iCoolDownWait;
 
         TInt iEventError;
 
+        // Autoresume downloads
+        TBool iAutoResume;
+
         CMPXMedia* iMpxMedia;
 
         TBool iFileCheckDisabled;
+
+        TInt iLastDownloadError;
 
         CVCXMyVideosTestServiceEmu* iServiceEmu;
 
@@ -796,6 +880,11 @@ NONSHARABLE_CLASS(CVCXMyVideosCollectionPluginTest) : public CScriptBase,
         // This is for passing media count check when mpx plugin build is urel, 
         // which causes add media cmd to fail. 
         TInt iAddMediaCmdCount;
+        
+        // Class to hold robustness and performance data.
+        CVCXTestStatsKeeper* iStats;
+
+        TBool iStatsEnabled;        
     };
 
 #endif      // VCXMYVIDEOSCOLLECTIONPLUGINTEST_H

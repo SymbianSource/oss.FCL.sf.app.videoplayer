@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4.1 %
+// Version : %version: 4 %
 
 
  
@@ -34,12 +34,12 @@ public:
     static CMPXVideoRegion* NewLC();
     ~CMPXVideoRegion();
 
-    inline void Print();
-    inline void SetRegion( RRegion& aRegion );
-    inline TRegion& GetRegion();
+    void Print();
+    void SetRegion( RRegion& aRegion );
+    TRegion& GetRegion();
    
-    inline void ExternalizeL( RWriteStream& aStream ) const;
-    inline void InternalizeL( RReadStream& aStream );
+    void ExternalizeL( RWriteStream& aStream ) const;
+    void InternalizeL( RReadStream& aStream );
     
 private:
     CMPXVideoRegion(); 

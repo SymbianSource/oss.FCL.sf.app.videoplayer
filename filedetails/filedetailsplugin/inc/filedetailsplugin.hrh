@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: File details plug-in constants.
+*/
+
+#ifndef FILEDETAILSPLUGIN_HRH
+#define FILEDETAILSPLUGIN_HRH
+
+/**
+ * Plugin implementation UID
+ */
+#define KFileDetailsPluginImplementationUid 0x20029FCB
+
+/**
+ * Plugin DLL UID
+ */
+#define KFileDetailsPluginDllUid 0x2002A509
+
+#endif // FILEDETAILSPLUGIN_HRH

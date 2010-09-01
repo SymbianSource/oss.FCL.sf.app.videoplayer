@@ -1,38 +1,20 @@
-///*
-//* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
-//* All rights reserved.
-//* This component and the accompanying materials are made available
-//* under the terms of the License "Eclipse Public License v1.0"
-//* which accompanies this distribution, and is available
-//* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-//*
-//* Initial Contributors:
-//* Nokia Corporation - initial contribution.
-//*
-//* Contributors:
-//*
-//* Description: 
-//*
-//*/
 
-ANY_SIZE -1
-
+VCXCollectionMyVideos "20016B97" old
 // 0 is mapped to the VCXCollectionMyVideos constant
-VCXCollectionMyVideos "0"
+//VCXCollectionMyVideos "0"
 
-// From vcxmyvideoscategories.cpp
-EVcxMyVideosAllVideos      "All videos"
-EVcxMyVideosDownloads      "Downloads"
-EVcxMyVideosTvRecordings   "TV recordings"
-EVcxMyVideosCapturedVideos "Captured videos"
-EVcxMyVideosOther          "Other"
+VCXCollectionMusic "101FFC3A"
+VCXCollectionPodcast "101FFC3C"
 
-// Album names for tests.
-Album1 "Video album 1"
-Album2 "Video album 2"
-Album3 "Video album 3"
-Album4 "Video album 4"
-Album5 "Video album 5"
+// Index, not id of the item. always same?
+// From vcxmyvideoscollection.hrh
+EVcxMyVideosAllVideos      0
+//EVcxMyVideosPlaylists
+EVcxMyVideosDownloads      1
+EVcxMyVideosTvRecordings   2
+EVcxMyVideosCapturedVideos 3 // NO SUPPORT ON UI
+EVcxMyVideosOther          4
+//EVcxMyVideosDownloadList   5 // NOT SUPPORTED
 
 // Download state
 EVcxMyVideosDlStateNone 0
@@ -60,14 +42,26 @@ SIDELOADER_WAIT 25000
 PAUSE_MV_CASE_BEGIN 500
 MV_LOOP_COUNT 100
 
-// From vcxmyvideostestutils.h
-VcxTestVideo3Gp            0       // Extension .3GP
-VcxTestVideoMpeg4          1       // Extension .MP4
+// From CIptvTestVideoCreator.h
+IptvTestVideo3Gp            0       // Extension .3GP
+IptvTestVideo3Gp2           1       // Extension .3G2
+IptvTestVideoMp2            2       // Extension .MP2
+IptvTestVideoMpeg1          3       // Extension .MPG
+IptvTestVideoMpeg2          4       // Extension .MPG
+IptvTestVideoSuperVideoCd   5       // Extension .MPG
+IptvTestVideoMp3            6       // Extension .MP3
+IptvTestVideoAppleMpeg      7       // Extension .MP4
+IptvTestVideoMpeg4          8       // Extension .MP4
+IptvTestVideoMpegAvc        9       // Extension .MP4
+IptvTestVideoQuicktime      10      // Extension .MOV
+IptvTestVideoRealVideo      11      // Extension .RM
+IptvTestVideoAvi            12      // Extension .AVI
+IptvTestVideoWmv            13      // Extension .WMV
+IptvTestVideoAviAC3         14      // Extension .AVI
 
-PAUSE_SIDELOAD_15_SECONDS        15000
-PAUSE_SIDELOAD_30_SECONDS        30000
-PAUSE_SIDELOAD_MINUTE            60000
-PAUSE_SIDELOAD_10_MINUTES        300000
+PAUSE_SIDELOAD              30000   // 30 seconds
+PAUSE_SIDELOAD_LONG         60000   // a minute
+PAUSE_SIDELOAD_VERY_LONG    300000  // 10 minutes
 
 KVCXMYVideosTestMessageNotAccepted                    0
 
@@ -94,16 +88,12 @@ KVCXMYVideosTestMessageDeleteResp                     2011
 KVCXMYVideosTestMessageCommandCanceled                2012
 
 KVCXMYVideosTestMessageCollectionGeneral              3000
+KVCXMYVideosTestMessageCollectionItemChanged          3001
+KVCXMYVideosTestMessageCollectionCategoryChanged      3002
 
-KVCXMYVideosTestMessageMpxVideoInserted               4000
-KVCXMYVideosTestMessageMpxCategoryInserted            4001
-KVCXMYVideosTestMessageMpxAlbumInserted               4002
-KVCXMYVideosTestMessageMpxVideoDeleted                4003
-KVCXMYVideosTestMessageMpxCategoryDeleted             4004
-KVCXMYVideosTestMessageMpxAlbumDeleted                4005
-KVCXMYVideosTestMessageMpxVideoModified               4006
-KVCXMYVideosTestMessageMpxCategoryModified            4007
-KVCXMYVideosTestMessageMpxAlbumModified               4008
+KVCXMYVideosTestMessageMpxItemInserted                4000
+KVCXMYVideosTestMessageMpxItemDeleted                 4001
+KVCXMYVideosTestMessageMpxItemModified                4002
 
 KVCXMyVideosTestMessageVideoListOrderChanged          5000
 
@@ -225,6 +215,16 @@ FREESPACE_1MB                       1024000
 FREESPACE_2MB                       2048000
 FREESPACE_5MB                       5120000
 FREESPACE_10MB                      10240000
+
+// http://193.65.182.78/nokia_vod.xml
+SERVICE_1                          "NokiaVideos"
+// http://193.65.182.78/testingfeed_iptvengine.xml
+SERVICE_2                          "Enginetestingfeed"
+// http://193.65.182.78/miscvideos.xml
+SERVICE_MISCVIDEOS                          "Miscvideos"
+// http://193.65.182.78/misc/smallvideos/smallvideos.xml
+SERVICE_SMALLVIDEOS                "SmallVideos"
+
 
 KVcxNsMpxEventDownloadStarted            1
 KVcxNsMpxEventAllDownloadsEnded          2

@@ -1,0 +1,104 @@
+/*
+* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Project definition file for project IptvClientApi*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+#include <bldvariant.hrh>
+#include "../../utils/inc/IptvEngineUids.h"
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET            iptvclientapi.dll
+TARGETTYPE        dll
+//0x1000008D is for static dll
+UID               0x1000008D IPTV_CLIENT_API_UID
+
+#ifndef WINSCW
+TARGETPATH        /system/libs
+#endif
+
+SOURCEPATH        ../src
+SOURCE            RIptvClientSession.cpp
+SOURCE            CIptvClientBase.cpp
+SOURCE            CIptvServiceManagementClient.cpp
+SOURCE            CIptvService.cpp
+SOURCE            CIptvServices.cpp
+SOURCE            CIptvMyVideosClient.cpp
+SOURCE            CIptvMyVideosContentUpdateObserver.cpp
+SOURCE            CIptvMyVideosTotalVideoLengthObserver.cpp
+SOURCE            CIptvMyVideosCopyOrMoveObserver.cpp
+SOURCE            CIptvMyVideosVideoBriefDetails.cpp
+SOURCE            CIptvMyVideosVideoFullDetails.cpp
+SOURCE            CIptvMyVideosFolder.cpp
+SOURCE            CIptvMyVideosGlobalFolderId.cpp
+SOURCE            CIptvMyVideosGlobalFileId.cpp
+SOURCE            CIptvVodContentClient.cpp
+SOURCE            CIptvVodContentCategoryBriefDetails.cpp
+SOURCE            CIptvVodContentContentBriefDetails.cpp
+SOURCE            CIptvVodContentContentFullDetails.cpp
+SOURCE            CIptvVodContentUpdateObserver.cpp
+SOURCE            CIptvVodDlClient.cpp
+SOURCE            CIptvVodDlDownloadReq.cpp
+SOURCE            CIptvVodDlCancelDownloadReq.cpp
+SOURCE            CIptvVodDlDownloadEvent.cpp
+SOURCE            CIptvVodDlDownloadList.cpp
+SOURCE            CIptvVodDlDownloadListItem.cpp
+SOURCE            CIptvVodDlResumeDownloadReq.cpp
+SOURCE            TIptvVodDlDownloadId.cpp
+SOURCE            CIptvLiveTvClient.cpp
+SOURCE            CIptvEventListener.cpp
+SOURCE            CIptvEvents.cpp
+SOURCE            CIptvSmEvent.cpp
+SOURCE            ciptvsecureprovisioningparameters.cpp
+SOURCE            CIptvEpgService.cpp
+
+USERINCLUDE       ../../server/server/inc
+USERINCLUDE       ../../server/IptvServiceManager/inc
+USERINCLUDE       ../../server/IptvNetworkSelection/inc
+USERINCLUDE       ../inc
+USERINCLUDE       ../../utils/inc
+USERINCLUDE       ../../livetvutils/inc/
+USERINCLUDE       ../../vccommon/conf
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY           euser.lib
+LIBRARY           bafl.lib //descriptor arrays 
+LIBRARY           sysutil.lib // SysUtil
+LIBRARY           estor.lib
+LIBRARY           efsrv.lib
+LIBRARY           flogger.lib
+LIBRARY           iptvutil.lib
+
+// Secure provisioning, ciptvsecureprovisioningparameters.cpp uses these
+LIBRARY           centralrepository.lib
+LIBRARY	          cryptography.lib        // For RInteger, CRSASignature, CRSAPKCS1v15Verifier...
+LIBRARY           etelmm.lib
+LIBRARY           etel.lib
+
+// For RAPTOR compliancy
+LIBRARY           ecom.lib
+
+#if !defined(__SERIES60_30__) && !defined(__SERIES60_31__) && !defined(__SERIES60_32__)
+LANGUAGE_IDS 
+#else
+LANG    SC 
+#endif // !defined(__SERIES60_30__) && !defined(__SERIES60_31__) && !defined(__SERIES60_32__)
+
+CAPABILITY      CAP_GENERAL_DLL DRM

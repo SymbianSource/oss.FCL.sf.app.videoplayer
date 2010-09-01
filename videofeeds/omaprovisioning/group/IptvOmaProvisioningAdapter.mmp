@@ -1,0 +1,73 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    This file provides the information required for building the*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+#include <bldvariant.hrh>
+#include <data_caging_paths.hrh>
+
+//OPTION ARMCC --asm --interleave
+ALWAYS_BUILD_AS_ARM
+
+TARGET          iptvomaprovisioningadapter.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x10282430
+
+VENDORID        VID_DEFAULT
+//CAPABILITY      CAP_ECOM_PLUGIN
+CAPABILITY      ALL -TCB -DRM -AllFiles
+
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../../clientapi/inc
+USERINCLUDE     ../../server/server/inc
+USERINCLUDE     ../../server/IptvNetworkSelection/inc
+USERINCLUDE     ../../utils/inc
+USERINCLUDE     ../../vccommon/conf
+
+
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../data
+START RESOURCE  IptvOmaProvisioningAdapter.rss
+END // RESOURCE
+
+SOURCEPATH      ../data
+START RESOURCE  IptvOmaProvisioningAdapterRes.rss
+HEADER
+LANGUAGE_IDS 
+END // RESOURCE
+
+
+SOURCEPATH      ../src
+SOURCE          CIptvOmaProvisioningAdapter.cpp
+SOURCE          CIptvOmaProvisioningAdapterGroupProxy.cpp
+
+LIBRARY        	euser.lib 
+LIBRARY	        provisioningengine.lib
+LIBRARY	        bafl.lib 
+LIBRARY         iptvclientapi.lib
+LIBRARY         flogger.lib
+LIBRARY         efsrv.lib
+LIBRARY         iptvutil.lib
+LIBRARY         cone.lib                // CCoeEnv
+LIBRARY         commonengine.lib        // StringLoader
+
+// For RAPTOR compliancy
+LIBRARY         ecom.lib 
+

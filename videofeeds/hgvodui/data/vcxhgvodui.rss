@@ -1,0 +1,1214 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Resource definitions for project hgvodui*
+*/
+
+
+
+
+NAME VCVV
+
+#include <avkon.rh>
+#include <avkon.hrh>
+#include <avkon.rsg>
+#include <avkon.loc>
+#include <avkon.mbg>
+#include <eikon.rh>
+#include <eikon.rsg>
+
+#include <ipvideo.loc>
+#include "vcxhgvodui.hrh"
+
+// ---------------------------------------------------------
+//   
+//    Define the resource file signature 
+//    This resource should be empty.
+//
+// ---------------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------
+//   
+//    Define default menu and CBA key.
+//
+// ---------------------------------------------------------
+//
+
+RESOURCE AVKON_VIEW r_vcxhg_vod_main_view
+    {
+    menubar = r_vcxhg_vod_serviceview_menubar;
+    cba = r_vcxhg_vod_softkeys_options_back__open;
+    }
+
+//----------------------------------------------------  
+// r_vcx_vod_serviceview_menubar
+// Menu title definition for service view
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_serviceview_menubar
+    {
+    titles=
+        {
+        MENU_TITLE 
+        	{ 
+        	menu_pane = r_vcxhg_vod_serviceview_menu; 
+        	}
+        };
+    }
+
+//----------------------------------------------------  
+// r_vcxhg_vod_categoryview_menubar
+// Menu title definition for category view
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_categoryview_menubar
+    {
+    titles=
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_vcxhg_vod_categoryview_menu; 
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_contentview_menubar 
+// Menu title definition for content view
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_contentview_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_vcxhg_vod_contentview_menu; 
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_servicegroupview_menubar 
+// Menu title definition for content view
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_servicegroupview_menubar
+    {
+    titles =
+        {
+        MENU_TITLE 
+            { 
+            menu_pane = r_vcxhg_vod_servicegroupview_menu; 
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_serviceview_menu
+// Service view menu
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_serviceview_menu
+    {
+    items =
+        {
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceOpenCmd; 
+            txt = qtn_iptv_open_feed;
+            flags = EEikMenuItemAction;
+            },
+        
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceSubscriptionsCmd; 
+            txt = qtn_iptv_feed_subscriptions;
+            },
+
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceDetailsCmd; 
+            txt = qtn_iptv_feed_details;
+            flags = EEikMenuItemSpecific;
+            },
+            
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceRemoveCmd; 
+            txt = qtn_iptv_remove_feed;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceAddCmd;
+            cascade = r_vcxhg_vod_feedview_addfeed_submenu; 
+            txt = qtn_iptv_add_feed_submenu;
+            },
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceRefreshAllCmd; 
+            txt = qtn_iptv_feed_refresh;
+            },
+        MENU_ITEM
+            { 
+            command = EVcxHgVodServiceManageAccountCmd; 
+            txt = qtn_iptv_manage_account;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EVcxHgVodServiceMoveCmd; 
+            txt = qtn_fldr_move_item;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_categoryview_menu
+// Category view menu
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_categoryview_menu
+    {
+    items =
+        {
+        MENU_ITEM
+            { 
+            command = EVcxHgVodCategoryOpenCmd; 
+            txt = qtn_iptv_open_feed;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EVcxHgVodCategoryScheduleDownloadsCmd; 
+            txt = qtn_iptv_schedule_downloads;
+            },  
+        MENU_ITEM
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_content_view_menu
+// Feed view menu
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_contentview_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentPlayCmd; 
+            txt = qtn_iptv_play; 
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentStartDownloadCmd; 
+            txt = qtn_iptv_download;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command=EVcxHgVodContentResumeDownloadCmd; 
+            txt = qtn_iptv_resume_download;
+            flags = EEikMenuItemSpecific;
+            },          
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentCancelDownloadCmd; 
+            txt = qtn_iptv_cancel_download; 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentNewSearchCmd;
+            txt = qtn_iptv_new_search; 
+            },
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentDetailsCmd; 
+            txt = qtn_iptv_video_details; 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentSendCmd;
+            cascade = r_vcxhg_vod_contentview_share_link_submenu;
+            txt = qtn_options_send_via; 
+            flags = EEikMenuItemSpecificListQuery;
+            },            
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentOpenLinkCmd; 
+            txt = qtn_iptv_open_link;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EVcxHgVodContentScheduleDownloadsCmd; 
+            txt = qtn_iptv_schedule_downloads;
+            },    
+       MENU_ITEM 
+            { 
+            command=EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            { 
+            command=EAknCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_vcxhg_vod_servicegroupview_menu
+// Service group view menu definition
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_servicegroupview_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            {
+            command = EVcxHgVodServiceGroupOpenCmd;
+            txt = qtn_iptv_open_feed;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM 
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM 
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_vcxhg_vod_feedview_addfeed_submenu
+// "Add feed" submenu definition
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_feedview_addfeed_submenu
+    {
+    items=
+        {
+        MENU_ITEM 
+            {
+            command = EVcxHgVodServiceAddViaCatalogCmd;
+            txt = qtn_iptv_service_catalog_submenu;
+            },
+        MENU_ITEM 
+            {
+            command = EVcxHgVodServiceAddManuallyCmd;
+            txt = qtn_iptv_insert_address_submenu;
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_vcxhg_vod_contentview_share_link_submenu
+// "Send" submenu definition
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_contentview_share_link_submenu
+    {
+    items=
+        {
+        MENU_ITEM 
+            {
+            command = EVcxHgVodContentSendViaMsgCmd;
+            txt = qtn_query_send_via_msg;
+            },
+        MENU_ITEM 
+            {
+            command = EVcxHgVodContentSendViaEmailCmd;
+            txt = qtn_query_send_via_email;
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_vcxhg_vod_send_context_menubar
+// Context menu title definition for Send functionality
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_send_context_menubar
+    {
+    titles=
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_vcxhg_vod_contentview_share_link_submenu;
+            }
+        };
+    }
+
+//----------------------------------------------------
+// r_vcxhg_vod_msk_content_context_menubar
+// Context menu title definition for content view msk
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_vcxhg_vod_msk_content_context_menubar
+    {
+    titles=
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_vcxhg_vod_contentview_context_menu;
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+// r_vcxhg_vod_contentview_context_menu
+// MSK context sensitive menu in content view
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_vcxhg_vod_contentview_context_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            {
+            command = EVcxHgVodContentPlayCmd;
+            txt = qtn_iptv_play;
+            },
+        MENU_ITEM 
+            {
+            command = EVcxHgVodContentStartDownloadCmd;
+            txt = qtn_iptv_download;
+            },
+        MENU_ITEM
+            {
+            command=EVcxHgVodContentResumeDownloadCmd; 
+            txt = qtn_iptv_resume_download;
+            },          
+        MENU_ITEM 
+            { 
+            command=EVcxHgVodContentCancelDownloadCmd; 
+            txt = qtn_iptv_cancel_download; 
+            }
+        };
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_softkeys_options_back__open (MSK)
+//----------------------------------------------------
+//
+RESOURCE CBA r_vcxhg_vod_softkeys_options_back__open
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack;    txt = text_softkey_back;},
+        CBA_BUTTON {id=EAknSoftkeyOpen;    txt = qtn_msk_open;}
+        };
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_msk_button_open
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_open
+    {
+    id = EAknSoftkeyOpen;
+    txt = qtn_msk_open;
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_msk_button_download
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_download
+    {
+    id = EVcxHgVodContentStartDownloadCmd;
+    txt = qtn_iptv_softkey_download;
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_msk_button_play
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_play
+    {
+    id = EVcxHgVodContentPlayCmd;
+    txt = qtn_msk_play;
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_msk_button_resume
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_resume
+    {
+    id = EVcxHgVodContentResumeDownloadCmd;
+    txt = qtn_iptv_softkey_resume;
+    }
+
+//----------------------------------------------------
+//    r_vcxhg_vod_msk_button_do_nothing
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_do_nothing
+    {
+    id = EVcxHgVodEmptyMskCmd;
+    txt = "";
+    }
+
+//----------------------------------------------------
+//     r_vcxhg_vod_msk_button_ctxtmenu
+//----------------------------------------------------
+//
+RESOURCE CBA_BUTTON r_vcxhg_vod_msk_button_ctxtmenu
+    {
+    id = EAknSoftkeyContextOptions;
+    txt = text_softkey_option;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_remove_feed_query
+// -----------------------------------------------------------------------------
+//    
+RESOURCE DIALOG r_vcxhg_vod_remove_feed_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationLayout;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_opening_feeds
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_vod_opening_feeds
+    {
+    buf = qtn_vcx_ns_opening_feeds;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_feeds_video_directory
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_vod_feeds_video_directory
+    {
+    buf = qtn_iptv_video_directory_list;
+    }
+// -----------------------------------------------------------------------------
+// r_vcxhg_video_feeds_title
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_video_feeds_title
+    {
+    buf = qtn_iptv_video_feeds_title;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcx_last_update
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_last_update
+    {
+    buf = qtn_vcx_hg_last_update;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcx_updating_feed
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_updating_feed
+    {
+    buf = qtn_iptv_updating_feed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcx_feed_update_failed
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_feed_update_failed
+    {
+    buf = qtn_iptv_feed_update_failed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcx_vod_updating_items
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_vod_updating_items
+    {
+    //empty list text
+    buf = qtn_vcx_ns_updating_items;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcx_vod_updating
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_vod_updating
+    {
+    //info popup
+    buf = qtn_iptv_updating;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_no_data
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_vod_no_data
+    {
+    // change
+    buf = qtn_iptv_no_videos;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videosize_gb
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_videosize_gb
+    {
+    buf = qtn_iptv_size_list_gb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videosize_mb
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_videosize_mb
+    {
+    buf = qtn_iptv_size_list_mb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videosize_kb
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_videosize_kb
+    {
+    buf = qtn_iptv_list_size_kb;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videolength_full
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_videolength_full
+    {
+    buf = qtn_iptv_video_list_length_full;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videolength_min
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhg_videolength_min
+    {
+    buf = qtn_iptv_video_list_length_min;
+    }
+
+// -----------------------------------------------------------------------------
+// r_iptv_video_downloading
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_iptv_video_downloading
+    {
+    buf = qtn_iptv_video_downloading;
+    }
+
+// -----------------------------------------------------------------------------
+// r_iptv_video_downloaded
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_iptv_video_downloaded
+    {
+    buf = qtn_iptv_video_downloaded;
+    }
+
+// -----------------------------------------------------------------------------
+// r_iptv_download_paused
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_iptv_download_paused
+    {
+    buf = qtn_iptv_download_paused;
+    }
+
+// -----------------------------------------------------------------------------
+// r_iptv_download_failed
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_iptv_download_failed
+    {
+    buf = qtn_iptv_download_failed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_updated_thumbnails
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_updated_thumbnails
+    {
+    buf = qtn_iptv_updated_thumbnails;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_vod_updated_thumbnails
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_updated_thumbnails_one
+    {
+    buf = qtn_iptv_updated_thumbnails_one;
+    }
+// -----------------------------------------------------------------------------
+// r_vcxhg_video_search
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_video_search
+    {
+    buf = qtn_vcx_hg_video_search;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_search_videos_found_one
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_search_videos_found_one
+    {
+    buf = qtn_vcx_hg_search_videos_found_one;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_search_videos_found
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_search_videos_found
+    {
+    buf = qtn_vcx_hg_search_videos_found;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_search_query_dlg
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxhg_search_query_dlg
+    {
+    flags = EGeneralQueryFlags;
+    buttons=R_AVKON_SOFTKEYS_OK_CANCEL;
+    items=
+        {
+        DLG_LINE
+            {
+            type=EAknCtQuery;
+            id=EGeneralQuery;
+            control= AVKON_DATA_QUERY
+                {
+                layout = EDataLayout;
+                label = qtn_iptv_search_query;
+                control=EDWIN
+                    {
+                    flags=EEikEdwinAutoSelection;
+                    width=6;
+                    lines=1;
+                    };
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_searching_wait_note
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxhg_searching_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_CANCEL;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE 
+                { 
+                layout = EWaitLayout;
+                singular_label = qtn_iptv_searching_wait_note;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
+//------------------------------------------------------------------------------
+// r_vcxhg_authentication_query
+// Defines an authentication dialog 
+//------------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxhg_authentication_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtMultilineQuery;
+            id = EMultilineFirstLine;
+            control = AVKON_DATA_QUERY
+                { 
+                layout = EMultiDataFirstEdwin;
+                label = qtn_iptv_query_username;
+                control = EDWIN
+                    {
+                    flags = 0;
+                    width = 5;
+                    lines = 1;
+                    maxlength = 40;
+                    };
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMultilineQuery;
+            id = EMultilineSecondLine;
+            control = AVKON_DATA_QUERY 
+                { 
+                layout = EMultiDataSecondSecEd;
+                label = qtn_iptv_query_password;
+                control = SECRETED
+                    {
+                    num_letters = 40;
+                    };
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_confirmation_query
+// Confirmation query with OK softkey
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_vcxhg_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_CONFIRMATION_QUERY 
+                { 
+                layout = EConfirmationLayout;
+                bmpfile= AVKON_BITMAP_FILE;
+                bmpid= EMbmAvkonQgn_note_error;
+                bmpmask= EMbmAvkonQgn_note_error_mask;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_categories_video_list
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_categories_video_list
+    {
+    buf = qtn_vcx_hg_categories_video_list;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_videos_in_category
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_videos_in_category
+    {
+    buf = qtn_vcx_hg_videos_in_category;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_one_video_in_category
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_one_video_in_category
+    {
+    buf = qtn_vcx_hg_one_video_in_category;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_remove_feed_query_txt
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_remove_feed_query_txt
+    {
+    buf = qtn_iptv_remove_feed_confirmation;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_title_video_search
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_title_video_search
+    {
+    buf = qtn_vcx_title_video_search;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_error_search_failed
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_error_search_failed
+    {
+    buf = qtn_iptv_search_failed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_no_videos_found
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_no_videos_found
+    {
+    buf = qtn_vcx_ns_no_videos_found;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_no_videos
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_no_videos
+    {
+    buf = qtn_vcx_ns_no_videos;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_invalid_data_received
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_invalid_data_received
+    {
+    buf = qtn_iptv_invalid_data; 
+    }       
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_invalid_access_point
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_invalid_access_point
+    {
+    buf = qtn_iptv_invalid_access_point; 
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_auth_failed
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_auth_failed
+    {
+    buf = qtn_iptv_authentication_failed;
+    }    
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_invalid_address
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_invalid_address
+    {
+    buf = qtn_iptv_invalid_address; 
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_content_update_failed
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_content_update_failed
+    {   
+    buf = qtn_iptv_content_update_failed;
+    }
+
+// -----------------------------------------------------------------------------
+// r_vcxhg_content_update_failed
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhg_memory_full
+    {   
+    buf = qtn_iptv_memory_full_delete_data;
+    }
+// -----------------------------------------------------------------------------
+// r_vcxhgvod_video_details_message_query
+// -----------------------------------------------------------------------------
+//  
+RESOURCE DIALOG r_vcxhgvod_video_details_message_query
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY; 
+    items =
+        {
+        DLG_LINE 
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = qtn_iptv_details_header;
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_name { buf = qtn_iptv_video_name; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+// To be removed, not specified in UI spec for Rel6
+RESOURCE TBUF r_vcxhgvod_video_details_length { buf = qtn_iptv_video_length; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_size_kb { buf = qtn_iptv_size_kb; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_size_mb { buf = qtn_iptv_size_mb; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_size_gb { buf = qtn_iptv_size_gb; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_language { buf = qtn_iptv_video_language; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_description { buf = qtn_iptv_video_description; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_author { buf = qtn_iptv_author; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_details_copyright { buf = qtn_iptv_copyright; }
+
+// -----------------------------------------------------------------------------
+// r_vcxhgvod_feed_details_message_query
+// -----------------------------------------------------------------------------
+//  
+RESOURCE DIALOG r_vcxhgvod_feed_details_message_query
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagNoBorder | EEikDialogFlagNoShadow;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY; 
+    items =
+        {
+        DLG_LINE 
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EAknMessageQueryHeaderId;
+            control = AVKON_HEADING
+                {
+                label = qtn_iptv_details_header;
+                headinglayout = R_AVKON_WML_SIGN_QUERY_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtMessageQuery;
+            id = EAknMessageQueryContentId;
+            control = AVKON_MESSAGE_QUERY
+                {
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcxhg_vod_serviceview_moving_softkeys
+// Feed list softkeys when moving.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcxhg_vod_serviceview_moving_softkeys
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EVcxHgVodMovingSoftkeyOk; txt=text_softkey_ok; },
+        CBA_BUTTON{id=EVcxHgVodMovingSoftkeyCancel; txt=text_softkey_cancel; },
+        CBA_BUTTON{id=EVcxHgVodMovingSoftkeyOk; txt=""; }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_vcxhg_vod_serviceview_moving_softkeys_ok_disabled
+// Feed list softkeys when moving, but not allowed to move here.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_vcxhg_vod_serviceview_moving_softkeys_ok_disabled
+    {
+    buttons =
+        {
+        CBA_BUTTON{id=EAknSoftkeyEmpty; txt=" "; },
+        CBA_BUTTON{id=EVcxHgVodMovingSoftkeyCancel; txt=text_softkey_cancel; },
+        CBA_BUTTON{id=EAknSoftkeyEmpty; txt=" "; }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_video_dl_progress
+    {
+    buf = qtn_iptv_memory_percentage;
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_err_video_missing_from_server
+    {
+    buf = qtn_iptv_video_missing_from_server;
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_err_memory_full 
+    {
+    buf = qtn_iptv_memory_full_delete_data;
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_err_invalid_address 
+    {
+    buf = qtn_iptv_invalid_data;
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//  
+RESOURCE TBUF r_vcxhgvod_err_download_failed 
+    {
+    buf = qtn_iptv_download_failed_note;
+    }
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhgvod_download_canceled { buf = qtn_iptv_download_canceled; }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_vcxhgvod_resume_not_possible
+    {
+    buf = qtn_iptv_resume_not_possible;
+    }

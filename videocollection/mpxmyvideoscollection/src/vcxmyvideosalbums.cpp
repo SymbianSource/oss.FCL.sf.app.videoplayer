@@ -264,7 +264,7 @@ void CVcxMyVideosAlbums::RemoveVideosFromAlbumL( CMPXMedia* aCmd )
 //
 void CVcxMyVideosAlbums::AddAlbumL( CMPXMedia& aCmd )
     {
-    if ( TVcxMyVideosCollectionUtil::Title( aCmd ).Length() > KVcxMvcMaxTitleLength )
+    if ( TVcxMyVideosCollectionUtil::Title( aCmd ).Length() > 255 )
         {
         User::Leave( KErrArgument );
         }
@@ -776,29 +776,6 @@ void CVcxMyVideosAlbums::NewVideoFlagChangedL( TUint32 aMdsId )
 void CVcxMyVideosAlbums::VideoTitleChangedL( TUint32 aMdsId )
     {    
     NewVideoFlagChangedL( aMdsId ); // same calculation works for this
-    }
-
-// ----------------------------------------------------------------------------
-// CVcxMyVideosAlbums::VideosAddedOrRemovedFromCacheL
-// ----------------------------------------------------------------------------
-//
-void CVcxMyVideosAlbums::VideosAddedOrRemovedFromCacheL( RArray<TUint32> aMdsIds )
-    {
-    TInt albumCount = iAlbums.Count();
-    TInt videoCount = aMdsIds.Count();
-    for ( TInt i = 0; i < albumCount; i++ )
-        {
-        for ( TInt j = 0; j < videoCount; j++ )
-            {
-            if ( iAlbums[i]->BelongsToAlbum( aMdsIds[j] ) )
-                {
-                if ( iChangedAlbums.Find( i ) == KErrNotFound )
-                    {
-                    iChangedAlbums.AppendL( i );
-                    }
-                }
-            }
-        }    
     }
 
 // ----------------------------------------------------------------------------
