@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -45,6 +45,7 @@ class VideoPlaybackControlBar : public HbWidget
         void setVisibleToControlBar( bool visible );
         void durationChanged( int duration );
         void positionChanged( int position );
+        void resetControl();
 
     private:
         VideoPlaybackControlsController *mController;

@@ -14,7 +14,7 @@
 # Description: Project file for building testuserinputhandler
 #
 #
-# Version : %version: 4 %
+# Version : %version: 6 %
 
 TEMPLATE = app
 TARGET = testuserinputhandler
@@ -31,22 +31,19 @@ INCLUDEPATH += ../../../inc \
                
 
 LIBS += -lremconcoreapi.dll \
-        -lremconInterfacebase.dll 
+        -lremconInterfacebase.dll \
+        -lcentralrepository.dll         
 
                 
 # Input
 HEADERS += stub/inc/mpxvideoviewwrapper.h \
            stub/inc/videobaseplaybackview.h \
            stub/inc/videoplaybackviewfiledetails.h \
-           stub/inc/hal.h \
-           stub/inc/centralrepository.h \
            inc/testuserinputhandler.h \
            ../../viewinc/videoplaybackuserinputhandler.h
                                                 
 SOURCES += stub/src/mpxvideoviewwrapper.cpp \					 				 
            stub/src/videobaseplaybackview.cpp \
            stub/src/videoplaybackviewfiledetails.cpp \
-           stub/src/hal.cpp \
-           stub/src/centralrepository.cpp \
            src/testuserinputhandler.cpp \		       
            ../../viewsrc/videoplaybackuserinputhandler.cpp

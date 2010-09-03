@@ -14,12 +14,17 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 3 %
+# Version : %version: 4 %
 
 
 TEMPLATE = app
 TARGET = testvideoappuiengine
 DEFINES += BUILD_VIDEOPLAYERAPP_DLL
+
+symbian: 
+{ 
+    MMP_RULES += "USERINCLUDE stub/inc"
+}
 
 INCLUDEPATH += stub/inc \
                ../../../../inc \

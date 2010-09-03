@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  7 %
+// Version : %version:  9 %
 
 
 
@@ -41,8 +41,7 @@ class CVideoPlaybackUserInputHandler : public CBase,
         /**
         * Two-phased constructor.
         */
-        static CVideoPlaybackUserInputHandler* NewL(
-                CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected );
+        static CVideoPlaybackUserInputHandler* NewL( CMPXVideoViewWrapper* aWrapper );
 
         /**
         * Destructor.
@@ -59,10 +58,12 @@ class CVideoPlaybackUserInputHandler : public CBase,
         /**
         * Symbian 2nd phase constructor.
         */
-        void ConstructL( TBool aTvOutConnected );
+        void ConstructL();
 
     public:
-        void ProcessKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType );
+        /*void ProcessPointerEventL( CCoeControl* aControl,
+                                   const TPointerEvent& aPointerEvent,
+                                   TVideoControlType aMPXControl );*/
 
 	    void ProcessMediaKey( TRemConCoreApiOperationId aOperationId,
                               TRemConCoreApiButtonAction aButtonAct );
@@ -90,9 +91,8 @@ class CVideoPlaybackUserInputHandler : public CBase,
         * @return void
         */
         void SetForeground( TBool aForeground );
- 
-        void HandleTVOutEventL( TBool aTVOutConnected );
-                
+
+
 	private:
         /**
         * Handles volume repeat timer timout
@@ -105,6 +105,12 @@ class CVideoPlaybackUserInputHandler : public CBase,
         * @return void
         */
         void HandleVolumeRepeatL();
+        
+        /**
+        * Checks if the key lock is ON
+        * @return ETrue if keylock is ON, EFalse otherwise
+        */        
+        TBool IsKeyLocked();         
 
         void HandleFastForward( TRemConCoreApiButtonAction aButtonAct );
 
@@ -114,17 +120,9 @@ class CVideoPlaybackUserInputHandler : public CBase,
 
         void HandleVolumeDown( TRemConCoreApiButtonAction aButtonAct );
 
-        // Handles the Display light timer timeout
-        static TInt  HandleDisplayTimeout( TAny* aPtr );
-        
-        // Disable the display backlight
-        void DisableBacklight();
-        
-        // Enable the display backlight
-        void EnableBacklight();
-        
-        // Restarts the timer for display light time-out
-        void RestartDisplayTimer();
+        /*void ReRoutePointerEventL( CCoeControl* aControl,
+                                   const TPointerEvent& aPointerEvent,
+                                   TVideoControlType aControl );*/
 
     private:
 
@@ -138,14 +136,9 @@ class CVideoPlaybackUserInputHandler : public CBase,
 
         CPeriodic*                              iVolumeRepeatTimer;     // owned
         TBool                                   iVolumeRepeatUp;
-        TBool                                   iTVOutConnected;        // Flag to indicate if TV is connected
-        CPeriodic*                              iDisplayTimer;          // Timer to timeout the lights time-out
-        TInt                                    iDisplayTimeOut;        // Value of the lights time-out
-
         TBool                                   iForeground;
         CMPXVideoViewWrapper*                   iViewWrapper;
 };
-
 
 #endif /*VIDEOPLAYBACKUSERINPUTHANDLER_H_*/
 

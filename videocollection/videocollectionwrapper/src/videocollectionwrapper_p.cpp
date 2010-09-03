@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 27 %
+// Version : %version: 30 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -25,7 +25,10 @@
 #include "videocollectionwrapper.h"
 #include "videocollectionwrapper_p.h"
 #include "videolistdatamodel.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
+#include "videoproxymodelallvideos.h"
+#include "videoproxymodelcollections.h"
+#include "videoproxymodelcontent.h"
 #include "videocollectionclient.h"
 #include "videocollectioncommon.h"
 #include "videocollectiontrace.h"
@@ -37,13 +40,13 @@
 // VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate()
 // -----------------------------------------------------------------------------
 //
-VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate() 
-    : mAllVideosModel( 0 )
-    , mCollectionsModel( 0 )
-    , mCollectionContentModel( 0 )
-    , mGenericModel( 0 )
-    , mSourceModel( 0 )
-    , mAboutToClose( false )
+VideoCollectionWrapperPrivate::VideoCollectionWrapperPrivate() :
+    mGenericModel( 0 ),
+    mAllVideosModel( 0 ),
+    mCollectionsModel( 0 ),
+    mCollectionContentModel( 0 ),
+    mSourceModel( 0 ),
+    mAboutToClose( false )
 {
 	FUNC_LOG;
     // NOP 
@@ -58,85 +61,83 @@ VideoCollectionWrapperPrivate::~VideoCollectionWrapperPrivate()
 	FUNC_LOG;
 }
 
-
 // -----------------------------------------------------------------------------
-// VideoCollectionWrapperPrivate::getModel()
+// VideoCollectionWrapperPrivate::getGenericModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapperPrivate::getModel(VideoCollectionCommon::TModelType &type)
+VideoProxyModelGeneric* VideoCollectionWrapperPrivate::getGenericModel()
 {
-	FUNC_LOG;
-    INFO_1("VideoCollectionWrapperPrivate::getModel() type: %d", type);
-	
-    if(mAboutToClose)
+    FUNC_LOG;
+    if(!mGenericModel)
     {
-        return 0;
+        mGenericModel = initProxyModelModel<VideoProxyModelGeneric>();
     }
+    return mGenericModel;
+}
+
+// -----------------------------------------------------------------------------
+// VideoCollectionWrapperPrivate::getAllVideosModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapperPrivate::getAllVideosModel()
+{
+    FUNC_LOG;
+    if(!mAllVideosModel)
+    {
+        mAllVideosModel = initProxyModelModel<VideoProxyModelAllVideos>();
+    }
+    return mAllVideosModel;
+}
+
+// -----------------------------------------------------------------------------
+// VideoCollectionWrapperPrivate::getCollectionsModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapperPrivate::getCollectionsModel()
+{
+    FUNC_LOG;
+    if(!mCollectionsModel)
+    {
+        mCollectionsModel = initProxyModelModel<VideoProxyModelCollections>();
+    }
+    return mCollectionsModel;    
+}
+
+// -----------------------------------------------------------------------------
+// VideoCollectionWrapperPrivate::getCollectionContentModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapperPrivate::getCollectionContentModel()
+{
+    FUNC_LOG;
+    if(!mCollectionContentModel)
+    {
+        mCollectionContentModel = initProxyModelModel<VideoProxyModelContent>();
+    }
+    return mCollectionContentModel;
+}
+
+// -----------------------------------------------------------------------------
+// VideoCollectionWrapperPrivate::initSourceModel()
+// -----------------------------------------------------------------------------
+//
+bool VideoCollectionWrapperPrivate::initSourceModel()
+{
+    FUNC_LOG;
     
-    VideoSortFilterProxyModel *model = 0;
     if(!mSourceModel)
     {
         mSourceModel = new VideoListDataModel();
-        if(!mSourceModel || mSourceModel->initialize() < 0 || 
+        if(mSourceModel->initialize() < 0 || 
             !connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(aboutToQuitSlot())) )
         {
-            ERROR(-1, "VideoCollectionWrapperPrivate::getModel() sourceModel setup failed.");
-            return 0;
+            delete mSourceModel;
+            mSourceModel = 0;
+            ERROR(-1, "VideoCollectionWrapperPrivate::initSourceModel() sourceModel setup failed.");
+            return false;
         }
     }
-    bool needsInitialization = false;
-    if(type == VideoCollectionCommon::EModelTypeAllVideos)
-    {
-        if(!mAllVideosModel)
-        {
-            mAllVideosModel = new VideoSortFilterProxyModel(type);
-            needsInitialization = true;
-        }
-        model = mAllVideosModel;
-    }
-    else if(type == VideoCollectionCommon::EModelTypeCollections)
-    {
-        if(!mCollectionsModel)
-        {
-            mCollectionsModel = new VideoSortFilterProxyModel(type);
-            needsInitialization = true;
-        }
-        model = mCollectionsModel;
-    }
-    else if(type == VideoCollectionCommon::EModelTypeCollectionContent)
-    {
-        if(!mCollectionContentModel)
-        {
-            mCollectionContentModel = new VideoSortFilterProxyModel(type);
-			needsInitialization = true;   
-        }
-        model = mCollectionContentModel;
-    }
-    else if(type == VideoCollectionCommon::EModelTypeGeneric)
-    {
-        if(!mGenericModel)
-        {
-            mGenericModel = new VideoSortFilterProxyModel(type);
-            needsInitialization = true;
-        }
-        model = mGenericModel;
-    }
-    
-    if(needsInitialization)
-    {        
-        if(model && model->initialize(mSourceModel) < 0)
-        {
-            ERROR(-1, "VideoCollectionWrapperPrivate::getModel() no model or init failed.");
-            delete model;
-            return 0;
-        }
-        if(!connect(model, SIGNAL(shortDetailsReady(TMPXItemId)), mSourceModel, SIGNAL(shortDetailsReady(TMPXItemId))))
-        {
-        	delete model;
-        	return 0;
-        }
-    }   
-    return model;
+    return true;
 }
 
 // -----------------------------------------------------------------------------

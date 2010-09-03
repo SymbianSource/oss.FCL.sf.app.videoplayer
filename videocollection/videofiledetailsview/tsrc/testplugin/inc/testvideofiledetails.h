@@ -25,7 +25,7 @@
 #include <mpxitemid.h>
 
 class VideoFileDetailsViewPlugin;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 
 class TestVideoFileDetails : public QObject
@@ -207,7 +207,7 @@ private:
     /**
      * stub model
      */
-    VideoSortFilterProxyModel* mDummyModel;
+    VideoProxyModelGeneric* mDummyModel;
     
     /**
      * Testable object

@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestVideoPlaybackControlBar
-* 
+*
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 #include <qdebug>
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     pass[0] = argv[0];
     pass[1] = "-o";
     pass[2] = "c:\\data\\testcontrolbar.txt";
-    
+
     int res = QTest::qExec(&tv, 3, pass);
-    
+
     return res;
 }
 
@@ -64,7 +64,7 @@ void TestControlBar::init()
 {
     MPX_ENTER_EXIT(_L("TestControlBar::init()"));
 
-    mController = new VideoPlaybackControlsController();   
+    mController = new VideoPlaybackControlsController();
     mControlBar = new VideoPlaybackControlBar( mController );
 
     mControlBar->initialize();
@@ -208,6 +208,27 @@ void TestControlBar::testPositionChanged()
     int position = 54321;
     mControlBar->positionChanged( position );
     QVERIFY( mControlBar->mProgressBar->mPosition == position );
+
+    cleanup();
+}
+
+// ---------------------------------------------------------------------------
+// testResetControl
+// ---------------------------------------------------------------------------
+//
+void TestControlBar::testResetControl()
+{
+    MPX_ENTER_EXIT(_L("TestControlBar::testResetControl()"));
+
+    init();
+
+    QVERIFY( ! mControlBar->mProgressBar->mReset );
+    QVERIFY( ! mControlBar->mToolBar->mReset );
+
+    mControlBar->resetControl();
+
+    QVERIFY( mControlBar->mProgressBar->mReset );
+    QVERIFY( mControlBar->mToolBar->mReset );
 
     cleanup();
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -38,7 +38,7 @@ class CVideoPlaybackUserInputHandler : public CBase
         * Two-phased constructor.
         */
         IMPORT_C static CVideoPlaybackUserInputHandler* NewL(
-                CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected );
+                CMPXVideoViewWrapper* aWrapper );
 
         /**
         * Destructor.
@@ -55,21 +55,20 @@ class CVideoPlaybackUserInputHandler : public CBase
         /**
         * Symbian 2nd phase constructor.
         */
-        void ConstructL( TBool aTvOutConnected );
+        void ConstructL();
 
     public:
         void ProcessKeyEventL( const TKeyEvent& aKeyEvent, TEventCode aType );
 
         void SetForeground( TBool aForeground );
-         
+
         void HandleTVOutEventL(TBool aTVOutConnected);
-                
+
     private:
         TBool                                   iTVOutConnected;        // Flag to indicate if TV is connected
         TBool                                   iForeground;
         CMPXVideoViewWrapper*                   iViewWrapper;
 };
-
 
 #endif /*VIDEOPLAYBACKUSERINPUTHANDLER_H_*/
 

@@ -18,7 +18,7 @@
 // INCLUDE FILES
 #include <qabstractitemmodel.h>
 #include <QDebug>
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectionwrapper.h"
 
 int VideoCollectionWrapper::mReferenceCount = 0;
@@ -72,7 +72,7 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
 // getModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
+VideoProxyModelGeneric* VideoCollectionWrapper::getAllVideosModel()
 {
     return mModel;
 }
@@ -81,7 +81,7 @@ VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(int type)
 // setModel()
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionWrapper::setModel(VideoSortFilterProxyModel* model)
+void VideoCollectionWrapper::setModel(VideoProxyModelGeneric* model)
 {
     mModel = model;
 }

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#43 %
+// Version : %version: 47 %
 
 
 #include <QApplication>
@@ -26,8 +26,8 @@
 #include <xqserviceutil.h>
 #include <hbview.h>
 #include <hbapplication.h>
-#include <hbactivitymanager.h>
 #include <hbnotificationdialog.h>
+#include <afactivitystorage.h>
 
 #include "videoplayerengine.h"
 #include "videoactivitystate.h"
@@ -50,6 +50,7 @@ VideoPlayerEngine::VideoPlayerEngine( bool isService )
     , mFileDetailsViewPlugin( 0 )
     , mPlaybackWrapper( 0 )
     , mVideoServices( 0 )
+    , mActivityStorage( 0 )
 {
     MPX_DEBUG(_L("VideoPlayerEngine::VideoPlayerEngine()"));
 }
@@ -91,6 +92,8 @@ VideoPlayerEngine::~VideoPlayerEngine()
 
     delete mPlaybackWrapper;
 
+    delete mActivityStorage;
+    
     // disconnect all signals 
     disconnect();
 }
@@ -151,6 +154,16 @@ void VideoPlayerEngine::initialize()
     }
     else
     {
+        if(!mActivityStorage)
+        {
+            mActivityStorage = new AfActivityStorage();
+        }
+        
+        VideoActivityState::instance().setActivityData(mActivityStorage->activityData(ACTIVITY_VIDEOPLAYER_MAINVIEW));    
+
+        // after reading, remove activity to prevent multiple instances in taskswitcher
+        mActivityStorage->removeActivity(ACTIVITY_VIDEOPLAYER_MAINVIEW);
+        
         //
         // check latest plugin type from activity manager data and create + activate it 
         // CollectionView (default) and playbackview are the ones that are accepted
@@ -230,20 +243,6 @@ void VideoPlayerEngine::handleCommand( int commandCode )
             break;
         }
     }    
-}
-
-// -------------------------------------------------------------------------------------------------
-// viewReadySlot()
-// -------------------------------------------------------------------------------------------------
-//
-void VideoPlayerEngine::viewReadySlot()
-{
-    MPX_ENTER_EXIT(_L("VideoPlayerEngine::viewReady()"));
-    emit applicationReady();
-    // since we need to emit applicationReady only once at startup,
-    // disconnect the viewReady -signal from this object
-    disconnect(hbInstance->allMainWindows().value(0), SIGNAL(viewReady()), 
-               this, SLOT(viewReadySlot()));
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -488,18 +487,26 @@ void VideoPlayerEngine::handleQuit()
 {
     MPX_ENTER_EXIT(_L("VideoPlayerEngine::handleQuit()"));
 	
-    if ( ! mIsService )
+    if ( ! mIsService && mActivityStorage)
     {
         VideoActivityState &localActivity(VideoActivityState::instance());
+        
+        // screenshot required for activity to save correctly
+        // need to take it before deactivation to actually show something
+        QVariantHash metadata;
+        HbMainWindow *window = hbInstance->allMainWindows().first();
+        metadata.insert("screenshot", QPixmap::grabWidget(window, window->rect()));
             
-        QVariant data = QVariant();
-        HbActivityManager *actManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+        QVariant data = QVariant();      
         
         //
         // deactivate is the final point for current plugin to save it's activity data into 
         // VideoActivityState before they are saved to to activity manager
         //
-        mCurrentViewPlugin->deactivateView();        
+        if ( mCurrentViewPlugin )
+        {
+            mCurrentViewPlugin->deactivateView();
+        }
         
         //
         // get and save recent view type: either playback or collection view plugins are currently used.
@@ -523,11 +530,12 @@ void VideoPlayerEngine::handleQuit()
         
         data = viewType;
         localActivity.setActivityData( data, KEY_VIEWPLUGIN_TYPE );
-        
-        // save data to activity manager
-        actManager->addActivity( ACTIVITY_VIDEOPLAYER_MAINVIEW, 
-                                 localActivity.getActivityData(),
-                                 QVariantHash() );                
+
+        // save data to activity manager, if it fails there's nothing to do
+        mActivityStorage->saveActivity( ACTIVITY_VIDEOPLAYER_MAINVIEW, 
+                                        localActivity.getActivityData(),
+                                        metadata );
+                                                
     }
     
     delete this;
@@ -633,7 +641,11 @@ bool VideoPlayerEngine::isPlayServiceInvoked()
     
     bool result = false;   
     
-    if ( mIsService )
+    if ( mIsPlayService )
+    {
+        result = true;        
+    }    
+    else if ( mIsService )
     {
         QString intface = XQServiceUtil::interfaceName();
         MPX_DEBUG(_L("VideoPlayerEngine::isPlayServiceInvoked() : interfaceName(%s)"), intface.data() );     

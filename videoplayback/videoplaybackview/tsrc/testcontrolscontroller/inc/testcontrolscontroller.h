@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 #ifndef __TESTCONTROLSCONTROLLER_H__
 #define __TESTCONTROLSCONTROLLER_H__
@@ -71,6 +71,7 @@ private slots:
     void testHandleEventTvOutDisconnected();
     void testHandleEventHandleErrors();
     void testHandleEventShowVolumeControls();
+    void testHandleEventBackground();
     void testIsFileDetailsAdded();
 
     //

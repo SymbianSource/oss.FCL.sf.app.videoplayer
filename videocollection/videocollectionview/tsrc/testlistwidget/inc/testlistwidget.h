@@ -11,11 +11,11 @@
 *
 * Contributors:
 *
-* Description:   tester for methods in VideoSortFilterProxyModel
+* Description:   tester for methods in VideoProxyModelGeneric
 *
 */
 
-// Version : %version: 27 %
+// Version : %version: 28 %
 
 #ifndef __TESTLISTWIDGET_H__
 #define __TESTLISTWIDGET_H__
@@ -28,7 +28,7 @@ class VideoListWidget;
 class DummyDataModel;
 class HbAbstractViewItem;
 class HbView;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 class HbMainWindow;
 class ListWidgetTester;
@@ -45,7 +45,7 @@ class TestListWidget : public QObject
 public:
 
     void setRowCount(int count,
-        TModelType type = EModelTypeAllVideos,
+        VideoProxyModelGeneric *proxyModel = 0,
         VideoListDataModel *model = 0);
     
     // test functions for the test framework

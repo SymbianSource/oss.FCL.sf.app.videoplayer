@@ -23,7 +23,7 @@
 #include "videocollectioncommon.h"
 
 class HbListView;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 class VideoCollectionViewUtils : public QObject
 {
@@ -73,6 +73,16 @@ public:
      * @return Application UID if operation succeeded, less than zero in error cases.
      */
     int getCenRepIntValue(int key);
+    
+    /**
+     * Set video services in use.
+     */
+    void setIsService();
+
+    /**
+     * Get video services in use.
+     */
+    bool isService();
 
 public:
     /**
@@ -84,7 +94,7 @@ public:
     /**
      * Initilizes model sort values.
      */
-    static void sortModel(VideoSortFilterProxyModel *model, bool async, VideoCollectionCommon::TCollectionLevels target);
+    static void sortModel(VideoProxyModelGeneric *model, bool async, VideoCollectionCommon::TCollectionLevels target);
     
     /**
      * Method saves the latest videolist widget level into local activity manager 
@@ -149,6 +159,10 @@ private:
     virtual ~VideoCollectionViewUtils();
 
 private:
+
+    /** is service */
+    bool mIsService;
+    
     /** current sorting role */
     int mVideosSortRole;
     int mCollectionsSortRole;

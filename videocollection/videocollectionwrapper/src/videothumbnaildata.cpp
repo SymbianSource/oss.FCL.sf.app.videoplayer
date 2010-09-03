@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 26.1.2 %
+// Version : %version: 26.1.3 %
 
 // INCLUDE FILES
 #include "videocollectiontrace.h"
@@ -84,7 +84,7 @@ const QIcon* VideoThumbnailData::getThumbnail(const TMPXItemId &mediaId)
 // VideoThumbnailData::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
+void VideoThumbnailData::startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex)
 {
 	INFO_2("VideoThumbnailData::startBackgroundFetching() model: 0x%x, fetchIndex: %d", model, fetchIndex);
     d_ptr->startBackgroundFetching(model, fetchIndex);

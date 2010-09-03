@@ -22,8 +22,8 @@
 // INCLUDES
 #include <QtTest/QtTest>
 
+
 class VideoPlaybackViewPlugin;
-class MpxViewPlugin;
 
 
 class TestVideoPlaybackViewPlugin : public QObject
@@ -59,7 +59,7 @@ class TestVideoPlaybackViewPlugin : public QObject
         void commandSignal(int);
 
     private:    
-        MpxViewPlugin* mVidPBPlugin;    
+        VideoPlaybackViewPlugin* mVidPBPlugin;    
 };
 
 

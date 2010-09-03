@@ -14,12 +14,18 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#14 %
+# Version : %version: 16 %
 
 
 TEMPLATE = app
 TARGET = testvideoplayerengine
 DEFINES += BUILD_VIDEOPLAYERAPP_DLL
+
+symbian: 
+{ 
+    MMP_RULES += "USERINCLUDE stub/inc"
+}
+
 
 DEPENDPATH += inc src stub/src stub/inc
 
@@ -46,6 +52,7 @@ HEADERS += videoplaybackwrapper.h \
            videoserviceview.h \
            hbview.h \
            videoactivitystate.h \
+           afactivitystorage.h \
            ../../../../inc/videoplayerengine.h
 
 SOURCES += videoplaybackwrapper.cpp \
@@ -59,4 +66,5 @@ SOURCES += videoplaybackwrapper.cpp \
            videoserviceplay.cpp \
            videoserviceview.cpp \
            videoactivitystate.cpp \
+           afactivitystorage.cpp \
            ../../src/videoplayerengine.cpp

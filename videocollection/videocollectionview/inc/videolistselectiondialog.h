@@ -31,7 +31,7 @@ class HbCheckBox;
 class HbStackedWidget;
 class VideoCollectionUiLoader;
 class VideoCollectionWrapper;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoListWidget;
 
 class VideoListSelectionDialog: public HbDialog
@@ -265,7 +265,7 @@ private:
     /**
      * Video list model
      */
-    VideoSortFilterProxyModel *mModel;
+    VideoProxyModelGeneric *mModel;
     
     /**
      * Boolean to know if the model is ready or not. 

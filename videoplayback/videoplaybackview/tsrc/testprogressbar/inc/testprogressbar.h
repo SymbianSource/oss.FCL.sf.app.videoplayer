@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestProgressBar
-* 
+*
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 #ifndef __TESTPROGRESSBAR_H__
 #define __TESTPROGRESSBAR_H__
@@ -37,17 +37,17 @@ class TestProgressBar : public QObject
          * will be called before each testfunction is executed.
          *
          */
-        void init(); 
-    
+        void init();
+
         /**
          * will be called after every testfunction.
          *
          */
         void cleanup();
-    
+
         void setup();
 
-    // test functions for the test framework         
+    // test functions for the test framework
     private slots:
         void testHandleSliderPressed();
         void testHandleSliderMoved();
@@ -55,8 +55,9 @@ class TestProgressBar : public QObject
         void testUpdateWithFileDetails();
         void testUpdateState();
         void testDurationChanged();
-        void testPositionChanged();	
+        void testPositionChanged();
         void testHandleSeekingTimeout();
+        void testResetControl();
 
     signals:
         void commandSignal();

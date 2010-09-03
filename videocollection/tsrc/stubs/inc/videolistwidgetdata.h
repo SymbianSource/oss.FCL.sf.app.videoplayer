@@ -18,6 +18,8 @@
 #ifndef VIDEOLISTWIDGETDATA_H
 #define VIDEOLISTWIDGETDATA_H
 
+#include <QModelIndex>
+
 class VideoListWidgetData
 {
 public: // methods

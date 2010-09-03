@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 20 %
+// Version : %version: ou1cpsw#22 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -33,6 +33,7 @@
 class MpxViewPlugin;
 class VideoServices;
 class VideoPlaybackWrapper;
+class AfActivityStorage;
 
 /**
  *  VideoPlayerEngine
@@ -64,7 +65,6 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
     
     public slots:
         void handleCommand( int commandCode );
-        void viewReadySlot();
 
     private slots:
         void handleQuit();
@@ -111,6 +111,8 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
         VideoPlaybackWrapper      *mPlaybackWrapper;
 
         VideoServices*            mVideoServices;
+        
+        AfActivityStorage*        mActivityStorage;
 
 };
 

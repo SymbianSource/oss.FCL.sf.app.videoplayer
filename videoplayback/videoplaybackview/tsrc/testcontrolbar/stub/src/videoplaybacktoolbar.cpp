@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 
 
@@ -31,9 +31,10 @@
 // VideoPlaybackToolBar::VideoPlaybackToolBar()
 // -------------------------------------------------------------------------------------------------
 //
-VideoPlaybackToolBar::VideoPlaybackToolBar( 
+VideoPlaybackToolBar::VideoPlaybackToolBar(
         VideoPlaybackControlsController* controller )
     : mController( controller )
+    , mReset( false )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackToolBar::VideoPlaybackToolBar"));
 }
@@ -121,6 +122,17 @@ void VideoPlaybackToolBar::setVisible( bool visible )
     MPX_DEBUG(_L("VideoPlaybackToolBar::setVisible position = %d"), visible );
 
     mVisible = visible;
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackToolBar::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackToolBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackToolBar::resetControl()"));
+
+    mReset = true;
 }
 
 //End of file

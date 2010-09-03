@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 6.1.1 %
 
 // INCLUDE FILES
 #include <qpixmap.h>
@@ -47,7 +47,7 @@ VideoThumbnailFetcher::VideoThumbnailFetcher()
 {
 	FUNC_LOG;
     mThumbnailManager = new ThumbnailManager();
-    mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailMedium);
+    mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailSmall);
     mThumbnailManager->setQualityPreference(ThumbnailManager::OptimizeForPerformance);
     mThumbnailManager->setMode(ThumbnailManager::CropToAspectRatio);
     

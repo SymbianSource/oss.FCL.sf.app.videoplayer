@@ -27,7 +27,7 @@
 
 // FORWARD DECLARATIONS
 class VideoCollectionWrapperPrivate;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 
 /**
@@ -39,7 +39,7 @@ class VideoSortFilterProxyModel;
  *  @code
  *  #include "videocollectioncommon.h"
  *  #include "videocollectionwrapper.h"
- *  #include "videosortfilterproxymodel.h"
+ *  #include "videoproxymodelgeneric.h"
  *  
  *  ...
  *  ////
@@ -47,7 +47,7 @@ class VideoSortFilterProxyModel;
  *  ////
  *  VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
  *  // getting all videos model
- *  VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+ *  VideoProxyModelGeneric *model = wrapper.getAllVideosModel();
  *  ...
  *  ////
  *  // Opening collection and start fetching video item data
@@ -80,15 +80,37 @@ public: // Constructor
     static VideoCollectionWrapper &instance();  
     
 	/**
-     * Returns pointer to model. Null if creation fails or if
+     * Returns pointer to generic video model. Null if creation fails or if
      * application is closing.
-     * 
-     * @param type of the model
      * 
      * @return address to model or NULL if fails or if application is closing.
      */    
-    VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType type);
+    VideoProxyModelGeneric* getGenericModel();
 
+    /**
+     * Returns pointer to all videos model. Null if creation fails or if
+     * application is closing.
+     * 
+     * @return address to model or NULL if fails or if application is closing.
+     */    
+    VideoProxyModelGeneric* getAllVideosModel();
+
+    /**
+     * Returns pointer to collections model. Null if creation fails or if
+     * application is closing.
+     * 
+     * @return address to model or NULL if fails or if application is closing.
+     */    
+    VideoProxyModelGeneric* getCollectionsModel();
+    
+    /**
+     * Returns pointer to collection content model. Null if creation fails or if
+     * application is closing.
+     * 
+     * @return address to model or NULL if fails or if application is closing.
+     */    
+    VideoProxyModelGeneric* getCollectionContentModel();
+    
     /**
      * Method can be used by client to emit status signal
      * containing status code from particular async status.

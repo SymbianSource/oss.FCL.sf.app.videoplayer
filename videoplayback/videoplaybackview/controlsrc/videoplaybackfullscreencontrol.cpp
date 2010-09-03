@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#10 %
+// Version : %version: da1mmcf#11 %
 
 
 
@@ -33,10 +33,10 @@
 // VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl()
 // -------------------------------------------------------------------------------------------------
 //
-VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl( 
-        VideoPlaybackControlsController* controller, 
-        TVideoPlaybackControls index, 
-        HbWidget* widget, 
+VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl(
+        VideoPlaybackControlsController* controller,
+        TVideoPlaybackControls index,
+        HbWidget* widget,
         TUint controlproperties )
     : mController( controller )
     , mControl( widget )
@@ -307,6 +307,18 @@ void VideoPlaybackFullScreenControl::updateControlsWithFileDetails(
 void VideoPlaybackFullScreenControl::updateControlProperties( TUint properties )
 {
     mProperties = properties;
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackFullScreenControl::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackFullScreenControl::resetControl()
+{
+    if ( mControlIndex == EControlBar )
+    {
+        static_cast<VideoPlaybackControlBar*>(mControl)->resetControl();
+    }
 }
 
 // End of file

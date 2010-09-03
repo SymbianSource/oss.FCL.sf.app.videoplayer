@@ -15,14 +15,14 @@
 * 
 */
 
-// Version : %version: 31 %
+// Version : %version: 32 %
 
 // INCLUDE FILES
 #include <qabstractitemmodel.h>
 
 #include "videocollectionwrapper.h"
 #include "videocollectionwrapper_p.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectiontrace.h"
 
 // -----------------------------------------------------------------------------
@@ -59,15 +59,57 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
 }
 
 // -----------------------------------------------------------------------------
-// CVideoCollectionWrapper::getModel()
+// CVideoCollectionWrapper::getGenericModel()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(VideoCollectionCommon::TModelType type)
+VideoProxyModelGeneric* VideoCollectionWrapper::getGenericModel()
+{
+    FUNC_LOG;
+    if(d)
+    {
+        return d->getGenericModel();
+    }
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
+// CVideoCollectionWrapper::getAllVideosModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapper::getAllVideosModel()
 {
 	FUNC_LOG;
     if(d)
     {
-        return d->getModel(type);
+        return d->getAllVideosModel();
+    }
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
+// CVideoCollectionWrapper::getCollectionsModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapper::getCollectionsModel()
+{
+    FUNC_LOG;
+    if(d)
+    {
+        return d->getCollectionsModel();
+    }
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
+// CVideoCollectionWrapper::getCollectionContentModel()
+// -----------------------------------------------------------------------------
+//
+VideoProxyModelGeneric* VideoCollectionWrapper::getCollectionContentModel()
+{
+    FUNC_LOG;
+    if(d)
+    {
+        return d->getCollectionContentModel();
     }
     return 0;
 }

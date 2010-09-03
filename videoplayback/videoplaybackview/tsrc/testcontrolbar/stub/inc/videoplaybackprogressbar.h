@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -38,6 +38,7 @@ class VideoPlaybackProgressBar : public HbWidget
         void initialize();
         void updateWithFileDetails( VideoPlaybackViewFileDetails* details );
         void updateState( TMPXPlaybackState state );
+        void resetControl();
 
     public:
         void durationChanged( int duration );
@@ -47,6 +48,7 @@ class VideoPlaybackProgressBar : public HbWidget
         VideoPlaybackControlsController *mController;
         VideoPlaybackViewFileDetails *mFileDetails;
         TMPXPlaybackState mState;
+        bool mReset;
         int mDuration;
         int mPosition;
 };

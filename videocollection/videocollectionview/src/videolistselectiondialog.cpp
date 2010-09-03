@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 30.1.3 %
+// Version : %version: 30.1.4 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -30,7 +30,7 @@
 
 #include "videocollectionuiloader.h"
 #include "videolistwidget.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videolistselectiondialog.h"
 #include "videocollectionwrapper.h"
 #include "videocollectionviewutils.h"
@@ -101,8 +101,7 @@ VideoListSelectionDialog::VideoListSelectionDialog( VideoCollectionUiLoader *uiL
 
     // create model for list widget
     mModel =
-        VideoCollectionWrapper::instance().getModel(
-        		VideoCollectionCommon::EModelTypeGeneric);
+        VideoCollectionWrapper::instance().getGenericModel();
     if (mModel)
     {
         // create list widget
@@ -189,7 +188,7 @@ bool VideoListSelectionDialog::initDialog()
 	FUNC_LOG;
     if(!mModel)
     {
-        mModel = VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeGeneric);
+        mModel = VideoCollectionWrapper::instance().getGenericModel();
         if (!mModel)
         {
            return false;
@@ -793,9 +792,8 @@ QString VideoListSelectionDialog::getSelectedName()
     QString name;
     if(mSelectedAlbumId.iId2 > KVcxMvcMediaTypeVideo)
     {
-        VideoSortFilterProxyModel *model = 
-                VideoCollectionWrapper::instance().getModel(
-                		VideoCollectionCommon::EModelTypeCollections);
+        VideoProxyModelGeneric *model = 
+                VideoCollectionWrapper::instance().getCollectionsModel();
         if(!model)
         {
             return name;

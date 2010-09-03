@@ -40,7 +40,7 @@
 #include "videocollectioncommon.h"
 #include "mpxhbvideocommondefs.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "testvideofiledetails.h"
 
 // trick to get access to protected/private members.
@@ -64,7 +64,7 @@ const char *TEST_VIDEO_DETAILS_MENUACTION_DELETE = "mOptionsDelete";
 void TestVideoFileDetails::initTestCase()
 {
    mDummyModel = 0;
-   mDummyModel = new VideoSortFilterProxyModel();
+   mDummyModel = new VideoProxyModelGeneric();
    
    connect(this, SIGNAL(shortDetailsReady(TMPXItemId)), mDummyModel, SIGNAL(shortDetailsReady(TMPXItemId)));
    connect(this, SIGNAL(fullDetailsReady(QVariant&)), mDummyModel, SIGNAL(fullVideoDetailsReady(QVariant&)));

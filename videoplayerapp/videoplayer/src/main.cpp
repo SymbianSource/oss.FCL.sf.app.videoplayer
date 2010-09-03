@@ -15,22 +15,26 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: 11.1.3 %
 
 
 #include <QObject>
 #include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <xqserviceutil.h>
-#include <hbactivitymanager.h>
 #include <hbtranslator.h> 
 
 #include "videoplayerengine.h"
-#include "videoactivitystate.h"
+#include "videoplayerapp.h"
 
 int main(int argc, char *argv[])
 {
-    HbApplication app( argc, argv, Hb::SplashFixedVertical );
+    //
+    // has the application been launched via XQ Service Framework
+    //
+    bool isAservice(XQServiceUtil::isService(argc, argv));
+
+    VideoPlayerApp app( argc, argv, isAservice ? Hb::NoSplash : Hb::SplashFixedVertical );
 
     // 
     // automatically loads & installs corresponding translation file
@@ -38,26 +42,15 @@ int main(int argc, char *argv[])
     HbTranslator translator("videos");
     translator.loadCommon();
     
-    //
-    // has the application been launched via XQ Service Framework
-    //
-    bool isService = XQServiceUtil::isService();
-    
-    if ( ! isService )
+    if ( !isAservice )
     {
         app.setApplicationName( hbTrId("txt_videos_title_videos") );
-        
-        HbActivityManager *actManager = app.activityManager();
-        // save activity data locally
-        VideoActivityState::instance().setActivityData( actManager->activityData( ACTIVITY_VIDEOPLAYER_MAINVIEW ) );
-        // remove from activitymanager
-        actManager->removeActivity( ACTIVITY_VIDEOPLAYER_MAINVIEW );
     }
 
     HbMainWindow mainWindow( 0, Hb::WindowFlagTransparent );
+    QObject::connect(&mainWindow, SIGNAL(viewReady()), &app, SLOT(viewReadySlot()));
 
-    VideoPlayerEngine *engine = new VideoPlayerEngine( isService );
-    QObject::connect(&mainWindow, SIGNAL(viewReady()), engine, SLOT(viewReadySlot()));
+    VideoPlayerEngine *engine = new VideoPlayerEngine( isAservice );
     engine->initialize();
     mainWindow.show();
     return app.exec();

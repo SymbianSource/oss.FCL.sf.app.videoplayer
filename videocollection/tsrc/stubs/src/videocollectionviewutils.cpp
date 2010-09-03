@@ -20,6 +20,7 @@
 
 int VideoCollectionViewUtilsData::mLastError = 0;
 bool VideoCollectionViewUtilsData::mLoadSortingValuesFails = false;
+bool VideoCollectionViewUtilsData::mIsServiceValue = false;
 int VideoCollectionViewUtilsData::mVideoSortRole = -1;
 int VideoCollectionViewUtilsData::mCollectionSortRole = -1;
 Qt::SortOrder VideoCollectionViewUtilsData::mVideoSortOrder = Qt::AscendingOrder;
@@ -40,6 +41,7 @@ VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 }
 
 VideoCollectionViewUtils::VideoCollectionViewUtils():
+mIsService(false),
 mVideosSortRole(-1),
 mCollectionsSortRole(-1),
 mVideosSortOrder(Qt::AscendingOrder),
@@ -159,7 +161,7 @@ void VideoCollectionViewUtils::getCollectionActivityData(TMPXItemId &id, QString
 }
 
 
-void VideoCollectionViewUtils::sortModel(VideoSortFilterProxyModel *model,
+void VideoCollectionViewUtils::sortModel(VideoProxyModelGeneric *model,
     bool async, VideoCollectionCommon::TCollectionLevels target)
 {
     Q_UNUSED(model);
@@ -172,4 +174,14 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
 {
     VideoCollectionViewUtilsData::mLastStatusAdditional = additional;
     VideoCollectionViewUtilsData::mLastError = statusCode;
+}
+
+void VideoCollectionViewUtils::setIsService()
+{
+	mIsService = VideoCollectionViewUtilsData::mIsServiceValue;
+}
+
+bool VideoCollectionViewUtils::isService()
+{
+    return mIsService;
 }

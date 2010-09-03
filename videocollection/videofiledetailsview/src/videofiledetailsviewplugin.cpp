@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 76.1.8 %
+// Version : %version: 76.1.9 %
 
 // INCLUDE FILES
 #include <qcoreapplication.h>
@@ -44,7 +44,7 @@
 #include "videocollectioncommon.h"
 #include "mpxhbvideocommondefs.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videoservices.h"
 #include "videodetailslabel.h"
 #include "videocollectiontrace.h"
@@ -136,7 +136,7 @@ void VideoFileDetailsViewPlugin::createView()
 		return;
 	}
 
-	mModel = mCollectionWrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+	mModel = mCollectionWrapper.getAllVideosModel();
 
 	if (!mModel)
 		{

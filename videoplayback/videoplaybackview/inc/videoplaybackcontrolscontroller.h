@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#24 %
+// Version : %version: da1mmcf#25 %
 
 
 
@@ -254,6 +254,8 @@ class VideoPlaybackControlsController : public QObject
 		void setDefaultBitmap();
 
 		void generateThumbNail();
+
+		void resetControls();
 
     signals:
 

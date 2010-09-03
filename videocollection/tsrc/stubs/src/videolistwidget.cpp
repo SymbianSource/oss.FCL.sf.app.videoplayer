@@ -47,7 +47,7 @@ VideoListWidget::~VideoListWidget()
     VideoListWidgetData::reset();
 }
 
-int VideoListWidget::initialize(VideoSortFilterProxyModel &model,
+int VideoListWidget::initialize(VideoProxyModelGeneric &model,
     bool isService, VideoCollectionCommon::TCollectionLevels level)
 {
     Q_UNUSED(isService);
@@ -109,7 +109,7 @@ VideoCollectionCommon::TCollectionLevels VideoListWidget::getLevel()
     return mCurrentLevel;
 }
 
-VideoSortFilterProxyModel* VideoListWidget::getModel()
+VideoProxyModelGeneric* VideoListWidget::getModel()
 { 
     return mModel;
 }

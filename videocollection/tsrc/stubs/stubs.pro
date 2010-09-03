@@ -76,7 +76,7 @@ HEADERS_TEMP = \
     inc/videolistwidgetdata.h \
     inc/videolistviewdata.h \
     inc/videoplayerappexport.h \
-    inc/videosortfilterproxymodeldata.h \
+    inc/videoproxymodeldata.h \
     inc/videothumbnailtestdata.h \
     inc/videoactivitystate.h \
     inc/xqserviceutilxtra.h \
@@ -92,7 +92,10 @@ HEADERS_TEMP = \
     ../../videocollectionview/inc/videolistview.h \
     ../../videocollectionwrapper/inc/videolistdatamodel.h \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
-    ../../videocollectionwrapper/inc/videosortfilterproxymodel.h \
+    ../../videocollectionwrapper/inc/videoproxymodelgeneric.h \
+    ../../videocollectionwrapper/inc/videoproxymodelallvideos.h \
+    ../../videocollectionwrapper/inc/videoproxymodelcollections.h \
+    ../../videocollectionwrapper/inc/videoproxymodelcontent.h \
     ../../videocollectionwrapper/inc/videothumbnaildata.h \
     ../../videocollectionview/inc/videooperatorservice.h \
     ../../videocollectionview/inc/videooperatorservice_p.h
@@ -131,7 +134,10 @@ SOURCES_TEMP = \
     src/videolistview.cpp \
     src/videolistdatamodel.cpp \
     src/videocollectionwrapper.cpp \
-    src/videosortfilterproxymodel.cpp \
+    src/videoproxymodelgeneric.cpp \
+    src/videoproxymodelallvideos.cpp \
+    src/videoproxymodelcollections.cpp \
+    src/videoproxymodelcontent.cpp \
     src/videothumbnaildata.cpp \
     src/videoservices.cpp \
     src/videoserviceurifetch.cpp \
@@ -139,6 +145,7 @@ SOURCES_TEMP = \
     src/videoactivitystate.cpp \
     src/videooperatorservice.cpp \
     src/videooperatorservice_p.cpp \
+	src/videocollectionwrapperdata.cpp \
     src/xqsettingsmanagerstub.cpp
 
 HEADERS += $$find(HEADERS_TEMP, ^(?!.*$$TESTEDCLASS).*$)

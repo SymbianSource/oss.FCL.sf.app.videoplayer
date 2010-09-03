@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 32 %
+# Version : %version: da1mmcf#33 %
 
 
 TEMPLATE = lib
@@ -58,7 +58,6 @@ LIBS += -lmpxplaybackutility.dll \
         -lcone.dll \
         -lefsrv.dll \
         -lws32.dll \
-        -lhal.dll \
         -lgdi.dll \
         -lshareui.dll 
 

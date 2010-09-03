@@ -15,12 +15,12 @@
 * 
 */
 
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "hblistview.h"
 
 QList<HbAbstractViewItem*> HbListView::mVisibleItems = QList<HbAbstractViewItem*>();
 HbAbstractItemView::SelectionMode HbListView::mSelectionMode = HbAbstractItemView::InvalidSelection;
-VideoSortFilterProxyModel* HbListView::mLatestModel = 0;
+VideoProxyModelGeneric* HbListView::mLatestModel = 0;
 bool HbListView::mReturnNullPrototype = false; 
 bool HbListView::mVScrollBarIsNull = false;
 bool HbListView::mLatestrecycling = false;

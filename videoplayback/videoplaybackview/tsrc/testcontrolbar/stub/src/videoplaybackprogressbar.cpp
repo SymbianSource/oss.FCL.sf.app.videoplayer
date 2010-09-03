@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -28,9 +28,10 @@
 // VideoPlaybackProgressBar::VideoPlaybackProgressBar
 // -------------------------------------------------------------------------------------------------
 //
-VideoPlaybackProgressBar::VideoPlaybackProgressBar( 
+VideoPlaybackProgressBar::VideoPlaybackProgressBar(
         VideoPlaybackControlsController* controller )
     : mController( controller )
+    , mReset( false )
     , mDuration( -1 )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackProgressBar::VideoPlaybackProgressBar()"));
@@ -97,6 +98,17 @@ void VideoPlaybackProgressBar::updateState( TMPXPlaybackState state )
     MPX_DEBUG(_L("VideoPlaybackProgressBar::updateState() state = %d"), state );
 
     mState = state;
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackProgressBar::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackProgressBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackProgressBar::resetControl()"));
+
+    mReset = true;
 }
 
 //End of file

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 21 %
+// Version : %version: 22 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -67,6 +67,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackState ) : public CBase
         // Commands received from the Framework
         virtual void  HandlePlay();
         virtual void  HandlePause();
+        virtual void  DoHandlePause();
         virtual void  HandlePlayPause();
         virtual void  HandleStop();
         virtual void  HandleStartSeekL( TBool aForward );

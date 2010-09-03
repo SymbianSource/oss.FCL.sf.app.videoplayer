@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#50 %
+// Version : %version: da1mmcf#51 %
 
 
 
@@ -434,6 +434,13 @@ void VideoPlaybackControlsController::handleEvent(
             MPX_DEBUG(_L("    [EControlCmdShowVolumeControls]"));
 
             showVolumeControls();
+            break;
+        }
+        case EControlCmdHandleBackgroundEvent:
+        {
+            MPX_DEBUG(_L("    [EControlCmdHandleBackgroundEvent]"));
+
+            resetControls();
             break;
         }
     }
@@ -1582,6 +1589,20 @@ bool VideoPlaybackControlsController::shouldShowRNLogo()
     }
 
     return showRNLogo;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::resetControls()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackControlsController::resetControls()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlsController::resetControls()"));
+
+    for ( int i = 0 ; i < mControls.count() ; i++ )
+    {
+        mControls[i]->resetControl();
+    }
 }
 
 // End of File

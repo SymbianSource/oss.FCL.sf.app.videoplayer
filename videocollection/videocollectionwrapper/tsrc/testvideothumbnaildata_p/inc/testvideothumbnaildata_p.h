@@ -23,7 +23,7 @@
 
 // FORWARD DECLARATIONS
 class VideoThumbnailDataTester;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 class QSignalSpy;
 
@@ -63,7 +63,7 @@ signals:
 private:
 
     VideoThumbnailDataTester *mTestObject;
-    VideoSortFilterProxyModel *mModel;
+    VideoProxyModelGeneric *mModel;
     
 public:
     VideoCollectionWrapper *mWrapper;

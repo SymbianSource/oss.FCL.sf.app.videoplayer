@@ -173,8 +173,3 @@ private: // data
 };
 
 #endif  // __VIDEODATACONTAINER_H__
-
-
-    
-
-

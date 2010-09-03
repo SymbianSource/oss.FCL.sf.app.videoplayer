@@ -31,6 +31,7 @@ public: // methods
     static void reset()
     {
         mLastError = 0;
+		mIsServiceValue = false;
         mLoadSortingValuesFails = false;
         mVideoSortRole = -1;
         mCollectionSortRole = -1;
@@ -48,7 +49,8 @@ public: // methods
     
 public: // data
     static int mLastError;
-    static bool mLoadSortingValuesFails;
+    static bool mIsServiceValue;
+	static bool mLoadSortingValuesFails;
     static int mVideoSortRole;
     static int mCollectionSortRole;
     static Qt::SortOrder mVideoSortOrder;

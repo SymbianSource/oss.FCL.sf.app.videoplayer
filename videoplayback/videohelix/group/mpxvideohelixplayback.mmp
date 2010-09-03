@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: ou1cpsw#18 %
+// Version : %version: 19 %
 
 
 
@@ -43,6 +43,7 @@ SOURCE          mpxvideoaccessoryobserver.cpp
 SOURCE          mpxvideoplayerutility.cpp
 SOURCE          mpxvideodrmhelper.cpp
 SOURCE          mpxvideoposterframesetter.cpp
+SOURCE          mpxcalldetector.cpp
 
 START RESOURCE  ../data/10282550.rss
 TARGET          mpxvideohelixplayback.rsc

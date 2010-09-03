@@ -26,7 +26,7 @@
 class VideoListSelectionDialog;
 class VideoCollectionUiLoader;
 class VideoListDataModel;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoListWidget;
 class VideoListSelectionDialogTesterHelper;
 
@@ -36,7 +36,7 @@ class TestVideoListSelectionDialog : public QObject
 
 private:
     
-    void setRowCount(int count, VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos, VideoListDataModel *model = 0);
+    void setRowCount(int count, VideoProxyModelGeneric *proxyModel = 0, VideoListDataModel *model = 0);
     
     // test functions for the test framework
 
@@ -150,7 +150,7 @@ private:
     /**
      * dummy model
      */
-    VideoSortFilterProxyModel *mModel;
+    VideoProxyModelGeneric *mModel;
     
     /**
      * dummy widget
@@ -161,6 +161,7 @@ private:
  	 * flag indicating if last call to init succeeded.
  	 */
     bool mInitOk;
+
 };
 
 

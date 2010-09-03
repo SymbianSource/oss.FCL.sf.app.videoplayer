@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 3 %
 
 #include "videoservices.h"
 #include "videoserviceurifetch.h"
@@ -43,7 +43,7 @@ VideoServiceUriFetch::~VideoServiceUriFetch()
 // fetch()
 // ----------------------------------------------------------------------------
 //
-void VideoServiceUriFetch::fetch(const QString& title)
+void VideoServiceUriFetch::fetch(const QString& /*title*/)
 {
     mServiceApp->setCurrentService(VideoServices::EUriFetcher);
 }

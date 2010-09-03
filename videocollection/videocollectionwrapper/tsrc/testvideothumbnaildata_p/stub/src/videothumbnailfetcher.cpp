@@ -77,7 +77,7 @@ void VideoThumbnailFetcher::addFetch(const QString fileName, const TMPXItemId &m
 // VideoThumbnailFetcher::continueFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::continueFetching(bool cancelOngoingFetches)
+void VideoThumbnailFetcher::continueFetching(bool /*cancelOngoingFetches*/)
 {
     mContinueFetchingCallCount++;
 }
@@ -115,7 +115,7 @@ int VideoThumbnailFetcher::fetchCount()
 // VideoThumbnailFetcher::enableThumbnailCreation()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailFetcher::enableThumbnailCreation(bool enable)
+void VideoThumbnailFetcher::enableThumbnailCreation(bool /*enable*/)
 {
     mEnableThumbnailCreationCallCount++;
 }

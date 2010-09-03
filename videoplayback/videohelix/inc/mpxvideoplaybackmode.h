@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 20 %
+// Version : %version: 21 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKMODE_H_
@@ -68,7 +68,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackMode ) : public CBase
         virtual void GetPdlStatusL( CMPXCommand& aCmd );
         virtual void UpdateSeekPosition( TInt64& aPosition );
         inline virtual TBool IsDownloadPaused();
-        virtual void HandlePause();
+        virtual TInt HandlePause();
         virtual void HandleBackground();
         virtual TBool IsNetworkMode2GL();
         virtual TBool CanPlayNow();
@@ -137,7 +137,7 @@ class CMPXStreamingPlaybackMode : public CMPXVideoPlaybackMode
         virtual TBool CanPlayNow();
         virtual void HandleOpenComplete();
         void OpenFileL( const TDesC& aMediaFile );
-        virtual void HandlePause();
+        virtual TInt HandlePause();
 };
 
 ////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ class CMPXLiveStreamingPlaybackMode : public CMPXStreamingPlaybackMode
 
         // Methods where video plabkack behavior varies for live streaming media
         inline virtual TInt GetMode();
-        virtual void HandlePause();
+        virtual TInt HandlePause();
         virtual TBool SendErrorToView( TInt aError );
         virtual void HandlePauseToPlayTransitionL();
 };

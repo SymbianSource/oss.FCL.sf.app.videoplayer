@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 #ifndef __TESTCONTROLBAR_H__
 #define __TESTCONTROLBAR_H__
@@ -57,6 +57,7 @@ class TestControlBar : public QObject
         void testSetVisibleToControlBar();
         void testDurationChanged();
         void testPositionChanged();
+        void testResetControl();
 
     signals:
         void commandSignal(int);

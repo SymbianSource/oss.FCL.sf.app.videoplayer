@@ -162,15 +162,6 @@ namespace VideoCollectionCommon
         statusVideosRemovedFromCollection
     };
 
-    enum TModelType
-    {
-    	EModelTypeInvalid,
-    	EModelTypeAllVideos,
-    	EModelTypeCollections,
-    	EModelTypeCollectionContent,
-    	EModelTypeGeneric
-    };
-
     /**
      * Utility macro to trace heap consumption.
      */

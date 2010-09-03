@@ -31,7 +31,7 @@
 
 // FORWARD DECLARATIONS
 class VideoCollectionWrapper;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class QModelIndex;
 class QTimer;
 class VideoThumbnailFetcher;
@@ -86,7 +86,7 @@ public:
      * @param model model of the items for the fetching.  
      * @param fetchIndex index where to start the background thumbnail fetching.
      */
-    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);
+    void startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex);
     
     /**
      * Enables or disables thumbnail background fetching.
@@ -193,10 +193,10 @@ protected:
      * 
      * @param iconName name of the file or resource.
      * 
-     * @return HbIcon the icon load from resource or file.
+     * @return QIcon the icon load from resource or file.
      * 
      */
-    HbIcon loadIcon(QString iconName);
+    QIcon *loadIcon(QString iconName);
 
     /**
      * Starts timer that continues the background thumbnail fetching at timeout.
@@ -254,7 +254,7 @@ private slots:
     
 private: // Data
 
-    VideoThumbnailFetcher            *mThumbnailFetcher;
+    VideoThumbnailFetcher           *mThumbnailFetcher;
     
     /**
      * Local cache for thumbnail data:
@@ -262,19 +262,19 @@ private: // Data
      * - data is the actual thumbnail data.
      * If thumbnail data is not yet fetched, QIcon is default thumbnail.
      */
-    QCache<TMPXItemId, QIcon>        mThumbnailData;
+    QCache<TMPXItemId, QIcon>       mThumbnailData;
 
     /**
      * Local hash for default thumbnails.
      * - key is mpx item id defining default tn type 
-     *  - data is the actual thumbnail data.
+     * - data is the actual thumbnail data.
      */
-    QHash<TMPXItemId, HbIcon>       mDefaultThumbnails;
+    QHash<TMPXItemId, QIcon *>      mDefaultThumbnails;
 
     /**
      * Current model, set at call to startBackgroundFetching.
      */
-    QPointer<VideoSortFilterProxyModel>     mCurrentModel;
+    QPointer<VideoProxyModelGeneric>     mCurrentModel;
     
     /**
      * Current index for background thumbnail fetching.

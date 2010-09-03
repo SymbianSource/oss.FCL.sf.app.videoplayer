@@ -25,7 +25,7 @@
 #include <videocollectioncommon.h>
 
 // FORWARD DECLARATIONS
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 
 class VideoCollectionWrapper : public QObject
@@ -59,13 +59,13 @@ public: // Constructor
      *
      * @return address to model or NULL if fails.
      */
-    VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType type);
+    VideoProxyModelGeneric* getGenericModel();
 
 /* Additional functions needed for testing purposes */
 
     void reset();
 
-    void setModel(VideoSortFilterProxyModel* model);
+    void setModel(VideoProxyModelGeneric* model);
 
 signals:
 
@@ -89,7 +89,7 @@ private:
 
 private:
 
-    VideoSortFilterProxyModel* mModel;
+    VideoProxyModelGeneric* mModel;
     
 public:
     

@@ -27,7 +27,7 @@
 
 // FORWARD DECLARATIONS
 class VideoThumbnailDataPrivate;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 // CLASS DECLARATIONS
 
@@ -95,7 +95,7 @@ public:
      * @param fetchIndex index where to start the background thumbnail fetching.
      *  
      */
-    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);
+    void startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex);
     
     /**
      * Enables or disables thumbnail background fetching. Default is enabled.

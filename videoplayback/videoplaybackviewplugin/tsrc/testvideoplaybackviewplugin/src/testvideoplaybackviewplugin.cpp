@@ -17,9 +17,7 @@
 
 #include <hbapplication.h>
 #include <hbinstance.h>
-#include <xqpluginloader.h>
-#include <mpxviewpluginqt.h>
-#include <xqplugininfo.h>
+
 
 
 #include "testvideoplaybackviewplugin.h"
@@ -56,13 +54,8 @@ int main(int argc, char *argv[])
 //
 void TestVideoPlaybackViewPlugin::init()
 {    
-    QList<XQPluginInfo> impls;
-    XQPluginLoader::listImplementations("org.nokia.mmdt.MpxViewPlugin/1.0", impls);
-
-    XQPluginLoader pluginLoader( MpxHbVideoCommon::KMpxVideoPluginDllPlaybackUid );
-    QObject* instance = pluginLoader.instance();
-
-    mVidPBPlugin = qobject_cast<MpxViewPlugin*>( instance )->viewPlugin();  ;
+    
+    mVidPBPlugin = new VideoPlaybackViewPlugin();
 }
 
 // ---------------------------------------------------------------------------
@@ -87,11 +80,11 @@ void TestVideoPlaybackViewPlugin::testCreateView()
 
     QVERIFY(mVidPBPlugin != NULL );
 	
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView == NULL );
+    QVERIFY(mVidPBPlugin->mView == NULL );
 	
     mVidPBPlugin->createView();
 	  
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView != NULL );
+    QVERIFY(mVidPBPlugin->mView != NULL );
 }
 
 // ---------------------------------------------------------------------------
@@ -100,10 +93,10 @@ void TestVideoPlaybackViewPlugin::testCreateView()
 //
 void TestVideoPlaybackViewPlugin::testActivateView()
 {
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView != NU				
+    QVERIFY(mVidPBPlugin->mView != NULL );			
     mVidPBPlugin->activateView();
 		
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mViewActivated == true  );
+    QVERIFY(mVidPBPlugin->mViewActivated == true  );
 }
 
 // ---------------------------------------------------------------------------
@@ -112,12 +105,12 @@ void TestVideoPlaybackViewPlugin::testActivateView()
 //
 void TestVideoPlaybackViewPlugin::testDeactivateView()
 {
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView != NULL );
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mViewActivated == true  );
+    QVERIFY(mVidPBPlugin->mView != NULL );
+    QVERIFY(mVidPBPlugin->mViewActivated == true  );
 		
     mVidPBPlugin->deactivateView();
 		
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mViewActivated == false  );
+    QVERIFY(mVidPBPlugin->mViewActivated == false  );
 }
 
 // ---------------------------------------------------------------------------
@@ -126,11 +119,11 @@ void TestVideoPlaybackViewPlugin::testDeactivateView()
 //
 void TestVideoPlaybackViewPlugin::testDestroyView()
 {
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView != NULL );
+    QVERIFY(mVidPBPlugin->mView != NULL );
 		
     mVidPBPlugin->destroyView();
 		
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView == NULL );    
+    QVERIFY(mVidPBPlugin->mView == NULL );    
 }
 
 // ---------------------------------------------------------------------------
@@ -140,8 +133,7 @@ void TestVideoPlaybackViewPlugin::testDestroyView()
 void TestVideoPlaybackViewPlugin::testGetView()
 {
     QVERIFY( mVidPBPlugin->getView() != NULL );	
-    QVERIFY(reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->mView == 
-    reinterpret_cast<VideoPlaybackViewPlugin*>( mVidPBPlugin )->getView() );		    
+    QVERIFY(mVidPBPlugin->mView == mVidPBPlugin->getView() );		    
 }
 
 // End of file

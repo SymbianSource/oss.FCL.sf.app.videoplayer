@@ -27,6 +27,7 @@
 #include <qset.h>
 #include <qdebug.h>
 
+#include "videolistwidgetdata.h"
 #include "testvideocollectionuiloader.h"
 #include "videohintwidget.h"
 #include "videocollectionwrapperdata.h"
@@ -741,6 +742,7 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
         QVERIFY(found);
         i++;
     }
+    QCOMPARE(VideoListWidgetData::mInitializeCount, 3);
     
     // Getting proxymodel fails.
     cleanup();
@@ -748,7 +750,9 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
     mTestObject->addData(params,
         this,
         SLOT(handleObjectReady(QObject*, const QString&)));
-    VideoCollectionWrapperData::mGetModelFails = true;
+    VideoCollectionWrapperData::mGetAllVideosModelFails = true;
+    VideoCollectionWrapperData::mGetCollectionsModelFails = true;
+    VideoCollectionWrapperData::mGetCollectionContentModelFails = true;
     mTestObject->loadPhase(VideoCollectionUiLoaderParam::LoadPhasePrimary);
     mTestObject->loadPhase(VideoCollectionUiLoaderParam::LoadPhaseSecondary);
     QTest::qWait(5000); // 5 seconds
@@ -769,6 +773,7 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
         i++;
     }
     params.clear();
+    QCOMPARE(VideoListWidgetData::mInitializeCount, 0);
 }
 
 // ---------------------------------------------------------------------------

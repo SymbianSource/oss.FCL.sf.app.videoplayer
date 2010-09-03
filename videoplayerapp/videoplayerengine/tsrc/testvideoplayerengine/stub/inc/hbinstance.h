@@ -15,12 +15,13 @@
 *
 */
 
-// Version : %version:  %
+// Version : %version:  da1mmcf#8 %
 
 #ifndef _HBINSTANCE_H
 #define _HBINSTANCE_H
 
 #include <QList>
+#include <hbmainwindow.h>
 
 // Get stubs included before they are searched from /epoc32/include/mw
 #include "stub/inc/mpxviewpluginqt.h"
@@ -37,9 +38,7 @@ class HbInstance
 public:
     static HbInstance *instance();
 
-    HbInstance* primaryWindow() const;
-
-    QList<HbInstance *> allMainWindows() const;
+    QList<HbMainWindow *> allMainWindows() const;
     
     void removeView( QGraphicsWidget* y );
 
@@ -50,6 +49,9 @@ public:
 private:
     HbInstance();
     ~HbInstance();
+    
+public:
+    QList<HbMainWindow*>  mWindows;
 };
 
 #endif // STUBHBINSTANCE_H

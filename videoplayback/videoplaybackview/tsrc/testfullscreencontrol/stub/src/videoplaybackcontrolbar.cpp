@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -32,9 +32,10 @@
 // VideoPlaybackControlBar::VideoPlaybackControlBar()
 // -------------------------------------------------------------------------------------------------
 //
-VideoPlaybackControlBar::VideoPlaybackControlBar( 
+VideoPlaybackControlBar::VideoPlaybackControlBar(
         VideoPlaybackControlsController* controller )
     : mController( controller )
+    , mReset( false )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlBar::VideoPlaybackControlBar"));
 }
@@ -114,6 +115,17 @@ void VideoPlaybackControlBar::positionChanged( int position )
     MPX_DEBUG(_L("VideoPlaybackControlBar::positionChanged()"));
 
     mPosition = position;
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackControlBar::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackControlBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlBar::resetControl()"));
+
+    mReset = true;
 }
 
 //End of file

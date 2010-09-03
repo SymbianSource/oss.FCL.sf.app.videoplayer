@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#31 %
+# Version : %version: 32 %
 
 
 TEMPLATE = lib
@@ -56,7 +56,8 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lxqserviceutil.dll \
         -lflogger.dll \
         -lefsrv \
-        -lcommonengine.dll         
+        -lcommonengine.dll \
+        -lafservice.dll      
 
 DEPENDPATH += ../../inc ../inc inc
 VPATH += src

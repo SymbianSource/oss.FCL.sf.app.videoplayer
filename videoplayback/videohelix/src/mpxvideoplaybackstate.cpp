@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 48 %
+// Version : %version: 49 %
 
 
 //
@@ -792,6 +792,21 @@ void CMPXVideoPlaybackState::UpdateSeekableL( CMPXCommand& aCmd )
     }
 }
 
+//  ------------------------------------------------------------------------------------------------
+//    CMPXVideoPlaybackState::DoHandlePause()
+//  ------------------------------------------------------------------------------------------------
+void CMPXVideoPlaybackState::DoHandlePause()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackState::DoHandlePause()"));
+
+    TInt err = iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+
+    if ( err != KErrNone )
+    {
+        MPX_TRAPD( err2, SendErrorToViewL( err ) );
+    }
+}
+
 // *************************************************************************************************
 //
 //                          STATE SUB-CLASSES
@@ -929,7 +944,7 @@ void CMPXNotInitialisedState::HandlePlay()
 {
     MPX_DEBUG(_L("CMPXNotInitialisedState::HandlePlay() Plugin error"));
 
-     MPX_TRAPD( err, SendErrorToViewL( iVideoPlaybackCtlr->iPBPluginError ) );
+    MPX_TRAPD( err, SendErrorToViewL( iVideoPlaybackCtlr->iPBPluginError ) );
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1207,7 +1222,7 @@ void CMPXInitialisedState::HandlePlay()
     }
     else
     {
-        iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+        HandlePause();
     }
 
     iVideoPlaybackCtlr->iAllowAutoPlay = ETrue;
@@ -1282,7 +1297,27 @@ void CMPXInitialisedState::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandlePause()"));
 
-    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+    TInt err = iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+
+    if ( err != KErrNone )
+    {
+        MPX_DEBUG(_L("CMPXInitialisedState::HandlePause() err = %d"), err);
+
+        //
+        //  For Initialized state, Helix will return an error of KErrNotReady since the DRM
+        //  rights consumption has not started.  Ignore the KErrNotReady error and transition
+        //  to the stopped state since no rights have been consumed.  This will free up
+        //  memory by closing the playback.
+        //
+        if ( err == KErrNotReady && iVideoPlaybackCtlr->iFileDetails->iDrmProtected )
+        {
+            HandleStop();
+        }
+        else
+        {
+            MPX_TRAPD( err2, SendErrorToViewL( err ) );
+        }
+    }
 }
 
 // *************************************************************************************************
@@ -1368,7 +1403,7 @@ void CMPXPlayingState::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXPlayingState::HandlePause()"));
 
-    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+    DoHandlePause();
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -1856,7 +1891,7 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
             //
             //  Delayed pause, background event was received while we were in buffering state
             //
-            iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+            HandlePause();
         }
     }
     else
@@ -1915,7 +1950,7 @@ void CMPXBufferingState::HandlePause()
     //
     if ( iVideoPlaybackCtlr->iPlaybackMode->IsDownloadPaused() )
     {
-        iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+        DoHandlePause();
     }
 }
 
@@ -1985,7 +2020,7 @@ void CMPXSeekingState::HandlePlay()
     }
     else
     {
-        iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+        HandlePause();
     }
 }
 
@@ -2008,7 +2043,8 @@ void CMPXSeekingState::HandlePause()
     MPX_ENTER_EXIT(_L("CMPXSeekingState::HandlePause()"));
 
     MPX_TRAPD( err, HandleStopSeekL() );
-    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
+
+    DoHandlePause();
 }
 
 //  ------------------------------------------------------------------------------------------------

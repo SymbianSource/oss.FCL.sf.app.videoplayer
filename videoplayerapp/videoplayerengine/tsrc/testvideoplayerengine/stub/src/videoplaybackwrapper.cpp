@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#10 %
+// Version : %version:  da1mmcf#11 %
 
 
 #include "videoplaybackwrapper.h"
@@ -75,7 +75,10 @@ int VideoPlaybackWrapper::replayMedia( QString aFileName )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackWrapper::replayMedia"));   
     
-    Q_UNUSED( aFileName ); 
+    Q_UNUSED( aFileName );
+    
+    emit handlePlaybackView( MpxHbVideoCommon::ActivatePlaybackView ); 
+        
     return 0;
 }
 

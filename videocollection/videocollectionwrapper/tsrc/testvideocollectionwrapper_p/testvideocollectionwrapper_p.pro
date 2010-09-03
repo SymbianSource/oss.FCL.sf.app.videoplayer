@@ -25,12 +25,18 @@ LIBS += -lmpxcommon.dll -lmpxcollectionutility.dll -lflogger.dll -lestor.dll \
 
 # Input
 HEADERS += inc/testvideocollectionwrapper_p.h \           
-           stub/inc/videosortfilterproxymodel.h \
+           stub/inc/videoproxymodelgeneric.h \
+           stub/inc/videoproxymodelallvideos.h \
+           stub/inc/videoproxymodelcollections.h \
+           stub/inc/videoproxymodelcontent.h \
            stub/inc/videolistdatamodel.h \
            stub/inc/videocollectionwrapper.h \
            ../../inc/videocollectionwrapper_p.h
 
 SOURCES += src/testvideocollectionwrapper_p.cpp \
-           stub/src/videosortfilterproxymodel.cpp \
+           stub/src/videoproxymodelgeneric.cpp \
+           stub/src/videoproxymodelallvideos.cpp \
+           stub/src/videoproxymodelcollections.cpp \
+           stub/src/videoproxymodelcontent.cpp \
            stub/src/videolistdatamodel.cpp \
            ../../src/videocollectionwrapper_p.cpp            

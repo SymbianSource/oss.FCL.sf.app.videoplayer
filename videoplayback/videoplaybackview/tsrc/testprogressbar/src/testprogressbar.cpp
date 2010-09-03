@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 
 #include <qdebug>
@@ -213,31 +213,6 @@ void TestProgressBar::testHandleSliderMoved()
     QVERIFY( mProgBar->mDraggingPosition == movedPositoin );
     QVERIFY( mProgBar->mProgressSlider->progressValue() == movedPositoin );
     QVERIFY( mProgBar->mProgressSlider->sliderValue() == movedPositoin );
-
-    //
-    // If user isnot dragging the slider and movedPosition > mDuration
-    //
-    movedPositoin = 30;
-    mProgBar->mSliderDragging = false;
-
-    emit mProgBar->mProgressSlider->move( movedPositoin );
-
-    QVERIFY( mProgBar->mProgressSlider->progressValue() == mProgBar->mDuration );
-    QVERIFY( mProgBar->mProgressSlider->sliderValue() == mProgBar->mDuration );
-    QVERIFY( mController->mCommand == EMPXPbvCmdEndOfClip );
-
-    //
-    // If user isnot dragging the slider and movedPosition < mDuration
-    //
-    movedPositoin = 10;
-
-    emit mProgBar->mProgressSlider->move( movedPositoin );
-
-    QVERIFY( mProgBar->mProgressSlider->progressValue() == movedPositoin );
-    QVERIFY( mProgBar->mProgressSlider->sliderValue() == movedPositoin );
-
-    QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
-    QVERIFY( mController->mValue == movedPositoin );
 
     cleanup();
 }
@@ -446,6 +421,33 @@ void TestProgressBar::testHandleSeekingTimeout()
 
     QVERIFY( mController->mCommand == EMPXPbvCmdSetPosition );
     QVERIFY( mController->mValue == mProgBar->mDraggingPosition );
+
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// testResetControl
+// -------------------------------------------------------------------------------------------------
+//
+void TestProgressBar::testResetControl()
+{
+    MPX_ENTER_EXIT(_L("TestProgressBar::testResetControl()"));
+
+    setup();
+
+    mController->mTimerAction = ETimerCancel;
+    mProgBar->mSliderDragging = true;
+    mProgBar->resetControl();
+
+    QVERIFY( ! mProgBar->mSliderDragging );
+    QVERIFY( mController->mTimerAction == ETimerReset );
+
+    mController->mTimerAction = ETimerCancel;
+    mProgBar->mSliderDragging = false;
+    mProgBar->resetControl();
+
+    QVERIFY( ! mProgBar->mSliderDragging );
+    QVERIFY( mController->mTimerAction == ETimerCancel );
 
     cleanup();
 }

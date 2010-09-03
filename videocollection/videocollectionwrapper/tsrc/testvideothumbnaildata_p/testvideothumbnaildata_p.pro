@@ -55,7 +55,7 @@ HEADERS += inc/testvideothumbnaildata_p.h \
            inc/videothumbnaildatatester.h \
            stub/inc/videothumbnailfetcher.h  \
            stub/inc/videocollectionwrapper.h \
-           stub/inc/videosortfilterproxymodel.h \
+           stub/inc/videoproxymodelgeneric.h \
            ../../inc/videothumbnaildata_p.h \
            ../../../inc/videocollectionexport.h
                
@@ -63,5 +63,5 @@ SOURCES += src/testvideothumbnaildata_p.cpp \
            src/videothumbnaildatatester.cpp \
            stub/src/videothumbnailfetcher.cpp  \
            stub/src/videocollectionwrapper.cpp \
-           stub/src/videosortfilterproxymodel.cpp \
+           stub/src/videoproxymodelgeneric.cpp \
            ../../src/videothumbnaildata_p.cpp

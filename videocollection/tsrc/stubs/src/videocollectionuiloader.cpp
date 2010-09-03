@@ -136,14 +136,17 @@ void VideoCollectionUiLoader::initObject(QObject *object,
         name == DOCML_NAME_VC_COLLECTIONWIDGET ||
         name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET)
     {
-        VideoCollectionCommon::TModelType type = VideoCollectionCommon::EModelTypeAllVideos;
+        VideoProxyModelGeneric *model(0);
+        
         if(name == DOCML_NAME_VC_COLLECTIONWIDGET) {
-            type = VideoCollectionCommon::EModelTypeCollections;
+            model = wrapper.getCollectionsModel();
         } else if (name == DOCML_NAME_VC_COLLECTIONCONTENTWIDGET) {
-            type = VideoCollectionCommon::EModelTypeCollectionContent;
+            model = wrapper.getCollectionContentModel();
+        } else
+        {
+            model = wrapper.getAllVideosModel();
         }
         VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
-        VideoSortFilterProxyModel *model = wrapper.getModel(type);
         
         VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid;
         if(name == DOCML_NAME_VC_VIDEOLISTWIDGET )

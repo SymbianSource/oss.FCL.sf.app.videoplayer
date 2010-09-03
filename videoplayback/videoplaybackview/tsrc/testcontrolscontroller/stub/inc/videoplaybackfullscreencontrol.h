@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -36,9 +36,9 @@ class VideoPlaybackFullScreenControl : public QObject
     Q_OBJECT
 
     public:
-        VideoPlaybackFullScreenControl( VideoPlaybackControlsController* controller, 
+        VideoPlaybackFullScreenControl( VideoPlaybackControlsController* controller,
                                         TVideoPlaybackControls index,
-                                        HbWidget* widget, 
+                                        HbWidget* widget,
                                         TUint controlproperties );
 
         virtual ~VideoPlaybackFullScreenControl();
@@ -49,7 +49,7 @@ class VideoPlaybackFullScreenControl : public QObject
         * Set visibility of each control
         */
         virtual void setVisibility( TMPXPlaybackState aState );
-        
+
         /**
         * return control index
         */
@@ -84,7 +84,7 @@ class VideoPlaybackFullScreenControl : public QObject
         * set changed state
         */
         void updateState( TMPXPlaybackState state );
-        
+
         /*
          *  UpdateDownloadPosition
          *  updates the download ratio on the progress bar
@@ -102,6 +102,8 @@ class VideoPlaybackFullScreenControl : public QObject
 
         virtual void updateControlProperties( TUint properties );
 
+        void resetControl();
+
     public:
         int                       mPosition;
         int                       mDuration;
@@ -109,15 +111,16 @@ class VideoPlaybackFullScreenControl : public QObject
         int                       mDownloadSize;
         int                       mDownloadPosition;
         int                       mVolume;
-        
+
         bool                      mVisible;
         TMPXPlaybackState         mState;
         TMPXPlaybackState         mVisibilityState;
-        
+
         VideoPlaybackControlsController* mController;
         HbWidget                 *mControl;
         TVideoPlaybackControls    mControlIndex;
         TUint                     mProperties;
+        bool                      mControlReset;
 };
 
 #endif /*VIDEOPLAYBACKFULLSCREENCONTROL_H_*/

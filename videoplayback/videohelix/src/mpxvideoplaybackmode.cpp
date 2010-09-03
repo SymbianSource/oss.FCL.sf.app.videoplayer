@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 34 %
+// Version : %version: 35 %
 
 
 //
@@ -159,7 +159,7 @@ void CMPXVideoPlaybackMode::UpdateSeekPosition( TInt64& aPosition )
 //  ------------------------------------------------------------------------------------------------
 //    CMPXVideoPlaybackMode::HandlePause()
 //  ------------------------------------------------------------------------------------------------
-void CMPXVideoPlaybackMode::HandlePause()
+TInt CMPXVideoPlaybackMode::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoPlaybackMode::HandlePause()"));
 
@@ -173,10 +173,8 @@ void CMPXVideoPlaybackMode::HandlePause()
                                                               0,
                                                               err );
     }
-    else
-    {
-        TRAP_IGNORE( iVideoPlaybackCtlr->iState->SendErrorToViewL( err ) );
-    }
+
+    return err;
 }
 
 //  ------------------------------------------------------------------------------------------------
@@ -479,13 +477,15 @@ TBool CMPXStreamingPlaybackMode::CanPlayNow()
 //  ------------------------------------------------------------------------------------------------
 //    CMPXStreamingPlaybackMode::HandlePause()
 //  ------------------------------------------------------------------------------------------------
-void CMPXStreamingPlaybackMode::HandlePause()
+TInt CMPXStreamingPlaybackMode::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXStreamingPlaybackMode::HandlePause()"));
 
+    TInt err = KErrNone;
+
     if ( iVideoPlaybackCtlr->iFileDetails->iPausableStream )
     {
-        MPX_TRAPD( err, iVideoPlaybackCtlr->iPlayer->PauseL() );
+        MPX_TRAP( err, iVideoPlaybackCtlr->iPlayer->PauseL() );
 
         if ( err == KErrNone )
         {
@@ -496,13 +496,9 @@ void CMPXStreamingPlaybackMode::HandlePause()
                                                    0,
                                                    err );
         }
-        else
-        {
-            TRAP_IGNORE( iVideoPlaybackCtlr->iState->SendErrorToViewL( err ) );
-        }
     }
     // Streaming link is non-pausable and no alarm stop playback
-    else if ( !iVideoPlaybackCtlr->IsAlarm() )
+    else if ( ! iVideoPlaybackCtlr->IsAlarm() )
     {
         iVideoPlaybackCtlr->iPlayer->Stop();
 
@@ -512,6 +508,8 @@ void CMPXStreamingPlaybackMode::HandlePause()
                                                               0,
                                                               KErrNone );
     }
+
+    return err;
 }
 
 
@@ -540,7 +538,7 @@ CMPXLiveStreamingPlaybackMode::~CMPXLiveStreamingPlaybackMode()
 //  ------------------------------------------------------------------------------------------------
 //    CMPXLiveStreamingPlaybackMode::HandlePause()
 //  ------------------------------------------------------------------------------------------------
-void CMPXLiveStreamingPlaybackMode::HandlePause()
+TInt CMPXLiveStreamingPlaybackMode::HandlePause()
 {
     MPX_ENTER_EXIT(_L("CMPXLiveStreamingPlaybackMode::HandlePause()"));
 
@@ -555,6 +553,8 @@ void CMPXLiveStreamingPlaybackMode::HandlePause()
     iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent( MMPXPlaybackPluginObserver::EPPaused,
                                                           0,
                                                           KErrNone );
+
+    return KErrNone;
 }
 
 //  ------------------------------------------------------------------------------------------------

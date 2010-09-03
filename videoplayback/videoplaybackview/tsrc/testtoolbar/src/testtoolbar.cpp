@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  7 %
+// Version : %version:  8 %
 
 
 #include <qdebug>
@@ -668,6 +668,61 @@ void TestToolBar::testSend()
     //
     QVERIFY( mController->mCommand == EMPXPbvCmdPause );
     QVERIFY( mController->mSendVideoDone == true );
+
+    //
+    // clean up
+    //
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// testResetControl
+// -------------------------------------------------------------------------------------------------
+//
+void TestToolBar::testResetControl()
+{
+    MPX_ENTER_EXIT(_L("TestToolBar::testResetControl()"));
+
+    init( true );
+
+    //
+    // FF
+    //
+    mVideoToolBar->mSeekingState = EFastForwarding;
+    mController->mTimerAction = ETimerCancel;
+    mController->mCommand = EMPXPbvCmdSeekForward;
+
+    mVideoToolBar->resetControl();
+
+    QVERIFY( mVideoToolBar->mSeekingState == ENotSeeking );
+    QVERIFY( mController->mTimerAction == ETimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdEndSeek );
+
+    //
+    // RW
+    //
+    mController->mTimerAction = ETimerCancel;
+    mController->mCommand = EMPXPbvCmdSeekForward;
+    mVideoToolBar->mSeekingState = ERewinding;
+
+    mVideoToolBar->resetControl();
+
+    QVERIFY( mVideoToolBar->mSeekingState == ENotSeeking );
+    QVERIFY( mController->mTimerAction == ETimerReset );
+    QVERIFY( mController->mCommand == EMPXPbvCmdEndSeek );
+
+    //
+    // Not seeking
+    //
+    mController->mTimerAction = ETimerCancel;
+    mController->mCommand = EMPXPbvCmdPlay;
+    mVideoToolBar->mSeekingState = ENotSeeking;
+
+    mVideoToolBar->resetControl();
+
+    QVERIFY( mVideoToolBar->mSeekingState == ENotSeeking );
+    QVERIFY( mController->mTimerAction == ETimerCancel );
+    QVERIFY( mController->mCommand == EMPXPbvCmdPlay );
 
     //
     // clean up

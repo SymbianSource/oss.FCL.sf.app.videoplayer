@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 
 
@@ -148,7 +148,7 @@ void VideoPlaybackControlBar::setVisibleToControlBar( bool visible )
     if ( visible != isVisible() )
     {
         setVisible( visible );
-        mToolBar->setVisible( visible );        
+        mToolBar->setVisible( visible );
     }
 }
 
@@ -188,6 +188,25 @@ void VideoPlaybackControlBar::positionChanged( int position )
     if ( mToolBar )
     {
         mToolBar->positionChanged( position );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackControlBar::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackControlBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlBar::positionChanged()"));
+
+    if ( mProgressBar )
+    {
+        mProgressBar->resetControl();
+    }
+
+    if ( mToolBar )
+    {
+        mToolBar->resetControl();
     }
 }
 

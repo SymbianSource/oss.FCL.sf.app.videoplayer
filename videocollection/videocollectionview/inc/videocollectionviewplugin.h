@@ -21,6 +21,7 @@
 #include <mpxviewpluginqt.h>
 
 class VideoCollectionUiLoader;
+class VideoCollectionViewUtils;
 class VideoListView;
 class VideoServices;
 
@@ -135,6 +136,11 @@ private:
      * View object, owned
      */
     VideoListView *mView;
+
+    /**
+     * Reference to video collection view utils
+     */
+    VideoCollectionViewUtils &mUiUtils;
 
     /**
      * Activated flag. Set as true when view is properly activated.

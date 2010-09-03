@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 3 %
+# Version : %version: 5 %
 
 
 TEMPLATE = app
@@ -27,7 +27,7 @@ symbian:
     TARGET.CAPABILITY = ALL -DRM -TCB
     TARGET.EPOCHEAPSIZE = 0x20000 0x1600000
     TARGET.UID3 = 0x200211FE
-    SKINICON = qtg_large_video_tv 
+    SKINICON = qtg_large_video 
 
     BLD_INF_RULES.prj_exports += "rom/videoplayer.iby          CORE_APP_LAYER_IBY_EXPORT_PATH(videoplayer.iby)" \
                                  "rom/videoplayerresources.iby LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(videoplayerresources.iby)" \
@@ -55,7 +55,10 @@ LIBS += -lvideoplayerengine.dll \
 
 VPATH += src
 
-SOURCES += main.cpp
+HEADERS += inc/videoplayerapp.h
+
+SOURCES += src/main.cpp \
+           src/videoplayerapp.cpp
 
 RSS_RULES += \
 "    datatype_list =                                                                              " \

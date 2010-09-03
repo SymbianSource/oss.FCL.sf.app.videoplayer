@@ -18,7 +18,6 @@
 #include "videocollectiontrace.h"
 #include "videolistwidget.h"
 
-#include <xqserviceutil.h>
 #include <qcoreapplication.h>
 #include <qtimer.h>
 #include <hbscrollbar.h>
@@ -37,7 +36,7 @@
 #include "videocollectionuiloader.h"
 #include "videolistselectiondialog.h"
 #include "videothumbnaildata.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectioncommon.h"
 #include "mpxhbvideocommondefs.h"
 
@@ -45,6 +44,7 @@
 const char* const LIST_WIDGET_OBJECT_NAME_CONTEXT_MENU             = "vc:ListWidgetContextMenu";
 const char* const LIST_WIDGET_OBJECT_NAME_DELETE_VIDEO             = "vc:ListWidgetMessageBoxDeleteVideo";
 const char* const LIST_WIDGET_OBJECT_NAME_RENAME_VIDEO             = "vc:ListWidgetInputDialogRenameVideo";
+const char* const LIST_WIDGET_OBJECT_NAME_RENAME_ALBUM             = "vc:ListWidgetInputDialogRenameAlbum";
 const char* const LIST_WIDGET_OBJECT_NAME_REMOVE_COLLECTION        = "vc:ListWidgetMessageBoxRemoveCollection";
 const char* const LIST_WIDGET_OBJECT_NAME_NAV_KEY_BACK             = "vc:ListWidgetNavKeyBack";
 const char* const LIST_WIDGET_OBJECT_NAME_NAV_KEY_QUIT             = "vc:ListWidgetNavKeyQuit";
@@ -108,7 +108,7 @@ VideoListWidget::~VideoListWidget()
 // initialize
 // ---------------------------------------------------------------------------
 //
-int VideoListWidget::initialize(VideoSortFilterProxyModel &model, 
+int VideoListWidget::initialize(VideoProxyModelGeneric &model, 
                                 bool isService,
                                 VideoCollectionCommon::TCollectionLevels level)
 {
@@ -191,18 +191,17 @@ int VideoListWidget::activate(VideoCollectionCommon::TCollectionLevels level)
         ERROR_1(-1, "VideoListWidget::activate() [0x%x]: connecting signals failed.", this);
         return -1;
     }
-
+    
+    // Enable thumbnail background fetching.
+    VideoThumbnailData::instance().enableBackgroundFetching(true);
+    fetchThumbnailsForVisibleItems();
+    
     // open model to the current level in case not in album or category
     if (level != VideoCollectionCommon::ELevelAlbum &&
         level != VideoCollectionCommon::ELevelDefaultColl)
     {
          mModel->open(level);
     }
-    
-    // Enable thumbnail background fetching.
-    VideoThumbnailData &thumbnailData = VideoThumbnailData::instance();
-    thumbnailData.enableBackgroundFetching(true);
-    fetchThumbnailsForVisibleItems();
 
     return 0;
 }
@@ -222,10 +221,8 @@ void VideoListWidget::deactivate()
     setVisible(false);
     disConnectSignals();
 
-    // Free allocated memory for list thumbnails and disable background fetching.
-    VideoThumbnailData &thumbnailData = VideoThumbnailData::instance();
-    thumbnailData.enableBackgroundFetching(false);
-    thumbnailData.freeThumbnailData();
+    // Disable background thumbnail fetching.
+    VideoThumbnailData::instance().enableBackgroundFetching(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -603,7 +600,7 @@ void VideoListWidget::setServiceContextMenu()
 // getModel
 // ---------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoListWidget::getModel()
+VideoProxyModelGeneric* VideoListWidget::getModel()
 { 
 	FUNC_LOG_ADDR(this);
     return mModel; 
@@ -685,6 +682,10 @@ void VideoListWidget::doActivateItem(const QModelIndex &index)
     }
     else
     {
+        if(mModel->getMediaIdAtIndex(index).iId2 == KVcxMvcMediaTypeVideo)
+        {
+            VideoThumbnailData::instance().freeThumbnailData();
+        }
     	mModel->openItem(mModel->getMediaIdAtIndex(index));
     }
 }
@@ -798,18 +799,34 @@ void VideoListWidget::renameSlot()
     
     QModelIndex index = currentIndex();
     QVariant variant = mModel->data(index, VideoCollectionCommon::KeyTitle);
-     
+    
     if(variant.isValid())
     {
-        QString label(hbTrId("txt_videos_title_enter_name"));
-        QString albumName = variant.toString();
+        QString label;
+        const char* objectName = 0;
+        QString currentName = variant.toString();
         
-        HbInputDialog *dialog = new HbInputDialog();
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->setObjectName(LIST_WIDGET_OBJECT_NAME_RENAME_VIDEO);
-        dialog->setPromptText(label);
-        dialog->setValue(albumName);
-        dialog->open(this, SLOT(renameDialogFinished(HbAction *)));
+        TMPXItemId mpxId = mModel->getMediaIdAtIndex(index);
+        if(mpxId.iId2 == KVcxMvcMediaTypeAlbum)
+        {
+            label = hbTrId("txt_videos_title_enter_name");
+            objectName = LIST_WIDGET_OBJECT_NAME_RENAME_ALBUM;
+        }
+        else if(mpxId.iId2 == KVcxMvcMediaTypeVideo)
+        {
+            label = hbTrId("txt_videos_dialog_video_name");
+            objectName = LIST_WIDGET_OBJECT_NAME_RENAME_VIDEO;
+        }
+        
+        if(!label.isEmpty())
+        {
+            HbInputDialog *dialog = new HbInputDialog();
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->setObjectName(objectName);
+            dialog->setPromptText(label);
+            dialog->setValue(currentName);
+            dialog->open(this, SLOT(renameDialogFinished(HbAction *)));
+        }   
     }
 }
 
@@ -828,6 +845,7 @@ void VideoListWidget::renameDialogFinished(HbAction *action)
     }
     QModelIndex index = currentIndex();
     TMPXItemId itemId = mModel->getMediaIdAtIndex(index);
+    
     QVariant newNameVariant = dialog->value();
     QVariant oldNameVariant = mModel->data(index, VideoCollectionCommon::KeyTitle);
     if(!newNameVariant.isValid() || !oldNameVariant.isValid())
@@ -835,9 +853,10 @@ void VideoListWidget::renameDialogFinished(HbAction *action)
         // invalid data at index
         return;
     }
-    QString newAlbumName = newNameVariant.toString().trimmed();
-    QString oldAlbumName = oldNameVariant.toString();
-    if(!newAlbumName.length() || newAlbumName == oldAlbumName)
+    
+    QString newName = newNameVariant.toString().trimmed();
+    QString oldName = oldNameVariant.toString();
+    if(!newName.length() || newName == oldName)
     {
         // no new name provided or name has not changed
         return;
@@ -845,9 +864,9 @@ void VideoListWidget::renameDialogFinished(HbAction *action)
     if(itemId.iId2 == KVcxMvcMediaTypeAlbum)
     {     
         // for album, we need to make sure name is unique
-        newAlbumName = mModel->resolveAlbumName(newAlbumName);
+        newName = mModel->resolveAlbumName(newName);
     }
-    mModel->renameItem(itemId, newAlbumName);
+    mModel->renameItem(itemId, newName);
 }
 
 // ---------------------------------------------------------------------------

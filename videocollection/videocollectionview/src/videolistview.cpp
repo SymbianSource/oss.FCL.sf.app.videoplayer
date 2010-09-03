@@ -15,10 +15,9 @@
 *
 */
 
-// Version : %version: 113.1.5 %
+// Version : %version: 113.1.8 %
 
 // INCLUDE FILES
-#include <xqserviceutil.h>
 #include <qactiongroup.h>
 #include <hbinstance.h>
 #include <hbmainwindow.h>
@@ -44,7 +43,7 @@
 #include "videolistview.h"
 #include "videocollectioncommon.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectionuiloader.h"
 #include "mpxhbvideocommondefs.h"
 #include "videooperatorservice.h"
@@ -123,7 +122,7 @@ int VideoListView::initializeView()
 	int collectionListPhase = VideoCollectionUiLoaderParam::LoadPhaseSecondary;
 	int collectionContentListPhase = VideoCollectionUiLoaderParam::LoadPhaseSecondary;
 	VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelVideos;
-    if (XQServiceUtil::isService())
+    if (mUiUtils.isService())
     {
         INFO("VideoListView::initializeView() initializing service.");
     	if (!mVideoServices)
@@ -608,6 +607,13 @@ int VideoListView::createToolbar()
         else if(level == VideoCollectionCommon::ELevelAlbum) 
         {
             bar->addActions(mToolbarCollectionActionGroup->actions());
+            if(!mModelReady)
+            {
+                // if model not ready yet toolbuttons should not be
+                // visible, after model responds visibility will be updated
+                mToolbarActions[ETBActionAddVideos]->setVisible(false);
+                mToolbarActions[ETBActionRemoveVideos]->setVisible(false);
+            }
         }
 
         if(mToolbarServiceExtension && (level == VideoCollectionCommon::ELevelCategory 
@@ -738,7 +744,7 @@ void VideoListView::showHint(bool show)
         return;
     }
 
-    VideoSortFilterProxyModel *model = mCurrentList->getModel();
+    VideoProxyModelGeneric *model = mCurrentList->getModel();
     
     if(!model || (!mModelReady && model->rowCount() == 0))
     {
@@ -774,6 +780,7 @@ void VideoListView::showHint(bool show)
 
     if (mToolbarViewsActionGroup && mToolbarCollectionActionGroup && !mVideoServices)
     {
+        mToolbarActions[ETBActionAddVideos]->setVisible(true);
         if (show)
         {
         	mToolbarActions[ETBActionRemoveVideos]->setVisible(false);
@@ -819,7 +826,7 @@ void VideoListView::setHintLevel(VideoHintWidget::HintLevel level)
 void VideoListView::updateSubLabel()
 {
 	FUNC_LOG;
-    VideoSortFilterProxyModel *model = 0;
+    VideoProxyModelGeneric *model = 0;
     if(mCurrentList)
     {
         model = mCurrentList->getModel(); 
@@ -1096,7 +1103,7 @@ void VideoListView::doSorting(int role)
 	}
 	// sort model
 	Qt::SortOrder order(Qt::AscendingOrder);
-	VideoSortFilterProxyModel *model = mCurrentList->getModel();
+	VideoProxyModelGeneric *model = mCurrentList->getModel();
 	if(model->sortRole() == role && model->sortOrder() == Qt::AscendingOrder)
 	{
 		order = Qt::DescendingOrder;
@@ -1319,7 +1326,7 @@ void VideoListView::aboutToShowMainMenuSlot()
     }
     
     //  No other actions shown if there's no videos.
-    VideoSortFilterProxyModel *model = mCurrentList->getModel();
+    VideoProxyModelGeneric *model = mCurrentList->getModel();
     if (!model || !model->rowCount())
     {
         return;
@@ -1403,7 +1410,7 @@ void VideoListView::prepareBrowseServiceMenu()
     showAction(false, DOCML_NAME_SORT_BY_SIZE);
     showAction(false, DOCML_NAME_SORT_MENU);
     
-    VideoSortFilterProxyModel *model = mCurrentList->getModel();
+    VideoProxyModelGeneric *model = mCurrentList->getModel();
     if (!model || !model->rowCount())
     {
         return;
@@ -1482,7 +1489,7 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
             return;
         }
                 
-        VideoSortFilterProxyModel *model = collectionContentWidget->getModel();
+        VideoProxyModelGeneric *model = collectionContentWidget->getModel();
         if(!model)
         {
             // no model for content widget, cannot activate
@@ -1512,18 +1519,21 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
         mModelReady = model->rowCount() > 0;
         setHintLevel(VideoHintWidget::Collection);
 
-        // update toolbar for albums, default categories don't have one. Neither does services.
-        toolBar()->clearActions();
-        if(!mVideoServices && level == VideoCollectionCommon::ELevelAlbum && 
-           mToolbarCollectionActionGroup && mToolbarActions.contains(ETBActionCollections))
+        if(mToolbarCollectionActionGroup)
         {
-            mToolbarActions[ETBActionCollections]->setChecked(false);
-            toolBar()->addActions(mToolbarCollectionActionGroup->actions());
-            setItemVisible(Hb::ToolBarItem, true);
-        }
-        else
-        {
-            setItemVisible(Hb::ToolBarItem, false);
+            // update toolbar for albums, default categories don't have one. Neither does services.
+            toolBar()->clearActions();
+            if(!mVideoServices && level == VideoCollectionCommon::ELevelAlbum && 
+                mToolbarActions.contains(ETBActionCollections))
+            {
+                mToolbarActions[ETBActionCollections]->setChecked(false);
+                toolBar()->addActions(mToolbarCollectionActionGroup->actions());
+                setItemVisible(Hb::ToolBarItem, true);
+            }
+            else
+            {
+                setItemVisible(Hb::ToolBarItem, false);
+            }
         }
         // restore animations for collection content widget
         collectionContentWidget->setEnabledAnimations(animationState);

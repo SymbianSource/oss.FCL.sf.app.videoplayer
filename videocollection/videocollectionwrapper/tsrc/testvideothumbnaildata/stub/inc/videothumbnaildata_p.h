@@ -28,7 +28,7 @@
 #include <mpxitemid.h>
 
 // FORWARD DECLARATIONS
-class VideoSortFilterProxyModel 
+class VideoProxyModelGeneric 
 {
 public:
     int ooo;
@@ -129,7 +129,7 @@ public:
      * @param model
      * @param fetchIndex index where to start the background thumbnail fetching.
      */
-    void startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex);    
+    void startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex);    
     
     /**
      * Enables thumbnail creation.

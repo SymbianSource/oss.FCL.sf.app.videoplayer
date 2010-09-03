@@ -18,39 +18,44 @@
 #ifndef VIDEOCOLLECTIONWRAPPERDATA_H
 #define VIDEOCOLLECTIONWRAPPERDATA_H
 
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
+#include "videoproxymodelallvideos.h"
+#include "videoproxymodelcollections.h"
+#include "videoproxymodelcontent.h"
 #include "videolistdatamodel.h"
+#include <qpointer.h>
 
-class VideoCollectionWrapperData
+class VideoCollectionWrapperData : public QObject
 {
+    Q_OBJECT 
+    
 public: // methods
-    static void reset()
-    {
-        mGetModelFails = false;
+    static void reset();
+    /*{
+        mGetGenericModelFails = false;
+        mGetAllVideosModelFails = false;
+        mGetCollectionsModelFails = false;
+        mGetCollectionContentModelFails = false;
         
         delete mAllVideosModel;
-        mAllVideosModel = 0;
-        
         delete mCollectionsModel;
-        mCollectionsModel = 0;
-        
         delete mCollectionContentModel;
-        mCollectionContentModel = 0;
-        
         delete mGenericModel;
-        mGenericModel = 0;
-        
+
         delete mSourceModel;
         mSourceModel = 0;        
-    }
+    }*/
     
 public: // data
-    static bool mGetModelFails;
+    static bool mGetGenericModelFails;
+    static bool mGetAllVideosModelFails;
+    static bool mGetCollectionsModelFails;
+    static bool mGetCollectionContentModelFails;
     static VideoListDataModel *mSourceModel;
-    static VideoSortFilterProxyModel *mAllVideosModel;
-    static VideoSortFilterProxyModel *mCollectionsModel;
-    static VideoSortFilterProxyModel *mCollectionContentModel;
-    static VideoSortFilterProxyModel *mGenericModel;    
+    static QPointer<VideoProxyModelGeneric> mAllVideosModel;
+    static QPointer<VideoProxyModelGeneric> mCollectionsModel;
+    static QPointer<VideoProxyModelGeneric> mCollectionContentModel;
+    static QPointer<VideoProxyModelGeneric> mGenericModel;
 };
 
-#endif /* VIDEOSORTFILTERPROXYMODEL_H */
+#endif /* VIDEOCOLLECTIONWRAPPERDATA_H */

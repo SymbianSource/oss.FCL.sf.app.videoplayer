@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  11 %
+// Version : %version:  12 %
 
 
 
@@ -765,6 +765,29 @@ void VideoPlaybackToolBar::retrieveButtons()
                              mController, SLOT( sendVideo() ) );
                 }
             }
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackToolBar::resetControl
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackToolBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackToolBar::resetControl"));
+
+    switch( mSeekingState )
+    {
+        case EFastForwarding:
+        {
+            ffReleased();
+            break;
+        }
+        case ERewinding:
+        {
+            rwReleased();
+            break;
         }
     }
 }

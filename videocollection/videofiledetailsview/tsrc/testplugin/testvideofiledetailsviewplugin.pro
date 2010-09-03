@@ -54,7 +54,7 @@ LIBS += -lestor.dll \
 # Input
 HEADERS += inc/testvideofiledetails.h \
            stub/inc/videocollectionwrapper.h \
-           stub/inc/videosortfilterproxymodel.h \
+           stub/inc/videoproxymodelgeneric.h \
            stub/inc/hbmessagebox.h \
            stub/inc/shareui.h \
            stub/inc/thumbnailmanager_qt.h \
@@ -65,7 +65,7 @@ HEADERS += inc/testvideofiledetails.h \
    
 SOURCES += src/testvideofiledetails.cpp \
            stub/src/videocollectionwrapper.cpp \
-           stub/src/videosortfilterproxymodel.cpp \
+           stub/src/videoproxymodelgeneric.cpp \
            stub/src/hbmessagebox.cpp \
            stub/src/shareui.cpp \
            stub/src/thumbnailmanager_qt.cpp \

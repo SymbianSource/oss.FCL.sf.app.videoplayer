@@ -28,7 +28,7 @@
 
 #include "testvideothumbnaildata_p.h"
 #include "videothumbnailfetcher.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectionwrapper.h"
 
 #include "e32std.h"
@@ -115,14 +115,14 @@ void TestVideoThumbnailData_p::init()
     VideoThumbnailFetcher::mAddFetchFails = false;
     VideoThumbnailFetcher::mThumbnailReadyError = 0;
     
-    mModel = new VideoSortFilterProxyModel();
+    mModel = new VideoProxyModelGeneric();
     VideoCollectionWrapper::instance().setModel(mModel);
     mTestObject = new VideoThumbnailDataTester();
     mTestObject->initialize();
     mTestObject->mCurrentModel = mModel;
     
-    VideoSortFilterProxyModel::mReturnInvalidIndexes = false;
-    VideoSortFilterProxyModel::mRowCountCallCount = 0;
+    VideoProxyModelGeneric::mReturnInvalidIndexes = false;
+    VideoProxyModelGeneric::mRowCountCallCount = 0;
 
     qRegisterMetaType<QList<TMPXItemId> >("QList<TMPXItemId>& ");
 }
@@ -186,35 +186,19 @@ void TestVideoThumbnailData_p::testDestructor()
 //
 void TestVideoThumbnailData_p::testInitialize()
 {
-    VideoCollectionWrapper::instance().setModel(0);
-
     mTestObject = new VideoThumbnailDataTester();
-    QVERIFY(mTestObject->mThumbnailFetcher == 0);
-    QVERIFY(mTestObject->mCurrentModel == 0);
-    QVERIFY(mTestObject->mBgFetchTimer == 0);
-    cleanup();
-
-    mTestObject = new VideoThumbnailDataTester();
-    mTestObject->disconnectSignals();
-    delete mTestObject->mBgFetchTimer;
-    mTestObject->mBgFetchTimer = 0;
-    delete mTestObject->mThumbnailFetcher;
-    mTestObject->mThumbnailFetcher = 0;
-    mTestObject->mCurrentModel = 0;
-
-    mTestObject->initialize();
-    QVERIFY(mTestObject->mThumbnailFetcher == 0);
-    QVERIFY(mTestObject->mCurrentModel == 0);
-    QVERIFY(mTestObject->mBgFetchTimer == 0);
-    cleanup();
-
-    init();
-    mTestObject->initialize();
-    mTestObject->initialize();
+    QVERIFY(mTestObject->initialize() == 0);
+    VideoThumbnailFetcher *fetcher = mTestObject->mThumbnailFetcher;
+    QTimer *ftimer = mTestObject->mBgFetchTimer;
+    QTimer *rtimer = mTestObject->mTbnReportTimer;
     QVERIFY(mTestObject->mThumbnailFetcher != 0);
-    QVERIFY(mTestObject->mCurrentModel != 0);
     QVERIFY(mTestObject->mBgFetchTimer != 0);
-    QCOMPARE( mTestObject->mThumbnailFetcher->mConstructorCallCount, 1);
+    QVERIFY(mTestObject->mTbnReportTimer != 0);
+    QVERIFY(mTestObject->initialize() == 0);
+    // Verify they are still the same. 
+    QVERIFY(mTestObject->mThumbnailFetcher == fetcher);
+    QVERIFY(mTestObject->mBgFetchTimer == ftimer);
+    QVERIFY(mTestObject->mTbnReportTimer == rtimer);
     cleanup();
 }
 
@@ -224,7 +208,6 @@ void TestVideoThumbnailData_p::testInitialize()
 //
 void TestVideoThumbnailData_p::testGetThumbnail()
 {
-
     int mediaid(50);
     QPixmap pixmap(100,100);
     pixmap.fill(Qt::blue);
@@ -248,7 +231,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnail()
     
     // Tests when mModel is null.
     init();
-    VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
+    VideoProxyModelGeneric* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
     spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     QCOMPARE(mTestObject->startFetchingThumbnail(TMPXItemId(0, 0), TB_PRIORITY), -1);
@@ -358,7 +341,7 @@ void TestVideoThumbnailData_p::testStartFetchingThumbnails()
     indexes.append(mTestObject->mCurrentModel->index(0, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(10, 0, QModelIndex()));
     indexes.append(mTestObject->mCurrentModel->index(20, 0, QModelIndex()));
-    VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
+    VideoProxyModelGeneric* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
     
     spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
@@ -481,7 +464,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     
     // Tests when mModel is null.
     init();
-    VideoSortFilterProxyModel* backupProxyModel = mTestObject->mCurrentModel;
+    VideoProxyModelGeneric* backupProxyModel = mTestObject->mCurrentModel;
     mTestObject->mCurrentModel = NULL;
     spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId> &)));
     mTestObject->emitDoBackgroundFetching();
@@ -490,7 +473,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
     QCOMPARE(VideoThumbnailFetcher::mRequests.count(), 0);
     mTestObject->mCurrentModel = backupProxyModel;
     QVERIFY(mTestObject->mCurrentFetchIndex == 0);
-    QCOMPARE(VideoSortFilterProxyModel::mRowCountCallCount, 0);
+    QCOMPARE(VideoProxyModelGeneric::mRowCountCallCount, 0);
     cleanup();
 
     // Tests when mThumbnailFetcher is null.
@@ -621,7 +604,7 @@ void TestVideoThumbnailData_p::testDoBackgroundFetching()
         mTestObject->mCurrentModel->appendData(QString("file") + QString::number(i));
     }
     spy = new QSignalSpy(mTestObject, SIGNAL(thumbnailsFetched(QList<TMPXItemId>&)));
-    VideoSortFilterProxyModel::mReturnInvalidIndexes = true;
+    VideoProxyModelGeneric::mReturnInvalidIndexes = true;
     mTestObject->mCurrentFetchIndex = THUMBNAIL_BACKGROUND_FETCH_AMOUNT/2;
     mTestObject->emitDoBackgroundFetching();
     QVERIFY(checkThumbnailReadyCount(spy, 0));
@@ -716,15 +699,6 @@ void TestVideoThumbnailData_p::testDefaultThumbnail()
     // Second call when tn has been loaded already.
     QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeAlbum)));
     QVERIFY(mTestObject->mDefaultThumbnails.count() == 2);
-    
-    // Default tn for unknown category
-    tn = mTestObject->defaultThumbnail(TMPXItemId(555, KVcxMvcMediaTypeCategory));
-    QVERIFY( tn != 0 );
-    QVERIFY( tn->isNull() == false );
-    // Second call when tn has been loaded already.
-    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeCategory))); 
-    // Still two because icon is same as default album 
-    QVERIFY(mTestObject->mDefaultThumbnails.count() == 2);
 
     // Default tn for downloads category
     tn = mTestObject->defaultThumbnail(TMPXItemId(KVcxMvcCategoryIdDownloads, KVcxMvcMediaTypeCategory));
@@ -743,20 +717,13 @@ void TestVideoThumbnailData_p::testDefaultThumbnail()
     QVERIFY(mTestObject->mDefaultThumbnails.count() == 4);    
     
     cleanup();
-    
 
     init();
-
     QVERIFY(mTestObject->mDefaultThumbnails.count() == 0);
 
-    // Default tn for unknown category, tn not loaded
+    // Default tn for unknown category.
     tn = mTestObject->defaultThumbnail(TMPXItemId(555, KVcxMvcMediaTypeCategory));
-    QVERIFY( tn != 0 );
-    QVERIFY( tn->isNull() == false );
-    // Second call when tn has been loaded already.
-    QVERIFY(tn == mTestObject->defaultThumbnail(TMPXItemId(0, KVcxMvcMediaTypeCategory))); 
-    // Still two because icon is same as default album 
-    QVERIFY(mTestObject->mDefaultThumbnails.count() == 1);
+    QVERIFY( tn == 0 );
     
     cleanup();
 }
@@ -810,7 +777,7 @@ void TestVideoThumbnailData_p::testStartBackgroundFetching()
     
     // Set new model.
     mTestObject->mBackgroundFetchingEnabled = true;
-    VideoSortFilterProxyModel *model = mTestObject->mCurrentModel; 
+    VideoProxyModelGeneric *model = mTestObject->mCurrentModel; 
     mTestObject->mCurrentModel = 0;
     mTestObject->mCurrentFetchIndex = -5;
     mTestObject->startBackgroundFetching(model, 10);
@@ -955,4 +922,5 @@ void TestVideoThumbnailData_p::testAboutToQuitSlot()
     
     cleanup();
 }
+
 // End of file

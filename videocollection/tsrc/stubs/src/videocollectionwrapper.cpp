@@ -17,13 +17,16 @@
 
 #include "videocollectionwrapper.h"
 #include "videocollectionwrapperdata.h"
-
-bool VideoCollectionWrapperData::mGetModelFails = false;
+/*
+bool VideoCollectionWrapperData::mGetGenericModelFails = false;
+bool VideoCollectionWrapperData::mGetAllVideosModelFails = false;
+bool VideoCollectionWrapperData::mGetCollectionsModelFails = false;
+bool VideoCollectionWrapperData::mGetCollectionContentModelFails = false;
 VideoListDataModel *VideoCollectionWrapperData::mSourceModel = 0;
-VideoSortFilterProxyModel *VideoCollectionWrapperData::mAllVideosModel = 0;
-VideoSortFilterProxyModel *VideoCollectionWrapperData::mCollectionsModel = 0;
-VideoSortFilterProxyModel *VideoCollectionWrapperData::mCollectionContentModel = 0;
-VideoSortFilterProxyModel *VideoCollectionWrapperData::mGenericModel = 0;
+QPointer<VideoProxyModelGeneric> VideoCollectionWrapperData::mAllVideosModel = 0;
+QPointer<VideoProxyModelGeneric> VideoCollectionWrapperData::mCollectionsModel = 0;
+QPointer<VideoProxyModelGeneric> VideoCollectionWrapperData::mCollectionContentModel = 0;
+QPointer<VideoProxyModelGeneric> VideoCollectionWrapperData::mGenericModel = 0;*/
 
 VideoCollectionWrapper &VideoCollectionWrapper::instance()
 {
@@ -41,85 +44,100 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
     VideoCollectionWrapperData::reset();
 }
 
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(VideoCollectionCommon::TModelType type)
+VideoProxyModelGeneric* VideoCollectionWrapper::getGenericModel()
 {
-    VideoSortFilterProxyModel *model = 0;
-    if (!VideoCollectionWrapperData::mGetModelFails)
+    VideoProxyModelGeneric *model = 0;
+    if (!VideoCollectionWrapperData::mGetGenericModelFails)
     {
         VideoListDataModel *sourceModel = VideoCollectionWrapperData::mSourceModel;
         if (!sourceModel)
         {
             sourceModel = new VideoListDataModel;
-            if (sourceModel)
-            {
-                sourceModel->initialize();
-                VideoCollectionWrapperData::mSourceModel = sourceModel;
-            }
+            sourceModel->initialize();
+            VideoCollectionWrapperData::mSourceModel = sourceModel;
         }
-        
-        switch (type)
+
+        model = VideoCollectionWrapperData::mGenericModel;
+        if(!model && VideoCollectionWrapperData::mSourceModel)
         {
-            case VideoCollectionCommon::EModelTypeAllVideos:
-            {
-                model = VideoCollectionWrapperData::mAllVideosModel;
-                if (!model)
-                {
-                    model = new VideoSortFilterProxyModel(type);
-                    if (model)
-                    {
-                        model->initialize(sourceModel);
-                        VideoCollectionWrapperData::mAllVideosModel = model;
-                    }
-                }
-                break;
-            }
-            case VideoCollectionCommon::EModelTypeCollections:
-            {
-                model = VideoCollectionWrapperData::mCollectionsModel;
-                if (!model)
-                {
-                    model = new VideoSortFilterProxyModel(type);
-                    if (model)
-                    {
-                        model->initialize(sourceModel);
-                        VideoCollectionWrapperData::mCollectionsModel = model;
-                    }
-                }
-                break;
-            }
-            case VideoCollectionCommon::EModelTypeCollectionContent:
-            {
-                model = VideoCollectionWrapperData::mCollectionContentModel;
-                if (!model)
-                {
-                    model = new VideoSortFilterProxyModel(type);
-                    if (model)
-                    {
-                        model->initialize(sourceModel);
-                        VideoCollectionWrapperData::mCollectionContentModel = model;
-                    }
-                }
-                break;
-            }
-            case VideoCollectionCommon::EModelTypeGeneric:
-            {
-                model = VideoCollectionWrapperData::mGenericModel;
-                if (!model)
-                {
-                    model = new VideoSortFilterProxyModel(type);
-                    if (model)
-                    {
-                        model->initialize(sourceModel);
-                        VideoCollectionWrapperData::mGenericModel = model;
-                    }
-                }
-                break;
-            }
-            default:
-            {
-                // invalid model type
-                break;
-            }
+            model = new VideoProxyModelGeneric();
+            model->initialize(VideoCollectionWrapperData::mSourceModel);
+            VideoCollectionWrapperData::mGenericModel = model;
+        }
+    }
+    
+    return model;
+}
+
+VideoProxyModelGeneric* VideoCollectionWrapper::getAllVideosModel()
+{
+    VideoProxyModelGeneric *model = 0;
+    if (!VideoCollectionWrapperData::mGetAllVideosModelFails)
+    {
+        VideoListDataModel *sourceModel = VideoCollectionWrapperData::mSourceModel;
+        if (!sourceModel)
+        {
+            sourceModel = new VideoListDataModel;
+            sourceModel->initialize();
+            VideoCollectionWrapperData::mSourceModel = sourceModel;
+        }
+
+        model = VideoCollectionWrapperData::mAllVideosModel;
+        if (!model)
+        {
+            model = new VideoProxyModelAllVideos();
+                model->initialize(VideoCollectionWrapperData::mSourceModel);
+            VideoCollectionWrapperData::mAllVideosModel = model;
+        }
+    }
+    
+    return model;
+}
+
+VideoProxyModelGeneric* VideoCollectionWrapper::getCollectionsModel()
+{
+    VideoProxyModelGeneric *model = 0;
+    if (!VideoCollectionWrapperData::mGetCollectionsModelFails)
+    {
+        VideoListDataModel *sourceModel = VideoCollectionWrapperData::mSourceModel;
+        if (!sourceModel)
+        {
+            sourceModel = new VideoListDataModel;
+            sourceModel->initialize();
+            VideoCollectionWrapperData::mSourceModel = sourceModel;
+        }
+
+        model = VideoCollectionWrapperData::mCollectionsModel;
+        if (!model)
+        {
+            model = new VideoProxyModelCollections();
+            model->initialize(VideoCollectionWrapperData::mSourceModel);
+            VideoCollectionWrapperData::mCollectionsModel = model;
+        }
+    }
+    
+    return model;
+}
+
+VideoProxyModelGeneric* VideoCollectionWrapper::getCollectionContentModel()
+{
+    VideoProxyModelGeneric *model = 0;
+    if (!VideoCollectionWrapperData::mGetCollectionContentModelFails)
+    {
+        VideoListDataModel *sourceModel = VideoCollectionWrapperData::mSourceModel;
+        if (!sourceModel)
+        {
+            sourceModel = new VideoListDataModel;
+            sourceModel->initialize();
+            VideoCollectionWrapperData::mSourceModel = sourceModel;
+        }
+
+        model = VideoCollectionWrapperData::mCollectionContentModel;
+        if (!model)
+        {
+            model = new VideoProxyModelContent();
+            model->initialize(VideoCollectionWrapperData::mSourceModel);
+            VideoCollectionWrapperData::mCollectionContentModel = model;
         }
     }
     

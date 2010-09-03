@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24.1.3 %
+// Version : %version: 24.1.5 %
 
 // INCLUDE FILES
 #include <qapplication.h>
@@ -30,7 +30,7 @@
 
 #include "videothumbnaildata_p.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videothumbnailfetcher.h"
 #include "videocollectiontrace.h"
 
@@ -182,10 +182,6 @@ int VideoThumbnailDataPrivate::connectSignals()
 	FUNC_LOG;
     if(!mSignalsConnected)
     {
-        VideoSortFilterProxyModel *model = 
-                VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeAllVideos);
-        if(!model)
-            return -1;
         if(!connect(mThumbnailFetcher, SIGNAL(thumbnailReady( QPixmap , const TMPXItemId &, int )),
                     this, SLOT(thumbnailReadySlot( QPixmap , const TMPXItemId &, int))) ||
             !connect(mThumbnailFetcher, SIGNAL(allThumbnailsFetched()),
@@ -228,6 +224,7 @@ const QIcon* VideoThumbnailDataPrivate::getThumbnail( const TMPXItemId &mediaId)
 int VideoThumbnailDataPrivate::startFetchingThumbnails(const QList<QModelIndex> &indexes, int priority)
 {
 	FUNC_LOG;
+	
     if(!mCurrentModel || !mThumbnailFetcher)
     {
         return -1;
@@ -410,19 +407,26 @@ void VideoThumbnailDataPrivate::allThumbnailsFetchedSlot()
 //
 const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &mediaId)
 {
+    FUNC_LOG;
+    
+    if(!mBackgroundFetchingEnabled)
+    {
+        return 0;
+    }
+    
     const TMPXItemId defaultIdVideo(KMaxTUint32-1, KVcxMvcMediaTypeVideo);
     const TMPXItemId defaultIdAlbum(KMaxTUint32-1, KVcxMvcMediaTypeAlbum);
     const TMPXItemId defaultIdDownloads(KVcxMvcCategoryIdDownloads, KVcxMvcMediaTypeCategory);
     const TMPXItemId defaultIdCaptured(KVcxMvcCategoryIdCaptured, KVcxMvcMediaTypeCategory);
 
     // Default thumbnail for video
-    if(mediaId.iId2 == KVcxMvcMediaTypeVideo) 
+    if(mediaId.iId2 == KVcxMvcMediaTypeVideo)
     {
         if(!mDefaultThumbnails.contains(defaultIdVideo))
         {
             mDefaultThumbnails[defaultIdVideo] = loadIcon("qtg_large_video");
         }
-        return &mDefaultThumbnails[defaultIdVideo].qicon();
+        return mDefaultThumbnails[defaultIdVideo];
     }
     else
     {
@@ -433,7 +437,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &media
             {
                 mDefaultThumbnails[defaultIdAlbum] = loadIcon("qtg_large_video_collection");
             }
-            return &mDefaultThumbnails[defaultIdAlbum].qicon();
+            return mDefaultThumbnails[defaultIdAlbum];
         }
 
         // Thumbnails for default collections.
@@ -445,7 +449,7 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &media
                 {
                     mDefaultThumbnails[defaultIdDownloads] = loadIcon("qtg_large_video_download");
                 }
-                return &mDefaultThumbnails[defaultIdDownloads].qicon();
+                return mDefaultThumbnails[defaultIdDownloads];
             }
             
             case KVcxMvcCategoryIdCaptured:
@@ -454,16 +458,12 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &media
                 {
                     mDefaultThumbnails[defaultIdCaptured] = loadIcon("qtg_large_video_capture");
                 }
-                return &mDefaultThumbnails[defaultIdCaptured].qicon();
+                return mDefaultThumbnails[defaultIdCaptured];
             }
 
             default:
             {
-                if(!mDefaultThumbnails.contains(defaultIdAlbum))
-                {
-                    mDefaultThumbnails[defaultIdAlbum] = loadIcon("qtg_large_video_collection");
-                }
-                return &mDefaultThumbnails[defaultIdAlbum].qicon();
+                return 0;
             }
         }
     }
@@ -473,50 +473,30 @@ const QIcon* VideoThumbnailDataPrivate::defaultThumbnail(const TMPXItemId &media
 // VideoThumbnailDataPrivate::loadIcon()
 // -----------------------------------------------------------------------------
 //
-HbIcon VideoThumbnailDataPrivate::loadIcon(QString iconName)
-{
-    HbIcon icon(iconName);
+QIcon *VideoThumbnailDataPrivate::loadIcon(QString iconName)
+{   
+    FUNC_LOG;
     
-    if(!icon.isNull())
+    HbIcon resource(iconName);
+    QIcon *icon = 0;
+    
+    if(!resource.isNull())
     {
-        QPixmap dest = QPixmap(DEFAULT_THUMBNAIL_WIDTH, DEFAULT_THUMBNAIL_HEIGHT);
-
-        // Scale the icon into the thumbnail area.
-        QPixmap source = icon.pixmap();
-        // Smooth scaling is very expensive (size^2). Therefore we reduce the size
-        // to 2x of the destination size and using fast transformation before doing final smooth scaling.
-        if(source.size().width() > (6*dest.width()) || source.size().height() > (6*dest.height()))
-        {
-            QSize intermediate_size = QSize( dest.width() * 2, dest.height() * 2 );
-            source = source.scaled(intermediate_size, Qt::KeepAspectRatio, Qt::FastTransformation );
-        }
-        QPixmap scaled = source.scaled(dest.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-        // Center the icon.
-        int xDiff = 0;
-        int yDiff = 0;
-        if(dest.width() > scaled.width())
-        {
-            xDiff = (dest.width() - scaled.width()) / 2;
-        }
-        if(dest.height() > scaled.height())
-        {
-            yDiff = (dest.height() - scaled.height()) / 2;
-        }
+        // Set matching height, width is adjusted automaticly.
+        resource.setHeight(DEFAULT_THUMBNAIL_HEIGHT);
         
-        // Paint it.
+        QPixmap dest = QPixmap(DEFAULT_THUMBNAIL_WIDTH, DEFAULT_THUMBNAIL_HEIGHT);
+        
         QPainter painter(&dest);
         painter.setCompositionMode(QPainter::CompositionMode_Source);
-        painter.fillRect(dest.rect(), Qt::transparent);
-        painter.drawPixmap(xDiff, yDiff, scaled.width(), scaled.height(), scaled);
+        painter.fillRect(dest.rect(), Qt::transparent);        
+        resource.paint(&painter, dest.rect());
         painter.end();
         
-        return HbIcon(dest);
+        icon = new QIcon(dest);
     }
-    else
-    {
-        return HbIcon();
-    }
+    
+    return icon;
 }
 
 // -----------------------------------------------------------------------------
@@ -590,6 +570,13 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
     // Clear data.
     mReadyThumbnailMediaIds.clear();
     mThumbnailData.clear();
+    
+    QHash<TMPXItemId, QIcon *>::const_iterator iter = mDefaultThumbnails.constBegin();
+    while(iter != mDefaultThumbnails.constEnd())
+    {
+        delete *iter;
+        iter++;
+    }
     mDefaultThumbnails.clear();
 }
 
@@ -597,7 +584,7 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
 // VideoThumbnailDataPrivate::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
+void VideoThumbnailDataPrivate::startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex)
 {
 	FUNC_LOG;
 

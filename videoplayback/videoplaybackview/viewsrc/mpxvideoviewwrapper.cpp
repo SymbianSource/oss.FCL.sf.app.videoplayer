@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#45 %
+// Version : %version: da1mmcf#47 %
 
 
 
@@ -125,7 +125,7 @@ void CMPXVideoViewWrapper::ConstructL()
     //
     // Create user input handler
     //
-    iUserInputHandler = CVideoPlaybackUserInputHandler::NewL( this, iFileDetails->mTvOutConnected );
+    iUserInputHandler = CVideoPlaybackUserInputHandler::NewL( this );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -579,11 +579,6 @@ void CMPXVideoViewWrapper::HandleVideoPlaybackMessage( CMPXMessage* aMessage )
             if ( tvOutConnected )
             {
                 cmdId = EControlCmdTvOutConnected;
-            }
-
-            if ( iUserInputHandler )
-            {
-                TRAP_IGNORE(iUserInputHandler->HandleTVOutEventL( tvOutConnected ));
             }
 
             if ( iControlsController )
@@ -1271,12 +1266,18 @@ void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aViewForeground, T
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL()"),
                    _L("aViewForeground = %d, aAppForegournd = %d"), aViewForeground, aAppForegournd );
 
+    iUserInputHandler->SetForeground( aAppForegournd );
+    
     TMPXVideoPlaybackCommand videoCmd = EPbCmdHandleBackground;
+    TVideoPlaybackControlCommandIds controlsCmd = EControlCmdHandleBackgroundEvent;
 
     if ( aViewForeground )
     {
         videoCmd = EPbCmdHandleForeground;
+        controlsCmd = EControlCmdHandleForegroundEvent;
     }
+
+    iControlsController->handleEvent( controlsCmd );
 
     //
     //  create command to pass to playback plugin

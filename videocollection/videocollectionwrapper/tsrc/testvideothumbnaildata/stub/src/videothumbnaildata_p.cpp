@@ -117,7 +117,7 @@ void VideoThumbnailDataPrivate::freeThumbnailData()
 // VideoThumbnailData::startBackgroundFetching()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
+void VideoThumbnailDataPrivate::startBackgroundFetching(VideoProxyModelGeneric */*model*/, int /*fetchIndex*/)
 {
     mStartBackgroundFetchingCallCount++;
 }
@@ -126,7 +126,7 @@ void VideoThumbnailDataPrivate::startBackgroundFetching(VideoSortFilterProxyMode
 // VideoThumbnailData::enableThumbnailCreation()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataPrivate::enableThumbnailCreation(bool enable)
+void VideoThumbnailDataPrivate::enableThumbnailCreation(bool /*enable*/)
 {
     mEnableThumbnailCreationCallCount++;
 }

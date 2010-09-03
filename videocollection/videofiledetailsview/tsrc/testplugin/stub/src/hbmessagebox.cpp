@@ -54,7 +54,7 @@ HbMessageBox::~HbMessageBox()
     }
 }
 
-void HbMessageBox::setStandardButtons(StandardButtons buttons)
+void HbMessageBox::setStandardButtons(StandardButtons /*buttons*/)
 {
 	//NOP
 }

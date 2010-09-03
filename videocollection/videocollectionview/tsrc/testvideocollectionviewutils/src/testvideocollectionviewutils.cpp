@@ -24,7 +24,7 @@
 #include "hblabel.h"
 #include "hbaction.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodeldata.h"
+#include "videoproxymodeldata.h"
 #include "videoactivitystate.h"
 #include "videocollectioncommon.h"
 #include "centralrepository.h"
@@ -623,58 +623,57 @@ void TestVideoVideoCollectionViewUtils::testSortModel()
     // null model
     VideoCollectionViewUtils::sortModel(0, false, target);
     
-    VideoSortFilterProxyModel *model = 
-        VideoCollectionWrapper::instance().getModel(VideoCollectionCommon::EModelTypeGeneric);
+    VideoProxyModelGeneric *model = 
+        VideoCollectionWrapper::instance().getGenericModel();
     
     // target == invalid -> default values used as sort -call 
     VideoCollectionViewUtils::sortModel(model, false, target);
     
-    QVERIFY(VideoSortFilterProxyModelData::mDoSortingCallCount == 1);
-    QVERIFY(VideoSortFilterProxyModelData::mSortRole == VideoCollectionCommon::KeyDateTime);
-    QVERIFY(VideoSortFilterProxyModelData::mSortOrder == Qt::AscendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync == false); 
+    QVERIFY(VideoProxyModelData::mDoSortingCallCount == 1);
+    QVERIFY(VideoProxyModelData::mSortRole == VideoCollectionCommon::KeyDateTime);
+    QVERIFY(VideoProxyModelData::mSortOrder == Qt::AscendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync == false); 
     QVERIFY(testObject.mVideosSortRole == -1);
     QVERIFY(testObject.mVideosSortOrder == Qt::AscendingOrder);
     QVERIFY(testObject.mCollectionsSortRole == -1);
     QVERIFY(testObject.mCollectionsSortOrder == Qt::AscendingOrder);
     
-    VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
-    VideoSortFilterProxyModelData::mSortRole = -1;
-    VideoSortFilterProxyModelData::mSortOrder = Qt::AscendingOrder;
-    VideoSortFilterProxyModelData::mSortAsync = true;
+    VideoProxyModelData::mDoSortingCallCount = 0;
+    VideoProxyModelData::mSortRole = -1;
+    VideoProxyModelData::mSortOrder = Qt::AscendingOrder;
+    VideoProxyModelData::mSortAsync = true;
     
     // target == VideoCollectionCommon::ELevelVideos
     target = VideoCollectionCommon::ELevelVideos;
     VideoCollectionViewUtils::sortModel(model, false, target);
     
-    QVERIFY(VideoSortFilterProxyModelData::mDoSortingCallCount == 1);
-    QVERIFY(VideoSortFilterProxyModelData::mSortRole == VideoCollectionCommon::KeyDateTime);
-    QVERIFY(VideoSortFilterProxyModelData::mSortOrder == Qt::DescendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync == false); 
+    QVERIFY(VideoProxyModelData::mDoSortingCallCount == 1);
+    QVERIFY(VideoProxyModelData::mSortRole == VideoCollectionCommon::KeyDateTime);
+    QVERIFY(VideoProxyModelData::mSortOrder == Qt::DescendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync == false); 
     QVERIFY(testObject.mVideosSortRole == VideoCollectionCommon::KeyDateTime);
     QVERIFY(testObject.mVideosSortOrder == Qt::DescendingOrder);
     QVERIFY(testObject.mCollectionsSortRole == -1);
     QVERIFY(testObject.mCollectionsSortOrder == Qt::AscendingOrder);
     
     
-    VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
-    VideoSortFilterProxyModelData::mSortRole = -1;
-    VideoSortFilterProxyModelData::mSortOrder = Qt::AscendingOrder;
-    VideoSortFilterProxyModelData::mSortAsync = true;
+    VideoProxyModelData::mDoSortingCallCount = 0;
+    VideoProxyModelData::mSortRole = -1;
+    VideoProxyModelData::mSortOrder = Qt::AscendingOrder;
+    VideoProxyModelData::mSortAsync = true;
        
     // target == VideoCollectionCommon::ELevelCategory
     target = VideoCollectionCommon::ELevelCategory;
     VideoCollectionViewUtils::sortModel(model, false, target);
     
-    QVERIFY(VideoSortFilterProxyModelData::mDoSortingCallCount == 1);
-    QVERIFY(VideoSortFilterProxyModelData::mSortRole == VideoCollectionCommon::KeyTitle);
-    QVERIFY(VideoSortFilterProxyModelData::mSortOrder == Qt::DescendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync == false); 
+    QVERIFY(VideoProxyModelData::mDoSortingCallCount == 1);
+    QVERIFY(VideoProxyModelData::mSortRole == VideoCollectionCommon::KeyTitle);
+    QVERIFY(VideoProxyModelData::mSortOrder == Qt::DescendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync == false); 
     QVERIFY(testObject.mVideosSortRole == VideoCollectionCommon::KeyDateTime);
     QVERIFY(testObject.mVideosSortOrder == Qt::DescendingOrder);
     QVERIFY(testObject.mCollectionsSortRole == VideoCollectionCommon::KeyTitle);
     QVERIFY(testObject.mCollectionsSortOrder == Qt::DescendingOrder);
-    
 }
 
 // -----------------------------------------------------------------------------

@@ -55,9 +55,8 @@ VideoCollectionWrapper::~VideoCollectionWrapper()
 // VideoCollectionWrapper::open()
 // -----------------------------------------------------------------------------
 //
-VideoSortFilterProxyModel* VideoCollectionWrapper::getModel(VideoCollectionCommon::TModelType type)
+VideoProxyModelGeneric* VideoCollectionWrapper::getGenericModel()
 {
-    Q_UNUSED(type);
     return mModel;
 }
 
@@ -74,7 +73,7 @@ void VideoCollectionWrapper::reset()
 // VideoCollectionWrapper::setModel()
 // -----------------------------------------------------------------------------
 //
-void VideoCollectionWrapper::setModel(VideoSortFilterProxyModel* model)
+void VideoCollectionWrapper::setModel(VideoProxyModelGeneric* model)
 {
     Q_UNUSED(model);
     mModel = model;

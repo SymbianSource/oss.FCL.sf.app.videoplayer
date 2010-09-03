@@ -43,18 +43,18 @@ signals:
 public:
     
     VideoListSelectionDialogTesterHelper(VideoListSelectionDialog *testable = 0) 
-    : mTestable(testable) {};
+    : mTestable(testable), mSignalsConnected(false) {};
     
     ~VideoListSelectionDialogTesterHelper() {};
     
     bool connectSignals()
     {
-        if(!mTestable)
+        if(!mTestable || mSignalsConnected)
         {
             return false;
         }
-        // disconnect first to make sure there signals are not connected twice
-        disconnectSignals();
+        mSignalsConnected = true;
+
         if(!connect(this, SIGNAL(markAllSignal(int)), mTestable, SLOT(markAllStateChangedSlot(int))))
         {
             return false;
@@ -91,8 +91,9 @@ public:
     
     void disconnectSignals()
     {
-        if(mTestable)
+        if(mTestable && mSignalsConnected)
         {
+            mSignalsConnected = false;
             disconnect(this, SIGNAL(markAllSignal(int)), mTestable, SLOT(markAllStateChangedSlot(int)));
             disconnect(this, SIGNAL(selectionChangedSignal(const QItemSelection&, const QItemSelection&)), 
                             mTestable, SLOT(selectionChangedSlot(const QItemSelection&, const QItemSelection&)));
@@ -142,6 +143,11 @@ public:
     }
     
     VideoListSelectionDialog *mTestable;
+    
+    /**
+     * flag indicating if signals are connected. 
+     */
+    bool mSignalsConnected;    
 };
 
 #endif

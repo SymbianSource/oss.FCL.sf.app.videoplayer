@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  14 %
+// Version : %version:  15 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -658,6 +658,23 @@ void TestControlsController::testHandleEventShowVolumeControls()
     mController->handleEvent( EControlCmdShowVolumeControls, 0 );
 
     QVERIFY( mController->mVolumeControl->mVisible == true );
+
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// TestControlsController::testHandleEventBackground
+// -------------------------------------------------------------------------------------------------
+//
+void TestControlsController::testHandleEventBackground()
+{
+    MPX_DEBUG(_L("TestControlsController::testHandleEventBackground()") );
+
+    init();
+
+    mController->handleEvent( EControlCmdHandleBackgroundEvent, 0 );
+
+    QVERIFY( mController->mControls[0]->mControlReset );
 
     cleanup();
 }

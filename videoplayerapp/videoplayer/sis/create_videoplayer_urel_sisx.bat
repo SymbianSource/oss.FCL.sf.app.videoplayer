@@ -17,5 +17,5 @@ rem
 REM Make qt videoplayer urel sisx file (contains hb -libraries)
 
 call makesis videoplayer_urel.pkg videoplayer_urel.sis
-call signsis videoplayer_urel.sis videoplayer_urel.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
+call signsis videoplayer_urel.sis videoplayer_urel.sisx \Nokia_RnDCert_02.der \Nokia_RnDCert_02.key
 call del videoplayer_urel.sis

@@ -26,7 +26,7 @@
 #include "hbeffect.h"
 
 class VideoListView;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 class VideoCollectionUiLoader;
 class VideoListWidget;
@@ -48,7 +48,7 @@ class TestListView : public QObject
     /**
      * Set row count in model.
      */
-    void setRowCount(int count, VideoSortFilterProxyModel *model = 0);
+    void setRowCount(int count, VideoProxyModelGeneric *model = 0);
     
     /**
      * Check if action is visible.

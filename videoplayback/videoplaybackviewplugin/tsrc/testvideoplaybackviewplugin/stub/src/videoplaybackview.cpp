@@ -15,13 +15,13 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
 //  Include Files
 #include <hbinstance.h>
-#include "videoplaybackview.h"
+#include "../inc/videoplaybackview.h"
 
 
 //  Member Functions
@@ -55,7 +55,7 @@ void VideoPlaybackView::handleActivateView()
 //   VideoPlaybackView::handleDeactivateView()
 // -------------------------------------------------------------------------------------------------
 //
-EXPORT_C void VideoPlaybackView::handleDeactivateView()
+void VideoPlaybackView::handleDeactivateView()
 {
 }
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: da1mmcf#6 %
 
 #include "stub/inc/xqpluginloader.h"
 #include "stub/inc/xqplugininfo.h"
@@ -75,10 +75,7 @@ QObject* XQPluginLoader::instance()
         return 0;
     }
     
-    if ( ! mPluginList.contains( mUid ) )
-    {
-        mPluginList[mUid] = new TestViewPlugin();
-    }
+    mPluginList[mUid] = new TestViewPlugin();
 
     return mPluginList[mUid];
 }

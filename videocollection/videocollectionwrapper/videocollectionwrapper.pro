@@ -57,7 +57,10 @@ HEADERS += inc/videodatasignalreceiver.h \
            inc/videothumbnaildata_p.h \
            inc/videothumbnailfetcher.h \
            inc/videocollectionutils.h \
-           inc/videosortfilterproxymodel.h \
+           inc/videoproxymodelgeneric.h \
+           inc/videoproxymodelallvideos.h \
+           inc/videoproxymodelcollections.h \
+           inc/videoproxymodelcontent.h \
            inc/videodatacontainer.h \
            inc/videodeleteworker.h \
            ../inc/videocollectionexport.h
@@ -72,7 +75,10 @@ SOURCES += src/videocollectionclient.cpp \
            src/videothumbnaildata_p.cpp \
            src/videothumbnailfetcher.cpp \
            src/videocollectionutils.cpp \
-           src/videosortfilterproxymodel.cpp \
+           src/videoproxymodelgeneric.cpp \
+           src/videoproxymodelallvideos.cpp \
+           src/videoproxymodelcollections.cpp \
+           src/videoproxymodelcontent.cpp \
            src/videodeleteworker.cpp \
            src/videodatacontainer.cpp
           

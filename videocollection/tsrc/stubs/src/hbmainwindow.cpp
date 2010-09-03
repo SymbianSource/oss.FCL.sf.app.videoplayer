@@ -23,9 +23,8 @@
 // addView
 // ---------------------------------------------------------------------------
 //
-HbView* HbMainWindow::addView(QGraphicsWidget *widget)
+HbView* HbMainWindow::addView(HbView *view)
 {
-    HbView* view = qobject_cast<HbView*>(widget);
     mViews.append(view);
     return view;
 }
@@ -34,9 +33,9 @@ HbView* HbMainWindow::addView(QGraphicsWidget *widget)
 // removeView
 // ---------------------------------------------------------------------------
 //
-void HbMainWindow::removeView(QGraphicsWidget *widget)
+void HbMainWindow::removeView(HbView *view)
 {
-    mViews.removeAll(qobject_cast<HbView*>(widget));
+    mViews.removeAll(view);
 }
 
 // ---------------------------------------------------------------------------

@@ -15,11 +15,11 @@
 *
 */
 
-// Version : %version: 54 %
+// Version : %version: 55 %
 
 #define private public
 #include "videoservices.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videolistwidget.h"
 #include "videolistview.h"
 #undef private
@@ -59,7 +59,7 @@
 #include "videocollectionwrapperdata.h"
 #include "videocollectionviewutilsdata.h"
 #include "videolistselectiondialogdata.h"
-#include "videosortfilterproxymodeldata.h"
+#include "videoproxymodeldata.h"
 #include "videocollectionuiloaderdata.h"
 #include "videolistdatamodeldata.h"
 #include "xqserviceutilxtra.h"
@@ -147,7 +147,7 @@ void TestListView::cleanup()
     VideoCollectionWrapperData::reset();
     VideoCollectionViewUtilsData::reset();
     VideoListSelectionDialogData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     HbDocumentLoader::cleanup();
 }
 
@@ -175,7 +175,7 @@ int	TestListView::visibleMenuActions()
 // setRowCount
 // ---------------------------------------------------------------------------
 //
-void TestListView::setRowCount(int count, VideoSortFilterProxyModel *model)
+void TestListView::setRowCount(int count, VideoProxyModelGeneric *model)
 {
     if(!model)
     {
@@ -464,7 +464,7 @@ void TestListView::testActivateView()
     videoListWidget = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_VIDEOLISTWIDGET);
     QVERIFY(videoListWidget);
 	VideoListWidgetData::mActivateReturnValue =	-1;
-	QCOMPARE( mTestView->activateView(invalidId), -1	);
+	QCOMPARE( mTestView->activateView(invalidId), -1 );
 	QVERIFY( VideoListWidgetData::mActive == false );
 	QCOMPARE( VideoListWidgetData::mActivateCount, 1 );
 	QCOMPARE( VideoListWidgetData::mDeactivateCount, 1 );
@@ -492,7 +492,7 @@ void TestListView::testActivateView()
     TMPXItemId itemId = TMPXItemId::InvalidId();
     init();
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdCaptured;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->activateView(itemId), 0);
@@ -500,14 +500,14 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
     cleanup();
     
     // activate collection content view::
     // -downloaded category
     init();
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdDownloads;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->activateView(itemId), 0);
@@ -515,7 +515,7 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_downloaded"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
     cleanup();
 
     // activate collection content view:
@@ -523,7 +523,7 @@ void TestListView::testActivateView()
     init();
     videoListWidget = mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_VIDEOLISTWIDGET);
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdOther;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->activateView(itemId), -1);
@@ -532,14 +532,14 @@ void TestListView::testActivateView()
     QCOMPARE(mTestView->mCollectionName.length(), 0);
     // for not activated widget, defaultlevel is ELevelVideos 
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelVideos);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, TMPXItemId::InvalidId());
+    QCOMPARE(VideoProxyModelData::mLastItemId, TMPXItemId::InvalidId());
     cleanup();
 
     // activate collection content view:
     // -invalid category but item id is ok
     init();
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = 0;
     itemId.iId2 = KVcxMvcMediaTypeVideo;
     QCOMPARE(mTestView->activateView(itemId), -1);
@@ -548,7 +548,7 @@ void TestListView::testActivateView()
     QCOMPARE(mTestView->mCollectionName.length(), 0);
     // for not activated widget, defaultlevel is ELevelVideos 
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelVideos);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, TMPXItemId::InvalidId());
+    QCOMPARE(VideoProxyModelData::mLastItemId, TMPXItemId::InvalidId());
     cleanup();
 
     // activate view:
@@ -562,7 +562,7 @@ void TestListView::testActivateView()
     videoServices->mCurrentService = VideoServices::EBrowse;
     videoServices->mSortRole = 0;
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdCaptured;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->initializeView(), 0);
@@ -571,9 +571,9 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
     serviceUtilXtra->decreaseReferenceCount();
     videoServices->decreaseReferenceCount();
     cleanup();
@@ -589,7 +589,7 @@ void TestListView::testActivateView()
     videoServices->mCurrentService = VideoServices::EBrowse;
     videoServices->mSortRole = 1;
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdCaptured;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->initializeView(), 0);
@@ -598,9 +598,9 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
     cleanup();
     serviceUtilXtra->decreaseReferenceCount();
     videoServices->decreaseReferenceCount();
@@ -616,7 +616,7 @@ void TestListView::testActivateView()
     videoServices->mCurrentService = VideoServices::EBrowse;
     videoServices->mSortRole = 2;
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdCaptured;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->initializeView(), 0);
@@ -625,9 +625,9 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
     cleanup();
     serviceUtilXtra->decreaseReferenceCount();
     videoServices->decreaseReferenceCount();
@@ -643,7 +643,7 @@ void TestListView::testActivateView()
     videoServices->mCurrentService = VideoServices::EBrowse;
     videoServices->mSortRole = 3;
     VideoListWidgetData::reset();
-    VideoSortFilterProxyModelData::reset();
+    VideoProxyModelData::reset();
     itemId.iId1 = KVcxMvcCategoryIdCaptured;
     itemId.iId2 = KVcxMvcMediaTypeCategory;
     QCOMPARE(mTestView->initializeView(), 0);
@@ -652,9 +652,9 @@ void TestListView::testActivateView()
     QCOMPARE(VideoListWidgetData::mActivateCount, 1);
     QCOMPARE(mTestView->mCollectionName, hbTrId("txt_videos_dblist_captured"));
     QCOMPARE(mTestView->mCurrentList->getLevel(), VideoCollectionCommon::ELevelDefaultColl);
-    QCOMPARE(VideoSortFilterProxyModelData::mLastItemId, itemId);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeySizeValue);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QCOMPARE(VideoProxyModelData::mLastItemId, itemId);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeySizeValue);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
     cleanup();
     serviceUtilXtra->decreaseReferenceCount();
     videoServices->decreaseReferenceCount();
@@ -832,16 +832,16 @@ void TestListView::testStartSortingSlot()
 	init(false);
 	connect(this, SIGNAL(testSignal(int)), mTestView, SLOT(startSorting()));
 	emit testSignal(0);
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 0);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, -1);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 0);
+    QCOMPARE(VideoProxyModelData::mSortRole, -1);
 	cleanup();
 
     // View is not activated.
     init();
     connect(this, SIGNAL(testSignal(int)), mTestView, SLOT(startSorting()));
     emit testSignal(0);
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 0);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, -1);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 0);
+    QCOMPARE(VideoProxyModelData::mSortRole, -1);
     cleanup();
 
     TMPXItemId invalidId = TMPXItemId::InvalidId();
@@ -856,8 +856,8 @@ void TestListView::testStartSortingSlot()
     HbMenuData::mMenuAction = sortMenuAction;
     connect(this, SIGNAL(testSignal(int)), mTestView, SLOT(startSorting()));
     emit testSignal(0);
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 0);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, -1);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 0);
+    QCOMPARE(VideoProxyModelData::mSortRole, -1);
     cleanup();
 
 	// Good	cases.
@@ -866,7 +866,7 @@ void TestListView::testStartSortingSlot()
     sortMenu = mUiLoader->findWidget<HbMenu>(DOCML_NAME_SORT_MENU);
     sortMenuAction->setMenu(sortMenu);
     HbMenuData::mMenuAction = sortMenuAction;
-    VideoSortFilterProxyModel* model = mTestView->mCurrentList->getModel();
+    VideoProxyModelGeneric* model = mTestView->mCurrentList->getModel();
 	QVERIFY(action != 0);
 	mUiLoader->findWidget<HbMenu>(DOCML_NAME_OPTIONS_MENU)->setActiveAction(sortMenuAction);
 	HbAction* sortAction = mUiLoader->findObject<HbAction>(DOCML_NAME_SORT_BY_NAME);
@@ -883,42 +883,42 @@ void TestListView::testStartSortingSlot()
 	connect(this, SIGNAL(testSignal(int)), mTestView, SLOT(startSorting()));
 	emit testSignal(0);
 	// since current list is videolist, sorting count is 2 because both all videos and collection content are sorted
-	QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 2);
-	QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
-	QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
+	QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 2);
+	QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
+	QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync);
 
-    VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
+    VideoProxyModelData::mDoSortingCallCount = 0;
     // emit test signal again, with same parameters. Sorting should be switched to
     // descending order.
     emit testSignal(0);
     // since current list is videolist, sorting count is 2 because both all videos and collection content are sorted
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 2);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::DescendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 2);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::DescendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync);
 
-    VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
+    VideoProxyModelData::mDoSortingCallCount = 0;
     // on third emit, sorting should be switched back to ascending
     emit testSignal(0);
     // since current list is videolist, sorting count is 2 because both all videos and collection content are sorted
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 2);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 2);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyTitle);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync);
 
     // test that after changing the sort role, the order is also switched to ascending.
     model->doSorting(model->sortRole(), Qt::DescendingOrder);
     sortAction = mUiLoader->findObject<HbAction>(DOCML_NAME_SORT_BY_DATE);
     QVERIFY(sortAction != 0);
     sortMenu->setActiveAction(sortAction);
-    VideoSortFilterProxyModelData::mDoSortingCallCount = 0;
+    VideoProxyModelData::mDoSortingCallCount = 0;
     emit testSignal(0);
     // since current list is videolist, sorting count is 2 because both all videos and collection content are sorted
-    QCOMPARE(VideoSortFilterProxyModelData::mDoSortingCallCount, 2);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
-    QCOMPARE(VideoSortFilterProxyModelData::mSortOrder, Qt::AscendingOrder);
-    QVERIFY(VideoSortFilterProxyModelData::mSortAsync);
+    QCOMPARE(VideoProxyModelData::mDoSortingCallCount, 2);
+    QCOMPARE(VideoProxyModelData::mSortRole, (int)VideoCollectionCommon::KeyDateTime);
+    QCOMPARE(VideoProxyModelData::mSortOrder, Qt::AscendingOrder);
+    QVERIFY(VideoProxyModelData::mSortAsync);
 	cleanup();
 	
 	// start sorting slot:
@@ -1049,20 +1049,20 @@ void TestListView::testDeleteItemsSlot()
     // selection dialog exists
     ////////////
     VideoCollectionUiLoaderData::mFailDialogLoad = false;
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId(2, 3);
+    VideoProxyModelData::mOpenedItemId = TMPXItemId(2, 3);
     emit testSignal();
     QCOMPARE(VideoListSelectionDialogData::mMultiSelectionLaunchCount, 1);
     QCOMPARE(VideoListSelectionDialogData::mSelectionType, (int)VideoListSelectionDialog::EDeleteVideos);
-    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoSortFilterProxyModelData::mOpenedItemId);
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoProxyModelData::mOpenedItemId);
     
     ////////////
     // test second successful activation.
     ////////////
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId(3, 2);
+    VideoProxyModelData::mOpenedItemId = TMPXItemId(3, 2);
     emit testSignal();
     QCOMPARE(VideoListSelectionDialogData::mMultiSelectionLaunchCount, 2);
     QCOMPARE(VideoListSelectionDialogData::mSelectionType, (int)VideoListSelectionDialog::EDeleteVideos);
-    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoSortFilterProxyModelData::mOpenedItemId);
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoProxyModelData::mOpenedItemId);
 
     cleanup();
 }
@@ -1315,8 +1315,8 @@ void TestListView::testCollectionOpenedSlot()
 	mTestView->mCurrentList = tmpList;
 	
 	// collection list widget has no model
-	VideoSortFilterProxyModel *nullModel = 0;
-	VideoSortFilterProxyModel *tempModel = collectionContent->getModel();
+	VideoProxyModelGeneric *nullModel = 0;
+	VideoProxyModelGeneric *tempModel = collectionContent->getModel();
 	collectionContent->initialize(*nullModel, false, VideoCollectionCommon::ELevelDefaultColl);
 	listWidget = mTestView->mCurrentList;
 	listWidgetActivateCount = VideoListWidgetData::mActivateCount;
@@ -1683,7 +1683,7 @@ void TestListView::testAddVideosToCollectionSlot()
     QVERIFY(connect(this, SIGNAL(testSignal()), mTestView, SLOT(addVideosToCollectionSlot())));
 
     TMPXItemId invalidId = TMPXItemId::InvalidId();
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId(0, 2);
+    VideoProxyModelData::mOpenedItemId = TMPXItemId(0, 2);
     
     // Not initalized, no mCurrentList
     emit testSignal();
@@ -1708,7 +1708,7 @@ void TestListView::testAddVideosToCollectionSlot()
     mTestView->mCurrentList->mCurrentLevel = VideoCollectionCommon::ELevelCategory;
     emit testSignal();
     QVERIFY(VideoListSelectionDialogData::mSelectionType == VideoListSelectionDialog::EAddToCollection);
-    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoSortFilterProxyModelData::mOpenedItemId);
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoProxyModelData::mOpenedItemId);
     QCOMPARE(VideoCollectionViewUtilsData::mLastError, 0);
 
     // Current level is album, video list widget load fails.
@@ -1719,7 +1719,7 @@ void TestListView::testAddVideosToCollectionSlot()
     mTestView->mCurrentList->mCurrentLevel = VideoCollectionCommon::ELevelAlbum;
     emit testSignal();
     QVERIFY(VideoListSelectionDialogData::mSelectionType == VideoListSelectionDialog::EAddToCollection);
-    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoSortFilterProxyModelData::mOpenedItemId);
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoProxyModelData::mOpenedItemId);
     QCOMPARE(VideoCollectionViewUtilsData::mLastError, 0);
     
     // Current level is album, but model is empty.
@@ -1766,7 +1766,7 @@ void TestListView::testAddVideosToCollectionSlot()
     setRowCount(1);
     emit testSignal();
     QVERIFY(VideoListSelectionDialogData::mSelectionType == VideoListSelectionDialog::EAddToCollection);
-    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoSortFilterProxyModelData::mOpenedItemId);
+    QVERIFY(VideoListSelectionDialogData::mSettedMpxId == VideoProxyModelData::mOpenedItemId);
     QCOMPARE(VideoCollectionViewUtilsData::mLastError, 0);
     
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(addVideosToCollectionSlot()));
@@ -1812,15 +1812,15 @@ void TestListView::testRemoveVideosFromCollectionSlot()
     
     // Open item is invalid
     VideoCollectionUiLoaderData::mFindFailure = false;
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId::InvalidId();
+    VideoProxyModelData::mOpenedItemId = TMPXItemId::InvalidId();
     emit testSignal();
     
     // Open item is video!
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId(0, KVcxMvcMediaTypeVideo);
+    VideoProxyModelData::mOpenedItemId = TMPXItemId(0, KVcxMvcMediaTypeVideo);
     emit testSignal();
     
     // Good case.
-    VideoSortFilterProxyModelData::mOpenedItemId = TMPXItemId(0, KVcxMvcMediaTypeAlbum);
+    VideoProxyModelData::mOpenedItemId = TMPXItemId(0, KVcxMvcMediaTypeAlbum);
     emit testSignal();
     
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(removeVideosFromCollectionSlot()));

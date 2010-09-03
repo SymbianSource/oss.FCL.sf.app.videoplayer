@@ -76,9 +76,9 @@ public:
         return mSoftKeyAction;
     }
     
-    HbView *addView(QGraphicsWidget *widget = 0);
+    HbView *addView(HbView *view = 0);
     
-    void removeView(QGraphicsWidget *widget);
+    void removeView(HbView *view);
     
     QList<HbView *> views() const;
     

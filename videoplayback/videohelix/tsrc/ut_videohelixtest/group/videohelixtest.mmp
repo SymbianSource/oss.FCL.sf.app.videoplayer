@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 
@@ -60,6 +60,7 @@ SOURCE          mpxvideoplaybackmode.cpp
 SOURCE          mpxvideoplaybackstate.cpp
 SOURCE          mpxvideoseeker.cpp
 SOURCE          mpxvideoposterframesetter.cpp
+SOURCE          mpxcalldetector.cpp
 
 
 LIBRARY         euser.lib

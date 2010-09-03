@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 38.1.6 %
+// Version : %version: 38.1.7 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -126,10 +126,30 @@ const TMPXItemId& VideoListDataModelPrivate::getMediaIdFromIndex(const int &inde
 //
 const QString VideoListDataModelPrivate::getVideoNameFromIndex(const int &index )  const
 {
-    QString txt;
     CMPXMedia* media = mMediaData.fromIndex(index);
-    VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralTitle, txt );
-    return txt;
+    QString text;
+
+    TMPXItemId mpxId( 0, 0 );
+    VideoCollectionUtils::instance().mediaValue<TMPXItemId>(media, KMPXMediaGeneralId, mpxId );
+    
+    //Localize default categories
+    if(mpxId.iId2 == KVcxMvcMediaTypeCategory)
+    {
+        switch(mpxId.iId1)
+        {
+            case KVcxMvcCategoryIdDownloads:
+                text = hbTrId("txt_videos_dblist_downloaded");
+                break;
+            case KVcxMvcCategoryIdCaptured:
+                text = hbTrId("txt_videos_dblist_captured");
+                break;
+        }
+    }
+    else
+    {
+        VideoCollectionUtils::instance().mediaValue<QString>(media, KMPXMediaGeneralTitle, text );
+    }
+    return text;
 }
  
 // -----------------------------------------------------------------------------

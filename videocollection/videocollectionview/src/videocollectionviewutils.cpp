@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 47 %
+// Version : %version: 51 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -27,11 +27,12 @@
 #include <hbnotificationdialog.h>
 #include <hbparameterlengthlimiter.h>
 #include <xqsettingsmanager.h>
+#include <xqserviceutil.h>
 #include <vcxmyvideosdefs.h>
 
 #include "videocollectioncommon.h"
 #include "videocollectionviewutils.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videoactivitystate.h"
 #include "videocollectioncenrepdefs.h"
 #include "videocollectiontrace.h"
@@ -70,11 +71,12 @@ VideoCollectionViewUtils& VideoCollectionViewUtils::instance()
 // VideoCollectionViewUtils
 // ---------------------------------------------------------------------------
 //
-VideoCollectionViewUtils::VideoCollectionViewUtils():
-    mVideosSortRole(-1),
-    mCollectionsSortRole(-1),
-    mVideosSortOrder(Qt::AscendingOrder),
-    mCollectionsSortOrder(Qt::AscendingOrder)
+VideoCollectionViewUtils::VideoCollectionViewUtils()
+    : mIsService(false)
+    , mVideosSortRole(-1)
+    , mCollectionsSortRole(-1)
+    , mVideosSortOrder(Qt::AscendingOrder)
+    , mCollectionsSortOrder(Qt::AscendingOrder)
 {
 	FUNC_LOG;
 }
@@ -86,6 +88,30 @@ VideoCollectionViewUtils::VideoCollectionViewUtils():
 VideoCollectionViewUtils::~VideoCollectionViewUtils()
 {
 	FUNC_LOG;
+}
+
+// ---------------------------------------------------------------------------
+// setIsService
+// ---------------------------------------------------------------------------
+//
+void VideoCollectionViewUtils::setIsService()
+{
+    FUNC_LOG;
+
+    mIsService = XQServiceUtil::isService();
+    
+    INFO_1("VideoCollectionViewUtils::setService() saving: is service: %d", mIsService);
+}
+
+// ---------------------------------------------------------------------------
+// isService
+// ---------------------------------------------------------------------------
+//
+bool VideoCollectionViewUtils::isService()
+{
+    FUNC_LOG;
+
+    return mIsService;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,7 +282,7 @@ void VideoCollectionViewUtils::initListView(HbListView *view)
 // ---------------------------------------------------------------------------
 //
 void VideoCollectionViewUtils::sortModel(
-    VideoSortFilterProxyModel *model,
+    VideoProxyModelGeneric *model,
     bool async,
     VideoCollectionCommon::TCollectionLevels target)
 {
@@ -394,7 +420,7 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             }
         break;
         case VideoCollectionCommon::statusMultipleDeleteFail:
-            msg = hbTrId("txt_videos_info_unable_to_delete_some_items_which");
+            msg = hbTrId("txt_videos_info_unable_to_delete_some_videos_which");
         break;
         case VideoCollectionCommon::statusSingleRemoveFail:
             format = hbTrId("txt_videos_info_unable_to_remove_collection_1");
@@ -412,9 +438,12 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
             {
                 int count = additional.toList().at(KAddToCollectionCountIndex).toInt();
                 QString name = additional.toList().at(KAddToCollectionNameIndex).toString();
-                if(count && name.length())
+                if(count > 0 && name.length())
                 {
-                    msg = hbTrId("txt_videos_dpopinfo_ln_videos_added_to_1", count).arg(name);
+                    const char* locId = count == 1 ? "txt_videos_dpopinfo_video_added_to_1" :
+                        "txt_videos_dpopinfo_videos_added_to_1";
+                    
+                    msg = hbTrId(locId).arg(name);
                 }
             }
             error = false;

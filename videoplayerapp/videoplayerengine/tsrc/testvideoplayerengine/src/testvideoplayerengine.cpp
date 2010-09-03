@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#15 %
+// Version : %version: 18 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -31,6 +31,7 @@
 #include <f32file.h>
 #include <qfile.h>
 
+#include "afactivitystorage.h"
 #include "mpxhbvideocommondefs.h"
 #include "testvideoplayerengine.h"
 #include "stub/inc/mpxviewpluginqt.h"
@@ -225,6 +226,9 @@ void TestVideoPlayerEngine::testInitializeService()
     QVERIFY( mTestObject->mIsService == true );
     QVERIFY( VideoServices::mReferenceCount == 0 );
 
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
+    
     mTestObject->initialize();
 
     QVERIFY( mTestObject->mCurrentViewPlugin == 0 );
@@ -235,8 +239,10 @@ void TestVideoPlayerEngine::testInitializeService()
     QVERIFY( mTestObject->mVideoServices != 0 );
     QVERIFY( mTestObject->mIsService == true );
     QVERIFY( VideoServices::mReferenceCount == 1 );
-
     QVERIFY( mTestObject->mCollectionViewPlugin != mTestObject->mPlaybackViewPlugin );
+    // during service initialization, we do not remove possible exiting activation state
+    QVERIFY( AfActivityStorage::mActivityCount == 0 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity.isEmpty() );
 
     cleanup();
 
@@ -267,7 +273,7 @@ void TestVideoPlayerEngine::testMultipleInitialize()
     QVERIFY( mTestObject->mVideoServices == 0 );
     QVERIFY( mTestObject->mIsService == false );
     QVERIFY( VideoServices::mReferenceCount == 0 );
-
+/*
     mCurrentViewPlugin = mTestObject->mCurrentViewPlugin;
     mPlaybackViewPlugin = mTestObject->mPlaybackViewPlugin;
     mCollectionViewPlugin = mTestObject->mCollectionViewPlugin;
@@ -280,7 +286,7 @@ void TestVideoPlayerEngine::testMultipleInitialize()
     QVERIFY( mCollectionViewPlugin == mTestObject->mCollectionViewPlugin );
     QVERIFY( mFileDetailsViewPlugin == mTestObject->mFileDetailsViewPlugin );
     QVERIFY( VideoServices::mReferenceCount == 0 );
-
+*/
     cleanup();
 
     QVERIFY( VideoServices::mReferenceCount == 0 );
@@ -882,6 +888,8 @@ void TestVideoPlayerEngine::testInitWithActivityData()
        
     init();
     QVERIFY( !mTestObject.isNull() );
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
     
     mTestObject->initialize();
     
@@ -894,14 +902,20 @@ void TestVideoPlayerEngine::testInitWithActivityData()
     QVERIFY( mTestObject->mPlaybackWrapper );
     QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
     QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
     init();
     QVERIFY( !mTestObject.isNull() );
+    QHash<QString, QVariant> activityHash; 
     
-    QVariant data = int( MpxHbVideoCommon::PlaybackView );
     // playback plugin 
-    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
+    QVariant data = int( MpxHbVideoCommon::PlaybackView );
+    activityHash[KEY_VIEWPLUGIN_TYPE] = data;
+    AfActivityStorage::mDataToReturn = activityHash;    
     mTestObject->initialize();
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mCurrentViewPlugin );
@@ -911,6 +925,8 @@ void TestVideoPlayerEngine::testInitWithActivityData()
     QVERIFY( mTestObject->mPlaybackWrapper );
     QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
     QVERIFY( mTestObject->mPlaybackViewPlugin->activated() );
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
     init();
@@ -918,8 +934,11 @@ void TestVideoPlayerEngine::testInitWithActivityData()
     
     // only collection view and playback view are accepted, so all other cases 
     // ends up into default: collectionview
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
     data = int( MpxHbVideoCommon::VideoDetailsView );
-    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
+    activityHash[KEY_VIEWPLUGIN_TYPE] = data;
+    AfActivityStorage::mDataToReturn = activityHash;  
     mTestObject->initialize();
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mCurrentViewPlugin );
@@ -929,43 +948,66 @@ void TestVideoPlayerEngine::testInitWithActivityData()
     QVERIFY( mTestObject->mPlaybackWrapper );
     QVERIFY( mTestObject->mCurrentViewPlugin->activated() );
     QVERIFY( mTestObject->mCollectionViewPlugin->activated() );
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
     
 }
 
-void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
+void TestVideoPlayerEngine::testHandleQuitWithActivityData()
 {
     MPX_ENTER_EXIT(_L("TestVideoPlayerEngine::testHandleQuitWihtActivityData()"));
     
     // we make sure that engine saves correct plugin type before exit
     // using VideoActivityState since value is saved there before actually
     // being save to activitymanager
-    
+    QHash<QString, QVariant> activityHash; 
+    QVariant data = int( MpxHbVideoCommon::CollectionView );
+    activityHash[KEY_VIEWPLUGIN_TYPE] = data;  
+    AfActivityStorage::mDataToReturn = activityHash;  
     init();
+    
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
     QVERIFY( !mTestObject.isNull() );
     connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
 
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
-    
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
+    AfActivityStorage::mLastHandledActivity = "";
     emit aboutToQuit();
-       
-    QVariant data = QVariant();
+      
+    data = QVariant();    
     data = VideoActivityState::instance().getActivityData( KEY_VIEWPLUGIN_TYPE );
     QVERIFY( data.isValid() );
     QVERIFY( data.toInt() == MpxHbVideoCommon::CollectionView );
     QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
+    QVERIFY( AfActivityStorage::mActivityCount == 0 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
     init();
     QVERIFY( ! mTestObject.isNull() );
     connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
     
+    
     data = int(MpxHbVideoCommon::PlaybackView);
-    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
+    activityHash[KEY_VIEWPLUGIN_TYPE] = data;
+    data.clear();
+    data = bool( true );
+    activityHash[KEY_LAST_LOCAL_PLAYBACK] = data;
+    AfActivityStorage::mDataToReturn = activityHash;  
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
+    
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
+    AfActivityStorage::mLastHandledActivity = "";
     
     emit aboutToQuit();
     
@@ -974,16 +1016,26 @@ void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
     QVERIFY( data.isValid() );
     QVERIFY( data.toInt() == MpxHbVideoCommon::PlaybackView );
     QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
+    QVERIFY( AfActivityStorage::mActivityCount == 0 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
     init();
     QVERIFY( ! mTestObject.isNull() );
     connect( this, SIGNAL(aboutToQuit()), mTestObject, SLOT(handleQuit()) );
-    
+    activityHash.clear();
+    data.clear();
     data = int( MpxHbVideoCommon::VideoDetailsView );
-    VideoActivityState::instance().setActivityData( data, KEY_VIEWPLUGIN_TYPE );
+    activityHash[KEY_VIEWPLUGIN_TYPE] = data;
+    AfActivityStorage::mDataToReturn = activityHash;  
+    AfActivityStorage::mLastHandledActivity = "";
+    AfActivityStorage::mActivityCount = 0;
+    
     mTestObject->initialize();
     VideoActivityState::mAllDataGetCount = 0;
+    QVERIFY( AfActivityStorage::mActivityCount == -1 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
+    AfActivityStorage::mLastHandledActivity = "";      
     
     emit aboutToQuit();
        
@@ -992,6 +1044,8 @@ void TestVideoPlayerEngine::testHandleQuitWihtActivityData()
     QVERIFY( data.isValid() );
     QVERIFY( data.toInt() == MpxHbVideoCommon::CollectionView );
     QVERIFY( VideoActivityState::mAllDataGetCount == 1 );
+    QVERIFY( AfActivityStorage::mActivityCount == 0 );
+    QVERIFY( AfActivityStorage::mLastHandledActivity == ACTIVITY_VIDEOPLAYER_MAINVIEW );
     
     cleanup();
 }

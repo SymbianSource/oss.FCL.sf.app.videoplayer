@@ -26,7 +26,7 @@
 // FORWARD DECLARATIONS
 class QAbstractItemModel;
 
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 
 class VideoCollectionWrapper : public QObject         
@@ -62,7 +62,7 @@ public: // Constructor
    /**
     * return mModel
     */
-    VideoSortFilterProxyModel* getModel(int type);
+    VideoProxyModelGeneric* getAllVideosModel();
 
    /**
     * NOP at the moment
@@ -72,7 +72,7 @@ public: // Constructor
    /**
     * sete mModel
     */
-   void setModel(VideoSortFilterProxyModel* model);
+   void setModel(VideoProxyModelGeneric* model);
    
 signals:
    
@@ -96,7 +96,7 @@ private:
     /**
      * model to be used when testing videofiledetailsviewplugin
      */
-    VideoSortFilterProxyModel* mModel;
+    VideoProxyModelGeneric* mModel;
 
 public:
     

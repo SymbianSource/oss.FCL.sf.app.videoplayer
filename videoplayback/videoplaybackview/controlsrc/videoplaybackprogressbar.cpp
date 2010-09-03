@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#31 %
+// Version : %version: da1mmcf#32 %
 
 
 
@@ -310,22 +310,6 @@ void VideoPlaybackProgressBar::handleSliderMoved( int value )
             mSeekingTimer->start();
         }
     }
-    else
-    {
-        if ( value >= mDuration )
-        {
-            MPX_DEBUG(_L("VideoPlaybackProgressBar::setPosition() reached end of the clip"));
-
-            mController->handleCommand( EMPXPbvCmdEndOfClip );
-        }
-        else
-        {
-            value = mProgressSlider->sliderValue();
-
-            MPX_DEBUG(_L("VideoPlaybackProgressBar::setPosition() position = %d"), value);
-            mController->handleCommand( EMPXPbvCmdSetPosition, value );
-        }
-    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -464,6 +448,20 @@ void VideoPlaybackProgressBar::setEnableProgressSlider( bool enable )
     else if ( ! mProgressSlider->isEnabled() )
     {
         mProgressSlider->setEnabled( true );
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackProgressBar::resetControl
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackProgressBar::resetControl()
+{
+    MPX_DEBUG(_L("VideoPlaybackProgressBar::resetControl"));
+
+    if ( mSliderDragging )
+    {
+        handleSliderReleased();
     }
 }
 

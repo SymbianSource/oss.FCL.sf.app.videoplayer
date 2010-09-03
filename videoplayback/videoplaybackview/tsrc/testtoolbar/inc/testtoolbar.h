@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,10 +12,10 @@
 * Contributors:
 *
 * Description:   tester for methods in TestToolBar
-* 
+*
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 #ifndef __TESTTOOLBAR_H__
 #define __TESTTOOLBAR_H__
@@ -37,15 +37,15 @@ class TestToolBar : public QObject
          * will be called before each testfunction is executed.
          *
          */
-        void init( bool attachOperation = false ); 
-    
+        void init( bool attachOperation = false );
+
         /**
          * will be called after every testfunction.
          *
          */
         void cleanup();
 
-    // test functions for the test framework         
+    // test functions for the test framework
     private slots:
 
         // the order in which these testXX methods are declared is important
@@ -64,6 +64,7 @@ class TestToolBar : public QObject
         void testOpenDetailsView();
         void testAttach();
         void testSend();
+        void testResetControl();
 
     signals:
         void commandSignal();

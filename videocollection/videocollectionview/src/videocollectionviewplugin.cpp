@@ -15,11 +15,10 @@
 *
 */
 
-// Version : %version: 24 %
+// Version : %version: 25 %
 
 // INCLUDE FILES
 #include <xqplugin.h>
-#include <xqserviceutil.h>
 #include <hbaction.h>
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -30,6 +29,7 @@
 #include "videocollectionviewplugin.h"
 #include "videolistview.h"
 #include "videocollectionuiloader.h"
+#include "videocollectionviewutils.h"
 #include "mpxhbvideocommondefs.h"
 #include "videocollectiontrace.h"
 
@@ -40,6 +40,7 @@
 VideoCollectionViewPlugin::VideoCollectionViewPlugin()
     : mUiLoader( 0 )
     , mView( 0 )
+    , mUiUtils( VideoCollectionViewUtils::instance() )
     , mActivated( false )
     , mVideoServices( 0 )
 {
@@ -73,7 +74,9 @@ void VideoCollectionViewPlugin::createView()
 
         mUiLoader->reset();
         
-        mUiLoader->setIsService(XQServiceUtil::isService());
+        mUiUtils.setIsService();
+        
+        mUiLoader->setIsService(mUiUtils.isService());
 
 		bool ok(false);
 
@@ -160,7 +163,7 @@ void VideoCollectionViewPlugin::activateView()
         if(wnd)
         {
             TMPXItemId itemId = TMPXItemId::InvalidId();
-            bool isService = XQServiceUtil::isService();
+            bool isService = mUiUtils.isService();
             if (isService)
             {
                 if(!mVideoServices)

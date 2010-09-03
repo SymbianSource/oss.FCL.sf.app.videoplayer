@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -32,15 +32,16 @@
 // VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl()
 // -------------------------------------------------------------------------------------------------
 //
-VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl( 
-        VideoPlaybackControlsController* controller, 
-        TVideoPlaybackControls index, 
-        HbWidget* widget, 
+VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl(
+        VideoPlaybackControlsController* controller,
+        TVideoPlaybackControls index,
+        HbWidget* widget,
         TUint controlproperties )
     : mController( controller )
     , mControl( widget )
     , mControlIndex( index )
     , mProperties( controlproperties )
+    , mControlReset( false )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl()"));
 
@@ -81,7 +82,7 @@ bool VideoPlaybackFullScreenControl::isVisible()
 void VideoPlaybackFullScreenControl::setVisibility( TMPXPlaybackState state )
 {
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::setVisibility(%d)"), state);
-    
+
     mVisibilityState = state;
 }
 
@@ -111,7 +112,7 @@ bool VideoPlaybackFullScreenControl::volumeChanged( int volume )
 bool VideoPlaybackFullScreenControl::durationChanged( int duration )
 {
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::durationChanged() [%d]"), duration );
-    mDuration = duration;    
+    mDuration = duration;
     return true;
 }
 
@@ -120,9 +121,9 @@ bool VideoPlaybackFullScreenControl::durationChanged( int duration )
 // -------------------------------------------------------------------------------------------------
 //
 bool VideoPlaybackFullScreenControl::positionChanged( int position )
-{   
+{
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::positionChanged() [%d]"), position );
-    mPosition = position;    
+    mPosition = position;
     return true;
 }
 
@@ -134,7 +135,7 @@ bool VideoPlaybackFullScreenControl::aspectRatioChanged( int aspectRatio )
 {
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::aspectRatioChanged() [%d]"), aspectRatio );
     mAspectRatio = aspectRatio;
-    return true;    
+    return true;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ bool VideoPlaybackFullScreenControl::updateDownloadPosition( int size )
 void VideoPlaybackFullScreenControl::updateState( TMPXPlaybackState state )
 {
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::updateState() [%d]"), state );
-    mState = state; 
+    mState = state;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -188,6 +189,15 @@ void VideoPlaybackFullScreenControl::updateControlProperties( TUint properties )
 {
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::updateControlProperties()") );
     mProperties = properties;
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackFullScreenControl::resetControl()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackFullScreenControl::resetControl()
+{
+    mControlReset = true;
 }
 
 // End of file

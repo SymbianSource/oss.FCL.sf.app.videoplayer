@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   tester for methods in User Input Handler
-* 
+*
 */
 
 #ifndef __TESTUSERINPUTHANDLER_H__
@@ -23,55 +23,38 @@
 #include <QtTest/QtTest>
 
 
-
 // forward declaration
 class CMPXVideoViewWrapper;
-class CVideoPlaybackUserInputHandler;
 class VideoBasePlaybackView;
+class CVideoPlaybackUserInputHandler;
 
 
 class TestUserInputHandler : public QObject
 {
     Q_OBJECT
 
-public:
+    public:
+        void init();
+        void cleanup();
+        void setup();
 
-    void init(); 
-    
-    void cleanup();
-        
-    void setup();
-    
+    // test functions for the test framework
+    private slots:
+        void testProcessMediaKeyPlay();
+        void testProcessMediaKeyPause();
+        void testProcessMediaKeyPlayPause();
+        void testProcessMediaKeyStop();
+        void testProcessMediaKeyForward();
+        void testProcessMediaKeyRewind();
+        void testProcessMediaKeyVolumeUp();
+        void testProcessMediaKeyVolumeDown();
+        void testProcessMediaKeyWhenLocked();
+        void testProcessMediaKeyWhenInBackground();
 
-    // test functions for the test framework         
-private slots:
-
-    void testProcessMediaKeyPlay();
-
-    void testProcessMediaKeyPause();
-
-    void testProcessMediaKeyPlayPause();
-
-    void testProcessMediaKeyStop();
-
-    void testProcessMediaKeyForward();
-    
-    void testProcessMediaKeyRewind();
-    
-    void testProcessMediaKeyVolumeUp();
-    
-    void testProcessMediaKeyVolumeDown();
- 
-    void testHandleTVOutEventL();
-		
-    
-signals:
-    
-private:
-    CVideoPlaybackUserInputHandler*     mUserInputHdlr;	
-    VideoBasePlaybackView*              mBaseVideoView;
-    CMPXVideoViewWrapper*               mVideoViewWrapper;
- 
+    private:
+        CVideoPlaybackUserInputHandler*     mUserInputHdlr;
+        VideoBasePlaybackView*              mBaseVideoView;
+        CMPXVideoViewWrapper*               mVideoViewWrapper;
 };
 
 

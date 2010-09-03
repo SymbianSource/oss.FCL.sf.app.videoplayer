@@ -20,7 +20,7 @@
 #include "videolistselectiondialog.h"
 #include "videolistselectiondialogdata.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 
 bool VideoListSelectionDialogData::mExecReturnPrimary = false;
 int VideoListSelectionDialogData::mSelectionCount = 0;
@@ -79,7 +79,7 @@ void VideoListSelectionDialog::exec()
     // fill selection
     VideoListSelectionDialogData::mMultiSelectionLaunchCount++;
     VideoCollectionWrapper &wrapper = VideoCollectionWrapper::instance();
-    VideoSortFilterProxyModel *model = wrapper.getModel(VideoCollectionCommon::EModelTypeGeneric);
+    VideoProxyModelGeneric *model = wrapper.getGenericModel();
     if (model)
     {
         for (int i = 0; i < VideoListSelectionDialogData::mSelectionCount; i++)

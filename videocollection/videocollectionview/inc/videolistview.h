@@ -30,7 +30,7 @@ class VideoListWidget;
 class QActionGroup;
 class QVariant;
 class VideoCollectionViewUtils;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 class HbStackedWidget;
 class VideoCollectionUiLoader;

@@ -23,7 +23,7 @@
 //      - how to setup construction to fail for testing purposes
 
 
-// Version : %version: da1mmcf#9 %
+// Version : %version: da1mmcf#10 %
 
 #ifndef __TESTVIDEOPLAYERENGINE_H__
 #define __TESTVIDEOPLAYERENGINE_H__
@@ -83,7 +83,7 @@ class TestVideoPlayerEngine : public QObject
         void testSetEmbedded();
     
         void testInitWithActivityData();
-        void testHandleQuitWihtActivityData();
+        void testHandleQuitWithActivityData();
 
         // called after last test case executed
         void cleanupTestCase();

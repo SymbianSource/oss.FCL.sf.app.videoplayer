@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   VideoCollectionWrapperPrivate class definition
+* Description: VideoCollectionWrapperPrivate class definition
 * 
 */
 
@@ -29,7 +29,10 @@
 class CMPXMediaArray;
 class CMPXMedia;
 class VideoListDataModel;
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
+class VideoProxyModelAllVideos;
+class VideoProxyModelCollections;
+class VideoProxyModelContent;
 
 class VideoCollectionWrapperPrivate : public QObject        
 {    
@@ -51,55 +54,138 @@ public: // Constructor
 	 * Destructor
 	 */
 	~VideoCollectionWrapperPrivate();	
-
+    
     /**
-     * Returns the pointer into model. Creates the model if it doesn't exists yet.
+     * Returns the pointer into generic video model. Creates the model if it doesn't 
+     * exist yet.
      * 
      * Noter that if application has signaled aboutToQuit -signal indicating closing, all
      * previously created models have been removed and new ones will not be created 
      * anymore
-     *  
-     * @param type type of model
+     *
      * @return address of model, NULL if creation did not succeed or if application is closing.
      */    
-	VideoSortFilterProxyModel* getModel(VideoCollectionCommon::TModelType &type);
+    VideoProxyModelGeneric* getGenericModel();
+
+    /**
+     * Returns the pointer into all videos model. Creates the model if it doesn't exist yet.
+     * 
+     * Noter that if application has signaled aboutToQuit -signal indicating closing, all
+     * previously created models have been removed and new ones will not be created 
+     * anymore
+     *
+     * @return address of model, NULL if creation did not succeed or if application is closing.
+     */    
+ 
+    VideoProxyModelGeneric* getAllVideosModel();
+
+    /**
+     * Returns the pointer into collections model. Creates the model if it doesn't exist yet.
+     * 
+     * Noter that if application has signaled aboutToQuit -signal indicating closing, all
+     * previously created models have been removed and new ones will not be created 
+     * anymore
+     *
+     * @return address of model, NULL if creation did not succeed or if application is closing.
+     */    
+ 
+    VideoProxyModelGeneric* getCollectionsModel();
+    
+    /**
+     * Returns the pointer into collection content model. Creates the model if it doesn't 
+     * exist yet.
+     * 
+     * Noter that if application has signaled aboutToQuit -signal indicating closing, all
+     * previously created models have been removed and new ones will not be created 
+     * anymore
+     * 
+     * @return address of model, NULL if creation did not succeed or if application is closing.
+     */     
+    VideoProxyModelGeneric* getCollectionContentModel();
 
 private slots:
-  
-    
+
     /**
      * Signaled when UI environment is about to be destroyed. 
      * All models needs to be cleaned up before of that.
      * 
      */
     void aboutToQuitSlot();
-           
+    
 private:
+    
+    /**
+     * Creates proxy model and returns the pointer.
+     * 
+     * Noter that if application has signaled aboutToQuit -signal indicating closing, all
+     * previously created models have been removed and new ones will not be created 
+     * anymore.
+     * 
+     * @return address of model, NULL if creation did not succeed or if application is closing.
+     */
+    template<class T>
+    T *initProxyModelModel()
+    {
+        if(mAboutToClose)
+        {
+            return 0;
+        }
+        
+        if(!initSourceModel())
+        {
+            return 0;
+        }
+        
+        T *model = 0;
+
+        model = new T();
+            
+        if(model->initialize(mSourceModel) || 
+           !connect(model, SIGNAL(shortDetailsReady(TMPXItemId)), 
+                   mSourceModel, SIGNAL(shortDetailsReady(TMPXItemId))))
+        {
+            delete model;
+            model = 0;
+        }
+        
+        return model;
+    }
+    
+private:
+
+    /**
+     * Initializes source model.
+     * 
+     * @return true if initialization succeeds, otherwise false.
+     */
+    bool initSourceModel();
+    
+private:
+    
+    /**
+     * data model for collection content
+     */
+    QPointer<VideoProxyModelGeneric> mGenericModel;
     
 	/**
      * data model for all videos
      */
-	QPointer<VideoSortFilterProxyModel> mAllVideosModel;
+	QPointer<VideoProxyModelAllVideos> mAllVideosModel;
 	
 	/**
 	 * data model for collections
 	 */
-	QPointer<VideoSortFilterProxyModel> mCollectionsModel;
+	QPointer<VideoProxyModelCollections> mCollectionsModel;
 	
 	/**
 	 * data model for collection content
 	 */
-    QPointer<VideoSortFilterProxyModel> mCollectionContentModel;
-	
-	/**
-	 * data model for collection content
-	 */
-	QPointer<VideoSortFilterProxyModel> mGenericModel;
+    QPointer<VideoProxyModelContent> mCollectionContentModel;
 	
 	/**
 	 * source model
 	 */
-	QPointer<VideoListDataModel>        mSourceModel;
+	QPointer<VideoListDataModel>     mSourceModel;
 	
 	/**
 	 * flag to indicate, that object is to be deallocated, so no
@@ -111,6 +197,3 @@ private:
 #endif  // __VIDEOCOLLECTIONWRAPPERPRIVATE_H__
 
 // End of file
-    
-
-

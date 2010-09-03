@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  16 %
+// Version : %version:  17 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -650,6 +650,7 @@ void TestMPXVideoViewWrapper::testIssueVideoAppForegroundCmd()
     //
     TRAPD( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( ETrue, ETrue ) );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdHandleForeground );
+    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdHandleForegroundEvent );
     QVERIFY( errIssueVidAppFGCmd == KErrNone );
 
     //
@@ -657,6 +658,7 @@ void TestMPXVideoViewWrapper::testIssueVideoAppForegroundCmd()
     //
     TRAP( errIssueVidAppFGCmd, mVideoViewWrapper->IssueVideoAppForegroundCmdL( EFalse, EFalse ) );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdHandleBackground );
+    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdHandleBackgroundEvent );
     QVERIFY( errIssueVidAppFGCmd == KErrNone );
 
     cleanup();

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24 %
+// Version : %version: 24.1.1 %
 
 // INCLUDE FILES
 #include <qgraphicswidget.h>
@@ -32,7 +32,7 @@
 #include "videolistwidget.h"
 #include "videohintwidget.h"
 #include "videocollectionwrapper.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 #include "videocollectionviewutils.h"
 #include "videocollectiontrace.h"
 
@@ -368,8 +368,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
             VideoListWidget *videoList = qobject_cast<VideoListWidget*>(object);
             if (videoList)
             {
-                VideoSortFilterProxyModel *model =
-                    wrapper.getModel(VideoCollectionCommon::EModelTypeAllVideos);
+                VideoProxyModelGeneric *model = wrapper.getAllVideosModel();
                 if(model)
                 {
                 	VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelVideos);
@@ -381,8 +380,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
         }
         else if (name.compare(DOCML_NAME_VC_COLLECTIONWIDGET) == 0)
         {
-            VideoSortFilterProxyModel *model = wrapper.getModel(
-            		VideoCollectionCommon::EModelTypeCollections);
+            VideoProxyModelGeneric *model = wrapper.getCollectionsModel();
             if (model)
             {
                 VideoCollectionViewUtils::sortModel(model, true, VideoCollectionCommon::ELevelCategory);
@@ -399,8 +397,7 @@ void VideoCollectionUiLoader::initObject(QObject *object,
         }
         else if (name.compare(DOCML_NAME_VC_COLLECTIONCONTENTWIDGET) == 0)
         {
-            VideoSortFilterProxyModel *model = wrapper.getModel(
-            		VideoCollectionCommon::EModelTypeCollectionContent);
+            VideoProxyModelGeneric *model = wrapper.getCollectionContentModel();
             if (model)
             {
                 // collection content contains always a list of videos so we use 

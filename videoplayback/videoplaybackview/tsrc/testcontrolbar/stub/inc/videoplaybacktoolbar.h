@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  2 %
+// Version : %version:  3 %
 
 
 
@@ -45,6 +45,7 @@ class VideoPlaybackToolBar : public QWidget
         void durationChanged( int duration );
         void positionChanged( int position );
         void setVisible( bool visible );
+        void resetControl();
 
     public:
         VideoPlaybackControlsController *mController;
@@ -53,6 +54,7 @@ class VideoPlaybackToolBar : public QWidget
         int mPosition;
         int mDuration;
         bool mVisible;
+        bool mReset;
         TMPXPlaybackState mState;
 };
 

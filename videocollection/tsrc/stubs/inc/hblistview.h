@@ -23,7 +23,7 @@
 #include "hblistviewitem.h"
 #include "hbscrollbar.h"
 #include "hbabstractitemview.h"
-#include "videosortfilterproxymodel.h"
+#include "videoproxymodelgeneric.h"
 
 #include <QGraphicsItem>
 #include <QModelIndex>
@@ -111,7 +111,7 @@ public:
     /**
      * dummy method
      */
-    void setModel(VideoSortFilterProxyModel *model)
+    void setModel(VideoProxyModelGeneric *model)
     {
         mLatestModel = model;
     }
@@ -322,7 +322,7 @@ public:
     /**
      * provided model
      */
-    static VideoSortFilterProxyModel *mLatestModel;
+    static VideoProxyModelGeneric *mLatestModel;
     
     /**
      * -1 == initialized

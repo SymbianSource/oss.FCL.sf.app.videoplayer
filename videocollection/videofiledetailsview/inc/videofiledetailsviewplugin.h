@@ -26,7 +26,7 @@
 #include <qpixmap.h>
 #include <mpxitemid.h>
 
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class QModelIndex;
 class HbAction;
 class HbMarqueeItem;
@@ -236,7 +236,7 @@ private:
     /**
      * Pointer to the model that holds video details. Not owned.
      */
-    VideoSortFilterProxyModel* mModel;
+    VideoProxyModelGeneric* mModel;
 
     /**
      * pointer to videoservices instance

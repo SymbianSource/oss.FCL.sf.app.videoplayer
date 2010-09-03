@@ -24,12 +24,5 @@ class VideoCollectionWrapper
     
 public: // Constructor
     
-    enum TModelType
-    {
-        EAllVideos,
-        ECollections,
-        EGeneric,
-        ECollectionContent
-    };
 };
 #endif // __VIDEOCOLLECTIONWRAPPER_H__

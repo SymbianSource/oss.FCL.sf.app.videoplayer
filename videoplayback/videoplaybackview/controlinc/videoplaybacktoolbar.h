@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -80,6 +80,8 @@ class VideoPlaybackToolBar : public QObject
     public:
         VideoPlaybackToolBar( VideoPlaybackControlsController* controller );
         virtual ~VideoPlaybackToolBar();
+
+    public:
         void updateState( TMPXPlaybackState state );
         void aspectRatioChanged( int aspectRatio );
         void initialize();
@@ -87,6 +89,7 @@ class VideoPlaybackToolBar : public QObject
         void positionChanged( int position );
         void durationChanged( int duration );
         void setVisible( bool visible );
+        void resetControl();
 
     private slots:
         void playPause();

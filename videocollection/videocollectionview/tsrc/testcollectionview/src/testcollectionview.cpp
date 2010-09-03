@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   tester for methods in VideoSortFilterProxyModel
+* Description:   tester for methods in VideoProxyModelGeneric
 *
 */
 
@@ -110,7 +110,8 @@ void TestCollectionView::init()
     HbMainWindow *window = hbInstance->allMainWindows().value(0);
     if (window)
     {
-        window->addView(mTestView->getView());
+        HbView *view = qobject_cast<HbView*>(mTestView->getView());
+        window->addView(view);
     }
 }
 
@@ -347,7 +348,6 @@ void TestCollectionView::testTimerEvent()
     QApplication::sendEvent(mTestView, &timerEvent);
     QVERIFY(commandSpy.count() == 1);
     QVERIFY(delayedSpy.count() == 1);
-    
 }
 
 // ---------------------------------------------------------------------------

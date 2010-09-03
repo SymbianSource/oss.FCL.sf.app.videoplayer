@@ -15,16 +15,15 @@
 *
 */
 
-// Version : %version:  da1mmcf#7 %
+// Version : %version:  da1mmcf#8 %
 
-#include <hbmainwindow.h>
 
 #include "stub/inc/hbinstance.h"
 #include "mpxvideo_debug.h"
 
 bool initialised = false;
 HbInstance* mInstance = 0;
-QList<HbInstance *> mInstances;
+QList<HbMainWindow *> mWindows;
 
 // -------------------------------------------------------------------------------------------------
 // HbInstance::HbInstance()
@@ -33,6 +32,9 @@ QList<HbInstance *> mInstances;
 HbInstance::HbInstance()
 {
     MPX_DEBUG(_L("HbInstance::HbInstance()"));
+    
+    HbMainWindow* window = new HbMainWindow();  
+    mWindows.append(window);        
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -54,32 +56,21 @@ HbInstance* HbInstance::instance()
     
     if ( ! initialised )
     {
-    	mInstance = new HbInstance();  
-    	initialised = true;
-    	mInstances.append(mInstance);
+    	mInstance = new HbInstance();
     }
 	
     return mInstance;
 }
 
 // -------------------------------------------------------------------------------------------------
-// HbInstance::primaryWindow()
-// -------------------------------------------------------------------------------------------------
-//
-HbInstance* HbInstance::primaryWindow() const
-{
-    MPX_DEBUG(_L("HbInstance::primaryWindow()"));
-	return mInstance;
-}
-
-// -------------------------------------------------------------------------------------------------
 // HbInstance::allMainWindows()
 // -------------------------------------------------------------------------------------------------
 //
-QList<HbInstance *> HbInstance::allMainWindows() const
+QList<HbMainWindow *> HbInstance::allMainWindows() const
 {
     MPX_DEBUG(_L("HbInstance::allMainWindows()"));
-	return mInstances;
+
+	return mWindows;
 }
 
 // -------------------------------------------------------------------------------------------------

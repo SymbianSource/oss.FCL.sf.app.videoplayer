@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 26 %
+// Version : %version: 27 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -1957,6 +1957,13 @@ CVHPPTestClass::PlayduringVoiceCall( CStifItemParser& /*aItem*/ )
     iLog->Log(_L("CVHPPTestClass::PlayduringVoiceCall()"));
 
     TInt err = 0;
+
+    //callback event
+    TCallbackEvent* event = new TCallbackEvent;
+    event->iError = 0;
+    event->iData  = 0;
+    event->iEvent = EPPaused;
+    AddExpectedEvent( event );
 
     //set phone call as Connected
     err = RProperty::Set(KPSUidCtsyCallInformation, KCTsyCallState, EPSCTsyCallStateConnected);

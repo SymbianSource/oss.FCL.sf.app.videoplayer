@@ -75,9 +75,9 @@ void VideoThumbnailDataTester::emitAboutToQuit()
 // VideoThumbnailDataTester::initialize()
 // -----------------------------------------------------------------------------
 //
-void VideoThumbnailDataTester::initialize()
+int VideoThumbnailDataTester::initialize()
 {
-    VideoThumbnailDataPrivate::initialize();
+    return VideoThumbnailDataPrivate::initialize();
 }
 
 // -----------------------------------------------------------------------------

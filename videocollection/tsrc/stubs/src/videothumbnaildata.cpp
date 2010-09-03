@@ -60,7 +60,7 @@ const QIcon* VideoThumbnailData::getThumbnail(const TMPXItemId &mediaId)
     return 0;
 }
 
-void VideoThumbnailData::startBackgroundFetching(VideoSortFilterProxyModel *model, int fetchIndex)
+void VideoThumbnailData::startBackgroundFetching(VideoProxyModelGeneric *model, int fetchIndex)
 {
     Q_UNUSED(model);
     VideoThumbnailTestData::mStartBackgroundFetchingCallCount++;

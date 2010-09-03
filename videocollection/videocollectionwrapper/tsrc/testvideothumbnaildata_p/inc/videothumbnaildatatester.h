@@ -22,7 +22,7 @@
 #include <qobject.h>
 #include "videothumbnaildata_p.h"
 
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 
 class VideoThumbnailDataTester : public VideoThumbnailDataPrivate
 {
@@ -66,7 +66,7 @@ public:
     /**
      * Calls CVideoThumbnailDataPrivate::initialize
      */
-    void initialize();
+    int initialize();
 
     /**
      * Calls CVideoThumbnailDataPrivate::cleanup

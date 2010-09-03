@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -43,6 +43,7 @@ class VideoPlaybackControlBar : public HbWidget
         void setVisibleToControlBar( bool visible );
         void durationChanged( int duration );
         void positionChanged( int position );
+        void resetControl();
 
     public:
         VideoPlaybackControlsController *mController;
@@ -50,6 +51,7 @@ class VideoPlaybackControlBar : public HbWidget
         int  mDuration;
         int  mAspectRatio;
         bool mVisibility;
+        bool mReset;
         TMPXPlaybackState mState;
         VideoPlaybackViewFileDetails *mFileDetails;
 };

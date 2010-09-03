@@ -27,7 +27,7 @@
 #include "videoservices.h"
 #include "videocollectioncommon.h"
 
-class VideoSortFilterProxyModel;
+class VideoProxyModelGeneric;
 class VideoServices;
 class VideoCollectionUiLoader;
 class HbAction;
@@ -73,7 +73,7 @@ public:
      * @param level presetted level for the widget
      * @return int 0 initialization ok, < 0 if fails.
      */
-    int initialize(VideoSortFilterProxyModel &model, 
+    int initialize(VideoProxyModelGeneric &model, 
                    bool isService  = false,
                    VideoCollectionCommon::TCollectionLevels level = VideoCollectionCommon::ELevelInvalid);
 
@@ -107,9 +107,9 @@ public:
     /**
      * returns widget's model
      * 
-     * @return VideoSortFilterProxyModel*
+     * @return VideoProxyModelGeneric*
      */
-    VideoSortFilterProxyModel* getModel();
+    VideoProxyModelGeneric* getModel();
     
 public:
     
@@ -377,7 +377,7 @@ private:
      * Provided model
      * Not own.
      */
-    QPointer<VideoSortFilterProxyModel> mModel;
+    QPointer<VideoProxyModelGeneric> mModel;
 
     /**
      * pointer to videoservices instance. If exists, 

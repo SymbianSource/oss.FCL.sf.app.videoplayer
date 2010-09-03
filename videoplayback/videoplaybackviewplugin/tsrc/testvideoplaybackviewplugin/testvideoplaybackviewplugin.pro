@@ -14,29 +14,28 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 5 %
+# Version : %version: 6 %
 
 
 TEMPLATE = app
 TARGET = 
-CONFIG += qtestlib hb
+CONFIG += qtestlib qt hb
 
-DEPENDPATH += . \
-    inc \
-    src
+INCLUDEPATH += hbstub
+INCLUDEPATH += inc stub/inc
 
-INCLUDEPATH += 
+DEPENDPATH += inc src stub/inc stub/src
 
 LIBS += -lestor.dll \
         -lmpxviewframeworkqt.dll \
         -lxqplugins.dll
 
 # Input
-HEADERS += inc/testvideoplaybackviewplugin.h \           
-           stub/inc/videoplaybackview.h \
+HEADERS += testvideoplaybackviewplugin.h \           
+           videoplaybackview.h \
            ../../inc/videoplaybackviewplugin.h \
            ../../../../inc/mpxhbvideocommondefs.h 
                
-SOURCES += stub/src/videoplaybackview.cpp \
-           src/testvideoplaybackviewplugin.cpp \					 
+SOURCES += testvideoplaybackviewplugin.cpp \
+           videoplaybackview.cpp \					 
            ../../src/videoplaybackviewplugin.cpp 

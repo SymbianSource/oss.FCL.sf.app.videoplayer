@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   tester for methods in VideoSortFilterProxyModel
+* Description:   tester for methods in VideoProxyModelGeneric
 *
 */
 

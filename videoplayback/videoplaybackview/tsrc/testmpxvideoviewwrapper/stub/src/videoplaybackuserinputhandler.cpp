@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 // INCLUDE FILES
@@ -35,9 +35,6 @@
 #include "../inc/videoplaybackuserinputhandler.h"
 
 
-// CONSTANTS
-const TInt KMPXMicroSecondsInASecond = 1000000;
-
 
 // ======== MEMBER FUNCTIONS =======================================================================
 
@@ -55,14 +52,14 @@ CVideoPlaybackUserInputHandler::CVideoPlaybackUserInputHandler( CMPXVideoViewWra
 // -------------------------------------------------------------------------------------------------
 //
 CVideoPlaybackUserInputHandler* CVideoPlaybackUserInputHandler::NewL(
-        CMPXVideoViewWrapper* aWrapper, TBool aTvOutConnected )
+        CMPXVideoViewWrapper* aWrapper)
 {
     MPX_DEBUG(_L("CVideoPlaybackUserInputHandler::NewL()"));
 
     CVideoPlaybackUserInputHandler* self =
         new (ELeave) CVideoPlaybackUserInputHandler( aWrapper );
     CleanupStack::PushL( self );
-    self->ConstructL( aTvOutConnected );
+    self->ConstructL();
     CleanupStack::Pop();
     return self;
 }
@@ -72,9 +69,8 @@ CVideoPlaybackUserInputHandler* CVideoPlaybackUserInputHandler::NewL(
 // Symbian 2nd phase constructor can leave.
 // -------------------------------------------------------------------------------------------------
 //
-void CVideoPlaybackUserInputHandler::ConstructL( TBool aTvOutConnected )
+void CVideoPlaybackUserInputHandler::ConstructL()
 {
-    Q_UNUSED( aTvOutConnected );
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#16 %
+// Version : %version: da1mmcf#17 %
 
 
 
@@ -45,6 +45,7 @@ class VideoPlaybackProgressBar : public QObject
     public:
         void durationChanged( int duration );
         void positionChanged( int position );
+        void resetControl();
 
     private slots:
         void handleSliderPressed();
