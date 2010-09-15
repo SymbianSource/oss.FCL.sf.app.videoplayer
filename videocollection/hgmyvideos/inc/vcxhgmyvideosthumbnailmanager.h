@@ -98,6 +98,13 @@ NONSHARABLE_CLASS( CVcxHgMyVideosThumbnailManager ) :
          * @param aRequestId
          */
         void Cancel( TThumbnailRequestId aRequestId );
+        
+        /**
+         * Reset the generated thumbnails from given source
+         * 
+         * aSource Thumbnail source
+         */
+        void Reset( CThumbnailObjectSource& aSource );
 
         /**
          * Adds observer.

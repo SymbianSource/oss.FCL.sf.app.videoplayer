@@ -113,8 +113,7 @@ CVcxHgMyVideosVideoDataUpdater::CVcxHgMyVideosVideoDataUpdater(
     iModel( aModel ),
     iScroller( aScroller ),
     iVideoArray( aVideoArray ),
-    iVideosIndicator( aVideosIndicator ),
-    iPaused( EFalse )
+    iVideosIndicator( aVideosIndicator )
     {
     CActiveScheduler::Add( this );
     }

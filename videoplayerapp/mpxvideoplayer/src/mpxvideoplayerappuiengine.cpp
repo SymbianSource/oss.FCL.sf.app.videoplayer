@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: da1mmcf#72 %
+// Version : %version: 73 %
 
 
 #include <eikon.hrh>
@@ -52,6 +52,7 @@
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideo_debug.h"
 #include "mpxvideoplayercustomviewmsgconsts.h"
+#include "mpxvideoplayeriadupdate.h"
 
 const TInt KMpxPlaybackPluginTypeUid = 0x101FFCA0;
 
@@ -203,6 +204,12 @@ void CMpxVideoPlayerAppUiEngine::PreLoadPdlPlaybackViewL()
 CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::~CMpxVideoPlayerAppUiEngine()"));
+
+    if ( iIadUpdate )
+    {
+        delete iIadUpdate;
+        iIadUpdate = NULL;
+    }
 
     if ( iConstructTimer )
     {
@@ -1179,7 +1186,24 @@ void CMpxVideoPlayerAppUiEngine::DoLateConstructL()
 
     iConstructTimer->Cancel();
 
+    DoCheckForUpdatesL();
+
     PlaybackUtilityL();
 }
+
+// ---------------------------------------------------------------------------
+//   Checks for updates via IAD
+// ---------------------------------------------------------------------------
+// 
+void CMpxVideoPlayerAppUiEngine::DoCheckForUpdatesL()
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::DoCheckForUpdatesL()"));
+
+    if ( !iIadUpdate )
+        {
+        iIadUpdate = CMpxVideoPlayerIadUpdate::NewL( *iViewUtility );
+        }
+    iIadUpdate->StartL();
+    }
 
 // EOF

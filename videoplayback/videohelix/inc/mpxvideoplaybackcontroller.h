@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 29 %
+// Version : %version: 30 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKCONTROLLER_H_
@@ -41,6 +41,7 @@
 #include "mpxvideoplayerutility.h"
 #include "mpxvideo_debug.h"
 
+#include "mpxcalldetector.h"
 // DATA TYPES
 
 // FORWARD DECLARATIONS
@@ -68,6 +69,7 @@ class CHWRMLight;
 NONSHARABLE_CLASS( CMPXVideoPlaybackController )
     : public CBase
     , public MMPXCenRepObserver
+    , public MMPXCallDetectorObserver
 {
     public:
         //
@@ -146,6 +148,7 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
 
 
     private:
+        void CallDetectedL();
 
         void SetDisplayWindowL( CMPXCommand& aCmd );
         void RestartDSA( CMPXCommand& aCmd );
@@ -260,6 +263,9 @@ NONSHARABLE_CLASS( CMPXVideoPlaybackController )
         TTimeIntervalMicroSeconds32             iDisplayTimerTimeout;
         // Timer monitoring user activity when TV-out is connected
         CPeriodic*                              iUserActivityTimer;
+
+        // Call detector
+        CMPXCallDetector*                       iCallDetector; 
 
         TBool                                   iSeekable;
 

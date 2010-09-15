@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: ou1cpsw#3 %
+// Version : %version: ou1cpsw#4.1.1 %
 
 
 
@@ -35,13 +35,13 @@
 
 // #define _MPX_FILE_LOGGING_
 
-#ifdef _DEBUG
-    #define FU_DEBUG RDebug::Print
+#ifndef _DEBUG
+    #define FU_DEBUG
 #else
     #ifdef _MPX_FILE_LOGGING_
         #define FU_DEBUG MPXDebug::FileLog
     #else        
-        #define FU_DEBUG
+        #define FU_DEBUG RDebug::Print
     #endif
 #endif 
 

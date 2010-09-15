@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 26 %
 
 
 // This file defines the API for VideoBasePlaybackView.dll
@@ -387,9 +387,10 @@ class CMPXVideoBasePlaybackView : public CAknView,
         TBool                               iPdlReloading;
         TBool                               iRealOneDelayedPlay;
         TBool                               iKeyboardInFocus;
+        TBool                               iExitPlayer;
 
         HBufC*                              iClipName;
-        
+
         TBool                               iSyncClose;
 };
 

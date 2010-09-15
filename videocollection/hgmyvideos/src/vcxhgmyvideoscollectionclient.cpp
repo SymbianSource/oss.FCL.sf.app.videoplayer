@@ -47,6 +47,7 @@ const TInt KVcxHgEventLevelRoot     = 1;
 const TInt KVcxHgEventLevelCategory = 2;
 const TInt KVcxHgEventLevelVideo    = 3;
 
+const TInt KVcxMpxLevelRoot       = 1;
 const TInt KVcxMpxLevelCategories = 2;
 const TInt KVcxMpxLevelVideos     = 3;
 
@@ -220,9 +221,20 @@ void CVcxHgMyVideosCollectionClient::GetVideoListL( TInt aIndex )
         }
     else if ( iCollectionLevel == KVcxMpxLevelVideos )
         {
-        // OpenL() will return a list if there has been any changes.
-        // No reply if list is same as with previous OpenL().
-        iCollectionUtility->Collection().OpenL();
+		TInt currentIndex = CategoryIndexL();
+		
+        if ( aIndex == currentIndex )
+            {
+            // OpenL() will return a list if there has been any changes.
+            // No reply if list is same as with previous OpenL().
+            iCollectionUtility->Collection().OpenL();
+            }
+        else
+            {
+            iCollectionUtility->Collection().BackL( );
+            iCollectionUtility->Collection().OpenL( aIndex );
+            iCollectionLevel = KErrNotFound;
+            }
         }
     else
         {
@@ -381,16 +393,30 @@ void CVcxHgMyVideosCollectionClient::PlayVideoL( TMPXItemId aMpxItemId )
     IPTVLOGSTRING2_LOW_LEVEL( 
                 "CVcxHgMyVideosCollectionClient::PlayVideoL: Play video at collection index %d", aMpxItemId.iId1 );
     
-    CMPXCollectionPath* path = CMPXCollectionPath::NewL();
-    CleanupStack::PushL(path);
+    CMPXCollectionPath* collectionPath = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( collectionPath );
     
-    path->AppendL( KVcxUidMyVideosMpxCollection );
-    path->AppendL( KVcxMvcCategoryIdAll );
-    path->AppendL( aMpxItemId );
-    path->SelectL( aMpxItemId );
-    
-    iCollectionUtility->Collection().OpenL( *path );
-    CleanupStack::PopAndDestroy(path);
+    if ( collectionPath->Levels() == KVcxMpxLevelVideos )
+        {
+        collectionPath->DeselectAll();
+        collectionPath->SelectL( aMpxItemId );
+        iCollectionUtility->Collection().OpenL( *collectionPath );
+	    }
+    else
+        {
+        CMPXCollectionPath* customPath = CMPXCollectionPath::NewL();
+        CleanupStack::PushL(customPath);
+        
+        customPath->AppendL( KVcxUidMyVideosMpxCollection );
+        customPath->AppendL( KVcxMvcCategoryIdAll );
+        customPath->AppendL( aMpxItemId );
+        customPath->SelectL( aMpxItemId );
+       
+        iCollectionUtility->Collection().OpenL( *customPath );
+        CleanupStack::PopAndDestroy( customPath );
+        }
+
+    CleanupStack::PopAndDestroy( collectionPath );
     }
 
 // -----------------------------------------------------------------------------
@@ -1138,6 +1164,24 @@ void CVcxHgMyVideosCollectionClient::HandleGetVideoDetailsRespL( CMPXMessage* aM
         {
         iVideoModelObserver->VideoDetailsCompletedL( *media );
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CVcxHgMyVideosCollectionClient::CategoryIndexL()
+// -----------------------------------------------------------------------------
+//
+TInt CVcxHgMyVideosCollectionClient::CategoryIndexL()
+    {
+    CMPXCollectionPath* path = iCollectionUtility->Collection().PathL();
+    CleanupStack::PushL( path );
+    TInt index ( -1 );
+    if ( path->Levels() > KVcxMpxLevelCategories )
+        {
+        index = path->Index( KVcxMpxLevelRoot );
+        }
+    CleanupStack::PopAndDestroy( path );
+    
+    return index;
     }
 
 #if defined(_DEBUG) && IPTV_LOGGING_METHOD != 0

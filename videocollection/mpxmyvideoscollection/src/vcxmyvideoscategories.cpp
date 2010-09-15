@@ -256,7 +256,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
         }
 
     // Update videos counts
-    UpdateVideosCountL( *categoryArray, videosIncrements, newVideosIncrements );
+    UpdateVideosCountL( *categoryArray, videosIncrements,
+                        newVideosIncrements, !aNewItemsStartIndex );
 
     CleanupStack::PopAndDestroy( &newVideosIncrements ); // <-1
     CleanupStack::PopAndDestroy( &videosIncrements ); // <-1
@@ -267,7 +268,8 @@ void CVcxMyVideosCategories::UpdateCategoriesL( CMPXMedia& aVideoList,
 // ----------------------------------------------------------------------------
 //
 void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
-    RArray<TInt>& aVideosIncrements, RArray<TInt>& aNewVideosIncrements )
+    RArray<TInt>& aVideosIncrements, RArray<TInt>& aNewVideosIncrements,
+    TBool aForceUpdate  )
     {
     TBool modified = EFalse;
     TInt categoryCount = aCategoryArray.Count();
@@ -275,7 +277,7 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
     
     for ( TInt i = 0; i < categoryCount; i++ )
         {
-        if ( aVideosIncrements[i] != 0 )
+        if ( aForceUpdate || aVideosIncrements[i] != 0 )
             {
             category = aCategoryArray.AtL( i );
 
@@ -287,7 +289,7 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
             }
 
         //codescanner warning: aNewVideosIncrements count is same as aCategoryArray count, so the range is checked
-        if ( aNewVideosIncrements[i] != 0 )
+        if (  aForceUpdate || aNewVideosIncrements[i] != 0 )
             {
             category = aCategoryArray.AtL( i );
 
@@ -314,10 +316,9 @@ void CVcxMyVideosCategories::UpdateVideosCountL( CMPXMedia& aCategory,
     if ( aIncrement != 0 )
         {
         AddToTUint32AttributeL( aCategory, aIncrement, aCountAttribute );
-                
-        iCollection.iMessageList->AddEventL( aCategory.ValueTObjectL<TMPXItemId>(
-                KMPXMediaGeneralId ), EMPXItemModified, aEventInfo );
         }
+    iCollection.iMessageList->AddEventL( aCategory.ValueTObjectL<TMPXItemId>(
+            KMPXMediaGeneralId ), EMPXItemModified, aEventInfo );
     }
 
 // ----------------------------------------------------------------------------

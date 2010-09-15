@@ -343,6 +343,13 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCollectionClient ) : public CBase,
          * @param aError system error code.
          */
         void HandleGetVideoDetailsRespL( CMPXMessage* aMessage, TInt aError );
+        
+        /**
+         * Gets current collection path category level index
+         * 
+         * @return Index or KErrNotFound, if current path is not in video level
+         */
+        TInt CategoryIndexL();
 
     protected:
         

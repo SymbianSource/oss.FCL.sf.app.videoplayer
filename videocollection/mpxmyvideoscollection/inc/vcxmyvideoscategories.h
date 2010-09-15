@@ -216,9 +216,12 @@ NONSHARABLE_CLASS(CVcxMyVideosCategories) : CBase
         *                             calling function already has it available.
         * @param aVideosIncrements    How many new items were added to each category.
         * @param aNewVideosIncrements How many videos with new flag were added to each category.
+        * @param aForceUpdate         If set, the modify event is raised even though the count
+        *                             has not changed. ETrue, if update is to be forced.
         */
         void UpdateVideosCountL( CMPXMediaArray& aCategoryArray,
-                RArray<TInt>& aVideosIncrements, RArray<TInt>& aNewVideosIncrements );
+                RArray<TInt>& aVideosIncrements, RArray<TInt>& aNewVideosIncrements,
+                TBool aForceUpdate );
 
         /**
         * Increases/decreases aCountAttribute in aCategory. Adds event to

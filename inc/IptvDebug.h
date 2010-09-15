@@ -173,7 +173,7 @@
 #else
 
 // ARMV5 BUILD:
-#define IPTV_LOGGING_METHOD  1  // Flogger is default with target device
+#define IPTV_LOGGING_METHOD  2  // RDebug is default with target device
 
 #endif
 
