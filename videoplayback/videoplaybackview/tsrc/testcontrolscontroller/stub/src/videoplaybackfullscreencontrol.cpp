@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -84,6 +84,7 @@ void VideoPlaybackFullScreenControl::setVisibility( TMPXPlaybackState state )
     MPX_DEBUG(_L("VideoPlaybackFullScreenControl::setVisibility(%d)"), state);
 
     mVisibilityState = state;
+    setVisible( true );
 }
 
 // -------------------------------------------------------------------------------------------------

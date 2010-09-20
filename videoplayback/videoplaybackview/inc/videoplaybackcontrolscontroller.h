@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#25 %
+// Version : %version: da1mmcf#28 %
 
 
 
@@ -26,6 +26,7 @@
 #include <QObject>
 #include <QPixmap>
 
+#include <xqserviceutil.h>
 #include <mpxplaybackframeworkdefs.h>
 
 #include "mpxvideo_debug.h"
@@ -47,7 +48,7 @@ class VideoPlaybackFullScreenControl;
 class VideoPlaybackControlsController;
 class VideoPlaybackControlConfiguration;
 class VideoServices;
-
+class ShareUi;
 
 // DATA TYPES
 
@@ -145,7 +146,8 @@ class VideoPlaybackControlsController : public QObject
 
         inline TPlaybackViewMode viewMode();
 
-        void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
+        void evaluateAndChangeViewMode(
+                TPlaybackViewMode viewMode = EFullScreenView, bool transitionEffect = false );
 
         inline bool isAttachOperation();
 
@@ -154,6 +156,8 @@ class VideoPlaybackControlsController : public QObject
         bool isRNLogoBitmapInControlList();
 
         bool shouldShowRNLogo();
+        
+        inline bool isService();
 
     private:
         /**
@@ -241,12 +245,6 @@ class VideoPlaybackControlsController : public QObject
 		*/
 		bool isSoftKeyVisible();
 
-        /**
-        * Handle tvout connected/disconnected event
-        */
-		void handleTvOutEvent( bool connected,
-		                       TVideoPlaybackControlCommandIds event );
-
 		void updateVideoRect(  bool transitionEffect = true );
 
 		void showVolumeControls();
@@ -284,7 +282,7 @@ class VideoPlaybackControlsController : public QObject
         CMPXVideoViewWrapper                      *mViewWrapper;
         VideoPlaybackViewFileDetails              *mFileDetails;
 
-        QList<VideoPlaybackFullScreenControl*> mControls;
+        QList<VideoPlaybackFullScreenControl*>     mControls;
 
         VideoPlaybackControlPolicy                *mControlsPolicy;
         VideoPlaybackControlConfiguration         *mControlsConfig;
@@ -301,12 +299,15 @@ class VideoPlaybackControlsController : public QObject
         bool                                       mViewTransitionIsGoingOn;
         bool                                       mIsAttachOperation;
         bool                                       mFileDetailsAdded;
+        bool                                       mShowControlsWhenInHorizontal;
 
         TThumbNailState                            mThumbNailState;
 
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
         Qt::Orientation                            mOrientation;
+            
+        ShareUi                                    *mShareUi;
 };
 
 // INLINE METHODS
@@ -398,6 +399,20 @@ bool VideoPlaybackControlsController::isFileDetailsAdded()
 
     return mFileDetailsAdded;
 }
+
+
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::isService
+// -------------------------------------------------------------------------------------------------
+//
+inline
+bool VideoPlaybackControlsController::isService()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlsController::isService()"));
+    
+    return XQServiceUtil::isService();
+}
+
 
 #endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/
 

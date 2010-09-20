@@ -30,6 +30,7 @@ class VideoProxyModelGeneric;
 class VideoCollectionWrapper;
 class VideoCollectionUiLoader;
 class VideoListWidget;
+class HbToolBarExtension;
 
 class TestListView : public QObject
 {
@@ -75,14 +76,9 @@ private slots:
 	void testInitializeView();
 	
     /**
-     * Tests menus.
-     */
-    void testMenus();
-
-    /**
      * Tests createAction.
      */
-    void testCreateAction();
+    void testCreateToolbar();
     
     /**
      * Tests activatView.
@@ -110,16 +106,6 @@ private slots:
     void testAlbumListReadySlot();
 
     /**
-     * Tests deleteItemsSlot.
-     */
-    void testDeleteItemsSlot();
-
-    /**
-     * Tests aboutToShowMainMenuSlot.
-     */
-    void testAboutToShowMainMenuSlot();
-    
-    /**
      * Tests handleStatusSlot.
      */
     void testHandleStatusSlot();
@@ -134,16 +120,6 @@ private slots:
      */
     void testOpenCollectionViewSlot();
     
-    /**
-     * Tests openOperatorServiceSlot.
-     */
-    void testOpenOperatorServiceSlot();
-    
-    /**
-     * Tests startSortingSlot.
-     */
-    void testStartSortingSlot();
-
     /**
      * Tests view when orientation changes.
      */
@@ -183,27 +159,17 @@ private slots:
      * Tests orientationChangedSlot
      */
     void testOrientationChangedSlot();
+    
+    /**
+     * Tests toolbarActionsChanged
+     */
+    void testToolbarActionsChanged();
+    
+    /**
+     * Tests toolbarExtensionChanged
+     */
+    void testToolbarExtensionChanged();
 
-    /**
-     * Tests createCollectionSlot
-     */
-    void testCreateCollectionSlot();
-    
-    /**
-     * Tests addVideosToCollectionSlot
-     */
-    void testAddVideosToCollectionSlot();
-    
-    /**
-     * Tests removeVideosFromCollectionSlot
-     */
-    void testRemoveVideosFromCollectionSlot();
-    
-    /**
-     * Tests createOperatorServicesToolbar
-     */
-    void testCreateOperatorServicesToolbar();
-    
 signals:
 
     // Signals needed in tests.
@@ -228,6 +194,10 @@ signals:
     void testSignal(Qt::Orientation);
     
     void testSignal(const HbEffect::EffectStatus &status);
+    
+    void testSignal(QList<QAction*>);
+    
+    void testSignal(HbToolBarExtension*);
     
 private:
     

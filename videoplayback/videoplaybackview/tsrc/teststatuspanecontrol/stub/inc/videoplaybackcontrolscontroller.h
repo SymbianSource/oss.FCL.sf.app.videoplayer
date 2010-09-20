@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -97,7 +97,7 @@ class VideoPlaybackControlsController : public QObject
 
         inline bool isFileDetailsAdded();
 
-        void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
+        void evaluateAndChangeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
         TPlaybackViewMode viewMode();
 

@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hbdocument version="1.1">
     <widget name="content" type="HbWidget">
-        <widget name="bufferingIcon" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <icon iconName="preroll_anim" name="icon"/>
-            <real name="z" value="6"/>
-            <sizehint height="10.44776un" type="PREFERRED" width="10.44776un"/>
-            <bool name="visible" value="FALSE"/>
-        </widget>
+        <widget name="bufferingIcon" type="HbLabel"/>
+        <widget name="rnLogoBitmap" type="HbLabel"/>
         <widget name="titleLayout" type="HbWidget">
             <widget name="title" type="HbLabel">
                 <enums name="alignment" value="AlignLeft|AlignVCenter|AlignLeading"/>
@@ -39,13 +34,13 @@
                 <enums name="minMaxTextAlignment" value="AlignVCenter|AlignHCenter"/>
                 <string name="minText"/>
                 <real name="z" value="1"/>
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="1"/>
+                <sizehint height="5.97015un" type="PREFERRED" width="95.52239un"/>
                 <enums name="orientation" value="Horizontal"/>
                 <integer name="sliderValue" value="30"/>
                 <string name="maxText"/>
                 <string name="textAlignment" value="AlignBottom"/>
                 <bool name="textVisible" value="FALSE"/>
-                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="1"/>
-                <sizehint height="5.97015un" type="PREFERRED" width="95.52239un"/>
             </widget>
             <real name="z" value="1"/>
             <sizehint height="23.8806un" type="PREFERRED" width="95.52239un"/>
@@ -62,40 +57,6 @@
             <layout orientation="Vertical" type="linear">
                 <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                 <linearitem itemname="fileDetails" spacing="0px"/>
-            </layout>
-        </widget>
-        <widget name="bitmapLayout" type="HbWidget">
-            <widget name="audioOnlyBitmap" type="HbLabel">
-                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName="qtg_large_just_audio" name="icon"/>
-                <bool name="visible" value="FALSE"/>
-            </widget>
-            <widget name="partialAudioOnlyBitmap" type="HbLabel">
-                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName="qtg_large_corrupted" name="icon"/>
-                <bool name="visible" value="FALSE"/>
-            </widget>
-            <widget name="realAudioOnlyBitmap" type="HbLabel">
-                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName="qtg_large_realplayer" name="icon"/>
-                <bool name="visible" value="FALSE"/>
-            </widget>
-            <widget name="tvOutBitmap" type="HbLabel">
-                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName="qtg_large_tv_out" name="icon"/>
-                <bool name="visible" value="FALSE"/>
-            </widget>
-            <real name="z" value="5"/>
-            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-            <sizehint height="28.80597un" type="PREFERRED" width="47.7612un"/>
-            <sizehint height="2.68657un" type="MINIMUM" width="2.68657un"/>
-            <sizehint height="2307732.46823un" type="MAXIMUM" width="2307732.46823un"/>
-            <bool name="visible" value="FALSE"/>
-            <layout type="stacked">
-                <stackitem itemname="audioOnlyBitmap"/>
-                <stackitem itemname="partialAudioOnlyBitmap"/>
-                <stackitem itemname="realAudioOnlyBitmap"/>
-                <stackitem itemname="tvOutBitmap"/>
             </layout>
         </widget>
         <widget name="detailsPlaybackWindow" type="HbWidget">
@@ -143,12 +104,6 @@
                 <linearitem itemname="attachShareButton"/>
             </layout>
         </widget>
-        <widget name="rnLogoBitmap" type="HbLabel">
-            <icon iconName="qtg_large_realplayer" name="icon"/>
-            <real name="z" value="7"/>
-            <sizehint height="29.85075un" type="PREFERRED" width="29.85075un"/>
-            <bool name="visible" value="FALSE"/>
-        </widget>
         <size height="var(hb-param-screen-short-edge)" name="size" width="var(hb-param-screen-long-edge)"/>
         <real name="z" value="1"/>
         <rect height="var(hb-param-screen-short-edge)" name="geometry" width="var(hb-param-screen-long-edge)" x="0un" y="0un"/>
@@ -156,6 +111,8 @@
         <layout type="anchor">
             <anchoritem dst="bufferingIcon" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
             <anchoritem dst="bufferingIcon" dstEdge="CENTERV" spacing="0un" src="" srcEdge="CENTERV"/>
+            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
+            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERV" spacing="0un" src="" srcEdge="CENTERV"/>
             <anchoritem dst="titleLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
             <anchoritem dst="titleLayout" dstEdge="TOP" spacing="9.40299un" src="" srcEdge="TOP"/>
             <anchoritem dst="titleLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
@@ -172,19 +129,102 @@
             <anchoritem dst="detailsPlaybackWindow" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
             <anchoritem dst="detailsPlaybackWindow" dstEdge="RIGHT" spacing="0un" src="" srcEdge="CENTERH"/>
             <anchoritem dst="detailsPlaybackWindow" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-            <anchoritem dst="bitmapLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
-            <anchoritem dst="bitmapLayout" dstEdge="TOP" spacing="0un" src="titleLayout" srcEdge="TOP"/>
-            <anchoritem dst="bitmapLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="CENTERH"/>
-            <anchoritem dst="bitmapLayout" dstEdge="BOTTOM" spacing="0un" src="controlBarLayout" srcEdge="TOP"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="CENTERH"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0un" src="titleLayout" srcEdge="BOTTOM"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
             <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
-            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERV" spacing="0un" src="" srcEdge="CENTERV"/>
         </layout>
     </widget>
-    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_landscape" unit="un">
+    <section name="BufferingAnimation">
+        <widget name="content" type="HbWidget">
+            <widget name="bufferingIcon" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName="preroll_anim" name="icon"/>
+                <real name="z" value="6"/>
+                <sizehint height="10.44776un" type="PREFERRED" width="10.44776un"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+        </widget>
+    </section>
+    <section name="RNBitmap">
+        <widget name="content" type="HbWidget">
+            <widget name="rnLogoBitmap" type="HbLabel">
+                <icon iconName="qtg_large_realplayer" name="icon"/>
+                <real name="z" value="7"/>
+                <sizehint height="29.85075un" type="PREFERRED" width="29.85075un"/>
+                <bool name="visible" value="FALSE"/>
+            </widget>
+        </widget>
+    </section>
+    <section name="IndicatorBitmaps">
+        <widget name="content" type="HbWidget">
+            <widget name="bitmapLayout" type="HbWidget">
+                <widget name="audioOnlyBitmap" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <icon iconName="qtg_large_just_audio" name="icon"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="partialAudioOnlyBitmap" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <icon iconName="qtg_large_corrupted" name="icon"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="realAudioOnlyBitmap" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <icon iconName="qtg_large_realplayer" name="icon"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <widget name="tvOutBitmap" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <icon iconName="qtg_large_tv_out" name="icon"/>
+                    <bool name="visible" value="FALSE"/>
+                </widget>
+                <real name="z" value="5"/>
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                <sizehint height="28.80597un" type="PREFERRED" width="47.7612un"/>
+                <sizehint height="2.68657un" type="MINIMUM" width="2.68657un"/>
+                <sizehint height="2307732.46823un" type="MAXIMUM" width="2307732.46823un"/>
+                <bool name="visible" value="FALSE"/>
+                <layout type="stacked">
+                    <stackitem itemname="audioOnlyBitmap"/>
+                    <stackitem itemname="partialAudioOnlyBitmap"/>
+                    <stackitem itemname="realAudioOnlyBitmap"/>
+                    <stackitem itemname="tvOutBitmap"/>
+                </layout>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="bufferingIcon" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
+	            <anchoritem dst="bufferingIcon" dstEdge="CENTERV" spacing="0un" src="" srcEdge="CENTERV"/>
+	            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
+	            <anchoritem dst="rnLogoBitmap" dstEdge="CENTERV" spacing="0un" src="" srcEdge="CENTERV"/>
+                <anchoritem dst="titleLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="titleLayout" dstEdge="TOP" spacing="9.40299un" src="" srcEdge="TOP"/>
+                <anchoritem dst="titleLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="titleLayout" dstEdge="BOTTOM" spacing="14.32836un" src="" srcEdge="TOP"/>
+                <anchoritem dst="transparentWindow" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="transparentWindow" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="transparentWindow" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="transparentWindow" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="controlBarLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="controlBarLayout" dstEdge="TOP" spacing="-14.92537un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="controlBarLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="controlBarLayout" dstEdge="BOTTOM" spacing="-8.95522un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="detailsPlaybackWindow" dstEdge="TOP" spacing="0un" src="titleLayout" srcEdge="BOTTOM"/>
+                <anchoritem dst="detailsPlaybackWindow" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="detailsPlaybackWindow" dstEdge="RIGHT" spacing="0un" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="detailsPlaybackWindow" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="bitmapLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="bitmapLayout" dstEdge="TOP" spacing="0un" src="titleLayout" srcEdge="TOP"/>
+                <anchoritem dst="bitmapLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="bitmapLayout" dstEdge="BOTTOM" spacing="0un" src="controlBarLayout" srcEdge="TOP"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="LEFT" spacing="0un" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="TOP" spacing="0un" src="titleLayout" srcEdge="BOTTOM"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="fileDetailsLayout" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+    </section>
+    <metadata activeUIState="a" display="NHD-3.2-inch_landscape" unit="un">
         <resource location="videoplaybackview.qrc"/>
         <uistate name="Common ui state" sections="#common"/>
     </metadata>

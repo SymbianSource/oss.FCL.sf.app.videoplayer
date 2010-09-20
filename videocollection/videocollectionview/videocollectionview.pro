@@ -31,6 +31,7 @@ symbian: {
 
     # to enable resource access from Qt
     TARGET.EPOCALLOWDLLDATA = 1
+    VERSION = 10.0
 }
 
 # mpx view plugin definitions:
@@ -54,6 +55,8 @@ INCLUDEPATH += ../videocollectionwrapper/inc \
 # Input
 HEADERS += inc/videocollectionviewplugin.h \
            inc/videolistview.h \
+           inc/videolisttoolbar.h \
+           inc/videolistmenu.h \
            inc/videolistwidget.h \
            inc/videohintwidget.h \
            inc/videocollectionviewutils.h \
@@ -65,6 +68,8 @@ HEADERS += inc/videocollectionviewplugin.h \
 
 SOURCES += src/videocollectionviewplugin.cpp \
            src/videolistview.cpp \
+           src/videolisttoolbar.cpp \
+           src/videolistmenu.cpp \
            src/videolistwidget.cpp \
            src/videohintwidget.cpp \
            src/videocollectionviewutils.cpp \

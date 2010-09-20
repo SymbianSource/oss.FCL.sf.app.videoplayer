@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 
@@ -38,9 +38,9 @@ class VideoPlaybackStatusPaneControl : public VideoPlaybackFullScreenControl
     Q_OBJECT
 
     public:
-        VideoPlaybackStatusPaneControl( VideoPlaybackControlsController* controller, 
+        VideoPlaybackStatusPaneControl( VideoPlaybackControlsController* controller,
                                         TVideoPlaybackControls index,
-                                        HbWidget* widget, 
+                                        HbWidget* widget,
                                         TUint controlproperties );
 
         virtual ~VideoPlaybackStatusPaneControl();
@@ -71,7 +71,6 @@ class VideoPlaybackStatusPaneControl : public VideoPlaybackFullScreenControl
         void openFullScreenView();
 
     private:
-        bool                     mVisible;
         HbAction                *mActionBack;
         HbLabel                 *mTitleLabel;
         HbGroupBox              *mTitleGroupBox;

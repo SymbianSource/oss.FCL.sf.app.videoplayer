@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 #ifndef __TESTFILEDETAILSWIDGET_H__
 #define __TESTFILEDETAILSWIDGET_H__
@@ -65,6 +65,9 @@ class TestFileDetailsWidget : public QObject
         void testFormat();
         void testBitrate();
         void testFolder();
+        void testFilename();
+        void testFilePath();
+        
 
     private:
         void verifyResult( QString primaryText,

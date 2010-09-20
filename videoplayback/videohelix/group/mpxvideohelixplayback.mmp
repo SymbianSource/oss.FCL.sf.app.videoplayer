@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version: 19 %
+// Version : %version: ou1cpsw#20 %
 
 
 
@@ -30,6 +30,7 @@ UID             0x10009D8D 0x10282550
 
 VENDORID        VID_DEFAULT
 CAPABILITY      CAP_ECOM_PLUGIN
+VERSION         10.0
 
 SOURCEPATH      ../src
 SOURCE          mpxvideohelixplayback.cpp

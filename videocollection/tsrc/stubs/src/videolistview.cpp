@@ -16,6 +16,7 @@
 */
 
 #include "videolistview.h"
+#include "videolistwidget.h"
 #include "videocollectionviewutils.h"
 #include "videocollectionwrapper.h"
 
@@ -26,6 +27,7 @@ int VideoListViewData::mBackCount = 0;
 int VideoListViewData::mDeactivateViewCount = 0;
 int VideoListViewData::mInitializeViewCount = 0;
 TMPXItemId VideoListViewData::mActivatedItemId = TMPXItemId::InvalidId();
+VideoListWidget* VideoListViewData::mCurrentListWidget = 0;
 
 VideoListView::VideoListView(VideoCollectionUiLoader *uiLoader, QGraphicsItem *parent) :
 HbView(parent),
@@ -34,11 +36,7 @@ mWrapper(VideoCollectionWrapper::instance()),
 mUiLoader(uiLoader),
 mModelReady(false),
 mVideoServices(0),
-mCurrentList(0),
-mToolbarViewsActionGroup(0),
-mToolbarCollectionActionGroup(0),
-mToolbarServiceExtension(0)
-
+mCurrentList(0)
 {
     // not stubbed
 }
@@ -112,29 +110,13 @@ int VideoListView::createToolbar()
     return 0;
 }
 
-void VideoListView::createOperatorServicesToolbar()
+VideoListWidget *VideoListView::getCurrentList()
 {
-    // not stubbed
-}
-
-void VideoListView::loadOperatorService(int titleKey, int iconKey, int uriKey, int uidKey)
-{
-    // not stubbed
-    Q_UNUSED(titleKey);
-    Q_UNUSED(iconKey);
-    Q_UNUSED(uriKey);
-    Q_UNUSED(uidKey);
-}
-
-HbAction* VideoListView::createAction(QString icon,
-    QActionGroup* actionGroup,
-    const char *slot)
-{
-    Q_UNUSED(icon);
-    Q_UNUSED(actionGroup);
-    Q_UNUSED(slot);
-    // not stubbed
-    return 0;
+    if(VideoListViewData::mCurrentListWidget)
+    {
+        return VideoListViewData::mCurrentListWidget;
+    }
+    return mCurrentList;
 }
 
 void VideoListView::showHint(bool show)
@@ -154,29 +136,12 @@ void VideoListView::updateSubLabel()
     // not stubbed
 }
 
-void VideoListView::showAction(bool show, const QString &name)
-{
-    Q_UNUSED(show);
-    Q_UNUSED(name);
-    // not stubbed
-}
-
 void VideoListView::openAllVideosViewSlot()
 {
     // not stubbed
 }
 
 void VideoListView::openCollectionViewSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::openOperatorServiceSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::startSorting()
 {
     // not stubbed
 }
@@ -189,36 +154,6 @@ void VideoListView::aboutToChangeOrientationSlot()
 void VideoListView::orientationChangedSlot(Qt::Orientation orientation)
 {
     Q_UNUSED(orientation);
-    // not stubbed
-}
-
-void VideoListView::deleteItemsSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::createCollectionSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::addVideosToCollectionSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::removeVideosFromCollectionSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::aboutToShowMainMenuSlot()
-{
-    // not stubbed
-}
-
-void VideoListView::prepareBrowseServiceMenu()
-{
     // not stubbed
 }
 
@@ -246,19 +181,20 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
     // not stubbed
 }
 
-void VideoListView::doSorting(int value)
-{
-    Q_UNUSED(value);
-}
-
 void VideoListView::doDelayedsSlot()
 {
     // not stubbed    
 }
 
-void VideoListView::debugNotImplementedYet()
+
+void VideoListView::toolbarActionsChanged(QList<QAction*> newActions)
 {
-    // not stubbed
+    Q_UNUSED(newActions);    
+}
+
+void VideoListView::toolbarExtensionChanged(HbToolBarExtension* newExtension)
+{
+    Q_UNUSED(newExtension);     
 }
 
 // end of file

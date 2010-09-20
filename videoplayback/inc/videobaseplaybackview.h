@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#21 %
+// Version : %version:  22 %
 
 
 
@@ -93,7 +93,7 @@ class VideoBasePlaybackView : public HbView
 
         void initializeVideoPlaybackView();
 
-        void showDialog( const QString& string, bool closeView = true );
+        void showDialog( const QString& string, bool closeView = true, bool isError = true );
 
         virtual void handleClosePlaybackView();
 

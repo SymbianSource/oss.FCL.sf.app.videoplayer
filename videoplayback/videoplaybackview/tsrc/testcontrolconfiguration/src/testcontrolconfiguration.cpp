@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 6 %
+// Version : %version: 7 %
 
 #include <hbapplication.h>
 #include <hbinstance.h>
@@ -37,9 +37,9 @@
 #undef private
 
 
-// ---------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------
 // main
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 int main(int argc, char *argv[])
 {
@@ -60,18 +60,18 @@ int main(int argc, char *argv[])
     return res;
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // init
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::init()
 {
     MPX_ENTER_EXIT(_L("TestControlConfiguration::init()"));
 }
 
-// ---------------------------------------------------------------------------
-// init
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// setup
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::setup()
 {
@@ -84,9 +84,9 @@ void TestControlConfiguration::setup()
     mControlConfig = new VideoPlaybackControlConfiguration( mControlsController );
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // cleanup
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::cleanup()
 {
@@ -111,15 +111,18 @@ void TestControlConfiguration::cleanup()
     }
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testControlList
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::testControlList()
 {
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testControlList()"));
 
     setup();
+
+    QSignalSpy spy( mControlConfig, SIGNAL( controlListUpdated() ) );
+    QCOMPARE( spy.count(), 0 );
 
     //
     // Streaming case
@@ -133,12 +136,12 @@ void TestControlConfiguration::testControlList()
     QVERIFY( ! controlsList.contains( ERealLogoBitmap ) );
     QVERIFY( controlsList.contains( EBufferingAnimation ) );
 
-    cleanup();
+    QCOMPARE( spy.count(), 1 );
 
     //
     // local + RN
     //
-    setup();
+    mControlConfig->mControlsList.clear();
 
     mFileDetails->mPlaybackMode = EMPXVideoLocal;
     mFileDetails->mRNFormat = true;
@@ -150,12 +153,12 @@ void TestControlConfiguration::testControlList()
     QVERIFY( controlsList.contains( ERealLogoBitmap ) );
     QVERIFY( ! controlsList.contains( EBufferingAnimation ) );
 
-    cleanup();
+    QCOMPARE( spy.count(), 2 );
 
     //
     // local + non RN
     //
-    setup();
+    mControlConfig->mControlsList.clear();
 
     mFileDetails->mPlaybackMode = EMPXVideoLocal;
     mFileDetails->mRNFormat = false;
@@ -166,13 +169,16 @@ void TestControlConfiguration::testControlList()
     QVERIFY( controlsList.contains( EStatusPane ) );
     QVERIFY( ! controlsList.contains( ERealLogoBitmap ) );
     QVERIFY( ! controlsList.contains( EBufferingAnimation ) );
+    QCOMPARE( spy.count(), 2 );
+
+    spy.clear();
 
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateControlsWithFileDetails
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::testUpdateControlsWithFileDetails()
 {
@@ -181,43 +187,34 @@ void TestControlConfiguration::testUpdateControlsWithFileDetails()
     setup();
     mControlConfig->createControlList();
 
-    //
-    // 1. test with mVideoEnabled = false
-    //
-    mControlsController->mFileDetails->mVideoEnabled = false;
+    QSignalSpy spy( mControlConfig, SIGNAL( controlListUpdated() ) );
+    QCOMPARE( spy.count(), 0 );
 
     mControlConfig->updateControlsWithFileDetails();
 
     QList<TVideoPlaybackControls> controlsList = mControlConfig->controlList();
 
     QVERIFY( controlsList.contains( EControlBar ) );
+    QCOMPARE( spy.count(), 1 );
 
-    //
-    // 2. test with mVideoEnabled = true
-    //
-    mControlsController->mFileDetails->mVideoEnabled = false;
-
-    mControlConfig->updateControlsWithFileDetails();
-
-    QVERIFY( controlsList.contains( EControlBar ) );
-
-    QGraphicsWidget *widget =
-            mControlsController->layoutLoader()->findWidget( QString( "transparentWindow" ) );
-
-    QVERIFY( widget->isVisible() );
+    spy.clear();
 
     cleanup();
 }
 
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // testUpdateControlList
-// ---------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //
 void TestControlConfiguration::testUpdateControlList()
 {
     MPX_ENTER_EXIT(_L("TestControlConfiguration::testUpdateControlList()"));
 
     setup();
+
+    QSignalSpy spy( mControlConfig, SIGNAL( controlListUpdated() ) );
+    QCOMPARE( spy.count(), 0 );
+
     mControlConfig->createControlList();
 
     QGraphicsWidget *widget =
@@ -232,6 +229,7 @@ void TestControlConfiguration::testUpdateControlList()
     QVERIFY( controlsList.contains( EFileDetailsWidget ) );
     QVERIFY( controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
+    QCOMPARE( spy.count(), 1 );
 
     //
     // 2-1. Test for Fullscreen View
@@ -244,6 +242,7 @@ void TestControlConfiguration::testUpdateControlList()
     QVERIFY( ! controlsList.contains( EFileDetailsWidget ) );
     QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
+    QCOMPARE( spy.count(), 2 );
 
     //
     // 2-2. Test for Fullscreen View
@@ -256,6 +255,7 @@ void TestControlConfiguration::testUpdateControlList()
     QVERIFY( ! controlsList.contains( EFileDetailsWidget ) );
     QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( ! controlsList.contains( EIndicatorBitmap ) );
+    QCOMPARE( spy.count(), 3 );
 
     //
     // 3. Test for Audio Only View
@@ -267,6 +267,7 @@ void TestControlConfiguration::testUpdateControlList()
     QVERIFY( ! controlsList.contains( EDetailsViewPlaybackWindow ) );
     QVERIFY( controlsList.contains( EIndicatorBitmap ) );
     QVERIFY( controlsList.contains( EFileDetailsWidget ) );
+    QCOMPARE( spy.count(), 4 );
 
     //
     // 4. RN log gets removed
@@ -275,6 +276,7 @@ void TestControlConfiguration::testUpdateControlList()
     controlsList = mControlConfig->controlList();
 
     QVERIFY( ! controlsList.contains( ERealLogoBitmap ) );
+    QCOMPARE( spy.count(), 5 );
 
     //
     // 5. Surface attached
@@ -283,6 +285,7 @@ void TestControlConfiguration::testUpdateControlList()
     controlsList = mControlConfig->controlList();
 
     QVERIFY( widget->isVisible() );
+    QCOMPARE( spy.count(), 5 );
 
     //
     // 6. Surface detached
@@ -291,6 +294,10 @@ void TestControlConfiguration::testUpdateControlList()
     controlsList = mControlConfig->controlList();
 
     QVERIFY( ! widget->isVisible() );
+    QCOMPARE( spy.count(), 5 );
+
+    spy.clear();
+
     cleanup();
 }
 

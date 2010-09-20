@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 22 %
+// Version : %version: 23 %
 
 
 
@@ -101,31 +101,34 @@ void VideoPlaybackStatusPaneControl::setVisible( bool visible )
 {
     MPX_DEBUG(_L("VideoPlaybackStatusPaneControl::setVisible visible = %d"), visible);
 
-    mVisible = visible;
-
-    if ( mVisible )
+    if ( mVisible != visible )
     {
-        mController->view()->setTitleBarVisible( true );
-        mController->view()->setStatusBarVisible( true );
+        mVisible = visible;
 
-        if ( mController->viewMode() == EFullScreenView ||
-             mController->viewMode() == EDetailsView )
+        if ( mVisible )
         {
-            if ( mTitleLayout )
+            mController->view()->setTitleBarVisible( true );
+            mController->view()->setStatusBarVisible( true );
+
+            if ( mController->viewMode() == EFullScreenView ||
+                 mController->viewMode() == EDetailsView )
             {
-                mTitleLayout->setVisible( true );
+                if ( mTitleLayout )
+                {
+                    mTitleLayout->setVisible( true );
+                }
             }
         }
-    }
-    else
-    {
-        mController->view()->menu()->close();
-        mController->view()->setTitleBarVisible( false );
-        mController->view()->setStatusBarVisible( false );
-
-        if ( mTitleLayout )
+        else
         {
-            mTitleLayout->setVisible( false );
+            mController->view()->menu()->close();
+            mController->view()->setTitleBarVisible( false );
+            mController->view()->setStatusBarVisible( false );
+
+            if ( mTitleLayout )
+            {
+                mTitleLayout->setVisible( false );
+            }
         }
     }
 }
@@ -320,7 +323,7 @@ void VideoPlaybackStatusPaneControl::openFullScreenView()
 {
     MPX_DEBUG(_L("VideoPlaybackStatusPaneControl::openFullScreenView()"));
 
-    mController->changeViewMode( EFullScreenView );
+    mController->evaluateAndChangeViewMode( EFullScreenView, true );
 }
 
 // End of file

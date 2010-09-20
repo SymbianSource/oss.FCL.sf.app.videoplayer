@@ -47,6 +47,16 @@ public:
      */
     virtual ~VideoProxyModelGeneric();
 
+    /**
+     * Initializes model. Sets the given sourceModel as source model 
+     * for this proxy model.
+     * 
+     * @param sourceModel the source model
+     * 
+     * @return int 0 if initialization was ok. 
+     */
+    virtual int initialize(VideoListDataModel *sourceModel);
+    
 public:
     
     /**
@@ -105,6 +115,27 @@ public:
      * Returns sourceModel;
      */
     virtual const VideoListDataModel *sourceModel() const;
+    
+    /**
+     * sets item id filter used in generic proxy model
+     * while filtering rows. 
+     * 
+     * If provided filterValue -flag is true, we filter off items that 
+     * do not exist in container indicated as itemId. 
+     * If false, filtering works other way around. 
+     * 
+     * 
+     * @param filterValue item id used as filter
+     * @param filterValue
+     */
+    virtual void setGenericIdFilter(const TMPXItemId &itemId, bool filterValue);
+    
+    /**
+     * Set album in use and invalidates filtering.
+     * 
+     * @param albumId album id
+     */
+    virtual void setAlbumInUse(const TMPXItemId &albumId);    
     
 public:
     static int mOpenItemCallCount;

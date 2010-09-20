@@ -14,11 +14,7 @@
 * Description:    Makefile for Media Settings ROP Model*
 */
 
-
-
-// Version : %version: 7 %
-
-
+// Version : %version: 9 %
 
 #include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
@@ -27,7 +23,7 @@ CAPABILITY      CAP_ECOM_PLUGIN
 TARGETTYPE      PLUGIN
 UID             0x10009D8D 0x101F857B
 VENDORID        VID_DEFAULT
-//VERSION         11.6
+VERSION         10.0
 
 SOURCEPATH      ../src
 SOURCE          MPSettingsModelForROP.cpp
@@ -66,4 +62,4 @@ LIBRARY         flogger.lib
 LIBRARY         centralrepository.lib
 LIBRARY         commsdat.lib
 
-//end of file
+// End of File

@@ -116,6 +116,7 @@ public:
         mTriggeredCount++;
         QAction::trigger();
     }
+      
     
 public: // data
     
@@ -143,7 +144,7 @@ public: // data
      * menu
      */
     HbMenu* mMenu;
-    
+
 };
 
 #endif

@@ -15,11 +15,12 @@
 * 
 */
 
-// Version : %version: 15 %
+// Version : %version: 16 %
 
 // INCLUDE FILES
 #include <qobject.h>
 #include <QTime>
+#include <HbStringUtil>
 #include <hbglobal.h>
 #include <hbextendedlocale.h>
 
@@ -68,20 +69,20 @@ QString VideoCollectionUtils::prepareLengthString(quint32 length)
 	quint32 minutes = length / secondsInMinute % secondsInMinute;
 	quint32 seconds = length % secondsInMinute;
 	
-    QString hrs(QString::number(hours));
+    QString hrs(HbStringUtil::convertDigits(QString::number(hours)));
     if(hours < 10)
     {
-    	hrs.prepend(QString::number(0));
+    	hrs.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
-    QString mins(QString::number(minutes));
+    QString mins(HbStringUtil::convertDigits(QString::number(minutes)));
     if(minutes < 10)
     {
-    	mins.prepend(QString::number(0));
+    	mins.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
-    QString secs(QString::number(seconds));
+    QString secs(HbStringUtil::convertDigits(QString::number(seconds)));
     if(seconds < 10)
     {
-    	secs.prepend(QString::number(0));
+    	secs.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
     
     QString lengthStr(hbTrId( "txt_videos_list_l1l2l3" ).arg( hrs ).arg( mins ).arg( secs ));

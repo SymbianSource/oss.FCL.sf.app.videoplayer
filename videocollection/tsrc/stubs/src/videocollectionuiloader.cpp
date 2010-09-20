@@ -37,10 +37,12 @@ bool VideoCollectionUiLoaderData::mFailDialogLoad = false;
 QStringList VideoCollectionUiLoaderData::mFindFailureNameList;
 QMap<VideoCollectionUiLoader::ActionIds, HbAction*> VideoCollectionUiLoaderData::mMenuActions;
 int VideoCollectionUiLoaderData::mLastLoadPhasedData = -1;
+int VideoCollectionUiLoaderData::mAddDataCallCount = 0;
 
 VideoCollectionUiLoader::VideoCollectionUiLoader():
     HbDocumentLoader(),
     mTimerId(0),
+    mSortGroup(0),
     mIsService(0)
 {
     // not stubbed
@@ -60,6 +62,7 @@ void VideoCollectionUiLoader::addData(QList<VideoCollectionUiLoaderParam> params
     QObject *receiver,
     const char *slot)
 {
+    VideoCollectionUiLoaderData::mAddDataCallCount++;
     Q_UNUSED(params);
     Q_UNUSED(receiver);
     Q_UNUSED(slot);
@@ -190,18 +193,22 @@ void VideoCollectionUiLoader::initObject(QObject *object,
     else if(name == DOCML_NAME_SORT_BY_DATE)
     {
         VideoCollectionUiLoaderData::mMenuActions[EActionSortByDate] = qobject_cast<HbAction*>(object);
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortByDate]->setCheckable(true);
     }
     else if(name == DOCML_NAME_SORT_BY_NAME)
     {
         VideoCollectionUiLoaderData::mMenuActions[EActionSortByName] = qobject_cast<HbAction*>(object);
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortByName]->setCheckable(true);
     }
     else if(name == DOCML_NAME_SORT_BY_NUMBER_OF_ITEMS)
     {
         VideoCollectionUiLoaderData::mMenuActions[EACtionSortByItemCount] = qobject_cast<HbAction*>(object);
+        VideoCollectionUiLoaderData::mMenuActions[EACtionSortByItemCount]->setCheckable(true);
     }
     else if(name == DOCML_NAME_SORT_BY_SIZE)
     {
         VideoCollectionUiLoaderData::mMenuActions[EActionSortBySize] = qobject_cast<HbAction*>(object);
+        VideoCollectionUiLoaderData::mMenuActions[EActionSortBySize]->setCheckable(true);
     }
 }
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  15 %
+// Version : %version:  17 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -352,25 +352,64 @@ void TestControlsController::verifyHandleEventStateChangedResult( int value )
 
     mController->mOrientation = Qt::Horizontal;
 
-    if ( value == EPbStateInitialised &&
-            ( mController->mFileDetails->mPlaybackMode == EMPXVideoStreaming ||
-              mController->mFileDetails->mPlaybackMode == EMPXVideoLiveStreaming ) )
+    switch( value )
     {
-        QVERIFY( mController->mControlsConfig->mState == EControlCmdPluginInitialized );
-    }
-    else if ( value == EPbStatePlaying || value == EPbStateInitialising ||
-              value == EPbStateBuffering || value == EPbStatePaused ||
-              value == EPbStateNotInitialised )
-    {
-        for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+        case EPbStatePlaying:
         {
-            QVERIFY( mController->mControls[i]->mState == value );
-            QVERIFY( mController->mControls[i]->mVisibilityState == value );
+            bool visible = true;
+
+            if ( mController->mViewMode == EFullScreenView )
+            {
+                visible = false;
+            }
+
+            for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+            {
+                QVERIFY( mController->mControls[i]->mVisible == visible );
+                QVERIFY( mController->mControls[i]->mState == value );
+            }
+
+            break;
         }
-    }
-    else
-    {
-        QVERIFY( mController->mState == value );
+        case EPbStateBuffering:
+        {
+            if ( mFileDetails->mPlaybackMode == EMPXVideoLocal )
+            {
+                for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+                {
+                    QVERIFY( mController->mControls[i]->mState == value );
+                }
+            }
+            else
+            {
+                for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+                {
+                    QVERIFY( mController->mControls[i]->mState == value );
+                    QVERIFY( mController->mControls[i]->mVisible == true );
+                    QVERIFY( mController->mControls[i]->mVisibilityState == value );
+                }
+            }
+
+            break;
+        }
+        case EPbStatePaused:
+        case EPbStateInitialising:
+        case EPbStateNotInitialised:
+        case EPbStatePluginSeeking:
+        {
+            for ( int i = 0 ; i < mController->mControls.count() ; i++ )
+            {
+                QVERIFY( mController->mControls[i]->mState == value );
+                QVERIFY( mController->mControls[i]->mVisibilityState == value );
+            }
+            break;
+        }
+        default:
+        {
+            QVERIFY( mController->mState == value );
+
+            break;
+        }
     }
 }
 
@@ -513,23 +552,27 @@ void TestControlsController::testHandleEventTvOutConnected()
     init();
 
     //
-    // TV-Out Connected, value = true, EMPXVideoLocal
+    // TV-Out Connected, EMPXVideoLocal
     //
-    mController->handleEvent( EControlCmdTvOutConnected, true );
+    mController->mThumbNailState = EThumbNailEmpty;
+    mController->mViewMode = EFullScreenView;
+
+    mController->handleEvent( EControlCmdTvOutConnected );
+
     verifyHandleEventTvOutResult( true, true );
+    QVERIFY( mController->mViewMode == EAudioOnlyView );
 
     //
-    // TV-Out Connected, value = false, EMPXVideoLocal
-    //
-    mController->handleEvent( EControlCmdTvOutConnected, false );
-    verifyHandleEventTvOutResult( true, false );
-
-    //
-    // TV-Out Connected, value = false, non-EMPXVideoLocal
+    // TV-Out Connected, non-EMPXVideoLocal
     //
     mController->mFileDetails->mPlaybackMode = EMPXVideoStreaming;
+    mController->mThumbNailState = EThumbNailEmpty;
+    mController->mViewMode = EDetailsView;
+
     mController->handleEvent( EControlCmdTvOutConnected, false );
+
     verifyHandleEventTvOutResult( true, false );
+    QVERIFY( mController->mViewMode == EAudioOnlyView );
 
     cleanup();
 }
@@ -585,17 +628,6 @@ void TestControlsController::verifyHandleEventTvOutResult( bool tvOutConnected,
         QVERIFY( mController->mThumbnailManager->mQuality == ThumbnailManager::OptimizeForPerformance );
         QVERIFY( mController->mViewTransitionIsGoingOn == false );
     }
-    else if ( mController->mFileDetails->mVideoEnabled )
-    {
-        QVERIFY( mController->mViewTransitionIsGoingOn == true );
-        QVERIFY( mController->mViewMode == EFullScreenView );
-    }
-    else if ( ! mController->mFileDetails->mVideoEnabled )
-    {
-        QVERIFY( mController->mViewTransitionIsGoingOn == false );
-        QVERIFY( mController->mViewMode == EAudioOnlyView );
-    }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -609,16 +641,24 @@ void TestControlsController::testHandleEventTvOutDisconnected()
     init();
 
     //
-    // TV-Out Disconnected, value = true
+    // TV-Out Disconnected, move to full screen view
     //
-    mController->handleEvent( EControlCmdTvOutDisconnected, true );
+    mController->mViewMode = EAudioOnlyView;
+    mFileDetails->mVideoEnabled = true;
+    mController->handleEvent( EControlCmdTvOutDisconnected );
+
     verifyHandleEventTvOutResult( false, true );
+    QVERIFY( mController->mViewMode == EFullScreenView );
 
     //
-    // TV-Out Disconnected, value = false
+    // TV-Out Disconnected, move to audio only view
     //
-    mController->handleEvent( EControlCmdTvOutDisconnected, false );
-    verifyHandleEventTvOutResult( false, false );
+    mController->mViewMode = EAudioOnlyView;
+    mFileDetails->mVideoEnabled = false;
+    mController->handleEvent( EControlCmdTvOutDisconnected );
+
+    verifyHandleEventTvOutResult( false, true );
+    QVERIFY( mController->mViewMode == EAudioOnlyView );
 
     cleanup();
 }
@@ -1121,13 +1161,18 @@ void TestControlsController::testslot_sendVideo()
     init();
 
     //
-    // connect signal with controller sendVideoo() slot
+    // connect signal with controller sendVideo() slot
     //
     bool res = connect( this, SIGNAL( commandSignal() ), mController, SLOT( sendVideo() ) );
 
     //
     // emit signal, this will in turns invoke mController sendVideo() slot
     //
+    emit commandSignal();
+    
+    //
+    // emit again.
+    // 
     emit commandSignal();
 
     //

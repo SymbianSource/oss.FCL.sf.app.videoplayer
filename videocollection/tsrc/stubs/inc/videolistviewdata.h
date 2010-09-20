@@ -21,6 +21,8 @@
 #include <e32std.h>
 #include <mpxitemid.h>
 
+#include "videolistwidget.h"
+
 class VideoListViewData
 {
 public: // methods
@@ -31,14 +33,16 @@ public: // methods
         mDeactivateViewCount = 0;
         mBackCount = 0;
         mActivatedItemId = TMPXItemId::InvalidId();
+        mCurrentListWidget = 0;
     }
     
 public: // data
     static int mInitializeViewCount;
     static int mActivateViewCount;
     static int mDeactivateViewCount;
-    static int mBackCount;
+    static int mBackCount;    
     static TMPXItemId mActivatedItemId;
+    static VideoListWidget *mCurrentListWidget;
 };
 
 #endif /* VIDEOLISTVIEWDATA_H */

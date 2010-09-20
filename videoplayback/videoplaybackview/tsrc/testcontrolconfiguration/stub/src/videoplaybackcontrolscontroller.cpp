@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 
@@ -36,7 +36,7 @@
 //
 VideoPlaybackControlsController::VideoPlaybackControlsController(
         VideoPlaybackViewFileDetails *details )
-    : mFileDetails( details )   
+    : mFileDetails( details )
 {
     initializeController();
 }
@@ -47,7 +47,7 @@ VideoPlaybackControlsController::VideoPlaybackControlsController(
 //
 void VideoPlaybackControlsController::initializeController()
 {
-    mLoader = new VideoPlaybackDocumentLoader();		
+    mLoader = new VideoPlaybackDocumentLoader();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
 // -------------------------------------------------------------------------------------------------
 //
 VideoPlaybackDocumentLoader* VideoPlaybackControlsController::layoutLoader()
-{    
+{
     return mLoader;
 }
 
@@ -81,6 +81,14 @@ VideoPlaybackDocumentLoader* VideoPlaybackControlsController::layoutLoader()
 bool VideoPlaybackControlsController::shouldShowRNLogo()
 {
      return mFileDetails->mRNFormat ;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::controlsListUpdated
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackControlsController::controlsListUpdated()
+{
 }
 
 // End of File

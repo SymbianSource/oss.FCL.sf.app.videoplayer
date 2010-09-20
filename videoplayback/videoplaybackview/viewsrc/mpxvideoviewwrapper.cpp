@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#47 %
+// Version : %version: da1mmcf#48 %
 
 
 
@@ -92,15 +92,6 @@ void CMPXVideoViewWrapper::ConstructL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::ConstructL()"));
 
-
-    //
-    //  Get the playback utility instance from playback utility
-    //
-    iPlaybackUtility =
-        MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
-    iPlaybackUtility->AddObserverL( *this );
-    iPlaybackUtility->SetPrimaryClientL();
-
     //
     //  Get an instance of collection utility
     //  Used for the Collection Observer to get the MediaL callbacks
@@ -111,6 +102,27 @@ void CMPXVideoViewWrapper::ConstructL()
     //  Create Active Object for closing player
     //
     iCloseAO = CIdle::NewL( CActive::EPriorityStandard );
+
+    //
+    //  Get the playback utility instance from playback utility
+    //
+    iPlaybackUtility =
+        MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
+    iPlaybackUtility->SetPrimaryClientL();
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::ActivateL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::ActivateL()
+{
+    MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::ActivateL()"));
+
+    if ( iPlaybackUtility )
+    {
+        iPlaybackUtility->AddObserverL( *this );
+    }
 
     //
     //  Create Video Playback Display Handler
@@ -129,12 +141,12 @@ void CMPXVideoViewWrapper::ConstructL()
 }
 
 // -------------------------------------------------------------------------------------------------
-// CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
+// CMPXVideoViewWrapper::DeactivateL()
 // -------------------------------------------------------------------------------------------------
 //
-CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
+void CMPXVideoViewWrapper::Deactivate()
 {
-    MPX_DEBUG(_L("CMPXVideoViewWrapper::~CMPXVideoViewWrapper()"));
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::Deactivate()"));
 
     //
     //  Delete the display handler when the view is deactivated
@@ -157,12 +169,6 @@ CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
         iControlsController = NULL;
     }
 
-    if ( iCloseAO )
-    {
-        delete iCloseAO;
-        iCloseAO = NULL;
-    }
-
     if ( iFileDetails )
     {
         delete iFileDetails;
@@ -171,14 +177,34 @@ CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
 
     if ( iPlaybackUtility )
     {
+        iPlaybackUtility->CancelRequest();
         TRAP_IGNORE( iPlaybackUtility->RemoveObserverL( *this ) );
-        iPlaybackUtility->Close();
-        iPlaybackUtility = NULL;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
+// -------------------------------------------------------------------------------------------------
+//
+CMPXVideoViewWrapper::~CMPXVideoViewWrapper()
+{
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::~CMPXVideoViewWrapper()"));
+
+    if ( iCloseAO )
+    {
+        delete iCloseAO;
+        iCloseAO = NULL;
     }
 
     if ( iCollectionUtility )
     {
         iCollectionUtility->Close();
+    }
+
+    if ( iPlaybackUtility )
+    {
+        iPlaybackUtility->Close();
+        iPlaybackUtility = NULL;
     }
 }
 

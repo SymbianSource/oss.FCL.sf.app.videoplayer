@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#11 %
+// Version : %version: da1mmcf#12 %
 
 
 
@@ -42,6 +42,7 @@ VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl(
     , mControl( widget )
     , mControlIndex( index )
     , mProperties( controlproperties )
+    , mVisible( false )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackFullScreenControl::VideoPlaybackFullScreenControl()"));
 
@@ -63,17 +64,22 @@ VideoPlaybackFullScreenControl::~VideoPlaybackFullScreenControl()
 //
 void VideoPlaybackFullScreenControl::setVisible( bool visible )
 {
-    switch ( mControlIndex )
+    if( mVisible != visible )
     {
-        case EControlBar:
+        mVisible = visible;
+
+        switch ( mControlIndex )
         {
-            static_cast<VideoPlaybackControlBar*>(mControl)->setVisibleToControlBar( visible );
-            break;
-        }
-        default:
-        {
-            mControl->setVisible( visible );
-            break;
+            case EControlBar:
+            {
+                static_cast<VideoPlaybackControlBar*>(mControl)->setVisibleToControlBar( visible );
+                break;
+            }
+            default:
+            {
+                mControl->setVisible( visible );
+                break;
+            }
         }
     }
 }

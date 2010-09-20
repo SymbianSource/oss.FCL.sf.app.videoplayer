@@ -21,13 +21,14 @@
 
 #include <qobject.h>
 #include <qstring.h>
+#include "hbdialog.h"
 #include "hbaction.h"
 
 class QGraphicsWidget;
 class QGraphicsScene;
 class QGraphicsItem;
 
-class HbMessageBox : public QObject
+class HbMessageBox : public HbDialog
 {   
     Q_OBJECT
 

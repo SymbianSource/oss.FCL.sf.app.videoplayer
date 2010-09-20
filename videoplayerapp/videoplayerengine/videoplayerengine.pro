@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 32 %
+# Version : %version: 33 %
 
 
 TEMPLATE = lib
@@ -38,6 +38,7 @@ symbian:
         "DEFFILE ../bwins/videoplayerengine.def" \
         "$${LITERAL_HASH}endif"
     MMP_RULES += defBlock SMPSAFE
+    VERSION = 10.0
 }
 
 INCLUDEPATH += ../../inc \

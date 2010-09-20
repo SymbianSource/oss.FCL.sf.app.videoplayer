@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  6 %
+// Version : %version:  7 %
 
 
 #include <QDateTime>
@@ -606,6 +606,56 @@ QString TestFileDetailsWidget::dateTimeStringFormat( QDateTime dateTime )
             dateTimeString.data() );
 
     return dateTimeString;
+}
+
+// ---------------------------------------------------------------------------
+// testFilename
+// ---------------------------------------------------------------------------
+//
+void TestFileDetailsWidget::testFilename()
+{
+    MPX_ENTER_EXIT(_L("TestFileDetailsWidget::testFilename()"));
+
+    init();
+
+    VideoPlaybackViewFileDetails *details = mController->fileDetails();
+
+    details->mPlaybackMode = EMPXVideoLocal;
+    details->mClipName = KFILEPATH;
+    
+    mController->mViewMode = EDetailsView;
+
+    mWidget->updateWithFileDetails( details );
+
+    verifyResult( "File name", true,  "sample1" );
+
+    cleanup();
+}
+
+
+// ---------------------------------------------------------------------------
+// testFilePath
+// ---------------------------------------------------------------------------
+//
+void TestFileDetailsWidget::testFilePath()
+{
+    MPX_ENTER_EXIT(_L("TestFileDetailsWidget::testFilePath()"));
+
+    init();
+
+    VideoPlaybackViewFileDetails *details = mController->fileDetails();
+
+    details->mPlaybackMode = EMPXVideoLocal;
+    details->mClipName = KFILEPATH;
+    
+    mController->mViewMode = EDetailsView;
+
+    mWidget->updateWithFileDetails( details );
+
+    verifyResult( "File path", true,  "C:/sample1.wav" );
+
+    cleanup();
+    
 }
 
 // End of file

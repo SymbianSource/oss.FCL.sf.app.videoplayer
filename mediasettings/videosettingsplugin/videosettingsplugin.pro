@@ -24,6 +24,7 @@ symbian: {
     TARGET.CAPABILITY = CAP_GENERAL_DLL
     BLD_INF_RULES.prj_exports += "rom/videosettingsplugin.iby    CORE_APP_LAYER_IBY_EXPORT_PATH(videosettingsplugin.iby)"
     MMP_RULES += SMPSAFE
+    VERSION = 10.0
 }
 
 LIBS += -lcpframework \

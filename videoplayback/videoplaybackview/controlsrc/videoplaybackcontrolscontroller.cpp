@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#51 %
+// Version : %version: da1mmcf#54 %
 
 
 
@@ -27,7 +27,6 @@
 
 #include <QTimer>
 #include <thumbnailmanager_qt.h>
-#include <xqserviceutil.h>
 
 #include <hblabel.h>
 #include <hbvolumesliderpopup.h>
@@ -77,9 +76,11 @@ VideoPlaybackControlsController::VideoPlaybackControlsController(
     , mViewTransitionIsGoingOn( false )
     , mIsAttachOperation( false )
     , mFileDetailsAdded( false )
+    , mShowControlsWhenInHorizontal( false )
     , mThumbNailState( EThumbNailEmpty )
     , mState( EPbStateNotInitialised )
     , mViewMode( EFullScreenView )
+    , mShareUi( NULL )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::VideoPlaybackControlsController()"));
 
@@ -164,7 +165,7 @@ void VideoPlaybackControlsController::initializeController()
     //
     // if videoplayback is in service mode, create a videoservices instance
     //
-    if ( XQServiceUtil::isService() && ! mVideoServices )
+    if ( isService() && ! mVideoServices )
     {
         //
         // obtain VideoServices instance
@@ -282,6 +283,12 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
     	mVideoServices->decreaseReferenceCount();
     	mVideoServices = 0;
     }
+    
+    if( mShareUi )
+    {
+        delete mShareUi;
+        mShareUi = NULL;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -301,18 +308,7 @@ void VideoPlaybackControlsController::addFileDetails(
 
     mControlsConfig->updateControlsWithFileDetails();
 
-    //
-    // for audio-only clips and tv-out, default view is flip view
-    //
-    if ( ! details->mVideoEnabled )
-    {
-        changeViewMode( EAudioOnlyView, false );
-    }
-
-    if ( details->mTvOutConnected )
-    {
-        handleEvent( EControlCmdTvOutConnected );
-    }
+    evaluateAndChangeViewMode();
 
     //
     // Dimmed the volume control if it is video only
@@ -411,14 +407,18 @@ void VideoPlaybackControlsController::handleEvent(
         {
             MPX_DEBUG(_L("    [EControlCmdTvOutConnected]"));
 
-            handleTvOutEvent( true, event );
+            mFileDetails->mTvOutConnected = true;
+            evaluateAndChangeViewMode();
+
             break;
         }
         case EControlCmdTvOutDisconnected:
         {
             MPX_DEBUG(_L("    [EControlCmdTvOutDisConnected]"));
 
-            handleTvOutEvent( false, event );
+            mFileDetails->mTvOutConnected = false;
+            evaluateAndChangeViewMode();
+
             break;
         }
         case EControlCmdHandleErrors:
@@ -465,9 +465,33 @@ void VideoPlaybackControlsController::handleStateChange( TMPXPlaybackState newSt
         switch ( newState )
         {
             case EPbStatePlaying:
-            case EPbStateInitialising:
+            {
+                if ( mViewMode == EFullScreenView )
+                {
+                    hideAllControls();
+                }
+                else
+                {
+                    showControls();
+                }
+
+                updateState();
+
+                break;
+            }
             case EPbStateBuffering:
+            {
+                if ( mFileDetails->mPlaybackMode != EMPXVideoLocal )
+                {
+                    showControls();
+                }
+
+                updateState();
+
+                break;
+            }
             case EPbStatePaused:
+            case EPbStateInitialising:
             case EPbStateNotInitialised:
             case EPbStatePluginSeeking:
             {
@@ -594,13 +618,17 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
             //
             // Buffering animation icon
             //
+            mLoader->load( KPLAYBACKVIEW_DOCML, "BufferingAnimation", &ok );
+            MPX_DEBUG(_L("    EBufferingAnimation load BufferingAnimation ok = %d"), ok);
+
             QGraphicsWidget *widget = mLoader->findWidget( QString( "bufferingIcon" ) );
+
             HbLabel *bufferingAnim = qobject_cast<HbLabel*>( widget );
 
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              bufferingAnim,
-                                                              properties );
+                                                          controlIndex,
+                                                          bufferingAnim,
+                                                          properties );
             mControls.append( control );
 
             break;
@@ -611,9 +639,9 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
             // Status key (signal + title + back key)
             //
             control = new VideoPlaybackStatusPaneControl( this,
-                                                              controlIndex,
-                                                              NULL,
-                                                              properties );
+                                                          controlIndex,
+                                                          NULL,
+                                                          properties );
             mControls.append( control );
 
             break;
@@ -629,9 +657,9 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
             controlBar->initialize();
 
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              controlBar,
-                                                              properties );
+                                                          controlIndex,
+                                                          controlBar,
+                                                          properties );
             mControls.append( control );
 
             break;
@@ -643,36 +671,56 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
                 qobject_cast<VideoPlaybackFileDetailsWidget*>( widget );
 
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              fileDetails,
-                                                              properties );
+                                                          controlIndex,
+                                                          fileDetails,
+                                                          properties );
 
             mControls.append( control );
             break;
         }
         case EIndicatorBitmap:
         {
+            bool ok = true;
+
             QGraphicsWidget *widget = mLoader->findWidget( QString( "bitmapLayout" ) );
+
+            if ( widget == NULL )
+            {
+                mLoader->load( KPLAYBACKVIEW_DOCML, "IndicatorBitmaps", &ok );
+                widget = mLoader->findWidget( QString( "bitmapLayout" ) );
+
+                MPX_DEBUG(_L("    EIndicatorBitmap load IndicatorBitmaps ok = %d"), ok);
+            }
+
+            widget = mLoader->findWidget( QString( "bitmapLayout" ) );
+
             HbWidget *bitmapWidget = qobject_cast<HbWidget*>( widget );
 
             setDefaultBitmap();
+
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              bitmapWidget,
-                                                              properties );
+                                                          controlIndex,
+                                                          bitmapWidget,
+                                                          properties );
             mControls.append( control );
 
             break;
         }
         case ERealLogoBitmap:
         {
+            bool ok = false;
+
+            mLoader->load( KPLAYBACKVIEW_DOCML, "RNBitmap", &ok );
+            MPX_DEBUG(_L("    ERealLogoBitmap load RNBitmap ok = %d"), ok);
+
             QGraphicsWidget *widget = mLoader->findWidget( QString( "rnLogoBitmap" ) );
+
             HbWidget *bitmapWidget = qobject_cast<HbWidget*>( widget );
 
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              bitmapWidget,
-                                                              properties );
+                                                          controlIndex,
+                                                          bitmapWidget,
+                                                          properties );
             mControls.append( control );
 
             connect( bitmapWidget, SIGNAL( visibleChanged() ),
@@ -688,9 +736,9 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
             detailsPlaybackWindow->initialize();
 
             control = new VideoPlaybackFullScreenControl( this,
-                                                              controlIndex,
-                                                              detailsPlaybackWindow,
-                                                              properties );
+                                                          controlIndex,
+                                                          detailsPlaybackWindow,
+                                                          properties );
             mControls.append( control );
 
             break;
@@ -805,11 +853,18 @@ void VideoPlaybackControlsController::showControls()
 
     resetDisappearingTimers( ETimerReset );
 
-    if ( ! mViewTransitionIsGoingOn && mOrientation == Qt::Horizontal )
+    if ( ! mViewTransitionIsGoingOn )
     {
-        for ( int i = 0 ; i < mControls.count() ; i++ )
+        if ( mOrientation == Qt::Horizontal )
         {
-            mControls[i]->setVisibility( mState );
+            for ( int i = 0 ; i < mControls.count() ; i++ )
+            {
+                mControls[i]->setVisibility( mState );
+            }
+        }
+        else
+        {
+            mShowControlsWhenInHorizontal = true;
         }
     }
 }
@@ -1161,86 +1216,68 @@ bool VideoPlaybackControlsController::isSoftKeyVisible()
 }
 
 // -------------------------------------------------------------------------------------------------
-//   VideoPlaybackControlsController::handleTvOutEvent
-// -------------------------------------------------------------------------------------------------
-//
-void VideoPlaybackControlsController::handleTvOutEvent(
-        bool connected, TVideoPlaybackControlCommandIds event )
-{
-    Q_UNUSED( event );
-
-    MPX_DEBUG(_L("VideoPlaybackControlsController::handleTvOutEvent()"));
-
-    mFileDetails->mTvOutConnected = connected;
-
-    setDefaultBitmap();
-
-    if ( mFileDetails->mTvOutConnected )
-    {
-        generateThumbNail();
-    }
-
-    //
-    // Change the view.
-    // If Tv-out is connected, go to AudioOnlyView.
-    // If not, go back to default view.
-    //
-    TPlaybackViewMode viewMode = EFullScreenView;
-
-    if ( mFileDetails->mTvOutConnected || ! mFileDetails->mVideoEnabled )
-    {
-        viewMode = EAudioOnlyView;
-    }
-
-    changeViewMode( viewMode, false );
-}
-
-// -------------------------------------------------------------------------------------------------
 //   VideoPlaybackControlsController::changeViewMode
 // -------------------------------------------------------------------------------------------------
 //
-void VideoPlaybackControlsController::changeViewMode(
+void VideoPlaybackControlsController::evaluateAndChangeViewMode(
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::changeViewMode( %d, %d )"),
             viewMode, transitionEffect );
 
-    if ( viewMode != mViewMode )
+    switch ( viewMode )
     {
-        switch ( viewMode )
+        case EFullScreenView:
+        case EDetailsView:
         {
-            case EFullScreenView:
-            case EDetailsView:
+            if ( mFileDetails->mVideoEnabled &&
+                 ! mFileDetails->mTvOutConnected )
             {
-                if ( mFileDetails->mVideoEnabled && ! mFileDetails->mTvOutConnected )
+                if ( viewMode != mViewMode )
                 {
                     mViewMode = viewMode;
-
-                    //
-                    // Hack to clean up the screen before transition. We may not need it in NGA env
-                    //
-                    hideAllControls();
 
                     updateVideoRect( transitionEffect );
                 }
 
                 break;
             }
-            case EAudioOnlyView:
+            //
+            // Internal fall-through
+            // If it is not possible to change the mode to full screen/details
+            // coz of tvout or audio only clip
+            // then open audio only view instead
+            //
+        }
+        case EAudioOnlyView:
+        {
+            //
+            // If there is any event changed within audio only view,
+            // update bitmap to show current status
+            //
+            if ( ! mFileDetails->mVideoEnabled || mFileDetails->mTvOutConnected )
             {
-                if ( ! mFileDetails->mVideoEnabled || mFileDetails->mTvOutConnected )
+                if ( mViewMode == EAudioOnlyView )
                 {
-                    mViewMode = viewMode;
+                    setDefaultBitmap();
+                }
+                else
+                {
+                    mViewMode = EAudioOnlyView;
 
                     mControlsConfig->updateControlList( EControlCmdAudionOnlyViewOpened );
-                }
 
-                break;
+                    if ( mFileDetails->mTvOutConnected )
+                    {
+                        generateThumbNail();
+                    }
+                }
             }
-            default:
-            {
-                break;
-            }
+            break;
+        }
+        default:
+        {
+            break;
         }
     }
 }
@@ -1436,8 +1473,6 @@ void VideoPlaybackControlsController::handleThumbnailReady(
         mThumbNailState = EThumbNailNotAvailable;
     }
 
-    setDefaultBitmap();
-
     disconnect( mThumbnailManager, SIGNAL( thumbnailReady( QPixmap , void * , int , int ) ),
                 this, SLOT( handleThumbnailReady( QPixmap , void * , int , int ) ) );
 }
@@ -1475,10 +1510,14 @@ void VideoPlaybackControlsController::sendVideo()
     //
     // send video to shareUI
     //
-    ShareUi dlg;
+    if( ! mShareUi )
+    {
+        mShareUi = new ShareUi();
+    }
+
     QStringList fileList;
     fileList.append( mFileDetails->mClipName );
-    dlg.send( fileList, true );
+    mShareUi->send( fileList, true );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1566,9 +1605,12 @@ void VideoPlaybackControlsController::handleOrientationChanged( Qt::Orientation 
     Qt::Orientation  oldOrientaiton = mOrientation;
     mOrientation = orientation;
 
-    if ( oldOrientaiton == Qt::Vertical && orientation == Qt::Horizontal )
+    if ( oldOrientaiton == Qt::Vertical &&
+         orientation == Qt::Horizontal &&
+         mShowControlsWhenInHorizontal )
     {
         showControls();
+        mShowControlsWhenInHorizontal = false;
     }
 }
 
@@ -1583,7 +1625,7 @@ bool VideoPlaybackControlsController::shouldShowRNLogo()
     bool showRNLogo = false;
 
     if ( mFileDetails->mRNFormat &&
-         !mViewWrapper->IsResumingPlaybackAfterTermination() )
+         ! mViewWrapper->IsResumingPlaybackAfterTermination() )
     {
         showRNLogo = true;
     }

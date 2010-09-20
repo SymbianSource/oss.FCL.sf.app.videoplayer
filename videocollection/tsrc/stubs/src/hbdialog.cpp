@@ -27,7 +27,7 @@ bool HbDialog::secondaryReturnNull = false;
 int HbDialog::openAmount = 0;
 
 HbDialog::HbDialog(QGraphicsItem *parent) :
-HbWidget(parent),
+HbPopup(parent),
 mHeadingWidget(0),
 mContentWidget(0),
 mTimeout(NoTimeout),

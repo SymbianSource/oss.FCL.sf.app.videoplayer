@@ -30,9 +30,9 @@ int HbMessageBoxData::mAttribute = -1;
 int HbMessageBoxData::mOpenCallCount = 0;
 int HbMessageBoxData::mShowCallCount = 0;
 
-HbMessageBox::HbMessageBox(MessageBoxType type, QGraphicsItem *parent)
+HbMessageBox::HbMessageBox(MessageBoxType type, QGraphicsItem *parent) :
+ HbDialog(parent)       
 {
-    Q_UNUSED(parent);
     HbMessageBoxData::mType = type;
 
     HbAction *action = new HbAction();

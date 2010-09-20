@@ -15,11 +15,12 @@
 * 
 */
 
-// Version : %version: 52.1.2 %
+// Version : %version: 52.1.3 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
 #include <vcxmyvideosdefs.h>
+#include <HbStringUtil>
 
 #include "videolistdatamodel.h"
 #include "videolistdatamodel_p.h"
@@ -293,20 +294,20 @@ QString VideoListDataModel::doDetailRow(int &index) const
     total = total % secondsInMinute;
     int second = total;
 	
-    QString hrs(QString::number(hour));
+    QString hrs(HbStringUtil::convertDigits(QString::number(hour)));
     if(hour < 10)
     {
-    	hrs.prepend(QString::number(0));
+    	hrs.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
-    QString mins(QString::number(minutes));
+    QString mins(HbStringUtil::convertDigits(QString::number(minutes)));
     if(minutes < 10)
     {
-    	mins.prepend(QString::number(0));
+    	mins.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
-    QString secs(QString::number(second));
+    QString secs(HbStringUtil::convertDigits(QString::number(second)));
     if(second < 10)
     {
-    	secs.prepend(QString::number(0));
+    	secs.prepend(HbStringUtil::convertDigits(QString::number(0)));
     }
 	
     const char* loc = "txt_videos_dblist_captured_val_l1_l2_gb";
@@ -329,7 +330,8 @@ QString VideoListDataModel::doDetailRow(int &index) const
 		loc = "txt_videos_dblist_captured_val_l1_l2_kb";
 	}
 	
-    detailStr = hbTrId(loc).arg(hrs).arg(mins).arg(secs).arg(QString::number(dispSize));
+    detailStr = hbTrId(loc).arg(hrs).arg(mins).arg(secs).arg(
+                       HbStringUtil::convertDigits(QString::number(dispSize)));
 	
 	return detailStr;
 }

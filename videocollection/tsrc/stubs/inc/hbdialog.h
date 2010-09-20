@@ -21,11 +21,13 @@
 #include <QObject>
 #include <qsize.h>
 #include "hbwidget.h"
+#include "hbpopup.h"
 class QGraphicsItem;
 class QGraphicsWidget;
 class HbAction;
 
-class HbDialog :  public HbWidget
+
+class HbDialog :  public HbPopup
 {
    Q_OBJECT
    
@@ -37,22 +39,7 @@ signals:
     void finished(HbAction*); 
    
 public:
-    
-    enum DefaultTimeout
-    {
-       NoTimeout,
-       ConfirmationNoteTimeout,
-       StandardTimeout,
-       ContextMenuTimeout,
-    };
 
-    enum DismissPolicy
-    {
-       NoDismiss   = 0,
-       TapInside   = 1,
-       TapOutside  = 2,
-       TapAnywhere = TapInside | TapOutside
-    };
     
     /**
      * contructor
@@ -73,6 +60,19 @@ public slots:
     void open( QObject* receiver = 0, const char* member = 0 );
     
 public:
+    
+    /**
+     * stub show -method
+     */
+    virtual void show()
+    {
+        // NOP
+    }
+    
+    virtual void setAttribute(Qt::WidgetAttribute attr)
+    {
+        Q_UNUSED(attr);
+    }
     
     /**
      * sets mDismissPolicy

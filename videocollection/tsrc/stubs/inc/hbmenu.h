@@ -19,36 +19,13 @@
 #ifndef HBMENU_H
 #define HBMENU_H
 
-#include <hbwidget.h>
+#include "hbwidget.h"
+#include "hbpopup.h"
 
 class QGraphicsItem;
 class QPointF;
 class HbAction;
 
-class HbPopup
-{
-public:
-    enum Placement
-    {
-        TopLeftCorner,
-        TopRightCorner,
-        BottomLeftCorner,
-        BottomRightCorner,
-        TopEdgeCenter,
-        RightEdgeCenter,
-        BottomEdgeCenter,
-        LeftEdgeCenter,
-        Center
-    };
-
-    enum DismissPolicy
-    {
-        NoDismiss   = 0,
-        TapInside   = 1,
-        TapOutside  = 2,
-        TapAnywhere = TapInside | TapOutside
-    };
-};
 
 class HbMenu: public HbWidget
 {

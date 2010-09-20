@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 11 %
+# Version : %version: ou1cpsw#12 %
 
 TEMPLATE = app
 TARGET = testvideoplaybackview
@@ -38,6 +38,9 @@ HEADERS += mpxvideoviewwrapper.h \
            ../../../inc/videobaseplaybackview.h \
            ../../../inc/videoplaybackview.h \
            videoplaybackviewfiledetails.h \
+           hbdialog.h \
+           hbmessagebox.h \
+           hbnotificationdialog.h \
            hbtapgesture.h \
            hbpangesture.h \
            videoactivitystate.h
@@ -47,6 +50,8 @@ SOURCES += mpxvideoviewwrapper.cpp \
            ../../viewsrc/videobaseplaybackview.cpp \
            ../../viewsrc/videoplaybackview.cpp \
            ../../viewsrc/videoplaybackviewfiledetails.cpp \
+           hbmessagebox.cpp \
+           hbnotificationdialog.cpp \
            hbtapgesture.cpp \
            hbpangesture.cpp \
            videoactivitystate.cpp

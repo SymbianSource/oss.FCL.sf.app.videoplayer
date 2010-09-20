@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 11 %
+// Version : %version: 12 %
 
 
 
@@ -59,6 +59,24 @@ CMPXVideoViewWrapper* CMPXVideoViewWrapper::NewL( VideoBasePlaybackView* aView )
 void CMPXVideoViewWrapper::ConstructL()
 {
     iMediaRequested = EFalse;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::ActivateL()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::ActivateL()
+{
+    iActivated = ETrue;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::Deactivate()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::Deactivate()
+{
+    iActivated = EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------

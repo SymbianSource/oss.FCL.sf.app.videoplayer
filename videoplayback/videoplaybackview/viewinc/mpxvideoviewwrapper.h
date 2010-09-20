@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#24 %
+// Version : %version:  da1mmcf#25 %
 
 
 
@@ -211,6 +211,10 @@ class CMPXVideoViewWrapper : public CBase,
         TBool IsResumingPlaybackAfterTermination();
 
         void SurfacedAttached( TBool aAttached );
+
+        void ActivateL();
+
+        void Deactivate();
 
     private:
 

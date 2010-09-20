@@ -14,8 +14,6 @@
 * Description:    My Videos mpx collection plugin project specification*
 */
 
-
-
 #include <bldvariant.hrh>
 #include <data_caging_paths.hrh>
 #include <platform_paths.hrh>
@@ -27,6 +25,7 @@ UID             0x10009D8D 0x20016B96
 VENDORID        VID_DEFAULT
 //CAPABILITY      CAP_ECOM_PLUGIN
 CAPABILITY All -TCB
+VERSION         10.0
 
 SOURCEPATH      ../src
 SOURCE          vcxmyvideoscollectionpluginproxy.cpp
@@ -73,3 +72,5 @@ LIBRARY         efsrv.lib
 LIBRARY         charconv.lib
 LIBRARY         centralrepository.lib
 LIBRARY         PlatformEnv.lib
+
+// End of File

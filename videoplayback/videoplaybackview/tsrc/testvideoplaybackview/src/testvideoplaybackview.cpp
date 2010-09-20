@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 14 %
+// Version : %version: ou1cpsw#16 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -30,6 +30,10 @@
 #include <hbinstance.h>
 #include <qgraphicssceneevent>
 #include <QDebug>
+
+#include "hbdialog.h"
+#include "hbmessagebox.h"
+#include "hbnotificationdialog.h"
 
 #include "videoplaybackviewfiledetails.h"
 #include "mpxcommonvideoplaybackview.hrh"
@@ -107,7 +111,8 @@ void TestVideoPlaybackView::testHandleActivateView()
     init();
     mVideoView->handleActivateView();
 
-    QVERIFY( mVideoView->mVideoMpxWrapper->iMediaRequested == true );
+    QVERIFY( mVideoView->mVideoMpxWrapper->iMediaRequested );
+    QVERIFY( mVideoView->mVideoMpxWrapper->iActivated );
     QCOMPARE( mVideoView->mVideoMpxWrapper->iFileDetails->mBitRate, 16000 );
     QCOMPARE( mVideoView->mVideoMpxWrapper->iFileDetails->mTitle, QString("Test Video Title") );
 
@@ -166,33 +171,64 @@ void TestVideoPlaybackView::testShowDialog()
     // construct and activate playback view
     //
     setup();
-
+    
+    HbMessageBox::mMessageBConstructCount = 0;
+    HbNotificationDialog::mNotifConstructCount = 0;
     //
     // ensure that playback view is currently activated
     //
     QVERIFY( ! mVideoView->mTimerForClosingView->isActive() );
 
     //
-    // test showDialog() method
+    // test showDialog() method using default arguments
     //
     mVideoView->showDialog( "test error msg" );
-
-    //
-    // connect and emit signal for handleClosePopupDialog() slot
-    //
-    connect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
-    emit commandSignal();
-
-    //
-    // verify that playback view is properly closed
-    //
+    
+    QVERIFY(HbMessageBox::mMessageBConstructCount == 1);
+    QVERIFY(HbNotificationDialog::mNotifConstructCount == 0);
     QVERIFY( mVideoView->mTimerForClosingView->isActive() );
 
+    mVideoView->handleActivateView();
+    HbMessageBox::mMessageBConstructCount = 0;
+    HbNotificationDialog::mNotifConstructCount = 0;
+    mVideoView->mTimerForClosingView->stop();
+    
     //
-    // disconnect signal for handleClosePopupDialog() slot
+    // test showDialog() method, error, no closing 
     //
-    disconnect( this, SIGNAL( commandSignal() ), mVideoView, SLOT( handleClosePopupDialog() ) );
+    mVideoView->showDialog( "test error msg", false );
+    
+    QVERIFY(HbMessageBox::mMessageBConstructCount == 1);
+    QVERIFY(HbNotificationDialog::mNotifConstructCount == 0);
+    QVERIFY( !mVideoView->mTimerForClosingView->isActive() );
+    
+    HbMessageBox::mMessageBConstructCount = 0;
+    HbNotificationDialog::mNotifConstructCount = 0;
+    
+    //
+    // test showDialog() method, nofitification, closing 
+    //
+    mVideoView->showDialog( "test error msg", true, false );
+    
+    QVERIFY(HbMessageBox::mMessageBConstructCount == 0);
+    QVERIFY(HbNotificationDialog::mNotifConstructCount == 1);
+    QVERIFY( mVideoView->mTimerForClosingView->isActive() );
+    
+    mVideoView->handleActivateView();
+    HbMessageBox::mMessageBConstructCount = 0;
+    HbNotificationDialog::mNotifConstructCount = 0;
+    mVideoView->mTimerForClosingView->stop();
+    
+    //
+    // test showDialog() method, nofitification, not closing 
+    //
+    mVideoView->showDialog( "test error msg", false, false );
 
+    QVERIFY(HbMessageBox::mMessageBConstructCount == 0);
+    QVERIFY(HbNotificationDialog::mNotifConstructCount == 1);
+    QVERIFY( !mVideoView->mTimerForClosingView->isActive() );
+
+    
     //
     // destruct playback view
     //
@@ -428,7 +464,8 @@ void TestVideoPlaybackView::testHandleDeactivateView()
 
     mVideoView->handleDeactivateView();
 
-    QVERIFY( mVideoView->mVideoMpxWrapper == NULL );
+    QVERIFY( mVideoView->mVideoMpxWrapper != NULL );
+    QVERIFY( ! mVideoView->mVideoMpxWrapper->iActivated );
 
     cleanup();
 }

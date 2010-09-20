@@ -18,13 +18,13 @@
 &EN
 
 ; SIS header: name, uid, version
-#{"videoplayer"},(0x200211FE),1,0,0,TYPE=SA, RU
+#{"videoplayer"},(0x200211FE),10,10,2,TYPE=SA, RU
 
 ; Localised Vendor name
-%{"Nokia, Qt Software"}
+%{"Nokia"}
 
 ; Unique Vendor name
-:"Nokia, Qt Software"
+:"Nokia"
 
 ; Dependencies
 [0x101F7961],0,0,0,{"S60ProductID"}
@@ -57,8 +57,15 @@
 "/epoc32/release/armv5/urel/videoplayer.exe"                      - "!:/sys/bin/videoplayer.exe"
 "/epoc32/data/z/resource/apps/videoplayer.rsc"                    - "!:/resource/apps/videoplayer.rsc"
 "/epoc32/data/z/private/10003a3f/import/apps/videoplayer_reg.rsc" - "!:/private/10003a3f/import/apps/videoplayer_reg.rsc"
-"/epoc32/data/z/resource/qt/translations/videos_en.qm"            - "!:/resource/qt/translations/videos.qm"
+"/epoc32/data/z/resource/qt/translations/videos_en.qm"            - "!:/resource/qt/translations/videos_en.qm"
 
-"/epoc32/data/z/resource/plugins/videoplaybackviewplugin.rsc"   - "!:/resource/plugins/videoplaybackviewplugin.rsc"
-"/epoc32/release/armv5/urel/videoplaybackview.dll"              - "!:/sys/bin/videoplaybackview.dll"
-"/epoc32/release/armv5/urel/videoplaybackviewplugin.dll"        - "!:/sys/bin/videoplaybackviewplugin.dll"
+"/epoc32/data/z/resource/plugins/videoplaybackviewplugin.rsc"     - "!:/resource/plugins/videoplaybackviewplugin.rsc"
+"/epoc32/release/armv5/urel/videoplaybackview.dll"                - "!:/sys/bin/videoplaybackview.dll"
+"/epoc32/release/armv5/urel/videoplaybackviewplugin.dll"          - "!:/sys/bin/videoplaybackviewplugin.dll"
+
+;
+; Media settings
+;
+"/epoc32/release/armv5/urel/mpsettropmodel.dll"                   - "!:/sys/bin/mpsettropmodel.dll"
+"/epoc32/data/z/resource/plugins/mpsettropmodel.rsc"              - "!:/resource/plugins/mpsettropmodel.rsc"
+"/epoc32/release/armv5/urel/videosettingsplugin.dll"              - "!:/sys/bin/videosettingsplugin.dll"

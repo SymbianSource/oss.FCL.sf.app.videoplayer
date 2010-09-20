@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 #ifndef CMPXPLAYBACKUTILITY_H
 #define CMPXPLAYBACKUTILITY_H
@@ -61,6 +61,7 @@ class MMPXPlaybackUtility : public CBase
         virtual void Close() = 0;
         virtual void SetPrimaryClientL() = 0;
         virtual void SetL( TMPXPlaybackProperty aProperty,TInt aValue ) = 0;
+        virtual void CancelRequest() = 0;
 
     public:
         TMPXPlaybackState iState;
@@ -111,6 +112,8 @@ class CMPXPlaybackUtility : public MMPXPlaybackUtility,
                      MMPXPlaybackCallback& aCallback );
 
         void SetPrimaryClientL();
+
+        void CancelRequest();
 };
 
 #endif // CMPXPLAYBACKUTILITY_H

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 51 %
+// Version : %version: 52 %
 
 // INCLUDE FILES
 #include <hbglobal.h>
@@ -464,23 +464,26 @@ void VideoCollectionViewUtils::showStatusMsgSlot(int statusCode, QVariant &addit
 
     if(msg.count() > 0)
     {
+        HbDialog *note = 0;
         if(error)
         {
-            HbMessageBox *messageBox = new HbMessageBox(msg, HbMessageBox::MessageTypeWarning);
-            messageBox->setAttribute(Qt::WA_DeleteOnClose);
-            messageBox->setObjectName(VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING);
-            messageBox->show();
+            note = new HbMessageBox(msg, HbMessageBox::MessageTypeWarning); 
+            qobject_cast<HbMessageBox*>(note)->setStandardButtons( HbMessageBox::NoButton );
+            note->setObjectName(VIEW_UTILS_OBJECT_NAME_MESSAGE_BOX_WARNING);
         }
         else
         {
-            HbNotificationDialog *infoNote = new HbNotificationDialog();
-            infoNote->setAttribute(Qt::WA_DeleteOnClose);
+            note = new HbNotificationDialog();
+
             // only title can be two rows for HbNotificationDialog
-            infoNote->setTitleTextWrapping(Hb::TextWordWrap);
-            infoNote->setTitle(msg);
-            infoNote->setObjectName(VIEW_UTILS_OBJECT_NAME_STATUS_MSG);
-            infoNote->show();
+            qobject_cast<HbNotificationDialog*>(note)->setTitleTextWrapping(Hb::TextWordWrap);
+            qobject_cast<HbNotificationDialog*>(note)->setTitle(msg);
+            note->setObjectName(VIEW_UTILS_OBJECT_NAME_STATUS_MSG);
         }
+        note->setAttribute(Qt::WA_DeleteOnClose);
+        note->setDismissPolicy(HbPopup::TapAnywhere);
+        note->setTimeout(HbPopup::StandardTimeout);
+        note->show();
     }
 }
 

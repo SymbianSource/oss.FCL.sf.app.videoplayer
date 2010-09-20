@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  12 %
+// Version : %version:  13 %
 
 
 
@@ -658,7 +658,7 @@ void VideoPlaybackToolBar::openDetailsView()
 
     if ( viewMode == EFullScreenView )
     {
-        mController->changeViewMode( EDetailsView );
+        mController->evaluateAndChangeViewMode( EDetailsView, true );
     }
 }
 

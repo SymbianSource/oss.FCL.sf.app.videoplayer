@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -98,6 +98,8 @@ class VideoPlaybackControlsController : public QObject
         TPlaybackViewMode viewMode();
 
         void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
+        
+        bool isService();
 
     public:
         VideoPlaybackViewFileDetails          *mFileDetails;

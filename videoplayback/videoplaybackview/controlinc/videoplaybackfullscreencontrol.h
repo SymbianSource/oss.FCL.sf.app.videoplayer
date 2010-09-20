@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#10 %
+// Version : %version: da1mmcf#11 %
 
 
 
@@ -104,6 +104,8 @@ class VideoPlaybackFullScreenControl : public QObject
         HbWidget                 *mControl;
         TVideoPlaybackControls    mControlIndex;
         TUint                     mProperties;
+
+        bool                      mVisible;
 };
 
 #endif /*VIDEOPLAYBACKFULLSCREENCONTROL_H_*/

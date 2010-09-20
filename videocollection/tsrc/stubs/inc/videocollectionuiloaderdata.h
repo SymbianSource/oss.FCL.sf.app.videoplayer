@@ -20,6 +20,7 @@
 
 #include <qstringlist.h>
 #include <qmap.h>
+#include "videocollectionuiloader.h"
 
 class VideoCollectionUiLoaderData
 {
@@ -31,6 +32,7 @@ public: // methods
         mFindFailureNameList.clear();
         mMenuActions.clear();
         mLastLoadPhasedData = -1;
+        mAddDataCallCount = 0;
     }
     
 public: // data
@@ -39,6 +41,7 @@ public: // data
     static QStringList mFindFailureNameList;
     static QMap<VideoCollectionUiLoader::ActionIds, HbAction*> mMenuActions;
     static int mLastLoadPhasedData;
+    static int mAddDataCallCount;
 };
 
 #endif /* VIDEOCOLLECTIONUILOADERDATA_H */

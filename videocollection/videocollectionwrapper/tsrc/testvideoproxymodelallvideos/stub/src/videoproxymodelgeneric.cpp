@@ -60,6 +60,15 @@ VideoProxyModelGeneric::~VideoProxyModelGeneric()
 }
 
 // -----------------------------------------------------------------------------
+// VideoProxyModelGeneric::initialize
+// -----------------------------------------------------------------------------
+//
+int VideoProxyModelGeneric::initialize(VideoListDataModel *sourceModel)
+{
+    return 0;
+}
+
+// -----------------------------------------------------------------------------
 // VideoProxyModelGeneric::openItem
 // -----------------------------------------------------------------------------
 //
@@ -134,9 +143,33 @@ void VideoProxyModelGeneric::processSorting()
     mProcessSortingCallCount++;
 }
 
+// -----------------------------------------------------------------------------
+// VideoProxyModelGeneric::sourceModel
+// -----------------------------------------------------------------------------
+//
 const VideoListDataModel *VideoProxyModelGeneric::sourceModel() const
 {
     return mModel;
 }
 
+// -----------------------------------------------------------------------------
+// VideoProxyModelGeneric::setGenericIdFilter
+// -----------------------------------------------------------------------------
+//
+void VideoProxyModelGeneric::setGenericIdFilter(const TMPXItemId &itemId, bool filterValue)
+{
+    Q_UNUSED(itemId);    
+    Q_UNUSED(filterValue);
+}
+    
+// -----------------------------------------------------------------------------
+// VideoProxyModelGeneric::setAlbumInUse
+// -----------------------------------------------------------------------------
+//
+void VideoProxyModelGeneric::setAlbumInUse(const TMPXItemId &albumId)
+{
+    Q_UNUSED(albumId);
+}
+
+    
 // End of file

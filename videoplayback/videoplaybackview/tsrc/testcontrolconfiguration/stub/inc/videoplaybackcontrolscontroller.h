@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -69,8 +69,11 @@ class VideoPlaybackControlsController : public QObject
         * Initialize controller
         */
         void initializeController();
-        
+
         bool shouldShowRNLogo();
+
+    public slots:
+        void controlsListUpdated();
 
     public:
         VideoPlaybackViewFileDetails          *mFileDetails;

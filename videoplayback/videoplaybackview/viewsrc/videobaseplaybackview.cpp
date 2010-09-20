@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#49 %
+// Version : %version: 49.1.2 %
 
 
 
@@ -30,6 +30,7 @@
 #include <hbaction.h>
 #include <hbinstance.h>
 #include <hbnotificationdialog.h>
+#include <hbmessagebox.h>
 #include <hblabel.h>
 #include <hbtapgesture.h>
 #include <hbpangesture.h>
@@ -100,6 +101,8 @@ void VideoBasePlaybackView::initializeVideoPlaybackView()
 
         mStayPaused = true;
     }
+
+    MPX_TRAPD( err, mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -140,7 +143,7 @@ void VideoBasePlaybackView::handleActivateView()
 {
     MPX_ENTER_EXIT(_L("VideoBasePlaybackView::handleActivateView()"));
 
-    MPX_TRAPD( err, mVideoMpxWrapper = CMPXVideoViewWrapper::NewL( this ) );
+    MPX_TRAPD( err, mVideoMpxWrapper->ActivateL() );
 
     connect( hbInstance->allMainWindows()[0], SIGNAL( obscured() ), this, SLOT( handleAppBackground() ) );
     connect( hbInstance->allMainWindows()[0], SIGNAL( revealed() ), this, SLOT( handleAppForeground() ) );
@@ -186,11 +189,7 @@ void VideoBasePlaybackView::handleDeactivateView()
     //
     MPX_TRAPD( err, mVideoMpxWrapper->HandleCommandL( EMPXPbvCmdClose ) );
 
-    if ( mVideoMpxWrapper )
-    {
-        delete mVideoMpxWrapper;
-        mVideoMpxWrapper = NULL;
-    }
+    MPX_TRAP( err, mVideoMpxWrapper->Deactivate() );
 
     //
     // go back to device orientation
@@ -307,19 +306,33 @@ void VideoBasePlaybackView::handlePluginError( int aError )
 //   VideoBasePlaybackView::showDialog
 // -------------------------------------------------------------------------------------------------
 //
-void VideoBasePlaybackView::showDialog( const QString& string, bool closeView )
+void VideoBasePlaybackView::showDialog( const QString& string, bool closeView, bool isError )
 {
-    MPX_DEBUG(_L("VideoBasePlaybackView::showDialog( %s, %d )"), string.data(), closeView );
+    MPX_DEBUG(_L("VideoBasePlaybackView::showDialog( %s, %d, %d )"), string.data(), closeView, isError );
 
     //
-    // create pop-up dialog for error notes,
-    //     set its position to the middle of the screen
-    //     and make sure pop-up dialog gets deleted on close.
+    // create pop-up dialog for error notes and notifications,
+    // For error notes, HbMessageBox is used: 
+    //  - Note will be dismissed by using standard timeout or
+    //  - If user taps anywhere on the screen.
+    // For notifications, HbNotification dialog will be used.
     //
-    QRectF screenRect = hbInstance->allMainWindows()[0]->rect();
-    HbNotificationDialog* dlg = new HbNotificationDialog();
+
+    HbDialog *dlg = 0;
+    if(isError)
+    {
+        dlg = new HbMessageBox( string, HbMessageBox::MessageTypeWarning ); 
+        // dialog will be closed by timeout, no buttons used
+        qobject_cast<HbMessageBox*>( dlg )->setStandardButtons( HbMessageBox::NoButton );
+    } 
+    else
+    {
+        dlg = new HbNotificationDialog();
+        qobject_cast<HbNotificationDialog*>( dlg )->setTitle( string );
+    }       
     dlg->setAttribute( Qt::WA_DeleteOnClose );
-
+    dlg->setDismissPolicy( HbPopup::TapAnywhere );
+    dlg->setTimeout( HbPopup::StandardTimeout );
 	if ( closeView )
 	{
         //
@@ -329,7 +342,6 @@ void VideoBasePlaybackView::showDialog( const QString& string, bool closeView )
         connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( handleClosePopupDialog() ) );
     }
 
-	dlg->setTitle( string );
     dlg->show();
 }
 

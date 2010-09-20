@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#24 %
+// Version : %version: da1mmcf#25 %
 
 
 
@@ -74,13 +74,15 @@ void VideoPlaybackControlConfiguration::createControlList()
         // streaming, add branding animation control to show while initializing
         //
         addControlToList( EBufferingAnimation );
+
+        emit controlListUpdated();
     }
     else if ( mControlsController->shouldShowRNLogo() )
     {
         addControlToList( ERealLogoBitmap );
-    }
 
-    emit controlListUpdated();
+        emit controlListUpdated();
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -121,6 +123,8 @@ void VideoPlaybackControlConfiguration::updateControlList(
             deleteControlFromList( EFileDetailsWidget );
             deleteControlFromList( EIndicatorBitmap );
 
+            emit controlListUpdated();
+
             break;
         }
         case EControlCmdDetailsViewOpened:
@@ -132,8 +136,9 @@ void VideoPlaybackControlConfiguration::updateControlList(
             deleteControlFromList( EIndicatorBitmap );
 
             addControlToList( EDetailsViewPlaybackWindow );
-
             addControlToList( EFileDetailsWidget );
+
+            emit controlListUpdated();
 
             break;
         }
@@ -149,6 +154,8 @@ void VideoPlaybackControlConfiguration::updateControlList(
             addControlToList( EIndicatorBitmap );
             addControlToList( EFileDetailsWidget );
 
+            emit controlListUpdated();
+
             break;
         }
         case EControlCmdRemoveRNLogo:
@@ -156,6 +163,8 @@ void VideoPlaybackControlConfiguration::updateControlList(
             MPX_DEBUG(_L("VideoPlaybackControlConfiguration::updateControlList() RN Logo removed"));
 
             deleteControlFromList( ERealLogoBitmap );
+
+            emit controlListUpdated();
 
             break;
         }
@@ -184,8 +193,6 @@ void VideoPlaybackControlConfiguration::updateControlList(
             break;
         }
     }
-
-    emit controlListUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------

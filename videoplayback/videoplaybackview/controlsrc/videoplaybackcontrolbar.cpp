@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 
 
@@ -143,15 +143,11 @@ void VideoPlaybackControlBar::updateWithFileDetails(
 void VideoPlaybackControlBar::setVisibleToControlBar( bool visible )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlBar::setVisibleToControlBar()"),
-                   _L("visible = %d, current visibility = %d"), visible, isVisible() );
+                   _L("visible = %d"), visible );
 
-    if ( visible != isVisible() )
-    {
-        setVisible( visible );
-        mToolBar->setVisible( visible );
-    }
+    setVisible( visible );
+    mToolBar->setVisible( visible );
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // VideoPlaybackControlBar::durationChanged()

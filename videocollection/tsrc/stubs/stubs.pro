@@ -36,6 +36,7 @@ HEADERS_TEMP = \
 	inc/xqserviceproviderstub.h \
 	inc/xqsettingsmanagerstub.h \
     inc/testobjectstore.h \
+    inc/hbpopup.h \
     inc/hbabstractitemview.h \
     inc/hbdocumentloader.h \
     inc/hbaction.h \
@@ -75,6 +76,7 @@ HEADERS_TEMP = \
     inc/videohintwidgetdata.h \
     inc/videolistwidgetdata.h \
     inc/videolistviewdata.h \
+    inc/videolisttoolbardata.h \
     inc/videoplayerappexport.h \
     inc/videoproxymodeldata.h \
     inc/videothumbnailtestdata.h \
@@ -90,6 +92,8 @@ HEADERS_TEMP = \
     ../../videocollectionview/inc/videolistselectiondialog.h \
     ../../videocollectionview/inc/videolistwidget.h \
     ../../videocollectionview/inc/videolistview.h \
+    ../../videocollectionview/inc/videolistmenu.h \
+    ../../videocollectionview/inc/videolisttoolbar.h \
     ../../videocollectionwrapper/inc/videolistdatamodel.h \
     ../../videocollectionwrapper/inc/videocollectionwrapper.h \
     ../../videocollectionwrapper/inc/videoproxymodelgeneric.h \
@@ -132,6 +136,8 @@ SOURCES_TEMP = \
     src/videolistselectiondialog.cpp \
     src/videolistwidget.cpp \
     src/videolistview.cpp \
+    src/videolistmenu.cpp \
+    src/videolisttoolbar.cpp \
     src/videolistdatamodel.cpp \
     src/videocollectionwrapper.cpp \
     src/videoproxymodelgeneric.cpp \

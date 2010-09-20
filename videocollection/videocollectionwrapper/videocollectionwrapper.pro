@@ -32,6 +32,7 @@ symbian: {
         "DEFFILE ../bwins/videocollectionwrapper.def" \
         "$${LITERAL_HASH}endif"
     MMP_RULES += defBlock SMPSAFE
+    VERSION = 10.0
 }
 
 DEPENDPATH += . inc src

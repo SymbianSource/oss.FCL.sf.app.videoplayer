@@ -20,27 +20,21 @@
 
 #include <hbview.h>
 #include <qnamespace.h>
-#include <qabstractitemmodel.h>
 #include <hbaction.h>
 
 #include "videohintwidget.h"
 
 class QGraphicsItem;
-class VideoListWidget;
-class QActionGroup;
 class QVariant;
-class VideoCollectionViewUtils;
-class VideoProxyModelGeneric;
-class VideoCollectionWrapper;
-class HbStackedWidget;
-class VideoCollectionUiLoader;
-class HbGroupBox;
-class VideoListSelectionDialog;
-class HbMenu;
-class VideoServices;
-class TMPXItemId;
 class HbToolBarExtension;
-class VideoOperatorService;
+class TMPXItemId;
+class VideoListWidget;
+class VideoCollectionViewUtils;
+class VideoCollectionWrapper;
+class VideoCollectionUiLoader;
+class VideoServices;
+class VideoListToolbar;
+class VideoListMenu;
 
 /**
  * Class acts as an container for widgets that are used to display different
@@ -98,6 +92,14 @@ public:
      *
      */
     void back();
+    
+    /**
+     * Returns pointer to currently active VideoListWidget. Null if no 
+     * active widget yet.
+     * 
+     * @return Currently active VideoListWidget, or null if no widget active.
+     */
+    VideoListWidget* getCurrentList();
 
 signals:
 
@@ -170,64 +172,6 @@ private slots:
     void openCollectionViewSlot();
     
     /**
-     * Slot is connected into hint widget's button's clicked signal.
-     *
-     * Activates first operator service. 
-     *
-     */
-    void openOperatorServiceSlot();
-
-     /**
-     * Slot is connected into main menus sort -items
-     * Method checks sorting role based on active menu item and initiates sorting
-     *
-     */
-    void startSorting();
-
-     /**
-     * Method checks the sorting role and starts sorting
-     *
-     */
-    void doSorting(int role);
-    
-    /**
-     * Slot is connected into main menus "delete items" (delete...) signal
-     *
-     * Calls ui utils to show multiple delete dialog for current widget
-     *
-     */
-    void deleteItemsSlot();
-
-    /**
-     * Slot is connected into main menus "Create new collection..." signal
-     * Shows a selection dialog for creating a new collection
-     *
-     */
-    void createCollectionSlot();
-
-    /**
-     * Slot is connected into toolbar's  "Add videos" signal
-     *
-     */
-    void addVideosToCollectionSlot();
-    
-    /**
-     * Slot is connected into toolbar's "remove videos" signal
-     */
-    void removeVideosFromCollectionSlot();
-
-    /**
-     * Slot is connected into main menus aboutToShow -signal
-     *
-     */
-    void aboutToShowMainMenuSlot();
-    
-    /**
-     * Prepare menu when videos used through browsing service.
-     */
-    void prepareBrowseServiceMenu();
-
-    /**
      * Slot is connected into hbInstance's primary window's
      * aboutToChangeOrientation -signal. This is called when
      * orientation is to be change.
@@ -268,13 +212,16 @@ private slots:
      */
     void objectReadySlot(QObject *object, const QString &name);
     
-    // TODO: following can be removed after all implementation ready
     /**
-     * Slot is connected into item signals that are not yet implemented.
-     * Slot shows "Not yet implemented" note
+     * Slot which is called when actions in toolbar needs to be changed.
      */
-    void debugNotImplementedYet();
-
+    void toolbarActionsChanged(QList<QAction*> newActions);
+    
+    /**
+     * Slot which is called when toolbar extension needs to be changed.
+     */
+    void toolbarExtensionChanged(HbToolBarExtension* newExtension);
+    
 private:
     /**
      * Convenience method that modelReadySlot and albumListReadySlot calls.
@@ -296,33 +243,6 @@ private:
     int createToolbar();
 
     /**
-     * Loads video services from central respository and creates toolbar buttons for them.  
-     */
-    void createOperatorServicesToolbar();
-    
-    /**
-     * Loads video service from Central Repository and stores it into member array.
-     * 
-     * @param titleKey CenRep key for service title.
-     * @param iconKey CenRep key for icon resource.
-     * @param uriKey CenRep key for service URI.
-     * @param uidKey CenRep key for service application UID.
-     */
-    void loadOperatorService(int titleKey, int iconKey, int uriKey, int uidKey);
-    
-    /**
-     * Creates action with given parameters. createActionGroup() must be called successfully
-     * before using this method.
-     *
-     * @param tooltip Tooltip text for the action.
-     * @param icon Filepath for the icon file.
-     * @param actionGroup Actiongroup for created action.
-     * @param slot Slot for the triggered signal of the action.
-     * @return HbAction pointer if creation ok, otherwise 0
-     */
-    HbAction* createAction(QString icon, QActionGroup* actionGroup, const char *slot);
-
-    /**
      * Shows or hides the hint. Only shows the hint if model does not have any
      * items.
      * 
@@ -339,11 +259,6 @@ private:
      * Updates the sublabel text.
      */
     void updateSubLabel();
-    
-    /**
-     * Shows or hides a menu action.
-     */
-    void showAction(bool show, const QString &name);
     
     /**
      * Activates all videos or collections -list.
@@ -365,18 +280,6 @@ private:
 private:
 
     /**
-     * Actions ids used in main menu and tool bar
-     */
-    enum TViewActionIds
-    {
-        ETBActionAllVideos     = 10,
-        ETBActionCollections   = 11,
-        ETBActionServices      = 12,
-        ETBActionAddVideos     = 13,
-        ETBActionRemoveVideos  = 14
-    };
-
-    /**
      * Reference to video collection view utils
      */
     VideoCollectionViewUtils &mUiUtils;
@@ -390,6 +293,16 @@ private:
      * Pointer to the XML UI (DocML) loader, not owned
      */
     VideoCollectionUiLoader* mUiLoader;
+    
+    /**
+     * Toolbar handler.
+     */
+    VideoListToolbar* mToolbar;
+    
+    /**
+     * Menu handler.
+     */
+    VideoListMenu* mMenu;
     
     /**
      * Boolean for knowing when the model is ready.
@@ -418,40 +331,10 @@ private:
     VideoListWidget* mCurrentList;
 
     /**
-     * Action group for the toolbar.
-     */
-    QActionGroup* mToolbarViewsActionGroup;
-
-    /**
-     * Action group for the toolbar.
-     */
-    QActionGroup* mToolbarCollectionActionGroup;
-
-    /**
-     * Map containing toolbar actions
-     */
-    QMap<TViewActionIds, HbAction*> mToolbarActions;
-
-    /**
-     * Sorting roles mapped to appropriate actions.
-     */
-    QMap<HbAction*, int> mSortingRoles;
-
-    /**
      * String containing the name of the currently open collection
      */
     QString mCollectionName;
     
-    /**
-     * Toolbar extension for operator services when there's more than
-     * one of them.
-     */
-    HbToolBarExtension *mToolbarServiceExtension;
-    
-    /**
-     * List of operator services.
-     */
-    QList<VideoOperatorService *> mVideoOperatorServices;
 };
 
 #endif // VIDEOLISTVIEW_H

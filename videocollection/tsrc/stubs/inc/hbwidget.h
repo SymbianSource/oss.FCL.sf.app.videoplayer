@@ -22,10 +22,6 @@
 #include <hbnamespace.h>
 #include <hbglobal.h>
 
- /**
- * counter to make sure alloc dealloc match
- */
-
 
 class HbWidget : public QGraphicsWidget
 {

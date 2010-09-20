@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  9 %
+// Version : %version:  10 %
 
 
 
@@ -72,6 +72,10 @@ class CMPXVideoViewWrapper : public CBase
 
         TInt GetMediaId();
 
+        void ActivateL();
+
+        void Deactivate();
+
     public: // data
 
         VideoBasePlaybackView*           iView;
@@ -80,6 +84,7 @@ class CMPXVideoViewWrapper : public CBase
         TBool                            iClosePlayerAO;
         TBool                            iAppForeground;
         TBool                            iViewForeground;
+        TBool                            iActivated;
         TInt                             iCommand;
         TInt                             iPlayPosition;
 };

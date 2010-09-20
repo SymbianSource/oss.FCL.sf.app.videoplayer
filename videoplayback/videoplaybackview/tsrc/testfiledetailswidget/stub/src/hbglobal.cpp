@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   4 %
+// Version : %version:   5 %
 
 
 
@@ -116,6 +116,14 @@ QString hbTrId( QString string, int n )
     else if ( string == "txt_videos_list_l1l2" )
     {
         loc = "%L1x%L2";
+    }
+    else if ( string == "txt_videos_list_file_path" )
+    {
+        loc = "File path";
+    }
+    else if ( string == "txt_videos_list_file_name" )
+    {
+        loc = "File name";
     }
 
     return loc;

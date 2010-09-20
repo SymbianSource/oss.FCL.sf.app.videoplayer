@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 5 %
+# Version : %version: 6 %
 
 
 TEMPLATE = app
@@ -37,6 +37,7 @@ symbian:
                                  "resources/videos.docml       /epoc32/data/z/resource/hb/splashml/videos.docml" \
                                  "resources/videos.splashml    /epoc32/data/z/resource/hb/splashml/videos.splashml"
     MMP_RULES += SMPSAFE
+    VERSION = 10.0
 }
 
 # Service provider specific configuration.

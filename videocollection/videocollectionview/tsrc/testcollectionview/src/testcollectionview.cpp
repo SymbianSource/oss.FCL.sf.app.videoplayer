@@ -36,6 +36,8 @@
 #include "videocollectionuiloaderdata.h"
 #include "videoservicebrowsedata.h"
 #include "videolistviewdata.h"
+#include "videocollectionviewutils.h"
+#include "videocollectionviewutilsdata.h"
 
 #define private public
 #include "videocollectionviewplugin.h"
@@ -216,6 +218,8 @@ void TestCollectionView::testActivateView()
     init();
     serviceUtil->setCurrentService(true);
     videoServices->mCurrentService = VideoServices::EBrowse;
+    VideoCollectionViewUtilsData::mIsServiceValue = true;
+    VideoCollectionViewUtils::instance().setIsService();
     VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdCaptured;
     mTestView->activateView();
     QCOMPARE(VideoListViewData::mActivateViewCount, 1);
@@ -228,6 +232,8 @@ void TestCollectionView::testActivateView()
     // -downloads category
     init();
     serviceUtil->setCurrentService(true);
+    VideoCollectionViewUtilsData::mIsServiceValue = true;
+    VideoCollectionViewUtils::instance().setIsService();
     videoServices->mCurrentService = VideoServices::EBrowse;
     VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdDownloads;
     mTestView->activateView();
@@ -240,6 +246,8 @@ void TestCollectionView::testActivateView()
     // -uri fetch service
     init();
     serviceUtil->setCurrentService(true);
+    VideoCollectionViewUtilsData::mIsServiceValue = true;
+    VideoCollectionViewUtils::instance().setIsService();
     videoServices->mCurrentService = VideoServices::EUriFetcher;
     mTestView->activateView();
     QCOMPARE(VideoListViewData::mActivateViewCount, 1);
@@ -249,6 +257,8 @@ void TestCollectionView::testActivateView()
     // final cleanup
     serviceUtil->decreaseReferenceCount();
     videoServices->decreaseReferenceCount();
+    VideoCollectionViewUtilsData::mIsServiceValue = false;
+    VideoCollectionViewUtils::instance().setIsService();
 }
 
 // ---------------------------------------------------------------------------

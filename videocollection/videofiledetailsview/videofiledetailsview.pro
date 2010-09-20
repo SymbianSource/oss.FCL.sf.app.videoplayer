@@ -24,6 +24,7 @@ symbian: {
    TARGET.CAPABILITY = ALL -TCB -DRM
    TARGET.EPOCALLOWDLLDATA = 1
    MMP_RULES += SMPSAFE
+   VERSION = 10.0
 }
 
 # mpx view plugin definitions:
@@ -66,4 +67,3 @@ LIBS += -lmpxviewframeworkqt.dll \
         -lvideoplayerengine.dll \
         -lshareui.dll \
         -lflogger.dll
-

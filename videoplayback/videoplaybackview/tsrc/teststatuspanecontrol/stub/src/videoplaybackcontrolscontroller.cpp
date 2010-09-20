@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  5 %
+// Version : %version:  6 %
 
 
 
@@ -42,7 +42,7 @@ VideoPlaybackControlsController::VideoPlaybackControlsController(
         VideoBasePlaybackView *view,
         VideoPlaybackViewFileDetails *details )
     : mView( view )
-    , mFileDetails( details )   
+    , mFileDetails( details )
 {
     initializeController();
 }
@@ -53,7 +53,7 @@ VideoPlaybackControlsController::VideoPlaybackControlsController(
 //
 void VideoPlaybackControlsController::initializeController()
 {
-    mLoader = new VideoPlaybackDocumentLoader();		
+    mLoader = new VideoPlaybackDocumentLoader();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -81,14 +81,14 @@ void VideoPlaybackControlsController::resetDisappearingTimers( TTimerAction time
 }
 
 // -------------------------------------------------------------------------------------------------
-//   VideoPlaybackControlsController::changeViewMode
+//   VideoPlaybackControlsController::evaluateAndChangeViewMode
 // -------------------------------------------------------------------------------------------------
 //
-void VideoPlaybackControlsController::changeViewMode( 
+void VideoPlaybackControlsController::evaluateAndChangeViewMode(
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
-    MPX_DEBUG(_L("VideoPlaybackControlsController::changeViewMode()"));
-    
+    MPX_DEBUG(_L("VideoPlaybackControlsController::evaluateAndChangeViewMode()"));
+
     Q_UNUSED( transitionEffect );
     mViewMode = viewMode;
 }

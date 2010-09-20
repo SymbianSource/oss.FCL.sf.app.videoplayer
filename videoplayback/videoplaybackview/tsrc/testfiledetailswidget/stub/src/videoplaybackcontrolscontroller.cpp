@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -86,4 +86,15 @@ void VideoPlaybackControlsController::resetDisappearingTimers( TTimerAction time
     mTimerAction = timerAction;
 }
 
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackControlsController::isService()
+// -------------------------------------------------------------------------------------------------
+//
+bool VideoPlaybackControlsController::isService()
+{
+    MPX_DEBUG(_L("VideoPlaybackControlsController::isService()"));
+
+    return false;
+}
 // End of File

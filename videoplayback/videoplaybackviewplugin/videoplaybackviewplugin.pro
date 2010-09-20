@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: da1mmcf#18 %
+# Version : %version: 19 %
 
 
 TEMPLATE = lib
@@ -30,6 +30,7 @@ symbian:
                    $$APP_LAYER_SYSTEMINCLUDE SYSTEMINCLUDE
     BLD_INF_RULES.prj_exports += "rom/videoplaybackviewplugin.iby CORE_APP_LAYER_IBY_EXPORT_PATH(videoplaybackviewplugin.iby)"
     MMP_RULES += SMPSAFE
+    VERSION = 10.0
 }
 
 SERVICE.INTERFACE_NAME = org.nokia.mmdt.QViewPlugin/1.0
