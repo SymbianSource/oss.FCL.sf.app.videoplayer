@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 // INCLUDE FILES
 #include <qactiongroup.h>
@@ -102,14 +102,6 @@ void VideoListToolbar::loadOperatorService(int titleKey, int iconKey, int uriKey
     Q_UNUSED(iconKey);
     Q_UNUSED(uriKey);
     Q_UNUSED(uidKey);
-}
-
-// ---------------------------------------------------------------------------
-// openOperatorServiceSlot()
-// ---------------------------------------------------------------------------
-//
-void VideoListToolbar::openOperatorServiceSlot()
-{
 }
 
 // -------------------------------------------------------------------------------------------------

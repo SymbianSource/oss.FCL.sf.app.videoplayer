@@ -78,7 +78,7 @@ namespace VideoCollectionCommon
      */
     const char * const VideoDetailLabels[] = {
             QT_TR_NOOP("txt_videos_list_title"),
-            QT_TR_NOOP("txt_videos_list_filename"),
+            QT_TR_NOOP("txt_videos_list_file_name"),
             QT_TR_NOOP("txt_videos_list_file_path"),
     		QT_TR_NOOP("txt_videos_list_drm"),
             QT_TR_NOOP("txt_videos_list_service"),

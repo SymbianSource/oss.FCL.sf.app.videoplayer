@@ -18,12 +18,14 @@
 TEMPLATE = subdirs
 
 CONFIG += ordered
-
-SUBDIRS += testcollectionview
-SUBDIRS += testhintwidget
-SUBDIRS += testlistview
-SUBDIRS += testlistwidget
-SUBDIRS += testvideocollectionuiloader
+                                                      
+SUBDIRS += testcollectionview                    
+SUBDIRS += testlistmenu                             
+SUBDIRS += testlisttoolbar                          
+SUBDIRS += testlistview                               
+SUBDIRS += testlistwidget                           
+SUBDIRS += testvideocollectionuiloader   
 SUBDIRS += testvideocollectionviewutils
 SUBDIRS += testvideolistselectiondialog
-                     
+SUBDIRS += testvideooperatorservice      
+SUBDIRS += testvideooperatorservice_p   

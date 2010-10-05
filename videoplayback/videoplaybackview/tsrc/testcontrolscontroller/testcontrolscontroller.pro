@@ -14,7 +14,7 @@
 # Description: Project file for building testcontrolscontroller
 #
 #
-# Version : %version: 9 %
+# Version : %version: 10 %
 
 
 TEMPLATE = app
@@ -46,7 +46,7 @@ HEADERS += videobaseplaybackview.h  \
            mpxvideoviewwrapper.h \
            thumbnailmanager_qt.h \
            testcontrolscontroller.h \
-           hbvolumesliderpopup.h \
+           videoplaybackvolumecontrol.h \
            xqserviceutilxtra.h \
            xqserviceutil.h \
            videoservices.h \
@@ -68,7 +68,7 @@ SOURCES += videobaseplaybackview.cpp \
            mpxvideoviewwrapper.cpp \
            thumbnailmanager_qt.cpp \
            testcontrolscontroller.cpp \
-           hbvolumesliderpopup.cpp \
+           videoplaybackvolumecontrol.cpp \
            xqserviceutilxtra.cpp \
            xqserviceutil.cpp \
            videoservices.cpp \

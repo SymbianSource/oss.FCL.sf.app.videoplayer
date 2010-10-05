@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -130,7 +130,6 @@ void CMPXVideoViewWrapper::RequestMediaL()
     SetFileDetails( ETrue );
 
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoViewWrapper::ActivateClosePlayerActiveObject
@@ -251,6 +250,15 @@ void CMPXVideoViewWrapper::UpdateVideoRectDone()
 void CMPXVideoViewWrapper::SurfacedAttached( TBool aAttached )
 {
     iAttatched = aAttached;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::SetDefaultAspectRatio()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::SetDefaultAspectRatio( int aspectRatio )
+{
+    iAspectRatio = aspectRatio;
 }
 
 // EOF

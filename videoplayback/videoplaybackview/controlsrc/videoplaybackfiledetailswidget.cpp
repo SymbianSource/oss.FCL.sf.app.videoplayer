@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  29 %
+// Version : %version:  30 %
 
 
 #include <QDir>
@@ -99,31 +99,31 @@ void VideoPlaybackFileDetailsWidget::updateWithFileDetails(
             mFileDetailsUpdated = true;
 
             //
-            // Description
-            //
-            addItemToListWidget(
-                    hbTrId( "txt_videos_list_description" ), details->mDescription );           
-  
-            //
             // File name & File path
             //
-            // prevent exposure of private paths and show only : 
-            // (a) for standalone video player not when is launched from another app 
+            // prevent exposure of private paths and show only :
+            // (a) for standalone video player not when is launched from another app
             // (b) for local playback ony not for streaming video
             //
             if ( !mController->isService() )
-            {  
+            {
                 QFileInfo fileInfo( details->mClipName );
-                
-                // File name                
+
+                // File name
                 QString filename = fileInfo.completeBaseName();
-                addItemToListWidget( hbTrId( "txt_videos_list_file_name" ), filename );                
-                
-                // File path               
+                addItemToListWidget( hbTrId( "txt_videos_list_file_name" ), filename );
+
+                // File path
                 QString path = fileInfo.absoluteFilePath();
                 addItemToListWidget( hbTrId( "txt_videos_list_file_path" ), path );
-            }                            
-            
+            }
+
+            //
+            // Description
+            //
+            addItemToListWidget(
+                    hbTrId( "txt_videos_list_description" ), details->mDescription );
+
             //
             // Duration
             //

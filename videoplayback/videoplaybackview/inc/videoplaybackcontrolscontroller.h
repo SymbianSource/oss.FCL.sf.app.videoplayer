@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#28 %
+// Version : %version: da1mmcf#29 %
 
 
 
@@ -30,6 +30,7 @@
 #include <mpxplaybackframeworkdefs.h>
 
 #include "mpxvideo_debug.h"
+#include "mpxvideoviewwrapper.h"
 #include "videoplaybackcontrol.hrh"
 #include "mpxcommonvideoplaybackview.hrh"
 #include "videoplaybackviewfiledetails.h"
@@ -39,16 +40,15 @@ class QTimer;
 class QString;
 class HbAction;
 class ThumbnailManager;
-class HbVolumeSliderPopup ;
-class CMPXVideoViewWrapper;
+class ShareUi;
 class VideoBasePlaybackView;
+class VideoPlaybackVolumeControl;
 class VideoPlaybackControlPolicy;
 class VideoPlaybackDocumentLoader;
 class VideoPlaybackFullScreenControl;
 class VideoPlaybackControlsController;
 class VideoPlaybackControlConfiguration;
 class VideoServices;
-class ShareUi;
 
 // DATA TYPES
 
@@ -156,8 +156,10 @@ class VideoPlaybackControlsController : public QObject
         bool isRNLogoBitmapInControlList();
 
         bool shouldShowRNLogo();
-        
+
         inline bool isService();
+
+        inline int volumeSteps();
 
     private:
         /**
@@ -291,7 +293,7 @@ class VideoPlaybackControlsController : public QObject
         QTimer                                    *mRNLogoTimer;
 
         VideoPlaybackDocumentLoader               *mLoader;
-        HbVolumeSliderPopup                       *mVolumeControl;
+        VideoPlaybackVolumeControl                *mVolumeControl;
 
         ThumbnailManager                          *mThumbnailManager;
         VideoServices                             *mVideoServices;
@@ -306,7 +308,7 @@ class VideoPlaybackControlsController : public QObject
         TMPXPlaybackState                          mState;
         TPlaybackViewMode                          mViewMode;
         Qt::Orientation                            mOrientation;
-            
+
         ShareUi                                    *mShareUi;
 };
 
@@ -400,7 +402,6 @@ bool VideoPlaybackControlsController::isFileDetailsAdded()
     return mFileDetailsAdded;
 }
 
-
 // -------------------------------------------------------------------------------------------------
 //   VideoPlaybackControlsController::isService
 // -------------------------------------------------------------------------------------------------
@@ -409,11 +410,23 @@ inline
 bool VideoPlaybackControlsController::isService()
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::isService()"));
-    
+
     return XQServiceUtil::isService();
 }
 
+// -------------------------------------------------------------------------------------------------
+//   VideoPlaybackControlsController::volumeSteps
+// -------------------------------------------------------------------------------------------------
+//
+inline
+int VideoPlaybackControlsController::volumeSteps()
+{
+    int volumeSteps = mViewWrapper->VolumeSteps();
+    MPX_DEBUG(_L("VideoPlaybackControlsController::volumeSteps() steps = %d"), volumeSteps);
 
-#endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_P_H_*/
+    return volumeSteps;
+}
+
+#endif /*MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_*/
 
 // End of File

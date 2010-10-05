@@ -71,6 +71,8 @@ class TestMPXVideoViewWrapper : public QObject
         void testHandlePlaybackCommandComplete();
         void testHandleMedia();
         void testSurfacedAttached();
+        void testVolumeSteps();
+        void testSetDefaultAspectRatio();
 
     signals:
         void commandSignal(int);

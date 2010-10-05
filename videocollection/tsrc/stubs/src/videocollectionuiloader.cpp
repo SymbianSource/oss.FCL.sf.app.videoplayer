@@ -26,7 +26,6 @@
 #include "videocollectionuiloaderdef.h"
 #include "videolistview.h"
 #include "videolistwidget.h"
-#include "videohintwidget.h"
 #include "videolistselectiondialog.h"
 #include "videocollectionwrapper.h"
 
@@ -166,10 +165,6 @@ void VideoCollectionUiLoader::initObject(QObject *object,
     {
 
     }
-    else if (name == DOCML_NAME_VC_VIDEOHINTWIDGET)
-    {
-
-    }
     else if (name == DOCML_NAME_OPTIONS_MENU)
     {
 
@@ -245,10 +240,6 @@ QObject* VideoCollectionUiLoader::createObject(const QString& type,
             {
                 return 0;
             }
-        }
-        else if (name == DOCML_NAME_VC_VIDEOHINTWIDGET)
-        {
-            object = new VideoHintWidget(this);
         }
         if (object)
         {

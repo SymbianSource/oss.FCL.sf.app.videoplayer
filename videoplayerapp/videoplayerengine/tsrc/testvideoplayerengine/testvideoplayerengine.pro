@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 16 %
+# Version : %version: 17 %
 
 
 TEMPLATE = app
@@ -53,6 +53,7 @@ HEADERS += videoplaybackwrapper.h \
            hbview.h \
            videoactivitystate.h \
            afactivitystorage.h \
+	   videoiadupdatewrapper.h \
            ../../../../inc/videoplayerengine.h
 
 SOURCES += videoplaybackwrapper.cpp \
@@ -67,4 +68,5 @@ SOURCES += videoplaybackwrapper.cpp \
            videoserviceview.cpp \
            videoactivitystate.cpp \
            afactivitystorage.cpp \
+	   videoiadupdatewrapper.cpp \
            ../../src/videoplayerengine.cpp

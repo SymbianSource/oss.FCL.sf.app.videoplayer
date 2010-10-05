@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  9 %
 
 
 #include <qdebug>
@@ -429,8 +429,7 @@ void TestToolBar::testUpdateWithFileDetails()
     // video clip, view mode is full-screen
     //
     details->mVideoEnabled = true;
-    details->mVideoHeight = 1;
-    details->mVideoWidth = 1;
+    details->mAspectRatioChangeable = true;
     details->mTvOutConnected = false;
     details->mSeekable = true;
     details->mPausableStream = true;
@@ -448,8 +447,7 @@ void TestToolBar::testUpdateWithFileDetails()
     // video clip has same aspect ratio as display window
     //
     details->mVideoEnabled = true;
-    details->mVideoHeight = 360;
-    details->mVideoWidth = 640;
+    details->mAspectRatioChangeable = false;
     details->mTvOutConnected = false;
     mController->mViewMode = EFullScreenView;
 
@@ -465,8 +463,7 @@ void TestToolBar::testUpdateWithFileDetails()
     // audio-only clip, view mode is full-screen
     //
     details->mVideoEnabled = false;
-    details->mVideoHeight = 0;
-    details->mVideoWidth = 1;
+    details->mAspectRatioChangeable = false;
     details->mTvOutConnected = true;
     details->mSeekable = false;
     details->mPausableStream = true;
@@ -483,8 +480,7 @@ void TestToolBar::testUpdateWithFileDetails()
     // local audio-only clip, view mode is audio-only
     //
     details->mVideoEnabled = false;
-    details->mVideoHeight = 0;
-    details->mVideoWidth = 1;
+    details->mAspectRatioChangeable = false;
     details->mTvOutConnected = true;
     details->mSeekable = true;
     details->mPausableStream = false;
@@ -546,8 +542,7 @@ void TestToolBar::testUpdateWithFileDetails()
     // video clip, view mode is full-screen
     //
     details->mVideoEnabled = true;
-    details->mVideoHeight = 1;
-    details->mVideoWidth = 1;
+    details->mAspectRatioChangeable = false;
     details->mTvOutConnected = false;
     details->mSeekable = true;
     details->mPausableStream = true;

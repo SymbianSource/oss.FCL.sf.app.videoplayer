@@ -125,12 +125,6 @@ void VideoListView::showHint(bool show)
     // not stubbed
 }
 
-void VideoListView::setHintLevel(VideoHintWidget::HintLevel level)
-{
-    Q_UNUSED(level);
-    // not stubbed
-}
-
 void VideoListView::updateSubLabel()
 {
     // not stubbed

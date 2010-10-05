@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 27 %
+// Version : %version: 28 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -1830,11 +1830,6 @@ CVHPPTestClass::PhoneCallRejected( CStifItemParser& aItem )
 
         if ( err == KErrNone )
         {
-            //
-            //  Clear ringing
-            //
-            RProperty::Set(KPSUidCtsyCallInformation, KCTsyCallState, EPSCTsyCallStateNone);
-
             CreateBackgroundCommand(background);
         }
     }

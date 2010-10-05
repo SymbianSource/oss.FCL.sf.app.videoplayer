@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SystemDefinition schema="3.0.0">
- <package id="videoplayer" name="Video Player Apps" levels="support plugin util apps" xmlns:qt="http://www.nokia.com/qt">
+ <package id="videoplayer" name="Video Player Apps" version="10.10.3" levels="support plugin util apps" xmlns:qt="http://www.nokia.com/qt">
   <collection id="videoplayer_plat" name="Video Player Apps Platform Interfaces" level="apps">
    <component id="videoplayer_startup_api" name="Video Player Startup API" class="api" filter="s60">
     <unit bldFile="videoplayer_plat/videoplayer_startup_api/group"/>
@@ -20,140 +20,44 @@
    <component id="videocollectionwrapper" filter="s60" name="Video Collection Wrapper" introduced="^4">
     <unit bldFile="videocollection/videocollectionwrapper" qt:proFile="videocollectionwrapper.pro"/>
    </component>
-   <component id="testvideocollectionclient" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
+     <component id="videocollectionwrapper_test" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
       <!--Can only have one unit. Need to split into separate component or #include from a common file-->
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideocollectionclient" qt:proFile="testvideocollectionclient.pro"/>
-   </component>
-   <component id="testvideocollectionlistener" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideocollectionlistener" qt:proFile="testvideocollectionlistener.pro"/>
-   </component>
-   <component id="testvideocollectionwrapper_p" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideocollectionwrapper_p" qt:proFile="testvideocollectionwrapper_p.pro"/>
-   </component>
-   <component id="testvideodatacontainer" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideodatacontainer" qt:proFile="testvideodatacontainer.pro"/>
-   </component>
-   <component id="testvideodeleteworker" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideodeleteworker" qt:proFile="testvideodeleteworker.pro"/>
-   </component>
-   <component id="testvideomodel" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideomodel" qt:proFile="testvideomodel.pro"/>
-   </component>
-   <component id="testvideomodel_p" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideomodel_p" qt:proFile="testvideomodel_p.pro"/>
-   </component>
-<!--   <component id="testvideosortfilterproxymodel" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideosortfilterproxymodel" qt:proFile="testvideosortfilterproxymodel.pro"/>
-   </component> -->
-   <component id="testvideothumbnaildata" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideothumbnaildata" qt:proFile="testvideothumbnaildata.pro"/>
-   </component>
-   <component id="testvideothumbnaildata_p" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideothumbnaildata_p" qt:proFile="testvideothumbnaildata_p.pro"/>
-   </component>
-   <component id="testvideothumbnailfetcher" filter="s60,test,qt_unit_test" name="Video Collection Wrapper Tests" introduced="^4">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionwrapper/tsrc/testvideothumbnailfetcher" qt:proFile="testvideothumbnailfetcher.pro"/>
-   </component>
+      <meta rel="testbuild">
+       <group name="vado.101_videocollectionwrapper_qt.tsrc"/>
+      </meta>      
+      <unit bldFile="videocollection/videocollectionwrapper/tsrc" qt:proFile="videocollectionwrappertest.pro"/>
+     </component>
    <component id="videocollectionview" filter="s60" name="Video Collection View" introduced="^4">
     <unit bldFile="videocollection/videocollectionview" qt:proFile="videocollectionview.pro"/>
    </component>
-	 <component id="testcollectionview" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
+    <component id="videocollectionview_test" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
       <!--Can only have one unit. Need to split into separate components or #include from a common file-->
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testcollectionview" qt:proFile="testcollectionview.pro"/>
-   </component>
-   <component id="testhintwidget" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testhintwidget" qt:proFile="testhintwidget.pro"/>
-   </component>
-   <component id="testlistview" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testlistview" qt:proFile="testlistview.pro"/>
-   </component>
-   <component id="testlistwidget" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testlistwidget" qt:proFile="testlistwidget.pro"/>
-   </component>
-   <component id="testvideocollectionuiloader" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testvideocollectionuiloader" qt:proFile="testvideocollectionuiloader.pro"/>
-   </component>
-   <component id="testvideocollectionviewutils" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testvideocollectionviewutils" qt:proFile="testvideocollectionviewutils.pro"/>
-   </component>
-   <component id="testvideolistselectiondialog" filter="s60,test,qt_unit_test" name="Video Collection View Tests">
-    <meta rel="testbuild">
-    <group name="vado.101_videocollection_qt.tsrc"/>
-       </meta>
-    <unit bldFile="videocollection/videocollectionview/tsrc/testvideolistselectiondialog" qt:proFile="testvideolistselectiondialog.pro"/>
-   </component>
+      <meta rel="testbuild">
+       <group name="vado.101_videocollectionview_qt.tsrc"/>
+      </meta>
+      <unit bldFile="videocollection/videocollectionview/tsrc" qt:proFile="videocollectionviewtests.pro"/>
+     </component>
    <component id="videofiledetailsview" filter="s60" name="Video File Details View" introduced="^4">
     <unit bldFile="videocollection/videofiledetailsview" qt:proFile="videofiledetailsview.pro"/>
    </component>
-   </collection>
-   <collection id="mediasettings" name="Media Settings" level="support">
+  </collection>
+  <collection id="mediasettings" name="Media Settings" level="support">
    <component id="mediasettingsengine" filter="s60" name="Media Settings Engine">
     <unit bldFile="mediasettings/mediasettingsengine/group"/>
    </component>
    <component id="videosettingsplugin" filter="s60" name="Video Settings Plugin" class="plugin">
     <unit bldFile="mediasettings/videosettingsplugin" qt:proFile="videosettingsplugin.pro"/>
    </component>
-   </collection>
-   <collection id="videoplayerapp" name="Video Player App" level="apps">
+  </collection>
+  <collection id="videoplayerapp" name="Video Player App" level="apps">
    <component id="videoplayerengine" name="Video Player Engine" filter="s60"  introduced="^4">
     <unit bldFile="videoplayerapp/videoplayerengine" qt:proFile="videoplayerengine.pro"/>
    </component>
    <component id="hbvideoplayer" filter="s60" name="Video Player" introduced="^4">
     <unit bldFile="videoplayerapp/videoplayer" qt:proFile="videoplayer.pro"/>
    </component>
-   </collection>
-   <collection id="videoplayback" name="Video Playback Plugins" level="plugin">
+  </collection>
+  <collection id="videoplayback" name="Video Playback Plugins" level="plugin">
    <component id="videoplaybackview" filter="s60" name="Video Playback View" class="plugin" introduced="^4">
     <unit bldFile="videoplayback/videoplaybackview"  qt:proFile="videoplaybackview.pro"/>
    </component>
@@ -170,7 +74,6 @@
   </collection>
  </package>
 </SystemDefinition>
-
 
 
 

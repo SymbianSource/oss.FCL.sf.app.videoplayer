@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 #include <hbapplication.h>
 
@@ -147,32 +147,6 @@ void VideoServiceUriFetch::fetch()
     }
 
 	emit mServiceApp->titleReady(mTitle);
-    mServiceApp->setCurrentService(VideoServices::EUriFetcher);
-
-    mRequestIndex = setCurrentRequestAsync();
-    MPX_DEBUG(_L("VideoServiceUriFetch::fetch() : mRequestIndex(%d)"), mRequestIndex );
-}
-
-// ----------------------------------------------------------------------------
-// fetch()
-// ----------------------------------------------------------------------------
-//
-void VideoServiceUriFetch::fetch(const QString& title)
-{
-	MPX_ENTER_EXIT(_L("VideoServiceUriFetch::fetch()"),
-                   _L("title = %s"), title.data() );
-    
-    emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
-
-    mTitle = title;
-
-    if (mTitle.isEmpty())
-    {
-    	mTitle = hbTrId("txt_videos_title_videos");
-    }
-
-   	emit mServiceApp->titleReady(mTitle);
-
     mServiceApp->setCurrentService(VideoServices::EUriFetcher);
 
     mRequestIndex = setCurrentRequestAsync();

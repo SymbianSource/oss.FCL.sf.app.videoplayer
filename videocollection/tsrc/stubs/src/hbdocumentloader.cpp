@@ -30,7 +30,6 @@
 #include "videocollectionuiloaderdef.h"
 #include "videolistwidget.h"
 #include "videolistview.h"
-#include "videohintwidget.h"
 #include "videolistselectiondialog.h"
 
 bool HbDocumentLoader::mFindWidgetFails = false;
@@ -229,10 +228,6 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     {
         obj = new VideoListWidget(0, 0);
     }
-    else if(name == DOCML_NAME_VC_VIDEOHINTWIDGET)
-    {
-        obj = new VideoHintWidget(0, 0);
-    }
     else if(name == DOCML_NAME_OPTIONS_MENU)
     {
         obj = new HbMenu();
@@ -269,11 +264,7 @@ QObject *HbDocumentLoader::doCreateObject(const QString &name)
     {
         obj = new HbAction();
     }
-    else if(name == DOCML_NAME_HINT_BUTTON)
-    {
-        obj = new HbPushButton();
-    }
-    else if(name == DOCML_NAME_NO_VIDEOS_LABEL)
+    else if(name == DOCML_NAME_NO_CONTENT_LABEL)
     {
         obj = new HbLabel();
     }

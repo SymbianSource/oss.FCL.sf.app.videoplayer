@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#16 %
+// Version : %version: 17 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -171,7 +171,7 @@ void TestVideoPlaybackView::testShowDialog()
     // construct and activate playback view
     //
     setup();
-    
+
     HbMessageBox::mMessageBConstructCount = 0;
     HbNotificationDialog::mNotifConstructCount = 0;
     //
@@ -183,7 +183,7 @@ void TestVideoPlaybackView::testShowDialog()
     // test showDialog() method using default arguments
     //
     mVideoView->showDialog( "test error msg" );
-    
+
     QVERIFY(HbMessageBox::mMessageBConstructCount == 1);
     QVERIFY(HbNotificationDialog::mNotifConstructCount == 0);
     QVERIFY( mVideoView->mTimerForClosingView->isActive() );
@@ -192,35 +192,35 @@ void TestVideoPlaybackView::testShowDialog()
     HbMessageBox::mMessageBConstructCount = 0;
     HbNotificationDialog::mNotifConstructCount = 0;
     mVideoView->mTimerForClosingView->stop();
-    
+
     //
-    // test showDialog() method, error, no closing 
+    // test showDialog() method, error, no closing
     //
     mVideoView->showDialog( "test error msg", false );
-    
+
     QVERIFY(HbMessageBox::mMessageBConstructCount == 1);
     QVERIFY(HbNotificationDialog::mNotifConstructCount == 0);
     QVERIFY( !mVideoView->mTimerForClosingView->isActive() );
-    
+
     HbMessageBox::mMessageBConstructCount = 0;
     HbNotificationDialog::mNotifConstructCount = 0;
-    
+
     //
-    // test showDialog() method, nofitification, closing 
+    // test showDialog() method, nofitification, closing
     //
     mVideoView->showDialog( "test error msg", true, false );
-    
+
     QVERIFY(HbMessageBox::mMessageBConstructCount == 0);
     QVERIFY(HbNotificationDialog::mNotifConstructCount == 1);
     QVERIFY( mVideoView->mTimerForClosingView->isActive() );
-    
+
     mVideoView->handleActivateView();
     HbMessageBox::mMessageBConstructCount = 0;
     HbNotificationDialog::mNotifConstructCount = 0;
     mVideoView->mTimerForClosingView->stop();
-    
+
     //
-    // test showDialog() method, nofitification, not closing 
+    // test showDialog() method, nofitification, not closing
     //
     mVideoView->showDialog( "test error msg", false, false );
 
@@ -228,7 +228,7 @@ void TestVideoPlaybackView::testShowDialog()
     QVERIFY(HbNotificationDialog::mNotifConstructCount == 1);
     QVERIFY( !mVideoView->mTimerForClosingView->isActive() );
 
-    
+
     //
     // destruct playback view
     //
@@ -622,20 +622,34 @@ void TestVideoPlaybackView::testGestureEvent()
     QCOMPARE( spy1.count(), 0 );
 
     //
-    // Test pan gesture with GestureFinished
+    // 1. Test pan gesture with GestureFinished
     //
     panGesture->mState = Qt::GestureFinished;
-    panGesture->mSceneDelta = QPointF( 5, 0 );
+    panGesture->mSceneVelocity = QPointF( 5, 0 );
+    panGesture->mSceneOffset = QPointF( 205, 0 );
     mVideoView->gestureEvent( event );
 
     //
     // ensure signal has been emitted
     //
     QCOMPARE( spy1.count(), 1 );
+
+    //
+    // 2. Test pan gesture with GestureFinished
+    //
+    panGesture->mSceneVelocity = QPointF( 5, 0 );
+    panGesture->mSceneOffset = QPointF( 105, 0 );
+    mVideoView->gestureEvent( event );
+
+    //
+    // ensure signal has not been emitted
+    //
+    QCOMPARE( spy1.count(), 1 );
+
     spy1.clear();
 
     //
-    // Test pan gesture with GestureFinished
+    // 3. Test pan gesture with GestureFinished
     //
 
     //
@@ -649,7 +663,20 @@ void TestVideoPlaybackView::testGestureEvent()
     QCOMPARE( spy2.count(), 0 );
 
     panGesture->mState = Qt::GestureFinished;
-    panGesture->mSceneDelta = QPointF( -5, 0 );
+    panGesture->mSceneVelocity = QPointF( -5, 0 );
+    panGesture->mSceneOffset = QPointF( -205, 0 );
+    mVideoView->gestureEvent( event );
+
+    //
+    // ensure signal has been emitted yet
+    //
+    QCOMPARE( spy2.count(), 1 );
+
+    //
+    // 4. Test pan gesture with GestureFinished
+    //
+    panGesture->mSceneVelocity = QPointF( -5, 0 );
+    panGesture->mSceneOffset = QPointF( -105, 0 );
     mVideoView->gestureEvent( event );
 
     //

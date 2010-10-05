@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 //  Include Files
 
@@ -53,7 +53,7 @@ CMediaClientVideoDisplay::CMediaClientVideoDisplay()
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-void CMediaClientVideoDisplay::RemoveSurface()	
+void CMediaClientVideoDisplay::RemoveSurface()
 {
 }
 
@@ -61,17 +61,17 @@ void CMediaClientVideoDisplay::RemoveSurface()
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-void CMediaClientVideoDisplay::AddDisplayWindowL(const RWindowBase* /*aWindow*/, 
-	                                               const TRect& /*aClipRect*/, 
+void CMediaClientVideoDisplay::AddDisplayWindowL(const RWindowBase* /*aWindow*/,
+	                                               const TRect& /*aClipRect*/,
 	                                               const TRect& /*aCropRegion*/,
-							                                   const TRect& /*aVideoExtent*/, 
-							                                   TReal32 /*aScaleWidth*/, 
+							                                   const TRect& /*aVideoExtent*/,
+							                                   TReal32 /*aScaleWidth*/,
 							                                   TReal32 /*aScaleHeight*/,
-							                                   TVideoRotation /*aRotation*/, 
-							                                   TAutoScaleType /*aAutoScaleType*/, 
-							                                   TInt /*aHorizPos*/, 
-							                                   TInt /*aVertPos*/, 
-							                                   RWindow* /*aWindow2*/)	
+							                                   TVideoRotation /*aRotation*/,
+							                                   TAutoScaleType /*aAutoScaleType*/,
+							                                   TInt /*aHorizPos*/,
+							                                   TInt /*aVertPos*/,
+							                                   RWindow* /*aWindow2*/)
 {
 }
 
@@ -79,10 +79,10 @@ void CMediaClientVideoDisplay::AddDisplayWindowL(const RWindowBase* /*aWindow*/,
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMediaClientVideoDisplay::SurfaceCreated(const TSurfaceId& /*aSurfaceId*/, 
-	                                            const TRect& /*aCropRect*/, 
-	                                            TVideoAspectRatio /*aAspectRatio*/, 
-	                                            const TRect& /*aCropRegion*/)	
+TInt CMediaClientVideoDisplay::SurfaceCreated(const TSurfaceId& /*aSurfaceId*/,
+	                                            const TRect& /*aCropRect*/,
+	                                            TVideoAspectRatio /*aAspectRatio*/,
+	                                            const TRect& /*aCropRegion*/)
 {
     return KErrNone;
 }
@@ -92,13 +92,13 @@ TInt CMediaClientVideoDisplay::SurfaceCreated(const TSurfaceId& /*aSurfaceId*/,
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-TInt CMediaClientVideoDisplay::SurfaceParametersChanged(const TSurfaceId& /*aSurfaceId*/, 
-	                                                      const TRect& /*aCropRect*/, 
+TInt CMediaClientVideoDisplay::SurfaceParametersChanged(const TSurfaceId& /*aSurfaceId*/,
+	                                                      const TRect& /*aCropRect*/,
 	                                                      TVideoAspectRatio /*aAspectRatio*/)
 {
-    return KErrNone;	
-}	
-	
+    return KErrNone;
+}
+
 
 // -------------------------------------------------------------------------------------------------
 // CMediaClientVideoDisplay::RemoveSurface()
@@ -107,30 +107,30 @@ TInt CMediaClientVideoDisplay::SurfaceParametersChanged(const TSurfaceId& /*aSur
 TInt CMediaClientVideoDisplay::RedrawWindows(const TRect& /*aCropRegion*/)
 {
     return KErrNone;
-}							
+}
 
 
 // -------------------------------------------------------------------------------------------------
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-void CMediaClientVideoDisplay::SetVideoExtentL(const RWindowBase& /*aWindow*/, 
-	                                             const TRect& /*aVideoExtent*/, 
+void CMediaClientVideoDisplay::SetVideoExtentL(const RWindowBase& /*aWindow*/,
+	                                             const TRect& aVideoExtent,
 	                                             const TRect& /*aCropRegion*/)
 {
-}	
-	
-	
+    iVideoExtent = aVideoExtent;
+}
+
+
 // -------------------------------------------------------------------------------------------------
 // CMediaClientVideoDisplay::RemoveSurface()
 // -------------------------------------------------------------------------------------------------
 //
-void CMediaClientVideoDisplay::SetAutoScaleL(TAutoScaleType /*aScaleType*/, 
-	                                           TInt /*aHorizPos*/, 
-	                                           TInt /*aVertPos*/, 
+void CMediaClientVideoDisplay::SetAutoScaleL(TAutoScaleType /*aScaleType*/,
+	                                           TInt /*aHorizPos*/,
+	                                           TInt /*aVertPos*/,
 	                                           const TRect& /*aCropRegion*/)
 {
-}	
-	
-	
+}
+
 // EOF

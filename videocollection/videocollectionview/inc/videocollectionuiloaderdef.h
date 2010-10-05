@@ -21,7 +21,6 @@
 // Constants
 static const char* DOCML_VIDEOCOLLECTIONVIEW_FILE         = ":/layout/collectionview.docml";
 static const char* DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST = "listsSection";
-static const char* DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT = "hintSection";
 static const char* DOCML_NAME_VIEW                        = "view";
 
 // Videocollection View
@@ -29,7 +28,6 @@ static const char* DOCML_NAME_VC_HEADINGBANNER            = "vc:mBanner";
 static const char* DOCML_NAME_VC_COLLECTIONWIDGET         = "vc:mCollectionWidget";
 static const char* DOCML_NAME_VC_COLLECTIONCONTENTWIDGET  = "vc:mCollectionContentWidget";
 static const char* DOCML_NAME_VC_VIDEOLISTWIDGET          = "vc:mListWidget";
-static const char* DOCML_NAME_VC_VIDEOHINTWIDGET          = "vc:mHintWidget";
 
 // Videocollection Options Menu
 static const char* DOCML_NAME_OPTIONS_MENU                = "vc:mOptionsMenu";
@@ -44,9 +42,8 @@ static const char* DOCML_NAME_ADD_TO_COLLECTION           = "vc:mAddtoCollection
 static const char* DOCML_NAME_CREATE_COLLECTION           = "vc:mCreateNewCollection";
 static const char* DOCML_NAME_DELETE_MULTIPLE             = "vc:mDeleteMultiple";
 
-// Videocollection hint widget
-static const char* DOCML_NAME_HINT_BUTTON                 = "vc:mHintButton";
-static const char* DOCML_NAME_NO_VIDEOS_LABEL             = "vc:mNoVideosLabel";
+// Videocollection no content label
+static const char* DOCML_NAME_NO_CONTENT_LABEL             = "vc:mNoContentLabel";
 
 // video multiselection dialog
 static const char* DOCML_VIDEOSELECTIONDIALOG_FILE        = ":/layout/videolistselectiondialog.docml";

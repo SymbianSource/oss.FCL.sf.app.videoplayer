@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#11 %
+// Version : %version:  da1mmcf#12 %
 
 
 
@@ -47,16 +47,16 @@ VideoPlaybackViewFileDetails::clearFileDetails()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackViewFileDetails::ClearFileDetails()"));
 
-    mMimeType = tr("");  
+    mMimeType = tr("");
     mTitle = tr("");
     mArtist = tr("");
     mClipName = tr("");
-    mDescription = tr("");  
+    mDescription = tr("");
     mLocation = tr("");
     mCopyright = tr("");
     mLanguage = tr("");
     mKeywords = tr("");
-    
+
     mPlaybackMode = EMPXVideoLocal;
     mSeekable = false;
     mPausableStream = false;
@@ -68,6 +68,7 @@ VideoPlaybackViewFileDetails::clearFileDetails()
     mDuration = 0;
     mTvOutConnected   = false;
     mDrmProtected = false;
+    mAspectRatioChangeable = false;
 
     mVideoHeight = 0;
     mVideoWidth  = 0;

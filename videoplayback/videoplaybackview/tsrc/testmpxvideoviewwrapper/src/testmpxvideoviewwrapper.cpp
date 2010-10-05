@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  18 %
+// Version : %version:  20 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -37,6 +37,7 @@
 #include "mpxcollectionutility.h"
 #include "mpxcollectionplaylist.h"
 #include "testmpxvideoviewwrapper.h"
+#include "devsoundif.h"
 
 #include "../stub/inc/videobaseplaybackview.h"
 #include "../stub/inc/videoplaybackviewfiledetails.h"
@@ -837,8 +838,6 @@ void TestMPXVideoViewWrapper::testHandleMedia()
     QVERIFY( err == KErrNone );
     QCOMPARE( mVideoViewWrapper->iView->mCurrentError, KErrNone );
     QVERIFY( mVideoViewWrapper->iControlsController->mFileDetailsAdded );
-    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSetAspectRatio );
-    QVERIFY( mVideoViewWrapper->iControlsController->mValue == EMMFNatural );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPlay );
     QVERIFY( mVideoViewWrapper->iMediaRequestStatus == MediaDelivered );
 
@@ -872,8 +871,6 @@ void TestMPXVideoViewWrapper::testHandleMedia()
     QVERIFY( err == KErrNone );
     QCOMPARE( mVideoViewWrapper->iView->mCurrentError, KErrNone );
     QVERIFY( mVideoViewWrapper->iControlsController->mFileDetailsAdded );
-    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSetAspectRatio );
-    QVERIFY( mVideoViewWrapper->iControlsController->mValue == EMMFNatural );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPause );
     QVERIFY( mVideoViewWrapper->iMediaRequestStatus == MediaDelivered );
 
@@ -906,8 +903,6 @@ void TestMPXVideoViewWrapper::testHandleMedia()
 
     QVERIFY( err == KErrNone );
     QVERIFY( ! mVideoViewWrapper->iControlsController->mFileDetailsAdded );
-    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSetAspectRatio );
-    QVERIFY( mVideoViewWrapper->iControlsController->mValue == EMMFNatural );
     QVERIFY( mVideoViewWrapper->iPlaybackUtility->iCommand == EPbCmdPause );
     QCOMPARE( mVideoViewWrapper->iView->mCurrentError, KErrNone );
     QVERIFY( mVideoViewWrapper->iMediaRequestStatus == MediaDelivered );
@@ -962,6 +957,37 @@ void TestMPXVideoViewWrapper::testSurfacedAttached()
 
     mVideoViewWrapper->SurfacedAttached( EFalse );
     QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSurfaceDetached );
+
+    cleanup();
+}
+
+void TestMPXVideoViewWrapper::testVolumeSteps()
+{
+    init();
+
+    int volumeSteps = 0;
+
+    TRAP_IGNORE( {
+        CDevSoundIf* devSoundIf = CDevSoundIf::NewL();
+        volumeSteps = devSoundIf->GetNumberOfVolumeSteps();
+        delete devSoundIf;
+    } );
+
+    QVERIFY( mVideoViewWrapper->VolumeSteps() == volumeSteps );
+
+    cleanup();
+}
+
+void TestMPXVideoViewWrapper::testSetDefaultAspectRatio()
+{
+    init();
+
+    int aspectRatio = 3;
+
+    mVideoViewWrapper->SetDefaultAspectRatio( aspectRatio );
+
+    QVERIFY( mVideoViewWrapper->iControlsController->mReceivedEvent == EControlCmdSetAspectRatio );
+    QVERIFY( mVideoViewWrapper->iControlsController->mValue == aspectRatio );
 
     cleanup();
 }

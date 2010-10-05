@@ -15,13 +15,12 @@
 *
 */
 
-// Version : %version:  9 %
+// Version : %version:  11 %
 
 #include <sysutil.h>
 #include <s32file.h>
 #include <mpxcommand.h>
 #include <mpxcommandgeneraldefs.h>
-#include <mpxplaybackutility.h>
 #include <mpxvideoplaybackdefs.h>
 
 #include "mpxvideoviewwrapper.h"
@@ -30,10 +29,8 @@
 #include "videoplaybackviewfiledetails.h"
 
 
-CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                                            CMPXVideoViewWrapper* aViewWrapper )
-    : iPlaybackUtility( aPlayUtil )
-    , iViewWrapper( aViewWrapper )
+CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( CMPXVideoViewWrapper* aViewWrapper )
+    : iViewWrapper( aViewWrapper )
 {
 }
 
@@ -42,13 +39,12 @@ CVideoPlaybackDisplayHandler::~CVideoPlaybackDisplayHandler()
 }
 
 CVideoPlaybackDisplayHandler*
-CVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
-                                    CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler::NewL( CMPXVideoViewWrapper* aViewWrapper )
 {
     MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::NewL()"));
 
     CVideoPlaybackDisplayHandler* self =
-        new(ELeave) CVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
+        new(ELeave) CVideoPlaybackDisplayHandler( aViewWrapper );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -72,12 +68,14 @@ void CVideoPlaybackDisplayHandler::CreateDisplayWindowL(
                                           RWsSession& aWs,
                                           CWsScreenDevice& aScreenDevice,
                                           RWindow& aWin,
-                                          TRect aDisplayRect )
+                                          TRect aDisplayRect,
+                                          VideoPlaybackViewFileDetails* fileDetails )
 {
     Q_UNUSED( aWs );
     Q_UNUSED( aScreenDevice );
     Q_UNUSED( aWin );
     Q_UNUSED( aDisplayRect );
+    Q_UNUSED( fileDetails );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -108,7 +106,7 @@ void CVideoPlaybackDisplayHandler::HandleVideoDisplayMessageL( CMPXMessage* /*aM
 TInt CVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCmd )
 {
     iCommand = aCmd;
-    
+
     switch ( aCmd )
     {
         case EPbCmdNaturalAspectRatio:
@@ -127,20 +125,6 @@ TInt CVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCm
             break;
         }
     }
-
-    return iAspectRatio;
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
-// -------------------------------------------------------------------------------------------------
-//
-TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
-                                          VideoPlaybackViewFileDetails* aFileDetails,
-                                          TReal32 aDisplayAspectRatio )
-{
-    Q_UNUSED( aFileDetails );
-    Q_UNUSED( aDisplayAspectRatio );
 
     return iAspectRatio;
 }

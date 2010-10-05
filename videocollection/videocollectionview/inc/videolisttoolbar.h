@@ -91,11 +91,6 @@ public slots:
      */
     void viewStateChanged(VideoCollectionCommon::TCollectionLevels currentLevel, 
         bool noVideos, bool modelReady);
-    
-    /**
-     * Launches the first operator service from the operator service list.
-     */
-    void openOperatorServiceSlot();
 
     /**
      * Slot is connected into "Add videos" signal

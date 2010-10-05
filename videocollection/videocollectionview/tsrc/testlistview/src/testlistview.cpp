@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 58 %
+// Version : %version: 60 %
 
 #define private public
 #include "videoservices.h"
@@ -41,6 +41,7 @@
 #include "hblistview.h"
 #include "hbinputdialog.h"
 #include "hbtoolbarextension.h"
+#include "hblabel.h"
 #include <qactiongroup.h>
 #include <videocollectioncommon.h>
 #include <qhash.h>
@@ -54,8 +55,6 @@
 #include "videocollectionviewutils.h"
 #include "videolistselectiondialog.h"
 #include "videocollectionwrapper.h"
-#include "videohintwidget.h"
-#include "videohintwidgetdata.h"
 #include "videolistwidgetdata.h"
 #include "videocollectionwrapperdata.h"
 #include "videocollectionviewutilsdata.h"
@@ -266,7 +265,6 @@ void TestListView::testCreateDelete()
 void TestListView::testInitializeView()
 {
     VideoListWidget *videoListWidget = 0;
-    VideoHintWidget *hintWidget = 0;
     
     init(false);
 	// Test mUiLoader is null
@@ -947,11 +945,11 @@ void TestListView::testUpdateSubLabel()
     
 	mTestView->mCurrentList = videoListWidget; 
 	emit testLayoutChangedSignal();
-	QCOMPARE( label->heading(), QString("txt_videos_subtitle_all_videos_ln") );
+	QCOMPARE( label->heading(), QString("txt_videos_subtitle_all_videos_l1") );
 
     mTestView->mCurrentList = collectionWidget; 
 	emit testLayoutChangedSignal();
-    QCOMPARE( label->heading(), QString("txt_videos_subtitle_collections_ln") );
+    QCOMPARE( label->heading(), QString("txt_videos_subtitle_collections_l1") );
 
     mTestView->mCurrentList = collectionContentWidget; 
 	emit testLayoutChangedSignal();
@@ -983,50 +981,48 @@ void TestListView::testShowHint()
     mTestView->mModelReady = true;
     connect(this, SIGNAL(testLayoutChangedSignal()), mTestView, SLOT(layoutChangedSlot()));
     
-    // hint widget cannot be loaded. (cannot be tested, run for coverity)
-    VideoCollectionUiLoaderData::mFindFailureNameList.append(DOCML_NAME_VC_VIDEOHINTWIDGET);
+    // no content label cannot be loaded. (cannot be tested, run for coverity)
+    VideoCollectionUiLoaderData::mFindFailureNameList.append(DOCML_NAME_NO_CONTENT_LABEL);
     emit testLayoutChangedSignal();
     VideoCollectionUiLoaderData::mFindFailureNameList.clear();
     
-    VideoHintWidget *hintWidget = mUiLoader->findWidget<VideoHintWidget>(DOCML_NAME_VC_VIDEOHINTWIDGET);    
-    hintWidget->deactivate();
-    
     /////
-    // hint widget showing
+    // no content label showing
     // model not ready, row count zero.
+    HbLabel *noContentLabel =
+        mUiLoader->findWidget<HbLabel>(
+            DOCML_NAME_NO_CONTENT_LABEL);
+    noContentLabel->setVisible(false);
     mTestView->mModelReady = false;
     setRowCount(0);
     VideoListWidget *backup = mTestView->mCurrentList;
     mTestView->mCurrentList =  mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_COLLECTIONWIDGET);
     emit testLayoutChangedSignal();
-    QVERIFY(hintWidget->isVisible() == false);
-    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
+    QVERIFY(noContentLabel->isVisible() == false);
     mTestView->mCurrentList = backup;
     
     // model not ready, row count not zero.
     setRowCount(1);
+    noContentLabel->setVisible(false);
     emit testLayoutChangedSignal();    
-    QVERIFY(hintWidget->isVisible() == false );
-    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
+    QVERIFY(noContentLabel->isVisible() == false );
     QVERIFY(mTestView->mModelReady);
     
     // model ready, row count not zero
     mTestView->mModelReady = true;
+    noContentLabel->setVisible(false);
     emit testLayoutChangedSignal();    
-    QVERIFY(hintWidget->isVisible() == false );
-    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
+    QVERIFY(noContentLabel->isVisible() == false );
 
     // model ready, row count is zero
     setRowCount(0);
     emit testLayoutChangedSignal();    
-    QVERIFY(hintWidget->isVisible() == true );
-    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
-
+    QVERIFY(noContentLabel->isVisible() == true );
+    
     // model ready, row count is zero, show to be false
     connect(this, SIGNAL(testSignal()), mTestView, SLOT(openCollectionViewSlot()));
     emit testSignal();
-    QVERIFY(hintWidget->isVisible() == false );
-    QVERIFY(VideoHintWidgetData::mSettedButtonShowLevel);
+    QVERIFY(noContentLabel->isVisible() == false );
     disconnect(this, SIGNAL(testSignal()), mTestView, SLOT(openCollectionViewSlot()));
    
     mTestView->mCurrentList =  mUiLoader->findWidget<VideoListWidget>(DOCML_NAME_VC_VIDEOLISTWIDGET);

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#54 %
+// Version : %version: da1mmcf#57 %
 
 
 
@@ -29,7 +29,6 @@
 #include <thumbnailmanager_qt.h>
 
 #include <hblabel.h>
-#include <hbvolumesliderpopup.h>
 #include <hbtransparentwindow.h>
 #include <hbiconanimationmanager.h>
 #include <shareui.h>
@@ -37,10 +36,11 @@
 #include <hbtapgesture.h>
 #include <hbpangesture.h>
 
-#include "mpxvideoviewwrapper.h"
+#include "videoservices.h"
 #include "videobaseplaybackview.h"
 #include "videoplaybackcontrolbar.h"
 #include "videoplaybackcontrolpolicy.h"
+#include "videoplaybackvolumecontrol.h"
 #include "videoplaybackdocumentloader.h"
 #include "videoplaybackviewfiledetails.h"
 #include "videoplaybackstatuspanecontrol.h"
@@ -49,7 +49,6 @@
 #include "videoplaybackcontrolscontroller.h"
 #include "videoplaybackcontrolconfiguration.h"
 #include "videoplaybackdetailsplaybackwindow.h"
-#include "videoservices.h"
 
 
 // ================= MEMBER FUNCTIONS ==============================================================
@@ -146,15 +145,6 @@ void VideoPlaybackControlsController::initializeController()
     mControlsConfig = new VideoPlaybackControlConfiguration( this );
     connect( mControlsConfig, SIGNAL( controlListUpdated() ), this, SLOT( controlsListUpdated() ) );
     mControlsConfig->createControlList();
-
-    //
-    // Create volume popup control
-    //
-    mVolumeControl = new HbVolumeSliderPopup();
-    mVolumeControl->setVisible( false );
-    mVolumeControl->setTimeout( KControlsTimeOut );
-    mVolumeControl->setTickPosition( Hb::NoSliderTicks );
-    mVolumeControl->setRange( KPbPlaybackVolumeLevelMin, KPbPlaybackVolumeLevelMax );
 
     //
     // grab tap gesture
@@ -283,7 +273,7 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
     	mVideoServices->decreaseReferenceCount();
     	mVideoServices = 0;
     }
-    
+
     if( mShareUi )
     {
         delete mShareUi;
@@ -295,8 +285,7 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
 // VideoPlaybackControlsController::addFileDetails()
 // -------------------------------------------------------------------------------------------------
 //
-void VideoPlaybackControlsController::addFileDetails(
-    VideoPlaybackViewFileDetails* details )
+void VideoPlaybackControlsController::addFileDetails( VideoPlaybackViewFileDetails* details )
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::addFileDetails"));
 
@@ -309,15 +298,6 @@ void VideoPlaybackControlsController::addFileDetails(
     mControlsConfig->updateControlsWithFileDetails();
 
     evaluateAndChangeViewMode();
-
-    //
-    // Dimmed the volume control if it is video only
-    //
-    if ( ! mFileDetails->mAudioEnabled )
-    {
-        mVolumeControl->setValue( 0 );
-        mVolumeControl->setEnabled( false );
-    }
 
     //
     // grab pan gesture for playlist and seekable(skippable) clip
@@ -692,8 +672,6 @@ void VideoPlaybackControlsController::appendControl( TVideoPlaybackControls cont
                 MPX_DEBUG(_L("    EIndicatorBitmap load IndicatorBitmaps ok = %d"), ok);
             }
 
-            widget = mLoader->findWidget( QString( "bitmapLayout" ) );
-
             HbWidget *bitmapWidget = qobject_cast<HbWidget*>( widget );
 
             setDefaultBitmap();
@@ -770,7 +748,7 @@ void VideoPlaybackControlsController::handleTappedOnScreen()
                     //
                     // If the volume control is visible, hide it
                     //
-                    if ( mVolumeControl->isVisible() )
+                    if ( mVolumeControl && mVolumeControl->isVisible() )
                     {
                         mVolumeControl->setVisible( false );
                     }
@@ -933,10 +911,12 @@ void VideoPlaybackControlsController::volumeChanged( int volume )
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::volumeChanged() [%d]"), volume);
 
-    if ( mVolumeControl )
+    if ( ! mVolumeControl )
     {
-        mVolumeControl->setValue( volume );
+        mVolumeControl = new VideoPlaybackVolumeControl( this );
     }
+
+    mVolumeControl->volumeChanged( volume );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -947,10 +927,12 @@ void VideoPlaybackControlsController::showVolumeControls()
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::showVolumeControls()"));
 
-    if ( mVolumeControl )
+    if ( ! mVolumeControl )
     {
-        mVolumeControl->setVisible( true );
+        mVolumeControl = new VideoPlaybackVolumeControl( this );
     }
+
+    mVolumeControl->setVisible( true );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1222,7 +1204,7 @@ bool VideoPlaybackControlsController::isSoftKeyVisible()
 void VideoPlaybackControlsController::evaluateAndChangeViewMode(
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
-    MPX_DEBUG(_L("VideoPlaybackControlsController::changeViewMode( %d, %d )"),
+    MPX_DEBUG(_L("VideoPlaybackControlsController::evaluateAndChangeViewMode( %d, %d )"),
             viewMode, transitionEffect );
 
     switch ( viewMode )
@@ -1361,8 +1343,12 @@ void VideoPlaybackControlsController::updateVideoRect( bool transitionEffect )
             rect = widget->geometry();
         }
 
+        //
+        // Turn off the transition effect since it hits performance with high resolution clip
+        // Need to test again with transition effect on with IVE 3.5
+        //
         mViewWrapper->UpdateVideoRect(
-                rect.x(), rect.y(), rect.width(), rect.height(), transitionEffect );
+                rect.x(), rect.y(), rect.width(), rect.height(), false );
     }
 }
 

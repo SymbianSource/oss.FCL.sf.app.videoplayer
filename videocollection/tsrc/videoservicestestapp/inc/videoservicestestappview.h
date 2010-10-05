@@ -37,16 +37,13 @@ private slots:
     void handleError(int errorCode, const QString& errorMessage);
 
     void fetchVideo();
-    void fetchVideoDeprecatedOldService();
     void fetchVideoDeprecatedNewService();
     void browseCapturedVideos();
-    void browseCapturedVideosDeprecatedOldService();
     void browseCapturedVideosDeprecatedNewService();
     
 public slots:
     
     void browseCapturedVideosFinished(HbAction *action);
-    void browseCapturedVideosDeprecatedOldServiceFinished(HbAction *action);
     void browseCapturedVideosDeprecatedNewServiceFinished(HbAction *action);
 
 private:

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1.1.2 %
+// Version : %version: 1.1.3 %
 
 // INCLUDE FILES
 #include <qactiongroup.h>
@@ -308,20 +308,6 @@ void VideoListToolbar::loadOperatorService(int titleKey, int iconKey, int uriKey
     {
         // Load failed, delete service data.
         delete service;
-    }
-}
-
-// ---------------------------------------------------------------------------
-// openOperatorServiceSlot()
-// ---------------------------------------------------------------------------
-//
-void VideoListToolbar::openOperatorServiceSlot()
-{
-    FUNC_LOG;
-    
-    if(mVideoOperatorServices.count() > 0)
-    {
-        mVideoOperatorServices[0]->launchService();
     }
 }
 

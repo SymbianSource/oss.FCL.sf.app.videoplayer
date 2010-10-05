@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 113.1.13 %
+// Version : %version: 113.1.15 %
 
 // INCLUDE FILES
 #include <hbinstance.h>
@@ -26,13 +26,13 @@
 #include <hbgroupbox.h>
 #include <hbparameterlengthlimiter.h>
 #include <hbtoolbarextension.h>
+#include <hblabel.h> 
 #include <xqaiwdecl.h>
 #include <vcxmyvideosdefs.h>
 
 #include "videoservices.h"
 #include "videocollectionviewutils.h"
 #include "videolistwidget.h"
-#include "videohintwidget.h"
 #include "videolistview.h"
 #include "videolisttoolbar.h"
 #include "videolistmenu.h"
@@ -58,7 +58,6 @@ VideoListView::VideoListView( VideoCollectionUiLoader *uiLoader, QGraphicsItem *
     , mMenu(0)
     , mModelReady(false)
     , mViewReady(false)
-    , mHintLevel(VideoHintWidget::AllVideos)
     , mVideoServices(0)
     , mCurrentList(0)
 {
@@ -168,21 +167,8 @@ int VideoListView::initializeView()
         true,
         VideoCollectionUiLoaderParam::LoadPhaseSecondary));
     params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_VC_VIDEOHINTWIDGET,
+        DOCML_NAME_NO_CONTENT_LABEL,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhaseSecondary));
-    params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_HINT_BUTTON,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhaseSecondary));
-    params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_NO_VIDEOS_LABEL,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
         true,
         VideoCollectionUiLoaderParam::LoadPhaseSecondary));
     mUiLoader->addData(params,
@@ -512,19 +498,6 @@ int VideoListView::createToolbar()
         
         mToolbar->initialize();
         mToolbar->viewStateChanged(mCurrentList->getLevel(), true, false);
-        
-        // make sure that the hint widget's button is connected, and connected only once.
-        QObject *hintButton =
-            mUiLoader->findObject<QObject>(
-                DOCML_NAME_HINT_BUTTON, false);
-        
-        if(hintButton)
-        {
-            connect(hintButton, SIGNAL(clicked(bool)), 
-                mToolbar, SLOT(openOperatorServiceSlot()), 
-                Qt::UniqueConnection);
-        }
-        // note that if hintButton is not found, then it's connected in objectReadySlot.
     }
 
     return 0;
@@ -551,29 +524,16 @@ void VideoListView::showHint(bool show)
     
     mModelReady = true;
     
-    // decide if the hintwidget needs to be shown or not.
+    // decide if no content label needs to be shown or not.
     show = show && model->rowCount() == 0;
-    
-    // If show is false, then hint widget is fetched only if it exists. If
-    // show is true then hint widget is also created and prepared if it does not exists.
-    VideoHintWidget *hintWidget =
-        mUiLoader->findWidget<VideoHintWidget>(
-            DOCML_NAME_VC_VIDEOHINTWIDGET, show);
-    
-    if (hintWidget)
+
+    // set visibility for the label.
+    HbLabel *noContentLabel =
+        mUiLoader->findWidget<HbLabel>(
+            DOCML_NAME_NO_CONTENT_LABEL);
+    if (noContentLabel)
     {
-        hintWidget->setLevel(mHintLevel);
-        if (show)
-        {
-            hintWidget->activate();
-            bool showHintBtns = (mCurrentList->getLevel() != VideoCollectionCommon::ELevelDefaultColl); 
-            hintWidget->setButtonShown(showHintBtns);
-        }
-        else
-        {
-            hintWidget->deactivate();
-            hintWidget->setButtonShown(true);
-        }
+        noContentLabel->setVisible(show);
     }
 
     mToolbar->viewStateChanged(mCurrentList->getLevel(), show, mModelReady);
@@ -594,16 +554,6 @@ void VideoListView::showHint(bool show)
             subLabel->show();
         }
     }
-}
-
-// ---------------------------------------------------------------------------
-// setHintLevel
-// ---------------------------------------------------------------------------
-//
-void VideoListView::setHintLevel(VideoHintWidget::HintLevel level)
-{
-	FUNC_LOG;
-	mHintLevel = level;
 }
 
 // ---------------------------------------------------------------------------
@@ -631,16 +581,16 @@ void VideoListView::updateSubLabel()
         {
 			if (mCurrentList->getLevel() == VideoCollectionCommon::ELevelVideos)
 			{
-			    // no need to update sublabel if there are no items in videolist
-			    // hint widget is shown instead
+			    // no need to update sublabel if there are no items in videolist.
+			    // no content label is shown instead.
 			    if (itemCount)
 			    {
-	                subLabel->setHeading(hbTrId("txt_videos_subtitle_all_videos_ln", itemCount));
+	                subLabel->setHeading(hbTrId("txt_videos_subtitle_all_videos_l1", itemCount));
 			    }
 			}
 			else if (mCurrentList->getLevel() == VideoCollectionCommon::ELevelCategory)
 			{
-				subLabel->setHeading(hbTrId("txt_videos_subtitle_collections_ln", itemCount));
+				subLabel->setHeading(hbTrId("txt_videos_subtitle_collections_l1", itemCount));
 			}
 			else
 			{
@@ -774,8 +724,6 @@ void VideoListView::openAllVideosViewSlot()
         // activate all videos list
         mCurrentList = videoListWidget;
         mCurrentList->activate(VideoCollectionCommon::ELevelVideos);
-
-        setHintLevel(VideoHintWidget::AllVideos);
         
         // update the sublabel, as in most cases the data is already up to date.
         updateSubLabel();
@@ -916,10 +864,8 @@ void VideoListView::collectionOpenedSlot(bool openingCollection,
 
         updateSubLabel();
         
-        // update hint widget for correct content
         mModelReady = model->rowCount() > 0;
-        setHintLevel(VideoHintWidget::Collection);
-        
+
         if(mToolbar)
         {
             // if toolbar not yet created, it means that we're activating
@@ -985,10 +931,6 @@ void VideoListView::objectReadySlot(QObject *object, const QString &name)
             // safe to call doDelayed right away
             qobject_cast<VideoListWidget*>(object)->doDelayedsSlot();
         }        
-    }
-    else if (name.compare(DOCML_NAME_HINT_BUTTON) == 0)
-    {
-        connect(object, SIGNAL(clicked(bool)), mToolbar, SLOT(openOperatorServiceSlot()));
     }
 }
 

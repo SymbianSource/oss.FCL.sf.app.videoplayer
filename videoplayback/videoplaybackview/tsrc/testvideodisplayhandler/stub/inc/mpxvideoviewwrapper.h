@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  6 %
 
 
 
@@ -29,8 +29,6 @@
 #include <e32base.h>	// CBase
 #include <e32std.h>	 // TBuf
 
-
-#include "videoplaybackcontrol.hrh"
 
 //  Constants
 
@@ -74,6 +72,8 @@ class CMPXVideoViewWrapper : public CBase
 
         void SurfacedAttached( TBool aAttached );
 
+        void SetDefaultAspectRatio( int aspectRatio );
+
     public: // data
 
         VideoBasePlaybackView*        iView;
@@ -82,6 +82,7 @@ class CMPXVideoViewWrapper : public CBase
         TBool                         iClosePlayerAO;
         TBool                         iForeground;
         TBool                         iAttatched;
+        TInt                          iAspectRatio;
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

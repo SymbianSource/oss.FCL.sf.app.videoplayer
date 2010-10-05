@@ -15,7 +15,7 @@
 * 
 */
 
-// Version : %version: 30.1.4 %
+// Version : %version: 30.1.5 %
 
 // INCLUDE FILES
 #include <qgraphicsitem.h>
@@ -793,7 +793,7 @@ QString VideoListSelectionDialog::getSelectedName()
     if(mSelectedAlbumId.iId2 > KVcxMvcMediaTypeVideo)
     {
         VideoProxyModelGeneric *model = 
-                VideoCollectionWrapper::instance().getCollectionsModel();
+                VideoCollectionWrapper::instance().getGenericModel();
         if(!model)
         {
             return name;

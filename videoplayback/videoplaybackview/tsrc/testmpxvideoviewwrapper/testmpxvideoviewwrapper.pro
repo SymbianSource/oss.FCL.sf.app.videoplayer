@@ -14,7 +14,7 @@
 # Description: Project file for building testmpxvideoviewwrapper
 #
 #
-# Version : %version: 10 %
+# Version : %version: 11 %
 
 
 TEMPLATE = app
@@ -44,6 +44,7 @@ HEADERS += testmpxvideoviewwrapper.h \
            mpxplaybackutility.h \
            mpxcollectionutility.h \
            mpxcollectionplaylist.h \
+           devsoundif.h \
            ../../viewinc/mpxvideoviewwrapper.h
 					                
 SOURCES += testmpxvideoviewwrapper.cpp \
@@ -55,4 +56,5 @@ SOURCES += testmpxvideoviewwrapper.cpp \
            mpxcollectionutility.cpp \
            mpxcollectionplaylist.cpp \
            videoplaybackuserinputhandler.cpp \
+           devsoundif.cpp \
            ../../viewsrc/mpxvideoviewwrapper.cpp

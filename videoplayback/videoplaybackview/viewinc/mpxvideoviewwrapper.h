@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#25 %
+// Version : %version:  da1mmcf#29 %
 
 
 
@@ -216,6 +216,10 @@ class CMPXVideoViewWrapper : public CBase,
 
         void Deactivate();
 
+        int VolumeSteps();
+
+        void SetDefaultAspectRatio( TInt aspectRatio );
+
     private:
 
         /**
@@ -267,6 +271,8 @@ class CMPXVideoViewWrapper : public CBase,
         void UpdatePbPluginMediaL( TBool aSeek );
 
         TInt GetMediaId();
+
+        void InitializeFileDetails();
 
     protected: // data
         MMPXPlaybackUtility*                 iPlaybackUtility;

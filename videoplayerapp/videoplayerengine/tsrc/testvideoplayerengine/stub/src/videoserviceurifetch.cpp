@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 3 %
 
 #include "videoservices.h"
 #include "videoserviceurifetch.h"
@@ -45,10 +45,9 @@ VideoServiceUriFetch::~VideoServiceUriFetch()
 // fetch()
 // ----------------------------------------------------------------------------
 //
-void VideoServiceUriFetch::fetch( const QString& title )
+void VideoServiceUriFetch::fetch()
 {
     MPX_DEBUG(_L("VideoServiceUriFetch::fetch()"));
 
-    Q_UNUSED( title );    
     mServiceApp->setCurrentService( VideoServices::EUriFetcher );
 }

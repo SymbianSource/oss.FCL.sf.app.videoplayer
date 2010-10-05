@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#48 %
+// Version : %version: da1mmcf#52 %
 
 
 
@@ -23,6 +23,7 @@
 
 #include <w32std.h>
 #include <eikenv.h>
+#include <devsoundif.h>
 
 #include <mpxplaybackcommanddefs.h>
 #include <mpxvideoplaybackdefs.h>
@@ -127,7 +128,7 @@ void CMPXVideoViewWrapper::ActivateL()
     //
     //  Create Video Playback Display Handler
     //
-    iDisplayHandler = CVideoPlaybackDisplayHandler::NewL( iPlaybackUtility, this );
+    iDisplayHandler = CVideoPlaybackDisplayHandler::NewL( this );
 
     //
     // Create control's controller
@@ -656,10 +657,7 @@ void CMPXVideoViewWrapper::DoHandleStateChangeL( TInt aNewState )
                         iMediaRequestStatus = MediaNotRequested;
                         HandleCommandL( EMPXPbvCmdResetControls );
 
-                        if ( iFileDetails )
-                        {
-                            iFileDetails->clearFileDetails();
-                        }
+                        InitializeFileDetails();
                     }
                 }
                 break;
@@ -952,7 +950,6 @@ void CMPXVideoViewWrapper::ParseMetaDataL( const CMPXMessage& aMedia )
     {
         iFileDetails->mModificationTime = aMedia.ValueTObjectL<TInt>( KMPXMediaVideoLastModified );
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1293,7 +1290,7 @@ void CMPXVideoViewWrapper::IssueVideoAppForegroundCmdL( TBool aViewForeground, T
                    _L("aViewForeground = %d, aAppForegournd = %d"), aViewForeground, aAppForegournd );
 
     iUserInputHandler->SetForeground( aAppForegournd );
-    
+
     TMPXVideoPlaybackCommand videoCmd = EPbCmdHandleBackground;
     TVideoPlaybackControlCommandIds controlsCmd = EControlCmdHandleBackgroundEvent;
 
@@ -1328,38 +1325,7 @@ void CMPXVideoViewWrapper::CreateControlsL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoViewWrapper::CreateControlsL()"));
 
-    //
-    //  Query playback plugin for filename and mode
-    //
-    CMPXCommand* cmd = CMPXCommand::NewL();
-    CleanupStack::PushL( cmd );
-
-    RetrieveFileNameAndModeL( cmd );
-
-    //
-    //  Create a temporary file details that is populated with the
-    //  file name and playback mode.  This will be delete when
-    //  plugin initialization is complete
-    //
-    if ( iFileDetails )
-    {
-        delete iFileDetails;
-        iFileDetails = NULL;
-    }
-
-    iFileDetails = new VideoPlaybackViewFileDetails();
-
-    TPtrC fileName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );
-    const QString qFilename( (QChar*)fileName.Ptr(), fileName.Length() );
-    iFileDetails->mClipName = qFilename;
-
-    iFileDetails->mPlaybackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
-
-    iFileDetails->mTvOutConnected   = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutConnected );
-
-    TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );
-    const QString qMimeType( (QChar*)mimeType.Ptr(), mimeType.Length() );
-    iFileDetails->mMimeType = qMimeType;
+    InitializeFileDetails();
 
     //
     // get playlist information and set mMultiItemPlaylist flag
@@ -1382,8 +1348,6 @@ void CMPXVideoViewWrapper::CreateControlsL()
     }
 
     iFileDetails->mMultiItemPlaylist = ( numItems > 1 );
-
-    CleanupStack::PopAndDestroy( cmd );
 
     if ( iControlsController )
     {
@@ -1465,31 +1429,13 @@ void CMPXVideoViewWrapper::IssuePlayCommandL()
             TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
 
             //
-            // get window aspect ratio
-            //   if device is in landscape mode, width > height
-            //   if device is in portrait mode, width < height
-            //
-            TReal32 width = (TReal32) displayRect.Width();
-            TReal32 height = (TReal32) displayRect.Height();
-            TReal32 displayAspectRatio = (width > height)? (width / height) : (height / width);
-
-            //
-            // get new aspect ratio
-            TInt newAspectRatio =
-                iDisplayHandler->SetDefaultAspectRatioL( iFileDetails, displayAspectRatio );
-
-            //
             //  Setup the display window and issue play command
             //
             iDisplayHandler->CreateDisplayWindowL( CCoeEnv::Static()->WsSession(),
                                                    *(CCoeEnv::Static()->ScreenDevice()),
                                                    *window,
-                                                   displayRect );
-
-            if ( iControlsController )
-            {
-                iControlsController->handleEvent( EControlCmdSetAspectRatio, newAspectRatio );
-            }
+                                                   displayRect,
+                                                   iFileDetails );
         }
 
         // if coming back after a forced termination, the playback position must
@@ -1685,6 +1631,82 @@ void CMPXVideoViewWrapper::SurfacedAttached( TBool aAttached )
     }
 
     iControlsController->handleEvent( event );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::VolumeSteps()
+// -------------------------------------------------------------------------------------------------
+//
+int CMPXVideoViewWrapper::VolumeSteps()
+{
+    int volumeSteps = 0;
+
+    TRAP_IGNORE( {
+        CDevSoundIf* devSoundIf = CDevSoundIf::NewL();
+        volumeSteps = devSoundIf->GetNumberOfVolumeSteps();
+        delete devSoundIf;
+    } );
+
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::VolumeSteps() volumeSteps = %d"), volumeSteps);
+
+    return volumeSteps;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::InitializeFileDetails()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::InitializeFileDetails()
+{
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::InitializeFileDetails()"));
+
+    CMPXCommand* cmd = CMPXCommand::NewL();
+    CleanupStack::PushL( cmd );
+
+    RetrieveFileNameAndModeL( cmd );
+
+    //
+    //  Create a temporary file details that is populated with the
+    //  file name and playback mode.  This will be deleted when
+    //  plugin initialization is complete
+    //
+    if ( !iFileDetails )
+    {
+        iFileDetails = new VideoPlaybackViewFileDetails();
+    }
+    else
+    {
+        iFileDetails->clearFileDetails();
+    }
+
+    TPtrC fileName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );
+    const QString qFilename( (QChar*)fileName.Ptr(), fileName.Length() );
+    iFileDetails->mClipName = qFilename;
+
+    iFileDetails->mPlaybackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::InitializeFileDetails() - mode %d"), iFileDetails->mPlaybackMode);
+
+    iFileDetails->mTvOutConnected   = cmd->ValueTObjectL<TInt>( KMPXMediaVideoTvOutConnected );
+
+    TPtrC mimeType( cmd->ValueText( KMPXMediaVideoRecognizedMimeType ) );
+    const QString qMimeType( (QChar*)mimeType.Ptr(), mimeType.Length() );
+    iFileDetails->mMimeType = qMimeType;
+
+    CleanupStack::PopAndDestroy( cmd );
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::SetDefaultAspectRatio()
+// -------------------------------------------------------------------------------------------------
+//
+void CMPXVideoViewWrapper::SetDefaultAspectRatio( TInt aspectRatio )
+{
+    MPX_DEBUG(_L("CMPXVideoViewWrapper::SetDefaultAspectRatio() aspectRatio = %d"), aspectRatio);
+
+    if ( iControlsController )
+    {
+        iControlsController->handleEvent( EControlCmdSetAspectRatio, aspectRatio );
+    }
 }
 
 // EOF

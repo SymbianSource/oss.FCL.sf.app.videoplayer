@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   1 %
 
 
 
@@ -42,6 +42,14 @@ class HbVolumeSliderPopup : public HbWidget
         void setTimeout( int timeout );
         void setTickPosition( Hb::SliderTickPositions position );
         void setRange( int min, int max );
+        int value();
+        void setSingleStep( int steps );
+
+    signals:
+        void valueChanged( int );
+        void iconClicked();
+        void sliderPressed();
+        void sliderReleased();
 
     public:
         bool mVisible;
@@ -50,6 +58,8 @@ class HbVolumeSliderPopup : public HbWidget
         int  mTimeOut;
         int  mMin;
         int  mMax;
+        int  mSteps;
+
         Hb::SliderTickPositions mPosition;
 };
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 5 %
+// Version : %version: 6 %
 
 
 
@@ -105,6 +105,9 @@ class VideoPlaybackToolBar : public QObject
         void retrieveButtons();
 
     private:
+        void setAspectRatioButton();
+
+    private:
         VideoPlaybackControlsController *mController;
         HbToolBar                       *mToolBar;
         QTimer                          *mSeekStartTimer;
@@ -120,7 +123,6 @@ class VideoPlaybackToolBar : public QObject
         int     mPosition;
         int     mDuration;
         int     mAspectRatio;
-        TReal32 mDisplayAspectRatio;
 };
 
 #endif /*VIDEOPLAYBACKTOOLBAR_H_*/

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  da1mmcf#5 %
+// Version : %version:  6 %
 
 // INCLUDES
 #include <QtTest/QtTest>
@@ -30,6 +30,7 @@
 #define private public
 #include "videoservices.h"
 #include "videoserviceurifetch.h"
+#include "videoservicebrowse.h"
 #include "videoserviceplay.h"
 #include "videoserviceuri.h"
 #undef private
@@ -100,6 +101,7 @@ void TestVideoServices::testCreateDelete()
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceBrowse );
     QVERIFY( mTestObject->mServiceView );
     QVERIFY( mTestObject->mServiceUriView );
     QVERIFY( mTestObject->mEngine == 0 );
@@ -116,6 +118,7 @@ void TestVideoServices::testCreateDeleteEngine()
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceBrowse );
     QVERIFY( mTestObject->mServiceView );
     QVERIFY( mTestObject->mServiceUriView );    
     QVERIFY( mTestObject->mEngine == mEngine );
@@ -132,6 +135,7 @@ void TestVideoServices::testCurrentService()
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceBrowse );
     QVERIFY( mTestObject->mServiceView );
     QVERIFY( mTestObject->mServiceUriView );    
     QVERIFY( mTestObject->mEngine == 0 );
@@ -140,9 +144,12 @@ void TestVideoServices::testCurrentService()
     mTestObject->mServicePlay->playMedia( QString() );
     QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
-    mTestObject->mServiceUriFetch->fetch( QString() );
+    mTestObject->mServiceBrowse->browseVideos(0, 0);
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EBrowse );
+
+    mTestObject->mServiceUriFetch->fetch( );
     QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
-    
+
     mTestObject->mServicePlay->playMedia( QString() );
     QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
     
@@ -154,11 +161,15 @@ void TestVideoServices::testCurrentService()
     QVERIFY( mTestObject );
     QVERIFY( mTestObject->mServicePlay );
     QVERIFY( mTestObject->mServiceUriFetch );
+    QVERIFY( mTestObject->mServiceBrowse );
     QVERIFY( mTestObject->mServiceView );
     QVERIFY( mTestObject->mEngine == mEngine );
     QVERIFY( mTestObject->mCurrentService == VideoServices::ENoService );
 
-    mTestObject->mServiceUriFetch->fetch( QString() );
+    mTestObject->mServiceBrowse->browseVideos(0, 0);
+    QVERIFY( mTestObject->mCurrentService == VideoServices::EBrowse );
+
+    mTestObject->mServiceUriFetch->fetch( );
     QVERIFY( mTestObject->mCurrentService == VideoServices::EUriFetcher );
     
     mTestObject->mServicePlay->playMedia( QString() );
@@ -176,6 +187,4 @@ void TestVideoServices::cleanupTestCase()
 
 
 // End of file
-
-
 

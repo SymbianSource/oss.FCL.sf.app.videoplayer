@@ -71,27 +71,23 @@ public:
     QString contextTitle() const;
 
 public slots:  // for QTHighway to notify provider about request
+
     /*
      *  Client can use this method launch video URI fetching
      *
      */
     void fetch();
 
-    /*
-     *  Client can use this method launch video URI fetching
-     *
-     * @param title title to be set
-     *
-     */
-    void fetch(const QString& title);
-
 public slots:  // for provider to notify client
+
     void fetchFailed( int errorCode );
 
 private:
+
     void doComplete( QStringList filesList);
 
 private:
+
     /*
      * The request index 
      */

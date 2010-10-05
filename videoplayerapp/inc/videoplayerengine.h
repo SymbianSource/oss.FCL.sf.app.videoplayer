@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#22 %
+// Version : %version: ou1cpsw#23 %
 
 #ifndef VIDEOPLAYERENGINE_H
 #define VIDEOPLAYERENGINE_H
@@ -34,6 +34,7 @@ class MpxViewPlugin;
 class VideoServices;
 class VideoPlaybackWrapper;
 class AfActivityStorage;
+class VideoIadUpdateWrapper;
 
 /**
  *  VideoPlayerEngine
@@ -95,6 +96,8 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
         bool shouldActivateCollectionView();
         
         void handlePlaybackFailure(int errorCode);
+        
+        void checkForUpdates();
 
     private:
         bool                      mIsService;
@@ -114,6 +117,7 @@ class VIDEOPLAYERAPP_DLL_EXPORT VideoPlayerEngine : public QObject
         
         AfActivityStorage*        mActivityStorage;
 
+        VideoIadUpdateWrapper*    mIadUpdateWrapper;
 };
 
 #endif // VIDEOPLAYERENGINE_H

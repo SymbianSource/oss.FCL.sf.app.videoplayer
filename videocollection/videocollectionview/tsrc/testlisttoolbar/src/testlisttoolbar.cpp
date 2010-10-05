@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 2 %
+// Version : %version: 3 %
 
 #include <hbapplication.h>
 #include <qlist.h>
@@ -550,31 +550,6 @@ void TestListToolbar::testViewStateChangedWithServiceExt()
     disconnect(mTestObject, SIGNAL(toolbarExtensionChanged(HbToolBarExtension*)), this, SLOT(testToolbarExtensionChangedSlot(HbToolBarExtension*)));
 }
 
-
-
-
-// ---------------------------------------------------------------------------
-// testOpenOperatorServiceSlot
-// ---------------------------------------------------------------------------
-//
-void TestListToolbar::testOpenOperatorServiceSlot()
-{
-    mTestObject->initialize();
-    // no operator services
-    mTestObject->openOperatorServiceSlot();
-    QVERIFY(VideoOperatorServiceData::mLaunchServiceCallCount == 0);
-    
-    cleanup();
-    init();
-    VideoOperatorServiceData::mTitles.append("TestTitle");
-    VideoOperatorServiceData::mUris.append("TestURI");
-    VideoOperatorServiceData::mIcons.append("TestIcon"); 
-    mTestObject->initialize();
-    // more than zero operator services
-    mTestObject->openOperatorServiceSlot();
-    QVERIFY(VideoOperatorServiceData::mLaunchServiceCallCount == 1);
-}
- 
 // ---------------------------------------------------------------------------
 // testAddVideosToCollectionSlot
 // ---------------------------------------------------------------------------

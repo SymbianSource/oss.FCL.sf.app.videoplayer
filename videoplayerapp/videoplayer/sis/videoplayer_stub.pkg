@@ -18,7 +18,7 @@
 &EN
 
 ; SIS header: name, uid, version
-# {"videoplayer"}, (0x200211FE), 10,10,2, TYPE=SA
+# {"videoplayer"}, (0x200211FE), 10,10,3, TYPE=SA
 
 ; Localised Vendor name
 %{"Nokia"}

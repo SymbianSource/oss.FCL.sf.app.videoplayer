@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -47,16 +47,16 @@ VideoPlaybackViewFileDetails::clearFileDetails()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackViewFileDetails::ClearFileDetails()"));
 
-    mMimeType = tr("");  
+    mMimeType = tr("");
     mTitle = tr("");
     mArtist = tr("");
     mClipName = tr("");
-    mDescription = tr("");  
+    mDescription = tr("");
     mLocation = tr("");
     mCopyright = tr("");
     mLanguage = tr("");
     mKeywords = tr("");
-    
+
     mPlaybackMode = EMPXVideoLocal;
     mSeekable = false;
     mPausableStream = false;
@@ -64,6 +64,7 @@ VideoPlaybackViewFileDetails::clearFileDetails()
     mVideoEnabled = false;
     mPartialPlayback = false;
     mRNFormat = false;
+    mAspectRatioChangeable = false;
 
     mDuration = 0;
     mTvOutConnected   = false;

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  3 %
+// Version : %version:  4 %
 
 
 
@@ -92,19 +92,19 @@ class VideoPlaybackControlsController : public QObject
         */
         inline VideoPlaybackViewFileDetails* fileDetails();
 
-        TPlaybackViewMode viewMode();
+        inline TPlaybackViewMode viewMode();
 
-        void changeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
+        void evaluateAndChangeViewMode( TPlaybackViewMode viewMode, bool transitionEffect = true );
 
         bool isAttachOperation();
-        
+
     private slots:
         void attachVideo();
         void sendVideo();
-                
+
     public:
-        VideoPlaybackViewFileDetails  *mFileDetails;
-        VideoBasePlaybackView         *mView;
+        VideoPlaybackViewFileDetails   *mFileDetails;
+        VideoBasePlaybackView          *mView;
 
         TMPXPlaybackState               mState;
         TPlaybackViewMode               mViewMode;

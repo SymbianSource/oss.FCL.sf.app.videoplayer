@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: %
+// Version : %version: 4 %
 
 #ifndef __VIDEOSERVICES_H__
 #define __VIDEOSERVICES_H__
@@ -38,6 +38,8 @@ class VideoPlayerEngine;
 class VideoServices : public QObject
 {
     Q_OBJECT
+
+    Q_DISABLE_COPY( VideoServices )
 
     public:
 
@@ -123,6 +125,7 @@ class VideoServices : public QObject
          */
         virtual ~VideoServices();
     
+    public:
         void setEngine( VideoPlayerEngine* engine );
     
         /**
@@ -136,8 +139,6 @@ class VideoServices : public QObject
          * @return engine
          */
         VideoPlayerEngine* engine();
-    
-        Q_DISABLE_COPY( VideoServices )
     
     private:
     

@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 4 %
+# Version : %version: 5 %
 
 
 TEMPLATE = app
@@ -28,7 +28,8 @@ symbian:
 
 INCLUDEPATH += stub/inc \
                ../../../../inc \
-               $$MW_LAYER_SYSTEMINCLUDE
+               $$MW_LAYER_SYSTEMINCLUDE \
+               $$APP_LAYER_SYSTEMINCLUDE
               
 DEPENDPATH += stub/inc stub/src inc src
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
@@ -33,10 +33,14 @@ class HbPanGesture : public QPanGesture
         virtual ~HbPanGesture();
         Qt::GestureState state(){ return mState; }
         QPointF sceneDelta();
+        QPointF sceneVelocity();
+        QPointF sceneOffset();
 
     public:
         Qt::GestureState mState;
         QPointF mSceneDelta;
+        QPointF mSceneVelocity;
+        QPointF mSceneOffset;
 };
 
 #endif /*HBPANGESTURE_H_*/

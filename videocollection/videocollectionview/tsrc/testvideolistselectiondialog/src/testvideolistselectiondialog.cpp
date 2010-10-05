@@ -158,7 +158,10 @@ void TestVideoListSelectionDialog::init()
 //
 void TestVideoListSelectionDialog::cleanup()
 {
-    mTestHelper->disconnectSignals();
+    if(mTestHelper)
+    {
+        mTestHelper->disconnectSignals();
+    }
     
     delete mTestObject; 
     mTestObject = 0;
@@ -169,8 +172,6 @@ void TestVideoListSelectionDialog::cleanup()
     mSourceModel = 0;
     
     mModel = 0;
-    
-    
 }
 
 // ---------------------------------------------------------------------------
@@ -196,6 +197,8 @@ void TestVideoListSelectionDialog::testConstructDestruct()
     QVERIFY(mTestObject->mModel == 0);
     QVERIFY(mTestObject->mListWidget == 0);
     
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = 0;
 
@@ -215,8 +218,6 @@ void TestVideoListSelectionDialog::testSetupContent()
 {
     VideoCollectionWrapperData::reset();
     VideoListWidgetData::reset();
-    cleanup();
-    init();
     
     QVERIFY(mInitOk == true);
     QVERIFY(mModel != 0);
@@ -280,6 +281,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
         
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoProxyModelData::reset();
@@ -309,6 +312,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
     
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoProxyModelData::reset();
@@ -363,6 +368,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
 
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoProxyModelData::reset();
@@ -392,6 +399,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
     
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);    
     VideoProxyModelData::reset();
@@ -421,6 +430,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
    
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoProxyModelData::reset();
@@ -449,6 +460,8 @@ void TestVideoListSelectionDialog::testSetupContent()
     QVERIFY(mTestObject->mModelReady == false);
     QVERIFY(mTestObject->mAlbumListReady == false);
    
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     VideoProxyModelData::reset();
@@ -534,6 +547,8 @@ void TestVideoListSelectionDialog::testSetupInitFailures()
     mTestObject->mModel = backup; backup = 0;
     mTestObject->mListWidget = backupWidget; backupWidget = 0;
     
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     
@@ -553,6 +568,8 @@ void TestVideoListSelectionDialog::testSetupInitFailures()
     QVERIFY(mTestObject->mCheckBox == 0);  
     VideoListWidgetData::mInitializeReturnValue = 0;
     
+    if(mTestHelper) 
+        mTestHelper->disconnectSignals();
     delete mTestObject;
     mTestObject = new VideoListSelectionDialog(mTestUiLoader);
     

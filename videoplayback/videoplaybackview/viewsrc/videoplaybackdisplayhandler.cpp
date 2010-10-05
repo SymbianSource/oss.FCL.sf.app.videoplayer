@@ -15,13 +15,12 @@
 *
 */
 
-// Version : %version:  29 %
+// Version : %version:  31 %
 
 #include <sysutil.h>
 #include <s32file.h>
 #include <mpxcommand.h>
 #include <mpxcommandgeneraldefs.h>
-#include <mpxplaybackutility.h>
 #include <mpxvideoplaybackdefs.h>
 
 #include "videocontainer.h"
@@ -36,10 +35,8 @@ const TReal32 KTRANSITIONEFFECTCNT = 8;
 _LIT( KAspectRatioFile, "c:\\private\\200159b2\\mpxvideoplayer_aspect_ratio.dat" );
 
 
-CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                                            CMPXVideoViewWrapper* aViewWrapper )
-    : iPlaybackUtility( aPlayUtil )
-    , iTransitionEffectCnt( 0 )
+CVideoPlaybackDisplayHandler::CVideoPlaybackDisplayHandler( CMPXVideoViewWrapper* aViewWrapper )
+    : iTransitionEffectCnt( 0 )
     , iViewWrapper( aViewWrapper )
     , iScaleWidth( 100.0f )
     , iScaleHeight( 100.0f )
@@ -81,13 +78,12 @@ CVideoPlaybackDisplayHandler::~CVideoPlaybackDisplayHandler()
 }
 
 CVideoPlaybackDisplayHandler*
-CVideoPlaybackDisplayHandler::NewL( MMPXPlaybackUtility* aPlayUtil,
-                                    CMPXVideoViewWrapper* aViewWrapper )
+CVideoPlaybackDisplayHandler::NewL( CMPXVideoViewWrapper* aViewWrapper )
 {
     MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::NewL()"));
 
     CVideoPlaybackDisplayHandler* self =
-        new(ELeave) CVideoPlaybackDisplayHandler( aPlayUtil, aViewWrapper );
+        new(ELeave) CVideoPlaybackDisplayHandler( aViewWrapper );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -113,9 +109,21 @@ void CVideoPlaybackDisplayHandler::CreateDisplayWindowL(
                                           RWsSession& /*aWs*/,
                                           CWsScreenDevice& aScreenDevice,
                                           RWindow& aWin,
-                                          TRect aDisplayRect )
+                                          TRect aDisplayRect,
+                                          VideoPlaybackViewFileDetails* aFileDetails )
 {
     MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::CreateDisplayWindowL()"));
+
+    iFileDetails = aFileDetails;
+
+    //
+    // get window aspect ratio
+    //   if device is in landscape mode, width > height
+    //   if device is in portrait mode, width < height
+    //
+    TReal32 width = (TReal32) aDisplayRect.Width();
+    TReal32 height = (TReal32) aDisplayRect.Height();
+    iDisplayAspectRatio = (width > height)? (width / height) : (height / width);
 
     if ( ! iVideoContainer )
     {
@@ -125,6 +133,8 @@ void CVideoPlaybackDisplayHandler::CreateDisplayWindowL(
     }
 
     RWindowBase *videoWindow = iVideoContainer->DrawableWindow();
+    ((RWindow*)videoWindow )->SetBackgroundColor( KRgbBlack );
+
     videoWindow->SetOrdinalPosition( -1 );
     (&aWin)->SetOrdinalPosition( 0 );
 
@@ -219,22 +229,32 @@ TInt CVideoPlaybackDisplayHandler::SetAspectRatioL( TMPXVideoPlaybackCommand aCm
 }
 
 // -------------------------------------------------------------------------------------------------
-//   CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL
+//   CVideoPlaybackDisplayHandler::CalculateAspectRatioL
 // -------------------------------------------------------------------------------------------------
 //
-TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
-        VideoPlaybackViewFileDetails* aFileDetails, TReal32 aDisplayAspectRatio )
+TInt CVideoPlaybackDisplayHandler::CalculateAspectRatioL()
 {
-    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL()"));
+    MPX_ENTER_EXIT(_L("CVideoPlaybackDisplayHandler::CalculateAspectRatioL()"));
 
     TInt newAspectRatio = EMMFNatural;
 
-    if ( aFileDetails->mVideoHeight > 0 && aFileDetails->mVideoWidth > 0 )
+    if ( iFileDetails->mVideoHeight > 0 && iFileDetails->mVideoWidth > 0 )
     {
         TMMFScalingType scalingType = EMMFNatural;
 
-        TReal32 videoAspectRatio = (TReal32)aFileDetails->mVideoWidth /
-                                   (TReal32)aFileDetails->mVideoHeight;
+        TReal32 videoAspectRatio = (TReal32)iFileDetails->mVideoWidth /
+                                   (TReal32)iFileDetails->mVideoHeight;
+        //
+        //  If the pixel aspect ratio is valid, use it to modify the videoAspectRatio
+        //
+        if ( iAspectRatio.iDenominator )
+        {
+            MPX_DEBUG(_L("VideoPlaybackDisplayHandler::CalculateAspectRatioL() iAspectRatio = (%d,%d)"),
+                iAspectRatio.iNumerator, iAspectRatio.iDenominator );
+
+            TReal32 par = (TReal32)iAspectRatio.iNumerator / (TReal32)iAspectRatio.iDenominator;
+            videoAspectRatio *= par;
+       }
 
         TInt cnt = iAspectRatioArray.Count();
         TInt i = 0;
@@ -244,8 +264,8 @@ TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         //
         for ( ; i < cnt ; i++ )
         {
-            if ( iAspectRatioArray[i].videoRatio == videoAspectRatio &&
-                 iAspectRatioArray[i].screenRatio == aDisplayAspectRatio &&
+            if ( IsAspectRatioEqual( iAspectRatioArray[i].videoRatio, videoAspectRatio ) &&
+                 IsAspectRatioEqual( iAspectRatioArray[i].screenRatio, iDisplayAspectRatio ) &&
                  ( scalingType = iAspectRatioArray[i].scalingType ) > 0 )
             {
                 break;
@@ -255,21 +275,33 @@ TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
         //
         //  if can't find out match aspect ratio in dat file,
         //  choose the scaling type through the rule
-        //      aspectRatioDiff =  videoAspectRatio - aDisplayAspectRatio
-        //      aspectRatioDiff ==  0        ==> natural
-        //      aspectRatioDiff > 0.1        ==> zoom
-        //      aspectRatioDiff < - 0.3      ==> natural
-        //      aspectRatioDiff >= - 0.3 and <= 0.1   ==> stretch
+        //      aspectRatioDiff =  videoAspectRatio - iDisplayAspectRatio
+        //      aspectRatioDiff >= - 0.00001 and <= 0.00001    ==> natural
+        //      aspectRatioDiff > 0.1                          ==> zoom
+        //      aspectRatioDiff < - 0.3                        ==> natural
+        //      aspectRatioDiff >= - 0.3 and <= 0.1            ==> stretch
+        //
+        //               -0.3      -0.00001       0.00001         0.1
+        //     ------------------------------------------------------------
+        //         Natural |   Stretch  |   Natural  |   Stretch   |  Zoom
         //
 
         if ( i == cnt )
         {
-            if ( videoAspectRatio - aDisplayAspectRatio > 0.1 )
+            TReal32 aspectRatioDiff = videoAspectRatio - iDisplayAspectRatio;
+
+            MPX_DEBUG(_L("VideoPlaybackDisplayHandler::CalculateAspectRatioL() videoAspectRatio = d,iDisplayAspectRatio = %d)"),
+                    videoAspectRatio, iDisplayAspectRatio );
+
+            if ( IsAspectRatioEqual( videoAspectRatio, iDisplayAspectRatio )  )
+            {
+                scalingType = EMMFNatural;
+            }
+            else if ( aspectRatioDiff > 0.1 )
             {
                 scalingType = EMMFZoom;
             }
-            else if ( ( videoAspectRatio != aDisplayAspectRatio ) &&
-                      ( videoAspectRatio - aDisplayAspectRatio > (- 0.3) ) )
+            else if ( aspectRatioDiff > - 0.3 )
             {
                 scalingType = EMMFStretch;
             }
@@ -277,11 +309,14 @@ TInt CVideoPlaybackDisplayHandler::SetDefaultAspectRatioL(
             TMPXAspectRatio ratio;
 
             ratio.videoRatio = videoAspectRatio;
-            ratio.screenRatio = aDisplayAspectRatio;
+            ratio.screenRatio = iDisplayAspectRatio;
             ratio.scalingType = scalingType;
 
             iAspectRatioArray.Append( ratio );
         }
+
+        iFileDetails->mAspectRatioChangeable =
+                ! IsAspectRatioEqual( videoAspectRatio, iDisplayAspectRatio );
 
         iCurrentIndexForAspectRatio = i;
 
@@ -485,7 +520,38 @@ void CVideoPlaybackDisplayHandler::SetVideoRectL( TRect aRect )
 
     if ( iVideoDisplay )
     {
-        iVideoDisplay->SetVideoExtentL( *iWindowBase, aRect, TRect( iWindowBase->Size() ) );
+        TRect temp = aRect;
+
+        MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::SetVideoRectL() origianl rect %d %d %d %d"),
+                temp.iTl.iX, temp.iTl.iY, temp.iBr.iX, temp.iBr.iY );
+
+        //
+        // Need to transform based on rotation clockwise
+        // since the input rect is based on orbit orientation(which can be landscape or potrait)
+        // and the video surface is always in device orientation(can't be changed by anything).
+        // If iRotation is EVideoRotationNone,
+        // we don't need to transfrom the rect since video and ui surfaces are in same orietation.
+        // but if iRotation is not EVideoRotationNone,
+        // we need to transform the rect based on clockwise.
+        //
+        switch( iRotation )
+        {
+            case EVideoRotationClockwise90:
+            {
+                int screenWidth = iWindowBase->Size().iWidth;
+
+                temp = TRect( screenWidth - aRect.iBr.iY,
+                              aRect.iTl.iX,
+                              screenWidth - aRect.iTl.iY,
+                              aRect.iBr.iX );
+                break;
+            }
+        }
+
+        MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::SetVideoRectL() transformed rect %d %d %d %d"),
+                temp.iTl.iX, temp.iTl.iY, temp.iBr.iX, temp.iBr.iY );
+
+        iVideoDisplay->SetVideoExtentL( *iWindowBase, temp, iCropRect );
     }
 }
 
@@ -541,6 +607,7 @@ void CVideoPlaybackDisplayHandler::AddDisplayWindowL( CWsScreenDevice& aScreenDe
     );
 
     MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::AddDisplayWindowL() Display Added"));
+
     //
     //  Check if surface was created before window was ready
     //
@@ -573,6 +640,8 @@ void CVideoPlaybackDisplayHandler::SurfaceCreatedL( CMPXMessage* aMessage )
     iSurfaceId = aMessage->ValueTObjectL<TSurfaceId>( KMPXMediaVideoDisplayTSurfaceId );
     iCropRect = aMessage->ValueTObjectL<TRect>( KMPXMediaVideoDisplayCropRect );
     iAspectRatio = aMessage->ValueTObjectL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio );
+
+    iViewWrapper->SetDefaultAspectRatio( CalculateAspectRatioL() );
 
     if ( iVideoDisplay )
     {
@@ -618,6 +687,8 @@ void CVideoPlaybackDisplayHandler::SurfaceChangedL( CMPXMessage* aMessage )
     iSurfaceId = aMessage->ValueTObjectL<TSurfaceId>( KMPXMediaVideoDisplayTSurfaceId );
     iCropRect = aMessage->ValueTObjectL<TRect>( KMPXMediaVideoDisplayCropRect );
     iAspectRatio = aMessage->ValueTObjectL<TVideoAspectRatio>( KMPXMediaVideoDisplayAspectRatio );
+
+    iViewWrapper->SetDefaultAspectRatio( CalculateAspectRatioL() );
 
     if ( iVideoDisplay )
     {
@@ -692,6 +763,28 @@ TInt CVideoPlaybackDisplayHandler::SetNgaAspectRatioL( TMPXVideoPlaybackCommand 
     }
 
     return aspectRatio;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CVideoPlaybackDisplayHandler::IsAspectRatioEqual()
+// -------------------------------------------------------------------------------------------------
+//
+TBool CVideoPlaybackDisplayHandler::IsAspectRatioEqual( TReal32 aRatio1, TReal32 aRatio2 )
+{
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::IsAspectRatioEqual() ar1 = %f ar2 = %f)"),
+            aRatio1, aRatio2 );
+
+    TBool valuesEqual = EFalse;
+    TReal32 arDiff = aRatio1 - aRatio2;
+
+    if ( arDiff < 0.00001 && arDiff > -0.00001 )
+    {
+        valuesEqual = ETrue;
+    }
+
+    MPX_DEBUG(_L("CVideoPlaybackDisplayHandler::IsAspectRatioEqual(%d)"), valuesEqual);
+
+    return valuesEqual;
 }
 
 // End of File

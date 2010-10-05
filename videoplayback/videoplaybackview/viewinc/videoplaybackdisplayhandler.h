@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  12 %
+// Version : %version:  14 %
 
 
 #ifndef __VIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -29,11 +29,10 @@
 #include <mediaclientvideodisplay.h>
 
 
-// 
+//
 //  CLASS DECLARATION
 //
 class CVideoContainer;
-class MMPXPlaybackUtility;
 class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
 
@@ -52,39 +51,37 @@ class CVideoPlaybackDisplayHandler : public CBase
         TReal32         screenRatio;
         TMMFScalingType scalingType;
     } TMPXAspectRatio ;
-    
+
     public:
 
         ~CVideoPlaybackDisplayHandler();
 
-        static CVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
-                                                   CMPXVideoViewWrapper* aViewWrapper );
+        static CVideoPlaybackDisplayHandler* NewL( CMPXVideoViewWrapper* aViewWrapper );
 
         void CreateDisplayWindowL( RWsSession& aWs,
                                    CWsScreenDevice& aScreenDevice,
                                    RWindow& aWin,
-                                   TRect aDisplayRect );
+                                   TRect aDisplayRect,
+                                   VideoPlaybackViewFileDetails* aFileDetails );
 
         void RemoveDisplayWindow();
 
         void HandleVideoDisplayMessageL( CMPXMessage* aMessage );
 
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
-        
-        TInt SetDefaultAspectRatioL( VideoPlaybackViewFileDetails* aFileDetails, 
-                                     TReal32 aDisplayAspectRatio );
+
+        TInt CalculateAspectRatioL();
 
         void UpdateVideoRectL( TRect aRect, TBool transitionEffect );
 
     private:
 
-        CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                      CMPXVideoViewWrapper* aViewWrapper );
+        CVideoPlaybackDisplayHandler( CMPXVideoViewWrapper* aViewWrapper );
 
         void ConstructL();
-        
+
         void LoadAspectRatioL();
-        
+
         void SaveAspectRatioL();
 
         void SetVideoRectL( TRect aClipRect );
@@ -102,13 +99,12 @@ class CVideoPlaybackDisplayHandler : public CBase
         void SurfaceChangedL( CMPXMessage* aMessage );
         void SurfaceRemoved();
         TInt SetNgaAspectRatioL( TMPXVideoPlaybackCommand aCmd );
+        TBool IsAspectRatioEqual( TReal32 aRatio1, TReal32 aRatio2 );
 
     private:
-        MMPXPlaybackUtility*                iPlaybackUtility;
-
         RArray<TMPXAspectRatio>             iAspectRatioArray;
         TInt                                iCurrentIndexForAspectRatio;
-        TReal                               iDisplayAspectRatio;
+        TReal32                             iDisplayAspectRatio;
 
         TRect                               iWindowRect;
 
@@ -136,6 +132,7 @@ class CVideoPlaybackDisplayHandler : public CBase
         TVideoRotation                      iRotation;
         TAutoScaleType                      iAutoScale;
         CVideoContainer*                    iVideoContainer;
+        VideoPlaybackViewFileDetails*       iFileDetails;
 };
 
 #endif // __VIDEOPLAYBACKDISPLAYHANDLER_H__

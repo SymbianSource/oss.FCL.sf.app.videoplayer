@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -43,17 +43,17 @@ VideoPlaybackViewFileDetails::clearFileDetails()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackViewFileDetails::ClearFileDetails()"));
 
-    mMimeType = tr("");  
+    mMimeType = tr("");
     mTitle = tr("");
     mArtist = tr("");
-    mDescription = tr("");  
+    mDescription = tr("");
     mLocation = tr("");
     mCopyright = tr("");
     mLanguage = tr("");
     mKeywords = tr("");
 
     mClipName = QString("testClip.3gp");
-    
+
     mPlaybackMode = EMPXVideoLocal;
     mSeekable = false;
     mPausableStream = false;
@@ -61,6 +61,7 @@ VideoPlaybackViewFileDetails::clearFileDetails()
     mVideoEnabled = false;
     mPartialPlayback = false;
     mRNFormat = false;
+    mAspectRatioChangeable = false;
 
     mDuration = 0;
     mTvOutConnected   = false;

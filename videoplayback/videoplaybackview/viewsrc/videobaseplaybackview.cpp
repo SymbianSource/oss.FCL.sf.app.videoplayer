@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 49.1.2 %
+// Version : %version: da1mmcf#49.1.3 %
 
 
 
@@ -51,6 +51,7 @@
 #include "videoplaybackviewfiledetails.h"
 #include "mpxcommonvideoplaybackview.hrh"
 
+const int KPanGestureThreshold = 200;
 
 //  Member Functions
 
@@ -312,7 +313,7 @@ void VideoBasePlaybackView::showDialog( const QString& string, bool closeView, b
 
     //
     // create pop-up dialog for error notes and notifications,
-    // For error notes, HbMessageBox is used: 
+    // For error notes, HbMessageBox is used:
     //  - Note will be dismissed by using standard timeout or
     //  - If user taps anywhere on the screen.
     // For notifications, HbNotification dialog will be used.
@@ -321,15 +322,15 @@ void VideoBasePlaybackView::showDialog( const QString& string, bool closeView, b
     HbDialog *dlg = 0;
     if(isError)
     {
-        dlg = new HbMessageBox( string, HbMessageBox::MessageTypeWarning ); 
+        dlg = new HbMessageBox( string, HbMessageBox::MessageTypeWarning );
         // dialog will be closed by timeout, no buttons used
         qobject_cast<HbMessageBox*>( dlg )->setStandardButtons( HbMessageBox::NoButton );
-    } 
+    }
     else
     {
         dlg = new HbNotificationDialog();
         qobject_cast<HbNotificationDialog*>( dlg )->setTitle( string );
-    }       
+    }
     dlg->setAttribute( Qt::WA_DeleteOnClose );
     dlg->setDismissPolicy( HbPopup::TapAnywhere );
     dlg->setTimeout( HbPopup::StandardTimeout );
@@ -472,21 +473,25 @@ void VideoBasePlaybackView::gestureEvent( QGestureEvent* event )
             emit tappedOnScreen();
         }
     }
-    else if ( HbPanGesture* gesture = static_cast<HbPanGesture*>( event->gesture( Qt::PanGesture ) ) )
-    {
-        if ( gesture->state() == Qt::GestureFinished && mActivated )
-        {
-            QPointF delta( gesture->sceneDelta() );
 
-            if ( delta.x() > 0 )
+    if ( HbPanGesture* gesture = static_cast<HbPanGesture*>( event->gesture( Qt::PanGesture ) ) )
+    {
+        if ( mActivated && gesture->state() == Qt::GestureFinished )
+        {
+            MPX_DEBUG(_L("VideoBasePlaybackView::gestureEvent() pan gesture finished"));
+
+            int nonZeroVelocity = (int)( gesture->sceneVelocity().x() );
+            int offset = (int)( gesture->sceneOffset().x() );
+
+            if ( offset > KPanGestureThreshold && nonZeroVelocity > 0 )
             {
-                MPX_DEBUG(_L("VideoBasePlaybackView::gestureEvent() right") );
+                MPX_DEBUG(_L("VideoBasePlaybackView::gestureEvent() pan gesture right") );
 
                 emit pannedToRight();
             }
-            else
+            else if ( offset < KPanGestureThreshold * -1.0f && nonZeroVelocity < 0 )
             {
-                MPX_DEBUG(_L("VideoBasePlaybackView::gestureEvent() left") );
+                MPX_DEBUG(_L("VideoBasePlaybackView::gestureEvent() pan gesture left") );
 
                 emit pannedToLeft();
             }

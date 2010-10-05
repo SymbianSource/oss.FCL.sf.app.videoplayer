@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="1.0">
+<hbdocument version="1.1">
     <object name="vc:mAddtoCollection" type="HbAction">
         <string locid="txt_videos_opt_add_to_collection" name="text"/>
     </object>
@@ -23,14 +23,14 @@
     </object>
     <widget name="view" type="VideoListView">
         <widget name="vc:mOptionsMenu" role="HbView:menu" type="HbMenu">
-            <ref object="vc:mAddtoCollection" role="HbMenu:addAction"/>
-            <ref object="vc:mCreateNewCollection" role="HbMenu:addAction"/>
-            <ref object="vc:mDeleteMultiple" role="HbMenu:addAction"/>
+            <ref object="vc:mAddtoCollection" role="HbWidget:addAction"/>
+            <ref object="vc:mCreateNewCollection" role="HbWidget:addAction"/>
+            <ref object="vc:mDeleteMultiple" role="HbWidget:addAction"/>
             <widget name="vc:mSortBy" role="HbMenu:menu" type="HbMenu">
-                <ref object="vc:mDate" role="HbMenu:addAction"/>
-                <ref object="vc:mName" role="HbMenu:addAction"/>
-                <ref object="vc:mNumberOfItems" role="HbMenu:addAction"/>
-                <ref object="vc:mSize" role="HbMenu:addAction"/>
+                <ref object="vc:mDate" role="HbWidget:addAction"/>
+                <ref object="vc:mName" role="HbWidget:addAction"/>
+                <ref object="vc:mNumberOfItems" role="HbWidget:addAction"/>
+                <ref object="vc:mSize" role="HbWidget:addAction"/>
                 <string locid="txt_videos_opt_sort_by" name="title"/>
             </widget>
         </widget>
@@ -40,16 +40,20 @@
                     <sizehint height="72un" type="PREFERRED" width="53.6un"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
-                <widget name="vc:mHintWidget" type="VideoHintWidget">
-                    <sizehint height="23.8806un" type="PREFERRED" width="23.8806un"/>
+                <widget name="vc:mNoContentLabel" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <sizehint height="var(hb-param-screen-height)" type="PREFERRED"/>
+                    <sizehint height="var(hb-param-screen-height)" type="MAXIMUM" width="var(hb-param-screen-width)"/>
                     <bool name="visible" value="FALSE"/>
-                </widget>        
+                    <string locid="txt_common_info_no_content" name="plainText" value="(No content)"/>
+                    <fontspec name="fontSpec" role="Primary" textheight="26.8"/>
+                </widget>
                 <real name="z" value="0"/>
                 <sizehint height="72un" type="PREFERRED" width="53.6un"/>
                 <bool name="visible" value="TRUE"/>
                 <layout type="stacked">
                     <stackitem itemname="vc:mListStacked"/>
-                    <stackitem itemname="vc:mHintWidget"/>
+                    <stackitem itemname="vc:mNoContentLabel"/>
                 </layout>
             </widget>
             <widget name="vc:mBanner" type="HbGroupBox">
@@ -69,43 +73,6 @@
             </layout>
         </widget>
     </widget>
-    <section name="hintSection">
-        <widget name="vc:mHintWidget" type="VideoHintWidget">
-            <widget name="vc:mNoVideosLabel" type="HbLabel">
-                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <sizehint height="6un" type="PREFERRED"/>
-                <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
-                <bool name="visible" value="FALSE"/>
-                <string locid="txt_videos_info_no_videos" name="plainText" value="(No videos)"/>
-                <fontspec name="fontSpec" role="Primary" textheight="26.8"/>
-            </widget>
-            <widget name="vc:mHintButtonLayout" type="HbWidget">
-                <widget name="vc:mHintButton" type="HbPushButton">
-                    <real name="z" value="1"/>
-                    <sizehint type="PREFERRED"/>
-                    <sizehint height="6un" type="MAXIMUM" width="2504062.01158un"/>
-                    <bool name="visible" value="FALSE"/>
-                    <string name="state" value="normal"/>
-                </widget>
-                <real name="z" value="0"/>
-                <sizehint height="11.9403un" type="PREFERRED" width="23.8806un"/>
-                <layout orientation="Horizontal" type="linear">
-                    <stretchitem stretchfactor="1"/>
-                    <linearitem itemname="vc:mHintButton"/>
-                    <stretchitem stretchfactor="1"/>
-                </layout>
-            </widget>
-            <real name="z" value="0"/>
-            <sizehint height="23.8806un" type="PREFERRED" width="23.8806un"/>
-            <bool name="visible" value="FALSE"/>
-            <layout orientation="Vertical" type="linear">
-                <stretchitem stretchfactor="1"/>
-                <linearitem itemname="vc:mNoVideosLabel"/>
-                <linearitem itemname="vc:mHintButtonLayout"/>
-                <stretchitem stretchfactor="1"/>
-            </layout>
-        </widget>            
-    </section>
     <section name="listsSection">
         <widget name="vc:mListStacked" type="HbWidget">
             <widget name="vc:mListWidget" type="VideoListWidget">
@@ -126,11 +93,10 @@
                 <stackitem itemname="vc:mCollectionWidget"/>
                 <stackitem itemname="vc:mCollectionContentWidget"/>
             </layout>
-        </widget>  
+        </widget>
     </section>
-    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
-        <uistate name="hintState" sections="#common hintSection"/>
         <uistate name="listsState" sections="#common listsSection"/>
     </metadata>
 </hbdocument>

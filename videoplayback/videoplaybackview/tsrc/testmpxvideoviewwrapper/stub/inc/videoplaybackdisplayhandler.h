@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  8 %
+// Version : %version:  10 %
 
 
 #ifndef __CVIDEOPLAYBACKDISPLAYHANDLER_H__
@@ -29,10 +29,9 @@
 #include <mediaclientvideodisplay.h>
 
 
-// 
+//
 //  CLASS DECLARATION
 //
-class MMPXPlaybackUtility;
 class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
 
@@ -46,34 +45,29 @@ class CVideoPlaybackDisplayHandler : public CBase
 
         ~CVideoPlaybackDisplayHandler();
 
-        static CVideoPlaybackDisplayHandler* NewL( MMPXPlaybackUtility* aPlayUtil,
-                                                   CMPXVideoViewWrapper* aViewWrapper );
+        static CVideoPlaybackDisplayHandler* NewL( CMPXVideoViewWrapper* aViewWrapper );
 
         void CreateDisplayWindowL( RWsSession& aWs,
                                    CWsScreenDevice& aScreenDevice,
                                    RWindow& aWin,
-                                   TRect aDisplayRect );
+                                   TRect aDisplayRect,
+                                   VideoPlaybackViewFileDetails* fileDetails );
 
         void RemoveDisplayWindow();
 
         void HandleVideoDisplayMessageL( CMPXMessage* aMessage );
 
         TInt SetAspectRatioL( TMPXVideoPlaybackCommand aCmd );
-        
-        TInt SetDefaultAspectRatioL( VideoPlaybackViewFileDetails* aFileDetails, 
-                                     TReal32 aDisplayAspectRatio );
 
         void UpdateVideoRectL( TRect aRect, TBool transitionEffect );
 
     private:
 
-        CVideoPlaybackDisplayHandler( MMPXPlaybackUtility* aPlayUtil,
-                                      CMPXVideoViewWrapper* aViewWrapper );
+        CVideoPlaybackDisplayHandler( CMPXVideoViewWrapper* aViewWrapper );
 
         void ConstructL();
 
     public:
-        MMPXPlaybackUtility*                iPlaybackUtility;
         CMPXVideoViewWrapper*               iViewWrapper;
         CMediaClientVideoDisplay*           iVideoDisplay;
 

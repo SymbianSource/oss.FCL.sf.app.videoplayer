@@ -15,7 +15,7 @@
  *
 */
 
-// Version : %version:  12 %
+// Version : %version:  ou1cpsw#14 %
 
 
 
@@ -750,26 +750,40 @@ void CMpxVideoPlayerAppUiEngine::UpdatePbPluginMediaL()
 //
 TInt CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination(const TDesC& aFileName)
 {
-    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination()"));        
+    MPX_DEBUG(_L("CMpxVideoPlayerAppUiEngine::ReplayAfterPriorTermination()"));      
     
-    ReadActivityData();
-    TMPXItemId mpxItemId(iLastPlayedItemId);
+    TInt error = KErrNone; 
     
-    TInt error = KErrNone;    
+    RFile file;
+    RFs fs;
+    TInt fileError = fs.Connect();
+    if ( fileError == KErrNone )
+    {
+        fileError = file.Open( fs, aFileName, EFileRead | EFileShareReadersOrWriters  );
     
-    MPX_TRAP( error,         
-        CMPXMedia* media = CMPXMedia::NewL();
-        CleanupStack::PushL(media);
-        
-        media->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem );  
-        media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, mpxItemId );
-        media->SetTextValueL( KMPXMediaGeneralTitle, aFileName );
-        media->SetTextValueL( KMPXMediaGeneralUri, aFileName );    
-        
-        OpenMediaL( *media );
-        
-        CleanupStack::PopAndDestroy( media );
-        );
+        if ( fileError == KErrNone && file.SubSessionHandle() )
+        {
+            file.Close();
+            
+            ReadActivityData();
+            TMPXItemId mpxItemId(iLastPlayedItemId);
+                               
+            MPX_TRAP( error,         
+                CMPXMedia* media = CMPXMedia::NewL();
+                CleanupStack::PushL(media);
+                
+                media->SetTObjectValueL<TMPXGeneralType>(KMPXMediaGeneralType, EMPXItem );  
+                media->SetTObjectValueL<TMPXItemId>( KMPXMediaGeneralId, mpxItemId );
+                media->SetTextValueL( KMPXMediaGeneralTitle, aFileName );
+                media->SetTextValueL( KMPXMediaGeneralUri, aFileName );    
+                
+                OpenMediaL( *media );
+                
+                CleanupStack::PopAndDestroy( media );
+                );        
+        }  
+        fs.Close();
+    }
     
     return error;
 }

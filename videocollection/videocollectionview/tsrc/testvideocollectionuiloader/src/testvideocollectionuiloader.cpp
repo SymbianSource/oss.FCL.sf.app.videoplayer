@@ -29,7 +29,6 @@
 
 #include "videolistwidgetdata.h"
 #include "testvideocollectionuiloader.h"
-#include "videohintwidget.h"
 #include "videocollectionwrapperdata.h"
 
 #define private public
@@ -171,12 +170,6 @@ void TestVideoCollectionUiLoader::testFindWidget()
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
         true,
         VideoCollectionUiLoaderParam::LoadPhasePrimary);
-    VideoCollectionUiLoaderParam hint(
-        DOCML_NAME_VC_VIDEOHINTWIDGET,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhasePrimary);
     
     // pre-load widget asynchronously and find widget
     params.append(banner);
@@ -241,38 +234,6 @@ void TestVideoCollectionUiLoader::testFindWidget()
     QVERIFY(!mObjects.contains(DOCML_NAME_VC_HEADINGBANNER));
     cleanup();
     init();
-
-    // do not pre-load widget but add it in queue, section loaded
-    ok = false;
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
-    QVERIFY(ok);
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        &ok);
-    QVERIFY(ok);
-    params.append(hint);
-    mTestObject->addData(params,
-        this,
-        SLOT(handleObjectReady(QObject*, const QString&)));
-    VideoHintWidget *hintWidget =
-        mTestObject->findWidget<VideoHintWidget>(
-            DOCML_NAME_VC_VIDEOHINTWIDGET);
-    QVERIFY(hintWidget);
-    QVERIFY(mObjects.contains(DOCML_NAME_VC_VIDEOHINTWIDGET));
-    params.clear();
-    cleanup();
-    init();
-
-    // do not pre-load widget, section not loaded
-    ok = false;
-    HbDocumentLoader::mFindWidgetFails = true;
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
-    QVERIFY(ok);
-    hintWidget =
-        mTestObject->findWidget<VideoHintWidget>(
-            DOCML_NAME_VC_VIDEOHINTWIDGET);
-    QVERIFY(!hintWidget);
-    QVERIFY(!mObjects.contains(DOCML_NAME_VC_VIDEOHINTWIDGET));
 }
 
 // ---------------------------------------------------------------------------
@@ -434,21 +395,6 @@ void TestVideoCollectionUiLoader::testLoadSection()
     mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST, &ok);
     QVERIFY(ok);
     QVERIFY(mTestObject->mSections.contains(DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST));
-    cleanup();
-    init();
-
-    // load section:
-    // -docml loaded
-    // -two correct sections
-    ok = false;
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, &ok);
-    QVERIFY(ok);
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST, &ok);
-    QVERIFY(ok);
-    QVERIFY(mTestObject->mSections.contains(DOCML_VIDEOCOLLECTIONVIEW_SECTION_LIST));
-    mTestObject->load(DOCML_VIDEOCOLLECTIONVIEW_FILE, DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT, &ok);
-    QVERIFY(ok);
-    QVERIFY(mTestObject->mSections.contains(DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT));
     cleanup();
     init();
 
@@ -628,12 +574,6 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
         true,
         VideoCollectionUiLoaderParam::LoadPhasePrimary));
     params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_VC_VIDEOHINTWIDGET,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhasePrimary));
-    params.append(VideoCollectionUiLoaderParam(
         DOCML_NAME_OPTIONS_MENU,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
         true,
@@ -679,15 +619,8 @@ void TestVideoCollectionUiLoader::testLoadPhase_2()
         false,
         VideoCollectionUiLoaderParam::LoadPhasePrimary));
     params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_HINT_BUTTON,
+        DOCML_NAME_NO_CONTENT_LABEL,
         DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
-        true,
-        VideoCollectionUiLoaderParam::LoadPhasePrimary));
-    params.append(VideoCollectionUiLoaderParam(
-        DOCML_NAME_NO_VIDEOS_LABEL,
-        DOCML_VIDEOCOLLECTIONVIEW_FILE,
-        DOCML_VIDEOCOLLECTIONVIEW_SECTION_HINT,
         true,
         VideoCollectionUiLoaderParam::LoadPhasePrimary));
     params.append(VideoCollectionUiLoaderParam(

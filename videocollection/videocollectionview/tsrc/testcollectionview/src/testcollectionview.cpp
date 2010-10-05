@@ -217,7 +217,7 @@ void TestCollectionView::testActivateView()
     // -captured category
     init();
     serviceUtil->setCurrentService(true);
-    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->setCurrentService(VideoServices::EBrowse);
     VideoCollectionViewUtilsData::mIsServiceValue = true;
     VideoCollectionViewUtils::instance().setIsService();
     VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdCaptured;
@@ -234,7 +234,7 @@ void TestCollectionView::testActivateView()
     serviceUtil->setCurrentService(true);
     VideoCollectionViewUtilsData::mIsServiceValue = true;
     VideoCollectionViewUtils::instance().setIsService();
-    videoServices->mCurrentService = VideoServices::EBrowse;
+    videoServices->setCurrentService(VideoServices::EBrowse);
     VideoServiceBrowseData::mBrowseCategory = KVcxMvcCategoryIdDownloads;
     mTestView->activateView();
     QCOMPARE(VideoListViewData::mActivateViewCount, 1);
@@ -248,7 +248,7 @@ void TestCollectionView::testActivateView()
     serviceUtil->setCurrentService(true);
     VideoCollectionViewUtilsData::mIsServiceValue = true;
     VideoCollectionViewUtils::instance().setIsService();
-    videoServices->mCurrentService = VideoServices::EUriFetcher;
+    videoServices->setCurrentService(VideoServices::EUriFetcher);
     mTestView->activateView();
     QCOMPARE(VideoListViewData::mActivateViewCount, 1);
     QVERIFY(VideoListViewData::mActivatedItemId == TMPXItemId::InvalidId());

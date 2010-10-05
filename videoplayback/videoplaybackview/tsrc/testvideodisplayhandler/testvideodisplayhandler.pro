@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 6 %
+# Version : %version: 7 %
 
 TEMPLATE = app
 TARGET = testvideodisplayhandler
@@ -23,13 +23,12 @@ DEFINES += BUILD_VIDEOPLAYBACK_DLL
 
 DEPENDPATH += inc src stub/inc stub/src
 
-INCLUDEPATH += ../../../inc \
-               ../../../../inc \
-               ../../controlinc \
-               $$MW_LAYER_SYSTEMINCLUDE 
+INCLUDEPATH = hbstub
+INCLUDEPATH += stub/inc \
+               ../../../inc \
+               ../../../../inc
 
-LIBS += -lmpxplaybackutility.dll \
-        -lmpxcommon.dll \
+LIBS += -lmpxcommon.dll \
         -lestor.dll \
         -lsysutil.dll \
         -lcone.dll \

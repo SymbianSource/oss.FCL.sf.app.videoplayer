@@ -25,6 +25,7 @@
 
 #include <mpxplaybackutility.h>
 
+#include "mediaclientvideodisplay.h"
 #include "testvideodisplayhandler.h"
 #include "../stub/inc/videobaseplaybackview.h"
 #include "../stub/inc/videoplaybackviewfiledetails.h"
@@ -63,12 +64,11 @@ int main(int argc, char *argv[])
 //
 void TestVideoDisplayHandler::init()
 {
-    mPlaybackUtility = MMPXPlaybackUtility::UtilityL( KPbModeDefault );
-
     mBaseVideoView    = new VideoBasePlaybackView();
     mVideoViewWrapper = CMPXVideoViewWrapper::NewL( mBaseVideoView );
 
-    mDispHdlr = CVideoPlaybackDisplayHandler::NewL(mPlaybackUtility, mVideoViewWrapper);
+    mDispHdlr = CVideoPlaybackDisplayHandler::NewL( mVideoViewWrapper);
+    mFileDetails = new VideoPlaybackViewFileDetails();
 }
 
 // ---------------------------------------------------------------------------
@@ -77,20 +77,29 @@ void TestVideoDisplayHandler::init()
 //
 void TestVideoDisplayHandler::cleanup()
 {
-    if ( mPlaybackUtility )
+    if ( mFileDetails )
     {
-        mPlaybackUtility->Close();
-        mPlaybackUtility = NULL;
+        delete mFileDetails;
+        mFileDetails = NULL;
     }
 
-    delete mDispHdlr;
-    mDispHdlr = NULL;
+    if ( mDispHdlr )
+    {
+        delete mDispHdlr;
+        mDispHdlr = NULL;
+    }
 
-    delete mVideoViewWrapper;
-    mVideoViewWrapper = NULL;
+    if ( mVideoViewWrapper )
+    {
+        delete mVideoViewWrapper;
+        mVideoViewWrapper = NULL;
+    }
 
-    delete mBaseVideoView;
-    mBaseVideoView = NULL;
+    if ( mBaseVideoView )
+    {
+        delete mBaseVideoView;
+        mBaseVideoView = NULL;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -111,7 +120,8 @@ void TestVideoDisplayHandler::setup()
     mDispHdlr->CreateDisplayWindowL( CCoeEnv::Static()->WsSession(),
                                      *(CCoeEnv::Static()->ScreenDevice()),
                                      *window,
-                                     displayRect);
+                                     displayRect,
+                                     mFileDetails );
 
     QCOMPARE( mDispHdlr->iWindowRect, displayRect);
 
@@ -140,6 +150,9 @@ void TestVideoDisplayHandler::testHandleSurfaceCreatedMessageL()
 {
     setup();
 
+    mFileDetails->mVideoHeight = 174;
+    mFileDetails->mVideoWidth = 144;
+
     CMPXMessage* message = NULL;
     TRAP_IGNORE
     (
@@ -152,6 +165,7 @@ void TestVideoDisplayHandler::testHandleSurfaceCreatedMessageL()
 
     QVERIFY( ! mDispHdlr->iSurfaceId.IsNull() );
     QVERIFY( mDispHdlr->iViewWrapper->iAttatched );
+    QVERIFY( mFileDetails->mAspectRatioChangeable );
 
     mDispHdlr->RemoveDisplayWindow();
     cleanup();
@@ -172,6 +186,8 @@ void TestVideoDisplayHandler::testHandleSurfaceChangedMessageL()
     mDispHdlr->HandleVideoDisplayMessageL( message );
 
     QVERIFY( ! mDispHdlr->iSurfaceId.IsNull() );
+    QVERIFY( ! mFileDetails->mAspectRatioChangeable );
+    QVERIFY( mVideoViewWrapper->iAspectRatio == EMMFNatural );
 
     mDispHdlr->RemoveDisplayWindow();
     cleanup();
@@ -214,44 +230,6 @@ void TestVideoDisplayHandler::testSetDefaultAspectRatioL()
 {
     setup();
 
-    //
-    // get window size
-    //
-    RWindow *window = mBaseVideoView->getWindow();
-    TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
-
-    //
-    // get window aspect ratio
-    //   if device is in landscape mode, width > height
-    //   if device is in portrait mode, width < height
-    //
-    TReal32 width = (TReal32) displayRect.Width();
-    TReal32 height = (TReal32) displayRect.Height();
-    TReal32 displayAspectRatio = (width > height)? (width / height) : (height / width);
-
-    //
-    // aspect ratio zoom
-    //
-    mFileDetails = new VideoPlaybackViewFileDetails();
-    mFileDetails->mVideoHeight = 280;
-    mFileDetails->mVideoWidth  = 600;
-
-    int aspectRatio = mDispHdlr->SetDefaultAspectRatioL( mFileDetails, displayAspectRatio );
-
-    QVERIFY( aspectRatio == EMMFZoom );
-
-    //
-    // aspect ratio stretch
-    //
-    mFileDetails->mVideoHeight = 144;
-    mFileDetails->mVideoWidth  = 220;
-
-    aspectRatio = mDispHdlr->SetDefaultAspectRatioL( mFileDetails, displayAspectRatio );
-
-    QVERIFY( aspectRatio == EMMFStretch );
-
-    mDispHdlr->RemoveDisplayWindow();
-
     cleanup();
 }
 
@@ -261,11 +239,37 @@ void TestVideoDisplayHandler::testUpdateVideoRectL()
 
     RWindow *window = mBaseVideoView->getWindow();
 
+    //
+    // Transition effect is off
+    //
     TRect displayRect = TRect( 0, 0, 200, 300 );
 
     mDispHdlr->UpdateVideoRectL( displayRect, false );
 
     QCOMPARE( mDispHdlr->iWindowRect, displayRect);
+
+    //
+    // iRotation is off
+    //
+    displayRect = TRect( 0, 0, 300, 400 );
+    mDispHdlr->iRotation = EVideoRotationNone;
+
+    mDispHdlr->UpdateVideoRectL( displayRect, false );
+
+    QCOMPARE( mDispHdlr->iWindowRect, displayRect);
+
+    //
+    // iRotation is on
+    //
+    displayRect = TRect( 0, 0, 200, 300 );
+
+    TRect expectedRect = TRect( 60, 0, 360, 200 );
+    mDispHdlr->iRotation = EVideoRotationClockwise90;
+
+    mDispHdlr->UpdateVideoRectL( displayRect, false );
+
+    QCOMPARE( mDispHdlr->iWindowRect, displayRect );
+    QCOMPARE( mDispHdlr->iVideoDisplay->iVideoExtent, expectedRect );
 
     mDispHdlr->RemoveDisplayWindow();
     cleanup();

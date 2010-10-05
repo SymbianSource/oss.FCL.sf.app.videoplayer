@@ -124,16 +124,7 @@ void VideoServicesTestAppView::createLayout()
 
         if (bottomLayout)
         {
-            //bottomLayout->addStretch();
-/*
-            HbPushButton* button = new HbPushButton("Fetch video OLD IF OLD S");
-            if (button)
-            {
-                connect(button, SIGNAL(clicked()), this, SLOT(fetchVideoDeprecatedOldService()));
-                bottomLayout->addItem(button);
-            }
-*/
-            HbPushButton* button = new HbPushButton("Fetch video OLD IF NEW S");
+            HbPushButton* button = new HbPushButton("Fetch video OLD (removed)");
             if (button)
             {
                 connect(button, SIGNAL(clicked()), this, SLOT(fetchVideoDeprecatedNewService()));
@@ -147,15 +138,7 @@ void VideoServicesTestAppView::createLayout()
                 bottomLayout->addItem(button);
             }
 
-/*
-            button = new HbPushButton("Browse \"Captured\" videos OLD IF OLD S");
-            if (button)
-            {
-                connect(button, SIGNAL(clicked()), this, SLOT(browseCapturedVideosDeprecatedOldService()));
-                bottomLayout->addItem(button);
-            }
-*/
-            button = new HbPushButton("Browse \"Captured\" videos OLD IF NEW S");
+            button = new HbPushButton("Browse \"Captured\" videos OLD(removed)");
             if (button)
             {
                 connect(button, SIGNAL(clicked()), this, SLOT(browseCapturedVideosDeprecatedNewService()));
@@ -188,7 +171,7 @@ void VideoServicesTestAppView::fetchVideo()
 
     delete mReq;
     mReq = 0;
-    mReq = mAppMgr.create(XQI_VIDEO_FETCH, "fetch()", true);
+    mReq = mAppMgr.create(XQI_VIDEO_FETCH, XQOP_VIDEO_FETCH, true);
 
     qDebug() <<  "VideoServicesTestAppView::fetchVideo: mReq=" << mReq;
 
@@ -233,7 +216,8 @@ void VideoServicesTestAppView::browseCapturedVideos()
     delete mReq;
     mReq = 0;
 
-    mReq = mAppMgr.create("com.nokia.symbian.IVideoBrowse", "browseVideos(int,int)", true);
+    //mReq = mAppMgr.create(XQI_VIDEO_BROWSE, XQOP_VIDEO_BROWSE, true);
+    mReq = mAppMgr.create(XQI_VIDEO_BROWSE, "browseVideos(int,int)", true);
 
     qDebug() <<  "VideoServicesTestAppView::browseCapturedVideos: mReq=" << mReq;
 
@@ -260,8 +244,8 @@ void VideoServicesTestAppView::browseCapturedVideos()
     dialog->setInputMode(HbInputDialog::IntInput, 1);
     dialog->setPromptText("Enter category", 0);
     dialog->setPromptText("Enter sort role", 1);
-	dialog->setValue(3, 0);
-	dialog->setValue(0, 1);
+	dialog->setValue(KVcxMvcCategoryIdCaptured, 0);
+	dialog->setValue(XQService::SortTitle, 1);
     dialog->open(this, SLOT(browseCapturedVideosFinished(HbAction *)));
 
     qDebug() <<  "VideoServicesTestAppView::browseCapturedVideos END";
@@ -292,49 +276,6 @@ void VideoServicesTestAppView::browseCapturedVideosFinished(HbAction *action)
         delete mReq;
         mReq = 0;
     }
-}
-
-void VideoServicesTestAppView::fetchVideoDeprecatedOldService()
-{
-    qDebug() <<  "VideoServicesTestAppView::fetchVideo START";
-
-    mResultEdit->setText("");
-    mErrorEdit->setText("");
-    mErrorCodeEdit->setText("");
-
-    delete mReq;
-    mReq = 0;
-    mReq = mAppMgr.create("com.nokia.Videos", "IVideoFetch", "fetch(QString)", true);
-
-    qDebug() <<  "VideoServicesTestAppView::fetchVideo: mReq=" << mReq;
-
-    if (!mReq)
-    {
-        mErrorEdit->setText("Failed to create REQ");
-        return;
-    }
-    else
-    {
-        connect(mReq, SIGNAL(requestOk(const QVariant&)), SLOT(handleOk(const QVariant&)));
-        connect(mReq, SIGNAL(requestError(int,const QString&)), SLOT(handleError(int,const QString&)));
-    }
-
-    // Set arguments for request (application title)
-    QList<QVariant> args;
-    args << QVariant(QString("<OLD-IF-OLD-S app_name>"));
-    mReq->setArguments(args);
-
-    // Make the request
-    if (!mReq->send())
-    {
-        mErrorEdit->setText("Failed to send REQ");
-        qDebug() <<  "VideoServicesTestAppView::fetchVideo: XQAiwRequest::send returned false";
-    }
-    // req no longer needed, remove it
-    delete mReq;
-    mReq = 0;
-
-    qDebug() <<  "VideoServicesTestAppView::fetchVideo END";
 }
 
 void VideoServicesTestAppView::fetchVideoDeprecatedNewService()
@@ -377,76 +318,6 @@ void VideoServicesTestAppView::fetchVideoDeprecatedNewService()
     delete mReq;
     mReq = 0;
     qDebug() <<  "VideoServicesTestAppView::fetchVideo END";
-}
-
-
-void VideoServicesTestAppView::browseCapturedVideosDeprecatedOldService()
-{
-    qDebug() <<  "VideoServicesTestAppView::browseCapturedVideos START";
-
-    mResultEdit->setText("");
-    mErrorEdit->setText("");
-    mErrorCodeEdit->setText("");
-
-    delete mReq;
-    mReq = 0;
-    mReq = mAppMgr.create("com.nokia.Videos", "IVideoBrowse", "browseVideos(QString,int,int)", true);
-
-    qDebug() <<  "VideoServicesTestAppView::browseCapturedVideos: mReq=" << mReq;
-
-    if (!mReq)
-    {
-        mErrorEdit->setText("Failed to create REQ");
-        return;
-    }
-    else
-    {
-        connect(mReq, SIGNAL(requestOk(QVariant)), SLOT(handleOk(QVariant)));
-        connect(mReq, SIGNAL(requestError(int,QString)), SLOT(handleError(int,QString)));
-    }
-
-    HbInputDialog *dialog = new HbInputDialog();
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setAdditionalRowVisible(true);
-    dialog->setInputMode(HbInputDialog::IntInput, 0);
-    dialog->setInputMode(HbInputDialog::IntInput, 1);
-    dialog->setPromptText("Enter category", 0);
-    dialog->setPromptText("Enter sort role", 1);
-	dialog->setValue(3, 0);
-	dialog->setValue(0, 1);
-    dialog->open(this, SLOT(browseCapturedVideosDeprecatedOldServiceFinished(HbAction *)));
-
-    qDebug() <<  "VideoServicesTestAppView::browseCapturedVideos END";
-}
-
-void VideoServicesTestAppView::browseCapturedVideosDeprecatedOldServiceFinished(HbAction *action)
-{
-    HbInputDialog *dialog = static_cast<HbInputDialog*>(sender());
-
-    const QString title = "<OLD-IF-OLD-S app name>";
-
-    int category = dialog->value(0).toInt();
-    int sortRole = dialog->value(1).toInt();
-
-    if(dialog->actions().first() == action)
-    {
-    	// set arguments
-        QList<QVariant> args;
-        args.append(title);
-        args.append(QVariant(category));
-        args.append(QVariant(sortRole));
-        mReq->setArguments(args);
-
-        // Make the request
-        if (!mReq->send())
-        {
-            mErrorEdit->setText("Failed to send REQ");
-            qDebug() <<  "VideoServicesTestAppView::browseCapturedVideosFinished: XQAiwRequest::send returned false";
-        }
-        // req no longer needed, remove it
-        delete mReq;
-        mReq = 0;
-    }
 }
 
 void VideoServicesTestAppView::browseCapturedVideosDeprecatedNewService()

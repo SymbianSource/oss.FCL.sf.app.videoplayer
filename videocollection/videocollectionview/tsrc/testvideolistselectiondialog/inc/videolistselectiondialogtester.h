@@ -18,6 +18,7 @@
 #ifndef __VIDEOLISTSELECTIONDIALOGTESTER_H__
 #define __VIDEOLISTSELECTIONDIALOGTESTER_H__
 
+#include <qpointer.h>
 #include "videolistselectiondialog.h"
 
 class VideoListSelectionDialogTesterHelper : public QObject
@@ -142,7 +143,7 @@ public:
         emit finishedSignal(action);
     }
     
-    VideoListSelectionDialog *mTestable;
+    QPointer<VideoListSelectionDialog> mTestable;
     
     /**
      * flag indicating if signals are connected. 

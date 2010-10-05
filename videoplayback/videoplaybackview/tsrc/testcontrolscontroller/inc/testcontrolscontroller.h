@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  10 %
+// Version : %version:  11 %
 
 #ifndef __TESTCONTROLSCONTROLLER_H__
 #define __TESTCONTROLSCONTROLLER_H__
@@ -73,6 +73,7 @@ private slots:
     void testHandleEventShowVolumeControls();
     void testHandleEventBackground();
     void testIsFileDetailsAdded();
+    void testVolumeSteps();
 
     //
     // test handleCommand()

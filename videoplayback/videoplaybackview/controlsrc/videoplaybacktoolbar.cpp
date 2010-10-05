@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  13 %
+// Version : %version:  14 %
 
 
 
@@ -193,15 +193,6 @@ void VideoPlaybackToolBar::initialize()
         //
         RWindow *window = mController->view()->getWindow();
         TRect displayRect = TRect( TPoint( window->Position() ), TSize( window->Size() ) );
-
-        //
-        // get window aspect ratio
-        //   if device is in portrait mode, width > height
-        //   if device is in landscape mode, width < height
-        //
-        TReal32 width = (TReal32) displayRect.Width();
-        TReal32 height = (TReal32) displayRect.Height();
-        mDisplayAspectRatio = (width > height)? (width / height) : (height / width);
     }
 }
 
@@ -423,33 +414,7 @@ void VideoPlaybackToolBar::aspectRatioChanged( int aspectRatio )
 
     mAspectRatio = aspectRatio;
 
-    //
-    // If we are in attach service or audio only view, then don't update the icon.
-	// Aspect ratio icon slots are shared with attach and share icon.
-	// Just update the mAspectRatio
-	// and once we go back to full screen, we will show the correct aspect ratio icon
-	//
-    if ( ! mController->isAttachOperation() && mController->viewMode() == EFullScreenView )
-    {
-        switch( mAspectRatio )
-        {
-            case EMMFNatural:
-            {
-                mButtonActions[E1stButton]->setIcon( *mButtonIcons[EStretchIcon] );
-                break;
-            }
-            case EMMFStretch:
-            {
-                mButtonActions[E1stButton]->setIcon( *mButtonIcons[EZoomIcon] );
-                break;
-            }
-            default:
-            {
-                mButtonActions[E1stButton]->setIcon( *mButtonIcons[ENaturalIcon] );
-                break;
-            }
-        }
-    }
+    setAspectRatioButton();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -530,40 +495,13 @@ void VideoPlaybackToolBar::updateWithFileDetails(
     {
         if ( mController->viewMode() == EFullScreenView )
         {
-            //
-            // Show aspect ratio button
-            //
-            aspectRatioChanged( mAspectRatio );
+            setAspectRatioButton();
 
-            if ( ! details->mVideoEnabled ||
-                   details->mVideoHeight <= 0 ||
-                   details->mVideoWidth <= 0 ||
-                   details->mTvOutConnected )
+            if ( mButtons.count() )
             {
-                //
-                // dim 'aspect ratio' buttons
-                //
-                mButtonActions[E1stButton]->setEnabled( false );
-            }
-            else
-            {
-                //
-                // check if video clip has same aspect ratio as display window
-                //
-                TReal32 videoAspectRatio = (TReal32) details->mVideoWidth / (TReal32) details->mVideoHeight;
-                bool enabled = ( mDisplayAspectRatio == videoAspectRatio )? false : true;
-
-                //
-                // enable or dim 'aspect ratio' buttons accordingly
-                //
-                mButtonActions[E1stButton]->setEnabled( enabled );
-
-                if ( mButtons.count() )
-                {
-                    disconnect( mButtons[E1stButton], SIGNAL( released() ), 0, 0 );
-                    connect( mButtons[E1stButton], SIGNAL( released() ),
-                             this, SLOT( changeAspectRatio() ) );
-                }
+                disconnect( mButtons[E1stButton], SIGNAL( released() ), 0, 0 );
+                connect( mButtons[E1stButton], SIGNAL( released() ),
+                         this, SLOT( changeAspectRatio() ) );
             }
         }
         else if ( mController->viewMode() == EAudioOnlyView )
@@ -788,6 +726,58 @@ void VideoPlaybackToolBar::resetControl()
         {
             rwReleased();
             break;
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// VideoPlaybackToolBar::setAspectRatioButton
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlaybackToolBar::setAspectRatioButton()
+{
+    MPX_DEBUG(_L("VideoPlaybackToolBar::setAspectRatioButton"));
+
+    //
+    // If we are in attach service or audio only view, then don't update the icon.
+    // Aspect ratio icon slots are shared with attach and share icon.
+    // Just update the mAspectRatio
+    // and once we go back to full screen, we will show the correct aspect ratio icon
+    //
+    if ( ! mController->isAttachOperation() && mController->viewMode() == EFullScreenView )
+    {
+        switch( mAspectRatio )
+        {
+            case EMMFNatural:
+            {
+                mButtonActions[E1stButton]->setIcon( *mButtonIcons[EStretchIcon] );
+                break;
+            }
+            case EMMFStretch:
+            {
+                mButtonActions[E1stButton]->setIcon( *mButtonIcons[EZoomIcon] );
+                break;
+            }
+            default:
+            {
+                mButtonActions[E1stButton]->setIcon( *mButtonIcons[ENaturalIcon] );
+                break;
+            }
+        }
+
+        if ( mController->fileDetails()->mAspectRatioChangeable )
+        {
+            if ( ! mButtonActions[E1stButton]->isEnabled() )
+            {
+                mButtonActions[E1stButton]->setEnabled( true );
+            }
+        }
+        else
+        {
+            if ( mButtonActions[E1stButton]->isEnabled() )
+            {
+                mButtonActions[E1stButton]->setEnabled( false );
+            }
         }
     }
 }

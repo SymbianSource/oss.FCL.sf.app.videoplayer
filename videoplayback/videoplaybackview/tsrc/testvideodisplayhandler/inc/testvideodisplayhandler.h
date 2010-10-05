@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:   tester for methods in Video Display Handler
-* 
+*
 */
 
 #ifndef __TESTVIDEODISPLAYHANDLER_H__
@@ -24,7 +24,6 @@
 
 // forward declaration
 class CVideoPlaybackDisplayHandler;
-class MMPXPlaybackUtility;
 class VideoBasePlaybackView;
 class CMPXVideoViewWrapper;
 class VideoPlaybackViewFileDetails;
@@ -40,17 +39,17 @@ class TestVideoDisplayHandler : public QObject
          * will be called before each testfunction is executed.
          *
          */
-        void init(); 
-    
+        void init();
+
         /**
          * will be called after every testfunction.
          *
          */
         void cleanup();
-        
+
         void setup();
-    
-    // test functions for the test framework         
+
+    // test functions for the test framework
     private slots:
         // the order in which these testXX methods are declared is important
         // changing this order will affect the test results
@@ -61,15 +60,14 @@ class TestVideoDisplayHandler : public QObject
         void testHandleVideoRemovedMessageL();
         void testSetAspectRatioL();
         void testSetDefaultAspectRatioL();
-        void testUpdateVideoRectL();	
-    
-    
+        void testUpdateVideoRectL();
+
+
     private:
-        CVideoPlaybackDisplayHandler*     mDispHdlr;	
-        MMPXPlaybackUtility*              mPlaybackUtility;  
+        CVideoPlaybackDisplayHandler*     mDispHdlr;
         VideoBasePlaybackView*            mBaseVideoView;
         CMPXVideoViewWrapper*             mVideoViewWrapper;
-        VideoPlaybackViewFileDetails*     mFileDetails; 
+        VideoPlaybackViewFileDetails*     mFileDetails;
 };
 
 #endif  // __TESTVIDEODISPLAYHANDLER_H__

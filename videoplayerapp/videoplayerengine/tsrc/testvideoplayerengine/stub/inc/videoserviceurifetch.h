@@ -51,7 +51,7 @@ public slots:  // for QTHighway to notify provider about request
      * @param title title to be set
      *
      */
-    void fetch(const QString& title);
+    void fetch();
 
 private:
     VideoServices* mServiceApp;

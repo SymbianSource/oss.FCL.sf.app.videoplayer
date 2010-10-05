@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 47 %
+// Version : %version: 49 %
 
 
 #include <QApplication>
@@ -33,6 +33,7 @@
 #include "videoactivitystate.h"
 #include "videoplaybackwrapper.h"
 #include "videoservices.h"
+#include "videoiadupdatewrapper.h"
 #include "mpxvideo_debug.h"
 
 // -------------------------------------------------------------------------------------------------
@@ -51,6 +52,7 @@ VideoPlayerEngine::VideoPlayerEngine( bool isService )
     , mPlaybackWrapper( 0 )
     , mVideoServices( 0 )
     , mActivityStorage( 0 )
+    , mIadUpdateWrapper( 0 )
 {
     MPX_DEBUG(_L("VideoPlayerEngine::VideoPlayerEngine()"));
 }
@@ -93,6 +95,8 @@ VideoPlayerEngine::~VideoPlayerEngine()
     delete mPlaybackWrapper;
 
     delete mActivityStorage;
+    
+    delete mIadUpdateWrapper;
     
     // disconnect all signals 
     disconnect();
@@ -181,6 +185,7 @@ void VideoPlayerEngine::initialize()
             // if replay fails, then activate collection view instead
             if ( error != KErrNone )
             {
+                handlePlaybackFailure(error);
                 loadPluginAndCreateView( MpxHbVideoCommon::CollectionView );  
                 activateView( MpxHbVideoCommon::CollectionView );                 
             }            
@@ -255,6 +260,11 @@ void VideoPlayerEngine::doDelayedLoad()
 	
     createMissingViews();
 	
+    if (!mEmbedded && !isPlayServiceInvoked())
+    {
+        checkForUpdates();
+    }
+    
     mDelayedLoadDone = true;
 }
 
@@ -716,44 +726,43 @@ void VideoPlayerEngine::handlePlaybackFailure(int errorCode)
 {                    
     MPX_DEBUG(_L("VideoPlayerEngine::handlePlaybackFailure()"));        
             
-    if ( mIsPlayService )  
-    { 
-        HbNotificationDialog* dlg = new HbNotificationDialog();
+    HbNotificationDialog* dlg = new HbNotificationDialog();
+    
+    if ( mIsPlayService )
+    {
+        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( serviceQuit() ) );    
+    }    
         
-        connect( dlg, SIGNAL( aboutToClose() ), this, SLOT( serviceQuit() ) );
-        
-        switch ( errorCode )
+    switch ( errorCode )
+    {
+        case KErrNotSupported:
+        case KErrUnknown:
+        case KErrCorrupt:
+        case KErrTooBig:
         {
-            case KErrNotSupported:
-            case KErrUnknown:
-            case KErrCorrupt:
-            case KErrTooBig:
-            {
-                dlg->setTitle( hbTrId( "txt_videos_info_invalid_clip_operation_canceled" ) );
-                break;
-            }
-            case KErrArgument:
-            case KErrBadName:
-            {
-                dlg->setTitle( hbTrId( "txt_videos_info_unable_to_connect_invalid_url" ) );
-                break;
-            }  
-            case KErrNotFound:
-            {
-                dlg->setTitle( hbTrId( "txt_videos_info_file_not_found" ) );
-                break;
-            } 
-            default:
-            {
-                const QString textToShow = mPlaybackWrapper->resloveErrorString(errorCode);
-                dlg->setTitle(textToShow);
-                break;
-            }
+            dlg->setTitle( hbTrId( "txt_videos_info_invalid_clip_operation_canceled" ) );
+            break;
         }
-        
-        dlg->show();                      
- 
+        case KErrArgument:
+        case KErrBadName:
+        {
+            dlg->setTitle( hbTrId( "txt_videos_info_unable_to_connect_invalid_url" ) );
+            break;
+        }  
+        case KErrNotFound:
+        {
+            dlg->setTitle( hbTrId( "txt_videos_info_file_not_found" ) );
+            break;
+        } 
+        default:
+        {
+            const QString textToShow = mPlaybackWrapper->resloveErrorString(errorCode);
+            dlg->setTitle(textToShow);
+            break;
+        }
     }
+        
+    dlg->show();                      
 }
 
 
@@ -769,5 +778,17 @@ void VideoPlayerEngine::serviceQuit()
     XQServiceUtil::toBackground( false );
 }
 
+// -------------------------------------------------------------------------------------------------
+// checkForUpdates()
+// -------------------------------------------------------------------------------------------------
+//
+void VideoPlayerEngine::checkForUpdates()
+{
+    if(!mIadUpdateWrapper)
+    {
+        mIadUpdateWrapper = new VideoIadUpdateWrapper();
+    }
+    mIadUpdateWrapper->checkForUpdates();
+}
 
 // End of file

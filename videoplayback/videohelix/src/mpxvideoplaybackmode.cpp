@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 35 %
+// Version : %version: ou1cpsw#37 %
 
 
 //
@@ -196,10 +196,6 @@ void CMPXVideoPlaybackMode::HandleBackground()
             iVideoPlaybackCtlr->iState->HandlePause();
             TRAP_IGNORE( iVideoPlaybackCtlr->SendHideControlsEventL() );
         }
-        else if ( iVideoPlaybackCtlr->IsPhoneCall() || iVideoPlaybackCtlr->IsVideoCall() )
-        {
-            iVideoPlaybackCtlr->iState->HandlePause();
-        }
     }
     else
     {
@@ -251,6 +247,8 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
     RMobilePhone::TMobilePhoneNetworkMode networkMode;
 
     User::LeaveIfError( telServer.Connect() );
+    CleanupClosePushL( telServer );
+    
     User::LeaveIfError( telServer.LoadPhoneModule( KMmTsyModuleName ) );
 
     TInt numPhones;
@@ -263,6 +261,7 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
 
     User::LeaveIfError( telServer.GetPhoneInfo( 0, phoneInfo ) );
     User::LeaveIfError( mobilePhone.Open( telServer, phoneInfo.iName ) );
+    CleanupClosePushL( mobilePhone );
     User::LeaveIfError( mobilePhone.Initialise() );
 
     User::LeaveIfError( mobilePhone.GetCurrentMode( networkMode ) );
@@ -272,8 +271,8 @@ TBool CMPXVideoPlaybackMode::IsNetworkMode2GL()
         networkMode2g = ETrue;
     }
 
-    mobilePhone.Close();
-    telServer.Close();
+    CleanupStack::PopAndDestroy( &mobilePhone );
+    CleanupStack::PopAndDestroy( &telServer );
 
     MPX_DEBUG(_L("CMPXVideoPlaybackMode::IsNetworkMode2GL(%d)"), networkMode2g);
 

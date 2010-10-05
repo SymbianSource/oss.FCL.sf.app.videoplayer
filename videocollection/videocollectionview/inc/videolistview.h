@@ -22,8 +22,6 @@
 #include <qnamespace.h>
 #include <hbaction.h>
 
-#include "videohintwidget.h"
-
 class QGraphicsItem;
 class QVariant;
 class HbToolBarExtension;
@@ -251,11 +249,6 @@ private:
     void showHint(bool show = true);
     
     /**
-     * 
-     */
-    void setHintLevel(VideoHintWidget::HintLevel level);
-    
-    /**
      * Updates the sublabel text.
      */
     void updateSubLabel();
@@ -315,11 +308,6 @@ private:
     bool mViewReady;
 
     /**
-     * Hint level for the hint widget.
-     */
-    VideoHintWidget::HintLevel mHintLevel;
-
-    /**
      * Pointer to videoservices instance
      * if exists, app has started as service
      */
@@ -334,7 +322,6 @@ private:
      * String containing the name of the currently open collection
      */
     QString mCollectionName;
-    
 };
 
 #endif // VIDEOLISTVIEW_H

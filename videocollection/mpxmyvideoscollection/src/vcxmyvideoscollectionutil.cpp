@@ -180,7 +180,9 @@ void TVcxMyVideosCollectionUtil::AppendToListL( CMPXMedia& aToList, CMPXMedia& a
     for ( TInt i = 0; i < count; i++ )
         {
         media = CMPXMedia::NewL( *(fromArray->AtL( i )) ); // points to same shared memory
+        CleanupStack::PushL( media );
         toArray->AppendL( media ); //ownership moves
+        CleanupStack::Pop( media );
         }
     }
 

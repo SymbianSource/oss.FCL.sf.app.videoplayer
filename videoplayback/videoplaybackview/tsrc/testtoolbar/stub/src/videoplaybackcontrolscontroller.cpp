@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 3 %
+// Version : %version: 4 %
 
 
 
@@ -59,7 +59,7 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
     if ( mView )
     {
         delete mView;
-        mView = NULL;       
+        mView = NULL;
     }
 }
 
@@ -67,7 +67,7 @@ VideoPlaybackControlsController::~VideoPlaybackControlsController()
 //   VideoPlaybackControlsController::handleCommand()
 // -------------------------------------------------------------------------------------------------
 //
-void VideoPlaybackControlsController::handleCommand( 
+void VideoPlaybackControlsController::handleCommand(
         TMPXVideoPlaybackViewCommandIds command, int value )
 {
     MPX_DEBUG(_L("VideoPlaybackControlsController::handleCommand(%d)"), command);
@@ -77,13 +77,13 @@ void VideoPlaybackControlsController::handleCommand(
 }
 
 // -------------------------------------------------------------------------------------------------
-//   VideoPlaybackControlsController::changeViewMode
+//   VideoPlaybackControlsController::evaluateAndChangeViewMode
 // -------------------------------------------------------------------------------------------------
 //
-void VideoPlaybackControlsController::changeViewMode( 
+void VideoPlaybackControlsController::evaluateAndChangeViewMode(
         TPlaybackViewMode viewMode, bool transitionEffect )
 {
-    MPX_DEBUG(_L("VideoPlaybackControlsController::changeViewMode()"));
+    MPX_DEBUG(_L("VideoPlaybackControlsController::evaluateAndChangeViewMode()"));
 
     Q_UNUSED( transitionEffect );
     mViewMode = viewMode;
@@ -106,7 +106,7 @@ void VideoPlaybackControlsController::resetDisappearingTimers( TTimerAction time
 //
 bool VideoPlaybackControlsController::isAttachOperation()
 {
-    MPX_DEBUG(_L("VideoPlaybackControlsController::isAttachOperation() ret %d"), 
+    MPX_DEBUG(_L("VideoPlaybackControlsController::isAttachOperation() ret %d"),
             mIsAttachOperation);
 
     return mIsAttachOperation;
@@ -119,10 +119,10 @@ bool VideoPlaybackControlsController::isAttachOperation()
 void VideoPlaybackControlsController::attachVideo()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::attachVideo()"));
-    
-    handleCommand( EMPXPbvCmdClose );    
+
+    handleCommand( EMPXPbvCmdClose );
     mAttachVideoDone = true;
-}    
+}
 
 // -------------------------------------------------------------------------------------------------
 // VideoPlaybackControlsController::sendVideo()
@@ -131,9 +131,9 @@ void VideoPlaybackControlsController::attachVideo()
 void VideoPlaybackControlsController::sendVideo()
 {
     MPX_ENTER_EXIT(_L("VideoPlaybackControlsController::sendVideo()"));
-    
-    handleCommand( EMPXPbvCmdPause );    
+
+    handleCommand( EMPXPbvCmdPause );
     mSendVideoDone = true;
-}    
+}
 
 // End of File

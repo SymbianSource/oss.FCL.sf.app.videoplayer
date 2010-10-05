@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   1 %
+// Version : %version:   2 %
 
 
 
@@ -50,6 +50,28 @@ QPointF HbPanGesture::sceneDelta()
     MPX_DEBUG(_L("HbPanGesture::sceneDelta") );
 
     return mSceneDelta;
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbPanGesture::sceneVelocity
+// -------------------------------------------------------------------------------------------------
+//
+QPointF HbPanGesture::sceneVelocity()
+{
+    MPX_DEBUG(_L("HbPanGesture::sceneVelocity") );
+
+    return mSceneVelocity;
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbPanGesture::sceneOffset
+// -------------------------------------------------------------------------------------------------
+//
+QPointF HbPanGesture::sceneOffset()
+{
+    MPX_DEBUG(_L("HbPanGesture::sceneOffset") );
+
+    return mSceneOffset;
 }
 
 // End of file

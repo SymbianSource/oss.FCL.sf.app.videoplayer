@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 #include <hbapplication.h>
 
@@ -106,38 +106,6 @@ int VideoServiceBrowse::sortRole() const
 {
     MPX_DEBUG(_L("VideoServiceBrowse::getBrowseCategory() ret %d"), mSortRole);
     return mSortRole;
-}
-
-// -------------------------------------------------------------------------------------------------
-// browseVideos()
-// -------------------------------------------------------------------------------------------------
-//
-void VideoServiceBrowse::browseVideos(const QString &title,
-    int category,
-    int sortRole)
-{    
-    MPX_ENTER_EXIT(_L("VideoServiceBrowse::browseVideos()"));	
-
-    // set application title
-    QString appTitle(title);
-    if (appTitle.isEmpty())
-    {
-        appTitle = hbTrId("txt_videos_title_videos");
-    }
-    
-    mTitle = appTitle;
-    mCategory = category;
-    mSortRole = sortRole;
-
-    // store async request id
-    mRequestIndex = setCurrentRequestAsync();
-
-    // start service
-    mServiceApp->setCurrentService(VideoServices::EBrowse);
-    emit mServiceApp->titleReady(appTitle);
-    emit mServiceApp->activated(MpxHbVideoCommon::ActivateCollectionView);
-
-    MPX_DEBUG(_L("VideoServiceBrowse::browseVideos() : mRequestIndex = %d"), mRequestIndex );
 }
 
 // ----------------------------------------------------------------------------

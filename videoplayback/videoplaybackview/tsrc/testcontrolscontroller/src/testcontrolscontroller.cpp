@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  17 %
+// Version : %version:  18 %
 
 #include <e32err.h>
 #include <w32std.h>
@@ -37,7 +37,7 @@
 #include "videoplaybackcontrolconfiguration.h"
 #include "thumbnailmanager_qt.h"
 #include "videoplaybackdocumentloader.h"
-#include "hbvolumesliderpopup.h"
+#include "videoplaybackvolumecontrol.h"
 #include "videoservices.h"
 #include "xqserviceutilxtra.h"
 
@@ -158,13 +158,7 @@ void TestControlsController::testAddFileDetails()
     //
     // validate 'TvOutConnected'
     //
-    verifyHandleEventTvOutResult(true, true);
-
-    //
-    // video-only, validate volume control is dimmed
-    //
-    QVERIFY( mController->mVolumeControl->mValue == 0 );
-    QVERIFY( mController->mVolumeControl->isEnabled() == false );
+    verifyHandleEventTvOutResult( true, true );
 
     //
     // verify 'title' (via mClipName) is set properly
@@ -425,7 +419,7 @@ void TestControlsController::testHandleEventSetVolume()
     int value = 40;
 
     mController->handleEvent( EControlCmdSetVolume, value );
-    QVERIFY( mController->mVolumeControl->mValue == value );
+    QVERIFY( mController->mVolumeControl->mVolume == value );
 
     cleanup();
 }
@@ -1169,10 +1163,10 @@ void TestControlsController::testslot_sendVideo()
     // emit signal, this will in turns invoke mController sendVideo() slot
     //
     emit commandSignal();
-    
+
     //
     // emit again.
-    // 
+    //
     emit commandSignal();
 
     //
@@ -1363,6 +1357,22 @@ void TestControlsController::testIsFileDetailsAdded()
     mController->addFileDetails( mFileDetails );
 
     QVERIFY( mController->isFileDetailsAdded() );
+
+    cleanup();
+}
+
+// -------------------------------------------------------------------------------------------------
+// TestControlsController::testVolumeSteps
+// -------------------------------------------------------------------------------------------------
+//
+void TestControlsController::testVolumeSteps()
+{
+    init();
+
+    int volume = 5;
+    mViewWrapper->mVolumeSteps = volume;
+
+    QVERIFY( mViewWrapper->VolumeSteps() == volume );
 
     cleanup();
 }

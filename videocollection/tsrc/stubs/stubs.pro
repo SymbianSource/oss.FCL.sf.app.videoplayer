@@ -73,7 +73,6 @@ HEADERS_TEMP = \
     inc/videocollectionwrapperdata.h \
     inc/videolistdatamodeldata.h \
     inc/videolistselectiondialogdata.h \
-    inc/videohintwidgetdata.h \
     inc/videolistwidgetdata.h \
     inc/videolistviewdata.h \
     inc/videolisttoolbardata.h \
@@ -88,7 +87,6 @@ HEADERS_TEMP = \
     inc/videoservices.h \
     ../../videocollectionview/inc/videocollectionuiloader.h \
     ../../videocollectionview/inc/videocollectionviewutils.h \
-    ../../videocollectionview/inc/videohintwidget.h \
     ../../videocollectionview/inc/videolistselectiondialog.h \
     ../../videocollectionview/inc/videolistwidget.h \
     ../../videocollectionview/inc/videolistview.h \
@@ -132,7 +130,6 @@ SOURCES_TEMP = \
     src/xqserviceutilxtra.cpp \
     src/videocollectionuiloader.cpp \
     src/videocollectionviewutils.cpp \
-    src/videohintwidget.cpp \
     src/videolistselectiondialog.cpp \
     src/videolistwidget.cpp \
     src/videolistview.cpp \

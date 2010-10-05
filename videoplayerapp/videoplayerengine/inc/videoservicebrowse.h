@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 #ifndef VIDEOSERVICEBROWSE_H
 #define VIDEOSERVICEBROWSE_H
@@ -32,7 +32,9 @@ class VideoServiceBrowse : public XQServiceProvider
     Q_OBJECT
     
 public:
+
     VideoServiceBrowse( VideoServices *parent, QLatin1String service );
+
     ~VideoServiceBrowse();
     
 public:
@@ -82,16 +84,6 @@ public slots:
     /**
      *  Browse video
      *
-     *  @param title, Title of the embedded Videos application
-     *  @param category, Category which type of videos are browsed
-     *  @param sort, Sort type.
-     *  @return None
-     */
-    void browseVideos(const QString &title, int category, int sortRole);
-
-    /**
-     *  Browse video
-     *
      *  @param category, Category which type of videos are browsed
      *  @param sort, Sort type.
      *  @return None
@@ -99,6 +91,7 @@ public slots:
     void browseVideos(int category, int sortRole);
 
 private:
+
     /** request index of the service */
     int mRequestIndex;
     

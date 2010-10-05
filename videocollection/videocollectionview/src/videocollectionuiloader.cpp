@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 24.1.1 %
+// Version : %version: 24.1.2 %
 
 // INCLUDE FILES
 #include <qgraphicswidget.h>
@@ -30,7 +30,6 @@
 #include "videolistview.h"
 #include "videolistselectiondialog.h"
 #include "videolistwidget.h"
-#include "videohintwidget.h"
 #include "videocollectionwrapper.h"
 #include "videoproxymodelgeneric.h"
 #include "videocollectionviewutils.h"
@@ -456,14 +455,6 @@ void VideoCollectionUiLoader::initObject(QObject *object,
                 }
             }
         }
-        else if (name.compare(DOCML_NAME_VC_VIDEOHINTWIDGET) == 0)
-        {
-            VideoHintWidget *hintWidget = qobject_cast<VideoHintWidget*>(object);
-            if (hintWidget)
-            {
-                hintWidget->initialize();
-            }
-        }
         else if (name.compare(DOCML_NAME_OPTIONS_MENU) == 0)
         {
             // ensure that all the actions related to options menu are loaded
@@ -678,10 +669,6 @@ QObject* VideoCollectionUiLoader::createObject( const QString& type, const QStri
     else if ( type == VideoListWidget::staticMetaObject.className() )
     {
         object = new VideoListWidget(this);
-    }
-    else if ( type == VideoHintWidget::staticMetaObject.className() )
-    {
-        object = new VideoHintWidget(this);
     }
     if ( object )
     {

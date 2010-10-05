@@ -84,12 +84,6 @@ private slots:
      */
     void testViewStateChangedWithServiceExt();     
     
-        
-    /**
-     * Tests openoperatorServiceSlot
-     */
-    void testOpenOperatorServiceSlot();
-    
     /**
      * Tests addVideosToCollectionSlot
      */

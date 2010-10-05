@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -47,19 +47,20 @@ class CMPXVideoViewWrapper : public CBase
         static CMPXVideoViewWrapper* NewL( VideoBasePlaybackView* aView );
         virtual ~CMPXVideoViewWrapper();
 
-        CMPXVideoViewWrapper( VideoBasePlaybackView* aView );        
+        CMPXVideoViewWrapper( VideoBasePlaybackView* aView );
         void ConstructL();
 
     public:
         void HandleCommandL( TInt aCommand );
-                             
+
         void SetPropertyL( TMPXPlaybackProperty aProperty, TInt aValue );
 
         void UpdateVideoRect( TInt aX, TInt aY, TInt aWidth, TInt aHeight, TBool transitionEffect );
 
         TBool IsResumingPlaybackAfterTermination();
 
-        
+        TInt VolumeSteps();
+
     public: // data
 
         VideoBasePlaybackView*         mView;
@@ -69,6 +70,7 @@ class CMPXVideoViewWrapper : public CBase
         TBool                            mForeground;
         int                              mProperty;
         int                              mCommandId;
+        int                              mVolumeSteps;
 };
 
 #endif  // __MPXVIDEOVIEWWRAPPER_H__

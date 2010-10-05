@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 // INCLUDE FILES
 #include <ctsydomainpskeys.h>
@@ -101,10 +101,10 @@ void CMPXCallDetector::RunL()
     
     if ( status == KErrNone )
     {
-        TInt status;
-        iTsyProperty.Get( status );
+        TInt callStatus;
+        iTsyProperty.Get( callStatus );
         
-        if ( status != EPSCTsyCallStateNone )
+        if ( callStatus != EPSCTsyCallStateNone && callStatus != EPSCTsyCallStateDisconnecting )
         {
             iObserver->CallDetectedL();
         }

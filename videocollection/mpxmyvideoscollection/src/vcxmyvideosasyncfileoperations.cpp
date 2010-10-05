@@ -481,8 +481,7 @@ void CVcxMyVideosAsyncFileOperations::InitSingleMoveOrCopyL( TUint32 aMdsId )
         {
         video = CMPXMedia::NewL( *videoInCache );
         }
-        
-    if ( !video )
+    else
         {
         video = iCollection.iMyVideosMdsDb->CreateVideoL( aMdsId, EFalse /* brief details */ );
         }

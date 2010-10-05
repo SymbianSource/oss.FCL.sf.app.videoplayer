@@ -58,7 +58,6 @@ HEADERS += inc/videocollectionviewplugin.h \
            inc/videolisttoolbar.h \
            inc/videolistmenu.h \
            inc/videolistwidget.h \
-           inc/videohintwidget.h \
            inc/videocollectionviewutils.h \
            inc/videocollectionuiloader.h \
            inc/videolistselectiondialog.h \
@@ -71,7 +70,6 @@ SOURCES += src/videocollectionviewplugin.cpp \
            src/videolisttoolbar.cpp \
            src/videolistmenu.cpp \
            src/videolistwidget.cpp \
-           src/videohintwidget.cpp \
            src/videocollectionviewutils.cpp \
            src/videocollectionuiloader.cpp \
            src/videolistselectiondialog.cpp \

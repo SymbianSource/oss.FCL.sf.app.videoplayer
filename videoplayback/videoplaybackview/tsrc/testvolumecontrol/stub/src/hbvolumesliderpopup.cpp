@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:   2 %
+// Version : %version:   1 %
 
 
 
@@ -92,7 +92,7 @@ void HbVolumeSliderPopup::setValue( int value )
 {
     MPX_DEBUG(_L("HbVolumeSliderPopup::setValue %d"), value );
 
-    mValue = value;    
+    mValue = value;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ void HbVolumeSliderPopup::setTimeout( int timeout )
 {
     MPX_DEBUG(_L("HbVolumeSliderPopup::setTimeout %d"), timeout );
 
-    mTimeOut = timeout;    
+    mTimeOut = timeout;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -127,6 +127,28 @@ void HbVolumeSliderPopup::setRange( int min, int max )
 
     mMin = min;
     mMax = max;
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbVolumeSliderPopup::value
+// -------------------------------------------------------------------------------------------------
+//
+int HbVolumeSliderPopup::value()
+{
+    MPX_DEBUG(_L("HbVolumeSliderPopup::value"));
+
+    return mValue;
+}
+
+// -------------------------------------------------------------------------------------------------
+// HbVolumeSliderPopup::setSingleStep
+// -------------------------------------------------------------------------------------------------
+//
+void HbVolumeSliderPopup::setSingleStep( int steps )
+{
+    MPX_DEBUG(_L("HbVolumeSliderPopup::setSingleStep"));
+
+    mSteps = steps;
 }
 
 // End of file

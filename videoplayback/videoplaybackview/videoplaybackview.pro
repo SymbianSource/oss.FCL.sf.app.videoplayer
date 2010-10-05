@@ -14,7 +14,7 @@
 # Description: Project file for building Videoplayer components
 #
 #
-# Version : %version: 34 %
+# Version : %version: da1mmcf#35 %
 
 
 TEMPLATE = lib
@@ -60,7 +60,8 @@ LIBS += -lmpxplaybackutility.dll \
         -lefsrv.dll \
         -lws32.dll \
         -lgdi.dll \
-        -lshareui.dll 
+        -lshareui.dll \
+        -lplaybackhelper.dll
 
 DEPENDPATH += ../inc inc viewinc controlinc
 VPATH += viewsrc controlsrc
@@ -83,7 +84,8 @@ HEADERS += videobaseplaybackview.h \
            videoplaybackfiledetailswidget.h \
            videoplaybackuserinputhandler.h \
            videoplaybackdetailsplaybackwindow.h \
-           videocontainer.h
+           videocontainer.h \
+           videoplaybackvolumecontrol.h
 
 SOURCES += videobaseplaybackview.cpp \
            videoplaybackview.cpp \
@@ -102,7 +104,8 @@ SOURCES += videobaseplaybackview.cpp \
            videoplaybackfiledetailswidget.cpp \
            videoplaybackuserinputhandler.cpp \
            videoplaybackdetailsplaybackwindow.cpp \
-           videocontainer.cpp
+           videocontainer.cpp \
+           videoplaybackvolumecontrol.cpp
 
 DOCML += resources/videoplaybackview.docml
 

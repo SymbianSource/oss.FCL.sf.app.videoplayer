@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 49 %
+// Version : %version: 51 %
 
 
 //
@@ -1891,7 +1891,7 @@ void CMPXBufferingState::HandleLoadingComplete( TInt aError )
             //
             //  Delayed pause, background event was received while we were in buffering state
             //
-            HandlePause();
+            DoHandlePause();
         }
     }
     else

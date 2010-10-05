@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version:  4 %
+// Version : %version:  5 %
 
 
 
@@ -34,7 +34,7 @@
 // -------------------------------------------------------------------------------------------------
 //
 CMPXVideoViewWrapper::CMPXVideoViewWrapper( VideoBasePlaybackView* aView )
-    : mView( aView )    
+    : mView( aView )
 {
 }
 
@@ -60,7 +60,7 @@ CMPXVideoViewWrapper* CMPXVideoViewWrapper::NewL( VideoBasePlaybackView* aView )
 //
 void CMPXVideoViewWrapper::ConstructL()
 {
-    mMediaRequested = EFalse;       
+    mMediaRequested = EFalse;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -89,23 +89,22 @@ void CMPXVideoViewWrapper::HandleCommandL( TInt aCommand )
 void CMPXVideoViewWrapper::SetPropertyL( TMPXPlaybackProperty aProperty, TInt aValue )
 {
     mProperty = aProperty;
-    Q_UNUSED( aValue );    
+    Q_UNUSED( aValue );
 }
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoViewWrapper::UpdateVideoRect()
 // -------------------------------------------------------------------------------------------------
 //
-void CMPXVideoViewWrapper::UpdateVideoRect( 
+void CMPXVideoViewWrapper::UpdateVideoRect(
         TInt aX, TInt aY, TInt aWidth, TInt aHeight, TBool transitionEffect )
 {
     Q_UNUSED( aX );
     Q_UNUSED( aY );
-    Q_UNUSED( aWidth );    
+    Q_UNUSED( aWidth );
     Q_UNUSED( aHeight );
-    Q_UNUSED( transitionEffect );    
+    Q_UNUSED( transitionEffect );
 }
-
 
 // -------------------------------------------------------------------------------------------------
 //   CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()
@@ -113,9 +112,16 @@ void CMPXVideoViewWrapper::UpdateVideoRect(
 //
 TBool CMPXVideoViewWrapper::IsResumingPlaybackAfterTermination()
 {
-    return false;   
+    return false;
 }
 
-
+// -------------------------------------------------------------------------------------------------
+//   CMPXVideoViewWrapper::VolumeSteps()
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMPXVideoViewWrapper::VolumeSteps()
+{
+    return mVolumeSteps;
+}
 
 // EOF
