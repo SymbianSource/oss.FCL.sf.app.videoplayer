@@ -602,20 +602,9 @@ void CVcxMyVideosAsyncFileOperations::HandleFileCopyCompletedL( TInt aErr )
         if ( iIsMoveOperation )
             {
             MPX_DEBUG2("CVcxMyVideosAsyncFileOperations:: move operation failed %d", aErr );
-
-            if ( ! BaflUtils::FileExists( iCollection.iFs, iSourcePath ) )
-                {
-                MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: mmc removed, deleting the old media" );
-                iCollection.iMyVideosMdsDb->RemoveVideo( iMediaForMoveOp->ValueTObjectL<TMPXItemId>(
-                        KMPXMediaGeneralId ).iId1 );
-                }
-            else
-                {
-                MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: setting media path back in MDS" );
-                iMediaForMoveOp->SetTextValueL( KMPXMediaGeneralUri, iSourcePath );
-                iCollection.SetVideoL( *iMediaForMoveOp );
-                }
-
+            MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: setting media path back in MDS" );
+            iMediaForMoveOp->SetTextValueL( KMPXMediaGeneralUri, iSourcePath );
+            iCollection.SetVideoL( *iMediaForMoveOp );
             MPX_DEBUG1("CVcxMyVideosAsyncFileOperations:: deleting target file");
             TInt delErr = BaflUtils::DeleteFile( iCollection.iFs, iTargetPath );
             if ( delErr != KErrNone )

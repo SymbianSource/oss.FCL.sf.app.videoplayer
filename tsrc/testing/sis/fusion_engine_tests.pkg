@@ -132,42 +132,6 @@
 "../../../../videoutils/videoutils_plat/videoconnutility_api/tsrc/conf/VCXConnUtilTest.inc" - "C:/TestFramework/VCXConnUtilTest.inc"
 "../../../../videoutils/videoutils_plat/videoconnutility_api/tsrc/conf/VCXConnUtilTestHelium.cfg" -  "C:/TestFramework/VCXConnUtilTestHelium.cfg"
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; VIDEOPLAYER UNIT TESTS
-
-; VIDEOHELIX
-;"/epoc32/release/armv5/udeb/videohelixtest.dll"   -   "!:/sys/bin/videohelixtest.dll"
-;"../../../videoplayback/videohelix/tsrc/ut_videohelixtest/conf/videohelixtest.cfg" - "c:/testframework/videohelixtest.cfg"
-;"../../../videoplayback/videohelix/tsrc/ut_videohelixtest/data/mmc/dcf.odf" - "e:/testing/data/dcf.odf"
-;"../../../videoplayback/videohelix/tsrc/ut_videohelixtest/data/mmc/sdp_test.sdp" - "e:/testing/data/sdp_test.sdp"
-;"../../../videoplayback/videohelix/tsrc/ut_videohelixtest/data/mmc/vhpp_test.3gp" - "e:/testing/data/vhpp_test.3gp"
-
-; MPXVIDEOPLAYER
-;"/epoc32/release/armv5/udeb/mpxvideoplayertest.dll" - "!:/sys/bin/mpxvideoplayertest.dll"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/conf/mpxvideoplayertest.cfg" - "c:/testframework/mpxvideoplayertest.cfg"
-
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/local.3gp" - "e:/testing/data/local.3gp"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/sdp_test.sdp" - "e:/testing/data/sdp_test.sdp"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/test_local_hw.ram" - "e:/testing/data/test_local.ram"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/test_multilocal_hw.ram" - "e:/testing/data/test_multilocal.ram"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/test_streaming.ram" - "e:/testing/data/test_streaming.ram"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/test_multilink_v2.asx" - "e:/testing/data/test_multilink_v2.asx"
-;"../../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/data/mmc/test_seekSingle_v3.asx" - "e:/testing/data/test_seekSingle_v3.asx"
-
-; VIDEOPLAYBACKCONTROLS
-;"/epoc32/release/armv5/udeb/ui_videoplaybackcontrolstest.dll"      - "!:/sys/bin/ui_videoplaybackcontrolstest.dll"
-;"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.rsc" - "!:/resource/apps/mpxvideoplaybackcontrols.rsc" 
-;"/epoc32/data/z/resource/apps/mpxvideoplaybackcontrols.mif" - "!:/resource/apps/mpxvideoplaybackcontrols.mif"
-;"../../../videoplayback/videoplaybackcontrols/tsrc/videoplaybackcontrols_test/conf/ui_videoplaybackcontrolstest.cfg" - "c:/testframework/ui_videoplaybackcontrolstest.cfg"
-;"../../../videoplayback/videoplaybackcontrols/tsrc/videoplaybackcontrols_test/data/mmc/test.3gp" - "e:/testing/data/test.3gp"
-;"../../../videoplayback/videoplaybackcontrols/tsrc/videoplaybackcontrols_test/data/mmc/test.rm" - "e:/testing/data/test.rm"
-
-; USERINPUTHANDLER
-;"/epoc32/release/armv5/udeb/ui_userinputhandlertest.dll" - "c:/sys/bin/ui_userinputhandlertest.dll"
-;"../../../videoplayback/videoplaybackviews/tsrc/ut_userinputhandlertest/conf/ui_userinputhandlertest.cfg" - "c:/testframework/ui_userinputhandlertest.cfg"
-
-
 ; Embedded SIS
 ; None
 

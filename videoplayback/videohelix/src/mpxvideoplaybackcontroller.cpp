@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 66 %
+// Version : %version: 64 %
 
 
 //
@@ -167,9 +167,6 @@ void CMPXVideoPlaybackController::ConstructL( MMPXPlaybackPluginObserver& aObs )
 
     iDrmHelper = CMpxVideoDrmHelper::NewL();
 
-    iCallDetector = CMPXCallDetector::NewL( this );
-    iCallDetector->RequestNotification();
-
     iSavedPosition = 0;
     iViewActivated  = EFalse;
 }
@@ -293,14 +290,6 @@ CMPXVideoPlaybackController::~CMPXVideoPlaybackController()
     delete iPausedState;
     delete iSeekingState;
     delete iStoppedState;
-
-    if ( iCallDetector )
-    {
-        iCallDetector->Cancel();
-
-        delete iCallDetector;
-        iCallDetector = NULL;
-    }
 
     if ( iPlaybackMode )
     {
@@ -930,7 +919,7 @@ void CMPXVideoPlaybackController::SetVolumeCenRepL( TInt aVolume )
 //  ------------------------------------------------------------------------------------------------
 void CMPXVideoPlaybackController::SetMuteCenRepL( TBool aMute )
 {
-    if ( iFileDetails && iFileDetails->iAudioEnabled )
+    if ( iFileDetails && iFileDetails->iAudioEnabled && !iAccessoryMonitor->IsTvOutConnected() )
     {
         iMuteWatcher->SetValueL( aMute );
 
@@ -2562,13 +2551,4 @@ void CMPXVideoPlaybackController::HandleFrameReady(TInt aError)
 
     iPlaybackMode->HandleFrameReady(aError);
 }
-
-void CMPXVideoPlaybackController::CallDetectedL()
-{
-    MPX_ENTER_EXIT(_L("CMPXVideoPlaybackController::CallDetectedL"));
-
-    // Pause playback
-    DoHandleCommandL( EPbCmdPause );
-}
-
 // End of file

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 88 %
+// Version : %version: 86 %
 
 
 //  Include Files
@@ -966,7 +966,7 @@ void CMPXVideoBasePlaybackView::HandlePluginErrorL( TInt aError )
         }
         case KMPXVideoCallOngoingError:
         {
-            DisplayInfoMessageL( R_MPX_VIDEO_CALL_ONGOING, ETrue );
+            DisplayInfoMessageL( R_MPX_VIDEO_CALL_ONGOING );
             break;
         }
         default:
@@ -1550,15 +1550,7 @@ TInt CMPXVideoBasePlaybackView::ClosePlayerL( TAny* aPtr )
 void CMPXVideoBasePlaybackView::DoClosePlayerL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::DoClosePlayerL()"));
-
-    if ( iExitPlayer )
-    {
-        AppUi()->HandleCommandL( EAknCmdExit );
-    }
-    else
-    {
-        AppUi()->HandleCommandL( EAknSoftkeyBack );
-    }
+    AppUi()->HandleCommandL( EAknSoftkeyBack );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1868,8 +1860,6 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::HandleDrmErrorsL()"));
 
-    TInt drmUiError = KErrNone;
-
     //
     //  If we receive an error when we are initialized, let the DRM UI Handler
     //  process the error.  If we have been playing, display the error message
@@ -1893,11 +1883,10 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
             DRM::CDrmUiHandling* drmUiHandling = DRM::CDrmUiHandling::NewL( iCoeEnv );
             CleanupStack::PushL( drmUiHandling );
 
-            MPX_TRAP( drmUiError,
-                      drmUiHandling->GetErrorHandler().HandleErrorL( fileHandle,
-                                                                     ContentAccess::EPlay,
-                                                                     aError,
-                                                                     NULL ) );
+            drmUiHandling->GetErrorHandler().HandleErrorL( fileHandle,
+                                                           ContentAccess::EPlay,
+                                                           aError,
+                                                           NULL );
 
             CleanupStack::PopAndDestroy( drmUiHandling );
         }
@@ -1914,12 +1903,10 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
                 DRM::CDrmUiHandling* drmUiHandling = DRM::CDrmUiHandling::NewL( iCoeEnv );
                 CleanupStack::PushL( drmUiHandling );
 
-                MPX_TRAP( drmUiError,
-                          drmUiHandling->GetErrorHandler().HandleErrorL( fileHandle64,
-                                                                         ContentAccess::EPlay,
-                                                                         aError,
-                                                                         NULL ) );
-
+                drmUiHandling->GetErrorHandler().HandleErrorL( fileHandle64,
+                                                               ContentAccess::EPlay,
+                                                               aError,
+                                                               NULL );
                 CleanupStack::PopAndDestroy( drmUiHandling );
             }
             else
@@ -1938,19 +1925,7 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
         CleanupStack::PopAndDestroy();  // fileHandle
     }
 
-    if ( KErrNone == drmUiError )
-    {
-        HandleClosePlaybackViewL();
-    }
-    else if ( KLeaveExit == drmUiError )
-    {
-        iExitPlayer = ETrue;
-        ActivateClosePlayerActiveObject();
-    }
-    else
-    {
-        User::Leave( drmUiError );
-    }
+    HandleClosePlaybackViewL();
 }
 
 // -------------------------------------------------------------------------------------------------

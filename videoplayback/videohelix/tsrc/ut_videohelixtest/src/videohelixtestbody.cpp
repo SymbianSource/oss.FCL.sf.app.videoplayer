@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 27 %
+// Version : %version: e003sa33#24.1.1 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -120,8 +120,9 @@ TInt CVHPPTestClass::RunMethodL( CStifItemParser& aItem )
         ENTRY ("InitializeWithPositionL", CVHPPTestClass::InitializeWithPositionL),
         ENTRY ("InitializeLinkWithPositionL", CVHPPTestClass::InitializeLinkWithPositionL),
         ENTRY ("InitializeHandleWithPositionL", CVHPPTestClass::InitializeHandleWithPositionL),
-        ENTRY ( "InitializeStreamingWithSdpFileHandleL", CVHPPTestClass::InitializeStreamingWithSdpFileHandleL ),
-        ENTRY ( "RetrieveFileNameAndModeL", CVHPPTestClass::RetrieveFileNameAndModeL )
+        ENTRY ( "InitializeStreamingWithSdpFileHandleL", 
+        		CVHPPTestClass::InitializeStreamingWithSdpFileHandleL ),
+        ENTRY ( "RetrieveFileNameAndModeL", CVHPPTestClass::RetrieveFileNameAndModeL )        
 
         //
         //  ADD NEW ENTRIES HERE
@@ -289,7 +290,7 @@ CVHPPTestClass::InitializeL( CStifItemParser& aItem )
 
     TInt duration;
     TInt volumeSteps;
-
+    
     TInt err = aItem.GetNextInt( duration );
 
     if ( err == KErrNone )
@@ -305,32 +306,32 @@ CVHPPTestClass::InitializeL( CStifItemParser& aItem )
 
         AddExpectedEvent( event );
 
-        //
+        // 
         // read number of volume steps
         //
         err = aItem.GetNextInt( volumeSteps );
-
+        
         if ( err == KErrNone )
-        {
+        {        
             //
             // set volume steps
             //
             SetVolumeSteps( volumeSteps );
-
-            TBuf<120> fullPath;
+            
+            TBuf<120> fullPath;    
 
             err = ReadFileInitializationParameters( aItem, fullPath );
-
+    
             if ( err == KErrNone )
             {
                 PreparePluginL();
-
+    
                 //
                 //  Initalize the Plugin with a file name
                 //
                 MPX_DEBUG(_L("Initialize the Plugin:  filename = %S"), &fullPath);
                 iLog->Log(_L("Initialize the Plugin:  filename = %S"), &fullPath);
-
+    
                 iPlaybackPlugin->InitialiseL( fullPath );
             }
         }
@@ -367,40 +368,40 @@ CVHPPTestClass::InitializeLinkL( CStifItemParser& aItem )
 
         AddExpectedEvent( event );
 
-        //
+        // 
         // read number of volume steps
         //
         err = aItem.GetNextInt( volumeSteps );
-
+        
         if ( err == KErrNone )
-        {
+        {        
             //
             // set volume steps
             //
             SetVolumeSteps( volumeSteps );
-
+        
             TPtrC  link;
-
+    
             //
             //  Read in the link from the config file
             //
             TInt err = aItem.GetNextString( link );
-
+    
             if ( err == KErrNone )
             {
                 TInt err = ReadInitializationErrors( aItem );
-
+    
                 if ( err == KErrNone )
                 {
                     PreparePluginL();
-
+    
                     //
                     //  Extract the streaming link from the ram file and
                     //  Initalize the Plugin with the link and an access point
                     //
                     MPX_DEBUG(_L("Initialize the Plugin:  link = %S"), &link);
                     iLog->Log(_L("Initialize the Plugin:  link = %S"), &link);
-
+    
                     iPlaybackPlugin->InitStreamingL( link, KNullDesC8, 11 );
                 }
             }
@@ -462,57 +463,57 @@ CVHPPTestClass::InitializeHandleL( CStifItemParser& aItem  )
     TInt duration;
     TInt volumeSteps;
     TInt fileHandle32;
-
+    
     TInt err = aItem.GetNextInt( fileHandle32 );
-
+    
     if ( err == KErrNone )
-    {
-
+    {        
+    
 #ifndef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         //
         // set RFile as default if the 64-bit flag is not defined
         //
         fileHandle32 = ETrue;
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
+        
         err = aItem.GetNextInt( duration );
-
+    
         if ( err == KErrNone )
         {
             //
             //  We will always get an Init Complete message out
             //
             TCallbackEvent* event = new TCallbackEvent;
-
+    
             event->iEvent = EPInitialised;
             event->iData  = duration;
             event->iError = KErrNone;
-
+    
             AddExpectedEvent( event );
-
-            //
+    
+            // 
             // read number of volume steps
             //
             err = aItem.GetNextInt( volumeSteps );
-
+            
             if ( err == KErrNone )
-            {
+            {        
                 //
                 // set volume steps
                 //
                 SetVolumeSteps( volumeSteps );
-
+            
                 TBuf<120> fullPath;
-
+        
                 err = ReadFileInitializationParameters( aItem, fullPath );
-
+        
                 if ( err == KErrNone )
                 {
                     PreparePluginL();
-
+        
                     RFs fs;
                     TInt error = fs.Connect();
-
+                    
                     //
                     //  Open a file handle to the clip
                     //
@@ -532,18 +533,18 @@ CVHPPTestClass::InitializeHandleL( CStifItemParser& aItem  )
                         file64.Close();
                     }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
+                            
                     //
                     //  Initalize the Plugin with a file name
                     //
                     MPX_DEBUG(_L("Initialize the Plugin with File Handle:  filename = %S"), &fullPath);
                     iLog->Log(_L("Initialize the Plugin with File Handle:  filename = %S"), &fullPath);
-
+            
                     fs.Close();
                 }
-            }
-        }
-    }
+            } 
+        } 
+    } 
 
     return err;
 }
@@ -890,14 +891,14 @@ CVHPPTestClass::SetPropertyL( CStifItemParser& aItem )
                     event->iError = KErrNone;
                     AddExpectedEvent( event );
                 }
-                else
-                {
-                    event->iEvent = EPSetComplete;
-                    event->iData  = property;
-                    event->iError = KErrNone;
-                    AddExpectedEvent( event );
-                }
-
+				else
+				{
+					event->iEvent = EPSetComplete;
+					event->iData  = property;
+					event->iError = KErrNone;
+					AddExpectedEvent( event );
+				}
+				
             }
 
             TRAP( err, iPlaybackPlugin->SetL( (TMPXPlaybackProperty)property, value ) );
@@ -1146,9 +1147,9 @@ CVHPPTestClass::ConnectToDownloadL( CStifItemParser& aItem )
     iLog->Log(_L("CVHPPTestClass::ConnectToDownloadL()"));
 
     TInt err = KErrNone;
-
-#ifdef USE_S60_DOWNLOAD_MANAGER
-
+    
+#ifdef USE_S60_DOWNLOAD_MANAGER       
+    
     iDlMgrTester = CDlMgrTestClass::NewL();
     iDlMgrTester->AddStifObserver( this );
 
@@ -1195,17 +1196,17 @@ CVHPPTestClass::ConnectToDownloadL( CStifItemParser& aItem )
             CleanupStack::PopAndDestroy( cmd );
         }
     }
-
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // suppress build warning
-    MPX_DEBUG(_L("CVHPPTestClass::ConnectToDownloadL() : parsing type = %d"), aItem.ParsingType());
-
-    // Signal TestScripter to continue from waittestclass
+    
+#else // USE_S60_DOWNLOAD_MANAGER    
+     
+	// suppress build warning
+    MPX_DEBUG(_L("CVHPPTestClass::ConnectToDownloadL() : parsing type = %d"), aItem.ParsingType()); 
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
+	
 #endif // USE_S60_DOWNLOAD_MANAGER
-
+    
     return err;
 }
 
@@ -1219,7 +1220,7 @@ CVHPPTestClass::SendPdlCustomCommandL( TMPXPlaybackPdCommand aCustomCmd )
     MPX_ENTER_EXIT(_L("CVHPPTestClass::SendPdlCustomCommandL"),
                    _L("aCustomCmd = %d"), aCustomCmd );
 
-#ifdef USE_S60_DOWNLOAD_MANAGER
+#ifdef USE_S60_DOWNLOAD_MANAGER     
 
     CMPXCommand* cmd = CMPXCommand::NewL();
     CleanupStack::PushL( cmd );
@@ -1231,12 +1232,12 @@ CVHPPTestClass::SendPdlCustomCommandL( TMPXPlaybackPdCommand aCustomCmd )
     iPlaybackPlugin->CommandL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
-
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // Signal TestScripter to continue from waittestclass
+	
+#else // USE_S60_DOWNLOAD_MANAGER     
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
+	
 #endif // USE_S60_DOWNLOAD_MANAGER
 
 }
@@ -1251,8 +1252,8 @@ CVHPPTestClass::PauseDownloadL( CStifItemParser& /*aItem*/ )
     MPX_ENTER_EXIT(_L("CVHPPTestClass::PauseDownloadL()"));
     iLog->Log(_L("CVHPPTestClass::PauseDownloadL()"));
 
-#ifdef USE_S60_DOWNLOAD_MANAGER
-
+#ifdef USE_S60_DOWNLOAD_MANAGER   
+    
     TCallbackEvent* event = new TCallbackEvent;
 
     event->iEvent = EPDownloadStateChanged;
@@ -1262,14 +1263,14 @@ CVHPPTestClass::PauseDownloadL( CStifItemParser& /*aItem*/ )
     AddExpectedEvent( event );
 
     iDlMgrTester->PauseDownload();
-
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // Signal TestScripter to continue from waittestclass
+    
+#else // USE_S60_DOWNLOAD_MANAGER    
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
-#endif // USE_S60_DOWNLOAD_MANAGER
-
+	
+#endif // USE_S60_DOWNLOAD_MANAGER 
+    
     return KErrNone;
 }
 
@@ -1284,9 +1285,9 @@ CVHPPTestClass::ResumeDownloadL( CStifItemParser& aItem )
     iLog->Log(_L("CVHPPTestClass::ResumeDownloadL()"));
 
     TInt err = KErrNone;
-
-#ifdef USE_S60_DOWNLOAD_MANAGER
-
+    
+#ifdef USE_S60_DOWNLOAD_MANAGER 
+    
     TInt dlSize;
 
     err = aItem.GetNextInt( dlSize );
@@ -1313,17 +1314,17 @@ CVHPPTestClass::ResumeDownloadL( CStifItemParser& aItem )
 
         iDlMgrTester->ResumeDownload();
     }
-
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // suppress build warning
-    MPX_DEBUG(_L("CVHPPTestClass::ResumeDownloadL() : parsing type = %d"), aItem.ParsingType());
-
-    // Signal TestScripter to continue from waittestclass
+    
+#else // USE_S60_DOWNLOAD_MANAGER    
+     
+	// suppress build warning
+    MPX_DEBUG(_L("CVHPPTestClass::ResumeDownloadL() : parsing type = %d"), aItem.ParsingType()); 
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
-#endif // USE_S60_DOWNLOAD_MANAGER
-
+	
+#endif // USE_S60_DOWNLOAD_MANAGER 
+    
     return err;
 }
 
@@ -1337,8 +1338,8 @@ CVHPPTestClass::CancelDownloadL( CStifItemParser& /*aItem*/ )
     MPX_ENTER_EXIT(_L("CVHPPTestClass::CancelDownloadL()"));
     iLog->Log(_L("CVHPPTestClass::CancelDownloadL()"));
 
-#ifdef USE_S60_DOWNLOAD_MANAGER
-
+#ifdef USE_S60_DOWNLOAD_MANAGER 
+    
     TCallbackEvent* event = new TCallbackEvent;
 
     event->iEvent = EPDownloadStateChanged;
@@ -1349,13 +1350,13 @@ CVHPPTestClass::CancelDownloadL( CStifItemParser& /*aItem*/ )
 
     iDlMgrTester->CancelDownload();
 
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // Signal TestScripter to continue from waittestclass
+#else // USE_S60_DOWNLOAD_MANAGER    
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
-#endif // USE_S60_DOWNLOAD_MANAGER
-
+	
+#endif // USE_S60_DOWNLOAD_MANAGER 
+    
     return KErrNone;
 }
 
@@ -1370,9 +1371,9 @@ CVHPPTestClass::RetrievePdlStatusL( CStifItemParser& aItem )
     iLog->Log(_L("CVHPPTestClass::RetrievePdlStatusL()"));
 
     TInt err = KErrNone;
-
-#ifdef USE_S60_DOWNLOAD_MANAGER
-
+    
+#ifdef USE_S60_DOWNLOAD_MANAGER 
+    
     TInt pdlState;
     TInt expectedPdlState;
     TInt downloadedBytes;
@@ -1431,16 +1432,16 @@ CVHPPTestClass::RetrievePdlStatusL( CStifItemParser& aItem )
         CleanupStack::PopAndDestroy( cmd );
     }
 
-#else // USE_S60_DOWNLOAD_MANAGER
-
-    // suppress build warning
-    MPX_DEBUG(_L("CVHPPTestClass::RetrievePdlStatusL() : parsing type = %d"), aItem.ParsingType());
-
-    // Signal TestScripter to continue from waittestclass
+#else // USE_S60_DOWNLOAD_MANAGER 
+     
+	// suppress build warning
+    MPX_DEBUG(_L("CVHPPTestClass::RetrievePdlStatusL() : parsing type = %d"), aItem.ParsingType()); 
+	
+	// Signal TestScripter to continue from waittestclass
     Signal();
-
-#endif // USE_S60_DOWNLOAD_MANAGER
-
+	
+#endif // USE_S60_DOWNLOAD_MANAGER 
+    
     return err;
 }
 
@@ -1622,7 +1623,7 @@ void
 CVHPPTestClass::ProcessEvent( TCallbackEvent* aCallback )
 {
     MPX_ENTER_EXIT(_L("CVHPPTestClass::ProcessEvent"));
-
+    
     if ( iExpectedCallbackArray->Count() > 0 )
     {
         TCallbackEvent* expectedCallback = (*iExpectedCallbackArray)[0];
@@ -1958,13 +1959,6 @@ CVHPPTestClass::PlayduringVoiceCall( CStifItemParser& /*aItem*/ )
 
     TInt err = 0;
 
-    //callback event
-    TCallbackEvent* event = new TCallbackEvent;
-    event->iError = 0;
-    event->iData  = 0;
-    event->iEvent = EPPaused;
-    AddExpectedEvent( event );
-
     //set phone call as Connected
     err = RProperty::Set(KPSUidCtsyCallInformation, KCTsyCallState, EPSCTsyCallStateConnected);
 
@@ -2033,14 +2027,7 @@ CVHPPTestClass::DisconnectTvOutL()
     event->iError = KErrNone;
 
     AddExpectedEvent( event );
-
-    event = new TCallbackEvent;
-    event->iEvent = EPPaused;
-    event->iData  = 0;
-    event->iError = KErrNone;
-
-    AddExpectedEvent( event );
-
+    
     iAccObserver->UpdateTvOutStatusL( EFalse );
 
     return KErrNone;
@@ -2134,69 +2121,69 @@ CVHPPTestClass::SetDrmProtectedL( CStifItemParser& aItem )
     return err;
 }
 
-// -----------------------------------------------------------------------------
-//  CVHPPTestClass::SetVolumeSteps
-// -----------------------------------------------------------------------------
-//
-TInt
-CVHPPTestClass::SetVolumeSteps( TInt aVolumeSteps )
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::SetVolumeSteps()"));
-    iLog->Log(_L("CVHPPTestClass::SetVolumeSteps()"));
-
+// ----------------------------------------------------------------------------- 
+//  CVHPPTestClass::SetVolumeSteps 
+// ----------------------------------------------------------------------------- 
+// 
+TInt 
+CVHPPTestClass::SetVolumeSteps( TInt aVolumeSteps ) 
+{ 
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::SetVolumeSteps()")); 
+    iLog->Log(_L("CVHPPTestClass::SetVolumeSteps()")); 
+    
     iPlayerUtility->SetVolumeSteps( aVolumeSteps );
+    
+    return KErrNone; 
+} 
 
-    return KErrNone;
-}
-
-// -----------------------------------------------------------------------------
-//  CVHPPTestClass::HandleVolumeL
-// -----------------------------------------------------------------------------
-//
-TInt
-CVHPPTestClass::HandleVolumeL( CStifItemParser& aItem )
-{
-    MPX_ENTER_EXIT(_L("CVHPPTestClass::HandleVolumeL()"));
-    iLog->Log(_L("CVHPPTestClass::HandleVolumeL()"));
-
-    TInt command;
-    TInt value;
-
+// ----------------------------------------------------------------------------- 
+//  CVHPPTestClass::HandleVolumeL 
+// ----------------------------------------------------------------------------- 
+// 
+TInt 
+CVHPPTestClass::HandleVolumeL( CStifItemParser& aItem ) 
+{ 
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::HandleVolumeL()")); 
+    iLog->Log(_L("CVHPPTestClass::HandleVolumeL()")); 
+      
+    TInt command; 
+    TInt value; 
+    
     TInt err = aItem.GetNextInt( command );
 
     if ( err == KErrNone )
     {
         err = aItem.GetNextInt( value );
 
-        if ( err == KErrNone )
-        {
-            //
-            // assign callback event values
-            //
-            TCallbackEvent* event = new TCallbackEvent;
-            event->iEvent = EPVolumeChanged;
-            event->iData  = value;
-            event->iError = KErrNone;
-
-            //
-            // save expected result to be compared later
-            //
-            AddExpectedEvent( event );
-
+        if ( err == KErrNone ) 
+        {         
+            // 
+            // assign callback event values 
+            // 
+            TCallbackEvent* event = new TCallbackEvent; 
+            event->iEvent = EPVolumeChanged; 
+            event->iData  = value; 
+            event->iError = KErrNone; 
+                  
+            // 
+            // save expected result to be compared later 
+            // 
+            AddExpectedEvent( event ); 
+    
             //
             // send command to playback plugin
             //
-            CreateVideoPlaybackCommandL( aItem, (TMPXVideoPlaybackCommand)command );
-        }
+            CreateVideoPlaybackCommandL( aItem, (TMPXVideoPlaybackCommand)command ); 
+        } 
     }
-
+    
     if ( err == KErrNone )
     {
         MPX_DEBUG(_L("CVHPPTestClass::HandleVolumeL() leaves with proper error"));
     }
-
-    return err;
-}
+    
+    return err; 
+} 
 
 
 TInt
@@ -2208,7 +2195,7 @@ CVHPPTestClass::InitializeWithPositionL( CStifItemParser& aItem )
     TInt duration;
     TInt volumeSteps;
     TInt position;
-
+    
     TInt err = aItem.GetNextInt( duration );
 
     if ( err == KErrNone )
@@ -2224,36 +2211,36 @@ CVHPPTestClass::InitializeWithPositionL( CStifItemParser& aItem )
 
         AddExpectedEvent( event );
 
-        //
+        // 
         // read number of volume steps
         //
         err = aItem.GetNextInt( volumeSteps );
-
+        
         if ( err == KErrNone )
-        {
+        {        
             //
             // set volume steps
             //
             SetVolumeSteps( volumeSteps );
-
+            
             err = aItem.GetNextInt( position );
-
+            
             if (err == KErrNone )
             {
-                TBuf<120> fullPath;
+                TBuf<120> fullPath;    
 
                 err = ReadFileInitializationParameters( aItem, fullPath );
-
+                
                 if ( err == KErrNone )
                 {
                     PreparePluginL();
-
+        
                     //
                     //  Initalize the Plugin with a file name
                     //
                     MPX_DEBUG(_L("Initialize the Plugin:  filename = %S, position = %d"), &fullPath, position);
                     iLog->Log(_L("Initialize the Plugin:  filename = %S, position = %d"), &fullPath, position);
-
+        
                     iPlaybackPlugin->InitialiseWithPositionL( fullPath, position );
                 }
 
@@ -2274,7 +2261,7 @@ CVHPPTestClass::InitializeLinkWithPositionL( CStifItemParser& aItem )
     TInt duration;
     TInt volumeSteps;
     TInt position;
-
+    
     TInt err = aItem.GetNextInt( duration );
 
     if ( err == KErrNone )
@@ -2290,44 +2277,44 @@ CVHPPTestClass::InitializeLinkWithPositionL( CStifItemParser& aItem )
 
         AddExpectedEvent( event );
 
-        //
+        // 
         // read number of volume steps
         //
         err = aItem.GetNextInt( volumeSteps );
-
+        
         if ( err == KErrNone )
-        {
+        {        
             //
             // set volume steps
             //
             SetVolumeSteps( volumeSteps );
-
+            
             err = aItem.GetNextInt( position );
-
+            
             if ( err == KErrNone )
             {
                 TPtrC  link;
-
+    
                 //
                 //  Read in the link from the config file
                 //
                 TInt err = aItem.GetNextString( link );
-
+    
                 if ( err == KErrNone )
                 {
                     TInt err = ReadInitializationErrors( aItem );
-
+    
                     if ( err == KErrNone )
                     {
                         PreparePluginL();
-
+    
                         //
                         //  Extract the streaming link from the ram file and
                         //  Initalize the Plugin with the link and an access point
                         //
                         MPX_DEBUG(_L("Initialize the Plugin:  link = %S, position = %d"), &link, position);
                         iLog->Log(_L("Initialize the Plugin:  link = %S, position = %d"), &link, position);
-
+    
                         iPlaybackPlugin->InitStreamingL( link, KNullDesC8, 11, position );
                     }
                 }
@@ -2349,41 +2336,41 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
     TInt volumeSteps;
     TInt position;
     TInt fileHandle32;
-
+    
     TInt err = aItem.GetNextInt( fileHandle32 );
-
+    
     if ( err == KErrNone )
-    {
-
+    {        
+    
 #ifndef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         //
         // set RFile as default if the 64-bit flag is not defined
         //
         fileHandle32 = ETrue;
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
+        
         err = aItem.GetNextInt( duration );
-
+    
         if ( err == KErrNone )
         {
             //
             //  We will always get an Init Complete message out
             //
             TCallbackEvent* event = new TCallbackEvent;
-
+    
             event->iEvent = EPInitialised;
             event->iData  = duration;
             event->iError = KErrNone;
-
+    
             AddExpectedEvent( event );
-
-            //
+    
+            // 
             // read number of volume steps
             //
             err = aItem.GetNextInt( volumeSteps );
-
+            
             if ( err == KErrNone )
-            {
+            {        
                 //
                 // set volume steps
                 //
@@ -2394,16 +2381,16 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
                 if (err == KErrNone )
                 {
                     TBuf<120> fullPath;
-
+                    
                     err = ReadFileInitializationParameters( aItem, fullPath );
-
+        
                     if ( err == KErrNone )
                     {
                         PreparePluginL();
-
+        
                         RFs fs;
                         TInt error = fs.Connect();
-
+                    
                         //
                         //  Open a file handle to the clip
                         //
@@ -2423,20 +2410,20 @@ CVHPPTestClass::InitializeHandleWithPositionL( CStifItemParser& aItem  )
                             file64.Close();
                         }
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
+                            
                         //
                         //  Initalize the Plugin with a file name
                         //
                         MPX_DEBUG(_L("Initialize the Plugin with File Handle:  filename = %S, position = %d"), &fullPath, position);
                         iLog->Log(_L("Initialize the Plugin with File Handle:  filename = %S, position = %d"), &fullPath, position);
-
+            
                         fs.Close();
                     }
-                }
+                }            
 
-            }
-        }
-    }
+            } 
+        } 
+    } 
 
     return err;
 }
@@ -2450,97 +2437,97 @@ CVHPPTestClass::InitializeStreamingWithSdpFileHandleL( CStifItemParser& aItem )
     TInt duration;
     TInt volumeSteps;
     TInt fileHandle32;
-
+    
     TInt err = aItem.GetNextInt( fileHandle32 );
-
+    
     if ( err == KErrNone )
-    {
-
+    {        
+    
 #ifndef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         //
         // set RFile as default if the 64-bit flag is not defined
         //
         fileHandle32 = ETrue;
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
+        
         err = aItem.GetNextInt( duration );
-
+    
         if ( err == KErrNone )
         {
             //
             //  We will always get an Init Complete message out
             //
             TCallbackEvent* event = new TCallbackEvent;
-
+    
             event->iEvent = EPInitialised;
             event->iData  = duration;
             event->iError = KErrNone;
-
+    
             AddExpectedEvent( event );
-
-            //
+    
+            // 
             // read number of volume steps
             //
             err = aItem.GetNextInt( volumeSteps );
-
+            
             if ( err == KErrNone )
-            {
+            {        
                 //
                 // set volume steps
                 //
                 SetVolumeSteps( volumeSteps );
-
+               
                 TBuf<120> fullPath;
                 err = ReadFileInitializationParameters( aItem, fullPath );
 
                 if ( err == KErrNone )
                 {
-                    PreparePluginL();
-
-                    MPX_DEBUG( _L("Initialize the Plugin:  link = %S"), &fullPath );
-                    iLog->Log( _L("Initialize the Plugin:  link = %S"), &fullPath );
-
-                    //
-                    //  Extract the streaming link from the ram file and
-                    //  Initalize the Plugin with the file handle and an access point
-                    //
-                    RFs fs;
-                    TInt error = fs.Connect();
-
-                    if ( fileHandle32 )
-                    {
-                        RFile file;
-                        error = file.Open( fs, fullPath, EFileRead | EFileShareAny );
-
-                        MPX_DEBUG( _L("Initialize the Plugin:  file open error = %d"),
-                                error );
-
-                        User::LeaveIfError( error );
-
-                        iPlaybackPlugin->InitStreamingL( file, 11 );
-                        file.Close();
-                    }
+					PreparePluginL();
+					
+					MPX_DEBUG( _L("Initialize the Plugin:  link = %S"), &fullPath );
+					iLog->Log( _L("Initialize the Plugin:  link = %S"), &fullPath );
+					
+					//
+					//  Extract the streaming link from the ram file and
+					//  Initalize the Plugin with the file handle and an access point
+					//
+					RFs fs;
+					TInt error = fs.Connect();
+					
+					if ( fileHandle32 )
+					{
+						RFile file;
+						error = file.Open( fs, fullPath, EFileRead | EFileShareAny );
+						
+						MPX_DEBUG( _L("Initialize the Plugin:  file open error = %d"),
+								error );   
+						
+						User::LeaveIfError( error );
+				  
+						iPlaybackPlugin->InitStreamingL( file, 11 );
+						file.Close();
+					}
     #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-                    else
-                    {
-                        RFile64 file64;
-                        error = file64.Open( fs, fullPath, EFileRead | EFileShareAny  );
-
-                        MPX_DEBUG( _L("Initialize the Plugin:  file open error = %d"),
-                                error );
-
-                        User::LeaveIfError( error );
-
-                        iPlaybackPlugin->InitStreaming64L( file64, 11 );
-                        file64.Close();
-                    }
+					else
+					{
+						RFile64 file64;
+						error = file64.Open( fs, fullPath, EFileRead | EFileShareAny  );
+						
+						MPX_DEBUG( _L("Initialize the Plugin:  file open error = %d"),
+								error );
+						
+						User::LeaveIfError( error );
+						
+						iPlaybackPlugin->InitStreaming64L( file64, 11 );
+						file64.Close();
+					}
 #endif // SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
-
-                    fs.Close();
+					
+					fs.Close();
                 }
-            }
-        }
-    }
+            } 
+        } 
+    } 
     return err;
 }
 
@@ -2550,10 +2537,10 @@ CVHPPTestClass::RetrieveFileNameAndModeL( CStifItemParser& aItem )
     MPX_ENTER_EXIT( _L("CVHPPTestClass::RetrieveFileNameAndModeL()") );
     iLog->Log( _L("CVHPPTestClass::RetrieveFileNameAndModeL()") );
 
-    TBuf<120>    fullPath;
-    TPtrC        fileName;
-    TInt        err;
-
+    TBuf<120>	fullPath;
+    TPtrC		fileName;
+    TInt		err;
+    
     err = aItem.GetNextString( fileName );
 
     if ( err == KErrNone )
@@ -2563,38 +2550,38 @@ CVHPPTestClass::RetrieveFileNameAndModeL( CStifItemParser& aItem )
         //
         fullPath.Append( KVideoTestPath );
         fullPath.Append( fileName );
-
+        
         TInt mode;
         err = aItem.GetNextInt( mode);
-
+        
         if ( err == KErrNone )
         {
-             CMPXCommand* cmd = CMPXCommand::NewL();
-            CleanupStack::PushL( cmd );
-
-            cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
-            cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId,
-                                         KMPXMediaIdVideoPlayback );
-            cmd->SetTObjectValueL<TInt>( KMPXMediaVideoPlaybackCommand, EPbCmdInitView );
-
-            iPlaybackPlugin->CommandL( *cmd );
-
-            TPtrC clipName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );
-            TMPXVideoMode  playbackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
-
-            MPX_DEBUG( _L("    Expected Data:  filename = %S, playbackmode= %d" ),
-                 &fullPath, mode );
-
-            MPX_DEBUG( _L("    Retrieved Data: filename = %S, playbackmode= %d"),
-                 &clipName, playbackMode );
-
-            if ( fullPath.Compare( clipName) != 0 || mode != playbackMode )
-            {
-                err = KErrGeneral;
-                MPX_DEBUG( _L("    err = %d"), err );
-            }
-
-            CleanupStack::PopAndDestroy( cmd );
+ 			CMPXCommand* cmd = CMPXCommand::NewL();
+			CleanupStack::PushL( cmd );
+	
+			cmd->SetTObjectValueL<TBool>( KMPXCommandGeneralDoSync, ETrue );
+			cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId,
+										 KMPXMediaIdVideoPlayback );
+			cmd->SetTObjectValueL<TInt>( KMPXMediaVideoPlaybackCommand, EPbCmdInitView );
+			
+			iPlaybackPlugin->CommandL( *cmd );
+			
+			TPtrC clipName( cmd->ValueText( KMPXMediaVideoPlaybackFileName ) );
+			TMPXVideoMode  playbackMode = (TMPXVideoMode) cmd->ValueTObjectL<TInt>( KMPXMediaVideoMode );
+	
+			MPX_DEBUG( _L("    Expected Data:  filename = %S, playbackmode= %d" ),
+				 &fullPath, mode );
+			
+			MPX_DEBUG( _L("    Retrieved Data: filename = %S, playbackmode= %d"),
+				 &clipName, playbackMode );
+			
+			if ( fullPath.Compare( clipName) != 0 || mode != playbackMode )
+			{
+			    err = KErrGeneral;
+				MPX_DEBUG( _L("    err = %d"), err );
+			}
+			
+			CleanupStack::PopAndDestroy( cmd );
         }
     }
 

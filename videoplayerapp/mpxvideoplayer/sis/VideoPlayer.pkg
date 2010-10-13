@@ -20,10 +20,10 @@
 &EN
 
 ; Header
-#{"Video Player"},(0x200159B2),9,21,35, TYPE=SA, RU
+#{"Video Player"},(0x200159B2),9,20,29, TYPE=SA, RU
 
-; Supports S60 v5.2
-[0x20022E6D], 0, 0, 0, {"Series60ProductID"}
+; Supports Series 60 v5.0
+;[0x1028315F], 0, 0, 0, {"Series60ProductID"}
 
 ; Localised Vendor name
 %{"Nokia"}

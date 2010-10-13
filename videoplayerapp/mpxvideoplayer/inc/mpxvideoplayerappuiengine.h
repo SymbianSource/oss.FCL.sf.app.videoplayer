@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 35 %
+// Version : %version: da1mmcf#34 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -43,7 +43,6 @@ class CMpxVideoEmbeddedPdlHandler;
 class MMPXCollectionUiHelper;
 class CAiwGenericParamList;
 class CVideoPlaylistUtility;
-class CMpxVideoPlayerIadUpdate;
 
 /**
 *  Application UI class.
@@ -315,11 +314,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          */
         virtual void DoLateConstructL();
 
-        /**
-         * Checks for updates via IAD.
-         */
-        void DoCheckForUpdatesL();
-
     private:       // data
 
         CMpxVideoPlayerAppUi*         iAppUi;
@@ -336,7 +330,6 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
         CIdle*                        iExitAo;
         CMediaRecognizer*             iRecognizer;       // own
         CMpxVideoEmbeddedPdlHandler*  iPdlHandler;       // own
-        CMpxVideoPlayerIadUpdate*     iIadUpdate;        // own
 
         TInt                     iAccessPointId;
         TBool                    iMultilinkPlaylist;

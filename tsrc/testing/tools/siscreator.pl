@@ -45,11 +45,15 @@ my @engineTests = (
 	);
 
 my @unitTests = (
+		"videoplayer\\tsrc\\testing\\sis\\fusion_unit_tests.pkg",
 		"videoplayer\\videoplayback\\videohelix\\tsrc\\ut_videohelixtest\\group\\videohelixtest.pkg",
 		"videoplayer\\videoplayback\\videoplaybackcontrols\\tsrc\\videoplaybackcontrols_test\\group\\videoplaybackcontrolstest.pkg",
 		"videoplayer\\videoplayback\\videoplaybackviews\\tsrc\\ut_userinputhandlertest\\group\\userinputhandlertest.pkg",
 		"videoplayer\\videoplayerapp\\mpxvideoplayer\\tsrc\\ut_mpxvideoplayertest\\group\\mpxvideoplayertest.pkg",
-		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group\\VcxHgMyVideosMainViewTest.pkg"
+		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group\\VcxHgMyVideosMainViewTest.pkg",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_collectionplugintest\\group\\ut_collectionplugintest.pkg",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideoscollectionutiltest\\group\\VcxMyVideosCollectionUtilTest.pkg",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideosmdsdb\\group\\VcxMyVideosMdsDbTest.pkg"
 	);
 
 ########################################

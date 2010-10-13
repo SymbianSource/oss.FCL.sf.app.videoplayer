@@ -16,10 +16,10 @@
 
 
 call makesis.exe cenrep.pkg cenrep.sis 
-call signsis.exe cenrep.sis cenrep.sisx \Nokia_RnDCert_02.der \Nokia_RnDCert_02.key
+call signsis.exe cenrep.sis cenrep.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
 call del cenrep.sis
 
 call makesis.exe VideoPlayer.pkg VideoPlayer.sis
-call signsis.exe VideoPlayer.sis VideoPlayer.sisx \Nokia_RnDCert_02.der \Nokia_RnDCert_02.key
+call signsis.exe VideoPlayer.sis VideoPlayer.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key
 call del VideoPlayer.sis
 call del cenrep.sisx

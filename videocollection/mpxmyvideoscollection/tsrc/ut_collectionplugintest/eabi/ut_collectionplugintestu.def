@@ -1,0 +1,5 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZTI22CVcxMdsShutdownMonitor @ 2 NONAME
+	_ZTV22CVcxMdsShutdownMonitor @ 3 NONAME
+

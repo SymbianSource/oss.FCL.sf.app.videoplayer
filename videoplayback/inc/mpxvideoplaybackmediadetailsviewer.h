@@ -15,9 +15,7 @@
 *
 */
 
-
-// Version : %version:  7 %
-
+// Version : %version:  e003sa33#6 %
 
 #ifndef MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
 #define MPXVIDEOPLAYBACKMEDIADETAILSVIEWER_H_
@@ -80,12 +78,12 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         * @param aRect drawable area.
         */
         void Draw( const TRect& aRect ) const;
-
+        
         /**
         * Creates new skins for the control
         * @return void
         */
-        void SkinChangeL();
+        void SkinChangeL();        
 
 
     public: // from CoeControl
@@ -102,56 +100,56 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
          *  @since 5.0
          */
         void Reset();
-
-        /**
+        
+        /** 
         * Accessor for the dynamically calculated viewer rect
-        * @since 9.2
+        * @since 9.2 
         * @return the viewer rect
-        */
-        TRect ViewerRect();
-
+        */                   
+        TRect ViewerRect();         
+              
 
     private:
-
+        
         void CreateLabelsL();
-
+        
         void LaunchDRMDetailsL();
-
+        
         /**
         * Sets label rects and text
         */
-        void FormatLabelsL() const;
-
+        void FormatLabelsL() const;   
+        
         void UpdateBackgroundBitmapL() const;
-
-        /**
+        
+        /** 
         * Timer callback for scroll timer
-        * @since 9.2
-        * @param aPtr Pointer to timers callback
-        * @return KErrNone
-        */
+        * @since 9.2 
+        * @param aPtr Pointer to timers callback 
+        * @return KErrNone 
+        */ 
         static TInt ScrollTimer( TAny* aPtr );
 
-        /**
+        /** 
         * Handle Scroll Timer
-        * @since 9.2
-        * @return void
-        */
+        * @since 9.2 
+        * @return void 
+        */ 
         void HandleScrollTimerL();
-
-        /**
+        
+        /** 
         * Determine the number of items to be shown in the viewer
-        * @since 9.2
+        * @since 9.2 
         * @return the number of rows to be created
-        */
+        */         
         TInt NumOfItemsShownInViewerL();
-
-        /**
+        
+        /** 
         * Dynamically calculate determine the viewer rectangle dyanmically
-        * @since 9.2
+        * @since 9.2 
         * @return the viewer rect
-        */
-        TRect CalculateViewerRectL();
+        */                   
+        TRect CalculateViewerRectL();          
 
         /**
          * Update the text of filename label
@@ -164,14 +162,14 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
         void UpdateTitleL();
 
     private:
-
+        
         /**
          * Scroll the too long text for some label
          */
         class TTextScroller
         {
             public:
-
+        
                 /**
                  * Constructor
                  */
@@ -196,38 +194,37 @@ class CMPXVideoPlaybackMediaDetailsViewer : public CCoeControl
                 void ScrollText( const TDesC& aSrcText, TDes& aDesText );
 
             private:
-
-                TUint32        iDelayBeginningTick;
-                TInt           iTextScrollPos;
-                TBool          iDelay;
-                TBool          iScroll;
-                TInt           iSrcTextLen;
+                
+                TUint32		iDelayBeginningTick;
+                TInt		iTextScrollPos;
+                TBool		iDelay;
+                TBool		iScroll;
+                TInt		iSrcTextLen;
         };
 
     private:    // Data
-
+        
         CMPXVideoPlaybackControlsController* iController;
-
+        
         CEikLabel*                           iClipnameLabel;
         CEikLabel*                           iTitleLabel;
-        CEikLabel*                           iArtistLabel;
+        CEikLabel*                           iArtistLabel;        
         CEikLabel*                           iFormatLabel;
         CEikLabel*                           iResolutionLabel;
         CEikLabel*                           iDurationLabel;
         CEikLabel*                           iBitrateLabel;
         CEikLabel*                           iLicenseLabel;
         CEikLabel*                           iAdditionalLabel;
+        
 
-
-        CFbsBitmap*                          iBackgroundBitmap;
+        CFbsBitmap*                          iBackgroundBitmap;   
         CPeriodic*                           iScrollingTextTimer;
         TRect                                iViewerRect;
         HBufC*                               iAdditionalString;
         TTextScroller                        iFilenameScroller;
         TTextScroller                        iTitleScroller;
         // after every scrolling label has updated, draw them
-        TBool                                iScrolledTextUpdated;
-        TBool                                iDrmDetailsLaunched;
+        TBool                                iScrolledTextUpdated; 
 };
 
 

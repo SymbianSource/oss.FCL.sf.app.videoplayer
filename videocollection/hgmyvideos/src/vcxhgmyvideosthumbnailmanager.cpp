@@ -114,18 +114,6 @@ void CVcxHgMyVideosThumbnailManager::Cancel( TThumbnailRequestId aRequestId )
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosThumbnailManager::Reset()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosThumbnailManager::Reset( CThumbnailObjectSource& aSource )
-    {
-    if ( iTnManager )
-        {
-        iTnManager->DeleteThumbnails( aSource );
-        }
-    }
-
-// -----------------------------------------------------------------------------
 // CVcxHgMyVideosThumbnailManager::AddObserverL()
 // -----------------------------------------------------------------------------
 //

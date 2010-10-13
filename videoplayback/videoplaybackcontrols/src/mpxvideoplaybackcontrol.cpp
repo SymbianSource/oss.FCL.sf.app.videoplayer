@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: 23.1.1 %
 
 
 // INCLUDE FILES
@@ -332,7 +332,6 @@ void CMPXVideoPlaybackControl::SetVisibility( TMPXPlaybackState aState )
             }
             break;
         }
-        case EPbStateInitialised:
         case EPbStateBuffering:
         {
             if ( iProperties & EMPXBufferingControl )

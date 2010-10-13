@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#12 %
+// Version : %version: ou1cpsw#11 %
 
 
 #include <platform_paths.hrh>
@@ -48,7 +48,6 @@ SOURCE          mpxcollectionuihelper_stub.cpp
 SOURCE          stifutilities.cpp
 SOURCE          coneutils_stub.cpp
 SOURCE          timeoutcontroller.cpp
-SOURCE          mpxvideoplayeriadupdate_stub.cpp
 
 SOURCEPATH      ../../../src
 SOURCE          mpxvideoplayerappuiengine.cpp

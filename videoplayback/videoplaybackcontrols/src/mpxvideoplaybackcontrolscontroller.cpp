@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 45 %
+// Version : %version: 44 %
 
 
 // INCLUDE FILES
@@ -117,17 +117,9 @@ void CMPXVideoPlaybackControlsController::ConstructL( CMPXVideoPlaybackViewFileD
 
     iFileDetails = aDetails;
     iTvOutConnected = iFileDetails->iTvOutConnected;
+    iShowControls  = ETrue;
 
     iRNFormat = IsRealFormatL( iFileDetails->iClipName->Des() );
-
-    if ( IsRealOneBitmapVisible() )
-    {
-        iShowControls  = EFalse;
-    }
-    else
-    {
-        iShowControls  = ETrue;
-    }
 
     iControlsPolicy = CMPXVideoPlaybackControlPolicy::NewL();
     iControlsConfig = CMPXVideoPlaybackControlConfiguration::NewL( this );
@@ -365,13 +357,8 @@ EXPORT_C void CMPXVideoPlaybackControlsController::HandleEventL(
         case EMPXControlCmdHandleForegroundEvent:
         {
             MPX_DEBUG(_L("    [EMPXControlCmdHandleForegroundEvent]"));
-
-            if ( ! IsRealOneBitmapVisible() )
-            {
-                iShowControls = ETrue;
-                UpdateControlsVisibility();
-            }
-
+            iShowControls = ETrue;
+            UpdateControlsVisibility();
             break;
         }
         case EMPXControlCmdHandleErrors:
@@ -1789,39 +1776,7 @@ void CMPXVideoPlaybackControlsController::SetRealOneBitmapVisibility( TBool aVis
     if ( iRealOneBitmap )
     {
         iRealOneBitmap->MakeVisible( aVisible );
-
-        if ( ! aVisible )
-        {
-            // HDMI/TV-out cable connected then show the controls
-            if ( iTvOutConnected  && !iShowControls )
-            {
-                iShowControls = ETrue;
-                UpdateControlsVisibility();
-            }
-            else
-            {
-                iShowControls = ETrue;
-            }
-        }
-    }// iRealOneBitmap
-}
-
-// -------------------------------------------------------------------------------------------------
-//   CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible()
-// -------------------------------------------------------------------------------------------------
-//
-TBool CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible()
-{
-    TBool visible = EFalse;
-
-    if ( iRealOneBitmap )
-    {
-        visible = iRealOneBitmap->IsVisible();
     }
-
-    MPX_DEBUG(_L("CMPXVideoPlaybackControlsController::IsRealOneBitmapVisible(%d)"), visible);
-
-    return visible;
 }
 
 // -------------------------------------------------------------------------------------------------

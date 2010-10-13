@@ -20,7 +20,7 @@
 &EN
 
 ;Header
-#{"Video Player"},(0x200159B2),9,21,35, TYPE=SA
+#{"Video Player"},(0x200159B2),9,20,29, TYPE=SA
 
 ;Localised Vendor name
 %{"Nokia"}

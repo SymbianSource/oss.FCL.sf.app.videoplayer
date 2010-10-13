@@ -39,7 +39,6 @@
 #include <coemain.h>
 #include <aknappui.h>
 #include <bautils.h>
-#include <apgcli.h>
 
 #include <vcxhgmyvideosicons.mbg>
 #include <myvideosindicator.h>
@@ -69,9 +68,7 @@ CVcxHgMyVideosCategoryModelHandler* CVcxHgMyVideosCategoryModelHandler::NewL(
     {
     CVcxHgMyVideosCategoryModelHandler* self = 
         new (ELeave) CVcxHgMyVideosCategoryModelHandler( aModel, aScroller );
-    CleanupStack::PushL( self );
-    self->ConstructL();
-    CleanupStack::Pop( self );
+
     return self;
     }
 
@@ -87,62 +84,6 @@ CVcxHgMyVideosCategoryModelHandler::CVcxHgMyVideosCategoryModelHandler(
       iTnManager( aModel.ThumbnailManager() ),
       iTnRequestId( KErrNotFound )
     {
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosCategoryModelHandler::ConstructL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosCategoryModelHandler::ConstructL()
-    {
-    CheckIfExtraItemsExistsL();
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosCategoryModelHandler::CheckIfExtraItemsExistsL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosCategoryModelHandler::CheckIfExtraItemsExistsL()
-    {
-    TInt value = 0;
-    TBuf<KMyVideosTitleUrlMaxLength> url;
-    // Check that cenrep exists and has some valid data
-    iModel.GetMyVideosCustomizationString( KCRVideoPlayerExtraItem2Url, url ); // ignore error code
-    if ( url.Length() == 0 )
-        {
-        TInt err = iModel.GetMyVideosCustomizationInt( KCRVideoPlayerExtraItem2Uid, value );
-        if ( err == KErrNone && value != 0 ) 
-            {
-            if ( AppExistsL( TUid::Uid( value ) ) )
-                {
-                iExtraItem2Exists = ETrue;
-                }
-            }
-        }
-    else
-        {
-        iExtraItem2Exists = ETrue;
-        }
-    
-    value = 0;
-    url.Zero();
-    iModel.GetMyVideosCustomizationString( KCRVideoPlayerExtraItem3Url, url ); // ignore error code
-    if ( url.Length() == 0 )
-        {
-        TInt err = iModel.GetMyVideosCustomizationInt( KCRVideoPlayerExtraItem3Uid, value );
-        if ( err == KErrNone && value != 0 )
-            {
-            if ( AppExistsL( TUid::Uid( value ) ) )
-                {
-                iExtraItem3Exists = ETrue;
-                }
-            }
-        }
-    else
-        {
-        iExtraItem3Exists = ETrue;
-        }
-    
     }
 
 // -----------------------------------------------------------------------------
@@ -727,7 +668,7 @@ void CVcxHgMyVideosCategoryModelHandler::UpdateCategoryListL()
     {
     IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # UpdateCategoryListL() - Enter" );
     
-    MakeCategoryIdArrayL();
+    MakeCategoryIdArray();
     
     if ( iCategoryIdArray.Count() != iScroller.ItemCount() )
         {
@@ -817,12 +758,12 @@ TInt CVcxHgMyVideosCategoryModelHandler::ResolveCategoryId( TInt aScrollerIndex 
     }
 
 // -----------------------------------------------------------------------------
-// CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArrayL()
+// CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray()
 // -----------------------------------------------------------------------------
 //
-void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArrayL()
+void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray()
     {
-    IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArrayL");
+    IPTVLOGSTRING_LOW_LEVEL("CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArray");
     
     iCategoryIdArray.Reset();    
     
@@ -835,7 +776,7 @@ void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArrayL()
     
     if ( error == KErrNone && value > EMyVideosListItemTypeEmpty )
         {
-        IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # MakeCategoryIdArrayL() Getting category items from cenrep" ); 
+        IPTVLOGSTRING_LOW_LEVEL( "MPX My Videos UI # MakeCategoryIdArray() Getting category items from cenrep" ); 
 
         for ( TInt i=KCRVideoPlayerItemLocation1; i<=KCRVideoPlayerItemLocation7; i++ )    
             {
@@ -872,17 +813,17 @@ void CVcxHgMyVideosCategoryModelHandler::MakeCategoryIdArrayL()
                 
                 if ( AcceptCategory( categoryId ) )
                     {
-                    iCategoryIdArray.AppendL( categoryId );
+                    iCategoryIdArray.Append( categoryId );
                     }
                 }
             }
         }
     else
         {
-		iCategoryIdArray.AppendL( KCategoryIdLastWatched );
-		iCategoryIdArray.AppendL( KVcxMvcCategoryIdCaptured );	    
-        iCategoryIdArray.AppendL( KVcxMvcCategoryIdOther );  
-        iCategoryIdArray.AppendL( KCategoryIdExtraItem1 );
+		iCategoryIdArray.Append( KCategoryIdLastWatched );
+		iCategoryIdArray.Append( KVcxMvcCategoryIdCaptured );	    
+        iCategoryIdArray.Append( KVcxMvcCategoryIdOther );  
+        iCategoryIdArray.Append( KCategoryIdExtraItem1 );
         }
     }
 
@@ -900,19 +841,11 @@ TBool CVcxHgMyVideosCategoryModelHandler::AcceptCategory( TInt aCategoryId )
         case KVcxMvcCategoryIdOther:
         case KCategoryIdLastWatched:
         case KCategoryIdExtraItem1:
+        case KCategoryIdExtraItem2:
+        case KCategoryIdExtraItem3:
             IPTVLOGSTRING2_LOW_LEVEL( 
                     "MPX My Videos UI # AcceptCategory() Accepted category: %d", aCategoryId );
             ret = ETrue;
-            break;
-        case KCategoryIdExtraItem2:
-            ret = iExtraItem2Exists;
-            IPTVLOGSTRING2_LOW_LEVEL( 
-                    "MPX My Videos UI # AcceptCategory() extra item 2 accepted: %d", ret );
-            break;
-        case KCategoryIdExtraItem3:
-            ret = iExtraItem3Exists;
-            IPTVLOGSTRING2_LOW_LEVEL( 
-                    "MPX My Videos UI # AcceptCategory() extra item 3 accepted: %d", ret );
             break;
         default:
             IPTVLOGSTRING2_LOW_LEVEL( 
@@ -1314,27 +1247,4 @@ TBool CVcxHgMyVideosCategoryModelHandler::PreloadedExistsL()
         {
         return EFalse;
         }
-    }
-
-// ------------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::AppExistsL()
-// ------------------------------------------------------------------------------
-//
-TBool CVcxHgMyVideosCategoryModelHandler::AppExistsL( const TUid& aAppUid )
-    {
-    IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::AppExistsL()" );
-    TBool retVal( EFalse );
-    RApaLsSession appArcSession;
-    User::LeaveIfError( appArcSession.Connect() );
-    CleanupClosePushL( appArcSession );
-    
-    TApaAppInfo appInfo;
-    TInt err = appArcSession.GetAppInfo( appInfo, aAppUid );
-    if ( err == KErrNone )
-        {
-        IPTVLOGSTRING_LOW_LEVEL( "CVcxHgMyVideosCategoryModelHandler::AppExistsL(): return TRUE" );
-        retVal = ETrue;
-        }
-    CleanupStack::PopAndDestroy( &appArcSession );
-    return retVal;
     }

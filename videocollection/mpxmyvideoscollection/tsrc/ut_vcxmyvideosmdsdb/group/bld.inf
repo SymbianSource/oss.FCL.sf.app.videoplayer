@@ -15,19 +15,21 @@
 *
 */
 
-// Version : %version: 1 %
+// Version : %version: 2 %
 
 
 PRJ_PLATFORMS
 DEFAULT
 
-PRJ_EXPORTS
+PRJ_TESTEXPORTS
 
 ../conf/VcxMyVideosMdsDbTest.cfg                  /epoc32/winscw/c/testframework/VcxMyVideosMdsDbTest.cfg
 ../init/testframework.ini                       /epoc32/winscw/c/testframework/testframework.ini
 
 PRJ_EXPORTS
 
+PRJ_TESTMMPFILES
+VcxMyVideosMdsDbTest.mmp
 
 PRJ_MMPFILES
-VcxMyVideosMdsDbTest.mmp
+

@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 9 %
+// Version : %version: 8 %
 
 
 // INCLUDE FILES
@@ -35,6 +35,33 @@ EXPORT_C CMPFileDetails::CMPFileDetails()
     : iSeekable( ETrue ), iDRMExpireConstraint( EMediaPlayerNone ), iDRMhasInfoURL(EFalse)
 {
     MPX_ENTER_EXIT(_L("CMPFileDetails::CMPFileDetails()"));
+
+    //Initializing to make sure no garbage in the variables
+    iTitle = NULL;
+    iFileName = NULL;
+	iFilePath = NULL;
+    iUrl = NULL;
+    iFormat = NULL;
+    iCopyright = NULL;
+    iArtist = NULL;
+    iAlbum = NULL;
+    iYear = NULL;
+
+    iOriginalArtist = NULL;
+    iAlbumTrack = NULL;
+    iGenre = NULL;
+    iComposer = NULL;
+    iAudioFileWebPage = NULL;
+    iComment = NULL;
+    iProvider = NULL;
+    iDescription = NULL;
+
+    iArtistXpcs = NULL;
+    iTitleXpcs = NULL;
+    iAlbumXpcs = NULL ;
+    iInfoXpcs = NULL;
+
+    iDRMInfoURL = NULL;
 }
 
 // -----------------------------------------------------------------------------

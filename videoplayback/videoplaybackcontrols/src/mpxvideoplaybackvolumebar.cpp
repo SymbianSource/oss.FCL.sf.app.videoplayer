@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 27 %
+// Version : %version: 25 %
 
 
 // INCLUDE FILES
@@ -457,9 +457,13 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButtonRepeat:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback )
             {
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
+#else
+                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdIncreaseVolume );
@@ -482,9 +486,13 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeIncreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Up:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback )
             {
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
+#else
+                iFeedback->InstantFeedback( ETouchFeedbackBasic );
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -511,9 +519,13 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButtonRepeat:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback )
             {
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
+#else
+                iFeedback->InstantFeedback( ETouchFeedbackSensitive );
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
             iController->HandleCommandL( EMPXPbvCmdDecreaseVolume );
@@ -536,9 +548,13 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeDecreaseL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Up:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback )
             {
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
+#else
+                iFeedback->InstantFeedback( ETouchFeedbackBasic );
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -567,7 +583,11 @@ void CMPXVideoPlaybackVolumeBar::HandleSpeakerControlEventL( const TPointerEvent
 #ifdef RD_TACTILE_FEEDBACK
             if ( iFeedback )
             {
+#ifdef SYMBIAN_BUILD_GCE
                 iFeedback->InstantFeedback( ETouchFeedbackBasicButton );
+#else
+                iFeedback->InstantFeedback( ETouchFeedbackBasic );
+#endif //SYMBIAN_BUILD_GCE
             }
 #endif //RD_TACTILE_FEEDBACK
 
@@ -636,7 +656,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
         case TPointerEvent::EButton1Down:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback )
             {
                 iFeedback->InstantFeedback( ETouchFeedbackSlider );
             }
@@ -657,8 +677,7 @@ void CMPXVideoPlaybackVolumeBar::HandleVolumeBarEventL( const TPointerEvent& aPo
         case TPointerEvent::EDrag:
         {
 #ifdef RD_TACTILE_FEEDBACK
-            if ( iFeedback && giveDynamicSliderFeedback && 
-                 !iController->FileDetails()->iTvOutConnected )
+            if ( iFeedback && giveDynamicSliderFeedback )
             {
                 iFeedback->StartFeedback( this,
                                           ETouchDynamicSlider,

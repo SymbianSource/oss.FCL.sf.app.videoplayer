@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 25 %
+// Version : %version: e003sa33#24 %
 
 
 // INCLUDE FILES
@@ -772,8 +772,7 @@ void CMPXVideoPlaybackProgressBar::UpdateProgressBarStateL( CMPXVideoPlaybackVie
                                    EAspectRatioNotPreserved );
         }
     }
-    else if ( aDetails->iPlaybackMode == EMPXVideoLiveStreaming &&
-              ! iLiveStreamingString )
+    else if ( aDetails->iPlaybackMode == EMPXVideoLiveStreaming )
     {
         iLiveStreamingString = iEikonEnv->AllocReadResourceL( R_MPX_LIVE_STREAMING );
 

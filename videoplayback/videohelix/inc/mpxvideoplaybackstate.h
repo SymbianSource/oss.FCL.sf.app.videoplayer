@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 21 %
+// Version : %version: 20 %
 
 
 #ifndef _CMPXVIDEOPLAYBACKSTATE_H_
@@ -225,7 +225,6 @@ class CMPXInitialisedState : public CMPXVideoPlaybackState
         virtual void HandleStop();
         virtual void HandleForeground();
         virtual void HandleBackground();
-        virtual void HandlePause();
 
         // general method
         virtual void HandleSetPositionL(TInt aPosition);

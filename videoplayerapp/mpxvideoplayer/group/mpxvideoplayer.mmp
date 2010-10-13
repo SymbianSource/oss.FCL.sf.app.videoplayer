@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 29 %
+// Version : %version: da1mmcf#28 %
 
 #include <platform_paths.hrh>
 #include <data_caging_paths.hrh>
@@ -37,7 +37,6 @@ SOURCE          mpxvideoplayerdocument.cpp
 SOURCE          mpxvideoplayerappui.cpp
 SOURCE          mpxvideoplayerappuiengine.cpp
 SOURCE          mpxvideoembeddedpdlhandler.cpp
-SOURCE          mpxvideoplayeriadupdate.cpp
 
 START RESOURCE  ../data/mpxvideoplayer.rss
 HEADER
@@ -82,7 +81,5 @@ LIBRARY         mpxcollectionhelper.lib
 LIBRARY         mpxcommon.lib
 LIBRARY         flogger.lib
 LIBRARY         videoplaylistutility.lib
-LIBRARY         featmgr.lib
-LIBRARY         iaupdateapi.lib
 
 // End of File

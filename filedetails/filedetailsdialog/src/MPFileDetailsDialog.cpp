@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 21 %
+// Version : %version: 20 %
 
 // INCLUDE FILES
 #include <aknlists.h>
@@ -310,7 +310,7 @@ EXPORT_C void CMPFileDetailsDialog::ExecuteLD(const TDesC& aFileName)
                     }
                 else if (!metaData->Name().CompareF(KMPArtist) || !metaData->Name().Compare(KMPAuthor))
                     {
-                    fileDetails->iArtist = metaData->Value().AllocL();
+                    fileDetails->iArtist = metaData->Value().Alloc();
                     }
                 else if (!metaData->Name().CompareF(KMPTitle))
                     {
@@ -1751,7 +1751,7 @@ void CMPFileDetailsDialog::SetFileDetailL( HBufC*& aBuf, const TDesC8& aDetail )
 
     if( !aBuf && aDetail.Length())
         {
-        aBuf = HBufC::NewL( aDetail.Length() );
+        aBuf = HBufC::New( aDetail.Length() );
         aBuf->Des().Copy( aDetail );
         }
 }

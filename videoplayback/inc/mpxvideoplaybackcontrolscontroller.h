@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 20 %
+// Version : %version: 19 %
 
 
 #ifndef MPXVIDEOPLAYBACKCONTROLSCONTROLLER_H_
@@ -226,11 +226,6 @@ class CMPXVideoPlaybackControlsController : public CBase
         * Return ETrue if any control is visible
         */
         TBool IsVisible();
-
-        /**
-        * Return ETrue if real one bitmap is visible
-        */
-        TBool IsRealOneBitmapVisible();
 
         /**
         * Append a control based on control index

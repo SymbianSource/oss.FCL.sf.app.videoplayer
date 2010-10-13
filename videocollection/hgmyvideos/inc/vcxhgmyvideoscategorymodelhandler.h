@@ -271,7 +271,7 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * Goes through given number of categories and
          * fills iCategoryIdArray from the accepted ones
          */
-        void MakeCategoryIdArrayL();
+        void MakeCategoryIdArray();
         
         /**
          * Checks if the given category is accepted or not.
@@ -351,24 +351,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * @return ETrue if the preloaded does exist, otherwise EFalse
          */
         TBool PreloadedExistsL();
-        
-        /**
-         * Check if given application exists.
-         * 
-         * @param aAppUid Application UID
-         * @return ETrue if application exists in the system, EFalse otherwise.
-         */
-        TBool AppExistsL( const TUid& aAppUid );
-        
-        /**
-         * Check if extra item applications 2 and 3 exists in the system.
-         */
-        void CheckIfExtraItemsExistsL();
-        
-        /** 
-         * 2nd phase constructor.
-         */
-        void ConstructL();
 
     private:
     
@@ -412,16 +394,6 @@ NONSHARABLE_CLASS( CVcxHgMyVideosCategoryModelHandler ) :
          * Video indicator class instance. Own.
          */
         CMyVideosIndicator* iVideoIndicator;
-        
-        /**
-         * ETrue if extra item 2 exists, i.e. URL available or valid application UID.
-         */
-        TBool iExtraItem2Exists;
-        
-        /**
-         * ETrue if extra item 3 exists, i.e. URL available or valid application UID.
-         */
-        TBool iExtraItem3Exists;
     };
 
 #endif // VCXHGMYVIDEOSCATEGORYMODELHANDLER_H

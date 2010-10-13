@@ -45,7 +45,10 @@ my @unitTests = (
 		"videoplayer\\videoplayback\\videoplaybackcontrols\\tsrc\\videoplaybackcontrols_test\\group",
 		"videoplayer\\videoplayback\\videoplaybackviews\\tsrc\\ut_userinputhandlertest\\group",
 		"videoplayer\\videoplayerapp\\mpxvideoplayer\\tsrc\\ut_mpxvideoplayertest\\group",
-		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group"
+		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_collectionplugintest\\group",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideoscollectionutiltest\\group",
+		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideosmdsdb\\group"
 	);
 
 ########################################

@@ -41,7 +41,6 @@
 #include "vcxhgmyvideosvideomodelhandler.h"
 #include "vcxhgmyvideosvideolistimpl.h"
 #include "vcxhgmyvideosvideodataupdater.h"
-#include "vcxhgmyvideosthumbnailmanager.h"
 
 #include "vcxhgmyvideos.hrh"
 #include "vcxhgmyvideoslistbase.h"
@@ -604,7 +603,6 @@ void CVcxHgMyVideosVideoModelHandler::PlayVideoL( TInt aIndex )
         TMPXItemId mpxItemId = media->ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId );
         SetVideoLastWatchedL( *media );
         ClearNewVideoFlagL( *media );
-        ResetEmptyDrmThumnailL( *media, aIndex );
 		IPTVLOGSTRING3_LOW_LEVEL( "CVcxHgMyVideosVideoModelHandler::PlayVideoL() aIndex=%d mpxItemId=%d", aIndex, (TInt) mpxItemId );
         iModel.CollectionClient().PlayVideoL( mpxItemId );        
         }
@@ -1418,30 +1416,4 @@ void CVcxHgMyVideosVideoModelHandler::ClearNewVideoFlagL( CMPXMedia& aMedia )
         iModel.CollectionClient().SetFlagsL( 
 		    aMedia.ValueTObjectL<TMPXItemId>( KMPXMediaGeneralId ), flags );   
         }    
-    }
-
-// -----------------------------------------------------------------------------
-// CVcxHgMyVideosVideoModelHandler::ResetEmptyDrmThumnailL()
-// -----------------------------------------------------------------------------
-//
-void CVcxHgMyVideosVideoModelHandler::ResetEmptyDrmThumnailL( CMPXMedia& aMedia, TInt aIndex )
-    {
-    CHgItem& item = iScroller.ItemL( aIndex );
-    
-    if ( !item.Icon() )
-        {
-        if ( aMedia.IsSupported( KMPXMediaGeneralFlags ) && 
-             aMedia.ValueTObjectL<TUint32>( KMPXMediaGeneralFlags ) 
-                                                     == EVcxMyVideosVideoDrmProtected );
-            {
-            CThumbnailObjectSource* source = 
-               CThumbnailObjectSource::NewLC( aMedia.ValueText( KMPXMediaGeneralUri ), NULL );
-            
-            // We cannot know at this phase, do the user get the license 
-            // when playing the video, so we have to reset this every time.
-            iModel.ThumbnailManager().Reset( *source );
-            
-            CleanupStack::PopAndDestroy( source );
-            }
-        }
     }

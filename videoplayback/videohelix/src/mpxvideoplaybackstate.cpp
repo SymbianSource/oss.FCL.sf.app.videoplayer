@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 48 %
+// Version : %version: 46.1.1 %
 
 
 //
@@ -243,6 +243,7 @@ void CMPXVideoPlaybackState::HandlePlaybackComplete( TInt aError )
 
     if ( aError == KErrNone )
     {
+
         iVideoPlaybackCtlr->iMPXPluginObs->HandlePluginEvent(
             MMPXPlaybackPluginObserver::EPPlayComplete,
             0,
@@ -1273,16 +1274,6 @@ void CMPXInitialisedState::HandleForeground()
 {
     MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandleForeground()"));
     CommandHandleForeground();
-}
-
-//  ------------------------------------------------------------------------------------------------
-//  CMPXInitialisedState::HandlePause()
-//  ------------------------------------------------------------------------------------------------
-void CMPXInitialisedState::HandlePause()
-{
-    MPX_ENTER_EXIT(_L("CMPXInitialisedState::HandlePause()"));
-
-    iVideoPlaybackCtlr->iPlaybackMode->HandlePause();
 }
 
 // *************************************************************************************************

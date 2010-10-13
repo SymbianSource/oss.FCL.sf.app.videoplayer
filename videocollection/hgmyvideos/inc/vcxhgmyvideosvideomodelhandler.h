@@ -458,16 +458,6 @@ NONSHARABLE_CLASS(  CVcxHgMyVideosVideoModelHandler ) :
          * This method resets iMarkedMediaList before returning.
          */
         void RestoreMarkingsL();
-        
-        /**
-         * Resets the empty thumbnail from DRM protected video clip.
-         * This causes the thumbnail to be attempted to be regenerated
-         * next time the thumbnail is fetched fron thumbnail manager.
-         *
-         * @param aMedia Media from which new video tag will be cleared.   
-         * @param aIndex Index of the visible item.
-         */
-        void ResetEmptyDrmThumnailL( CMPXMedia& aMedia, TInt aIndex );
 
     private:
         

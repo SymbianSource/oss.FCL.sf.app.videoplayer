@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version:  18 %
+// Version : %version:  e003sa33#17 %
 
 
 // INCLUDE FILES
@@ -65,7 +65,6 @@ const TUint32 KInvalidTick = 0;
 CMPXVideoPlaybackMediaDetailsViewer::CMPXVideoPlaybackMediaDetailsViewer(
     CMPXVideoPlaybackControlsController* aController )
     : iController( aController )
-    , iDrmDetailsLaunched( EFalse )
 {
 }
 
@@ -239,12 +238,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandlePointerEventL( const TPointerEve
 //
 void CMPXVideoPlaybackMediaDetailsViewer::LaunchDRMDetailsL()
 {
-    if ( ! iDrmDetailsLaunched )
-    {
-        iDrmDetailsLaunched = ETrue;
-        iController->iContainer->HandleCommandL( EMPXPbvLaunchDRMDetails );
-        iDrmDetailsLaunched = EFalse;
-    }
+    iController->iContainer->HandleCommandL(EMPXPbvLaunchDRMDetails);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -313,10 +307,10 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
 
         CleanupStack::PopAndDestroy( heading );
     }
-
+    
     // Title
     HBufC* fileTitle = iController->FileDetails()->GenerateFileTitleL();
-
+    
     if ( fileTitle && fileTitle->Length() )
     {
         // Title gets populated by UpdateTitle method
@@ -328,7 +322,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
         iTitleLabel->MakeVisible( ETrue );
         rowsAdded++;
     }
-
+    
     delete fileTitle;
 
     // Filename
@@ -345,9 +339,9 @@ void CMPXVideoPlaybackMediaDetailsViewer::FormatLabelsL() const
         iClipnameLabel->MakeVisible( ETrue );
         rowsAdded++;
     }
-
+    
     delete fileName;
-
+    
     // Mime Type (Format)
     if ( iController->FileDetails()->iMimeType && iController->FileDetails()->iMimeType->Length() )
     {
@@ -703,7 +697,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::HandleScrollTimerL()
     {
         UpdateFilenameL();
     }
-
+    
     if ( iTitleScroller.IsUpdateNeeded() )
     {
         UpdateTitleL();
@@ -761,8 +755,8 @@ TInt CMPXVideoPlaybackMediaDetailsViewer::NumOfItemsShownInViewerL()
     }
 
     HBufC* title = NULL;
-    TRAP_IGNORE ( title = iController->FileDetails()->GenerateFileTitleL() );
-
+    TRAP_IGNORE ( title = iController->FileDetails()->GenerateFileTitleL() ); 
+    
     if ( title )
     {
         numOfItems++;
@@ -849,10 +843,10 @@ TRect CMPXVideoPlaybackMediaDetailsViewer::CalculateViewerRectL()
 void CMPXVideoPlaybackMediaDetailsViewer::UpdateFilenameL()
 {
     MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackMediaDetailsViewer::UpdateFilenameL" ) );
-
-    HBufC* fileName = iController->FileDetails()->GenerateFileNameL();
+    
+	HBufC* fileName = iController->FileDetails()->GenerateFileNameL();
     CleanupStack::PushL( fileName );
-
+    
     if ( fileName && fileName->Length() )
     {
         HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_FILENAME_HEADING );
@@ -871,7 +865,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateFilenameL()
 
         CleanupStack::PopAndDestroy( heading );
     }
-
+    
     CleanupStack::PopAndDestroy( fileName );
 }
 
@@ -882,11 +876,11 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateFilenameL()
 void CMPXVideoPlaybackMediaDetailsViewer::UpdateTitleL()
 {
     MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackMediaDetailsViewer::UpdateTitleL" ) );
-
-    HBufC* fileTitle = iController->FileDetails()->GenerateFileTitleL();
+    
+	HBufC* fileTitle = iController->FileDetails()->GenerateFileTitleL();
     CleanupStack::PushL( fileTitle );
-
-    if ( fileTitle && fileTitle->Length() )
+    
+	if ( fileTitle && fileTitle->Length() )
     {
         HBufC* heading  = iEikonEnv->AllocReadResourceL( R_MPX_TITLE_HEADING );
         CleanupStack::PushL( heading );
@@ -904,8 +898,8 @@ void CMPXVideoPlaybackMediaDetailsViewer::UpdateTitleL()
 
         CleanupStack::PopAndDestroy( heading );
     }
-
-    CleanupStack::PopAndDestroy( fileTitle );
+	
+    CleanupStack::PopAndDestroy( fileTitle );	
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -946,8 +940,8 @@ TBool CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::IsScrollNeeded()
 TBool CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::IsUpdateNeeded()
 {
     MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::IsUpdateNeeded" ) );
-
-    // skip the scrolling operation if the loop for delay is going on
+    
+	// skip the scrolling operation if the loop for delay is going on
     TBool skipForTimerDelay = EFalse;
 
     // add a delay after each complete scrolling
@@ -983,12 +977,12 @@ void CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::ScrollText(
         TDes& aDesText )
 {
     MPX_ENTER_EXIT( _L( "CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::ScrollText" ) );
-
-    if ( 0 == iSrcTextLen )
+    
+	if ( 0 == iSrcTextLen )
     {
         iSrcTextLen = aSrcText.Length();
     }
-
+    
     ASSERT( aSrcText.Length() == iSrcTextLen );
     if ( aSrcText.Length() >= KMediaDetailsViewerVisibleCharacters )
     {
@@ -1005,7 +999,7 @@ void CMPXVideoPlaybackMediaDetailsViewer::TTextScroller::ScrollText(
             iTextScrollPos++;
         }
         iScroll = ETrue;
-
+        
     }
     else
     {
