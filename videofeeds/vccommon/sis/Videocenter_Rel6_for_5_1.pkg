@@ -1,0 +1,224 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of the License "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: 
+;
+
+;Languages
+&EN
+
+;Header
+#{"Video Center"},(0x102750D5),6,50,0, TYPE=SA, RU
+; Supports Series 60 v5.1
+[0x10283160], 0, 0, 0, {"Series60ProductID"}
+
+;Localised Vendor name
+%{"Nokia"}
+
+; Non-localised vendor name
+:"Nokia"
+
+@"cenrep.sisx",(0x10202be9)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;IpVideo.iby
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+"\epoc32\release\armv5\urel\IptvClientApi.dll" - "!:\sys\bin\IptvClientApi.dll"
+"\epoc32\release\armv5\urel\IptvServer.exe" - "!:\sys\bin\IptvServer.exe"
+
+"\epoc32\release\armv5\urel\IptvRssPlugin.DLL" - "!:\sys\bin\IptvRssPlugin.DLL"
+"\epoc32\data\z\resource\plugins\IptvRssPlugin.rsc" - "!:\resource\plugins\IptvRssPlugin.rsc"
+
+"\epoc32\release\armv5\urel\IptvUtil.dll" - "!:\sys\bin\IptvUtil.dll"
+
+"\epoc32\release\armv5\urel\IptvXmlTvEpgPlugin.DLL" - "!:\sys\bin\IptvXmlTvEpgPlugin.DLL"
+"\epoc32\data\z\resource\plugins\IptvXmlTvEpgPlugin.rsc" - "!:\resource\plugins\IptvXmlTvEpgPlugin.rsc"
+
+"\epoc32\release\armv5\urel\vcxmyvideoscollectionplugin.DLL" - "!:\sys\bin\vcxmyvideoscollectionplugin.DLL" 
+"\epoc32\data\z\resource\plugins\vcxmyvideoscollectionplugin.RSC" - "!:\resource\plugins\vcxmyvideoscollectionplugin.RSC"
+
+"\epoc32\release\armv5\urel\vcxhgmyvideosplugin.DLL" - "!:\sys\bin\vcxhgmyvideosplugin.DLL"
+"\epoc32\data\z\resource\plugins\vcxhgmyvideosplugin.RSC" - "!:\resource\plugins\vcxhgmyvideosplugin.RSC"
+
+
+"\epoc32\release\armv5\urel\vcxhgvodplugin.dll" - "!:\sys\bin\vcxhgvodplugin.dll" 
+"\epoc32\data\z\resource\plugins\vcxhgvodplugin.RSC" - "!:\resource\plugins\vcxhgvodplugin.RSC"
+
+ 
+
+"\epoc32\release\armv5\urel\vcxnssettingsplugin.dll" - "!:\sys\bin\vcxnssettingsplugin.dll" 
+"\epoc32\data\z\resource\plugins\vcxnssettingsplugin.RSC" - "!:\resource\plugins\vcxnssettingsplugin.RSC"
+
+"\epoc32\release\armv5\urel\vcxnsscheduleplugin.dll" - "!:\sys\bin\vcxnsscheduleplugin.dll"
+"\epoc32\data\z\resource\plugins\vcxnsscheduleplugin.RSC" - "!:\resource\plugins\vcxnsscheduleplugin.RSC"
+
+"\epoc32\release\armv5\urel\vcxnsahplugin.dll" - "!:\sys\bin\vcxnsahplugin.dll"
+"\epoc32\data\z\resource\plugins\vcxnsahplugin.rsc" - "!:\resource\plugins\vcxnsahplugin.rsc"
+
+"\epoc32\release\armv5\urel\LiveTvUtils.dll" - "!:\sys\bin\LiveTvUtils.dll"
+
+"\epoc32\release\armv5\urel\IptvNetworkEngine.dll" - "!:\sys\bin\IptvNetworkEngine.dll"
+
+"\epoc32\release\armv5\urel\IptvTunerEngine.dll" - "!:\sys\bin\IptvTunerEngine.dll"
+
+"\epoc32\release\armv5\urel\IptvLiveUIEpgEngine.dll" - "!:\sys\bin\IptvLiveUIEpgEngine.dll"
+
+"\epoc32\release\armv5\urel\vcxnsuiengine.dll" - "!:\sys\bin\vcxnsuiengine.dll"
+
+"\epoc32\release\armv5\urel\vcxnsbsutility.dll" - "!:\sys\bin\vcxnsbsutility.dll"
+
+"\epoc32\release\armv5\urel\vcxhgmyvideos.dll" - "!:\sys\bin\vcxhgmyvideos.dll"
+"\epoc32\data\Z\resource\apps\vcxhgmyvideos.mif" - "!:\resource\apps\vcxhgmyvideos.mif"
+"\epoc32\data\Z\resource\apps\vcxhgmyvideosicons.mif" - "!:\resource\apps\vcxhgmyvideosicons.mif"
+"\epoc32\release\armv5\urel\vcxnsappui.exe" - "!:\sys\bin\vcxnsappui.exe"
+"\epoc32\data\Z\private\10003a3f\apps\vcxnsappui_reg.RSC" - "!:\private\10003a3f\import\apps\vcxnsappui_reg.RSC"
+"\epoc32\data\Z\resource\apps\vcxnsappui_aif.mif" - "!:\resource\apps\vcxnsappui_aif.mif"
+;;"\epoc32\release\armv5\urel\vcxnsappui_test.exe" - "!:\sys\bin\vcxnsappui_test.exe"
+;;"\epoc32\data\Z\private\10003a3f\apps\vcxnsappui_test_reg.RSC" - "!:\private\10003a3f\import\apps\vcxnsappui_test_reg.RSC"
+;;"\epoc32\data\Z\resource\apps\vcxnsappui_test_icon.mif" - "!:\resource\apps\vcxnsappui_test_icon.mif"
+
+"\epoc32\release\armv5\urel\vcxhgvodui.dll" - "!:\sys\bin\vcxhgvodui.dll"
+"\epoc32\data\Z\resource\apps\vcxhgvod.mif" - "!:\resource\apps\vcxhgvod.mif"
+"\epoc32\data\Z\resource\apps\vcxhgvoddefaulticons.mif" - "!:\resource\apps\vcxhgvoddefaulticons.mif"
+
+
+"\epoc32\release\armv5\urel\CommonRecordingEngineClient.dll" - "!:\sys\bin\CommonRecordingEngineClient.dll"
+"\epoc32\release\armv5\urel\CommonRecordingEngine.exe" - "!:\sys\bin\CommonRecordingEngine.exe"
+"\epoc32\release\armv5\urel\DvrSdpParser.dll" - "!:\sys\bin\DvrSdpParser.dll"
+
+"\epoc32\release\armv5\urel\IptvProvisioningProcessor.dll" - "!:\sys\bin\IptvProvisioningProcessor.dll"
+
+"\epoc32\release\armv5\urel\IptvProvRec.DLL" - "!:\sys\bin\IptvProvRec.DLL"
+"\epoc32\data\Z\resource\plugins\IptvProvRec.rsc" - "!:\resource\plugins\IptvProvRec.rsc"
+
+"\epoc32\release\armv5\urel\IptvProvisioningApp.exe" - "!:\sys\bin\IptvProvisioningApp.exe"
+"\epoc32\data\Z\private\10003a3f\apps\IptvProvisioningApp_reg.rsc" - "!:\private\10003a3f\import\apps\IptvProvisioningApp_reg.rsc"
+
+"\epoc32\release\armv5\urel\IptvVodNotifierPlugin.DLL" - "!:\sys\bin\IptvVodNotifierPlugin.DLL"
+"\epoc32\data\Z\resource\plugins\IptvVodNotifierPlugin.rsc" - "!:\resource\plugins\IptvVodNotifierPlugin.rsc"
+"\epoc32\data\Z\resource\apps\IptvNotification.mif" - "!:\resource\apps\IptvNotification.mif"
+
+"\epoc32\release\armv5\urel\IptvReminderNotifierPlugin.DLL" - "!:\sys\bin\IptvReminderNotifierPlugin.DLL"
+"\epoc32\data\Z\resource\plugins\IptvReminderNotifierPlugin.rsc" - "!:\resource\plugins\IptvReminderNotifierPlugin.rsc" 
+"\epoc32\data\Z\resource\apps\IptvReminderNotification.mif" - "!:\resource\apps\IptvReminderNotification.mif"
+
+"\epoc32\release\armv5\urel\IptvSchedulerPlugin.DLL" - "!:\sys\bin\IptvSchedulerPlugin.DLL"
+"\epoc32\data\Z\resource\plugins\IptvSchedulerPlugin.rsc" - "!:\resource\plugins\IptvSchedulerPlugin.rsc" 
+
+"\epoc32\release\armv5\urel\CseSchedulerServer.exe" - "!:\sys\bin\CseSchedulerServer.exe"
+"\epoc32\release\armv5\urel\CseSchedulerClient.dll" - "!:\sys\bin\CseSchedulerClient.dll"
+
+"\epoc32\release\armv5\urel\ViaPlayerCore.dll" - "!:\sys\bin\ViaPlayerCore.dll"
+"\epoc32\release\armv5\urel\ViaPlayerControllerBase.dll" - "!:\sys\bin\ViaPlayerControllerBase.dll"
+"\epoc32\data\z\resource\apps\ViaPlayer.mif" - "!:\resource\apps\ViaPlayer.mif"
+
+"\epoc32\release\armv5\urel\ViaPlayerUtilities.dll" - "!:\sys\bin\ViaPlayerUtilities.dll"
+"\epoc32\data\z\resource\apps\ViaPlayerUtilities.mif" - "!:\resource\apps\ViaPlayerUtilities.mif"
+"\epoc32\data\z\resource\apps\ViaPlayerUtilities.mbm" - "!:\resource\apps\ViaPlayerUtilities.mbm"
+"\epoc32\release\armv5\urel\ViaPlayerDefaultView.dll" - "!:\sys\bin\ViaPlayerDefaultView.dll"
+
+"\epoc32\data\z\resource\apps\ViaPlayerOverlayStatusPane.Rsc" - "!:\resource\apps\ViaPlayerOverlayStatusPane.Rsc"
+"\epoc32\data\z\resource\apps\ViaPlayerNSeriesStatusPane.Rsc" - "!:\resource\apps\ViaPlayerNSeriesStatusPane.Rsc"
+"\epoc32\data\z\resource\apps\ViaPlayerOverlaySoftkeys.Rsc" - "!:\resource\apps\ViaPlayerOverlaySoftkeys.Rsc"
+"\epoc32\data\z\resource\apps\ViaPlayerOverlayVolumeControl.Rsc"-"!:\resource\apps\ViaPlayerOverlayVolumeControl.Rsc"
+
+"\epoc32\release\armv5\urel\ViaDlProgressController.dll" - "!:\sys\bin\ViaDlProgressController.dll"
+"\epoc32\data\z\resource\plugins\ViaDlProgressController.rsc" - "!:\resource\plugins\ViaDlProgressController.rsc"
+
+"\epoc32\release\armv5\urel\ViaUnicastStreamPlayerController.dll" - "!:\sys\bin\ViaUnicastStreamPlayerController.dll"
+"\epoc32\data\z\resource\plugins\ViaUnicastStreamPlayerController.rsc" - "!:\resource\plugins\ViaUnicastStreamPlayerController.rsc" 
+
+; #ifdef RD_IPTV_FEA_RTP_CLIP_SUPPORT
+; "\epoc32\release\armv5\urel\ViaRTPFilePlayController.dll" - "!:\sys\bin\ViaRTPFilePlayController.dll"
+; "\epoc32\data\z\resource\plugins\ViaRTPFilePlayController.rsc" - "!:\resource\plugins\ViaRTPFilePlayController.rsc"
+
+; #ifdef RD_IPTV_FEA_RTP_CLIP_SUPPORT
+; "\epoc32\release\armv5\urel\DvrRtpClipHandler.dll" - "!:\sys\bin\DvrRtpClipHandler.dll"
+; "\epoc32\release\armv5\urel\DvrRtpUtils.dll" - "!:\sys\bin\DvrRtpUtils.dll"
+
+; #ifdef RD_IPTV_FEA_RTP_CLIP_SUPPORT
+; "\epoc32\release\armv5\urel\RtpClipRecognizer.dll" - "!:\sys\bin\RtpClipRecognizer.dll"
+; "\epoc32\data\z\resource\plugins\RtpClipRecognizer.rsc" - "!:\resource\plugins\RtpClipRecognizer.rsc"
+
+"\epoc32\release\armv5\urel\IptvOmaProvisioningAdapter.dll" - "!:\sys\bin\IptvOmaProvisioningAdapter.dll" 
+"\epoc32\data\z\resource\plugins\IptvOmaProvisioningAdapter.rsc" - "!:\resource\plugins\IptvOmaProvisioningAdapter.rsc"
+
+"\epoc32\data\z\resource\apps\iptvmimesupport.RSC" - "!:\resource\apps\iptvmimesupport.RSC"
+
+"\epoc32\release\armv5\urel\iptvscheduleddownloadplugin.dll" - "!:\sys\bin\iptvscheduleddownloadplugin.dll" 
+"\epoc32\data\z\resource\plugins\iptvscheduleddownloadplugin.RSC" - "!:\resource\plugins\iptvscheduleddownloadplugin.RSC"
+
+"\epoc32\data\z\private\102750D5\backup_registration.xml" - "c:\private\102750D5\backup_registration.xml"
+"\epoc32\data\z\private\102750E2\backup_registration.xml" - "c:\private\102750E2\backup_registration.xml"
+
+"\epoc32\release\armv5\urel\vcxnssettingsengine.dll" - "!:\sys\bin\vcxnssettingsengine.dll"
+"\epoc32\release\armv5\urel\vcxnssettingsview.dll" - "!:\sys\bin\vcxnssettingsview.dll"
+"\epoc32\release\armv5\urel\vcxnsscheduleview.dll" - "!:\sys\bin\vcxnsscheduleview.dll"
+"\epoc32\release\armv5\urel\vcxnsgeneralsettingsplugin.dll" - "!:\sys\bin\vcxnsgeneralsettingsplugin.dll"
+"\epoc32\data\z\resource\plugins\vcxnsgeneralsettingsplugin.rsc" - "!:\resource\plugins\vcxnsgeneralsettingsplugin.rsc" 
+"\epoc32\data\Z\resource\apps\vcxnsgeneralsettingsplugin.mif" - "!:\resource\apps\vcxnsgeneralsettingsplugin.mif"
+
+;; Vc ns content harvester plugin
+"\epoc32\release\armv5\urel\vcxnscontentharvesterplugin.dll" - "!:\sys\bin\vcxnscontentharvesterplugin.dll"
+"\epoc32\data\z\resource\plugins\vcxnscontentharvesterplugin.rsc" - "!:\resource\plugins\vcxnscontentharvesterplugin.rsc"
+"\epoc32\data\z\resource\apps\vcxnstvvideosuiteres.rsc" - "!:\resource\apps\vcxnstvvideosuiteres.rsc"
+"\epoc32\include\vcxnstvvideosuiteres.rsg" - "!:\resource\apps\vcxnstvvideosuiteres.rsg"
+
+;; TV&Video suite configs
+"..\data\vcns_suite.xml" - "C:\private\101F4CD2\import\suites\tvvideosuite\suite.xml"
+"..\data\vcns_matrix_items.xml" - "C:\private\101F4CD2\import\suites\tvvideosuite\vcns_matrix_items.xml"
+"\epoc32\data\Z\resource\apps\videosuite.mif" - "!:\resource\apps\videosuite.mif"
+
+"\epoc32\release\armv5\urel\vcxconnectionutility.dll" - "!:\sys\bin\vcxconnectionutility.dll"
+"\epoc32\release\armv5\urel\vcxconnutilpsworker.exe" - "!:\sys\bin\vcxconnutilpsworker.exe"
+
+"\epoc32\release\armv5\urel\vcxviewmessageutility.dll" - "!:\sys\bin\vcxviewmessageutility.dll"
+
+
+"\epoc32\release\armv5\urel\VcXNotifierPlugin.DLL" - "!:\sys\bin\VcXNotifierPlugin.DLL"
+"\epoc32\data\Z\resource\plugins\VcXNotifier.rsc" - "!:\resource\plugins\VcXNotifier.rsc"
+"\epoc32\data\Z\resource\plugins\VcXNotifierPlugin.rsc" - "!:\resource\plugins\VcXNotifierPlugin.rsc"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; IpVideoCustom
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+"\epoc32\data\z\resource\apps\google_logo.mif" - "c:\resource\apps\google_logo.mif"
+"\epoc32\data\z\resource\apps\rocketboom_logo.mif" - "c:\resource\apps\rocketboom_logo.mif"
+"\epoc32\data\z\resource\apps\reuters_logo.mif" - "c:\resource\apps\reuters_logo.mif"
+"\epoc32\data\z\resource\apps\break_logo.mif" - "c:\resource\apps\break_logo.mif"
+"\epoc32\data\z\resource\apps\oululogo.mif" - "c:\resource\apps\oululogo.mif"
+"\epoc32\data\z\resource\apps\logo_promo_videos.mif" - "c:\resource\apps\logo_promo_videos.mif"
+"\epoc32\data\z\resource\apps\logo_yle_24.mif" - "c:\resource\apps\logo_yle_24.mif"
+"\epoc32\data\z\resource\apps\qgn_iptv_video_store_list.jpg" - "c:\resource\apps\qgn_iptv_video_store_list.jpg"
+"\epoc32\data\z\resource\apps\videocenter_prog_clip.jpg" - "c:\resource\apps\videocenter_prog_clip.jpg"
+"\epoc32\data\z\resource\apps\logo_nseries_studio.mif" - "c:\resource\apps\logo_nseries_studio.mif"
+"\epoc32\data\z\private\102750D5\services.xml" - "c:\private\102750D5\services.xml"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; IpVideoResources
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+"\epoc32\data\z\resource\apps\ViaPlayerDefaultView.Rsc" - "!:\resource\apps\ViaPlayerDefaultView.Rsc"
+"\epoc32\data\z\resource\apps\ViaPlayerUtilities.Rsc" - "!:\resource\apps\ViaPlayerUtilities.Rsc"
+"\epoc32\data\z\resource\Plugins\IptvReminderNotifier.RSC" - "!:\resource\Plugins\IptvReminderNotifier.RSC"
+"\epoc32\data\z\resource\apps\vcxnsappui.rsc" - "!:\resource\apps\vcxnsappui.rsc"
+;; "\epoc32\data\z\resource\apps\vcxnsappui_test.RSC" - "!:\resource\apps\vcxnsappui_test.RSC"
+"\epoc32\data\z\resource\apps\vcxhgmyvideos.RSC" - "!:\resource\apps\vcxhgmyvideos.RSC"
+"\epoc32\data\z\resource\apps\vcxhgvodui.RSC" - "!:\resource\apps\vcxhgvodui.RSC"
+"\epoc32\data\z\resource\apps\IptvProvisioningApp.RSC" - "!:\resource\apps\IptvProvisioningApp.RSC"
+"\epoc32\data\z\resource\Plugins\IptvVodNotifier.RSC" - "!:\resource\Plugins\IptvVodNotifier.RSC"
+"\epoc32\data\z\resource\apps\vcxnssettingsview.RSC" - "!:\resource\apps\vcxnssettingsview.RSC"
+"\epoc32\data\z\resource\apps\vcxnsscheduleview.RSC" - "!:\resource\apps\vcxnsscheduleview.RSC"

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+  <!ENTITY layer_real_source_path "sf/app/videoplayer" >
+]>
+
+<SystemDefinition name="video" schema="1.4.0">
+  <systemModel>
+    <layer name="app_layer">
+      <module name="videoplayer">
+        <unit unitID="vado.videoplayer" mrp="" bldFile="&layer_real_source_path;/group" name="videoplayer" />
+      </module>
+    </layer>
+    
+	<layer name="api_test_layer">
+		<module name="video_player_file_details_dialog_api_tsrc">
+			<unit unitID="vado.video_player_file_details_dialog_api_test" name="video_player_file_details_dialog_api_tsrc" bldFile="&layer_real_source_path;/videoplayer_plat/video_player_file_details_dialog_api/tsrc/group" mrp=""/>
+		</module>
+		<module name="videoplayer_startup_api_tsrc">
+			<unit unitID="vado.videoplayer_startup_api_test" name="videoplayer_startup_api_tsrc" bldFile="&layer_real_source_path;/videoplayer_plat/videoplayer_startup_api/tsrc/group" mrp=""/>
+		</module>		
+	</layer>
+
+	<layer name="unit_test_layer">
+		
+		<module name="videoplayer_tsrc">
+			<unit unitID="vado.videohelix_test" name="videohelix_tsrc" bldFile="&layer_real_source_path;/videoplayback/videohelix/tsrc/ut_videohelixtest/group" mrp=""/>
+			<unit unitID="vado.videoplaybackcontrols_test" name="videoplaybackcontrols_tsrc" bldFile="&layer_real_source_path;/videoplayback/videoplaybackcontrols/tsrc/videoplaybackcontrols_test/group" mrp=""/>
+			<unit unitID="vado.userinputhandler_test" name="userinputhandler_tsrc" bldFile="&layer_real_source_path;/videoplayback/videoplaybackviews/tsrc/ut_userinputhandlertest/group" mrp=""/>
+			<unit unitID="vado.mpxvideoplayer_test" name="mpxvideoplayer_tsrc" bldFile="&layer_real_source_path;/videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/group" mrp=""/>
+		</module>
+
+		<module name="mpxmyvideoscollection_tsrc">
+			<unit unitID="vado.mvcollection_tests_dependency1" name="mvcollection_tests_dependency1" bldFile="&layer_real_source_path;/tsrc/VCXTestCommon/group" mrp=""/>
+			<unit unitID="vado.mvcollection_tests_dependency2" name="mvcollection_tests_dependency2" bldFile="&layer_real_source_path;/tsrc/VCXTestUtilModule/group" mrp=""/>
+			<unit unitID="vado.mvcollection_tests_dependency3" name="mvcollection_tests_dependency3" bldFile="&layer_real_source_path;/tsrc/VCXTestMyVideosCollectionClient/group" mrp=""/>
+
+			<unit unitID="vado.mpxmyvideoscollection_test" name="mpxmyvideoscollection_tsrc" bldFile="&layer_real_source_path;/videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/group" mrp=""/>
+		</module>
+		
+		<module name="other_tsrc">
+			<unit unitID="vado.other_tests_dependency1" name="other_tests_dependency1" bldFile="&layer_real_source_path;/tsrc/VCXTestCommon/group" mrp=""/>
+			<unit unitID="vado.other_tests_dependency2" name="other_tests_dependency2" bldFile="&layer_real_source_path;/tsrc/VCXTestUtilModule/group" mrp=""/>
+			<unit unitID="vado.other_tests_dependency3" name="other_tests_dependency3" bldFile="&layer_real_source_path;/tsrc/VCXTestMyVideosCollectionClient/group" mrp=""/>
+
+			<unit unitID="vado.mediasettingsengine_test" name="mediasettingsengine_tsrc" bldFile="&layer_real_source_path;/mediasettings/mediasettingsengine/tsrc/mediasettingsenginetest/group" mrp=""/>
+			<unit unitID="vado.vpsettingsenginetest_test" name="vpsettingsenginetest_tsrc" bldFile="&layer_real_source_path;/mediasettings/videoplayersettingsengine/tsrc/vpsettingsenginetest/group" mrp=""/>
+		</module>
+		
+	</layer>  
+	
+  </systemModel>
+</SystemDefinition>

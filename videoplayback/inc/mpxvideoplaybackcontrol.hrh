@@ -1,0 +1,132 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  header file of CMPXVideoPlaybackControl
+*
+*/
+
+
+// Version : %version: 11 %
+
+
+#ifndef MPXVIDEOPLAYBACKCONTROL_HRH_
+#define MPXVIDEOPLAYBACKCONTROL_HRH_
+
+// DATA TYPES
+const TInt KThousandNotKilobyte = 1000;
+
+enum TMPFXVideoPlaybackControlProperties
+{
+    EMPXSoftkeyControl = 0x1,
+    EMPXBufferingControl = 0x2,
+    EMPXShownWhenInitializing = 0x4,
+    EMPXShownWhenPlaying =  0x8,
+    EMPXShownWhenPaused = 0x10,
+    EMPXShownWhenStopped = 0x20,
+    EMPXShownWhenSeeking = 0x40,
+    EMPXAllProperties = 0xffffffff
+};
+
+enum TMPXVideoPlaybackControls
+{
+    EMPXSoftkeyDetails,
+    EMPXSoftkeyBack,
+    EMPXButtonBar,
+    EMPXProgressBar,
+    EMPXVolumeBar,
+
+    // Only for streaming case
+    // Can handle from NotInitilized state
+    //
+    EMPXBufferingLabel,
+
+    // Only for audio only or tv out case
+    // Upto user or prepared state
+    EMPXTitleLabel,
+    EMPXArtistLabel,
+
+    //
+    //  Bitmaps
+    //
+    EMPXRealAudioBitmap,
+    EMPXSoundBitmap,
+    EMPXRealLogoBitmap,
+    EMPXNoVideoBitmap,
+
+    EMPXDownloadPausedIcon,
+
+    EMPXAspectRatioIcon,
+    EMPXBrandingAnimation,
+
+    EMPXVideoPausedIcon,
+    EMPXMediaDetailsViewer,
+
+    EMPXControlsCount  // has to be last
+};
+
+/** Command ID's. */
+enum TMPXVideoPlaybackControlCommandIds
+{
+    EMPXControlCmdPluginInitialized,
+    EMPXControlCmdToggleVisibility, // Whenever user taps on the screen
+    EMPXControlCmdTvOutConnected,
+    EMPXControlCmdTvOutDisconnected,
+    EMPXControlCmdSetAspectRatio,
+    EMPXControlCmdSetVolume,
+    EMPXControlCmdSetDuration,
+    EMPXControlCmdSetPosition,
+    EMPXControlCmdStateChanged,
+    EMPXControlCmdDownloadUpdated,
+    EMPXControlCmdSetDownloadSize,
+    EMPXControlCmdDownloadComplete,
+    EMPXControlCmdSetDownloadPaused,
+    EMPXControlCmdClearDownloadPaused,
+    EMPXControlCmdHandleBackgroundEvent,
+    EMPXControlCmdHandleForegroundEvent,
+    EMPXControlCmdHandleErrors,
+    EMPXControlCmdShowControls,
+    EMPXControlCmdSoftKeyPressed,
+    EMPXControlCmdShowFileDetailsViewer,
+    EMPXControlCmdCloseFileDetailsViewer,
+    EMPXControlCmdHideControls,
+    EMPXControlCmdSurfaceCreated,
+    EMPXControlCmdSurfaceRemoved,
+    EMPXControlCmdLoadingStarted,
+    EMPXControlCmdCreateAspectRatioIcon,
+    EMPXControlCmdDeleteAspectRatioIcon
+};
+
+enum TMPXVideoSeekingType
+{
+    EMpxVideoSeekingForward,
+    EMpxVideoSeekingBackward,
+    EMpxVideoSeekingStop
+};
+
+enum TMPXVideoControlType
+{
+    EMpxVideoPlaybackContainer,
+    EMpxVideoPlaybackControl
+};
+
+enum TMPXVideoUserInputType
+{
+    EMpxVideoKeyboard,
+    EMpxVideoTouch,
+    EMpxVideoMediaKeys,
+    EMpxVideoSpecialHWKeys,
+    EMpxVideoNone
+};
+
+
+#endif /*MPXVIDEOPLAYBACKCONTROL_HRH_*/

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="d2d2646887d216bb93266dee956796dc" dataversion="2.0">
+  <name>Video Collection API</name>
+  <description>Provides constants and enumerations for utilizing video collection indicator ECom plugin</description>
+  <type>c++</type>
+  <collection>videocollection</collection>
+  <libs>
+  </libs>
+  <release category="platform"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>no</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

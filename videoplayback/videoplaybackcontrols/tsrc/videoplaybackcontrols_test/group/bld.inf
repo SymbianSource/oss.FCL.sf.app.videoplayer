@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project VideoPlaybackControlsTest.
+*
+*/
+
+// Version : %version: ou1cpsw#7 %
+
+
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+
+PRJ_TESTEXPORTS
+../conf/ui_videoplaybackcontrolstest.cfg        /epoc32/winscw/c/testframework/ui_videoplaybackcontrolstest.cfg
+../init/testframework.ini                       /epoc32/winscw/c/testframework/testframework.ini
+../data/mmc/test.3gp                            /epoc32/winscw/c/data/videos/test.3gp
+../data/mmc/test.rm                             /epoc32/winscw/c/data/videos/test.rm
+../data/mmc/TestClipWithLongNameToTestScrollingInMediaDetailsViewer.3gp                             /epoc32/winscw/c/data/videos/TestClipWithLongNameToTestScrollingInMediaDetailsViewer.3gp
+
+
+PRJ_EXPORTS
+
+
+PRJ_TESTMMPFILES
+videoplaybackcontrolstest.mmp
+
+
+PRJ_MMPFILES
+
+
+//  End of File

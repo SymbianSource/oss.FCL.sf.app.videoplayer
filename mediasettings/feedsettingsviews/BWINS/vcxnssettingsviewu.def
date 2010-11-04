@@ -1,0 +1,15 @@
+EXPORTS
+	??0CVcxNsSettingsView@@IAE@VTUid@@@Z @ 1 NONAME ; CVcxNsSettingsView::CVcxNsSettingsView(class TUid)
+	??1CVcxNsSettingsView@@UAE@XZ @ 2 NONAME ; CVcxNsSettingsView::~CVcxNsSettingsView(void)
+	?ConstructL@CVcxNsSettingsView@@IAEXXZ @ 3 NONAME ABSENT ; void CVcxNsSettingsView::ConstructL(void)
+	?DoActivateL@CVcxNsSettingsView@@MAEXABVTVwsViewId@@VTUid@@ABVTDesC8@@@Z @ 4 NONAME ; void CVcxNsSettingsView::DoActivateL(class TVwsViewId const &, class TUid, class TDesC8 const &)
+	?DoDeactivate@CVcxNsSettingsView@@MAEXXZ @ 5 NONAME ; void CVcxNsSettingsView::DoDeactivate(void)
+	?DynInitMenuPaneL@CVcxNsSettingsView@@MAEXHPAVCEikMenuPane@@@Z @ 6 NONAME ; void CVcxNsSettingsView::DynInitMenuPaneL(int, class CEikMenuPane *)
+	?HandleClientRectChange@CVcxNsSettingsView@@QAEXXZ @ 7 NONAME ; void CVcxNsSettingsView::HandleClientRectChange(void)
+	?HandleCommandL@CVcxNsSettingsView@@UAEXH@Z @ 8 NONAME ; void CVcxNsSettingsView::HandleCommandL(int)
+	?HandleStatusPaneSizeChange@CVcxNsSettingsView@@MAEXXZ @ 9 NONAME ; void CVcxNsSettingsView::HandleStatusPaneSizeChange(void)
+	?NewL@CVcxNsSettingsView@@SAPAV1@XZ @ 10 NONAME ; class CVcxNsSettingsView * CVcxNsSettingsView::NewL(void)
+	?NewLC@CVcxNsSettingsView@@SAPAV1@XZ @ 11 NONAME ABSENT ; class CVcxNsSettingsView * CVcxNsSettingsView::NewLC(void)
+	?ConstructL@CVcxNsSettingsView@@IAEXPAV?$CArrayPtrFlat@VMGSTabbedView@@@@@Z @ 12 NONAME ; void CVcxNsSettingsView::ConstructL(class CArrayPtrFlat<class MGSTabbedView> *)
+	?NewLC@CVcxNsSettingsView@@SAPAV1@PAV?$CArrayPtrFlat@VMGSTabbedView@@@@@Z @ 13 NONAME ; class CVcxNsSettingsView * CVcxNsSettingsView::NewLC(class CArrayPtrFlat<class MGSTabbedView> *)
+

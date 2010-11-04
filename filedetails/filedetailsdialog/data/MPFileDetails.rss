@@ -1,0 +1,613 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resource file for MPFileDetailsDialog.dll.*
+*/
+
+
+// Version : %version: 7 %
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    MPFI
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.loc>
+#include <avkon.hrh>
+#include <AiwCommon.rh>
+#include <AiwCdmaCommands.hrh>
+#include <filedetailsdialog.loc>
+
+
+//  RESOURCE DEFINITIONS 
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="MPFileDlg"; }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_details_row_format
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_details_row_format
+    {
+    buf = "%0U\t%1U"; 
+    }
+
+// ---------------------------------------------------
+// 
+//    r_mp_file_details
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_details
+    {
+    buf = qtn_mp_fd_headings;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_format_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_format_heading
+    {
+    buf = qtn_mp_details_format;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_resolution_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_resolution_heading
+    {
+    buf = qtn_mp_details_resolution;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_resolution
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_resolution
+    {
+    buf = qtn_mp_times_indic;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_bitrate_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_bitrate_heading
+    {
+    buf = qtn_mp_details_bitrate;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_bitrate
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_bitrate
+    {
+    buf = qtn_mp_bitrate_kbps;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_samplerate_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_samplerate_heading
+    {
+    buf = qtn_mp_details_samplerate;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_samplerate
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_samplerate
+    {
+    buf = qtn_mp_samplerate_hz;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_duration_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_duration_heading
+    {
+    buf = qtn_mp_details_duration;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_size_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_size_heading
+    {
+    buf = qtn_mp_details_size;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_size_kb
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_size_kb
+    {
+    buf = qtn_mp_size_kb;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_size_mb
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_size_mb
+    {
+    buf = qtn_mp_size_mb;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_date_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_date_heading
+    {
+    buf = qtn_mp_details_date;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_time_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_time_heading
+    {
+    buf = qtn_mp_details_time;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_copyright_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_copyright_heading
+    {
+    buf = qtn_mp_details_copyright;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_artist_original_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_artist_original_heading
+    {
+    buf = qtn_mp_details_artist_original;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_album_track_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_album_track_heading
+    {
+    buf = qtn_mp_details_album_track;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_genre_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_genre_heading
+    {
+    buf = qtn_mp_details_genre;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_composer_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_composer_heading
+    {
+    buf = qtn_mp_details_composer;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_info_url_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_info_url_heading
+    {
+    buf = qtn_mp_details_url;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_comment_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_comment_heading
+    {
+    buf = qtn_mp_details_comment;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_url_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_url_heading
+    {
+    buf = qtn_mp_filedetails_url;
+    }
+
+// ---------------------------------------------------
+// 
+//    r_mp_file_title_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_title_heading
+    {
+    buf = qtn_mp_fd_title;
+    }
+
+// ---------------------------------------------------
+// 
+//    r_mp_file_name_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_name_heading
+    {
+    buf = qtn_mp_fd_filename;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_artist_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_artist_heading
+    {
+    buf = qtn_mp_details_artist;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_album_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_album_heading
+    {
+    buf = qtn_mp_details_album;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_year_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_year_heading
+    {
+    buf = qtn_mp_details_year;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_qtn_mp_file_upload_status
+// Video upload status heading text.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_mp_file_upload_status 
+    { 
+    buf = qtn_mp_details_upload_status; 
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_qtn_mp_video_uploaded
+// uploaded text (yes).
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_mp_video_uploaded 
+    { 
+    buf = qtn_mp_details_upload_status_yes; 
+    }
+
+//
+// -----------------------------------------------------------------------------
+//
+// r_qtn_mp_video_not_uploaded
+// not uploaded text.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_mp_video_not_uploaded 
+    { 
+    buf = qtn_mp_details_upload_status_no; 
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_provider_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_provider_heading
+    {
+    buf = qtn_mp_details_provider;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_description_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_mp_file_description_heading
+    {
+    buf = qtn_mp_details_description;
+    }
+
+// ---------------------------------------------------
+//
+//    r_mp_file_license_heading
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_qtn_mp_drm_license_heading
+    {
+    buf = qtn_mp_drm_license;
+    }
+
+// ---------------------------------------------------
+//
+//    r_qtn_mp_drm_details_view
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_qtn_mp_drm_details_view
+    {
+    buf = qtn_mp_drm_details_view;
+    }
+
+//----------------------------------------------------
+//
+//    r_mp_drm_file_details_softkeys_ok_view__ok
+//	  
+//	  LSK(ok) MSK(ok) RSK(view)
+//    
+//----------------------------------------------------
+//
+RESOURCE CBA r_mp_drm_file_details_softkeys_ok_view__ok
+    {
+    buttons =
+        {
+        CBA_BUTTON {id=EAknSoftkeyOk; txt=text_softkey_ok; },
+        CBA_BUTTON {id=EAknSoftkeyView; txt=text_softkey_view; },
+        CBA_BUTTON {id=EAknSoftkeyOk; txt=text_softkey_ok; }
+        };
+    }
+
+// ********** GENRE STRINGS ********** 
+
+//----------------------------------------------------
+//   
+//    r_mp_genre_strings
+//
+//----------------------------------------------------
+//
+RESOURCE ARRAY r_mp_genre_strings
+    {
+    items =
+        {
+        LBUF {txt = mp_metadata_genre_blues;},
+        LBUF {txt = mp_metadata_genre_classic_rock;},
+        LBUF {txt = mp_metadata_genre_country;},
+        LBUF {txt = mp_metadata_genre_dance;},
+        LBUF {txt = mp_metadata_genre_disco;},
+        LBUF {txt = mp_metadata_genre_funk;},
+        LBUF {txt = mp_metadata_genre_grunge;},
+        LBUF {txt = mp_metadata_genre_hiphop;},
+        LBUF {txt = mp_metadata_genre_jazz;},
+        LBUF {txt = mp_metadata_genre_metal;},
+        LBUF {txt = mp_metadata_genre_new_age;},
+        LBUF {txt = mp_metadata_genre_oldies;},
+        LBUF {txt = mp_metadata_genre_other;},
+        LBUF {txt = mp_metadata_genre_pop;},
+        LBUF {txt = mp_metadata_genre_r_b;},
+        LBUF {txt = mp_metadata_genre_rap;},
+        LBUF {txt = mp_metadata_genre_reggae;},
+        LBUF {txt = mp_metadata_genre_rock;},
+        LBUF {txt = mp_metadata_genre_techno;},
+        LBUF {txt = mp_metadata_genre_industrial;},
+        LBUF {txt = mp_metadata_genre_alternative;},
+        LBUF {txt = mp_metadata_genre_ska;},
+        LBUF {txt = mp_metadata_genre_death_metal;},
+        LBUF {txt = mp_metadata_genre_pranks;},
+        LBUF {txt = mp_metadata_genre_soundtrack;},
+        LBUF {txt = mp_metadata_genre_euro_techno;},
+        LBUF {txt = mp_metadata_genre_ambient;},
+        LBUF {txt = mp_metadata_genre_trip_hop;},
+        LBUF {txt = mp_metadata_genre_vocal;},
+        LBUF {txt = mp_metadata_genre_jazz_funk;},
+        LBUF {txt = mp_metadata_genre_fusion;},
+        LBUF {txt = mp_metadata_genre_trance;},
+        LBUF {txt = mp_metadata_genre_classical;},
+        LBUF {txt = mp_metadata_genre_instrumental;},
+        LBUF {txt = mp_metadata_genre_acid;},
+        LBUF {txt = mp_metadata_genre_house;},
+        LBUF {txt = mp_metadata_genre_game;},
+        LBUF {txt = mp_metadata_genre_sound_clip;},
+        LBUF {txt = mp_metadata_genre_gospel;},
+        LBUF {txt = mp_metadata_genre_noise;},
+        LBUF {txt = mp_metadata_genre_alternrock;},
+        LBUF {txt = mp_metadata_genre_bass;},
+        LBUF {txt = mp_metadata_genre_soul;},
+        LBUF {txt = mp_metadata_genre_punk;},
+        LBUF {txt = mp_metadata_genre_space;},
+        LBUF {txt = mp_metadata_genre_meditative;},
+        LBUF {txt = mp_metadata_genre_instrumental_pop;},
+        LBUF {txt = mp_metadata_genre_instrumental_rock;},
+        LBUF {txt = mp_metadata_genre_ethnic;},
+        LBUF {txt = mp_metadata_genre_gothic;},
+        LBUF {txt = mp_metadata_genre_darkwave;},
+        LBUF {txt = mp_metadata_genre_techno_industrial;},
+        LBUF {txt = mp_metadata_genre_electronic;},
+        LBUF {txt = mp_metadata_genre_pop_folk;},
+        LBUF {txt = mp_metadata_genre_eurodance;},
+        LBUF {txt = mp_metadata_genre_dream;},
+        LBUF {txt = mp_metadata_genre_southern_rock;},
+        LBUF {txt = mp_metadata_genre_comedy;},
+        LBUF {txt = mp_metadata_genre_cult;},
+        LBUF {txt = mp_metadata_genre_gangsta;},
+        LBUF {txt = mp_metadata_genre_top_40;},
+        LBUF {txt = mp_metadata_genre_christian_rap;},
+        LBUF {txt = mp_metadata_genre_pop_funk;},
+        LBUF {txt = mp_metadata_genre_jungle;},
+        LBUF {txt = mp_metadata_genre_native_american;},
+        LBUF {txt = mp_metadata_genre_cabaret;},
+        LBUF {txt = mp_metadata_genre_new_wave;},
+        LBUF {txt = mp_metadata_genre_psychadelic;},
+        LBUF {txt = mp_metadata_genre_rave;},
+        LBUF {txt = mp_metadata_genre_showtunes;},
+        LBUF {txt = mp_metadata_genre_trailer;},
+        LBUF {txt = mp_metadata_genre_lofi;},
+        LBUF {txt = mp_metadata_genre_tribal;},
+        LBUF {txt = mp_metadata_genre_acid_punk;},
+        LBUF {txt = mp_metadata_genre_acid_jazz;},
+        LBUF {txt = mp_metadata_genre_polka;},
+        LBUF {txt = mp_metadata_genre_retro;},
+        LBUF {txt = mp_metadata_genre_musical;},
+        LBUF {txt = mp_metadata_genre_rock_roll;},
+        LBUF {txt = mp_metadata_genre_hard_rock;},
+        LBUF {txt = mp_metadata_genre_folk;},
+        LBUF {txt = mp_metadata_genre_folk_rock;},
+        LBUF {txt = mp_metadata_genre_national_folk;},
+        LBUF {txt = mp_metadata_genre_swing;},
+        LBUF {txt = mp_metadata_genre_fast_fusion;},
+        LBUF {txt = mp_metadata_genre_bebob;},
+        LBUF {txt = mp_metadata_genre_latin;},
+        LBUF {txt = mp_metadata_genre_revival;},
+        LBUF {txt = mp_metadata_genre_celtic;},
+        LBUF {txt = mp_metadata_genre_bluegrass;},
+        LBUF {txt = mp_metadata_genre_avantgarde;},
+        LBUF {txt = mp_metadata_genre_gothic_rock;},
+        LBUF {txt = mp_metadata_genre_progressive_rock;},
+        LBUF {txt = mp_metadata_genre_psychedelic_rock;},
+        LBUF {txt = mp_metadata_genre_symphonic_rock;},
+        LBUF {txt = mp_metadata_genre_slow_rock;},
+        LBUF {txt = mp_metadata_genre_big_band;},
+        LBUF {txt = mp_metadata_genre_chorus;},
+        LBUF {txt = mp_metadata_genre_easy_listening;},
+        LBUF {txt = mp_metadata_genre_acoustic;},
+        LBUF {txt = mp_metadata_genre_humour;},
+        LBUF {txt = mp_metadata_genre_speech;},
+        LBUF {txt = mp_metadata_genre_chanson;},
+        LBUF {txt = mp_metadata_genre_opera;},
+        LBUF {txt = mp_metadata_genre_chamber_music;},
+        LBUF {txt = mp_metadata_genre_sonata;},
+        LBUF {txt = mp_metadata_genre_symphony;},
+        LBUF {txt = mp_metadata_genre_booty_bass;},
+        LBUF {txt = mp_metadata_genre_primus;},
+        LBUF {txt = mp_metadata_genre_porn_groove;},
+        LBUF {txt = mp_metadata_genre_satire;},
+        LBUF {txt = mp_metadata_genre_slow_jam;},
+        LBUF {txt = mp_metadata_genre_club;},
+        LBUF {txt = mp_metadata_genre_tango;},
+        LBUF {txt = mp_metadata_genre_samba;},
+        LBUF {txt = mp_metadata_genre_folklore;},
+        LBUF {txt = mp_metadata_genre_ballad;},
+        LBUF {txt = mp_metadata_genre_power_ballad;},
+        LBUF {txt = mp_metadata_genre_rhythmic_soul;},
+        LBUF {txt = mp_metadata_genre_freestyle;},
+        LBUF {txt = mp_metadata_genre_duet;},
+        LBUF {txt = mp_metadata_genre_punk_rock;},
+        LBUF {txt = mp_metadata_genre_drum_solo;},
+        LBUF {txt = mp_metadata_genre_a_capella;},
+        LBUF {txt = mp_metadata_genre_euro_house;},
+        LBUF {txt = mp_metadata_genre_dance_hall;},
+        LBUF {txt = mp_metadata_genre_goa;},
+        LBUF {txt = mp_metadata_genre_drum_bass;},
+        LBUF {txt = mp_metadata_genre_club_house;},
+        LBUF {txt = mp_metadata_genre_hardcore;},
+        LBUF {txt = mp_metadata_genre_terror;},
+        LBUF {txt = mp_metadata_genre_indie;},
+        LBUF {txt = mp_metadata_genre_britpop;},
+        LBUF {txt = mp_metadata_genre_neger_punk;},
+        LBUF {txt = mp_metadata_genre_polsk_punk;},
+        LBUF {txt = mp_metadata_genre_beat;},
+        LBUF {txt = mp_metadata_genre_christian_gangsta;},
+        LBUF {txt = mp_metadata_genre_heavy_metal;},
+        LBUF {txt = mp_metadata_genre_black_metal;},
+        LBUF {txt = mp_metadata_genre_crossover;},
+        LBUF {txt = mp_metadata_genre_contemporary_c;},
+        LBUF {txt = mp_metadata_genre_christian_rock;},
+        LBUF {txt = mp_metadata_genre_merengue;},
+        LBUF {txt = mp_metadata_genre_salsa;},
+        LBUF {txt = mp_metadata_genre_thrash_metal;},
+        LBUF {txt = mp_metadata_genre_anime;},
+        LBUF {txt = mp_metadata_genre_jpop;},
+        LBUF {txt = mp_metadata_genre_synthpop;},
+        LBUF {txt = mp_metadata_genre_unknown;}
+        };
+    }
+// End of File
+
+

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition schema="3.0.0">
+ <package id="videoplayer" name="Video Player Apps" version="92.92.1" levels="support plugin util apps" xmlns:qt="http://www.nokia.com/qt">
+  <collection id="videoplayer_plat" name="Video Player Apps Platform Interfaces" level="apps">
+   <component id="video_player_file_details_dialog_api" name="Video Player File Details Dialog API" class="api" filter="s60" introduced="^3">
+    <unit bldFile="videoplayer_plat/video_player_file_details_dialog_api/group"/>
+   </component> 
+   <component id="videocollection_api" name="Video Collection API" class="api" filter="s60" introduced="^3">
+    <unit bldFile="videoplayer_plat/videocollection_api/group"/>
+   </component>    
+   <component id="videoplayer_startup_api" name="Video Player Startup API" class="api" filter="s60" introduced="^3">
+    <unit bldFile="videoplayer_plat/videoplayer_startup_api/group"/>
+   </component>
+  </collection>
+  <collection id="videofeeds" name="Video Feeds" level="plugin">
+   <component id="vccommon" name="Vccommon" filter="s60" introduced="^3">
+    <unit bldFile="videofeeds/vccommon/group"/>
+   </component>
+  </collection>
+  <collection id="videocollection" name="Video Collection" level="util">
+   <component id="hgmyvideos" name="Hg My Videos" filter="s60" introduced="^3">
+    <unit bldFile="videocollection/hgmyvideos/group"/>
+   </component>
+   <component id="hgmyvideosplugin" name="Hg My Videos Plugin" filter="s60" introduced="^3">
+    <unit bldFile="videocollection/hgmyvideosplugin/group"/>
+   </component>  
+   <component id="mpxmyvideoscollection" name="MPX My Videos Collection" filter="s60" introduced="^3">
+    <unit bldFile="videocollection/mpxmyvideoscollection/group"/>
+   </component>
+   <component id="myvideosindicatorplugin" name="My Videos Indicator Plugin" filter="s60" introduced="^3">
+    <unit bldFile="videocollection/myvideosindicatorplugin/group"/>
+   </component>
+  </collection>
+  <collection id="mediasettings" name="Media Settings" level="support">
+   <component id="gsvideoplugin" name="Gs Video Plugin" filter="s60" introduced="^3">
+    <unit bldFile="mediasettings/gsvideoplugin/group"/>
+   </component>
+   <component id="mediasettingsapp" name="Media Settings App" filter="s60" introduced="^3">
+    <unit bldFile="mediasettings/mediasettingsapp/group"/>
+   </component>
+   <component id="mediasettingsengine" name="Media Settings Engine" filter="s60" introduced="^3">
+    <unit bldFile="mediasettings/mediasettingsengine/group"/>   
+    </component>
+   <component id="mpsettbase" name="Mp Settbase" filter="s60" introduced="^3">
+    <unit bldFile="mediasettings/mpsettbase/group"/>
+   </component>
+   <component id="videoplayersettingsengine" name="Video Player Settings Engine" filter="s60" introduced="^3">
+    <unit bldFile="mediasettings/videoplayersettingsengine/group"/>
+   </component>
+  </collection>
+  <collection id="File Details" name="File Details" level="plugin">
+   <component id="filedetailsdialog" name="File Details Dialog" filter="s60" introduced="^3">
+    <unit bldFile="filedetails/filedetailsdialog/group"/>
+   </component>
+  <component id="filedetailsplugin" name="File Details Plugin" filter="s60" introduced="^3">
+    <unit bldFile="filedetails/filedetailsplugin/group"/>
+   </component>
+  </collection>  
+  <collection id="videoplayerapp" name="Video Player App" level="apps">
+   <component id="lwplayer" name="Lw Player" filter="s60" introduced="^3">
+    <unit bldFile="videoplayerapp/lwplayer/group"/>
+   </component>
+   <component id="mpxvideoplayer" name="Mpx Video Player" filter="s60" introduced="^3">
+    <unit bldFile="videoplayerapp/mpxvideoplayer/group"/>
+   </component>
+  </collection>
+  <collection id="videoplayback" name="Video Playback Plugins" level="plugin">
+   <component id="videohelix" name="Video Helix" filter="s60" introduced="^3">
+    <unit bldFile="videoplayback/videohelix/group"/>
+   </component>
+   <component id="videopldplaybackviewplugin" name="Videopld Playback Plugin" filter="s60" introduced="^3">
+    <unit bldFile="videoplayback/videopdlplaybackviewplugin/group"/>
+   </component>   
+   <component id="videoplaybackcontrols" name="Videopld Playback Controls" filter="s60" introduced="^3">
+    <unit bldFile="videoplayback/videoplaybackcontrols/group"/>
+   </component>  
+   <component id="videoplaybackviewplugin" name="Video Playback View Plugin" filter="s60" introduced="^3">
+    <unit bldFile="videoplayback/videoplaybackviewplugin/group"/>
+   </component>   
+   <component id="videoplaybackviews" name="Video Playback Views" filter="s60" introduced="^3">
+    <unit bldFile="videoplayback/videoplaybackviews/group"/>
+   </component>
+  </collection>
+ </package>
+</SystemDefinition>
+
+
+

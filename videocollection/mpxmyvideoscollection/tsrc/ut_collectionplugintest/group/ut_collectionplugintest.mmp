@@ -1,0 +1,77 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project ut_collectionplugintest
+*
+*/
+
+// Version : %version: 2 %
+
+
+
+#include <platform_paths.hrh>
+
+EPOCALLOWDLLDATA
+
+TARGET          ut_collectionplugintest.dll
+TARGETTYPE      dll
+UID             0x1000008D 0x101FB3E3
+
+CAPABILITY      ALL -TCB
+
+DEFFILE         ut_collectionplugintest.def
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../../inc
+USERINCLUDE     ../../../../../inc
+
+SOURCEPATH      ../src
+
+SOURCE          ut_collectionplugintest.cpp
+SOURCE          ut_collectionplugintestBlocks.cpp
+SOURCE          vcxmyvideosasyncfileoperations_stub.cpp
+SOURCE          vcxmyvideoscategories_stub.cpp
+SOURCE          vcxmyvideosmdsdb_stub.cpp
+SOURCE          vcxmyvideosmessagelist_stub.cpp
+SOURCE          vcxmyvideosopenhandler_stub.cpp
+SOURCE          vcxmyvideosvideocache_stub.cpp
+SOURCE          vcxmyvideoscollectionutil_stub.cpp
+SOURCE          vcxmyvideosactivetask_stub.cpp
+SOURCE			vcxmyvideosalbums_stub.cpp
+SOURCE 			vcxmyvideosalbum_stub.cpp 
+SOURCE 			vcxmyvideosmdsalbums_stub.cpp
+
+SOURCEPATH      ../../../src
+SOURCE			vcxmyvideoscollectionplugin.cpp
+
+APP_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE   ../inc/
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+LIBRARY         ws32.lib
+LIBRARY         euser.lib
+LIBRARY         stiftestinterface.lib
+LIBRARY         stiftestengine.lib
+LIBRARY         bafl.lib
+LIBRARY         efsrv.lib
+LIBRARY         flogger.lib
+LIBRARY         mpxcommon.lib
+LIBRARY         ecom.lib
+LIBRARY         estor.lib
+LIBRARY         mdeclient.lib
+
+LANG            SC
+
+// End of File

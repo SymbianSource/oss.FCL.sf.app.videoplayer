@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for mpxvideoplayer unit tests
+*
+*/
+
+// Version : %version: ou1cpsw#4 %
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+
+../conf/mpxvideoplayertest.cfg                  /epoc32/winscw/c/testframework/mpxvideoplayertest.cfg
+../init/testframework.ini                       /epoc32/winscw/c/testframework/testframework.ini
+../data/mmc/local.3gp                           /epoc32/winscw/c/data/videos/local.3gp
+../data/mmc/sdp_test.sdp                        /epoc32/winscw/c/data/videos/sdp_test.sdp
+../data/mmc/test_streaming.ram                  /epoc32/winscw/c/data/videos/test_streaming.ram
+../data/mmc/test_local.ram                      /epoc32/winscw/c/data/videos/test_local.ram
+../data/mmc/test_multilocal.ram                 /epoc32/winscw/c/data/videos/test_multilocal.ram
+../data/mmc/test_multilink_v2.asx               /epoc32/winscw/c/data/videos/test_multilink_v2.asx
+../data/mmc/test_seekSingle_v3.asx              /epoc32/winscw/c/data/videos/test_seekSingle_v3.asx
+
+PRJ_EXPORTS
+
+PRJ_TESTMMPFILES
+mpxvideoplayertest.mmp
+
+PRJ_MMPFILES
+
+//  End of File

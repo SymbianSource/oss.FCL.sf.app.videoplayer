@@ -1,0 +1,348 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This is a localisation file for MediaSettings*
+*/
+
+
+// Version : %version: 7 %
+
+
+
+
+// LOCALISATION STRINGS
+
+// *** CAPTION strings ***
+
+//d:Application title for the grid view.
+//l:cell_app_pane_t1
+//r:5.2
+//
+#define qtn_mp_settings_short_caption "Video player settings"
+
+//d:Application title for the list view.
+//l:list_single_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_mp_settings_caption "Video player settings"
+
+//d:Media Settings plugin caption displayed under General Settings.
+//d:Displayed as a list item in general settings under application settings
+//l:list_single_large_graphic_pane_t1
+//r:5.2
+//
+#define qtn_set_folder_media_player "Videos"
+
+
+// ** MAIN view **
+
+//d:Text in Media Settings main view title pane.
+//d: UI Spec sec 14 application settings (p85)
+//l:title_pane_t2/opt9
+//r:5.2
+//
+#define qtn_mp_title_settings "Video player settings"
+
+//d:Text of a list item in main view's folder list.
+//d:Item opens Video settings view.
+//d: UI Spec sec 14 application settings (p85)
+//l:list_single_large_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_settings_video "Video"
+
+//d:Text of a list item in main view's folder list.
+//d:Item opens Streaming settings view.
+//d: UI Spec sec 14 application settings (p85)
+//l:list_single_large_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_settings_streaming "Streaming"
+
+
+// ** VIDEO view **
+
+//d:Text in Media Settings video view title pane.
+//d: UI Spec sec 14.1 video settings (p86)
+//l:title_pane_t2/opt9
+//r:5.0
+//
+#define qtn_mp_title_sett_video "Video settings"
+
+
+// ** STREAMING view **
+
+//d:Text in Media Settings streaming view title pane.
+//d: UI Spec 14.2 Streaming settings (p89)
+//l:title_pane_t2/opt9
+//r:5.0
+//
+#define qtn_mp_title_sett_stream "Streaming settings"
+
+//d:Text of a list item in s view's folder list.
+//d:Item opens Proxy settings folder.
+//d: UI Spec 14.2 Streaming settings (p89)
+//l:list_single_large_graphic_pane_t1_cp2
+//r:5.0
+//
+#define qtn_mp_setting_stream_proxy "RTSP Proxy"
+
+//d:Text of a list item in Streaming view's folder list.
+//d:Item opens Network settings folder.
+//d: UI Spec 14.2 Streaming settings (p89)
+//l:list_single_large_graphic_pane_t1_cp2
+//r:5.0
+//
+#define qtn_mp_setting_stream_net "Network"
+
+
+// ** PROXY view **
+
+//d:Text in proxy settings view title pane.
+//d: UI Spec 14.2.1 RTSP proxy (p90)
+//l:title_pane_t2/opt9
+//r:5.0
+//
+#define qtn_mp_sett_stream_title_proxy "Proxy"
+
+
+// ** NETWORK view **
+
+//d:Text in network settings view title pane.
+//d: UI Spec 14.2.2 Networking (p91)
+//l:title_pane_t2/opt9
+//r:5.0
+//
+#define qtn_mp_sett_stream_title_net "Network"
+
+
+
+// *** SETTING ITEMS ***
+
+// ** COMMON strings **
+
+// ** VIDEO CONTRAST **
+
+//d:Text of a list item in Video setting list view's list.
+//d:Item opens Video contrast setting page.
+//d:Appears also in the Video contrast setting page's title.
+//d: UI Spec sec 14.1 Video Settings (p87)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_video_contrast "Video contrast"
+
+//d:Text in slider control.
+//d:Video contrast setting page.
+//d:Minimum value.
+//d: UI Spec sec 14.1 Video Settings (p87)
+//l:setting_slider_pane_t2
+//r:5.0
+//
+#define qtn_vid_contrast_light "Light"
+
+//d:Text in slider control.
+//d:Video contrast setting page.
+//d:Maximum value.
+//d: UI Spec sec 14.1 Video Settings (p87)
+//l:setting_slider_pane_t2
+//r:5.0
+//
+#define qtn_vid_contrast_dark "Dark"
+
+//d:Text in Video setting list's Video contrast item's current value field.
+//d:Current value field text.
+//d: UI Spec sec 14.1 Video Settings (p87)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_contrast_value "%N%"
+
+// ** PROXY **
+
+//d:Text of a list item in RTSP Proxy setting list view's list.
+//d:Item opens Proxy mode setting page.
+//d:Appears also in the Proxy setting page's title.
+//d: UI Spec 14.2.1 RTSP proxy (p90)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_proxy "Proxy"
+
+//d:Text of a list item in Proxy mode setting page's list.
+//d:Appears also in Proxy settings list's Proxy item's current value field.
+//d:Setting value "Enabled".
+//d: UI Spec 14.2.1 RTSP proxy (p90)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_sett_proxy_enabled "Enabled"
+
+//d:Text of a list item in Proxy mode setting page's list.
+//d:Appears also in Proxy settings list's Proxy item's current value field.
+//d:Setting value "Disabled".
+//d: UI Spec 14.2.1 RTSP proxy (p90)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_sett_proxy_disabled "Disabled"
+
+
+// ** PROXY HOST **
+
+//d:Text of a list item in RTSP Proxy setting list view's list.
+//d:Item opens Proxy hostname setting page.
+//d:Appears also in the Proxy hostname setting page's title.
+//d: UI Spec 14.2.1 RTSP proxy (p90)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_proxy_host "Proxy hostname"
+
+
+// ** PROXY PORT **
+//d:Text of a list item in RTSP Proxy setting list view's list.
+//d:Item opens Proxy port setting page.
+//d:Appears also in the Proxy port setting page's title.
+//d: UI Spec 14.2.1 RTSP proxy (p91)	
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_proxy_port "Proxy port"
+
+
+// ** DEFAULT ACCESS POINT **
+
+//d:Text of a list item in Network setting list view's list.
+//d:Item opens Default Access Point setting page.
+//d: UI Spec 14.2.1 RTSP proxy (p91)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_default_ap "Default Access Point"
+
+//d:Text of a list item in Auto disconnect time setting page's list.
+//d:Setting value "User defined".
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_sett_autodiscon_user "User defined"
+
+
+// ** UDP PORT **
+
+//d:Text of a list item in Network setting list view's list.
+//d:Item opens Min UDP port setting page.
+//d:Appears also in the Min UDP port setting page's title.
+//d: UI Spec 14.2.2 Networking (p92)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_min_udp_port "Min UDP port"
+
+//d:Text of a list item in Network setting list view's list.
+//d:Item opens Max UDP port setting page.
+//d:Appears also in the Max UDP port setting page's title.
+//d: UI Spec 14.2.2 Networking (p92)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_setting_max_udp_port "Max UDP port"
+
+
+// ** BEARER SPECIFIC MAX BANDWIDTH **
+
+//d:Text of a list item in Advanced streaming setting list view's list.
+//d:Item opens GPRS bandwidth setting page.
+//d:Appears also in the GPRS bandwidth setting page's title.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_gprs_bandwidth "GPRS bandwidth"
+
+//d:Text of a list item in Advanced streaming setting list view's list.
+//d:Item opens EGPRS bandwidth setting page.
+//d:Appears also in the EGPRS bandwidth setting page's title.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_egprs_bandwidth "EGPRS bandwidth"
+
+//d:Text of a list item in Advanced streaming setting list view's list.
+//d:Item opens WCDMA bandwidth setting page.
+//d:Appears also in the WCDMA bandwidth setting page's title.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_wcdma_bandwidth "WCDMA bandwidth"
+
+//d:Text of a list item in Advanced streaming setting list view's list.
+//d:Item opens WLAN bandwidth setting page.
+//d:Appears also in the WLAN bandwidth setting page's title.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_wlan_bandwidth "WLAN bandwidth"
+
+//d:Text of a list item in Advanced streaming setting list view's list.
+//d:Item opens HSDPA bandwidth setting page.
+//d:Appears also in the HSDPA bandwidth setting page's title.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_setting_pane_t1
+//r:5.0
+//
+#define qtn_mp_hsdpa_bandwidth "HSDPA bandwidth"
+
+//d:Prompt text in user defined Bandwidth number query.
+//d:Data query.
+//d: UI Spec 14.2.2 Networking (p93)
+//l:popup_query_data_window
+//r:5.0
+//
+#define qtn_mp_header_bw "Bandwidth (Kbps):"
+
+//d:Text of a list item in GPRS/EGPRS/WCDMA bandwidth setting page's list.
+//d:Text in setting list item's current value field.
+//d:GPRS/EGPRS/WCDM bandwidth list item
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_bw_sett_value "%U Kbps"
+
+
+//d:Text of a list item in GPRS/EGPRS/WCDMA/WLAN bandwidth setting page's list.
+//d:Text in setting list item's current value field in Mbps.
+//d:GPRS/EGPRS/WCDM/WLAN bandwidth list item
+//d: UI Spec 14.2.2 Networking (p93)
+//l:list_set_graphic_pane_t1
+//r:5.0
+//
+#define qtn_mp_bw_sett_value_mbit "%U Mbps"
+
+
+//d:Command in Options list.
+//d:Opens Advanced settings view.
+//d: UI Spec 14.2.2 Networking (p92)
+//l:list_single_pane_t1_cp2
+//r:5.0
+//
+#define qtn_mp_option_adv_settings "Advanced settings"
+
+
+// End of File

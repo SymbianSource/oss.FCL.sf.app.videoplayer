@@ -1,0 +1,99 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Makefile for Media Settings app.*
+*/
+
+
+// Version : %version: 8 %
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <bldvariant.hrh>
+
+TARGET          mediasettings.exe
+TARGETTYPE      exe
+UID             0x100039CE 0x10005A3F
+EPOCSTACKSIZE   0x5000
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          MPSettingsApp.cpp 
+SOURCE          MPSettingsAppUi.cpp
+SOURCE          MPSettingsDocument.cpp
+SOURCE          MPSettingsMainContainer.cpp
+SOURCE          MPSettingsMainView.cpp
+SOURCE          MPSettingsVideoSettingItemList.cpp
+SOURCE          MPSettingsVideoContainer.cpp
+SOURCE          MPSettingsVideoView.cpp
+SOURCE          MPSettingsStreamingView.cpp
+SOURCE          MPSettingsStreamingContainer.cpp
+SOURCE          MPSettingsStreamingSettingItemList.cpp
+SOURCE          MPSettingsSliderSettingItem.cpp
+SOURCE          MPSettingsUDPPortSettingItem.cpp
+SOURCE          MPSettingsAdvancedBwContainer.cpp
+SOURCE          MPSettingsAdvancedBwSettingItemList.cpp
+SOURCE          MPSettingsAdvancedBwSettingItem.cpp
+SOURCE          MPSettingsAdvancedBwView.cpp
+
+START RESOURCE  ../data/MediaSettings.rss
+TARGETPATH      APP_RESOURCE_DIR
+TARGET          mediasettings.rsc
+HEADER
+LANGUAGE_IDS
+END
+
+START RESOURCE  ../data/MediaSettings_reg.rss
+DEPENDS mediasettings.rsg
+TARGETPATH      /private/10003a3f/apps
+END
+
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../../mpsettbase/inc
+USERINCLUDE     ../../videoplayersettingsengine/inc
+USERINCLUDE     ../../mediasettingsengine/inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+CAPABILITY      CAP_APPLICATION
+
+LIBRARY         euser.lib
+LIBRARY         efsrv.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         bafl.lib
+LIBRARY         eikcore.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikctl.lib
+LIBRARY         avkon.lib
+LIBRARY         commonengine.lib
+LIBRARY         ecom.lib
+LIBRARY         hlplch.lib
+LIBRARY         featmgr.lib
+LIBRARY         aknskins.lib
+LIBRARY         egul.lib
+LIBRARY         centralrepository.lib 
+LIBRARY         mpsettbase.lib
+LIBRARY         mpsettengine.lib
+LIBRARY         flogger.lib
+LIBRARY         vcxnssettingsengine.lib
+LIBRARY         commondialogs.lib
+LIBRARY	        cmmanager.lib
+LIBRARY         commsdat.lib
+
+// End of File

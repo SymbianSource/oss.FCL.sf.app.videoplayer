@@ -1,0 +1,11 @@
+;Run \vado\videoplayer\tsrc\testing\tools\genATSdrop.pl from 
+;the tsrc folder to create ATS3 drop.
+DEVICE INSERT_DEVICE
+EMAIL INSERT_EMAIL
+FLASH INSERT_FLASH_IMAGE
+FLASH INSERT_FLASH_IMAGE
+FLASH INSERT_FLASH_IMAGE
+SIS \VideoApp_Domain\videoplayer\videoplayerapp\mpxvideoplayer\sis\VideoPlayer.sisx
+INC ..\..\mediasettings\mediasettingsengine\tsrc\mediasettingsenginetest\conf\atsconf.txt
+INC ..\..\mediasettings\videoplayersettingsengine\tsrc\vpsettingsenginetest\conf\atsconf.txt
+INC ..\..\videocollection\mpxmyvideoscollection\tsrc\mpxmvcolltest\conf\atsconf.txt

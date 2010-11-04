@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<backup_registration version="1.0">
+    <passive_backup>
+      <include_directory name = "\" />
+      <include_file name = "services.dat" />
+      <include_file name = "SmDbVersion.dat" />
+    </passive_backup>
+    <public_backup>
+      <include_directory name = "C:\system\data\nokia\videocenter" />
+      <include_directory name = "E:\system\data\nokia\videocenter" />
+    </public_backup>
+</backup_registration>

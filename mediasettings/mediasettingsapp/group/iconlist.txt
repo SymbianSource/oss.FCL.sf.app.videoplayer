@@ -1,0 +1,10 @@
+-c8,8 qgn_menu_video
+-c8,8 qgn_prop_set_service
+-c8,8 qgn_prop_set_apps_mp
+-c8,8 qgn_prop_set_mp_video_sub
+-c8,8 qgn_prop_set_mp_stream_sub
+-c8,8 qgn_prop_set_mp_audio_sub
+-c8,1 qgn_prop_set_mp_video_tab2
+-c8,1 qgn_prop_set_mp_audio_tab3
+-c8,1 qgn_prop_set_mp_stream_tab2
+-c8,1 qgn_prop_set_mp_video_tab3

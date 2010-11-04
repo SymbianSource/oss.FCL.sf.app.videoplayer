@@ -1,0 +1,41 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZN24CMPXVideoPlaybackControl21DoHandlePointerEventLERK13TPointerEvent @ 2 NONAME
+	_ZN35CMPXVideoPlaybackControlsController12HandleEventLE34TMPXVideoPlaybackControlCommandIdsi @ 3 NONAME
+	_ZN35CMPXVideoPlaybackControlsController15AddFileDetailsLEP32CMPXVideoPlaybackViewFileDetails @ 4 NONAME
+	_ZN35CMPXVideoPlaybackControlsController4NewLEP26CMPXVideoPlaybackContainer5TRectP32CMPXVideoPlaybackViewFileDetails @ 5 NONAME
+	_ZN35CMPXVideoPlaybackControlsController9GetBitmapE25TMPXVideoPlaybackControls @ 6 NONAME
+	_ZN35CMPXVideoPlaybackControlsControllerD0Ev @ 7 NONAME
+	_ZN35CMPXVideoPlaybackControlsControllerD1Ev @ 8 NONAME
+	_ZN35CMPXVideoPlaybackControlsControllerD2Ev @ 9 NONAME
+	_ZTI23CMPXVideoPlaybackButton @ 10 NONAME ; #<TI>#
+	_ZTI24CMPXVideoPlaybackControl @ 11 NONAME ; #<TI>#
+	_ZTI26CMPXVideoPlaybackButtonBar @ 12 NONAME ; #<TI>#
+	_ZTI26CMPXVideoPlaybackContainer @ 13 NONAME ; #<TI>#
+	_ZTI26CMPXVideoPlaybackVolumeBar @ 14 NONAME ; #<TI>#
+	_ZTI27CMPXVideoPlaybackControlPdl @ 15 NONAME ; #<TI>#
+	_ZTI28CMPXVideoPlaybackProgressBar @ 16 NONAME ; #<TI>#
+	_ZTI30CMPXVideoPlaybackControlPolicy @ 17 NONAME ; #<TI>#
+	_ZTI32CMPXVideoPlaybackAspectRatioIcon @ 18 NONAME ; #<TI>#
+	_ZTI33CMPXVideoPlaybackUserInputHandler @ 19 NONAME ; #<TI>#
+	_ZTI34CMPXVideoPlaybackBrandingAnimation @ 20 NONAME ; #<TI>#
+	_ZTI35CMPXVideoPlaybackControlsController @ 21 NONAME ; #<TI>#
+	_ZTI37CMPXVideoPlaybackControlConfiguration @ 22 NONAME ; #<TI>#
+	_ZTV23CMPXVideoPlaybackButton @ 23 NONAME ; #<VT>#
+	_ZTV24CMPXVideoPlaybackControl @ 24 NONAME ; #<VT>#
+	_ZTV26CMPXVideoPlaybackButtonBar @ 25 NONAME ; #<VT>#
+	_ZTV26CMPXVideoPlaybackContainer @ 26 NONAME ; #<VT>#
+	_ZTV26CMPXVideoPlaybackVolumeBar @ 27 NONAME ; #<VT>#
+	_ZTV27CMPXVideoPlaybackControlPdl @ 28 NONAME ; #<VT>#
+	_ZTV28CMPXVideoPlaybackProgressBar @ 29 NONAME ; #<VT>#
+	_ZTV30CMPXVideoPlaybackControlPolicy @ 30 NONAME ; #<VT>#
+	_ZTV32CMPXVideoPlaybackAspectRatioIcon @ 31 NONAME ; #<VT>#
+	_ZTV33CMPXVideoPlaybackUserInputHandler @ 32 NONAME ; #<VT>#
+	_ZTV34CMPXVideoPlaybackBrandingAnimation @ 33 NONAME ; #<VT>#
+	_ZTV35CMPXVideoPlaybackControlsController @ 34 NONAME ; #<VT>#
+	_ZTV37CMPXVideoPlaybackControlConfiguration @ 35 NONAME ; #<VT>#
+	_ZN32CMPXVideoPlaybackViewFileDetails17GenerateFileNameLEv @ 36 NONAME
+	_ZTI35CMPXVideoPlaybackMediaDetailsViewer @ 37 NONAME
+	_ZTV35CMPXVideoPlaybackMediaDetailsViewer @ 38 NONAME
+	_ZN32CMPXVideoPlaybackViewFileDetails18GenerateFileTitleLEv @ 39 NONAME
+

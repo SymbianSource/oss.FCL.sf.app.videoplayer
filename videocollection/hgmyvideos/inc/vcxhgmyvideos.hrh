@@ -1,0 +1,66 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of the License "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  TVcxHgMyVideosOptionsCmds structure definition*
+*/
+
+
+
+
+#ifndef VCXHGMYVIDEOS_HRH
+#define VCXHGMYVIDEOS_HRH
+
+enum TVcxHgMyVideosOptionsCmds // Options menu in My Videos 
+    {
+    EVcxHgMyVideosCmdPlay = 700,             // Play video
+    EVcxHgMyVideosCmdOpen,                   // Open video view
+    EVcxHgMyVideosCmdDelete,                 // Delete video
+    EVcxHgMyVideosCmdVideoDetails,           // Video details
+    EVcxHgMyVideosCmdShowViaHomenet,         // Show video via Homenet (UPnP renderer)
+    EVcxHgMyVideosCmdStopShowViaHomenet,     // Stop show via Homenet
+    EVcxHgMyVideosCmdMemoryStatus,           // Memory status (Free memory/Used memory)
+    EVcxHgMyVideosCmdSortSubMenu,            // Sort videos sub-menu
+    EVcxHgMyVideosCmdSortByDate,             // Sort submenu: Sort by date
+    EVcxHgMyVideosCmdSortByName,             // Sort submenu: Sort by name
+    EVcxHgMyVideosCmdSortBySize,             // Sort submenu: Sort by size
+    EVcxHgMyVideosCmdCopy,                   // Copy video(s)
+    EVcxHgMyVideosCmdMove,                   // Move video(s)
+    EVcxHgMyVideosCmdMarkUnmarkSubMenu,      // Mark or unmark videos sub-menu
+    EVcxHgMyVideosCmdMark,                   // Mark/Unmark submenu: Mark video
+    EVcxHgMyVideosCmdUnmark,                 // Mark/Unmark submenu: Unmark video 
+    EVcxHgMyVideosCmdMarkAll,                // Mark/Unmark submenu: Mark all videos
+    EVcxHgMyVideosCmdUnmarkAll,              // Mark/Unmark submenu: Unmark all videos
+    EVcxHgMyVideosCmdMarkContext,            // Mark video (context menu)
+#ifdef RD_VIDEO_AS_RINGING_TONE    
+    EVcxHgMyVideosCmdAiwAssign,              // Submenu: Placeholder for "Use video as"
+#endif
+    EVcxHgMyVideosCmdHelp,                   // Help
+    EVcxHgMyVideosCmdExit,                   // Exit Video Storage
+    EVcxHgMyVideosCmdToggleMultipleMarking,  // Toggle marking mode state
+    EVcxHgMyVideosCmdSend,                   // Send video
+    EVcxHgMyVideosCmdNothing,                // Non-functional command
+    EVcxHgMyVideosCmdStartMarking,           // Sets marking mode on
+    EVcxHgMyVideosCmdStopMarking,             // Sets marking mode off
+    EVcxHgMyVideosCmdOpenSettings            // Opens Settings application
+#ifdef RD_VIDEO_AS_RINGING_TONE
+    ,EVcxHgMyVideosCmdAiwBase = 800           // Base number for AIW commands
+#endif
+    };
+
+enum TVcxHgMyVideosMarkButtonStates
+    {
+    EVcxHgMyVideosMarkButtonNormalMode = 0,   // First mark button state (normal)
+    EVcxHgMyVideosMarkButtonMarkingMode       // Second mark button state (latched)
+    };
+
+#endif // VCXHGMYVIDEOS_HRH
