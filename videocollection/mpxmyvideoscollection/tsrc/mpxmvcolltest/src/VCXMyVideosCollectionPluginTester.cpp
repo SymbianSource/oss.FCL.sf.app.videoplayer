@@ -2772,9 +2772,8 @@ void CVCXMyVideosCollectionPluginTester::StartDownloadL( const TDesC& aTitle, TI
         startDownloadReq = aMedia;
         }
 
-    //startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
-    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, 0 );
-
+    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
+	
     // read only iap needed?
     TUint flags = EVcxMyVideosServiceHasReadOnlyIap | EVcxMyVideosSilent;
 
@@ -2831,8 +2830,7 @@ void CVCXMyVideosCollectionPluginTester::ResumeDownloadL( const TDesC& aTitle, T
         startDownloadReq = aMedia;
         }
 
-    //startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
-    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, 0 );
+    startDownloadReq->SetTObjectValueL( KVcxMediaMyVideosIapId, aIapId );
 
     // read only iap needed?
     TUint flags = EVcxMyVideosServiceHasReadOnlyIap | EVcxMyVideosSilent;

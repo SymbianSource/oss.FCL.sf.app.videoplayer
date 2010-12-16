@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#14 %
+// Version : %version: ou1cpsw#14.1.1 %
 
 #ifndef MPXVIDEOPLAYER_APPUIENGINETESTER_H_
 #define MPXVIDEOPLAYER_APPUIENGINETESTER_H_
@@ -65,6 +65,7 @@ enum TMpxUtilityEvents
     EPlaybackUtilityPlayCmd,
     EPlaybackUtilityPdlInstance,
     EPlaybackUtilityClose,
+    EPlaybackUtilityDisableEffects,
     ECollectionUtilityMedia,
     ECollectionUtilityOpen,
     EAppUiCmdExit,
@@ -96,6 +97,7 @@ NONSHARABLE_CLASS( MAppUiEngineStifTestObserver )
 class CMpxVideoPlayerAppUi;
 class CMpxVideoPlayerAppUiEngine;
 class CMPXCollectionUtility;
+class CActiveSchedulerWait;
 
 class CMpxVideoPlayer_AppUiEngineTester : public CBase,
                                           public MAppUiEngineStifTestObserver,
@@ -123,6 +125,9 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         TInt HandleViewActivation( CStifItemParser& aItem );
         TInt ProcessCommandParametersL( CStifItemParser& aItem );
         TInt GetViewDepthL( CStifItemParser& aItem );
+        TInt ClearPlaybackUtilityL( CStifItemParser& aItem );
+        TInt ActivateLateConstructTimerL( CStifItemParser& aItem );
+        TInt HandleEmbeddedOpenL( CStifItemParser& aItem );
         void ClearPdlInformation();
 
         //
@@ -175,6 +180,9 @@ class CMpxVideoPlayer_AppUiEngineTester : public CBase,
         CCallbackEventArray*        iExpectedEventArray;
         TInt                        iError;
         CSimpleTimeout*             iTimeoutController;
+        
+        CActiveSchedulerWait*       iActiveWait;
+
 };
 
 #endif /* MPXVIDEOPLAYER_APPUIENGINETESTER_H_ */

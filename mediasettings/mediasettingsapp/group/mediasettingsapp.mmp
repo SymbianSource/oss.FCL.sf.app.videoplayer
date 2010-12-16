@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 6 %
+// Version : %version: 6.1.1 %
 
 
 
@@ -93,5 +93,6 @@ LIBRARY         flogger.lib
 LIBRARY         vcxnssettingsengine.lib
 LIBRARY         commondialogs.lib
 LIBRARY	        cmmanager.lib
+LIBRARY         commsdat.lib
 
 // End of File

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: da1mmcf#72 %
+// Version : %version: 72.1.1 %
 
 
 #include <eikon.hrh>
@@ -384,13 +384,28 @@ void CMpxVideoPlayerAppUiEngine::OpenFileL( RFile& aFile, const CAiwGenericParam
         }
         else if ( mediaType == CMediaRecognizer::ELocalSdpFile )
         {
-            PlaybackUtilityL().InitStreamingL( aFile, iAccessPointId );
+            TRAP( err, PlaybackUtilityL().InitStreamingL( aFile, iAccessPointId ) );
+            
+            if( err )
+                {
+                HandleUtilityErrorL( err );
+                PlaybackUtilityL().InitStreamingL( aFile, iAccessPointId );
+                }
+            
             ActivatePlaybackViewL();
         }
         else
         {
             iViewUtility->PreLoadViewL( KVideoPlaybackViewUid );
-            PlaybackUtilityL().InitL( aFile );
+            
+            TRAP( err, PlaybackUtilityL().InitL( aFile ) );
+            
+            if( err )
+                {
+                HandleUtilityErrorL( err );
+                PlaybackUtilityL().InitL( aFile );
+                }
+            
             ActivatePlaybackViewL();
         }
     }
@@ -489,9 +504,16 @@ void CMpxVideoPlayerAppUiEngine::ActivatePlaybackViewL()
         UpdatePbPluginMediaL();
         iUpdateSeekInfo = EFalse;
     }
-
-    MMPXPlayer* player = PlaybackUtilityL().PlayerManager().CurrentPlayer();
-
+    
+    MMPXPlayer* player = NULL;
+    TRAPD( err, player = PlaybackUtilityL().PlayerManager().CurrentPlayer() );
+    
+    if( err )
+        {
+        HandleUtilityErrorL( err );
+        player = PlaybackUtilityL().PlayerManager().CurrentPlayer();
+        }
+    
     TUid pluginUid( KNullUid );
     RArray<TUid> array;
 
@@ -901,9 +923,9 @@ void CMpxVideoPlayerAppUiEngine::HandleEmbeddedOpenL( TInt aErr, TMPXGeneralCate
     MPX_DEBUG(_L("CMPXVideoAppUi::HandleEmbeddedOpenL()"));
 
     if ( aErr == KErrNone )
-    {
-        PlaybackUtilityL().CommandL( EPbCmdDisableEffect );
-    }
+        {   
+        SendMpxPlaybackCmdL( EPbCmdDisableEffect );
+        }
 }
 
 
@@ -1020,8 +1042,8 @@ void CMpxVideoPlayerAppUiEngine::UpdatePbPluginMediaL()
                                                      EPbCmdUpdateSeekable );
 
     cmd->SetTObjectValueL<TBool>( KMPXMediaGeneralExtVideoSeekable, iSeekable );
-
-    PlaybackUtilityL().CommandL( *cmd );
+    
+    SendCustomMpxPlaybackUtilityCmdL( *cmd ) ;
 
     CleanupStack::PopAndDestroy( cmd );
 }
@@ -1059,11 +1081,19 @@ void CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL( const TDesC& aUri )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeStreamingLinkL()"),
                    _L("aUri = %S"), &aUri );
-
-    PlaybackUtilityL().InitStreamingL( aUri,
-                                      (TDesC8*)(&KDATATYPEVIDEOHELIX),
-                                      iAccessPointId );
-
+    
+    TRAPD( err, PlaybackUtilityL().InitStreamingL( aUri,
+                                                  (TDesC8*)(&KDATATYPEVIDEOHELIX),
+                                                   iAccessPointId ) );
+    
+    if( err )
+        {
+        HandleUtilityErrorL( err );
+        PlaybackUtilityL().InitStreamingL( aUri,
+                                           (TDesC8*)(&KDATATYPEVIDEOHELIX),
+                                           iAccessPointId ) ;
+        }
+    
     ActivatePlaybackViewL();
 }
 
@@ -1075,8 +1105,14 @@ void CMpxVideoPlayerAppUiEngine::InitializeFileL( const TDesC& aFileName )
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializeFileL()"),
                    _L("aFileName = %S"), &aFileName );
-
-    PlaybackUtilityL().InitL( aFileName );
+    
+    TRAPD( err, PlaybackUtilityL().InitL( aFileName ) );
+    
+    if( err )
+        {
+        HandleUtilityErrorL( err );
+        PlaybackUtilityL().InitL( aFileName );
+        }
 
     ActivatePlaybackViewL();
 }
@@ -1090,8 +1126,14 @@ void CMpxVideoPlayerAppUiEngine::InitializePlaylistL( const CMPXCollectionPlayli
 {
     MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::InitializePlaylistL()"));
 
-    PlaybackUtilityL().InitL( aPlaylist, aPlay );
-
+    TRAPD( err, PlaybackUtilityL().InitL( aPlaylist, aPlay ) );
+    
+    if( err )
+        {
+        HandleUtilityErrorL( err );
+        PlaybackUtilityL().InitL( aPlaylist, aPlay  );
+        }
+    
     ActivatePlaybackViewL();
 }
 
@@ -1113,11 +1155,11 @@ void CMpxVideoPlayerAppUiEngine::ClosePlaybackPluginL()
     else
     {
         if ( iPlaybackUtility )
-        {
-            iPlaybackUtility->CommandL( EPbCmdClose );
+            {            
+            SendMpxPlaybackCmdL( EPbCmdClose );
+            }
         }
     }
-}
 
 // -------------------------------------------------------------------------------------------------
 //   CMpxVideoPlayerAppUiEngine::SendMessageToPdlViewL()
@@ -1182,4 +1224,74 @@ void CMpxVideoPlayerAppUiEngine::DoLateConstructL()
     PlaybackUtilityL();
 }
 
+// ---------------------------------------------------------------------------
+//   Clears playbackutility
+// ---------------------------------------------------------------------------
+// 
+void CMpxVideoPlayerAppUiEngine::ClearPlaybackUtility()
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::ClearPlaybackUtility()"));
+    if( iPlaybackUtility )
+        {
+        MMPXPlayerManager& manager = iPlaybackUtility->PlayerManager();
+        TRAP_IGNORE( manager.ClearSelectPlayersL() );
+        iPlaybackUtility->Close();        
+        iPlaybackUtility = NULL;        
+        }    
+    }
+
+// ---------------------------------------------------------------------------
+//   Sends command to playback utility
+// ---------------------------------------------------------------------------
+// 
+void CMpxVideoPlayerAppUiEngine::SendCustomMpxPlaybackUtilityCmdL( CMPXCommand& aCmd )
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SendCustomMpxCmdL( CMPXCommand )"));
+    
+    TRAPD( err, PlaybackUtilityL().CommandL( aCmd ) ); 
+    
+    if( err )
+        {
+        // Handle error and call again
+        HandleUtilityErrorL( err );    
+        PlaybackUtilityL().CommandL( aCmd );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+//   Sends command to playback utility
+// ---------------------------------------------------------------------------
+// 
+void CMpxVideoPlayerAppUiEngine::SendMpxPlaybackCmdL( TMPXPlaybackCommand aCmd )
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SendPlaybackCmdL( TMPXPlaybackCommand )"));
+            
+    TRAPD( err, PlaybackUtilityL().CommandL( aCmd ) );
+    
+    if( err )
+        {
+        // Playback message sending failed. Exit application.
+        ActivateExitActiveObject();
+        }
+    }
+
+//---------------------------------------------------------------------------
+// Handles leaves coming from playback utility 
+//---------------------------------------------------------------------------
+// 
+void CMpxVideoPlayerAppUiEngine::HandleUtilityErrorL( TInt aError )
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::HandleSendingError( )"));
+    
+    if( aError == KErrNotReady ||
+        aError == KErrDied ||
+        aError == KErrServerTerminated )
+        {
+        ClearPlaybackUtility();            
+        }
+    else
+        {
+        User::LeaveIfError( aError );
+        }    
+    }
 // EOF

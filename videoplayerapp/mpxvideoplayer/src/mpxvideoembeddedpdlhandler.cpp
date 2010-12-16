@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version:  15 %
+// Version : %version:  ou1cpsw#15.1.1 %
 
 
 #include <mpxcommand.h>
@@ -99,8 +99,8 @@ void CMpxVideoEmbeddedPdlHandler::ConnectToEmbeddedDownloadL( TInt aDlId, TDesC&
         //  If it is, issue a play command to resume playback
 
         if ( ( aDlId == iDownloadId ) && ( ! aFileName.Compare( *iDownloadFileName ) ) )
-        {
-            iAppUiEngine->PlaybackUtilityL().CommandL( EPbCmdPlay );
+        {        
+            iAppUiEngine->SendMpxPlaybackCmdL( EPbCmdPlay );            
             iAppUiEngine->SendMessageToPdlViewL( KMpxVideoPlaybackPdlReloadComplete );
         }
         else
@@ -182,8 +182,8 @@ void CMpxVideoEmbeddedPdlHandler::SendPdlCustomCommandL( TMPXPlaybackPdCommand a
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackPDTransactionID, aData );
     cmd->SetTextValueL( KMPXMediaVideoPlaybackFileName, *iDownloadFileName );
     cmd->SetTObjectValueL<TInt>( KMPXMediaVideoMovePdlFile, iEmbeddedPdlCase );
-
-    iAppUiEngine->PlaybackUtilityL().CommandL( *cmd );
+    
+    TRAPD( err, iAppUiEngine->SendCustomMpxPlaybackUtilityCmdL( *cmd ) );
 
     CleanupStack::PopAndDestroy( cmd );
 }

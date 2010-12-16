@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 4 %
+// Version : %version: 5 %
 
 
 
@@ -97,8 +97,11 @@ class CMPSettingsAdvancedBwSettingItem : public CAknEnumeratedTextPopupSettingIt
 
         /**
         * Displays bandwidth number query.
+        * 
+        * @param aMin   Minimum allowed value (bps)
+        * @param aMax   Maximum allowed value (bps)
         */
-        void ShowAdvancedBwQueryL();
+        void ShowAdvancedBwQueryL( TInt aMin, TInt aMax );
 
         /**
         * Creates setting value text from aValue.

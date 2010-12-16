@@ -25,60 +25,8 @@
 #include "MPSettEngPluginImplementationUIDs.hrh"
 #include "MPSettingsModelForROP.h"
 #include "vcxtestlog.h"
-#include "IptvTestUtilALR.h"
 #include "MPSettingsROPSettings.hrh"
-#include "VCXTestCommon.h"
 
-// EXTERNAL DATA STRUCTURES
-//extern  ?external_data;
-
-// EXTERNAL FUNCTION PROTOTYPES  
-//extern ?external_function( ?arg_type,?arg_type );
-
-// CONSTANTS
-//const ?type ?constant_var = ?constant;
-
-// MACROS
-//#define ?macro ?macro_def
-
-// LOCAL CONSTANTS AND MACROS
-//const ?type ?constant_var = ?constant;
-//#define ?macro_name ?macro_def
-
-// MODULE DATA STRUCTURES
-//enum ?declaration
-//typedef ?declaration
-
-// LOCAL FUNCTION PROTOTYPES
-//?type ?function_name( ?arg_type, ?arg_type );
-
-// FORWARD DECLARATIONS
-//class ?FORWARD_CLASSNAME;
-
-// ============================= LOCAL FUNCTIONS ===============================
-
-// -----------------------------------------------------------------------------
-// ?function_name ?description.
-// ?description
-// Returns: ?value_1: ?description
-//          ?value_n: ?description_line1
-//                    ?description_line2
-// -----------------------------------------------------------------------------
-//
-/*
-?type ?function_name(
-    ?arg_type arg,  // ?description
-    ?arg_type arg)  // ?description
-    {
-
-    ?code  // ?comment
-
-    // ?comment
-    ?code
-    }
-*/
-
-// ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
 // CMPXMediaSettingsEngineTest::Delete
@@ -101,12 +49,6 @@ void CMPXMediaSettingsEngineTest::Delete()
         {
         delete iCommDb;
         iCommDb = NULL;
-        }
-    
-    if( iVCXTestCommon )
-        {
-        delete iVCXTestCommon;
-        iVCXTestCommon = NULL;
         }
     }
 
@@ -181,7 +123,7 @@ TInt CMPXMediaSettingsEngineTest::RunMethodL(
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::LogMethod
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -196,7 +138,20 @@ void CMPXMediaSettingsEngineTest::LogMethod( TPtrC aMethod )
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::PrintError
+// Prints the errorcode to UI
+// -----------------------------------------------------------------------------
+//
+void CMPXMediaSettingsEngineTest::PrintError( TInt aError )
+    {
+    // Print to UI
+    TBuf< 24 > buffer;
+    buffer.Format( KLogErrorCode, aError );
+    TestModuleIf().Printf( 0, KLogError, buffer );
+    }
+
+// -----------------------------------------------------------------------------
+// CMPXMediaSettingsEngineTest::CreateL
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -206,20 +161,19 @@ TInt CMPXMediaSettingsEngineTest::CreateL( CStifItemParser& aItem )
     VCXLOGLO1("--> CMPXMediaSettingsEngineTest::CreateL");
     TInt error( 0 );
     
-    iVCXTestCommon = CVCXTestCommon::NewL();
-    
     const TUid KSettingsModelForROPUid = {KMPSettEngImplUidROP};
     
     iModel = CMPSettingsModel::NewL(KSettingsModelForROPUid);
     
     iSettingsModel = static_cast<CMPSettingsModelForROP*>(iModel);
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::CreateL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::ListImplementationsL
+// CMPXMediaSettingsEngineTest::ListImplementationsL
 // List implementations of mpsettingsmodel
 // -----------------------------------------------------------------------------
 //
@@ -238,12 +192,13 @@ TInt CMPXMediaSettingsEngineTest::ListImplementationsL( CStifItemParser& aItem )
         VCXLOGLO3("CMPXMediaSettingsEngineTest::ListImplementationsL, [%d] uid = %d", i, array[i]->ImplementationUid() );
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::ListImplementationsL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::LoadSettingsLL
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -260,15 +215,17 @@ TInt CMPXMediaSettingsEngineTest::LoadSettingsLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::LoadSettingsLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::LoadSettingsLL");
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::LogMethod
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -278,11 +235,12 @@ TInt CMPXMediaSettingsEngineTest::StoreSettingsLL( CStifItemParser& /*aItem*/ )
     VCXLOGLO1("--> CMPXMediaSettingsEngineTest::StoreSettingsLL");
     TRAPD( error, iSettingsModel->StoreSettingsL() );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::StoreSettingsLL");
+    PrintError( error );
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::LogMethod
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -298,12 +256,13 @@ TInt CMPXMediaSettingsEngineTest::SetVideoContrastL( CStifItemParser& aItem )
     error = iSettingsModel->SetVideoContrast( value );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetVideoContrastL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::SetVideoContrastL");
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::LogMethod
+// CMPXMediaSettingsEngineTest::LogMethod
 // Generate log from current method
 // -----------------------------------------------------------------------------
 //
@@ -331,12 +290,13 @@ TInt CMPXMediaSettingsEngineTest::GetVideoContrastL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::GetVideoContrastL");
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetProxyModeL
+// CMPXMediaSettingsEngineTest::SetProxyModeL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetProxyModeL( CStifItemParser& aItem )
@@ -351,12 +311,13 @@ TInt CMPXMediaSettingsEngineTest::SetProxyModeL( CStifItemParser& aItem )
     error = iSettingsModel->SetProxyMode( value );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetProxyModeL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::SetProxyModeL");
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetProxyModeL
+// CMPXMediaSettingsEngineTest::GetProxyModeL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetProxyModeL ( CStifItemParser& aItem )
@@ -383,12 +344,13 @@ TInt CMPXMediaSettingsEngineTest::GetProxyModeL ( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::GetProxyModeL");
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetProxyHostNameLL
+// CMPXMediaSettingsEngineTest::SetProxyHostNameLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetProxyHostNameLL( CStifItemParser& aItem )
@@ -402,12 +364,13 @@ TInt CMPXMediaSettingsEngineTest::SetProxyHostNameLL( CStifItemParser& aItem )
     TRAPD( error, iSettingsModel->SetProxyHostNameL( value ) );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetProxyHostNameLL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetProxyHostNameLL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetProxyHostNameL
+// CMPXMediaSettingsEngineTest::GetProxyHostNameL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetProxyHostNameL( CStifItemParser& aItem )
@@ -433,12 +396,13 @@ TInt CMPXMediaSettingsEngineTest::GetProxyHostNameL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetProxyHostNameL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetProxyPortL
+// CMPXMediaSettingsEngineTest::SetProxyPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetProxyPortL( CStifItemParser& aItem )
@@ -453,12 +417,13 @@ TInt CMPXMediaSettingsEngineTest::SetProxyPortL( CStifItemParser& aItem )
     error = iSettingsModel->SetProxyPort( value );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetProxyPortL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetProxyPortL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetProxyPortL
+// CMPXMediaSettingsEngineTest::GetProxyPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetProxyPortL( CStifItemParser& aItem )
@@ -476,6 +441,7 @@ TInt CMPXMediaSettingsEngineTest::GetProxyPortL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetProxyPortL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -485,12 +451,13 @@ TInt CMPXMediaSettingsEngineTest::GetProxyPortL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::GetProxyPortL");    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetDefaultApL
+// CMPXMediaSettingsEngineTest::SetDefaultApL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetDefaultApL( CStifItemParser& aItem )
@@ -503,7 +470,7 @@ TInt CMPXMediaSettingsEngineTest::SetDefaultApL( CStifItemParser& aItem )
     User::LeaveIfError( aItem.GetNextString( iapName ) );
 
     TUint32 iapId( 0 );
-    TBool iapFound = iVCXTestCommon->GetIapIdL( iapName, iapId );
+    TBool iapFound = GetIapIdL( iapName, iapId );
     
     if( !iapFound )
         {
@@ -514,12 +481,13 @@ TInt CMPXMediaSettingsEngineTest::SetDefaultApL( CStifItemParser& aItem )
     error = iSettingsModel->SetDefaultAp( iapId );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetDefaultApL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetDefaultApL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetDefaultApL
+// CMPXMediaSettingsEngineTest::GetDefaultApL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetDefaultApL( CStifItemParser& aItem )
@@ -532,7 +500,7 @@ TInt CMPXMediaSettingsEngineTest::GetDefaultApL( CStifItemParser& aItem )
     User::LeaveIfError( aItem.GetNextString( expectedIap ) );
     
     TUint32 iapId( 0 );
-    TBool iapFound = iVCXTestCommon->GetIapIdL( expectedIap, iapId );
+    TBool iapFound = GetIapIdL( expectedIap, iapId );
     
     if( !iapFound )
         {
@@ -546,6 +514,7 @@ TInt CMPXMediaSettingsEngineTest::GetDefaultApL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetDefaultApL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -555,12 +524,13 @@ TInt CMPXMediaSettingsEngineTest::GetDefaultApL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO1("<-- CMPXMediaSettingsEngineTest::GetDefaultApL");    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetBandwidthControlModeL
+// CMPXMediaSettingsEngineTest::SetBandwidthControlModeL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetBandwidthControlModeL( CStifItemParser& aItem )
@@ -575,12 +545,13 @@ TInt CMPXMediaSettingsEngineTest::SetBandwidthControlModeL( CStifItemParser& aIt
     error = iSettingsModel->SetBandwidthControlMode( value );
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetBandwidthControlModeL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetBandwidthControlModeL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetBandwidthControlModeL
+// CMPXMediaSettingsEngineTest::GetBandwidthControlModeL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetBandwidthControlModeL( CStifItemParser& aItem )
@@ -598,6 +569,7 @@ TInt CMPXMediaSettingsEngineTest::GetBandwidthControlModeL( CStifItemParser& aIt
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetBandwidthControlModeL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -607,11 +579,12 @@ TInt CMPXMediaSettingsEngineTest::GetBandwidthControlModeL( CStifItemParser& aIt
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetMaxBandwidthL
+// CMPXMediaSettingsEngineTest::SetMaxBandwidthL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetMaxBandwidthL( CStifItemParser& aItem )
@@ -633,12 +606,13 @@ TInt CMPXMediaSettingsEngineTest::SetMaxBandwidthL( CStifItemParser& aItem )
     
     VCXLOGLO2("CMPXMediaSettingsEngineTest::SetMaxBandwidthL -- error after call: %d", error );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetMaxBandwidthL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetMaxBandwidthL
+// CMPXMediaSettingsEngineTest::GetMaxBandwidthL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetMaxBandwidthL( CStifItemParser& aItem )
@@ -663,6 +637,7 @@ TInt CMPXMediaSettingsEngineTest::GetMaxBandwidthL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetMaxBandwidthL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -672,12 +647,13 @@ TInt CMPXMediaSettingsEngineTest::GetMaxBandwidthL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetMaxBandwidthL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetConnectionTimeoutL
+// CMPXMediaSettingsEngineTest::SetConnectionTimeoutL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetConnectionTimeoutL( CStifItemParser& aItem )
@@ -694,15 +670,17 @@ TInt CMPXMediaSettingsEngineTest::SetConnectionTimeoutL( CStifItemParser& aItem 
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::SetConnectionTimeoutL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetConnectionTimeoutL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetConnectionTimeoutL
+// CMPXMediaSettingsEngineTest::GetConnectionTimeoutL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetConnectionTimeoutL( CStifItemParser& aItem )
@@ -721,6 +699,7 @@ TInt CMPXMediaSettingsEngineTest::GetConnectionTimeoutL( CStifItemParser& aItem 
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetConnectionTimeoutL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -730,12 +709,13 @@ TInt CMPXMediaSettingsEngineTest::GetConnectionTimeoutL( CStifItemParser& aItem 
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetConnectionTimeoutL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetServerTimeoutL
+// CMPXMediaSettingsEngineTest::SetServerTimeoutL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetServerTimeoutL( CStifItemParser& aItem )
@@ -752,15 +732,17 @@ TInt CMPXMediaSettingsEngineTest::SetServerTimeoutL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::SetServerTimeoutL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetServerTimeoutL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetServerTimeoutL
+// CMPXMediaSettingsEngineTest::GetServerTimeoutL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetServerTimeoutL( CStifItemParser& aItem )
@@ -779,6 +761,7 @@ TInt CMPXMediaSettingsEngineTest::GetServerTimeoutL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetServerTimeoutL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -788,12 +771,13 @@ TInt CMPXMediaSettingsEngineTest::GetServerTimeoutL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetServerTimeoutL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetMinUDPPortL
+// CMPXMediaSettingsEngineTest::SetMinUDPPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetMinUDPPortL( CStifItemParser& aItem )
@@ -807,12 +791,13 @@ TInt CMPXMediaSettingsEngineTest::SetMinUDPPortL( CStifItemParser& aItem )
 
     error = iSettingsModel->SetMinUDPPort( value );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetMinUDPPortL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetMinUDPPortL
+// CMPXMediaSettingsEngineTest::GetMinUDPPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetMinUDPPortL( CStifItemParser& aItem )
@@ -831,6 +816,7 @@ TInt CMPXMediaSettingsEngineTest::GetMinUDPPortL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetMinUDPPortL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -840,12 +826,13 @@ TInt CMPXMediaSettingsEngineTest::GetMinUDPPortL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetMinUDPPortL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetMaxUDPPortL
+// CMPXMediaSettingsEngineTest::SetMaxUDPPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetMaxUDPPortL( CStifItemParser& aItem )
@@ -859,12 +846,13 @@ TInt CMPXMediaSettingsEngineTest::SetMaxUDPPortL( CStifItemParser& aItem )
 
     error = iSettingsModel->SetMaxUDPPort( value );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetMaxUDPPort return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetMaxUDPPortL
+// CMPXMediaSettingsEngineTest::GetMaxUDPPortL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetMaxUDPPortL( CStifItemParser& aItem )
@@ -883,6 +871,7 @@ TInt CMPXMediaSettingsEngineTest::GetMaxUDPPortL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetMaxUDPPortL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -892,12 +881,13 @@ TInt CMPXMediaSettingsEngineTest::GetMaxUDPPortL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetMaxUDPPortL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetControllerVersionInfoL
+// CMPXMediaSettingsEngineTest::GetControllerVersionInfoL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetControllerVersionInfoL( CStifItemParser& aItem )
@@ -916,12 +906,13 @@ TInt CMPXMediaSettingsEngineTest::GetControllerVersionInfoL( CStifItemParser& aI
     
     VCXLOGLO2("CMPXMediaSettingsEngineTest::GetControllerVersionInfoL : %S", &verInfo );
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetControllerVersionInfoL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetControllerBuildDateL
+// CMPXMediaSettingsEngineTest::GetControllerBuildDateL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetControllerBuildDateL( CStifItemParser& aItem )
@@ -940,12 +931,13 @@ TInt CMPXMediaSettingsEngineTest::GetControllerBuildDateL( CStifItemParser& aIte
     
     VCXLOGLO2("CMPXMediaSettingsEngineTest::GetControllerBuildDateL : %S", &bldDate );
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetControllerBuildDateL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetControllerAdditionalInfoL
+// CMPXMediaSettingsEngineTest::GetControllerAdditionalInfoL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetControllerAdditionalInfoL( CStifItemParser& aItem )
@@ -963,13 +955,14 @@ TInt CMPXMediaSettingsEngineTest::GetControllerAdditionalInfoL( CStifItemParser&
         }
     
     VCXLOGLO2("CMPXMediaSettingsEngineTest::GetControllerAdditionalInfoL : %S", &addInfo );
-     
+    
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetControllerAdditionalInfoL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetDemandBwFactorL
+// CMPXMediaSettingsEngineTest::SetDemandBwFactorL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetDemandBwFactorL( CStifItemParser& aItem )
@@ -983,12 +976,13 @@ TInt CMPXMediaSettingsEngineTest::SetDemandBwFactorL( CStifItemParser& aItem )
 
     error = iSettingsModel->SetDemandBwFactor( value );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetDemandBwFactorL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetDemandBwFactorL
+// CMPXMediaSettingsEngineTest::GetDemandBwFactorL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetDemandBwFactorL( CStifItemParser& aItem )
@@ -1007,6 +1001,7 @@ TInt CMPXMediaSettingsEngineTest::GetDemandBwFactorL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetDemandBwFactorL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1016,12 +1011,13 @@ TInt CMPXMediaSettingsEngineTest::GetDemandBwFactorL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetDemandBwFactorL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetSustainBandwidthL
+// CMPXMediaSettingsEngineTest::SetSustainBandwidthL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetSustainBandwidthL( CStifItemParser& aItem )
@@ -1041,12 +1037,13 @@ TInt CMPXMediaSettingsEngineTest::SetSustainBandwidthL( CStifItemParser& aItem )
    
     error = iSettingsModel->SetSustainBandwidth( value, dataBearer );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetSustainBandwidthL return %d", error);       
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetSustainBandwidthL
+// CMPXMediaSettingsEngineTest::GetSustainBandwidthL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetSustainBandwidthL( CStifItemParser& aItem )
@@ -1071,6 +1068,7 @@ TInt CMPXMediaSettingsEngineTest::GetSustainBandwidthL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetSustainBandwidthL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1080,12 +1078,13 @@ TInt CMPXMediaSettingsEngineTest::GetSustainBandwidthL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetSustainBandwidthL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetSustainBwPresetsLL
+// CMPXMediaSettingsEngineTest::GetSustainBwPresetsLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetSustainBwPresetsLL( CStifItemParser& aItem )
@@ -1106,6 +1105,7 @@ TInt CMPXMediaSettingsEngineTest::GetSustainBwPresetsLL( CStifItemParser& aItem 
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetSustainBwPresetsLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1116,12 +1116,13 @@ TInt CMPXMediaSettingsEngineTest::GetSustainBwPresetsLL( CStifItemParser& aItem 
         VCXLOGLO3("[%d] = %d", i, values[i]);
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetSustainBandwidthL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::GetMaxBwPresetsLL
+// CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL( CStifItemParser& aItem )
@@ -1142,6 +1143,7 @@ TInt CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1154,11 +1156,12 @@ TInt CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL( CStifItemParser& aItem )
 
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::GetMaxBwPresetsLL return %d", error);
     
+    PrintError( error );
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetAutoDisconTimeLL
+// CMPXMediaSettingsEngineTest::SetAutoDisconTimeLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetAutoDisconTimeLL( CStifItemParser& aItem )
@@ -1174,15 +1177,17 @@ TInt CMPXMediaSettingsEngineTest::SetAutoDisconTimeLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::SetAutoDisconTimeLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetAutoDisconTimeLL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::AutoDisconTimeLL
+// CMPXMediaSettingsEngineTest::AutoDisconTimeLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::AutoDisconTimeLL( CStifItemParser& aItem )
@@ -1192,7 +1197,7 @@ TInt CMPXMediaSettingsEngineTest::AutoDisconTimeLL( CStifItemParser& aItem )
     TInt error( 0 );
     
     TInt expectedValue( 0 );
-    User::LeaveIfError( aItem.GetNextInt( expectedValue ) );
+    aItem.GetNextInt( expectedValue );
     
     TInt value( 0 );
     value = iSettingsModel->AutoDisconTimeL();
@@ -1200,6 +1205,7 @@ TInt CMPXMediaSettingsEngineTest::AutoDisconTimeLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::AutoDisconTimeLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1209,12 +1215,13 @@ TInt CMPXMediaSettingsEngineTest::AutoDisconTimeLL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::AutoDisconTimeLL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetVideoRepeatLL
+// CMPXMediaSettingsEngineTest::SetVideoRepeatLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetVideoRepeatLL( CStifItemParser& aItem )
@@ -1228,12 +1235,13 @@ TInt CMPXMediaSettingsEngineTest::SetVideoRepeatLL( CStifItemParser& aItem )
     TBool repeat( value );
     TRAPD( error, iSettingsModel->SetVideoRepeatL( repeat ) );
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetVideoRepeatLL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::IsVideoRepeatOnLL
+// CMPXMediaSettingsEngineTest::IsVideoRepeatOnLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::IsVideoRepeatOnLL( CStifItemParser& aItem )
@@ -1252,6 +1260,7 @@ TInt CMPXMediaSettingsEngineTest::IsVideoRepeatOnLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::IsVideoRepeatOnL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
    
@@ -1261,12 +1270,13 @@ TInt CMPXMediaSettingsEngineTest::IsVideoRepeatOnLL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::IsVideoRepeatOnLL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetDefaultViewLL
+// CMPXMediaSettingsEngineTest::SetDefaultViewLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetDefaultViewLL( CStifItemParser& aItem )
@@ -1280,12 +1290,13 @@ TInt CMPXMediaSettingsEngineTest::SetDefaultViewLL( CStifItemParser& aItem )
     TBool view( value );
     TRAPD( error, iSettingsModel->SetDefaultViewL( view ) );
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetDefaultViewLL return %d", error);    
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::IsDefaultViewOnLL
+// CMPXMediaSettingsEngineTest::IsDefaultViewOnLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::IsDefaultViewOnLL( CStifItemParser& aItem )
@@ -1304,6 +1315,7 @@ TInt CMPXMediaSettingsEngineTest::IsDefaultViewOnLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::IsDefaultViewOnLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1313,13 +1325,13 @@ TInt CMPXMediaSettingsEngineTest::IsDefaultViewOnLL( CStifItemParser& aItem )
         error = KErrCorrupt;
         }
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::IsDefaultViewOnLL return %d", error);
-
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::SetRockerKeysLL
+// CMPXMediaSettingsEngineTest::SetRockerKeysLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::SetRockerKeysLL( CStifItemParser& aItem )
@@ -1333,12 +1345,13 @@ TInt CMPXMediaSettingsEngineTest::SetRockerKeysLL( CStifItemParser& aItem )
     TBool keys( value );
     TRAPD( error, iSettingsModel->SetRockerKeysL( keys ) );
     
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetRockerKeysLL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::ShowRockerKeysLL
+// CMPXMediaSettingsEngineTest::ShowRockerKeysLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::ShowRockerKeysLL( CStifItemParser& aItem )
@@ -1348,8 +1361,13 @@ TInt CMPXMediaSettingsEngineTest::ShowRockerKeysLL( CStifItemParser& aItem )
 
     TInt temp( 0 );
     User::LeaveIfError( aItem.GetNextInt( temp ) );
-    
     TBool expectedValue( temp );
+    
+    // Set expected value to false if rocker keys are not supported
+    if( !iSettingsModel->IsRockerKeysSupportedL() )
+        {
+        expectedValue = EFalse;
+        }
     
     TBool value( 0 );
     TRAPD( error, value = iSettingsModel->ShowRockerKeysL() );
@@ -1357,6 +1375,7 @@ TInt CMPXMediaSettingsEngineTest::ShowRockerKeysLL( CStifItemParser& aItem )
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::ShowRockerKeysLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1365,12 +1384,14 @@ TInt CMPXMediaSettingsEngineTest::ShowRockerKeysLL( CStifItemParser& aItem )
         VCXLOGLO3("CMPXMediaSettingsEngineTest::ShowRockerKeysLL -- value %d, expected value %d", value, expectedValue);
         error = KErrCorrupt;
         }
+    
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::SetRockerKeysLL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CVideoScheduler_ApiTest::IsRockerKeysSupportedLL
+// CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL
 // -----------------------------------------------------------------------------
 //
 TInt CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL( CStifItemParser& aItem )
@@ -1389,6 +1410,7 @@ TInt CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL( CStifItemParser& aIte
     if( error != KErrNone )
         {
         VCXLOGLO2("CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL -- error after call: %d", error );
+        PrintError( error );
         return error;
         }
 
@@ -1398,27 +1420,227 @@ TInt CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL( CStifItemParser& aIte
         error = KErrCorrupt;
         }
 
+    PrintError( error );
     VCXLOGLO2("<-- CMPXMediaSettingsEngineTest::IsRockerKeysSupportedLL return %d", error);
     return error;
     }
 
 // -----------------------------------------------------------------------------
-// CMPXMediaSettingsEngineTest::?member_function
-// ?implementation_description
-// (other items were commented in a header).
+// CMPXMediaSettingsEngineTest::GetIapIdL
 // -----------------------------------------------------------------------------
 //
-/*
-TInt CMPXMediaSettingsEngineTest::?member_function(
-   CItemParser& aItem )
-   {
+TBool CMPXMediaSettingsEngineTest::GetIapIdL(const TDesC& aIapName, TUint32& aIapId)
+    {
+    VCXLOGLO1(">>>CMPXMediaSettingsEngineTest::GetIapIdL");
 
-   ?code
+    TBool found( EFalse );
 
-   }
-*/
+    VCXLOGLO2("CMPXMediaSettingsEngineTest:: Searching IAP: %S", &aIapName);
 
-// ========================== OTHER EXPORTED FUNCTIONS =========================
-// None
+    found = GetIapIdByNameL(aIapName, aIapId);
+
+    // Iap with exact name found
+    if( found )
+        {
+        VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdL");
+        return found;
+        }
+
+    VCXLOGLO1("<<<CMPXMediaSettingsEngineTest:: Iap with exact name was not found.");
+
+    TBuf<128> searchFor(aIapName);
+    searchFor.LowerCase();
+
+    if(searchFor == _L("invalidiap") )
+        {
+        aIapId = 6000;
+        VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdL");
+        return ETrue;
+        }
+
+    TBool isWlanIapName( EFalse );
+
+    if( aIapName == _L("wlan") )
+        {
+        found = GetIapIdByTypeL(EWlanIap, aIapId, 0);
+        isWlanIapName = ETrue;
+        }
+    else
+    if( aIapName == _L("wlan2") )
+        {
+        found = GetIapIdByTypeL(EWlanIap, aIapId, 1);
+        isWlanIapName = ETrue;
+        }
+    else
+    if( aIapName == _L("internet") )
+        {
+        found = GetIapIdByTypeL(EGprsIap, aIapId, 0);
+        }
+    else
+    if( aIapName == _L("internet2") )
+        {
+        found = GetIapIdByTypeL(EGprsIap, aIapId, 1);
+        }
+
+    if( !found && !isWlanIapName )
+        {
+        VCXLOGLO1("<<<CMPXMediaSettingsEngineTest:: Trying to find alternative IAP.");
+
+        // Try search other known GPRS IAPs
+        _LIT(KIapElisaInternet, "elisa internet");
+        _LIT(KIapElisaMMS, "elisa mms");
+        _LIT(KIapInternet, "internet");
+        _LIT(KIapProinternet, "prointernet");
+        _LIT(KGprsInternet, "gprs internet");
+
+        if( GetIapIdByNameL(KIapElisaInternet, aIapId) ||
+            GetIapIdByNameL(KIapElisaMMS, aIapId) ||
+            GetIapIdByNameL(KIapInternet, aIapId) ||
+            GetIapIdByNameL(KIapProinternet, aIapId) ||
+            GetIapIdByNameL(KGprsInternet, aIapId) )
+            {
+            found = ETrue;
+            }
+
+        if( !found )
+            {
+            VCXLOGLO1("<<<CMPXMediaSettingsEngineTest:: Any GPRS IAP is good...");
+            found = GetIapIdByTypeL(EGprsIap, aIapId, 0);
+            }
+        }
+    else
+        {
+        VCXLOGLO1("<<<CMPXMediaSettingsEngineTest:: WLAN IAP wanted. Not found.");
+        }
+
+    VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdL");
+    return found;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXTestCommon::GetIapIdByNameL
+// -----------------------------------------------------------------------------
+//
+TBool CMPXMediaSettingsEngineTest::GetIapIdByNameL(const TDesC& aIapName, TUint32& aIapId)
+    {
+    VCXLOGLO1(">>>CMPXMediaSettingsEngineTest::GetIapIdByNameL");
+    TBool found = EFalse;
+    aIapId = 0;
+
+    TBuf<128> searchFor(aIapName);
+    searchFor.LowerCase();
+    
+    // Get IAP names and ids from the database
+    CCommsDatabase* cdb( NULL );
+    TRAPD( err, cdb = CCommsDatabase::NewL( EDatabaseTypeIAP ) );
+    if( err != KErrNone )
+        {
+        VCXLOGLO2("CMPXMediaSettingsEngineTest::GetIapIdByNameL: CCommsDatabase::NewL left: %d, leaving", err);
+        User::Leave( err );
+        }
+    CleanupStack::PushL( cdb );
+
+    cdb->ShowHiddenRecords();
+
+    CCommsDbTableView* view( NULL );
+    TRAP( err, view = cdb->OpenTableLC( TPtrC(IAP) ); CleanupStack::Pop( view ); );
+    CleanupStack::PushL( view );
+    
+    if( err != KErrNone )
+        {
+        VCXLOGLO2("CMPXMediaSettingsEngineTest::GetIapIdByNameL: CCommsDatabase::OpenTableLC left: %d, leaving", err);
+        User::Leave( err );
+        }
+    
+    TBuf<40> name;
+    TUint32 id;
+    TInt res = view->GotoFirstRecord();
+    while( res == KErrNone )
+        {
+        TRAP( err, view->ReadTextL( TPtrC(COMMDB_NAME), name ) );
+        if( err != KErrNone ) continue;
+        TRAP( err, view->ReadUintL( TPtrC(COMMDB_ID), id ) );
+        if( err != KErrNone ) continue;
+
+        name.LowerCase();
+        if(searchFor == name)
+            {
+            aIapId = id;
+            VCXLOGLO3("CMPXMediaSettingsEngineTest:: Found IAP: %d, %S", aIapId, &aIapName);
+            found = ETrue;
+            break;
+            }
+        res = view->GotoNextRecord();
+        }
+
+    CleanupStack::PopAndDestroy( view );
+    CleanupStack::PopAndDestroy( cdb );
+
+    VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdByNameL");
+    return found;
+    }
+
+// -----------------------------------------------------------------------------
+// CVCXTestCommon::GetIapIdByTypeL
+// -----------------------------------------------------------------------------
+//
+TBool CMPXMediaSettingsEngineTest::GetIapIdByTypeL(TIapType aType, TUint32& aIapId, TInt aOrderNumber)
+    {
+    VCXLOGLO1(">>>CMPXMediaSettingsEngineTest::GetIapIdByTypeL");
+
+    aIapId = 0;
+    TBool found( EFalse );
+
+    #ifdef __WINSCW__
+        found = GetIapIdByNameL( _L("Ethernet with Daemon Dynamic IP"), aIapId );
+        VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdByTypeL");
+        return found;
+    #endif
+
+    // Get AP names and ids from the database
+    CCommsDatabase* TheDb = CCommsDatabase::NewL( EDatabaseTypeIAP );
+    CleanupStack::PushL( TheDb );
+
+    TheDb->ShowHiddenRecords();
+
+    CCommsDbTableView* view = TheDb->OpenTableLC( TPtrC(IAP) );
+
+    TBuf<40> name;
+    TUint32 id;
+    TBuf<255> iapType;
+    TInt matchCount(0);
+
+    TInt res = view->GotoFirstRecord();
+
+    while( res == KErrNone )
+        {
+        view->ReadTextL( TPtrC(COMMDB_NAME), name );
+        view->ReadUintL( TPtrC(COMMDB_ID), id );
+        view->ReadTextL( TPtrC(IAP_SERVICE_TYPE), iapType);
+
+        VCXLOGLO3("CMPXMediaSettingsEngineTest:: name: %S, id: %d", &name, id);
+        VCXLOGLO2("CMPXMediaSettingsEngineTest:: type: %S", &iapType);
+
+        if( ( iapType == _L("LANService") && aType == EWlanIap && name != _L("Easy WLAN") ) ||
+            ( iapType == _L("OutgoingGPRS") && aType == EGprsIap ) )
+            {
+            if( matchCount == aOrderNumber )
+                {
+                found = ETrue;
+                aIapId = id;
+                break;
+                }
+            matchCount++;
+            }
+
+        res = view->GotoNextRecord();
+        }
+
+    CleanupStack::PopAndDestroy( view ); // view
+    CleanupStack::PopAndDestroy( TheDb ); // TheDb
+
+    VCXLOGLO1("<<<CMPXMediaSettingsEngineTest::GetIapIdByTypeL");
+    return found;
+    }
 
 //  [End of File] - Do not remove

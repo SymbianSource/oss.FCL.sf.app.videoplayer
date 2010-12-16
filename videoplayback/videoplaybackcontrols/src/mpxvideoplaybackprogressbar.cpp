@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: e003sa33#24 %
+// Version : %version: ou1cpsw#25 %
 
 
 // INCLUDE FILES
@@ -50,8 +50,6 @@ const TInt KMPXProgressSliderWidth = 20;
 const TInt KMPXSliderHeightOverProgresBar = 5;
 const TInt64 KMPXMicroSeconds = 1000000;
 const TInt KMPXOneHourInSeconds = 3600;
-
-const TInt KMPXProgressBarHeight = 41;
 
 // ============================ MEMBER FUNCTIONS ===================================================
 
@@ -218,12 +216,8 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     // Calculate icon rects
     //
     TRect progressRect = Rect();
-    TInt topMarginHeight = ( progressRect.iBr.iY - KMPXProgressBarHeight ) / 2 - 10;
-    progressRect.iTl.iY += topMarginHeight;
-    progressRect.iBr.iY = progressRect.iTl.iY + KMPXProgressBarHeight;
-
     TAknLayoutRect seekBarFrameRect;
-    seekBarFrameRect.LayoutRect( progressRect, mup_progress_pane_cp04().LayoutLine() );
+    seekBarFrameRect.LayoutRect( progressRect, mup_progress_pane_cp04( 1 ).LayoutLine() );
 
     iFrameIconRect = seekBarFrameRect.Rect();
 
@@ -233,11 +227,8 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     //
     // Create labels
     //
-    if ( iPositionLabel )
-    {
-        delete iPositionLabel;
-        iPositionLabel = NULL;
-    }
+    delete iPositionLabel;
+    iPositionLabel = NULL;
 
     iPositionLabel = new (ELeave) CEikLabel;
     AknLayoutUtils::LayoutLabel( iPositionLabel,
@@ -248,11 +239,8 @@ void CMPXVideoPlaybackProgressBar::SetLayoutL()
     iPositionLabel->SetTextL( KNullDesC );
     iPositionLabel->MakeVisible( ETrue );
 
-    if ( iDurationLabel )
-    {
-        delete iDurationLabel;
-        iDurationLabel = NULL;
-    }
+    delete iDurationLabel;
+    iDurationLabel = NULL;
 
     iDurationLabel = new (ELeave) CEikLabel;
 

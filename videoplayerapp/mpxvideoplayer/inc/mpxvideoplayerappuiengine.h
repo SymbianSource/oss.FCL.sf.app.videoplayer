@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: da1mmcf#34 %
+// Version : %version: 34.1.1 %
 
 
 #ifndef CMPXVIDEOPLAYERAPPUIENGINE_H
@@ -233,6 +233,25 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          *  initialization of the standalone application
          */
         void ActivateLateConstructTimerL();
+                
+        /**
+         * Clears internal playbackutility pointer
+         */
+        void ClearPlaybackUtility();
+        
+        /**
+         * Sends given command to playback utility 
+         * @since 9.2
+         * @param aCmd reference to command
+         */
+        void SendCustomMpxPlaybackUtilityCmdL( CMPXCommand& aCmd );
+        
+        /**
+         * Sends given command to playback utility 
+         * @since 9.2
+         * @param aCmd reference to command
+         */
+        void SendMpxPlaybackCmdL( TMPXPlaybackCommand aCmd );
 
     private:
         /**
@@ -313,6 +332,14 @@ class CMpxVideoPlayerAppUiEngine : public CBase,
          *  application initialization.
          */
         virtual void DoLateConstructL();
+        
+        /**
+         * Handles error codes coming from MMPXPlaybackUtility
+         * method calls  
+         * @since 9.2
+         * @param aError error code
+         */
+        void HandleUtilityErrorL( TInt aError );
 
     private:       // data
 

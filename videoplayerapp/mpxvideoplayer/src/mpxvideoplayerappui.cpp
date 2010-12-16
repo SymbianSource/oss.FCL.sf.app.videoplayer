@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: da1mmcf#e92_38.1.1 %
+// Version : %version: e92_40 %
 
 
 #include <hlplch.h>                     // Help launcher
@@ -100,6 +100,8 @@ CMpxVideoPlayerAppUi::~CMpxVideoPlayerAppUi()
 //
 void CMpxVideoPlayerAppUi::HandleExit()
 {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUi::HandleExit()"));
+    
     Exit();
 }
 
@@ -158,8 +160,9 @@ void CMpxVideoPlayerAppUi::HandleCommandL( TInt aCommand )
         {
             MPX_DEBUG(_L("CMpxVideoPlayerAppUi::HandleCommandL() - Exit"));
 
-            iAppUiEngine->ClosePlaybackPluginL();
-
+            // Ignore leave, we are about close anyways
+            TRAP_IGNORE( iAppUiEngine->ClosePlaybackPluginL() );            
+            
             HandleExit();
             break;
         }

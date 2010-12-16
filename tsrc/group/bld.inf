@@ -25,6 +25,7 @@ PRJ_EXPORTS
 PRJ_MMPFILES
 
 PRJ_TESTMMPFILES
+// STARTENGINE -- used by builder.pl
 #include "../VCXTestCommon/group/bld.inf"
 #include "../VCXTestMyVideosCollectionClient/group/bld.inf"
 #include "../VCXTestUtilModule/group/bld.inf"
@@ -33,3 +34,15 @@ PRJ_TESTMMPFILES
 #include "../../videoplayer_plat/videoplayer_startup_api/tsrc/group/bld.inf"
 #include "../../mediasettings/mediasettingsengine/tsrc/mediasettingsenginetest/group/bld.inf"
 #include "../../mediasettings/videoplayersettingsengine/tsrc/vpsettingsenginetest/group/bld.inf"
+// ENDTEST -- used by builder.pl
+
+// STARTUNIT -- used by builder.pl
+#include "../..\videoplayback/videohelix/tsrc/ut_videohelixtest/group/bld.inf"
+#include "../../videoplayback/videoplaybackcontrols/tsrc/videoplaybackcontrols_test/group/bld.inf"
+#include "../../videoplayback/videoplaybackviews/tsrc/ut_userinputhandlertest/group/bld.inf"
+#include "../../videoplayerapp/mpxvideoplayer/tsrc/ut_mpxvideoplayertest/group/bld.inf"
+//#include "../../videocollection/hgmyvideos/tsrc/ut_vcxhgmyvideosmainview/group/bld.inf"
+#include "../../videocollection/mpxmyvideoscollection/tsrc/ut_collectionplugintest/group/bld.inf"
+#include "../../videocollection/mpxmyvideoscollection/tsrc/ut_vcxmyvideoscollectionutiltest/group/bld.inf"
+#include "../../videocollection/mpxmyvideoscollection/tsrc/ut_vcxmyvideosmdsdb/group/bld.inf"
+// ENDTEST -- used by builder.pl

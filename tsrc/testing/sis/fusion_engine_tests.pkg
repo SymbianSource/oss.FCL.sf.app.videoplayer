@@ -17,7 +17,7 @@
 &EN
 
 ; Provide value for uid
-#{"Fusion engine tests"},(0x00000000),1,1,0,TYPE=SA
+#{"Fusion engine tests"},(0x00000000),1,1,0,TYPE=SA,RU
 
 ; Series60 product id for S60 3.0
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
@@ -47,8 +47,6 @@
 ; COMMON MODULES + INCLUDES
 "/epoc32/release/armv5/udeb/VCXTestUtilModule.dll"        - "!:/Sys/Bin/VCXTestUtilModule.dll"
 "/epoc32/release/armv5/udeb/VCXTestCommon.dll"            - "!:/Sys/Bin/VCXTestCommon.dll"
-"/epoc32/release/armv5/udeb/IptvTestUtility.dll"          - "!:/Sys/Bin/IptvTestUtility.dll"
-"/epoc32/release/armv5/udeb/VCXTestEcgFileObserver.dll"   - "!:/Sys/Bin/VCXTestEcgFileObserver.dll"
 "/epoc32/release/armv5/udeb/VCXTestMyVideosCollectionClient.dll" - "!:/Sys/Bin/VCXTestMyVideosCollectionClient.dll"
 
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXConsts.inc" - "c:/testframework/VCXConsts.inc"
@@ -69,9 +67,6 @@
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestAttributes.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestAttributes.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestBigFiles.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestBigFiles.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestDelete.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestDelete.cfg"
-"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestDownload.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestDownload.cfg"
-"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestDownload2.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestDownload2.cfg"
-"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestMultipleDls.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestMultipleDls.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestFullMemory.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestFullMemory.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestLists.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestLists.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestMoveCopy.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestMoveCopy.cfg"
@@ -79,7 +74,6 @@
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestSideload.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestSideload.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestSorting.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestSorting.cfg"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/vcxmvcollectionplugintest.inc" - "C:/TestFramework/vcxmvcollectionplugintest.inc"
-"../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/conf/VCXMyVideosCollectionPluginTestHelium.cfg" - "C:/TestFramework/VCXMyVideosCollectionPluginTestHelium.cfg"
 
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/Data/MMC/video_3gp.3gp" -  "e:/testing/data/video_3gp.xxx"
 "../../../videocollection/mpxmyvideoscollection/tsrc/mpxmvcolltest/Data/MMC/video_3gp2.3g2" -  "e:/testing/data/video_3gp2.xxx"

@@ -26,9 +26,6 @@
 #include <TestclassAssert.h>
 #include "MPSettingsModelForROP.h"
 
-// CONSTANTS
-//const ?type ?constant_var = ?constant;
-
 // MACROS
 //#define ?macro ?macro_def
 #define TEST_CLASS_VERSION_MAJOR 0
@@ -43,23 +40,21 @@ _LIT( KMPXMediaSettingsEngineTestLogFileWithTitle, "MPXMediaSettingsEngineTest_[
 
 _LIT( KTestModuleName, "MPXMediaSettingsEngineTest" );
 _LIT( KLogLocation, "In %S" );
+_LIT( KLogError, "error" );
+_LIT( KLogErrorCode, "%d");
 
 const TUint32 KDefaultIapId = 666;
 
-// FUNCTION PROTOTYPES
-//?type ?function_name(?arg_list);
+enum TIapType
+    {
+    EWlanIap,   // Any WLAN AP
+    EGprsIap,   // Any GPRS AP
+    };
 
 // FORWARD DECLARATIONS
-//class ?FORWARD_CLASSNAME;
 class CMPXMediaSettingsEngineTest;
 class CMPSettingsModelForROP;
 class CCommsDatabase;
-class CVCXTestCommon;
-
-// DATA TYPES
-//enum ?declaration
-//typedef ?declaration
-//extern ?data_type;
 
 // CLASS DECLARATION
 
@@ -84,16 +79,6 @@ NONSHARABLE_CLASS(CMPXMediaSettingsEngineTest) : public CScriptBase
         */
         virtual ~CMPXMediaSettingsEngineTest();
 
-    public: // New functions
-
-        /**
-        * ?member_description.
-        * @since ?Series60_version
-        * @param ?arg1 ?description
-        * @return ?description
-        */
-        //?type ?member_function( ?type ?arg1 );
-
     public: // Functions from base classes
 
         /**
@@ -103,23 +88,6 @@ NONSHARABLE_CLASS(CMPXMediaSettingsEngineTest) : public CScriptBase
         * @return Symbian OS error code
         */
         virtual TInt RunMethodL( CStifItemParser& aItem );
-
-    protected:  // New functions
-
-        /**
-        * ?member_description.
-        * @since ?Series60_version
-        * @param ?arg1 ?description
-        * @return ?description
-        */
-        //?type ?member_function( ?type ?arg1 );
-
-    protected:  // Functions from base classes
-
-        /**
-        * From ?base_class ?member_description
-        */
-        //?type ?member_function();
 
     private:
 
@@ -132,11 +100,6 @@ NONSHARABLE_CLASS(CMPXMediaSettingsEngineTest) : public CScriptBase
         * By default Symbian 2nd phase constructor is private.
         */
         void ConstructL();
-
-        // Prohibit copy constructor if not deriving from CBase.
-        // ?classname( const ?classname& );
-        // Prohibit assigment operator if not deriving from CBase.
-        // ?classname& operator=( const ?classname& );
 
         /**
         * Frees all resources allocated from test methods.
@@ -151,14 +114,13 @@ NONSHARABLE_CLASS(CMPXMediaSettingsEngineTest) : public CScriptBase
         void LogMethod( TPtrC aMethod );
 
         /**
-        * Test methods are listed below. 
+        * Prints errorcode to UI
+        * @since ?Series60_version
         */
+        void PrintError( TInt aError );
 
         /**
-        * Example test method.
-        * @since ?Series60_version
-        * @param aItem Script line containing parameters.
-        * @return Symbian OS error code.
+        * Test methods are listed below. 
         */
         virtual TInt CreateL( CStifItemParser& aItem );
         virtual TInt ListImplementationsL( CStifItemParser& aItem );
@@ -205,44 +167,21 @@ NONSHARABLE_CLASS(CMPXMediaSettingsEngineTest) : public CScriptBase
         virtual TInt ShowRockerKeysLL( CStifItemParser& aItem );
         virtual TInt IsRockerKeysSupportedLL( CStifItemParser& aItem );
         
+        virtual TBool GetIapIdL(const TDesC& aIapName, TUint32& aIapId);
+        virtual TBool GetIapIdByNameL(const TDesC& aIapName, TUint32& aIapId);
+        virtual TInt GetIapIdByTypeL(TIapType aType, TUint32& aIapId, TInt aOrderNumber);
         /**
          * Method used to log version of test class
          */
         void SendTestClassVersion();
 
-        //ADD NEW METHOD DEC HERE
-        //[TestMethods] - Do not remove
-
-    public:     // Data
-        // ?one_line_short_description_of_data
-        //?data_declaration;
-
-    protected:  // Data
-        // ?one_line_short_description_of_data
-        //?data_declaration;
-
-    private:    // Data
-        
-        // ?one_line_short_description_of_data
-        //?data_declaration;
-
-        // Reserved pointer for future extension
-        //TAny* iReserved;
-
-    public:     // Friend classes
-        //?friend_class_declaration;
-    protected:  // Friend classes
-        //?friend_class_declaration;
-    private:    // Friend classes
-        //?friend_class_declaration;
-
+    private:
         CMPSettingsModel* iModel;
         CMPSettingsModelForROP* iSettingsModel;
         CApUtils* iApUtils;
         CCommsDatabase* iCommDb;
-        CVCXTestCommon* iVCXTestCommon;
     };
 
-#endif      // MEDIASETTINGSENGINETEST_H
+#endif // MEDIASETTINGSENGINETEST_H
 
 // End of File

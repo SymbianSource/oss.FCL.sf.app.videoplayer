@@ -174,6 +174,8 @@ NONSHARABLE_CLASS( CVHPPTestClass ) : public CScriptBase,
         virtual TInt InitializeHandleWithPositionL( CStifItemParser& aItem );
         virtual TInt InitializeStreamingWithSdpFileHandleL( CStifItemParser& aItem  );
         virtual TInt RetrieveFileNameAndModeL( CStifItemParser& aItem );
+        virtual TInt StartDefaultConnectionL(  CStifItemParser& aItem  );
+        virtual TInt CheckAccessPointL(  CStifItemParser& aItem  );
 
         // ---------------------------------------------------------------------
         //  Helper Functions

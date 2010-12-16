@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#10 %
+// Version : %version: ou1cpsw#10.1.1 %
 
 #ifndef MPXVIDEOPLAYER_TEST_H
 #define MPXVIDEOPLAYER_TEST_H
@@ -129,6 +129,9 @@ NONSHARABLE_CLASS(Cmpxvideoplayer_test) : public CScriptBase
         virtual TInt HandleMessageActivationMessageL( CStifItemParser& aItem );
         virtual TInt GetViewDepthL( CStifItemParser& aItem );
         virtual TInt ClearPdlInformation();
+        virtual TInt ClearPlaybackUtilityL( CStifItemParser& aItem );
+        virtual TInt HandleEmbeddedOpenL( CStifItemParser& aItem );
+        virtual TInt ActivateLateConstructTimerL( CStifItemParser& aItem );        
 
         /**
          * Method used to log version of test class

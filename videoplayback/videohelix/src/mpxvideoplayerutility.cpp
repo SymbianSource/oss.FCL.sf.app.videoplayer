@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 23 %
+// Version : %version: ou1cpsw#24.1.2 %
 
 
 #include <AudioPreference.h>
@@ -29,9 +29,14 @@
 #include "mpxvideoplaybackcontroller.h"
 #include <mpxvideoplaybackdefs.h>
 #include "mpxvideo_debug.h"
+#include "mpxvideoconnectionutility.h"
 
 const TInt KBufferExpandSize = 100;
 const TUid KSourceUid = { KMmfUidFileSource };
+
+
+_LIT(KUrlRtsp, "rtsp:");
+
 
 CMpxVideoPlayerUtility*
 CMpxVideoPlayerUtility::NewL( CMPXVideoPlaybackController* aVideoPlaybackCtrl )
@@ -507,7 +512,16 @@ void CMpxVideoPlayerUtility::OpenUrlL( const TDesC& aUrl, TInt aApId )
                    _L("aUrl = %S, ApId = %d"), &aUrl, aApId);
 
     CBufFlat* urlCfgBuffer = NULL;
-
+    
+    
+    if( aUrl.FindF(KUrlRtsp) == 0  )
+    {
+        // Change access point to streaming accesspoint if necessary
+        // Streaming access point is actually rtsp streaming access point for rtsp/3gpp streaming
+        // It must be used only with rtsp streaming, not for other protocols
+        aApId = MpxVideoConnectionUtility::CheckAccessPointL(aApId);
+    }
+    
     CMMFUrlParams* urlCfg = CMMFUrlParams::NewL( aUrl, aApId );
     CleanupStack::PushL( urlCfg );
 

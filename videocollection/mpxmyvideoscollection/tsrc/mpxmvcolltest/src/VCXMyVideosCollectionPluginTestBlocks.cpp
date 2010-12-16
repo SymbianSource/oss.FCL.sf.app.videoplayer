@@ -1214,8 +1214,10 @@ TInt CVCXMyVideosCollectionPluginTest::CheckMediaDetailL( CStifItemParser& aItem
         TInt expectedValue;
         User::LeaveIfError( aItem.GetNextInt( expectedValue ) );
 
+        VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: Getting attribute from media");
         TInt64 value = *(*media).Value<TInt64>( mpxMediaAttribute );
 
+        VCXLOGLO2("CVCXMyVideosCollectionPluginTest:: value %d", value);
         if( expectedValue != value )
             {
             err = KErrCorrupt;
@@ -4137,7 +4139,7 @@ TInt CVCXMyVideosCollectionPluginTest::MapMpxMediaAttribute(
 
         case EVcxTestMapping_KVcxMediaMyVideosAudioFourCc:
             {
-            VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: KVcxMediaMyVideosCategoryNewItemName");
+            VCXLOGLO1("CVCXMyVideosCollectionPluginTest:: KVcxMediaMyVideosAudioFourCc");
             aAttribute = KVcxMediaMyVideosAudioFourCc;
             aType = EVcxTestMediaAttributeTypeTUint32;
             }

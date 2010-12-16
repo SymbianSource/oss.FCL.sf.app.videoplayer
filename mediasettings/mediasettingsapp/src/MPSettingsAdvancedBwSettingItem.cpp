@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 7 %
+// Version : %version: 8 %
 
 
 
@@ -170,10 +170,25 @@ void CMPSettingsAdvancedBwSettingItem::HandleSettingPageEventL(CAknSettingPage* 
     
         TInt current = listbox->CurrentItemIndex();
         TInt count = listbox->Model()->NumberOfItems();
-
-        if (current == count - 1)
+        
+        if ( current == count - 1 )
             {
-            ShowAdvancedBwQueryL();
+			// Search min and max values to use as limits.
+            TInt min = KMaxTInt;
+            TInt max = 0;
+            for ( TInt i=0; i<iValueArray.Count(); i++ )
+                {
+                if ( iValueArray[i] < min )
+                    {
+                    min = iValueArray[i];
+                    }
+                if ( iValueArray[i] > max )
+                    {
+                    max = iValueArray[i];
+                    }
+                }
+            
+            ShowAdvancedBwQueryL( min, max );
             }
         else
             {
@@ -188,12 +203,16 @@ void CMPSettingsAdvancedBwSettingItem::HandleSettingPageEventL(CAknSettingPage* 
 // CMPSettingsAdvancedBwSettingItem::ShowAdvancedBwQueryL
 // -----------------------------------------------------------------------------
 //
-void CMPSettingsAdvancedBwSettingItem::ShowAdvancedBwQueryL()
+void CMPSettingsAdvancedBwSettingItem::ShowAdvancedBwQueryL( TInt aMin, TInt aMax )
     {
     MPX_FUNC("#MS# CMPSettingsAdvancedBwSettingItem::ShowAdvancedBwQueryL()");
     TReal value = static_cast<TReal>(iValue) / 1000;
     CAknFloatingPointQueryDialog* dlg = new (ELeave) CAknFloatingPointQueryDialog(value);
-    if (dlg->ExecuteLD(iQueryRes))
+
+    dlg->PrepareLC( iQueryRes );
+    dlg->SetMinimumAndMaximum( static_cast<TReal>(aMin) / 1000,
+                               static_cast<TReal>(aMax) / 1000 );
+    if ( dlg->RunLD() )
         {
         iValue = static_cast<TInt>(value * 1000);
         }

@@ -24,6 +24,7 @@ my $debug = 0;
 my $allowRun = 1;
 my $relType = "";
 my $sisPath = "videoplayer\\tsrc\\testing\\sis";
+my $certPath = "";
 my $certFile = "Nokia_RnDCert_02\.der";
 my $keyFile = "Nokia_RnDCert_02\.key";
 my $comment = ";TEMPCOMMENT ";
@@ -50,11 +51,11 @@ my @unitTests = (
 		"videoplayer\\videoplayback\\videoplaybackcontrols\\tsrc\\videoplaybackcontrols_test\\group\\videoplaybackcontrolstest.pkg",
 		"videoplayer\\videoplayback\\videoplaybackviews\\tsrc\\ut_userinputhandlertest\\group\\userinputhandlertest.pkg",
 		"videoplayer\\videoplayerapp\\mpxvideoplayer\\tsrc\\ut_mpxvideoplayertest\\group\\mpxvideoplayertest.pkg",
-		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group\\VcxHgMyVideosMainViewTest.pkg",
 		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_collectionplugintest\\group\\ut_collectionplugintest.pkg",
 		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideoscollectionutiltest\\group\\VcxMyVideosCollectionUtilTest.pkg",
 		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideosmdsdb\\group\\VcxMyVideosMdsDbTest.pkg"
 	);
+
 
 ########################################
 # PARSE ARGUMENTS
@@ -67,6 +68,11 @@ while(scalar(@ARGV) >= 1)
 	if($argument eq "-sispath")
 	{
 		$sisPath = shift();
+	}
+
+	elsif($argument eq "-certpath")
+	{
+		$certPath = shift();
 	}
 
 	elsif($argument eq "-type")
@@ -101,6 +107,10 @@ while(scalar(@ARGV) >= 1)
 
 my $basepath = FindBasePath();
 die("NO VIDEOAPP_DOMAIN FOLDER FOUND") if $basepath eq "";
+
+$certPath = $basepath if( $certPath eq "" );
+print "certPath: $certPath\n" if $debug;
+
 
 print "CREATING ${basepath}\\${sisPath}\n" if $debug;
 mkpath("${basepath}\\${sisPath}");
@@ -189,7 +199,7 @@ sub CreateSis
 	print "file: $filename\n" if $debug;
 	print "relfile: $relfilename\n" if $debug;
 	
-
+	# change directory to target path
 	chdir("${basepath}\\${temppath}");
 	
 	AddComment( "${filename}.pkg" ) if $allowRun;
@@ -198,18 +208,18 @@ sub CreateSis
 		print "\nCREATE TEMPORARY PKG\n\n" if $debug;
 		CreatePkg( $filename, $relType );
 	}
-	$cmd = "call makesis ${relfilename}\.pkg ${relfilename}\.sis";	
-	print $cmd . "\n" if $debug;
+	$cmd = "call makesis ${relfilename}\.pkg ${relfilename}\.sis\n";	
+	print $cmd if $debug;
 	system($cmd) if $allowRun;
 	RemComment( "${filename}.pkg" ) if $allowRun;
 	copy( "${relfilename}\.sis", "${baseDir}\\${targetDir}\\${relfilename}\.sis" ) if $allowRun;
 	chdir("${baseDir}\\${targetDir}");
-	$cmd = "signsis ${relfilename}\.sis ${relfilename}\.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key";
+	$cmd = "signsis ${relfilename}\.sis ${relfilename}\.sisx Nokia_RnDCert_02.der Nokia_RnDCert_02.key\n";
+	print $cmd if $debug;
 	system($cmd) if $allowRun;
 	unlink ( "${relfilename}\.sis" ) if $allowRun;
 	print "<<< CREATESIS\n" if $debug;
 }
-
 	
 ########################################
 # AddComment
@@ -218,6 +228,8 @@ sub CreateSis
 sub AddComment
 {
 	my ($file) = @_;
+	
+	print(">>> ADDCOMMENT\n") if $debug;
 	
 	open(FILE_HANDLE, $file) or die ("Could not read file '$file'\n");
 	my @lines = <FILE_HANDLE>;
@@ -231,14 +243,15 @@ sub AddComment
 	  {
 	    if( $line !~ /$comment/ )
 	    {
-	    	print $line . "\n" if $debug;
+	    	print "ucommenting: $line" if $debug;
 				$line = $comment . $line;
-				print $line . "\n" if $debug;
+				print "-> $line" if $debug;
 			}
 	  }
 	  print FILE_HANDLE $line;
   }	    
   close(FILE_HANDLE);
+  print("<<< ADDCOMMENT\n") if $debug;
 }
 
 ########################################
@@ -248,6 +261,8 @@ sub AddComment
 sub RemComment
 {
 	my ($file) = @_;
+	
+	print(">>> REMCOMMENT\n") if $debug;
 	
 	open(FILE_HANDLE, $file) or die ("Could not read file '$file'\n");
 	my @lines = <FILE_HANDLE>;
@@ -261,14 +276,15 @@ sub RemComment
 	  {
 	    if( $line =~ /$comment/ )
 	    {
-	    	print $line . "\n" if $debug;
+	    	print "uncommenting: $line" if $debug;
 	    	$line = substr( $line, length( $comment ) );
-	    	print $line . "\n" if $debug;
+	    	print "-> $line" if $debug;
 	    }
 	  }
 	  print FILE_HANDLE $line;
   }	    
   close(FILE_HANDLE);
+  print("<<< REMCOMMENT\n") if $debug;
 }
 
 ########################################
@@ -279,6 +295,8 @@ sub CreatePkg
 {
 	my ($file, $type) = @_;
 	
+	print(">>> CREATEPKG\n") if $debug;
+	
 	open(FILE_HANDLE, "${file}\.pkg") or die ("Could not read file '${file}\.pkg'\n");
 	my @lines = <FILE_HANDLE>;
 	close(FILE_HANDLE);
@@ -287,9 +305,10 @@ sub CreatePkg
   open(FILE_HANDLE, ">${file}_${type}\.pkg") or die ("Could not write file '${file}_${type}\.pkg'\n");
   foreach my $line ( @lines )
   {
-	  if( $line =~ /\/armv5\/(\w+)\//i )
+	  if( $line =~ /\/armv5\/(\w+)\//i)
 	  {
 	  	$currenttype = $1;
+	  	print "TYPE: $currenttype\n" if $debug;
 	  	if( $currenttype ne $type )
 	  	{
 	  		print $line if $debug;
@@ -297,9 +316,21 @@ sub CreatePkg
 	  		print $line if $debug;
 	  	}
 	  }
+	  if( $line =~ /\\armv5\\(\w+)\\/i)
+	  {
+	  	$currenttype = $1;
+	  	print "TYPE: $currenttype\n" if $debug;
+	  	if( $currenttype ne $type )
+	  	{
+	  		print $line if $debug;
+	  		$line =~ s/\\$currenttype\\/\\$type\\/;
+	  		print $line if $debug;
+	  	}
+	  }
 	  print FILE_HANDLE $line;
   }	    
   close(FILE_HANDLE);
+  print("<<< CREATEPKG\n") if $debug;
 }
 
 #------------------------------------------------------------------------------------

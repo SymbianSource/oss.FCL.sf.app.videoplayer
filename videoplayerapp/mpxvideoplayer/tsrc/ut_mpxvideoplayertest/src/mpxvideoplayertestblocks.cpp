@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#10 %
+// Version : %version: ou1cpsw#10.1.1 %
 
 // [INCLUDE FILES] - do not remove
 #include <e32svr.h>
@@ -73,6 +73,9 @@ TInt Cmpxvideoplayer_test::RunMethodL( CStifItemParser& aItem )
         ENTRY( "HandleMessageActivationMessageL", Cmpxvideoplayer_test::HandleMessageActivationMessageL ),
         ENTRY( "GetViewDepth", Cmpxvideoplayer_test::GetViewDepthL ),
         ENTRY( "ClearPdlInformation", Cmpxvideoplayer_test::ClearPdlInformation ),
+        ENTRY( "ClearPlaybackUtility", Cmpxvideoplayer_test::ClearPlaybackUtilityL ),
+        ENTRY( "ActivateLateConstructTimer", Cmpxvideoplayer_test::ActivateLateConstructTimerL ),        
+        ENTRY( "HandleEmbeddedOpen", Cmpxvideoplayer_test::HandleEmbeddedOpenL ),
     };
 
     const TInt count = sizeof( KFunctions ) / sizeof( TStifFunctionInfo );
@@ -245,4 +248,30 @@ TInt Cmpxvideoplayer_test::ClearPdlInformation()
     return KErrNone;
 }
 
+// -----------------------------------------------------------------------------
+//   Cmpxvideoplayer_test::ClearPlaybackUtilityL
+// -----------------------------------------------------------------------------
+//
+TInt Cmpxvideoplayer_test::ClearPlaybackUtilityL( CStifItemParser& aItem )
+{
+    return iAppUiEngineTester->ClearPlaybackUtilityL( aItem );    
+}
+
+// -----------------------------------------------------------------------------
+//   Cmpxvideoplayer_test::HandleEmbeddedOpenL
+// -----------------------------------------------------------------------------
+//
+TInt Cmpxvideoplayer_test::HandleEmbeddedOpenL( CStifItemParser& aItem )
+{
+    return iAppUiEngineTester->HandleEmbeddedOpenL( aItem );    
+}
+
+// -----------------------------------------------------------------------------
+//   Cmpxvideoplayer_test::ActivateLateConstructTimerL
+// -----------------------------------------------------------------------------
+//
+TInt Cmpxvideoplayer_test::ActivateLateConstructTimerL( CStifItemParser& aItem )
+{
+    return iAppUiEngineTester->ActivateLateConstructTimerL( aItem );    
+}
 //  [End of File] - Do not remove

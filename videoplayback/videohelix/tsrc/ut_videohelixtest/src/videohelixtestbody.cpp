@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: e003sa33#24.1.1 %
+// Version : %version: ou1cpsw#24.1.2 %
 
 
 // [INCLUDE FILES] - do not remove
@@ -43,6 +43,7 @@
 #include "mpxvideo_debug.h"
 #include "mpxvideoplayerutility_stub.h"
 #include "mpxhelixplaybackplugindefs.h"
+#include "mpxvideoconnectionutility.h"
 
 #ifdef __WINSCW__
     _LIT( KVideoTestPath, "c:\\data\\Videos\\" );
@@ -120,9 +121,10 @@ TInt CVHPPTestClass::RunMethodL( CStifItemParser& aItem )
         ENTRY ("InitializeWithPositionL", CVHPPTestClass::InitializeWithPositionL),
         ENTRY ("InitializeLinkWithPositionL", CVHPPTestClass::InitializeLinkWithPositionL),
         ENTRY ("InitializeHandleWithPositionL", CVHPPTestClass::InitializeHandleWithPositionL),
-        ENTRY ( "InitializeStreamingWithSdpFileHandleL", 
-        		CVHPPTestClass::InitializeStreamingWithSdpFileHandleL ),
-        ENTRY ( "RetrieveFileNameAndModeL", CVHPPTestClass::RetrieveFileNameAndModeL )        
+        ENTRY ( "InitializeStreamingWithSdpFileHandleL", CVHPPTestClass::InitializeStreamingWithSdpFileHandleL ),
+        ENTRY ( "RetrieveFileNameAndModeL", CVHPPTestClass::RetrieveFileNameAndModeL ),        
+        ENTRY ( "StartDefaultConnectionL", CVHPPTestClass::StartDefaultConnectionL ),
+        ENTRY ( "CheckAccessPointL", CVHPPTestClass::CheckAccessPointL )
 
         //
         //  ADD NEW ENTRIES HERE
@@ -2585,6 +2587,39 @@ CVHPPTestClass::RetrieveFileNameAndModeL( CStifItemParser& aItem )
         }
     }
 
+    return err;
+}
+
+TInt CVHPPTestClass::StartDefaultConnectionL(  CStifItemParser& aItem  )
+{
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::StartDefaultConnectionL()"));
+    iLog->Log(_L("CVHPPTestClass::StartDefaultConnectionL()"));
+    
+    // Everything else is ok except leave
+    MPX_TRAPD(err, MpxVideoConnectionUtility::StartDefaultConnectionL() );
+    
+    return err;
+}
+
+TInt CVHPPTestClass::CheckAccessPointL(  CStifItemParser& aItem  )
+{
+    MPX_ENTER_EXIT(_L("CVHPPTestClass::CheckAccessPointL()"));
+    iLog->Log(_L("CVHPPTestClass::CheckAccessPointL()"));
+    
+    TInt err(KErrNone);
+    // TODO tests 
+    TInt retVal(0);
+    // retval should be -1  when called with IapId 13
+    // because iapId 13 is handled as GPRS in stub code
+    retVal = MpxVideoConnectionUtility::CheckAccessPointL( 13 );  // number 2 has implementation is stub side
+    
+    if ( -1 != retVal )
+    {
+        MPX_DEBUG ( _L("ERROR MpxVideoConnectionUtility::CheckAccessPointL() returned: %d"), retVal);
+        err = KErrNotFound;
+    }
+   
+    
     return err;
 }
 

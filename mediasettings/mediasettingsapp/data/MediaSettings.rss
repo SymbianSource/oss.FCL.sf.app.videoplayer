@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 16 %
+// Version : %version: 17 %
 
 
 
@@ -958,9 +958,7 @@ RESOURCE DIALOG r_mpsett_gprs_bw_query
                 label = qtn_mp_header_bw;
                 control = FLPTED
                     {
-                    min = 5;
-                    max = 99.99; // Magic: ?
-                    maxlength = 5;
+                    maxlength = 9;
                     };
                 };
             }
@@ -1007,9 +1005,7 @@ RESOURCE DIALOG r_mpsett_egprs_bw_query
                 label = qtn_mp_header_bw;
                 control = FLPTED
                     {
-                    min = 5;
-                    max = 199.99; // Magic: ?
-                    maxlength = 6;
+                    maxlength = 9;
                     };
                 };
             }
@@ -1056,9 +1052,7 @@ RESOURCE DIALOG r_mpsett_wcdma_bw_query
                 label = qtn_mp_header_bw;
                 control = FLPTED
                     {
-                    min = 5;
-                    max = 1920.00; // Allow up to 1.92 Mbps
-                    maxlength = 7;
+                    maxlength = 9;
                     };
                 };
             }
@@ -1107,9 +1101,7 @@ RESOURCE DIALOG r_mpsett_wlan_bw_query
                 label = qtn_mp_header_bw;
                 control = FLPTED
                     {
-                    min = 5;
-                    max = 4300.00; // Allow up to 4.3 Mbps
-                    maxlength = 7;
+                    maxlength = 9;
                     };
                 };
             }
@@ -1155,9 +1147,7 @@ RESOURCE DIALOG r_mpsett_hsdpa_bw_query
                 label = qtn_mp_header_bw;
                 control = FLPTED
                     {
-                    min = 5;
-                    max = 3999.99; // Magic: ?
-                    maxlength = 7;
+                    maxlength = 9;
                     };
                 };
             }

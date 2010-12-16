@@ -17,6 +17,7 @@
 
 use Cwd; # for cwd
 
+my $comment = "//TEMPCOMMENT ";
 my $debug = 0;
 my $allowRun = 1;
 my $optionClean = 1;
@@ -35,21 +36,11 @@ my @fusionComponents = (
 		"videoplayer\\group"
 	);
 
-my @engineTests = (
+my @testComponents = (
 		"videoutils\\tsrc\\group",
 		"videoplayer\\tsrc\\group"
 	);
 
-my @unitTests = (
-		"videoplayer\\videoplayback\\videohelix\\tsrc\\ut_videohelixtest\\group",
-		"videoplayer\\videoplayback\\videoplaybackcontrols\\tsrc\\videoplaybackcontrols_test\\group",
-		"videoplayer\\videoplayback\\videoplaybackviews\\tsrc\\ut_userinputhandlertest\\group",
-		"videoplayer\\videoplayerapp\\mpxvideoplayer\\tsrc\\ut_mpxvideoplayertest\\group",
-		"videoplayer\\videocollection\\hgmyvideos\\tsrc\\ut_vcxhgmyvideosmainview\\group",
-		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_collectionplugintest\\group",
-		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideoscollectionutiltest\\group",
-		"videoplayer\\videocollection\\mpxmyvideoscollection\\tsrc\\ut_vcxmyvideosmdsdb\\group"
-	);
 
 ########################################
 # PARSE ARGUMENTS
@@ -126,19 +117,13 @@ if ( $optionClean )
 		    Clean( $basepath, $component, $optionPlatform, 0 );
 		}
 	}
-		
-	if ( $optionEngineTests )
+
+	if ( $optionEngineTests or $optionUnitTests )
 	{
-		foreach my $component ( @engineTests )
-		{
-		    Clean( $basepath, $component, $optionPlatform, 1 );
-		}
-	}
-		
-	if ( $optionUnitTests )
-	{
-		# Clean all unit tests
-		foreach my $component ( @unitTests )
+		#add comments if needed
+		ProcessTests();
+
+		foreach my $component ( @testComponents )
 		{
 		    Clean( $basepath, $component, $optionPlatform, 1 );
 		}
@@ -154,20 +139,13 @@ if ( $optionBuild )
 		    Build( $basepath, $component, $optionPlatform, 0 );
 		}
 	}
-		
-	if ( $optionEngineTests )
+	
+	if ( $optionEngineTests or $optionUnitTests )
 	{
-		# Clean all engine tests
-		foreach my $component ( @engineTests )
-		{
-		    Build( $basepath, $component, $optionPlatform, 1 );
-		}
-	}
-		
-	if ( $optionUnitTests )
-	{
-		# Clean all unit tests
-		foreach my $component ( @unitTests )
+		#add comments if needed
+		ProcessTests();
+				
+		foreach my $component ( @testComponents )
 		{
 		    Build( $basepath, $component, $optionPlatform, 1 );
 		}
@@ -206,7 +184,7 @@ sub Clean
 {
 	my ( $baseDir, $destDir, $optionPlatform, $isTestComponent ) = @_;
 	print ">>> CLEAN ${baseDir}\\${destDir}\\bld.inf FOR $optionPlatform\n" if $debug;
-	print "##\n#\n# CLEANING ${baseDir}\\${destDir}\n#\n##\n";
+	print "### CLEANING ${baseDir}\\${destDir}\n";
 	
 	my $cmd = "";
 	
@@ -246,7 +224,7 @@ sub Build
 {
 	my ( $baseDir, $destDir, $optionPlatform, $isTestComponent ) = @_;
 	print ">>> BUILD ${baseDir}\\${destDir}\\bld.inf FOR $optionPlatform\n" if $debug;
-	print "##\n#\n# BUILDING ${baseDir}\\${destDir}\n#\n##\n";
+	print "### BUILDING ${baseDir}\\${destDir}\n";
 	#my $cmd = "sbs -b ${baseDir}\\${destDir}\\bld.inf";
 	#$cmd .= " -c $optionPlatform" if $optionPlatform ne "";
 	#$cmd .= ".test" if $isTestComponent;
@@ -284,6 +262,95 @@ sub Build
 	print "<<< BUILD\n" if $debug;
 }
 
+########################################
+# ProcessTests
+#
+
+sub ProcessTests
+{
+	print ">>> PROCESS\n" if $debug;
+	foreach my $component ( @testComponents )
+	{
+		my $file = "$basepath\\$component\\bld.inf";
+		print $file . "\n";
+
+		open(FILE_HANDLE, $file) or die ("Could not read file '$file'\n");
+		my @lines = <FILE_HANDLE>;
+		close(FILE_HANDLE);
+
+		open(FILE_HANDLE, ">$file") or die ("Could not write file '$file'\n") if $allowRun;;
+
+		my $unit = 0;
+	  my $engine = 0;
+
+		foreach my $line ( @lines )
+    {
+			if( $line =~ /STARTENGINE/ )
+			{
+				print "engine test start tag found\n" if $debug;
+				$engine = 1;
+				$unit = 0;
+			}
+
+			if( $line =~ /STARTUNIT/ )
+			{
+				print "unit test start tag found\n" if $debug;
+				$engine = 0;
+				$unit = 1;
+			}
+
+			if( $line =~ /ENDTEST/ )
+			{
+				print "end tag found\n" if $debug;
+				$engine = 0;
+				$unit = 0;
+			}
+
+			if( $line =~ /bld\.inf/ )
+			{
+				if( $engine )
+				{
+					#Add comment if engine tests are disabled and the line is not commented
+					if ( not $optionEngineTests and $line !~ /$comment/ )
+					{
+						print "commented " if $debug;
+						$line = $comment . $line 
+					}
+					
+					#Remove comment if engine tests are enabled and the line is commented
+					if ( $optionEngineTests and $line =~ /$comment/ )
+					{
+						print "uncommented " if $debug;
+						$line = substr( $line, length( $comment ) );
+					}
+				}
+				elsif( $unit )
+				{
+					#Add comment if unit tests are disabled and the line is not commented
+					if ( not $optionUnitTests and $line !~ /$comment/ )
+					{
+						print "commented " if $debug;
+						$line = $comment . $line 
+					}
+					
+					#Remove comment if unit tests are enabled and the line is commented
+					if ( $optionUnitTests and $line =~ /$comment/ )
+					{
+						print "uncommented " if $debug;
+						$line = substr( $line, length( $comment ) );
+					}
+				}
+				
+				print $line if $debug;
+			}
+			
+			print FILE_HANDLE $line if $allowRun;;
+	    }	    
+	    close(FILE_HANDLE) if $allowRun;
+	}
+	print "<<< PROCESS\n" if $debug;
+}
+
 #------------------------------------------------------------------------------------
 # ShowHelp
 #------------------------------------------------------------------------------------
@@ -294,7 +361,13 @@ builder.pl
 
 This script will search the VideoApp_Domain root folder from current path.
 if the root folder is not found, the script will exit. In any other case,
-it builds all components.
+it builds all components. The array for master bld.inf-files is named
+\@fusionComponents.
+
+The script also includes an array, \@testComponents for test components, which 
+can be modified to set the master bld.inf locations for tests. The script
+will check for tags STARTENGINE, STARTUNIT, ENDTEST for setting the type
+of included bld.inf.
 
 Options:
 

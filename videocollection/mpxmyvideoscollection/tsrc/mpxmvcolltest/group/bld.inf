@@ -42,18 +42,13 @@ PRJ_TESTEXPORTS
 ../conf/vcxmvcollectionplugintest.inc                           /epoc32/winscw/c/testframework/vcxmvcollectionplugintest.inc
 ../conf/VCXMyVideosCollectionPluginTestAttributes.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestAttributes.cfg
 ../conf/VCXMyVideosCollectionPluginTestDelete.cfg               /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDelete.cfg
-../conf/VCXMyVideosCollectionPluginTestDownload.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDownload.cfg
-../conf/VCXMyVideosCollectionPluginTestDownload2.cfg            /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestDownload2.cfg
-../conf/VCXMyVideosCollectionPluginTestMultipleDls.cfg          /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMultipleDls.cfg
 ../conf/VCXMyVideosCollectionPluginTestFullMemory.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestFullMemory.cfg
 ../conf/VCXMyVideosCollectionPluginTestLists.cfg                /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestLists.cfg
 ../conf/VCXMyVideosCollectionPluginTestMoveCopy.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMoveCopy.cfg
 ../conf/VCXMyVideosCollectionPluginTestMultiDrives.cfg          /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMultiDrives.cfg
 ../conf/VCXMyVideosCollectionPluginTestSideload.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestSideload.cfg
 ../conf/VCXMyVideosCollectionPluginTestSorting.cfg              /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestSorting.cfg
-../conf/VCXMyVideosCollectionPluginTestRobustness.cfg           /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestRobustness.cfg
 ../conf/VCXMyVideosCollectionPluginTestHelium.cfg               /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestHelium.cfg
-../conf/VCXMyVideosCollectionPluginTestMediator.cfg             /epoc32/winscw/c/testframework/VCXMyVideosCollectionPluginTestMediator.cfg
 
 PRJ_EXPORTS
 

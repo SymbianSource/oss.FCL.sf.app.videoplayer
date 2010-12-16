@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#9 %
+// Version : %version: ou1cpsw#9.1.1 %
 
 
 #include <mpxcommandgeneraldefs.h>
@@ -222,6 +222,24 @@ void CMPXPlaybackUtility::CommandL( TMPXPlaybackCommand aCmd, TInt /*aData*/ )
                 iStifObserver->HandleUtilityEvent( event );
             }
 
+            break;
+        case EPbCmdDisableEffect:
+            {
+            iDisableEffectCallCount++;
+            if( iDisableEffectCallCount == 1  )
+                {
+                if ( iStifObserver )
+                    {
+                    TCallbackEvent* event = new TCallbackEvent;
+                    event->iEvent = EPlaybackUtilityDisableEffects;
+                    iStifObserver->HandleUtilityEvent( event );
+                    }                
+                }            
+            if( iDisableEffectCallCount >= 2 )
+                {
+                User::Leave( KErrNotFound );
+                }                        
+            }
             break;
         }
     }

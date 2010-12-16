@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 44 %
+// Version : %version: ou1cpsw#44.1.2 %
 
 
 // INCLUDE FILES
@@ -540,7 +540,7 @@ void CMPXVideoPlaybackControlsController::CreateRealOneBitmapL()
 
     iRealOneBitmap = CreateBitmapL( iconsPath,
                                     EMbmMpxvideoplaybackcontrolsQgn_graf_realplayer_splash_01,
-                                    main_mp4_pane_g1(0).LayoutLine() );
+                                    main_mp4_pane_g3( KMP4LayoutSet ).LayoutLine() );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1091,7 +1091,6 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
     CleanupStack::PushL( label );
 
     TAknTextComponentLayout SKLayout;
-    TAknWindowComponentLayout softkeyPane;
     TRect skRect;
 
     if ( aTop )
@@ -1102,21 +1101,13 @@ void CMPXVideoPlaybackControlsController::CreateFakeSoftKeyL(
     {
         SKLayout = main_mp4_pane_t1( KMP4LayoutSet );
     }
-
     AknLayoutUtils::LayoutLabel( label,
                                  iRect,
                                  SKLayout.LayoutLine() );
 
     if ( AknLayoutUtils::PenEnabled() )
     {
-        if ( aTop )
-        {
-            label->SetAlignment( EHRightVCenter );
-        }
-        else
-        {
-            label->SetAlignment( EHLeftVCenter );
-        }
+        label->SetAlignment( EHCenterVBottom );
     }
     else
     {

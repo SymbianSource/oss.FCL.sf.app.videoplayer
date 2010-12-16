@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 86 %
+// Version : %version: ou1cpsw#88 %
 
 
 //  Include Files
@@ -153,14 +153,9 @@ CMPXVideoBasePlaybackView::~CMPXVideoBasePlaybackView()
         delete iDisplayHandler;
         iDisplayHandler = NULL;
     }
-
-    if ( iPlaybackUtility )
-    {
-        TRAP_IGNORE( iPlaybackUtility->RemoveObserverL( *this ) );
-        iPlaybackUtility->Close();
-        iPlaybackUtility = NULL;
-    }
-
+    
+    ClearPlaybackUtility();
+    
     if ( iViewUtility )
     {
         iViewUtility->Close();
@@ -203,8 +198,8 @@ void CMPXVideoBasePlaybackView::CreateGeneralPlaybackCommandL( TMPXPlaybackComma
     cmd->SetTObjectValueL<TInt>( KMPXCommandGeneralId, KMPXCommandIdPlaybackGeneral );
     cmd->SetTObjectValueL<TInt>( KMPXCommandPlaybackGeneralType, aCmd );
 
-    iPlaybackUtility->CommandL( *cmd, this );
-
+    SendCustomMpxPlaybackUtilityCmdL( *cmd, this );
+    
     CleanupStack::PopAndDestroy( cmd );
 }
 
@@ -259,7 +254,7 @@ void CMPXVideoBasePlaybackView::HandleCommandL( TInt aCommand )
         case EMPXPbvCmdPlayPause:
         {
             MPX_DEBUG(_L("CMPXVideoBasePlaybackView::HandleCommandL() EMPXPbvCmdPause"));
-            iPlaybackUtility->CommandL( EPbCmdPlayPause );
+            SendPlaybackCmdL( EPbCmdPlayPause );
             break;
         }
         case EAknSoftkeyBack:
@@ -425,16 +420,9 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::DoActivateL()"));
 
     //
-    //  Get the playback utility instance from playback utility
-    //
-    iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
-    iPlaybackUtility->AddObserverL( *this );
-    iPlaybackUtility->SetPrimaryClientL();
-
-    //
     //  Initialize the playback state
     //
-    iPlaybackState = iPlaybackUtility->StateL();
+    iPlaybackState = PlaybackUtilityL().StateL();
 
     //
     //  Observe the View Framework when the view is active
@@ -474,7 +462,7 @@ void CMPXVideoBasePlaybackView::DoActivateL( const TVwsViewId& /* aPrevViewId */
     //
     //  Determine if the playback is from a playlist on view activation
     //
-    MMPXSource* s = iPlaybackUtility->Source();
+    MMPXSource* s = PlaybackUtilityL().Source();
     CMPXCollectionPlaylist* playlist = s->PlaylistL();
     iPlaylistView = (playlist) ? ETrue : EFalse;
     delete playlist;
@@ -517,12 +505,7 @@ void CMPXVideoBasePlaybackView::DoDeactivate()
         iDisplayHandler = NULL;
     }
 
-    if ( iPlaybackUtility )
-    {
-        TRAP_IGNORE( iPlaybackUtility->RemoveObserverL( *this ) );
-        iPlaybackUtility->Close();
-        iPlaybackUtility = NULL;
-    }
+    ClearPlaybackUtility();    
 
     //
     //  Stop observing the view framework when this view is deactivated
@@ -680,7 +663,7 @@ void CMPXVideoBasePlaybackView::RequestMediaL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RequestMediaL()"));
 
-    if ( ! iMediaRequested && iPlaybackState == EPbStateInitialised )
+    if ( ! iMediaRequested && ( iPlaybackState == EPbStateInitialised || iPlaybackState == EPbStateBuffering ) )
     {
         iMediaRequested = ETrue;
 
@@ -708,12 +691,12 @@ void CMPXVideoBasePlaybackView::RequestPlaybackMediaL()
     //
     //  Request the volume for the controls
     //
-    iPlaybackUtility->PropertyL( *this, EPbPropertyVolume );
+    PlaybackUtilityL().PropertyL( *this, EPbPropertyVolume );
 
     //
     //  Request the clip's meta data
     //
-    MMPXSource* s = iPlaybackUtility->Source();
+    MMPXSource* s = PlaybackUtilityL().Source();
 
     if ( s )
     {
@@ -755,7 +738,7 @@ void CMPXVideoBasePlaybackView::RequestCollectionMediaL()
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RequestCollectionMediaL()"));
 
     //  Request the clip's meta data
-    MMPXSource* s = iPlaybackUtility->Source();
+    MMPXSource* s = PlaybackUtilityL().Source();
 
     if ( s )
     {
@@ -925,7 +908,7 @@ void CMPXVideoBasePlaybackView::HandleClosePlaybackViewL()
 
     if ( IsMultiItemPlaylist() )
     {
-        iPlaybackUtility->CommandL( EPbCmdNext );
+        SendPlaybackCmdL( EPbCmdNext );
     }
     else
     {
@@ -1019,6 +1002,16 @@ void CMPXVideoBasePlaybackView::DoHandleStateChangeL( TInt aNewState )
             }
             case EPbStateBuffering:
             {
+                 MPX_DEBUG( _L( "CMPXVideoBasePlaybackView::DoHandleStateChangeL() - EPbStateBuffering" ));
+             
+                if (oldState == EPbStateInitialising)
+                {
+                   // Initialized was skipped because playback server went to directly to buffering state 
+                   // from initialising state. RequestMediaL must be still done.
+                   MPX_DEBUG( _L( "CMPXVideoBasePlaybackView::DoHandleStateChangeL() state skipped oldState == EPbStateInitialising" ));
+                   RequestMediaL();
+                }
+            
                 TInt bufferingPercentage( 0 );
 
                 //
@@ -1325,7 +1318,7 @@ void CMPXVideoBasePlaybackView::UpdatePbPluginMediaL( TBool aSeek)
 
     cmd->SetTObjectValueL<TBool>( KMPXMediaGeneralExtVideoSeekable, aSeek );
 
-    iPlaybackUtility->CommandL( *cmd );
+    SendCustomMpxPlaybackUtilityCmdL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
 }
@@ -1394,7 +1387,7 @@ void CMPXVideoBasePlaybackView::SetPropertyL( TMPXPlaybackProperty aProperty, TI
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::SetPropertyL"),
                    _L("aProperty = %d, aValue = %d"), aProperty, aValue );
 
-    iPlaybackUtility->SetL( aProperty, aValue );
+    PlaybackUtilityL().SetL( aProperty, aValue );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1514,7 +1507,7 @@ void CMPXVideoBasePlaybackView::RetrieveFileNameAndModeL( CMPXCommand* aCmd )
     aCmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
                                                       EPbCmdInitView );
 
-    iPlaybackUtility->CommandL( *aCmd );
+    SendCustomMpxPlaybackUtilityCmdL( *aCmd );
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1602,7 +1595,7 @@ void CMPXVideoBasePlaybackView::CreateVideoSpecificCmdL( TMPXVideoPlaybackComman
 
     cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, aCmd );
 
-    iPlaybackUtility->CommandL( *cmd );
+    SendCustomMpxPlaybackUtilityCmdL( *cmd );
 
     CleanupStack::PopAndDestroy( cmd );
 }
@@ -1721,7 +1714,7 @@ void CMPXVideoBasePlaybackView::HandleVolumeCmdL( TMPXPlaybackCommand aCmd )
         }
         default:
         {
-            iPlaybackUtility->CommandL( aCmd );
+            SendPlaybackCmdL( aCmd );
             break;
         }
     }
@@ -1935,7 +1928,7 @@ void CMPXVideoBasePlaybackView::HandleDrmErrorsL( TInt aError )
 TBool CMPXVideoBasePlaybackView::IsMultiItemPlaylist()
 {
     TInt numItems = 1;
-    MMPXSource* s = iPlaybackUtility->Source();
+    MMPXSource* s = PlaybackUtilityL().Source();
 
     if ( s )
     {
@@ -1976,7 +1969,7 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandleL( RFile& aFile )
     }
     else
     {
-        MMPXSource* s = iPlaybackUtility->Source();
+        MMPXSource* s = PlaybackUtilityL().Source();
 
         if ( s )
         {
@@ -2074,8 +2067,7 @@ void CMPXVideoBasePlaybackView::LaunchDRMDetailsL()
 //   CMPXVideoBasePlaybackView::RetrieveBufferingPercentageL()
 // -------------------------------------------------------------------------------------------------
 //
-TInt
-CMPXVideoBasePlaybackView::RetrieveBufferingPercentageL()
+TInt CMPXVideoBasePlaybackView::RetrieveBufferingPercentageL()
 {
     MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::RetrieveBufferingPercentageL()"));
 
@@ -2090,7 +2082,7 @@ CMPXVideoBasePlaybackView::RetrieveBufferingPercentageL()
     cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand,
                                                      EPbCmdRetrieveBufferingPercentage );
 
-    iPlaybackUtility->CommandL( *cmd );
+    SendCustomMpxPlaybackUtilityCmdL( *cmd );
 
     TInt buffPercentage = cmd->ValueTObjectL<TInt>( KMPXMediaVideoBufferingPercentage );
 
@@ -2120,7 +2112,7 @@ TInt CMPXVideoBasePlaybackView::OpenDrmFileHandle64L( RFile64& aFile )
     }
     else
     {
-        MMPXSource* s = iPlaybackUtility->Source();
+        MMPXSource* s = PlaybackUtilityL().Source();
 
         if ( s )
         {
@@ -2240,7 +2232,7 @@ void CMPXVideoBasePlaybackView::SendWindowCommandL( TMPXVideoPlaybackCommand aCm
     cmd->SetTObjectValueL<TMPXVideoPlaybackCommand>( KMPXMediaVideoPlaybackCommand, aCmd );
     cmd->SetTObjectValueL<TBool>( KMPXMediaVideoAppForeground, IsAppInFrontL() );
 
-    iPlaybackUtility->CommandL( *cmd );
+    SendCustomMpxPlaybackUtilityCmdL( *cmd );
     CleanupStack::PopAndDestroy( cmd );
 }
 
@@ -2301,4 +2293,74 @@ void CMPXVideoBasePlaybackView::ResetPdlUserInputs()
     MPX_DEBUG(_L("CMPXVideoBasePlaybackView::ResetPdlUserInputs()"));
 }
 
+// ---------------------------------------------------------------------------
+//   Sends command to playback utility
+// ---------------------------------------------------------------------------
+// 
+void CMPXVideoBasePlaybackView::SendCustomMpxPlaybackUtilityCmdL( CMPXCommand& aCmd,
+                                                MMPXPlaybackCallback* aCallback )
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SendCustomMpxPlaybackUtilityCmdL( CMPXCommand )"));
+    
+    TRAPD( err, PlaybackUtilityL().CommandL( aCmd, aCallback ) );
+    
+    if( err )
+        {
+		// Sending failed, we dont know what is wrong or how to fix it. Close pb.
+        ClosePlaybackViewL();
+        }        
+    }
+
+// ---------------------------------------------------------------------------
+//   Sends command to playback utility
+// ---------------------------------------------------------------------------
+// 
+void CMPXVideoBasePlaybackView::SendPlaybackCmdL( TMPXPlaybackCommand aCmd )
+    {
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::SendPlaybackCmdL( TMPXPlaybackCommand )"));
+            
+    TRAPD( err, PlaybackUtilityL().CommandL( aCmd ) );
+    
+    if( err )
+        {
+		// Sending failed, we dont know what is wrong or how to fix it. Close pb.
+        ClosePlaybackViewL();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+//   CMPXVideoBasePlaybackView::PlaybackUtilityL
+// -----------------------------------------------------------------------------
+//
+MMPXPlaybackUtility& CMPXVideoBasePlaybackView::PlaybackUtilityL()
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayerAppUiEngine::PlaybackUtilityL()"));
+
+    if ( ! iPlaybackUtility )
+    {
+        iPlaybackUtility = MMPXPlaybackUtility::UtilityL( EMPXCategoryVideo, KPbModeDefault );
+        iPlaybackUtility->AddObserverL( *this );
+        iPlaybackUtility->SetPrimaryClientL();
+    }
+    return *iPlaybackUtility;
+}
+
+// ---------------------------------------------------------------------------
+//   Clears playbackutility
+// ---------------------------------------------------------------------------
+// 
+void CMPXVideoBasePlaybackView::ClearPlaybackUtility()
+    {
+    MPX_ENTER_EXIT(_L("CMPXVideoBasePlaybackView::ClearPlaybackUtility()"));
+    
+    if( iPlaybackUtility )
+        {        
+        TRAP_IGNORE( iPlaybackUtility->RemoveObserverL( *this ) );
+        iPlaybackUtility->Close();
+        iPlaybackUtility = NULL;
+        }    
+    }
+
+    
+    
 // EOF

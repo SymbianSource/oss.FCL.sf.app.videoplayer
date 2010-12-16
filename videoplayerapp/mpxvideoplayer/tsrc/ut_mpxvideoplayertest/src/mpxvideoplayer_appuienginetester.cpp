@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#e92_23 %
+// Version : %version: ou1cpsw#e92_23.1.1 %
 
 
 #include "mpxvideoplayer_appuienginetester.h"
@@ -1207,6 +1207,11 @@ CMpxVideoPlayer_AppUiEngineTester::HandleUtilityEvent( TCallbackEvent* aEvent )
                     //  Clear other events since terminate message was received
                     //
                     iExpectedEventArray->ResetAndDestroy();
+                    
+                    if( iActiveWait && iActiveWait->IsStarted() )
+                        {
+                        iActiveWait->AsyncStop();
+                        }
 
                     break;
                 }
@@ -1256,6 +1261,20 @@ CMpxVideoPlayer_AppUiEngineTester::HandleUtilityEvent( TCallbackEvent* aEvent )
                     }
                     break;
                 }
+                case EPlaybackUtilityPdlInstance:
+                    {
+                    MPX_DEBUG(_L("CMpxVideoPlayer_AppUiEngineTester::HandleUtilityEvent() - EPlaybackUtilityPdlInstance"));
+                    if( iActiveWait && iActiveWait->IsStarted() )
+                        {
+                        iActiveWait->AsyncStop();
+                        }
+                    }
+                    break;
+                case EPlaybackUtilityDisableEffects:
+                    {
+                    iError = KErrNone;
+                    }
+                    break;
             }
 
             if ( iTimeoutController && iExpectedEventArray->Count() == 0 )
@@ -1323,6 +1342,95 @@ CMpxVideoPlayer_AppUiEngineTester::GetFileNameAndPathL( CStifItemParser& aItem )
     fullPath.Append( filename );
 
     return fullPath;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayer_AppUiEngineTester::ClearPlaybackUtilityL
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayer_AppUiEngineTester::ClearPlaybackUtilityL( CStifItemParser& aItem )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::ClearPlaybackUtilityL()"));
+
+    MMPXPlaybackUtility& utility = iAppUiEngine->PlaybackUtilityL();
+    
+    iAppUiEngine->ClearPlaybackUtility();
+    iAppUiEngine->ClearPlaybackUtility();
+    
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayer_AppUiEngineTester::ActivateLateConstructTimerL
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayer_AppUiEngineTester::ActivateLateConstructTimerL( CStifItemParser& aItem )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::ActivateLateConstructTimerL()"));
+    
+    TCallbackEvent* event = new (ELeave) TCallbackEvent;
+    event->iEvent = EPlaybackUtilityPdlInstance;    
+    AddExpectedEvent( event );
+    
+    if( !iActiveWait )
+        {
+        iActiveWait = new(ELeave)CActiveSchedulerWait();
+        }
+    
+    // What happens here:
+    // -Following call start 250ms timer
+    // -After time runs out it will create playback utility
+    // -In the end of playback utility we send message through
+    //  observers to HandleUtilityEvent where we release
+    //  CActiveSchedulerWait and complete this test with KErrNone
+    iAppUiEngine->ActivateLateConstructTimerL();
+    iAppUiEngine->ActivateLateConstructTimerL();
+
+    iActiveWait->Start();
+        
+    return KErrNone;
+}
+
+// -------------------------------------------------------------------------------------------------
+//   CMpxVideoPlayer_AppUiEngineTester::HandleEmbeddedOpenL
+// -------------------------------------------------------------------------------------------------
+//
+TInt CMpxVideoPlayer_AppUiEngineTester::HandleEmbeddedOpenL( CStifItemParser& aItem )
+{
+    MPX_ENTER_EXIT(_L("CMpxVideoPlayer_AppUiEngineTester::HandleEmbeddedOpenL()"));
+    
+    // At beginning we call with error code (just for the coverage)
+    iAppUiEngine->HandleEmbeddedOpenL( KErrGeneral, EMPXVideo );
+    
+    // First call with KErrNone, this should end up in
+    // HandleUtilityEvent where we clear iError
+    iError = KErrGeneral;
+    TCallbackEvent* event = new (ELeave) TCallbackEvent;
+    event->iEvent = EPlaybackUtilityDisableEffects;    
+    AddExpectedEvent( event );
+    iAppUiEngine->HandleEmbeddedOpenL( KErrNone, EMPXVideo );
+    User::LeaveIfError( iError );
+    
+    // Second call will leave
+    if( !iActiveWait )
+        {
+        iActiveWait = new(ELeave)CActiveSchedulerWait();
+        }
+    iError = KErrGeneral;
+    event = new (ELeave) TCallbackEvent;
+    event->iEvent = EAppUiCmdExit;
+    AddExpectedEvent( event );
+    iAppUiEngine->HandleEmbeddedOpenL( KErrNone, EMPXVideo ) ;
+    
+    iActiveWait->Start();
+    
+    // Check if expected even was cleared
+    if( iExpectedEventArray->Count() == 0 )
+        {
+        iError = KErrNone;
+        }
+    
+    return iError;
 }
 
 // EOF

@@ -16,7 +16,7 @@
 */
 
 
-// Version : %version: 3 %
+// Version : %version: 3.1.1 %
 
 
 
@@ -29,6 +29,9 @@
 #include <cmmanagerext.h>
 #include <cmdestinationext.h>
 #include <cmapplicationsettingsui.h>
+
+#include <commdb.h>             // CMDBSession
+#include <commsdattypesv1_1.h>  // CCDWAPIPBearerRecord
 
 #include "mediasettings.hrh"
 #include "MPSettingsStreamingSettingItemList.h"
@@ -228,8 +231,14 @@ void CMPSettingsStreamingSettingItemList::LoadSettingL(TInt aSettingId)
         {
         case EMPSettDefaultAPSettingId:
             {
-            iModel->GetDefaultAp( iDefaultAP );
-
+            TUint32 wapID = 0;
+            iModel->GetDefaultAp( wapID ); 
+            TRAPD( err, iDefaultAP = static_cast<TInt>( IapIdFromWapIdL( wapID ) ) );
+            if ( err )
+                {
+                iDefaultAP = 0;
+                }
+            
             if ( iDefaultAP != 0 ) 
                 {
                 UpdateSelectedConnectionNameL();
@@ -287,7 +296,14 @@ void CMPSettingsStreamingSettingItemList::StoreSettingL(TInt aSettingId)
     switch (aSettingId)
         {
         case EMPSettDefaultAPSettingId:
-            iModel->SetDefaultAp(iDefaultAP);
+            {
+            TUint32 wapID = 0;
+            TRAPD( err, wapID = WapIdFromIapIdL( static_cast<TUint32>( iDefaultAP ) ) );
+            if ( err == KErrNone )
+                {
+                iModel->SetDefaultAp( wapID );
+                }
+            }
             break;
         case EMPSettConnTimeoutSettingId:
             iModel->SetConnectionTimeout(iConnTimeout);
@@ -453,5 +469,89 @@ void CMPSettingsStreamingSettingItemList::HandleListBoxEventL(
         CAknSettingItemList::HandleListBoxEventL( aListBox, aListBoxEvent );
         }
     }
+
+// -----------------------------------------------------------------------------
+// CMPSettingsStreamingSettingItemList::WapIdFromIapIdL
+// -----------------------------------------------------------------------------
+//
+TUint32 CMPSettingsStreamingSettingItemList::WapIdFromIapIdL( TUint32 aIapId )
+    {
+    MPX_DEBUG2(_L("#MS# CMPSettingsStreamingSettingItemList::WapIdFromIapIdL(%d)"),aIapId);
+    
+    TUint32 wap = 0;
+#ifdef __WINSCW__    
+    wap = aIapId;
+#else    
+    
+    CMDBSession* db = CMDBSession::NewL( CMDBSession::LatestVersion() );
+    CleanupStack::PushL( db );
+    
+    // WapIpBearer table contains the mapping between wap and iap id's.
+    CCDWAPIPBearerRecord* wapBearerRecord = 
+        static_cast<CCDWAPIPBearerRecord*>( 
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
+        
+    CleanupStack::PushL( wapBearerRecord );
+    
+    wapBearerRecord->iWAPIAP = aIapId;
+    
+    TBool found = wapBearerRecord->FindL( *db );
+    if ( !found )
+        {
+        User::Leave( KErrNotFound );
+        }
+
+    wap = static_cast<TUint32>( wapBearerRecord->iWAPAccessPointId );
+    
+    CleanupStack::PopAndDestroy( wapBearerRecord );
+    CleanupStack::PopAndDestroy( db );
+
+#endif    
+    
+    MPX_DEBUG2(_L("#MS# CMPSettingsStreamingSettingItemList::WapIdFromIapIdL() - return wap id: %d "), wap);
+    return wap;
+    }
+
+// -----------------------------------------------------------------------------
+// CMPSettingsStreamingSettingItemList::IapIdFromWapIdL
+// -----------------------------------------------------------------------------
+//
+TUint32 CMPSettingsStreamingSettingItemList::IapIdFromWapIdL( TUint32 aWapId )
+    {
+    MPX_DEBUG2(_L("#MS# CMPSettingsStreamingSettingItemList::IapIdFromWapIdL(%d)"),aWapId);
+    
+    TUint32 iap = 0;
+#ifdef __WINSCW__
+    iap = aWapId;
+#else    
+    CMDBSession* db = CMDBSession::NewL( CMDBSession::LatestVersion() );
+    CleanupStack::PushL( db );
+    
+    // WapIpBearer table contains the mapping between wap and iap id's.
+    CCDWAPIPBearerRecord* wapBearerRecord = 
+        static_cast<CCDWAPIPBearerRecord*>( 
+                CCDRecordBase::RecordFactoryL( KCDTIdWAPIPBearerRecord ) );
+        
+    CleanupStack::PushL( wapBearerRecord );
+    
+    wapBearerRecord->iWAPAccessPointId = aWapId;
+    
+    TBool found = wapBearerRecord->FindL( *db );
+    if ( !found )
+        {
+        User::Leave( KErrNotFound );
+        }
+
+    iap = static_cast<TUint32>( wapBearerRecord->iWAPIAP );
+    
+    CleanupStack::PopAndDestroy( wapBearerRecord );
+    CleanupStack::PopAndDestroy( db );
+
+#endif
+    
+    MPX_DEBUG2(_L("#MS# CMPSettingsStreamingSettingItemList::IapIdFromWapIdL() - return iap id: %d "), iap);
+    return iap;
+    }
+
 
 //  End of File  

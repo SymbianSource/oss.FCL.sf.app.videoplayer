@@ -184,6 +184,9 @@ EVcxTestMapping_KVcxMediaMyVideosModifiedDateCurrent 28
 EVcxTestMapping_KVcxMediaMyVideosCategoryNewItemName 29
 EVcxTestMapping_KVcxMediaMyVideosAudioFourCc 30
 
+KCodeAC3    "33434120"
+KCodeEAC3   "33434145"
+
 // Flags
 // New video flag.
 EVcxMyVideosVideoNew                1

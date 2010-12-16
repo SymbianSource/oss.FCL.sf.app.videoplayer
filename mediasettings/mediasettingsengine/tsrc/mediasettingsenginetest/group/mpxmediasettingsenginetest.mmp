@@ -15,7 +15,6 @@
 */
 
 
-
 #include <platform_paths.hrh>
 
 TARGET          mpxmediasettingsenginetest.dll
@@ -32,8 +31,7 @@ CAPABILITY      ALL -TCB
 DEFFILE         mpxmediasettingsenginetest.def
 
 USERINCLUDE     ../inc 
-USERINCLUDE		../../../inc
-USERINCLUDE     ../../../../../tsrc/VCXTestCommon/inc
+USERINCLUDE	../../../inc
 
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/ecom
@@ -41,9 +39,6 @@ SYSTEMINCLUDE   /epoc32/include/ecom
 SOURCEPATH      ../src
 SOURCE          mpxmediasettingsenginetest.cpp
 SOURCE          mpxmediasettingsenginetestBlocks.cpp
-
-//RESOURCE        resource_file
-//RESOURCE        resource_file2
 
 LIBRARY         euser.lib
 LIBRARY         stiftestinterface.lib
@@ -57,32 +52,8 @@ LIBRARY         apengine.lib
 LIBRARY         commdb.lib
 LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
-LIBRARY			CentralRepository.lib
+LIBRARY		CentralRepository.lib
 LIBRARY         ecom.lib
-LIBRARY         VCXTestCommon.lib
 
 LANG            SC
-
-/*
-START WINS      
-?wins_specific_information
-END
-
-START MARM
-?marm_specific_information
-END
-*/
-// Other possible keywords:
- 
-// DOCUMENT     ?file, that is not compiled, but added to MSVC project workspace (i.e. release notes)
-/*
-START BITMAP ?target
-TARGETPATH   ?emulated_path_on_target_machine
-HEADER
-SOURCE       ?color_depth ?source_bitmap
-END
-*/
-// DEFFILE ?filename
-// AIF ?filename
-
 // End of File

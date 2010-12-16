@@ -15,7 +15,7 @@
 */
 
 
-// Version : %version: 2 %
+// Version : %version: 2.1.1 %
 
 
 
@@ -115,6 +115,24 @@ class CMPSettingsStreamingSettingItemList : public CAknSettingItemList
         * Sets proxy mode to disabled. 
         */
         void CheckProxyDisableL();
+        
+        /**
+         * Gets WAP id from IAP id. Leaves with KErrNotFound if no record with given 
+         * IAP id is found.
+         * 
+		 * @param  aIapId	IAP id.
+         * @return Access point id matching the given IAP id.
+         */
+        TUint32 WapIdFromIapIdL( TUint32 aIapId );
+
+        /**
+         * Gets IAP id from access point id. Leaves with KErrNotFound if no record with given 
+         * access point id is found.
+         * 
+		 * @param  aWapId	Access point id.
+         * @return IAP id matching the given access point id.
+         */
+        TUint32 IapIdFromWapIdL( TUint32 aWapId );        
         
     private: // From MEikListBoxObserver
 

@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: ou1cpsw#3 %
+// Version : %version: ou1cpsw#3.1.1 %
 
 #ifndef MPXPLAYBACKUTILITYIMP_STUB_H_
 #define MPXPLAYBACKUTILITYIMP_STUB_H_
@@ -121,6 +121,8 @@ NONSHARABLE_CLASS( CMPXPlaybackUtility ) : public CBase,
         RArray<MMPXPlaybackObserver*>   iObservers;
         MAppUiEngineStifTestObserver*   iStifObserver;
         TInt                            iRefCount;
+    public:
+        TInt                            iDisableEffectCallCount;
 };
 
 #endif /*MPXPLAYBACKUTILITYIMP_STUB_H_*/

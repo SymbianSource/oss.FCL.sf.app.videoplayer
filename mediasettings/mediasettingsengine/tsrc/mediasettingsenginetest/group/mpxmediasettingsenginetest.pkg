@@ -17,7 +17,7 @@
 &EN
 
 ; Provide value for uid
-#{"mpxmediasettingsenginetest"},(0x00000000),1,1,0,TYPE=SA
+#{"mpxmediasettingsenginetest"},(0x101FB3E3),1,1,0,TYPE=SA, RU
 
 ; Series60 product id for S60 3.0
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
@@ -43,9 +43,7 @@
 ; None
 
 ; Install files
-"/epoc32/release/armv5/udeb/mpxmediasettingsenginetest.dll"   -	"!:/Sys/Bin/mpxmediasettingsenginetest.dll"
-"/epoc32/release/armv5/udeb/VCXTestCommon.dll"                - "!:/Sys/Bin/VCXTestCommon.dll"
-"/epoc32/release/armv5/udeb/VCXTestUtilModule.dll"            - "!:/Sys/Bin/VCXTestUtilModule.dll"
+"/epoc32/release/armv5/urel/mpxmediasettingsenginetest.dll"   -	"!:/Sys/Bin/mpxmediasettingsenginetest.dll"
 "../conf/mpxmediasettingsenginetest.cfg"                      - "c:/testframework/mpxmediasettingsenginetest.cfg"
 "../init/testframework.ini"                                   - "c:/testframework/testframework.ini"
 

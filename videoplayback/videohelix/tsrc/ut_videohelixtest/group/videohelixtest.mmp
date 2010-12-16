@@ -15,7 +15,7 @@
 *
 */
 
-// Version : %version: 10 %
+// Version : %version: ou1cpsw#11 %
 
 
 
@@ -52,6 +52,7 @@ SOURCE          mediarecognizer_stub.cpp
 SOURCE          mpxvideoaccessoryobserver_stub.cpp
 SOURCE          mpxvideodrmhelper_stub.cpp
 SOURCE          tnmgr_stub.cpp
+SOURCE          rconnection_stub.cpp
 
 SOURCEPATH      ../../../src
 SOURCE          mpxvideodlmgrif.cpp
@@ -62,7 +63,7 @@ SOURCE          mpxvideoplaybackmode.cpp
 SOURCE          mpxvideoplaybackstate.cpp
 SOURCE          mpxvideoseeker.cpp
 SOURCE          mpxvideoposterframesetter.cpp
-
+SOURCE          mpxvideoconnectionutility.cpp
 
 LIBRARY         euser.lib
 LIBRARY         mpxcommon.lib
